@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{c443d9a8-dcf3-4b96-bf55-0797045be2b8}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile></StartupFile>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId>{2af0f10d-7135-4994-9156-5d01c9c11b7e}</InterpreterId>
+    <InterpreterVersion>3.4</InterpreterVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="azure\storage\auth.py" />
+    <Compile Include="azure\storage\blob\blobservice.py" />
+    <Compile Include="azure\storage\blob\models.py" />
+    <Compile Include="azure\storage\blob\_chunking.py" />
+    <Compile Include="azure\storage\blob\_serialization.py" />
+    <Compile Include="azure\storage\blob\__init__.py" />
+    <Compile Include="azure\storage\cloudstorageaccount.py" />
+    <Compile Include="azure\storage\connection.py" />
+    <Compile Include="azure\storage\constants.py" />
+    <Compile Include="azure\storage\file\fileservice.py" />
+    <Compile Include="azure\storage\file\models.py" />
+    <Compile Include="azure\storage\file\_chunking.py" />
+    <Compile Include="azure\storage\file\_serialization.py" />
+    <Compile Include="azure\storage\file\__init__.py" />
+    <Compile Include="azure\storage\models.py" />
+    <Compile Include="azure\storage\queue\models.py" />
+    <Compile Include="azure\storage\queue\queueservice.py" />
+    <Compile Include="azure\storage\queue\_serialization.py" />
+    <Compile Include="azure\storage\queue\__init__.py" />
+    <Compile Include="azure\storage\sharedaccesssignature.py" />
+    <Compile Include="azure\storage\storageclient.py" />
+    <Compile Include="azure\storage\table\models.py" />
+    <Compile Include="azure\storage\table\tableservice.py" />
+    <Compile Include="azure\storage\table\_serialization.py" />
+    <Compile Include="azure\storage\table\__init__.py" />
+    <Compile Include="azure\storage\_common_conversion.py" />
+    <Compile Include="azure\storage\_common_error.py" />
+    <Compile Include="azure\storage\_common_models.py" />
+    <Compile Include="azure\storage\_common_serialization.py" />
+    <Compile Include="azure\storage\_http\batchclient.py" />
+    <Compile Include="azure\storage\_http\httpclient.py" />
+    <Compile Include="azure\storage\_http\requestsclient.py" />
+    <Compile Include="azure\storage\_http\__init__.py" />
+    <Compile Include="azure\storage\_serialization.py" />
+    <Compile Include="azure\storage\__init__.py" />
+    <Compile Include="azure\__init__.py" />
+    <Compile Include="setup.py" />
+    <Compile Include="tests\blob_performance.py" />
+    <Compile Include="tests\common_extendedtestcase.py" />
+    <Compile Include="tests\common_recordingtestcase.py" />
+    <Compile Include="tests\doctest_blobservice.py" />
+    <Compile Include="tests\doctest_queueservice.py" />
+    <Compile Include="tests\doctest_tableservice.py" />
+    <Compile Include="tests\storage_settings_fake.py" />
+    <Compile Include="tests\storage_settings_real.py" />
+    <Compile Include="tests\storage_testcase.py" />
+    <Compile Include="tests\test_storage_account.py" />
+    <Compile Include="tests\test_storage_blob.py" />
+    <Compile Include="tests\test_storage_file.py" />
+    <Compile Include="tests\test_storage_queue.py" />
+    <Compile Include="tests\test_storage_sas.py" />
+    <Compile Include="tests\test_storage_table.py" />
+    <Compile Include="tests\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="azure" />
+    <Folder Include="azure\storage" />
+    <Folder Include="azure\storage\blob" />
+    <Folder Include="azure\storage\file" />
+    <Folder Include="azure\storage\queue" />
+    <Folder Include="azure\storage\table" />
+    <Folder Include="azure\storage\_http" />
+    <Folder Include="tests" />
+    <Folder Include="wheelhouse\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".gitignore" />
+    <Content Include="LICENSE.txt" />
+    <Content Include="MANIFEST.in" />
+    <Content Include="README.rst" />
+    <Content Include="requirements.txt" />
+    <Content Include="setup.cfg" />
+    <Content Include="wheelhouse\azure_common-0.20.0-py2.py3-none-any.whl" />
+    <Content Include="wheelhouse\azure_nspkg-1.0.0-py2.py3-none-any.whl" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\2.7" />
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\3.3" />
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\3.4" />
+    <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\3.5" />
+  </ItemGroup>
+  <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
+</Project>
