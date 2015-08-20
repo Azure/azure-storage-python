@@ -52,3 +52,28 @@ class TableSharedAccessPermissions(object):
 
     '''Delete entities.'''
     DELETE = 'd'
+
+class TablePayloadFormat(object):
+    '''
+    Specifies the accepted content type of the response payload. More information
+    can be found here: https://msdn.microsoft.com/en-us/library/azure/dn535600.aspx
+    '''
+
+    '''Returns no type information for the entity properties.'''
+    JSON_NO_METADATA = 'application/json;odata=nometadata'
+
+    '''Returns minimal type information for the entity properties.'''
+    JSON_MINIMAL_METADATA = 'application/json;odata=minimalmetadata'
+
+    '''Returns minimal type information for the entity properties plus some extra odata properties.'''
+    JSON_FULL_METADATA = 'application/json;odata=fullmetadata'
+
+class EdmType(object):
+    BINARY = 'Edm.Binary'
+    INT64 = 'Edm.Int64'
+    GUID = 'Edm.Guid'
+    DATETIME = 'Edm.DateTime'
+    STRING = 'Edm.String'
+    INT32 = 'Edm.Int32'
+    DOUBLE = 'Edm.Double'
+    BOOLEAN = 'Edm.Boolean'

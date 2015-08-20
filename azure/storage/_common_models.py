@@ -22,10 +22,6 @@ class WindowsAzureData(object):
     pass
 
 
-class Feed(object):
-    pass
-
-
 class _Base64String(str):
     pass
 

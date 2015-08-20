@@ -33,15 +33,18 @@ from .._common_serialization import (
     _parse_response_for_dict_filter,
     _update_request_uri_query_local_storage,
     _ETreeXmlToObject,
+    _extract_etag,
 )
 from .._http import HTTPRequest
-from .._http.batchclient import _BatchClient
+from .batchclient import _BatchClient
 from ..models import (
     SignedIdentifiers,
     StorageServiceProperties,
 )
 from .models import (
     TableSharedAccessPermissions,
+    Entity,
+    TablePayloadFormat,
 )
 from ..auth import (
     StorageSASAuthentication,
@@ -54,18 +57,28 @@ from .._serialization import (
     _convert_signed_identifiers_to_xml,
 )
 from ._serialization import (
-    _convert_entity_to_xml,
-    _convert_etree_element_to_entity,
-    _convert_etree_element_to_table,
-    _convert_response_to_entity,
-    _convert_table_to_xml,
+    _convert_entity_to_json,
+    _convert_table_to_json,
     _update_storage_table_header,
+    _get_entity_path,
+    _DEFAULT_ACCEPT_HEADER,
+    _DEFAULT_CONTENT_TYPE_HEADER,
+    _DEFAULT_PREFER_HEADER,
+)
+from ._deserialization import (
+    _convert_json_response_to_entity,
+    _convert_json_response_to_tables,
+    _convert_json_response_to_entities,
 )
 from ..constants import (
     TABLE_SERVICE_HOST_BASE,
     DEFAULT_HTTP_TIMEOUT,
     DEV_TABLE_HOST,
     X_MS_VERSION,
+)
+from ._error import (
+    _validate_dict_or_entity,
+    _validate_object_has_param,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -242,6 +255,7 @@ class TableService(_StorageClient):
         else:
             uri_part_table_name = ""
         request.path = '/Tables' + uri_part_table_name + ''
+        request.headers = [('Accept', TablePayloadFormat.JSON_NO_METADATA)]
         request.query = [
             ('$top', _int_or_none(top)),
             ('NextTableName', _str_or_none(next_table_name))
@@ -251,8 +265,7 @@ class TableService(_StorageClient):
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.convert_response_to_feeds(
-            response, _convert_etree_element_to_table)
+        return _convert_json_response_to_tables(response)
 
     def create_table(self, table, fail_on_exist=False):
         '''
@@ -270,7 +283,10 @@ class TableService(_StorageClient):
         request.method = 'POST'
         request.host = self._get_host()
         request.path = '/Tables'
-        request.body = _get_request_body(_convert_table_to_xml(table))
+        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
+                           _DEFAULT_PREFER_HEADER,
+                           _DEFAULT_ACCEPT_HEADER]
+        request.body = _get_request_body(_convert_table_to_json(table))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
@@ -297,6 +313,7 @@ class TableService(_StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = '/Tables(\'' + _str(table_name) + '\')'
+        request.headers = [_DEFAULT_ACCEPT_HEADER]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
@@ -350,10 +367,12 @@ class TableService(_StorageClient):
             _convert_signed_identifiers_to_xml(signed_identifiers))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request, content_type=None)
+        request.headers = _update_storage_table_header(request)
         self._perform_request(request)
 
-    def get_entity(self, table_name, partition_key, row_key, select=''):
+    def get_entity(self, table_name, partition_key, row_key, select=None,
+                   accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
+                   property_resolver=None):
         '''
         Get an entity in a table; includes the $select options.
 
@@ -362,29 +381,36 @@ class TableService(_StorageClient):
         row_key:
             RowKey of the entity.
         select:
-            Property names to select.
+            Optional. Property names to select.
+        accept:
+            Required. Specifies the accepted content type of the response 
+            payload. See TablePayloadFormat for possible values.
+        property_resolver:
+            Optional. A function which given the partition key, row key, 
+            property name, property value, and the property Edm type if 
+            returned by the service, returns the Edm type of the property.
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('partition_key', partition_key)
         _validate_not_none('row_key', row_key)
-        _validate_not_none('select', select)
+        _validate_not_none('accept', accept)
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + _str(table_name) + \
-            '(PartitionKey=\'' + _str(partition_key) + \
-            '\',RowKey=\'' + \
-            _str(row_key) + '\')?$select=' + \
-            _str(select) + ''
+        request.path = _get_entity_path(table_name, partition_key, row_key)
+        request.headers = [('Accept', _str(accept))]
+        request.query = [('$select', _str_or_none(select))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _convert_response_to_entity(response)
+        return _convert_json_response_to_entity(response, property_resolver)
 
     def query_entities(self, table_name, filter=None, select=None, top=None,
-                       next_partition_key=None, next_row_key=None):
+                       next_partition_key=None, next_row_key=None,
+                       accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
+                       property_resolver=None):
         '''
         Get entities in a table; includes the $filter and $select options.
 
@@ -403,12 +429,21 @@ class TableService(_StorageClient):
         next_row_key:
             Optional. When top is used, the next partition key is stored in
             result.x_ms_continuation['NextRowKey']
+        accept:
+            Required. Specifies the accepted content type of the response 
+            payload. See TablePayloadFormat for possible values.
+        property_resolver:
+            Optional. A function which given the partition key, row key, 
+            property name, property value, and the property Edm type if 
+            returned by the service, returns the Edm type of the property.
         '''
         _validate_not_none('table_name', table_name)
+        _validate_not_none('accept', accept)
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/' + _str(table_name) + '()'
+        request.headers = [('Accept', _str(accept))]
         request.query = [
             ('$filter', _str_or_none(filter)),
             ('$select', _str_or_none(select)),
@@ -421,11 +456,9 @@ class TableService(_StorageClient):
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.convert_response_to_feeds(
-            response, _convert_etree_element_to_entity)
+        return _convert_json_response_to_entities(response, property_resolver)
 
-    def insert_entity(self, table_name, entity,
-                      content_type='application/atom+xml'):
+    def insert_entity(self, table_name, entity):
         '''
         Inserts a new entity into a table.
 
@@ -433,73 +466,73 @@ class TableService(_StorageClient):
             Table name.
         entity:
             Required. The entity object to insert. Could be a dict format or
-            entity object.
-        content_type:
-            Required. Must be set to application/atom+xml
+            entity object. Must contain a PartitionKey and a RowKey.
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('entity', entity)
-        _validate_not_none('content_type', content_type)
+        _validate_dict_or_entity(entity)
+
         request = HTTPRequest()
         request.method = 'POST'
         request.host = self._get_host()
         request.path = '/' + _str(table_name) + ''
-        request.headers = [('Content-Type', _str_or_none(content_type))]
-        request.body = _get_request_body(_convert_entity_to_xml(entity))
+        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
+                           _DEFAULT_PREFER_HEADER,
+                           _DEFAULT_ACCEPT_HEADER]
+        request.body = _get_request_body(_convert_entity_to_json(entity))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _convert_response_to_entity(response)
+        return _extract_etag(response)
 
-    def update_entity(self, table_name, partition_key, row_key, entity,
-                      content_type='application/atom+xml', if_match='*'):
+    def update_entity(self, table_name, entity, if_match='*'):
         '''
         Updates an existing entity in a table. The Update Entity operation
         replaces the entire entity and can be used to remove properties.
 
         table_name:
             Table name.
-        partition_key:
-            PartitionKey of the entity.
-        row_key:
-            RowKey of the entity.
         entity:
             Required. The entity object to insert. Could be a dict format or
-            entity object.
-        content_type:
-            Required. Must be set to application/atom+xml
+            entity object. Must contain a PartitionKey and a RowKey.
         if_match:
-            Optional. Specifies the condition for which the merge should be
-            performed. To force an unconditional merge, set to the wildcard
-            character (*).
+            Required. The client may specify the ETag for the entity on the 
+            request in order to compare to the ETag maintained by the service 
+            for the purpose of optimistic concurrency. The update operation 
+            will be performed only if the ETag sent by the client matches the 
+            value maintained by the server, indicating that the entity has 
+            not been modified since it was retrieved by the client. To force 
+            an unconditional update, set If-Match to the wildcard character (*).
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('partition_key', partition_key)
-        _validate_not_none('row_key', row_key)
         _validate_not_none('entity', entity)
-        _validate_not_none('content_type', content_type)
+        _validate_not_none('if_match', if_match)
+        _validate_dict_or_entity(entity)
+
+        if isinstance(entity, Entity):
+            entity = vars(entity)
+        _validate_object_has_param('PartitionKey', entity)
+        _validate_object_has_param('RowKey', entity)
+
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(table_name) + '(PartitionKey=\'' + \
-            _str(partition_key) + '\',RowKey=\'' + _str(row_key) + '\')'
-        request.headers = [
-            ('Content-Type', _str_or_none(content_type)),
-            ('If-Match', _str_or_none(if_match))
-        ]
-        request.body = _get_request_body(_convert_entity_to_xml(entity))
+        request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
+        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
+                           _DEFAULT_ACCEPT_HEADER,
+                           ('If-Match', _str_or_none(if_match)),]
+        request.body = _get_request_body(_convert_entity_to_json(entity))
+
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _parse_response_for_dict_filter(response, filter=['etag'])
+        return _extract_etag(response)
 
-    def merge_entity(self, table_name, partition_key, row_key, entity,
-                     content_type='application/atom+xml', if_match='*'):
+    def merge_entity(self, table_name, entity, if_match='*'):
         '''
         Updates an existing entity by updating the entity's properties. This
         operation does not replace the existing entity as the Update Entity
@@ -507,45 +540,45 @@ class TableService(_StorageClient):
 
         table_name:
             Table name.
-        partition_key:
-            PartitionKey of the entity.
-        row_key:
-            RowKey of the entity.
         entity:
             Required. The entity object to insert. Can be a dict format or
-            entity object.
-        content_type:
-            Required. Must be set to application/atom+xml
+            entity object. Must contain a PartitionKey and a RowKey.
         if_match:
-            Optional. Specifies the condition for which the merge should be
-            performed. To force an unconditional merge, set to the wildcard
-            character (*).
+            Required. The client may specify the ETag for the entity on the 
+            request in order to compare to the ETag maintained by the service 
+            for the purpose of optimistic concurrency. The merge operation 
+            will be performed only if the ETag sent by the client matches the 
+            value maintained by the server, indicating that the entity has 
+            not been modified since it was retrieved by the client. To force 
+            an unconditional merge, set If-Match to the wildcard character (*).
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('partition_key', partition_key)
-        _validate_not_none('row_key', row_key)
         _validate_not_none('entity', entity)
-        _validate_not_none('content_type', content_type)
+        _validate_not_none('if_match', if_match)
+        _validate_dict_or_entity(entity)
+
+        if isinstance(entity, Entity):
+            entity = vars(entity)
+        _validate_object_has_param('PartitionKey', entity)
+        _validate_object_has_param('RowKey', entity)
+
         request = HTTPRequest()
         request.method = 'MERGE'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(table_name) + '(PartitionKey=\'' + \
-            _str(partition_key) + '\',RowKey=\'' + _str(row_key) + '\')'
-        request.headers = [
-            ('Content-Type', _str_or_none(content_type)),
-            ('If-Match', _str_or_none(if_match))
-        ]
-        request.body = _get_request_body(_convert_entity_to_xml(entity))
+        request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
+        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
+                           _DEFAULT_ACCEPT_HEADER,
+                           ('If-Match', _str_or_none(if_match)),]
+        request.body = _get_request_body(_convert_entity_to_json(entity))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _parse_response_for_dict_filter(response, filter=['etag'])
+        return _extract_etag(response)
 
     def delete_entity(self, table_name, partition_key, row_key,
-                      content_type='application/atom+xml', if_match='*'):
+                      if_match='*'):
         '''
         Deletes an existing entity in a table.
 
@@ -555,35 +588,31 @@ class TableService(_StorageClient):
             PartitionKey of the entity.
         row_key:
             RowKey of the entity.
-        content_type:
-            Required. Must be set to application/atom+xml
         if_match:
-            Optional. Specifies the condition for which the delete should be
-            performed. To force an unconditional delete, set to the wildcard
-            character (*).
+            Required. The client may specify the ETag for the entity on the 
+            request in order to compare to the ETag maintained by the service 
+            for the purpose of optimistic concurrency. The delete operation 
+            will be performed only if the ETag sent by the client matches the 
+            value maintained by the server, indicating that the entity has 
+            not been modified since it was retrieved by the client. To force 
+            an unconditional delete, set If-Match to the wildcard character (*).
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('partition_key', partition_key)
         _validate_not_none('row_key', row_key)
-        _validate_not_none('content_type', content_type)
         _validate_not_none('if_match', if_match)
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(table_name) + '(PartitionKey=\'' + \
-            _str(partition_key) + '\',RowKey=\'' + _str(row_key) + '\')'
-        request.headers = [
-            ('Content-Type', _str_or_none(content_type)),
-            ('If-Match', _str_or_none(if_match))
-        ]
+        request.path = _get_entity_path(table_name, partition_key, row_key)
+        request.headers = [_DEFAULT_ACCEPT_HEADER,
+                           ('If-Match', _str_or_none(if_match))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
         self._perform_request(request)
 
-    def insert_or_replace_entity(self, table_name, partition_key, row_key,
-                                 entity, content_type='application/atom+xml'):
+    def insert_or_replace_entity(self, table_name, entity):
         '''
         Replaces an existing entity or inserts a new entity if it does not
         exist in the table. Because this operation can insert or update an
@@ -591,38 +620,34 @@ class TableService(_StorageClient):
 
         table_name:
             Table name.
-        partition_key:
-            PartitionKey of the entity.
-        row_key:
-            RowKey of the entity.
         entity:
             Required. The entity object to insert. Could be a dict format or
-            entity object.
-        content_type:
-            Required. Must be set to application/atom+xml
+            entity object. Must contain a PartitionKey and a RowKey.
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('partition_key', partition_key)
-        _validate_not_none('row_key', row_key)
         _validate_not_none('entity', entity)
-        _validate_not_none('content_type', content_type)
+        _validate_dict_or_entity(entity)
+
+        if isinstance(entity, Entity):
+            entity = vars(entity)
+        _validate_object_has_param('PartitionKey', entity)
+        _validate_object_has_param('RowKey', entity)
+
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(table_name) + '(PartitionKey=\'' + \
-            _str(partition_key) + '\',RowKey=\'' + _str(row_key) + '\')'
-        request.headers = [('Content-Type', _str_or_none(content_type))]
-        request.body = _get_request_body(_convert_entity_to_xml(entity))
+        request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
+        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
+                           _DEFAULT_ACCEPT_HEADER]
+        request.body = _get_request_body(_convert_entity_to_json(entity))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _parse_response_for_dict_filter(response, filter=['etag'])
+        return _extract_etag(response)
 
-    def insert_or_merge_entity(self, table_name, partition_key, row_key,
-                               entity, content_type='application/atom+xml'):
+    def insert_or_merge_entity(self, table_name, entity):
         '''
         Merges an existing entity or inserts a new entity if it does not exist
         in the table. Because this operation can insert or update an entity,
@@ -630,35 +655,32 @@ class TableService(_StorageClient):
 
         table_name:
             Table name.
-        partition_key:
-            PartitionKey of the entity.
-        row_key:
-            RowKey of the entity.
         entity:
             Required. The entity object to insert. Could be a dict format or
-            entity object.
-        content_type:
-            Required. Must be set to application/atom+xml
+            entity object. Must contain a PartitionKey and a RowKey.
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('partition_key', partition_key)
-        _validate_not_none('row_key', row_key)
         _validate_not_none('entity', entity)
-        _validate_not_none('content_type', content_type)
+        _validate_dict_or_entity(entity)
+
+        if isinstance(entity, Entity):
+            entity = vars(entity)
+        _validate_object_has_param('PartitionKey', entity)
+        _validate_object_has_param('RowKey', entity)
+
         request = HTTPRequest()
         request.method = 'MERGE'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(table_name) + '(PartitionKey=\'' + \
-            _str(partition_key) + '\',RowKey=\'' + _str(row_key) + '\')'
-        request.headers = [('Content-Type', _str_or_none(content_type))]
-        request.body = _get_request_body(_convert_entity_to_xml(entity))
+        request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
+        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
+                           _DEFAULT_ACCEPT_HEADER]
+        request.body = _get_request_body(_convert_entity_to_json(entity))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _parse_response_for_dict_filter(response, filter=['etag'])
+        return _extract_etag(response)
 
     def _perform_request_worker(self, request):
         self.authentication.sign_request(request)

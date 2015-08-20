@@ -44,13 +44,15 @@
     <Compile Include="azure\storage\storageclient.py" />
     <Compile Include="azure\storage\table\models.py" />
     <Compile Include="azure\storage\table\tableservice.py" />
+    <Compile Include="azure\storage\table\batchclient.py" />
+    <Compile Include="azure\storage\table\_deserialization.py" />
+    <Compile Include="azure\storage\table\_error.py" />
     <Compile Include="azure\storage\table\_serialization.py" />
     <Compile Include="azure\storage\table\__init__.py" />
     <Compile Include="azure\storage\_common_conversion.py" />
     <Compile Include="azure\storage\_common_error.py" />
     <Compile Include="azure\storage\_common_models.py" />
     <Compile Include="azure\storage\_common_serialization.py" />
-    <Compile Include="azure\storage\_http\batchclient.py" />
     <Compile Include="azure\storage\_http\httpclient.py" />
     <Compile Include="azure\storage\_http\requestsclient.py" />
     <Compile Include="azure\storage\_http\__init__.py" />
@@ -79,6 +81,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="azure" />
+    <Folder Include="azure-storage\" />
+    <Folder Include="azure-storage\table\" />
     <Folder Include="azure\storage" />
     <Folder Include="azure\storage\blob" />
     <Folder Include="azure\storage\file" />

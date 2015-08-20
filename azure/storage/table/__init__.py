@@ -22,6 +22,8 @@ from .models import (
     EntityProperty,
     Table,
     TableSharedAccessPermissions,
+    TablePayloadFormat,
+	EdmType,
 )
 
 from .tableservice import TableService

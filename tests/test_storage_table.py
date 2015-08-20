@@ -23,10 +23,14 @@ import os
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc, tzoffset
 from requests import Session
+from math import(
+    isnan,
+)
 from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
     AzureMissingResourceHttpError,
+    AzureException,
 )
 from azure.storage import (
     AzureBatchOperationError,
@@ -115,8 +119,9 @@ class StorageTableTest(StorageTestCase):
         entity.married = True
         entity.deceased = False
         entity.optional = None
+        entity.evenratio = 3.0
         entity.ratio = 3.1
-        entity.large = 9333111000
+        entity.large = EntityProperty('Edm.Int64', 9333111000)
         entity.Birthday = datetime(1973, 10, 4)
         entity.birthday = datetime(1970, 10, 4)
         entity.binary = None
@@ -138,7 +143,8 @@ class StorageTableTest(StorageTestCase):
                 'deceased': False,
                 'optional': None,
                 'ratio': 3.1,
-                'large': 9333111000,
+                'evenratio': 3.0,
+                'large': EntityProperty('Edm.Int64', 9333111000),
                 'Birthday': datetime(1973, 10, 4),
                 'birthday': datetime(1970, 10, 4),
                 'other': EntityProperty('Edm.Int64', 20),
@@ -168,17 +174,46 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entity.sex, 'male')
         self.assertEqual(entity.married, True)
         self.assertEqual(entity.deceased, False)
+        self.assertFalse(hasattr(entity, "optional"))
         self.assertFalse(hasattr(entity, "aquarius"))
         self.assertEqual(entity.ratio, 3.1)
-        self.assertEqual(entity.large, 9333111000)
+        self.assertEqual(entity.evenratio, 3.0)
+        self.assertIsInstance(entity.large, EntityProperty)
+        self.assertEqual(entity.large.type, 'Edm.Int64')
+        self.assertEqual(entity.large.value, 9333111000)
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1970, 10, 4, tzinfo=tzutc()))
-        self.assertEqual(entity.other, 20)
+        self.assertIsInstance(entity.other, EntityProperty)
+        self.assertEqual(entity.other.type, 'Edm.Int64')
+        self.assertEqual(entity.other.value, 20)
         self.assertIsInstance(entity.clsid, EntityProperty)
         self.assertEqual(entity.clsid.type, 'Edm.Guid')
         self.assertEqual(entity.clsid.value,
                          'c9da6455-213d-42c9-9a79-3e9149a57833')
         self.assertTrue(hasattr(entity, "Timestamp"))
+        self.assertIsInstance(entity.Timestamp, datetime)
+        self.assertIsNotNone(entity.etag)
+
+    def _assert_default_entity_json_no_metadata(self, entity):
+        '''
+        Asserts that the entity passed in matches the default entity.
+        '''
+        self.assertEqual(entity.age, 39)
+        self.assertEqual(entity.sex, 'male')
+        self.assertEqual(entity.married, True)
+        self.assertEqual(entity.deceased, False)
+        self.assertFalse(hasattr(entity, "optional"))
+        self.assertFalse(hasattr(entity, "aquarius"))
+        self.assertEqual(entity.ratio, 3.1)
+        self.assertEqual(entity.evenratio, 3.0)
+        self.assertEqual(entity.large, '9333111000')
+        self.assertEqual(entity.Birthday, '1973-10-04T00:00:00Z')
+        self.assertEqual(entity.birthday, '1970-10-04T00:00:00Z')
+        self.assertEqual(entity.other, '20')
+        self.assertEqual(entity.clsid, 'c9da6455-213d-42c9-9a79-3e9149a57833')
+        self.assertTrue(hasattr(entity, "Timestamp"))
+        self.assertIsInstance(entity.Timestamp, datetime)
+        self.assertIsNotNone(entity.etag)
 
     def _assert_updated_entity(self, entity):
         '''
@@ -191,12 +226,14 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entity.sign, 'aquarius')
         self.assertFalse(hasattr(entity, "optional"))
         self.assertFalse(hasattr(entity, "ratio"))
+        self.assertFalse(hasattr(entity, "evenratio"))
         self.assertFalse(hasattr(entity, "large"))
         self.assertFalse(hasattr(entity, "Birthday"))
         self.assertEqual(entity.birthday, datetime(1991, 10, 4, tzinfo=tzutc()))
         self.assertFalse(hasattr(entity, "other"))
         self.assertFalse(hasattr(entity, "clsid"))
         self.assertTrue(hasattr(entity, "Timestamp"))
+        self.assertIsNotNone(entity.etag)
 
     def _assert_merged_entity(self, entity):
         '''
@@ -210,15 +247,34 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entity.deceased, False)
         self.assertEqual(entity.sign, 'aquarius')
         self.assertEqual(entity.ratio, 3.1)
-        self.assertEqual(entity.large, 9333111000)
+        self.assertEqual(entity.evenratio, 3.0)
+        self.assertIsInstance(entity.large, EntityProperty)
+        self.assertEqual(entity.large.type, 'Edm.Int64')
+        self.assertEqual(entity.large.value, 9333111000)
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1991, 10, 4, tzinfo=tzutc()))
-        self.assertEqual(entity.other, 20)
+        self.assertIsInstance(entity.other, EntityProperty)
+        self.assertEqual(entity.other.type, 'Edm.Int64')
+        self.assertEqual(entity.other.value, 20)
         self.assertIsInstance(entity.clsid, EntityProperty)
         self.assertEqual(entity.clsid.type, 'Edm.Guid')
         self.assertEqual(entity.clsid.value,
                          'c9da6455-213d-42c9-9a79-3e9149a57833')
         self.assertTrue(hasattr(entity, "Timestamp"))
+        self.assertIsNotNone(entity.etag)
+
+    def _resolver_with_assert(self, pk, rk, name, value, type):
+        self.assertIsNotNone(pk)
+        self.assertIsNotNone(rk)
+        self.assertIsNotNone(name)
+        self.assertIsNotNone(value)
+        self.assertIsNone(type)
+        if name == 'large' or name == 'other':
+            return 'Edm.Int64'
+        if name == 'Birthday' or name == 'birthday':
+            return 'Edm.DateTime'
+        if name == 'clsid':
+            return 'Edm.Guid'
 
     def _get_shared_access_policy(self, permission):
         date_format = "%Y-%m-%dT%H:%M:%SZ"
@@ -349,9 +405,18 @@ class StorageTableTest(StorageTestCase):
         self._create_table(self.table_name)
 
         # Act
-        tables = self.ts.query_tables()
-        for table in tables:
-            pass
+        tables = []
+        next=None
+        while True:
+            segment = self.ts.query_tables(next_table_name=next)
+            for table in segment:
+                tables.append(table)
+
+            next = None
+            if hasattr(segment, 'x_ms_continuation'):
+                next = segment.x_ms_continuation.get('nexttablename')
+            if not next:
+                break
 
         # Assert
         tableNames = [x.name for x in tables]
@@ -502,6 +567,21 @@ class StorageTableTest(StorageTestCase):
         # Assert
 
     @record
+    def test_insert_entity_with_large_value_throws(self):
+        # Arrange
+
+        # Act
+        dict = {'PartitionKey': 'MyPartition',
+                'RowKey': '1',
+                'large': 9333111000}
+
+        # Assert
+        with self.assertRaisesRegexp(TypeError, 
+                               '9333111000 is too large to be cast to type Edm.Int32. Please create an' + \
+                                   'EntityProperty with the type Edm.Int64.'):
+            self.ts.insert_entity(self.table_name, dict)
+
+    @record
     def test_get_entity(self):
         # Arrange
         self._create_table_with_default_entities(self.table_name, 1)
@@ -513,6 +593,89 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(resp.PartitionKey, 'MyPartition')
         self.assertEqual(resp.RowKey, '1')
         self._assert_default_entity(resp)
+
+    @record
+    def test_get_entity_if_match(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 1)
+
+        # Act
+        # Do a get and confirm the etag is parsed correctly by using it
+        # as a condition to delete.
+        resp = self.ts.get_entity(self.table_name, 'MyPartition', '1')
+        resp = self.ts.delete_entity(self.table_name, resp.PartitionKey, 
+                                     resp.RowKey, if_match=resp.etag)
+
+        # Assert
+
+    @record
+    def test_get_entity_full_metadata(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 1)
+
+        # Act
+        resp = self.ts.get_entity(self.table_name, 'MyPartition', '1',
+                                  accept='application/json;odata=fullmetadata')
+
+        # Assert
+        self.assertEqual(resp.PartitionKey, 'MyPartition')
+        self.assertEqual(resp.RowKey, '1')
+        self._assert_default_entity(resp)
+
+    @record
+    def test_get_entity_no_metadata(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 1)
+
+        # Act
+        resp = self.ts.get_entity(self.table_name, 'MyPartition', '1',
+                                  accept='application/json;odata=nometadata')
+
+        # Assert
+        self.assertEqual(resp.PartitionKey, 'MyPartition')
+        self.assertEqual(resp.RowKey, '1')
+        self._assert_default_entity_json_no_metadata(resp)
+
+    @record
+    def test_get_entity_with_property_resolver(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 1)
+
+        # Act
+        resp = self.ts.get_entity(self.table_name, 'MyPartition', '1',
+                                  accept='application/json;odata=nometadata',
+                                  property_resolver=self._resolver_with_assert)
+
+        # Assert
+        self.assertEqual(resp.PartitionKey, 'MyPartition')
+        self.assertEqual(resp.RowKey, '1')
+        self._assert_default_entity(resp)
+
+    @record
+    def test_get_entity_with_property_resolver_not_supported(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 1)
+
+        # Act
+        with self.assertRaisesRegexp(AzureException, 
+                               'Type not supported when sending data to the service:'):
+            self.ts.get_entity(self.table_name, 'MyPartition', '1',
+                               property_resolver=lambda pk, rk, name, val, type: 'badType')
+
+        # Assert
+
+    @record
+    def test_get_entity_with_property_resolver_invalid(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 1)
+
+        # Act
+        with self.assertRaisesRegexp(AzureException, 
+                               'The specified property resolver returned an invalid type.'):
+            self.ts.get_entity(self.table_name, 'MyPartition', '1',
+                               property_resolver=lambda pk, rk, name, val, type: 'Edm.Int64')
+
+        # Assert
 
     @record
     def test_get_entity_not_existing(self):
@@ -532,14 +695,36 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         resp = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1', 'age,sex')
+            self.table_name, 'MyPartition', '1', 'age,sex,xyz')
 
         # Assert
         self.assertEqual(resp.age, 39)
         self.assertEqual(resp.sex, 'male')
+        self.assertEqual(resp.xyz, None)
         self.assertFalse(hasattr(resp, "birthday"))
         self.assertFalse(hasattr(resp, "married"))
         self.assertFalse(hasattr(resp, "deceased"))
+
+    @record
+    def test_get_entity_with_special_doubles(self):
+        # Arrange
+        self._create_table(self.table_name)
+
+        entity = {'PartitionKey': 'MyPartition',
+                'RowKey': 'MyRowKey',
+                'inf': float('inf'),
+                'negativeinf': float('-inf'),
+                'nan': float('nan')}
+        self.ts.insert_entity(self.table_name, entity)
+
+        # Act
+        resp = self.ts.get_entity(
+            self.table_name, 'MyPartition', 'MyRowKey')
+
+        # Assert
+        self.assertEqual(resp.inf, float('inf'))
+        self.assertEqual(resp.negativeinf, float('-inf'))
+        self.assertTrue(isnan(resp.nan))
 
     @record
     def test_query_entities(self):
@@ -548,6 +733,59 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         resp = self.ts.query_entities(self.table_name)
+
+        # Assert
+        self.assertEqual(len(resp), 2)
+        for entity in resp:
+            self.assertEqual(entity.PartitionKey, 'MyPartition')
+            self._assert_default_entity(entity)
+        self.assertEqual(resp[0].RowKey, '1')
+        self.assertEqual(resp[1].RowKey, '2')
+
+    @record
+    def test_query_entities_full_metadata(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 2)
+
+        # Act
+        resp = self.ts.query_entities(self.table_name, 
+                                      accept='application/json;odata=fullmetadata')
+
+        # Assert
+        self.assertEqual(len(resp), 2)
+        for entity in resp:
+            self.assertEqual(entity.PartitionKey, 'MyPartition')
+            self._assert_default_entity(entity)
+            self.assertIsNotNone(entity.etag)
+        self.assertEqual(resp[0].RowKey, '1')
+        self.assertEqual(resp[1].RowKey, '2')
+
+    @record
+    def test_query_entities_no_metadata(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 2)
+
+        # Act
+        resp = self.ts.query_entities(self.table_name, 
+                                      accept='application/json;odata=nometadata')
+
+        # Assert
+        self.assertEqual(len(resp), 2)
+        for entity in resp:
+            self.assertEqual(entity.PartitionKey, 'MyPartition')
+            self._assert_default_entity_json_no_metadata(entity)
+        self.assertEqual(resp[0].RowKey, '1')
+        self.assertEqual(resp[1].RowKey, '2')
+
+    @record
+    def test_query_entities_with_property_resolver(self):
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 2)
+
+        # Act
+        resp = self.ts.query_entities(self.table_name, 
+                                      accept='application/json;odata=nometadata',
+                                      property_resolver=self._resolver_with_assert)
 
         # Assert
         self.assertEqual(len(resp), 2)
@@ -667,8 +905,7 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
-        resp = self.ts.update_entity(
-            self.table_name, 'MyPartition', '1', sent_entity)
+        resp = self.ts.update_entity(self.table_name, sent_entity)
 
         # Assert
         self.assertIsNotNone(resp)
@@ -679,13 +916,12 @@ class StorageTableTest(StorageTestCase):
     @record
     def test_update_entity_with_if_matches(self):
         # Arrange
-        entities = self._create_table_with_default_entities(self.table_name, 1)
+        etags = self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
         resp = self.ts.update_entity(
-            self.table_name,
-            'MyPartition', '1', sent_entity, if_match=entities[0].etag)
+            self.table_name, sent_entity, if_match=etags[0])
 
         # Assert
         self.assertIsNotNone(resp)
@@ -696,13 +932,13 @@ class StorageTableTest(StorageTestCase):
     @record
     def test_update_entity_with_if_doesnt_match(self):
         # Arrange
-        entities = self._create_table_with_default_entities(self.table_name, 1)
+        self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
         with self.assertRaises(AzureHttpError):
             self.ts.update_entity(
-                self.table_name, 'MyPartition', '1', sent_entity,
+                self.table_name, sent_entity,
                 if_match=u'W/"datetime\'2012-06-15T22%3A51%3A44.9662825Z\'"')
 
         # Assert
@@ -714,8 +950,7 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
-        resp = self.ts.insert_or_merge_entity(
-            self.table_name, 'MyPartition', '1', sent_entity)
+        resp = self.ts.insert_or_merge_entity(self.table_name, sent_entity)
 
         # Assert
         self.assertIsNotNone(resp)
@@ -730,8 +965,7 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
-        resp = self.ts.insert_or_merge_entity(
-            self.table_name, 'MyPartition', '1', sent_entity)
+        resp = self.ts.insert_or_merge_entity(self.table_name, sent_entity)
 
         # Assert
         self.assertIsNotNone(resp)
@@ -746,13 +980,11 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
-        resp = self.ts.insert_or_replace_entity(
-            self.table_name, 'MyPartition', '1', sent_entity)
+        resp = self.ts.insert_or_replace_entity(self.table_name, sent_entity)
 
         # Assert
         self.assertIsNotNone(resp)
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1')
+        received_entity = self.ts.get_entity(self.table_name, 'MyPartition', '1')
         self._assert_updated_entity(received_entity)
 
     @record
@@ -762,13 +994,11 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
-        resp = self.ts.insert_or_replace_entity(
-            self.table_name, 'MyPartition', '1', sent_entity)
+        resp = self.ts.insert_or_replace_entity(self.table_name, sent_entity)
 
         # Assert
         self.assertIsNotNone(resp)
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1')
+        received_entity = self.ts.get_entity(self.table_name, 'MyPartition', '1')
         self._assert_updated_entity(received_entity)
 
     @record
@@ -778,13 +1008,11 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
-        resp = self.ts.merge_entity(
-            self.table_name, 'MyPartition', '1', sent_entity)
+        resp = self.ts.merge_entity(self.table_name, sent_entity)
 
         # Assert
         self.assertIsNotNone(resp)
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1')
+        received_entity = self.ts.get_entity(self.table_name, 'MyPartition', '1')
         self._assert_merged_entity(received_entity)
 
     @record
@@ -795,38 +1023,35 @@ class StorageTableTest(StorageTestCase):
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
         with self.assertRaises(AzureHttpError):
-            self.ts.merge_entity(
-                self.table_name, 'MyPartition', '1', sent_entity)
+            self.ts.merge_entity(self.table_name, sent_entity)
 
         # Assert
 
     @record
     def test_merge_entity_with_if_matches(self):
         # Arrange
-        entities = self._create_table_with_default_entities(self.table_name, 1)
+        etags = self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
-        resp = self.ts.merge_entity(
-            self.table_name, 'MyPartition', '1',
-            sent_entity, if_match=entities[0].etag)
+        resp = self.ts.merge_entity(self.table_name,
+            sent_entity, if_match=etags[0])
 
         # Assert
         self.assertIsNotNone(resp)
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1')
+        received_entity = self.ts.get_entity(self.table_name, 'MyPartition', '1')
         self._assert_merged_entity(received_entity)
 
     @record
     def test_merge_entity_with_if_doesnt_match(self):
         # Arrange
-        entities = self._create_table_with_default_entities(self.table_name, 1)
+        self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
         with self.assertRaises(AzureHttpError):
             self.ts.merge_entity(
-                self.table_name, 'MyPartition', '1', sent_entity,
+                self.table_name, sent_entity,
                 if_match=u'W/"datetime\'2012-06-15T22%3A51%3A44.9662825Z\'"')
 
         # Assert
@@ -858,11 +1083,11 @@ class StorageTableTest(StorageTestCase):
     @record
     def test_delete_entity_with_if_matches(self):
         # Arrange
-        entities = self._create_table_with_default_entities(self.table_name, 1)
+        etags = self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
         resp = self.ts.delete_entity(
-            self.table_name, 'MyPartition', '1', if_match=entities[0].etag)
+            self.table_name, 'MyPartition', '1', if_match=etags[0])
 
         # Assert
         self.assertIsNone(resp)
@@ -872,7 +1097,7 @@ class StorageTableTest(StorageTestCase):
     @record
     def test_delete_entity_with_if_doesnt_match(self):
         # Arrange
-        entities = self._create_table_with_default_entities(self.table_name, 1)
+        self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -965,7 +1190,7 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(3, entity.test3)
         entity.test2 = 'value1'
         self.ts.begin_batch()
-        self.ts.update_entity(self.table_name, '001', 'batch_update', entity)
+        self.ts.update_entity(self.table_name, entity)
         self.ts.commit_batch()
         entity = self.ts.get_entity(self.table_name, '001', 'batch_update')
 
@@ -995,25 +1220,26 @@ class StorageTableTest(StorageTestCase):
         entity.RowKey = 'batch_merge'
         entity.test2 = 'value1'
         self.ts.begin_batch()
-        self.ts.merge_entity(self.table_name, '001', 'batch_merge', entity)
+        self.ts.merge_entity(self.table_name, entity)
         self.ts.commit_batch()
         entity = self.ts.get_entity(self.table_name, '001', 'batch_merge')
 
         # Assert
         self.assertEqual('value1', entity.test2)
-        self.assertEqual(1234567890, entity.test4)
+        self.assertIsInstance(entity.test4, EntityProperty)
+        self.assertEqual(entity.test4.type, 'Edm.Int64')
+        self.assertEqual(entity.test4.value, 1234567890)
 
     @record
     def test_batch_update_if_match(self):
         # Arrange
-        entities = self._create_table_with_default_entities(self.table_name, 1)
+        etags = self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
         sent_entity = self._create_updated_entity_dict('MyPartition', '1')
         self.ts.begin_batch()
         resp = self.ts.update_entity(
-            self.table_name,
-            'MyPartition', '1', sent_entity, if_match=entities[0].etag)
+            self.table_name, sent_entity, if_match=etags[0])
         self.ts.commit_batch()
 
         # Assert
@@ -1025,17 +1251,16 @@ class StorageTableTest(StorageTestCase):
     @record
     def test_batch_update_if_doesnt_match(self):
         # Arrange
-        entities = self._create_table_with_default_entities(self.table_name, 2)
+        self._create_table_with_default_entities(self.table_name, 2)
 
         # Act
         sent_entity1 = self._create_updated_entity_dict('MyPartition', '1')
         sent_entity2 = self._create_updated_entity_dict('MyPartition', '2')
         self.ts.begin_batch()
         self.ts.update_entity(
-            self.table_name, 'MyPartition', '1', sent_entity1,
+            self.table_name, sent_entity1,
             if_match=u'W/"datetime\'2012-06-15T22%3A51%3A44.9662825Z\'"')
-        self.ts.update_entity(
-            self.table_name, 'MyPartition', '2', sent_entity2)
+        self.ts.update_entity(self.table_name, sent_entity2)
         try:
             self.ts.commit_batch()
         except AzureBatchOperationError as error:
@@ -1067,8 +1292,7 @@ class StorageTableTest(StorageTestCase):
         entity.test4 = EntityProperty('Edm.Int64', '1234567890')
         entity.test5 = datetime.utcnow()
         self.ts.begin_batch()
-        self.ts.insert_or_replace_entity(
-            self.table_name, entity.PartitionKey, entity.RowKey, entity)
+        self.ts.insert_or_replace_entity(self.table_name, entity)
         self.ts.commit_batch()
 
         entity = self.ts.get_entity(
@@ -1077,7 +1301,9 @@ class StorageTableTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(entity)
         self.assertEqual('value', entity.test2)
-        self.assertEqual(1234567890, entity.test4)
+        self.assertIsInstance(entity.test4, EntityProperty)
+        self.assertEqual(entity.test4.type, 'Edm.Int64')
+        self.assertEqual(entity.test4.value, 1234567890)
 
     @record
     def test_batch_insert_merge(self):
@@ -1094,8 +1320,7 @@ class StorageTableTest(StorageTestCase):
         entity.test4 = EntityProperty('Edm.Int64', '1234567890')
         entity.test5 = datetime.utcnow()
         self.ts.begin_batch()
-        self.ts.insert_or_merge_entity(
-            self.table_name, entity.PartitionKey, entity.RowKey, entity)
+        self.ts.insert_or_merge_entity(self.table_name, entity)
         self.ts.commit_batch()
 
         entity = self.ts.get_entity(
@@ -1104,7 +1329,9 @@ class StorageTableTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(entity)
         self.assertEqual('value', entity.test2)
-        self.assertEqual(1234567890, entity.test4)
+        self.assertIsInstance(entity.test4, EntityProperty)
+        self.assertEqual(entity.test4.type, 'Edm.Int64')
+        self.assertEqual(entity.test4.value, 1234567890)
 
     @record
     def test_batch_delete(self):
@@ -1184,19 +1411,15 @@ class StorageTableTest(StorageTestCase):
             self.table_name, entity.PartitionKey, entity.RowKey)
         entity.RowKey = 'batch_all_operations_together-2'
         entity.test3 = 10
-        self.ts.update_entity(
-            self.table_name, entity.PartitionKey, entity.RowKey, entity)
+        self.ts.update_entity(self.table_name, entity)
         entity.RowKey = 'batch_all_operations_together-3'
         entity.test3 = 100
-        self.ts.merge_entity(
-            self.table_name, entity.PartitionKey, entity.RowKey, entity)
+        self.ts.merge_entity(self.table_name, entity)
         entity.RowKey = 'batch_all_operations_together-4'
         entity.test3 = 10
-        self.ts.insert_or_replace_entity(
-            self.table_name, entity.PartitionKey, entity.RowKey, entity)
+        self.ts.insert_or_replace_entity(self.table_name, entity)
         entity.RowKey = 'batch_all_operations_together-5'
-        self.ts.insert_or_merge_entity(
-            self.table_name, entity.PartitionKey, entity.RowKey, entity)
+        self.ts.insert_or_merge_entity(self.table_name, entity)
         self.ts.commit_batch()
 
         # Assert
@@ -1217,17 +1440,11 @@ class StorageTableTest(StorageTestCase):
 
             entity = self._create_updated_entity_dict(
                 '001', 'batch_negative_1')
-            self.ts.update_entity(
-                self.table_name,
-                entity['PartitionKey'],
-                entity['RowKey'], entity)
+            self.ts.update_entity(self.table_name, entity)
 
             entity = self._create_default_entity_dict(
                 '001', 'batch_negative_1')
-            self.ts.merge_entity(
-                self.table_name,
-                entity['PartitionKey'],
-                entity['RowKey'], entity)
+            self.ts.merge_entity(self.table_name, entity)
 
         self.ts.cancel_batch()
 
@@ -1246,9 +1463,7 @@ class StorageTableTest(StorageTestCase):
 
             entity = self._create_updated_entity_dict(
                 '001', 'batch_negative_1')
-            self.ts.update_entity(
-                self.table_name, entity['PartitionKey'], entity['RowKey'],
-                entity)
+            self.ts.update_entity(self.table_name, entity)
 
             entity = self._create_default_entity_dict(
                 '002', 'batch_negative_1')
@@ -1577,7 +1792,7 @@ class StorageTableTest(StorageTestCase):
         )
         self._set_service_options(service, self.settings)
         updated_entity = self._create_updated_entity_dict('MyPartition', '1')
-        resp = service.update_entity(self.table_name, 'MyPartition', '1', updated_entity)
+        resp = service.update_entity(self.table_name, updated_entity)
 
         # Assert
         received_entity = self.ts.get_entity(self.table_name, 'MyPartition', '1')

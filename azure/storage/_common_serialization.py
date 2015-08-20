@@ -33,7 +33,6 @@ except ImportError:
 
 from ._common_models import (
     WindowsAzureData,
-    Feed,
     _Base64String,
     HeaderDict,
     _unicode_type,
@@ -50,58 +49,10 @@ from ._common_error import (
     _WARNING_VALUE_SHOULD_BE_BYTES,
 )
 
-_etree_entity_feed_namespaces = {
-    'atom': 'http://www.w3.org/2005/Atom',
-    'm': 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata',
-    'd': 'http://schemas.microsoft.com/ado/2007/08/dataservices',
-}
-
-
-def _make_etree_ns_attr_name(ns, name):
-    return '{' + ns + '}' + name
-
-
-def _get_etree_tag_name_without_ns(tag):
-    val = tag.partition('}')[2]
-    return val
-
 
 def _get_etree_text(element):
     text = element.text
     return text if text is not None else ''
-
-
-def _get_readable_id(id_name, id_prefix_to_skip):
-    """simplified an id to be more friendly for us people"""
-    # id_name is in the form 'https://namespace.host.suffix/name'
-    # where name may contain a forward slash!
-    pos = id_name.find('//')
-    if pos != -1:
-        pos += 2
-        if id_prefix_to_skip:
-            pos = id_name.find(id_prefix_to_skip, pos)
-            if pos != -1:
-                pos += len(id_prefix_to_skip)
-        pos = id_name.find('/', pos)
-        if pos != -1:
-            return id_name[pos + 1:]
-    return id_name
-
-
-def _create_entry(entry_body):
-    ''' Adds common part of entry to a given entry body and return the whole
-    xml. '''
-    updated_str = datetime.utcnow().isoformat()
-    if datetime.utcnow().utcoffset() is None:
-        updated_str += '+00:00'
-
-    entry_start = '''<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<entry xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://www.w3.org/2005/Atom" >
-<title /><updated>{updated}</updated><author><name /></author><id />
-<content type="application/xml">
-    {body}</content></entry>'''
-    return entry_start.format(updated=updated_str, body=entry_body)
-
 
 def _to_datetime(strtime):
     return datetime.strptime(strtime, "%Y-%m-%dT%H:%M:%S.%f")
@@ -241,8 +192,6 @@ def _update_request_uri_query(request):
     return request.path, request.query
 
 
-
-
 def _parse_response_for_dict(response):
     ''' Extracts name-values from response header. Filter out the standard
     http headers.'''
@@ -293,6 +242,16 @@ def _parse_response_for_dict_filter(response, filter):
         return return_dict
     else:
         return None
+
+    
+def _extract_etag(response):
+    ''' Extracts the etag from the response headers. '''
+    if response and response.headers:
+        for name, value in response.headers:
+            if name.lower() == 'etag':
+                return value
+
+    return None
 
 
 class _ETreeXmlToObject(object):
@@ -366,63 +325,6 @@ class _ETreeXmlToObject(object):
 
         setattr(res, list_name, res_items)
         return res
-
-
-    @staticmethod
-    def convert_response_to_feeds(response, convert_func):
-
-        if response is None:
-            return None
-
-        feeds = _list_of(Feed)
-
-        _set_continuation_from_response_headers(feeds, response)
-
-        root = ETree.fromstring(response.body)
-
-        # some feeds won't have the 'feed' element, just a single 'entry' element
-        root_name = _get_etree_tag_name_without_ns(root.tag)
-        if root_name == 'feed':
-            entries = root.findall("./atom:entry", _etree_entity_feed_namespaces)
-        elif root_name == 'entry':
-            entries = [root]
-        else:
-            raise NotImplementedError()
-
-        for entry in entries:
-            feeds.append(convert_func(entry))
-
-        return feeds
-
-
-    @staticmethod
-    def get_entry_properties_from_element(element, include_id, id_prefix_to_skip=None, use_title_as_id=False):
-        ''' get properties from element tree element '''
-        properties = {}
-
-        etag = element.attrib.get(_make_etree_ns_attr_name(_etree_entity_feed_namespaces['m'], 'etag'), None)
-        if etag is not None:
-            properties['etag'] = etag
-
-        updated = element.findtext('./atom:updated', '', _etree_entity_feed_namespaces)
-        if updated:
-            properties['updated'] = updated
-
-        author_name = element.findtext('./atom:author/atom:name', '', _etree_entity_feed_namespaces)
-        if author_name:
-            properties['author'] = author_name
-
-        if include_id:
-            if use_title_as_id:
-                title = element.findtext('./atom:title', '', _etree_entity_feed_namespaces)
-                if title:
-                    properties['name'] = title
-            else:
-                id = element.findtext('./atom:id', '', _etree_entity_feed_namespaces)
-                if id:
-                    properties['name'] = _get_readable_id(id, id_prefix_to_skip)
-
-        return properties
 
 
     @staticmethod
