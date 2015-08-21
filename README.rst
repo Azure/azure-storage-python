@@ -1,4 +1,126 @@
-Microsoft Azure SDK for Python
-==============================
+Microsoft Azure Storage SDK for Python
+======================================
 
-This is the Microsoft Azure Storage Runtime Client Library.
+This project provides a client library in Python that makes it easy to
+consume Microsoft Azure Storage services. For documentation please see
+the Microsoft Azure `Python Developer Center`_ and our `ReadTheDocs`_ page.
+
+    If you are looking for the Service Bus or Azure Management
+    libraries, please visit
+    https://github.com/Azure/azure-sdk-for-python.
+
+Features
+========
+
+-  Blob
+
+   -  Create/Read/Update/Delete containers
+   -  Create/Read/Update/Delete blobs
+   -  Advanced Blob Operations
+
+-  Queue
+
+   -  Create/Delete Queues
+   -  Insert/Peek Queue Messages
+   -  Advanced Queue Operations
+
+-  Table
+
+   -  Create/Read/Update/Delete tables
+   -  Create/Read/Update/Delete entities
+   -  Batch operations
+   -  Advanced Table Operations
+
+-  Files
+
+   -  Create/Update/Delete Directories
+   -  Create/Read/Update/Delete Files
+   -  Advanced File Operations
+
+Getting Started
+===============
+
+Download
+--------
+
+Option 1: Via PyPi
+~~~~~~~~~~~~~~~~~~
+
+To install via the Python Package Index (PyPI), type:
+::
+
+    pip install azure-storage
+
+Option 2: Source Via Git
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To get the source code of the SDK via git just type:
+
+::
+
+    git clone git://github.com/Azure/azure-storage-python.git
+    cd ./azure-storage-python
+    python setup.py install
+
+Option 3: Source Zip
+~~~~~~~~~~~~~~~~~~~~
+
+Download a zip of the code via GitHub or PyPi. Then, type:
+
+::
+
+    cd ./azure-storage-python
+    python setup.py install
+
+Minimum Requirements
+--------------------
+
+-  Python 2.7, 3.3, or 3.4.
+-  See setup.py for dependencies
+
+Usage
+-----
+
+To use this SDK to call Microsoft Azure storage services, you need to
+first `create an account`_.
+
+Code Sample
+-----------
+
+TODO
+
+Need Help?
+==========
+
+Be sure to check out the Microsoft Azure `Developer Forums on MSDN`_ or
+the `Developer Forums on Stack Overflow`_ if you have trouble with the
+provided code.
+
+Contribute Code or Provide Feedback
+===================================
+
+If you would like to become an active contributor to this project please
+follow the instructions provided in `Azure Projects Contribution
+Guidelines`_.
+
+If you encounter any bugs with the library please file an issue in the
+`Issues`_ section of the project.
+
+Learn More
+==========
+
+-  `Python Developer Center`_
+-  `Azure Storage Service`_
+-  `Azure Storage Team Blog`_
+-  `ReadTheDocs`_
+
+.. _Python Developer Center: http://azure.microsoft.com/en-us/develop/python/
+.. _ReadTheDocs: http://azure-sdk-for-python.readthedocs.org/en/latest/storage.html
+.. _here: https://github.com/Azure/azure-storage-python/archive/master.zip
+.. _create an account: https://account.windowsazure.com/signup
+.. _Developer Forums on MSDN: http://social.msdn.microsoft.com/Forums/windowsazure/en-US/home?forum=windowsazuredata
+.. _Developer Forums on Stack Overflow: http://stackoverflow.com/questions/tagged/azure+windows-azure-storage
+.. _Azure Projects Contribution Guidelines: http://azure.github.io/guidelines.html
+.. _Issues: https://github.com/Azure/azure-storage-python/issues
+.. _Azure Storage Service: http://azure.microsoft.com/en-us/documentation/services/storage/
+.. _Azure Storage Team Blog: http://blogs.msdn.com/b/windowsazurestorage/
