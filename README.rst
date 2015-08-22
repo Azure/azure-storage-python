@@ -9,6 +9,26 @@ the Microsoft Azure `Python Developer Center`_ and our `ReadTheDocs`_ page.
     libraries, please visit
     https://github.com/Azure/azure-sdk-for-python.
 
+
+Compatibility
+=============
+
+**IMPORTANT**: If you have an earlier version of the azure package
+(version < 1.0), you should uninstall it before installing this package.
+
+You can check the version using pip:
+
+.. code:: shell
+
+    pip freeze
+
+If you see azure==0.11.0 (or any version below 1.0), uninstall it first:
+
+.. code:: shell
+
+    pip uninstall azure
+
+
 Features
 ========
 
