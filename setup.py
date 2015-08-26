@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
@@ -26,7 +26,7 @@ setup(
     license='Apache License 2.0',
     author='Microsoft Corporation',
     author_email='ptvshelp@microsoft.com',
-    url='https://github.com/Azure/azure-sdk-for-python',
+    url='https://github.com/Azure/azure-storage-python',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Programming Language :: Python',

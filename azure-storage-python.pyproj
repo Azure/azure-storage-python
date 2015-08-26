@@ -5,7 +5,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{c443d9a8-dcf3-4b96-bf55-0797045be2b8}</ProjectGuid>
     <ProjectHome />
-    <StartupFile></StartupFile>
+    <StartupFile>
+    </StartupFile>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
@@ -56,6 +57,8 @@
     <Compile Include="azure\storage\_serialization.py" />
     <Compile Include="azure\storage\__init__.py" />
     <Compile Include="azure\__init__.py" />
+    <Compile Include="doc\conf.py" />
+    <Compile Include="doc\__init__.py" />
     <Compile Include="setup.py" />
     <Compile Include="tests\blob_performance.py" />
     <Compile Include="tests\common_extendedtestcase.py" />
@@ -82,11 +85,25 @@
     <Folder Include="azure\storage\queue" />
     <Folder Include="azure\storage\table" />
     <Folder Include="azure\storage\_http" />
+    <Folder Include="doc\" />
+    <Folder Include="doc\ref\" />
     <Folder Include="tests" />
     <Folder Include="wheelhouse\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="doc\file.rst" />
+    <Content Include="doc\table.rst" />
+    <Content Include="doc\queue.rst" />
+    <Content Include="doc\blob.rst">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="doc\BuildDocs.bat" />
+    <Content Include="doc\index.rst" />
+    <Content Include="doc\InstallDocDependencies.bat" />
+    <Content Include="doc\make.bat" />
+    <Content Include="doc\Makefile" />
+    <Content Include="doc\requirements.txt" />
     <Content Include="LICENSE.txt" />
     <Content Include="MANIFEST.in" />
     <Content Include="README.rst" />
