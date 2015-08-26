@@ -135,7 +135,7 @@ Learn More
 -  `ReadTheDocs`_
 
 .. _Python Developer Center: http://azure.microsoft.com/en-us/develop/python/
-.. _ReadTheDocs: http://azure-sdk-for-python.readthedocs.org/en/latest/storage.html
+.. _ReadTheDocs: http://azure-storage.readthedocs.org/en/latest/
 .. _here: https://github.com/Azure/azure-storage-python/archive/master.zip
 .. _create an account: https://account.windowsazure.com/signup
 .. _Developer Forums on MSDN: http://social.msdn.microsoft.com/Forums/windowsazure/en-US/home?forum=windowsazuredata
