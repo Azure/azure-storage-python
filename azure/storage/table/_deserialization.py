@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------
+﻿#-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,8 +57,8 @@ def _from_entity_binary(value):
     return EntityProperty(EdmType.BINARY, _decode_base64_to_bytes(value))
 
 
-def _from_entity_int64(value):
-    return EntityProperty(EdmType.INT64, int(value))
+def _from_entity_int32(value):
+    return EntityProperty(EdmType.INT32, int(value))
 
 
 def _from_entity_datetime(value):
@@ -73,7 +73,8 @@ _EDM_TYPES = [EdmType.BINARY, EdmType.INT64, EdmType.GUID, EdmType.DATETIME,
 
 _ENTITY_TO_PYTHON_CONVERSIONS = {
     EdmType.BINARY: _from_entity_binary,
-    EdmType.INT64: _from_entity_int64,
+    EdmType.INT32: _from_entity_int32,
+    EdmType.INT64: int,
     EdmType.DOUBLE: float,
     EdmType.DATETIME: _from_entity_datetime,
 }
@@ -124,18 +125,17 @@ def _convert_json_to_entity(entry_element, property_resolver):
     # Partition key is a known property
     partition_key = properties.pop('PartitionKey', None)
     if partition_key:
-        _set_entity_attr(entity, 'PartitionKey', partition_key)
+        entity['PartitionKey'] = partition_key
 
     # Row key is a known property
     row_key = properties.pop('RowKey', None)
     if row_key:
-        _set_entity_attr(entity, 'RowKey', row_key)
+        entity['RowKey'] = row_key
 
     # Timestamp is a known property
     timestamp = properties.pop('Timestamp', None)
     if timestamp:
-        _set_entity_attr(entity, 'Timestamp',
-                         _from_entity_datetime(timestamp))
+        entity['Timestamp'] = _from_entity_datetime(timestamp)
         
     for name, value in properties.items():
         mtype = edmtypes.get(name);
@@ -149,9 +149,13 @@ def _convert_json_to_entity(entry_element, property_resolver):
             if mtype and mtype not in _EDM_TYPES:
                 raise AzureException(_ERROR_TYPE_NOT_SUPPORTED.format(mtype))
 
+        # Add type for Int32
+        if type(value) is int:
+            mtype = EdmType.INT32
+
         # no type info, property should parse automatically
-        if not mtype:
-            _set_entity_attr(entity, name, value)
+        if not mtype: 
+            entity[name] = value
         else:  # need an object to hold the property
             conv = _ENTITY_TO_PYTHON_CONVERSIONS.get(mtype)
             if conv is not None:
@@ -167,24 +171,15 @@ def _convert_json_to_entity(entry_element, property_resolver):
                         raise e
             else:
                 property = EntityProperty(mtype, value)
-            _set_entity_attr(entity, name, property)
+            entity[name] = property
 
     # extract etag from entry
     etag = odata.get('etag')
     if timestamp:
          etag = 'W/"datetime\'' + url_quote(timestamp) + '\'"'
-    _set_entity_attr(entity, 'etag', etag)
+    entity['etag'] = etag
 
     return entity
-
-
-def _set_entity_attr(entity, name, value):
-    try:
-        setattr(entity, name, value)
-    except UnicodeEncodeError:
-        # Python 2 doesn't support unicode attribute names, so we'll
-        # add them and access them directly through the dictionary
-        entity.__dict__[name] = value
 
 
 def _convert_json_response_to_tables(response):

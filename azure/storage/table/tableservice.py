@@ -387,8 +387,8 @@ class TableService(_StorageClient):
             payload. See TablePayloadFormat for possible values.
         property_resolver:
             Optional. A function which given the partition key, row key, 
-            property name, property value, and the property Edm type if 
-            returned by the service, returns the Edm type of the property.
+            property name, property value, and the property EdmType if 
+            returned by the service, returns the EdmType of the property.
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('partition_key', partition_key)
@@ -434,8 +434,8 @@ class TableService(_StorageClient):
             payload. See TablePayloadFormat for possible values.
         property_resolver:
             Optional. A function which given the partition key, row key, 
-            property name, property value, and the property Edm type if 
-            returned by the service, returns the Edm type of the property.
+            property name, property value, and the property EdmType if 
+            returned by the service, returns the EdmType of the property.
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('accept', accept)
@@ -510,9 +510,6 @@ class TableService(_StorageClient):
         _validate_not_none('entity', entity)
         _validate_not_none('if_match', if_match)
         _validate_dict_or_entity(entity)
-
-        if isinstance(entity, Entity):
-            entity = vars(entity)
         _validate_object_has_param('PartitionKey', entity)
         _validate_object_has_param('RowKey', entity)
 
@@ -556,9 +553,6 @@ class TableService(_StorageClient):
         _validate_not_none('entity', entity)
         _validate_not_none('if_match', if_match)
         _validate_dict_or_entity(entity)
-
-        if isinstance(entity, Entity):
-            entity = vars(entity)
         _validate_object_has_param('PartitionKey', entity)
         _validate_object_has_param('RowKey', entity)
 
@@ -568,7 +562,7 @@ class TableService(_StorageClient):
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
         request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
                            _DEFAULT_ACCEPT_HEADER,
-                           ('If-Match', _str_or_none(if_match)),]
+                           ('If-Match', _str_or_none(if_match))]
         request.body = _get_request_body(_convert_entity_to_json(entity))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -627,9 +621,6 @@ class TableService(_StorageClient):
         _validate_not_none('table_name', table_name)
         _validate_not_none('entity', entity)
         _validate_dict_or_entity(entity)
-
-        if isinstance(entity, Entity):
-            entity = vars(entity)
         _validate_object_has_param('PartitionKey', entity)
         _validate_object_has_param('RowKey', entity)
 
@@ -662,9 +653,6 @@ class TableService(_StorageClient):
         _validate_not_none('table_name', table_name)
         _validate_not_none('entity', entity)
         _validate_dict_or_entity(entity)
-
-        if isinstance(entity, Entity):
-            entity = vars(entity)
         _validate_object_has_param('PartitionKey', entity)
         _validate_object_has_param('RowKey', entity)
 

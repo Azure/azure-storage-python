@@ -121,11 +121,11 @@ class StorageTableTest(StorageTestCase):
         entity.optional = None
         entity.evenratio = 3.0
         entity.ratio = 3.1
-        entity.large = EntityProperty('Edm.Int64', 9333111000)
+        entity.large = 9333111000
         entity.Birthday = datetime(1973, 10, 4)
         entity.birthday = datetime(1970, 10, 4)
         entity.binary = None
-        entity.other = EntityProperty('Edm.Int64', 20)
+        entity.other = EntityProperty('Edm.Int32', 20)
         entity.clsid = EntityProperty(
             'Edm.Guid', 'c9da6455-213d-42c9-9a79-3e9149a57833')
         return entity
@@ -144,10 +144,10 @@ class StorageTableTest(StorageTestCase):
                 'optional': None,
                 'ratio': 3.1,
                 'evenratio': 3.0,
-                'large': EntityProperty('Edm.Int64', 9333111000),
+                'large': 9333111000,
                 'Birthday': datetime(1973, 10, 4),
                 'birthday': datetime(1970, 10, 4),
-                'other': EntityProperty('Edm.Int64', 20),
+                'other': EntityProperty('Edm.Int32', 20),
                 'clsid': EntityProperty(
                     'Edm.Guid',
                     'c9da6455-213d-42c9-9a79-3e9149a57833')}
@@ -178,13 +178,11 @@ class StorageTableTest(StorageTestCase):
         self.assertFalse(hasattr(entity, "aquarius"))
         self.assertEqual(entity.ratio, 3.1)
         self.assertEqual(entity.evenratio, 3.0)
-        self.assertIsInstance(entity.large, EntityProperty)
-        self.assertEqual(entity.large.type, 'Edm.Int64')
-        self.assertEqual(entity.large.value, 9333111000)
+        self.assertEqual(entity.large, 9333111000)
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1970, 10, 4, tzinfo=tzutc()))
         self.assertIsInstance(entity.other, EntityProperty)
-        self.assertEqual(entity.other.type, 'Edm.Int64')
+        self.assertEqual(entity.other.type, 'Edm.Int32')
         self.assertEqual(entity.other.value, 20)
         self.assertIsInstance(entity.clsid, EntityProperty)
         self.assertEqual(entity.clsid.type, 'Edm.Guid')
@@ -198,7 +196,7 @@ class StorageTableTest(StorageTestCase):
         '''
         Asserts that the entity passed in matches the default entity.
         '''
-        self.assertEqual(entity.age, 39)
+        self.assertEqual(entity.age, '39')
         self.assertEqual(entity.sex, 'male')
         self.assertEqual(entity.married, True)
         self.assertEqual(entity.deceased, False)
@@ -209,7 +207,9 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entity.large, '9333111000')
         self.assertEqual(entity.Birthday, '1973-10-04T00:00:00Z')
         self.assertEqual(entity.birthday, '1970-10-04T00:00:00Z')
-        self.assertEqual(entity.other, '20')
+        self.assertIsInstance(entity.other, EntityProperty)
+        self.assertEqual(entity.other.type, 'Edm.Int32')
+        self.assertEqual(entity.other.value, 20)
         self.assertEqual(entity.clsid, 'c9da6455-213d-42c9-9a79-3e9149a57833')
         self.assertTrue(hasattr(entity, "Timestamp"))
         self.assertIsInstance(entity.Timestamp, datetime)
@@ -248,13 +248,11 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entity.sign, 'aquarius')
         self.assertEqual(entity.ratio, 3.1)
         self.assertEqual(entity.evenratio, 3.0)
-        self.assertIsInstance(entity.large, EntityProperty)
-        self.assertEqual(entity.large.type, 'Edm.Int64')
-        self.assertEqual(entity.large.value, 9333111000)
+        self.assertEqual(entity.large, 9333111000)
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1991, 10, 4, tzinfo=tzutc()))
         self.assertIsInstance(entity.other, EntityProperty)
-        self.assertEqual(entity.other.type, 'Edm.Int64')
+        self.assertEqual(entity.other.type, 'Edm.Int32')
         self.assertEqual(entity.other.value, 20)
         self.assertIsInstance(entity.clsid, EntityProperty)
         self.assertEqual(entity.clsid.type, 'Edm.Guid')
@@ -269,7 +267,7 @@ class StorageTableTest(StorageTestCase):
         self.assertIsNotNone(name)
         self.assertIsNotNone(value)
         self.assertIsNone(type)
-        if name == 'large' or name == 'other':
+        if name == 'large' or name == 'age':
             return 'Edm.Int64'
         if name == 'Birthday' or name == 'birthday':
             return 'Edm.DateTime'
@@ -565,21 +563,6 @@ class StorageTableTest(StorageTestCase):
                 self._create_default_entity_dict('MyPartition', '1'))
 
         # Assert
-
-    @record
-    def test_insert_entity_with_large_value_throws(self):
-        # Arrange
-
-        # Act
-        dict = {'PartitionKey': 'MyPartition',
-                'RowKey': '1',
-                'large': 9333111000}
-
-        # Assert
-        with self.assertRaisesRegexp(TypeError, 
-                               '9333111000 is too large to be cast to type Edm.Int32. Please create an' + \
-                                   'EntityProperty with the type Edm.Int64.'):
-            self.ts.insert_entity(self.table_name, dict)
 
     @record
     def test_get_entity(self):
@@ -1226,9 +1209,7 @@ class StorageTableTest(StorageTestCase):
 
         # Assert
         self.assertEqual('value1', entity.test2)
-        self.assertIsInstance(entity.test4, EntityProperty)
-        self.assertEqual(entity.test4.type, 'Edm.Int64')
-        self.assertEqual(entity.test4.value, 1234567890)
+        self.assertEqual(1234567890, entity.test4)
 
     @record
     def test_batch_update_if_match(self):
@@ -1301,9 +1282,7 @@ class StorageTableTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(entity)
         self.assertEqual('value', entity.test2)
-        self.assertIsInstance(entity.test4, EntityProperty)
-        self.assertEqual(entity.test4.type, 'Edm.Int64')
-        self.assertEqual(entity.test4.value, 1234567890)
+        self.assertEqual(1234567890, entity.test4)
 
     @record
     def test_batch_insert_merge(self):
@@ -1329,9 +1308,7 @@ class StorageTableTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(entity)
         self.assertEqual('value', entity.test2)
-        self.assertIsInstance(entity.test4, EntityProperty)
-        self.assertEqual(entity.test4.type, 'Edm.Int64')
-        self.assertEqual(entity.test4.value, 1234567890)
+        self.assertEqual(1234567890, entity.test4)
 
     @record
     def test_batch_delete(self):
@@ -1527,8 +1504,8 @@ class StorageTableTest(StorageTestCase):
             self.table_name, "PartitionKey eq 'test'")
         # Assert
         self.assertEqual(len(resp), 2)
-        self.assertEqual(resp[0].__dict__[u'啊齄丂狛狜'], u'ꀕ')
-        self.assertEqual(resp[1].__dict__[u'啊齄丂狛狜'], u'hello')
+        self.assertEqual(resp[0][u'啊齄丂狛狜'], u'ꀕ')
+        self.assertEqual(resp[1][u'啊齄丂狛狜'], u'hello')
 
     @record
     def test_unicode_create_table_unicode_name(self):

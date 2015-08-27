@@ -34,7 +34,6 @@ from .._common_conversion import (
 from .._serialization import _update_storage_header
 from ._error import (
     _ERROR_CANNOT_SERIALIZE_VALUE_TO_ENTITY,
-    _ERROR_INT32_VALUE_TOO_LARGE,
 )
 from .models import (
     Entity,
@@ -73,11 +72,7 @@ def _update_storage_table_header(request):
 
 
 def _to_entity_int(data):
-    int_max = (2 << 30) - 1
-    if data > (int_max) or data < (int_max + 1) * (-1):
-        raise TypeError(_ERROR_INT32_VALUE_TOO_LARGE.format(data))
-    else:
-        return None, data
+    return EdmType.INT64, str(data)
 
 
 def _to_entity_bool(value):
@@ -106,6 +101,9 @@ def _to_entity_float(value):
 def _to_entity_property(value):
     if value.type == EdmType.BINARY:
         return value.type, _encode_base64(value.value)
+
+    if value.type == EdmType.INT32:
+        return None, int(value.value)
 
     return value.type, str(value.value)
 
@@ -154,9 +152,6 @@ def _convert_entity_to_json(source):
        "RowKey":"myrowkey"
     }
     '''
-
-    if isinstance(source, Entity):
-        source = vars(source)
 
     properties = {}
 

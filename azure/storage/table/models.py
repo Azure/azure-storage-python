@@ -12,19 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from .._common_models import (
-    WindowsAzureData,
+from ._error import (
+    _ERROR_ATTRIBUTE_MISSING,
 )
 
-
-class Entity(WindowsAzureData):
-
+class Entity(dict):
     ''' Entity class. The attributes of entity will be created dynamically. '''
-    pass
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(_ERROR_ATTRIBUTE_MISSING.format('Entity', name))
+
+    __setattr__ = dict.__setitem__
+
+    def __delattr__(self, name):
+        try:
+            del self[name]
+        except KeyError:
+            raise AttributeError(_ERROR_ATTRIBUTE_MISSING.format('Entity', name))
+
+    def __dir__(self):
+        return dir({}) + list(self.keys())
 
 
-class EntityProperty(WindowsAzureData):
-
+class EntityProperty(object):
     ''' Entity property. contains type and value.  '''
 
     def __init__(self, type=None, value=None):
@@ -32,9 +45,9 @@ class EntityProperty(WindowsAzureData):
         self.value = value
 
 
-class Table(WindowsAzureData):
-
+class Table(object):
     ''' Only for IntelliSense and telling user the return type. '''
+
     pass
 
 
@@ -53,6 +66,7 @@ class TableSharedAccessPermissions(object):
     '''Delete entities.'''
     DELETE = 'd'
 
+
 class TablePayloadFormat(object):
     '''
     Specifies the accepted content type of the response payload. More information
@@ -67,6 +81,7 @@ class TablePayloadFormat(object):
 
     '''Returns minimal type information for the entity properties plus some extra odata properties.'''
     JSON_FULL_METADATA = 'application/json;odata=fullmetadata'
+
 
 class EdmType(object):
     BINARY = 'Edm.Binary'

@@ -14,13 +14,10 @@
 #--------------------------------------------------------------------------
 
 from .._common_error import (
-    _ERROR_VALUE_NONE,
-)
-from .models import (
-    Entity,
-    TablePayloadFormat,
+    _ERROR_VALUE_NONE_OR_EMPTY,
 )
 
+_ERROR_ATTRIBUTE_MISSING = '\'{0}\' object has no attribute \'{1}\''
 _ERROR_CANNOT_FIND_PARTITION_KEY = 'Cannot find partition key in request.'
 _ERROR_CANNOT_FIND_ROW_KEY = 'Cannot find row key in request.'
 _ERROR_INCORRECT_TABLE_IN_BATCH = \
@@ -39,15 +36,12 @@ _ERROR_INVALID_PROPERTY_RESOLVER = \
     'The specified property resolver returned an invalid type. Name: {0}, Value: {1}, ' + \
     'EdmType: {2}'
 _ERROR_INVALID_ENTITY = 'The entity must be either in dict format or an entity object.'
-_ERROR_INT32_VALUE_TOO_LARGE = '{0} is too large to be cast to type Edm.Int32. Please create an' + \
-    'EntityProperty with the type Edm.Int64.'
 
 def _validate_dict_or_entity(entity):
-    if not isinstance(entity, dict) and not isinstance(entity, Entity):
-        raise TypeError(_ERROR_INVALID_ENTITY.format(param_name))
+    # Entity inherits from dict, so just validating dict is fine
+    if not isinstance(entity, dict):
+        raise TypeError(_ERROR_INVALID_ENTITY)
 
 def _validate_object_has_param(param_name, object):
-    if isinstance(object, Entity):
-        object = vars(object)
     if not object.get(param_name):
-        raise ValueError(_ERROR_VALUE_NONE.format(param_name))
+        raise ValueError(_ERROR_VALUE_NONE_OR_EMPTY.format(param_name))

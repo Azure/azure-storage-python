@@ -37,6 +37,7 @@ _WARNING_VALUE_SHOULD_BE_BYTES = \
     'automatically, with utf-8 text encoding.'
 _ERROR_VALUE_SHOULD_BE_BYTES = '{0} should be of type bytes.'
 _ERROR_VALUE_NONE = '{0} should not be None.'
+_ERROR_VALUE_NONE_OR_EMPTY = '{0} should not be None or empty.'
 _ERROR_VALUE_NEGATIVE = '{0} should not be negative.'
 _ERROR_PAGE_BLOB_SIZE_ALIGNMENT = \
     'Invalid page blob size: {0}. ' + \
