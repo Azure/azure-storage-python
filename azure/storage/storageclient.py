@@ -103,7 +103,6 @@ class _StorageClient(object):
             request_session=request_session,
             user_agent=_USER_AGENT_STRING,
         )
-        self._batchclient = None
         self._filter = self._perform_request_worker
 
     def with_filter(self, filter):
@@ -164,10 +163,7 @@ class _StorageClient(object):
         to error handler
         '''
         try:
-            if self._batchclient is not None:
-                return self._batchclient.insert_request_to_batch(request)
-            else:
-                resp = self._filter(request)
+            resp = self._filter(request)
 
             if sys.version_info >= (3,) and isinstance(resp, bytes) and \
                 text_encoding:

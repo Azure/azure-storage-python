@@ -14,6 +14,7 @@
 #--------------------------------------------------------------------------
 import sys
 import types
+import uuid
 
 from datetime import datetime
 from dateutil.tz import tzutc
@@ -31,6 +32,9 @@ from .._common_conversion import (
     _str,
     _str_or_none,
 )
+from .._common_serialization import (
+    _update_request_uri_query_local_storage,
+)
 from .._serialization import _update_storage_header
 from ._error import (
     _ERROR_CANNOT_SERIALIZE_VALUE_TO_ENTITY,
@@ -44,18 +48,23 @@ from .models import (
     EdmType,
 )
 
+if sys.version_info < (3,):
+    def _new_boundary():
+        return str(uuid.uuid1())
+else:
+    def _new_boundary():
+        return str(uuid.uuid1()).encode('utf-8')
 
 _DEFAULT_ACCEPT_HEADER = ('Accept', TablePayloadFormat.JSON_MINIMAL_METADATA)
 _DEFAULT_CONTENT_TYPE_HEADER = ('Content-Type', 'application/json')
 _DEFAULT_PREFER_HEADER = ('Prefer', 'return-no-content')
-
+_SUB_HEADERS = ['If-Match', 'Prefer', 'Accept', 'Content-Type', 'DataServiceVersion']
 
 def _get_entity_path(table_name, partition_key, row_key):
     return '/{0}(PartitionKey=\'{1}\',RowKey=\'{2}\')'.format(
             _str(table_name), 
             _str(partition_key), 
             _str(row_key))
-
 
 def _update_storage_table_header(request):
     ''' add additional headers for storage table request. '''
@@ -206,3 +215,53 @@ def _convert_table_to_json(table_name):
         the name of the table
     '''
     return _convert_entity_to_json({'TableName': table_name})
+
+def _convert_batch_to_json(batch_requests):
+    '''
+    Create json to send for an array of batch requests.
+
+    batch_requests:
+        an array of requests
+    '''
+    batch_boundary = b'batch_' + _new_boundary()
+    changeset_boundary = b'changeset_' + _new_boundary()
+
+    body = []
+    body.append(b'--' + batch_boundary + b'\n')
+    body.append(b'Content-Type: multipart/mixed; boundary=')
+    body.append(changeset_boundary + b'\n\n')
+
+    content_id = 1
+
+    # Adds each request body to the POST data.
+    for _, request in batch_requests:
+        body.append(b'--' + changeset_boundary + b'\n')
+        body.append(b'Content-Type: application/http\n')
+        body.append(b'Content-Transfer-Encoding: binary\n\n')
+        body.append(request.method.encode('utf-8'))
+        body.append(b' http://')
+        body.append(request.host.encode('utf-8'))
+        body.append(request.path.encode('utf-8'))
+        body.append(b' HTTP/1.1\n')
+        body.append(b'Content-ID: ')
+        body.append(str(content_id).encode('utf-8') + b'\n')
+        content_id += 1
+
+        for name, value in request.headers:
+            if name in _SUB_HEADERS:
+                body.append(name.encode('utf-8') + b': ')
+                body.append(value.encode('utf-8') + b'\n')
+
+        # Add different headers for different request types.
+        if not request.method == 'DELETE':
+            body.append(b'Content-Length: ')
+            body.append(str(len(request.body)).encode('utf-8'))
+            body.append(b'\n\n')
+            body.append(request.body + b'\n')
+
+        body.append(b'\n')
+
+    body.append(b'--' + changeset_boundary + b'--' + b'\n')
+    body.append(b'--' + batch_boundary + b'--')
+
+    return b''.join(body), 'multipart/mixed; boundary=' + batch_boundary.decode('utf-8')

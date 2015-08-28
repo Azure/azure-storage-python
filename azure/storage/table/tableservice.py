@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+from contextlib import contextmanager
 from azure.common import (
     AzureHttpError,
 )
@@ -36,7 +37,6 @@ from .._common_serialization import (
     _extract_etag,
 )
 from .._http import HTTPRequest
-from .batchclient import _BatchClient
 from ..models import (
     SignedIdentifiers,
     StorageServiceProperties,
@@ -57,8 +57,8 @@ from .._serialization import (
     _convert_signed_identifiers_to_xml,
 )
 from ._serialization import (
-    _convert_entity_to_json,
     _convert_table_to_json,
+    _convert_batch_to_json,
     _update_storage_table_header,
     _get_entity_path,
     _DEFAULT_ACCEPT_HEADER,
@@ -69,6 +69,8 @@ from ._deserialization import (
     _convert_json_response_to_entity,
     _convert_json_response_to_tables,
     _convert_json_response_to_entities,
+    _parse_batch_response,
+    _parse_batch_error,
 )
 from ..constants import (
     TABLE_SERVICE_HOST_BASE,
@@ -77,14 +79,22 @@ from ..constants import (
     X_MS_VERSION,
 )
 from ._error import (
-    _validate_dict_or_entity,
     _validate_object_has_param,
+)
+from ._request import (
+    _get_entity,
+    _insert_entity,
+    _update_entity,
+    _merge_entity,
+    _delete_entity,
+    _insert_or_replace_entity,
+    _insert_or_merge_entity,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
 )
 from ..storageclient import _StorageClient
-
+from .tablebatch import TableBatch
 
 class TableService(_StorageClient):
 
@@ -174,27 +184,6 @@ class TableService(_StorageClient):
             table_name=table_name,
         )
 
-    def begin_batch(self):
-        if self._batchclient is None:
-            self._batchclient = _BatchClient(
-                service_instance=self,
-                authentication=self.authentication,
-                request_session=self._httpclient.request_session,
-                timeout=self._httpclient.timeout,
-                user_agent=self._httpclient.user_agent,
-            )
-        return self._batchclient.begin_batch()
-
-    def commit_batch(self):
-        try:
-            ret = self._batchclient.commit_batch()
-        finally:
-            self._batchclient = None
-        return ret
-
-    def cancel_batch(self):
-        self._batchclient = None
-
     def get_table_service_properties(self):
         '''
         Gets the properties of a storage account's Table service, including
@@ -254,7 +243,7 @@ class TableService(_StorageClient):
             uri_part_table_name = "('" + table_name + "')"
         else:
             uri_part_table_name = ""
-        request.path = '/Tables' + uri_part_table_name + ''
+        request.path = '/Tables' + uri_part_table_name
         request.headers = [('Accept', TablePayloadFormat.JSON_NO_METADATA)]
         request.query = [
             ('$top', _int_or_none(top)),
@@ -370,43 +359,6 @@ class TableService(_StorageClient):
         request.headers = _update_storage_table_header(request)
         self._perform_request(request)
 
-    def get_entity(self, table_name, partition_key, row_key, select=None,
-                   accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
-                   property_resolver=None):
-        '''
-        Get an entity in a table; includes the $select options.
-
-        partition_key:
-            PartitionKey of the entity.
-        row_key:
-            RowKey of the entity.
-        select:
-            Optional. Property names to select.
-        accept:
-            Required. Specifies the accepted content type of the response 
-            payload. See TablePayloadFormat for possible values.
-        property_resolver:
-            Optional. A function which given the partition key, row key, 
-            property name, property value, and the property EdmType if 
-            returned by the service, returns the EdmType of the property.
-        '''
-        _validate_not_none('table_name', table_name)
-        _validate_not_none('partition_key', partition_key)
-        _validate_not_none('row_key', row_key)
-        _validate_not_none('accept', accept)
-        request = HTTPRequest()
-        request.method = 'GET'
-        request.host = self._get_host()
-        request.path = _get_entity_path(table_name, partition_key, row_key)
-        request.headers = [('Accept', _str(accept))]
-        request.query = [('$select', _str_or_none(select))]
-        request.path, request.query = _update_request_uri_query_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
-
-        return _convert_json_response_to_entity(response, property_resolver)
-
     def query_entities(self, table_name, filter=None, select=None, top=None,
                        next_partition_key=None, next_row_key=None,
                        accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
@@ -458,6 +410,93 @@ class TableService(_StorageClient):
 
         return _convert_json_response_to_entities(response, property_resolver)
 
+    def commit_batch(self, table_name, batch):
+        '''
+        Commits a batch request.
+
+        table_name:
+            Table name.
+        batch:
+            a Batch object
+        '''
+        _validate_not_none('table_name', table_name)
+
+        # Construct the batch request
+        request = HTTPRequest()
+        request.method = 'POST'
+        request.host = self._get_host()
+        request.path = '/' + '$batch'
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+
+        # Update the batch operation requests with table and client specific info
+        for row_key, batch_request in batch._requests:
+            batch_request.host = self._get_host()
+            if batch_request.method == 'POST':
+                batch_request.path = '/' + _str(table_name)
+            else:
+                batch_request.path = _get_entity_path(table_name, batch._partition_key, row_key)
+            batch_request.path, batch_request.query = _update_request_uri_query_local_storage(
+                batch_request, self.use_local_storage)
+
+        # Construct the batch body
+        request.body, boundary = _convert_batch_to_json(batch._requests)
+        request.headers = [('Content-Type', boundary)]
+
+        # Add the table and storage specific headers, including content length
+        request.headers = _update_storage_table_header(request)
+
+        # Perform the batch request and return the response
+        response = self._perform_request(request)
+        responses = _parse_batch_response(response.body)
+        return responses
+
+    @contextmanager
+    def batch(self, table_name):
+        '''
+        Creates a batch object which can be used as a context manager.
+        Commits the batch on exit.
+
+        table_name:
+            Table name.
+        '''
+        batch = TableBatch()
+        yield batch
+        self.commit_batch(table_name, batch)
+
+    def get_entity(self, table_name, partition_key, row_key, select=None,
+                   accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
+                   property_resolver=None):
+        '''
+        Get an entity in a table; includes the $select options.
+
+        table_name:
+            Table name.
+        partition_key:
+            PartitionKey of the entity.
+        row_key:
+            RowKey of the entity.
+        select:
+            Optional. Property names to select.
+        accept:
+            Required. Specifies the accepted content type of the response 
+            payload. See TablePayloadFormat for possible values.
+        property_resolver:
+            Optional. A function which given the partition key, row key, 
+            property name, property value, and the property EdmType if 
+            returned by the service, returns the EdmType of the property.
+        '''
+        _validate_not_none('table_name', table_name)
+        request = _get_entity(partition_key, row_key, select, accept)
+        request.host = self._get_host()
+        request.path = _get_entity_path(table_name, partition_key, row_key)
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_table_header(request)
+
+        response = self._perform_request(request)
+        return _convert_json_response_to_entity(response, property_resolver)
+
     def insert_entity(self, table_name, entity):
         '''
         Inserts a new entity into a table.
@@ -469,22 +508,14 @@ class TableService(_StorageClient):
             entity object. Must contain a PartitionKey and a RowKey.
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('entity', entity)
-        _validate_dict_or_entity(entity)
-
-        request = HTTPRequest()
-        request.method = 'POST'
+        request = _insert_entity(entity)
         request.host = self._get_host()
-        request.path = '/' + _str(table_name) + ''
-        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                           _DEFAULT_PREFER_HEADER,
-                           _DEFAULT_ACCEPT_HEADER]
-        request.body = _get_request_body(_convert_entity_to_json(entity))
+        request.path = '/' + _str(table_name)
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _extract_etag(response)
 
     def update_entity(self, table_name, entity, if_match='*'):
@@ -507,26 +538,14 @@ class TableService(_StorageClient):
             an unconditional update, set If-Match to the wildcard character (*).
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('entity', entity)
-        _validate_not_none('if_match', if_match)
-        _validate_dict_or_entity(entity)
-        _validate_object_has_param('PartitionKey', entity)
-        _validate_object_has_param('RowKey', entity)
-
-        request = HTTPRequest()
-        request.method = 'PUT'
+        request = _update_entity(entity, if_match)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
-        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                           _DEFAULT_ACCEPT_HEADER,
-                           ('If-Match', _str_or_none(if_match)),]
-        request.body = _get_request_body(_convert_entity_to_json(entity))
-
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _extract_etag(response)
 
     def merge_entity(self, table_name, entity, if_match='*'):
@@ -550,25 +569,14 @@ class TableService(_StorageClient):
             an unconditional merge, set If-Match to the wildcard character (*).
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('entity', entity)
-        _validate_not_none('if_match', if_match)
-        _validate_dict_or_entity(entity)
-        _validate_object_has_param('PartitionKey', entity)
-        _validate_object_has_param('RowKey', entity)
-
-        request = HTTPRequest()
-        request.method = 'MERGE'
+        request = _merge_entity(entity, if_match)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
-        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                           _DEFAULT_ACCEPT_HEADER,
-                           ('If-Match', _str_or_none(if_match))]
-        request.body = _get_request_body(_convert_entity_to_json(entity))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _extract_etag(response)
 
     def delete_entity(self, table_name, partition_key, row_key,
@@ -592,18 +600,13 @@ class TableService(_StorageClient):
             an unconditional delete, set If-Match to the wildcard character (*).
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('partition_key', partition_key)
-        _validate_not_none('row_key', row_key)
-        _validate_not_none('if_match', if_match)
-        request = HTTPRequest()
-        request.method = 'DELETE'
+        request = _delete_entity(partition_key, row_key, if_match)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, partition_key, row_key)
-        request.headers = [_DEFAULT_ACCEPT_HEADER,
-                           ('If-Match', _str_or_none(if_match))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
+
         self._perform_request(request)
 
     def insert_or_replace_entity(self, table_name, entity):
@@ -619,23 +622,14 @@ class TableService(_StorageClient):
             entity object. Must contain a PartitionKey and a RowKey.
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('entity', entity)
-        _validate_dict_or_entity(entity)
-        _validate_object_has_param('PartitionKey', entity)
-        _validate_object_has_param('RowKey', entity)
-
-        request = HTTPRequest()
-        request.method = 'PUT'
+        request = _insert_or_replace_entity(entity)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
-        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                           _DEFAULT_ACCEPT_HEADER]
-        request.body = _get_request_body(_convert_entity_to_json(entity))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _extract_etag(response)
 
     def insert_or_merge_entity(self, table_name, entity):
@@ -651,23 +645,14 @@ class TableService(_StorageClient):
             entity object. Must contain a PartitionKey and a RowKey.
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('entity', entity)
-        _validate_dict_or_entity(entity)
-        _validate_object_has_param('PartitionKey', entity)
-        _validate_object_has_param('RowKey', entity)
-
-        request = HTTPRequest()
-        request.method = 'MERGE'
+        request = _insert_or_merge_entity(entity)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
-        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                           _DEFAULT_ACCEPT_HEADER]
-        request.body = _get_request_body(_convert_entity_to_json(entity))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _extract_etag(response)
 
     def _perform_request_worker(self, request):

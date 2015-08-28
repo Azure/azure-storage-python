@@ -56,6 +56,8 @@ def _update_storage_header(request):
 
     # append addtional headers based on the service
     request.headers.append(('x-ms-version', X_MS_VERSION))
+    request.headers.append(('Accept-Charset', 'UTF-8'))
+    request.headers.append(('Accept-Encoding', 'identity'))
 
     # append x-ms-meta name, values to header
     for name, value in request.headers:

@@ -24,11 +24,16 @@ else:
 from json import (
     loads,
 )
+from .._http import HTTPResponse
 from azure.common import (
     AzureException,
 )
+from ..models import (
+    AzureBatchOperationError,
+)
 from .._common_serialization import (
     _set_continuation_from_response_headers,
+    _extract_etag,
 )
 from .._common_conversion import (
     _decode_base64_to_bytes,
@@ -228,3 +233,51 @@ def _convert_json_response_to_entities(response, property_resolver):
                                              property_resolver))
 
     return entities
+
+def _parse_batch_response(body):
+    parts = body.split(b'--changesetresponse_')
+
+    responses = []
+    for part in parts:
+        httpLocation = part.find(b'HTTP/')
+        if httpLocation > 0:
+            response = _parse_batch_response_part(part[httpLocation:])
+            if response.status >= 300:
+                _parse_batch_error(response)
+            responses.append(_extract_etag(response))
+
+    return responses
+
+def _parse_batch_response_part(part):
+    lines = part.splitlines();
+
+    # First line is the HTTP status/reason
+    status, _, reason = lines[0].partition(b' ')[2].partition(b' ')
+
+    # Followed by headers and body
+    headers = []
+    body = b''
+    isBody = False
+    for line in lines[1:]:
+        if line == b'' and not isBody:
+            isBody = True
+        elif isBody:
+            body += line
+        else:
+            headerName, _, headerVal = line.partition(b': ')
+            headers.append((headerName.lower().decode("utf-8"), headerVal.decode("utf-8")))
+
+    return HTTPResponse(int(status), reason.strip(), headers, body)
+
+def _parse_batch_error(response):
+    doc = loads(response.body.decode('utf-8'))
+
+    code = ''
+    message = ''
+    error = doc.get('odata.error')
+    if error:
+        code = error.get('code')
+        if error.get('message'):
+            message = error.get('message').get('value')
+
+    raise AzureBatchOperationError(message, response.status, code)

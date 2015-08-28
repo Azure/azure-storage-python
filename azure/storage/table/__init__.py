@@ -23,7 +23,7 @@ from .models import (
     Table,
     TableSharedAccessPermissions,
     TablePayloadFormat,
-	EdmType,
+    EdmType,
 )
-
+from .tablebatch import TableBatch
 from .tableservice import TableService

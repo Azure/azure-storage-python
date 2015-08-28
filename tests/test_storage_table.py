@@ -33,8 +33,6 @@ from azure.common import (
     AzureException,
 )
 from azure.storage import (
-    AzureBatchOperationError,
-    AzureBatchValidationError,
     AccessPolicy,
     SharedAccessPolicy,
     SignedIdentifier,
@@ -47,6 +45,7 @@ from azure.storage.table import (
     TableService,
     TableSharedAccessPermissions,
     EdmType,
+    TableBatch,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -593,6 +592,56 @@ class StorageTableTest(StorageTestCase):
                                '{0} is too large to be cast to type Edm.Int64.'.format(2**31)):
             self.ts.insert_entity(self.table_name, dict64)
 
+    def test_insert_entity_missing_pk(self):
+        # Arrange
+        entity = {'RowKey': 'rk'}
+
+        # Act
+        with self.assertRaises(ValueError):
+            resp = self.ts.insert_entity(self.table_name, entity)
+
+        # Assert
+
+    @record
+    def test_insert_entity_missing_rk(self):
+        # Arrange
+        entity = {'PartitionKey': 'pk'}
+
+        # Act
+        with self.assertRaises(ValueError):
+            resp = self.ts.insert_entity(self.table_name, entity)
+
+        # Assert
+
+    @record
+    def test_insert_entity_too_many_properties(self):
+        # Arrange
+        entity = {}
+        for i in range(255):
+            entity['key{0}'.format(i)] = 'value{0}'.format(i)
+
+        # Act
+        with self.assertRaises(ValueError):
+            resp = self.ts.insert_entity(self.table_name, entity)
+
+        # Assert
+
+    @record
+    def test_insert_entity_property_name_too_long(self):
+        # Arrange
+        str = 'a'*256
+        entity = {
+            'PartitionKey': 'pk',
+            'RowKey': 'rk',
+            str: 'badval'
+            }
+
+        # Act
+        with self.assertRaises(ValueError):
+            resp = self.ts.insert_entity(self.table_name, entity)
+
+        # Assert
+
     @record
     def test_get_entity(self):
         # Arrange
@@ -815,7 +864,7 @@ class StorageTableTest(StorageTestCase):
         entities_per_batch = 50
 
         for j in range(total_entities_count // entities_per_batch):
-            self.ts.begin_batch()
+            batch = TableBatch()
             for i in range(entities_per_batch):
                 entity = Entity()
                 entity.PartitionKey = 'large'
@@ -825,8 +874,8 @@ class StorageTableTest(StorageTestCase):
                 entity.test3 = 3
                 entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
                 entity.test5 = datetime(2016, 12, 31, 11, 59, 59, 0)
-                self.ts.insert_entity(self.table_name, entity)
-            self.ts.commit_batch()
+                batch.insert_entity(entity)
+            self.ts.commit_batch(self.table_name, batch)
 
         # Act
         start_time = datetime.now()
@@ -1119,7 +1168,6 @@ class StorageTableTest(StorageTestCase):
 
         # Assert
 
-    #--Test cases for batch ---------------------------------------------
     @record
     def test_with_filter_single(self):
         called = []
@@ -1158,348 +1206,6 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(called, ['b', 'a'])
 
         tc.delete_table(self.table_name)
-
-    @record
-    def test_batch_insert(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-        # Act
-        entity = Entity()
-        entity.PartitionKey = '001'
-        entity.RowKey = 'batch_insert'
-        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
-        entity.test2 = 'value'
-        entity.test3 = 3
-        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
-        entity.test5 = datetime.utcnow()
-
-        self.ts.begin_batch()
-        self.ts.insert_entity(self.table_name, entity)
-        self.ts.commit_batch()
-
-        # Assert
-        result = self.ts.get_entity(self.table_name, '001', 'batch_insert')
-        self.assertIsNotNone(result)
-
-    @record
-    def test_batch_update(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-        # Act
-        entity = Entity()
-        entity.PartitionKey = '001'
-        entity.RowKey = 'batch_update'
-        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
-        entity.test2 = 'value'
-        entity.test3 = 3
-        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
-        entity.test5 = datetime.utcnow()
-        self.ts.insert_entity(self.table_name, entity)
-
-        entity = self.ts.get_entity(self.table_name, '001', 'batch_update')
-        self.assertEqual(3, entity.test3)
-        entity.test2 = 'value1'
-        self.ts.begin_batch()
-        self.ts.update_entity(self.table_name, entity)
-        self.ts.commit_batch()
-        entity = self.ts.get_entity(self.table_name, '001', 'batch_update')
-
-        # Assert
-        self.assertEqual('value1', entity.test2)
-
-    @record
-    def test_batch_merge(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-        # Act
-        entity = Entity()
-        entity.PartitionKey = '001'
-        entity.RowKey = 'batch_merge'
-        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
-        entity.test2 = 'value'
-        entity.test3 = 3
-        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
-        entity.test5 = datetime.utcnow()
-        self.ts.insert_entity(self.table_name, entity)
-
-        entity = self.ts.get_entity(self.table_name, '001', 'batch_merge')
-        self.assertEqual(3, entity.test3)
-        entity = Entity()
-        entity.PartitionKey = '001'
-        entity.RowKey = 'batch_merge'
-        entity.test2 = 'value1'
-        self.ts.begin_batch()
-        self.ts.merge_entity(self.table_name, entity)
-        self.ts.commit_batch()
-        entity = self.ts.get_entity(self.table_name, '001', 'batch_merge')
-
-        # Assert
-        self.assertEqual('value1', entity.test2)
-        self.assertEqual(1234567890, entity.test4)
-
-    @record
-    def test_batch_update_if_match(self):
-        # Arrange
-        etags = self._create_table_with_default_entities(self.table_name, 1)
-
-        # Act
-        sent_entity = self._create_updated_entity_dict('MyPartition', '1')
-        self.ts.begin_batch()
-        resp = self.ts.update_entity(
-            self.table_name, sent_entity, if_match=etags[0])
-        self.ts.commit_batch()
-
-        # Assert
-        self.assertIsNone(resp)
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1')
-        self._assert_updated_entity(received_entity)
-
-    @record
-    def test_batch_update_if_doesnt_match(self):
-        # Arrange
-        self._create_table_with_default_entities(self.table_name, 2)
-
-        # Act
-        sent_entity1 = self._create_updated_entity_dict('MyPartition', '1')
-        sent_entity2 = self._create_updated_entity_dict('MyPartition', '2')
-        self.ts.begin_batch()
-        self.ts.update_entity(
-            self.table_name, sent_entity1,
-            if_match=u'W/"datetime\'2012-06-15T22%3A51%3A44.9662825Z\'"')
-        self.ts.update_entity(self.table_name, sent_entity2)
-        try:
-            self.ts.commit_batch()
-        except AzureBatchOperationError as error:
-            self.assertEqual(error.code, 'UpdateConditionNotSatisfied')
-            self.assertTrue(str(error).startswith('0:The update condition specified in the request was not satisfied.'))
-        else:
-            self.fail('AzureBatchOperationError was expected')
-
-        # Assert
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1')
-        self._assert_default_entity(received_entity)
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '2')
-        self._assert_default_entity(received_entity)
-
-    @record
-    def test_batch_insert_replace(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-        # Act
-        entity = Entity()
-        entity.PartitionKey = '001'
-        entity.RowKey = 'batch_insert_replace'
-        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
-        entity.test2 = 'value'
-        entity.test3 = 3
-        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
-        entity.test5 = datetime.utcnow()
-        self.ts.begin_batch()
-        self.ts.insert_or_replace_entity(self.table_name, entity)
-        self.ts.commit_batch()
-
-        entity = self.ts.get_entity(
-            self.table_name, '001', 'batch_insert_replace')
-
-        # Assert
-        self.assertIsNotNone(entity)
-        self.assertEqual('value', entity.test2)
-        self.assertEqual(1234567890, entity.test4)
-
-    @record
-    def test_batch_insert_merge(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-        # Act
-        entity = Entity()
-        entity.PartitionKey = '001'
-        entity.RowKey = 'batch_insert_merge'
-        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
-        entity.test2 = 'value'
-        entity.test3 = 3
-        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
-        entity.test5 = datetime.utcnow()
-        self.ts.begin_batch()
-        self.ts.insert_or_merge_entity(self.table_name, entity)
-        self.ts.commit_batch()
-
-        entity = self.ts.get_entity(
-            self.table_name, '001', 'batch_insert_merge')
-
-        # Assert
-        self.assertIsNotNone(entity)
-        self.assertEqual('value', entity.test2)
-        self.assertEqual(1234567890, entity.test4)
-
-    @record
-    def test_batch_delete(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-        # Act
-        entity = Entity()
-        entity.PartitionKey = '001'
-        entity.RowKey = 'batch_delete'
-        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
-        entity.test2 = 'value'
-        entity.test3 = 3
-        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
-        entity.test5 = datetime.utcnow()
-        self.ts.insert_entity(self.table_name, entity)
-
-        entity = self.ts.get_entity(self.table_name, '001', 'batch_delete')
-        #self.assertEqual(3, entity.test3)
-        self.ts.begin_batch()
-        self.ts.delete_entity(self.table_name, '001', 'batch_delete')
-        self.ts.commit_batch()
-
-    @record
-    def test_batch_inserts(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-        # Act
-        entity = Entity()
-        entity.PartitionKey = 'batch_inserts'
-        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
-        entity.test2 = 'value'
-        entity.test3 = 3
-        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
-
-        self.ts.begin_batch()
-        for i in range(100):
-            entity.RowKey = str(i)
-            self.ts.insert_entity(self.table_name, entity)
-        self.ts.commit_batch()
-
-        entities = self.ts.query_entities(
-            self.table_name, "PartitionKey eq 'batch_inserts'", '')
-
-        # Assert
-        self.assertIsNotNone(entities)
-        self.assertEqual(100, len(entities))
-
-    @record
-    def test_batch_all_operations_together(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-         # Act
-        entity = Entity()
-        entity.PartitionKey = '003'
-        entity.RowKey = 'batch_all_operations_together-1'
-        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
-        entity.test2 = 'value'
-        entity.test3 = 3
-        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
-        entity.test5 = datetime.utcnow()
-        self.ts.insert_entity(self.table_name, entity)
-        entity.RowKey = 'batch_all_operations_together-2'
-        self.ts.insert_entity(self.table_name, entity)
-        entity.RowKey = 'batch_all_operations_together-3'
-        self.ts.insert_entity(self.table_name, entity)
-        entity.RowKey = 'batch_all_operations_together-4'
-        self.ts.insert_entity(self.table_name, entity)
-
-        self.ts.begin_batch()
-        entity.RowKey = 'batch_all_operations_together'
-        self.ts.insert_entity(self.table_name, entity)
-        entity.RowKey = 'batch_all_operations_together-1'
-        self.ts.delete_entity(
-            self.table_name, entity.PartitionKey, entity.RowKey)
-        entity.RowKey = 'batch_all_operations_together-2'
-        entity.test3 = 10
-        self.ts.update_entity(self.table_name, entity)
-        entity.RowKey = 'batch_all_operations_together-3'
-        entity.test3 = 100
-        self.ts.merge_entity(self.table_name, entity)
-        entity.RowKey = 'batch_all_operations_together-4'
-        entity.test3 = 10
-        self.ts.insert_or_replace_entity(self.table_name, entity)
-        entity.RowKey = 'batch_all_operations_together-5'
-        self.ts.insert_or_merge_entity(self.table_name, entity)
-        self.ts.commit_batch()
-
-        # Assert
-        entities = self.ts.query_entities(
-            self.table_name, "PartitionKey eq '003'", '')
-        self.assertEqual(5, len(entities))
-
-    @record
-    def test_batch_same_row_operations_fail(self):
-        # Arrange
-        self._create_table(self.table_name)
-        entity = self._create_default_entity_dict('001', 'batch_negative_1')
-        self.ts.insert_entity(self.table_name, entity)
-
-        # Act
-        with self.assertRaises(AzureBatchValidationError):
-            self.ts.begin_batch()
-
-            entity = self._create_updated_entity_dict(
-                '001', 'batch_negative_1')
-            self.ts.update_entity(self.table_name, entity)
-
-            entity = self._create_default_entity_dict(
-                '001', 'batch_negative_1')
-            self.ts.merge_entity(self.table_name, entity)
-
-        self.ts.cancel_batch()
-
-        # Assert
-
-    @record
-    def test_batch_different_partition_operations_fail(self):
-        # Arrange
-        self._create_table(self.table_name)
-        entity = self._create_default_entity_dict('001', 'batch_negative_1')
-        self.ts.insert_entity(self.table_name, entity)
-
-        # Act
-        with self.assertRaises(AzureBatchValidationError):
-            self.ts.begin_batch()
-
-            entity = self._create_updated_entity_dict(
-                '001', 'batch_negative_1')
-            self.ts.update_entity(self.table_name, entity)
-
-            entity = self._create_default_entity_dict(
-                '002', 'batch_negative_1')
-            self.ts.insert_entity(self.table_name, entity)
-
-        self.ts.cancel_batch()
-
-        # Assert
-
-    @record
-    def test_batch_different_table_operations_fail(self):
-        # Arrange
-        other_table_name = self.table_name + 'other'
-        self.additional_table_names = [other_table_name]
-        self._create_table(self.table_name)
-        self._create_table(other_table_name)
-
-        # Act
-        with self.assertRaises(AzureBatchValidationError):
-            self.ts.begin_batch()
-
-            entity = self._create_default_entity_dict(
-                '001', 'batch_negative_1')
-            self.ts.insert_entity(self.table_name, entity)
-
-            entity = self._create_default_entity_dict(
-                '001', 'batch_negative_2')
-            self.ts.insert_entity(other_table_name, entity)
-
-        self.ts.cancel_batch()
 
     @record
     def test_unicode_property_value(self):
