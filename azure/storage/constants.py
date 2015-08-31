@@ -13,7 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '0.20.0rc2'
+__version__ = '0.20.0'
 
 # x-ms-version for storage service.
 X_MS_VERSION = '2014-02-14'
