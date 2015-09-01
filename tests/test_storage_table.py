@@ -46,6 +46,7 @@ from azure.storage.table import (
     EntityProperty,
     TableService,
     TableSharedAccessPermissions,
+    EdmType,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -125,9 +126,9 @@ class StorageTableTest(StorageTestCase):
         entity.Birthday = datetime(1973, 10, 4)
         entity.birthday = datetime(1970, 10, 4)
         entity.binary = None
-        entity.other = EntityProperty('Edm.Int32', 20)
+        entity.other = EntityProperty(EdmType.INT32, 20)
         entity.clsid = EntityProperty(
-            'Edm.Guid', 'c9da6455-213d-42c9-9a79-3e9149a57833')
+            EdmType.GUID, 'c9da6455-213d-42c9-9a79-3e9149a57833')
         return entity
 
     def _create_default_entity_dict(self, partition, row):
@@ -147,9 +148,9 @@ class StorageTableTest(StorageTestCase):
                 'large': 9333111000,
                 'Birthday': datetime(1973, 10, 4),
                 'birthday': datetime(1970, 10, 4),
-                'other': EntityProperty('Edm.Int32', 20),
+                'other': EntityProperty(EdmType.INT32, 20),
                 'clsid': EntityProperty(
-                    'Edm.Guid',
+                    EdmType.GUID,
                     'c9da6455-213d-42c9-9a79-3e9149a57833')}
 
     def _create_updated_entity_dict(self, partition, row):
@@ -182,10 +183,10 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1970, 10, 4, tzinfo=tzutc()))
         self.assertIsInstance(entity.other, EntityProperty)
-        self.assertEqual(entity.other.type, 'Edm.Int32')
+        self.assertEqual(entity.other.type, EdmType.INT32)
         self.assertEqual(entity.other.value, 20)
         self.assertIsInstance(entity.clsid, EntityProperty)
-        self.assertEqual(entity.clsid.type, 'Edm.Guid')
+        self.assertEqual(entity.clsid.type, EdmType.GUID)
         self.assertEqual(entity.clsid.value,
                          'c9da6455-213d-42c9-9a79-3e9149a57833')
         self.assertTrue(hasattr(entity, "Timestamp"))
@@ -208,7 +209,7 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entity.Birthday, '1973-10-04T00:00:00Z')
         self.assertEqual(entity.birthday, '1970-10-04T00:00:00Z')
         self.assertIsInstance(entity.other, EntityProperty)
-        self.assertEqual(entity.other.type, 'Edm.Int32')
+        self.assertEqual(entity.other.type, EdmType.INT32)
         self.assertEqual(entity.other.value, 20)
         self.assertEqual(entity.clsid, 'c9da6455-213d-42c9-9a79-3e9149a57833')
         self.assertTrue(hasattr(entity, "Timestamp"))
@@ -252,10 +253,10 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1991, 10, 4, tzinfo=tzutc()))
         self.assertIsInstance(entity.other, EntityProperty)
-        self.assertEqual(entity.other.type, 'Edm.Int32')
+        self.assertEqual(entity.other.type, EdmType.INT32)
         self.assertEqual(entity.other.value, 20)
         self.assertIsInstance(entity.clsid, EntityProperty)
-        self.assertEqual(entity.clsid.type, 'Edm.Guid')
+        self.assertEqual(entity.clsid.type, EdmType.GUID)
         self.assertEqual(entity.clsid.value,
                          'c9da6455-213d-42c9-9a79-3e9149a57833')
         self.assertTrue(hasattr(entity, "Timestamp"))
@@ -268,11 +269,11 @@ class StorageTableTest(StorageTestCase):
         self.assertIsNotNone(value)
         self.assertIsNone(type)
         if name == 'large' or name == 'age':
-            return 'Edm.Int64'
+            return EdmType.INT64
         if name == 'Birthday' or name == 'birthday':
-            return 'Edm.DateTime'
+            return EdmType.DATETIME
         if name == 'clsid':
-            return 'Edm.Guid'
+            return EdmType.GUID
 
     def _get_shared_access_policy(self, permission):
         date_format = "%Y-%m-%dT%H:%M:%SZ"
@@ -565,6 +566,34 @@ class StorageTableTest(StorageTestCase):
         # Assert
 
     @record
+    def test_insert_entity_with_large_int32_value_throws(self):
+        # Arrange
+
+        # Act
+        dict32 = {'PartitionKey': 'MyPartition',
+                'RowKey': '1',
+                'large': EntityProperty(EdmType.INT32, 2**15)}
+
+        # Assert
+        with self.assertRaisesRegexp(TypeError, 
+                               '{0} is too large to be cast to type Edm.Int32.'.format(2**15)):
+            self.ts.insert_entity(self.table_name, dict32)
+
+    @record
+    def test_insert_entity_with_large_int64_value_throws(self):
+        # Arrange
+
+        # Act
+        dict64 = {'PartitionKey': 'MyPartition',
+                'RowKey': '1',
+                'large': 2**31}
+
+        # Assert
+        with self.assertRaisesRegexp(TypeError, 
+                               '{0} is too large to be cast to type Edm.Int64.'.format(2**31)):
+            self.ts.insert_entity(self.table_name, dict64)
+
+    @record
     def test_get_entity(self):
         # Arrange
         self._create_table_with_default_entities(self.table_name, 1)
@@ -656,7 +685,7 @@ class StorageTableTest(StorageTestCase):
         with self.assertRaisesRegexp(AzureException, 
                                'The specified property resolver returned an invalid type.'):
             self.ts.get_entity(self.table_name, 'MyPartition', '1',
-                               property_resolver=lambda pk, rk, name, val, type: 'Edm.Int64')
+                               property_resolver=lambda pk, rk, name, val, type: EdmType.INT64)
 
         # Assert
 
@@ -791,10 +820,10 @@ class StorageTableTest(StorageTestCase):
                 entity = Entity()
                 entity.PartitionKey = 'large'
                 entity.RowKey = 'batch{0}-item{1}'.format(j, i)
-                entity.test = EntityProperty('Edm.Boolean', 'true')
+                entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
                 entity.test2 = 'hello world;' * 100
                 entity.test3 = 3
-                entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+                entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
                 entity.test5 = datetime(2016, 12, 31, 11, 59, 59, 0)
                 self.ts.insert_entity(self.table_name, entity)
             self.ts.commit_batch()
@@ -1139,10 +1168,10 @@ class StorageTableTest(StorageTestCase):
         entity = Entity()
         entity.PartitionKey = '001'
         entity.RowKey = 'batch_insert'
-        entity.test = EntityProperty('Edm.Boolean', 'true')
+        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
         entity.test2 = 'value'
         entity.test3 = 3
-        entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
         entity.test5 = datetime.utcnow()
 
         self.ts.begin_batch()
@@ -1162,10 +1191,10 @@ class StorageTableTest(StorageTestCase):
         entity = Entity()
         entity.PartitionKey = '001'
         entity.RowKey = 'batch_update'
-        entity.test = EntityProperty('Edm.Boolean', 'true')
+        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
         entity.test2 = 'value'
         entity.test3 = 3
-        entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
         entity.test5 = datetime.utcnow()
         self.ts.insert_entity(self.table_name, entity)
 
@@ -1189,10 +1218,10 @@ class StorageTableTest(StorageTestCase):
         entity = Entity()
         entity.PartitionKey = '001'
         entity.RowKey = 'batch_merge'
-        entity.test = EntityProperty('Edm.Boolean', 'true')
+        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
         entity.test2 = 'value'
         entity.test3 = 3
-        entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
         entity.test5 = datetime.utcnow()
         self.ts.insert_entity(self.table_name, entity)
 
@@ -1267,10 +1296,10 @@ class StorageTableTest(StorageTestCase):
         entity = Entity()
         entity.PartitionKey = '001'
         entity.RowKey = 'batch_insert_replace'
-        entity.test = EntityProperty('Edm.Boolean', 'true')
+        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
         entity.test2 = 'value'
         entity.test3 = 3
-        entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
         entity.test5 = datetime.utcnow()
         self.ts.begin_batch()
         self.ts.insert_or_replace_entity(self.table_name, entity)
@@ -1293,10 +1322,10 @@ class StorageTableTest(StorageTestCase):
         entity = Entity()
         entity.PartitionKey = '001'
         entity.RowKey = 'batch_insert_merge'
-        entity.test = EntityProperty('Edm.Boolean', 'true')
+        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
         entity.test2 = 'value'
         entity.test3 = 3
-        entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
         entity.test5 = datetime.utcnow()
         self.ts.begin_batch()
         self.ts.insert_or_merge_entity(self.table_name, entity)
@@ -1319,10 +1348,10 @@ class StorageTableTest(StorageTestCase):
         entity = Entity()
         entity.PartitionKey = '001'
         entity.RowKey = 'batch_delete'
-        entity.test = EntityProperty('Edm.Boolean', 'true')
+        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
         entity.test2 = 'value'
         entity.test3 = 3
-        entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
         entity.test5 = datetime.utcnow()
         self.ts.insert_entity(self.table_name, entity)
 
@@ -1340,10 +1369,10 @@ class StorageTableTest(StorageTestCase):
         # Act
         entity = Entity()
         entity.PartitionKey = 'batch_inserts'
-        entity.test = EntityProperty('Edm.Boolean', 'true')
+        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
         entity.test2 = 'value'
         entity.test3 = 3
-        entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
 
         self.ts.begin_batch()
         for i in range(100):
@@ -1367,10 +1396,10 @@ class StorageTableTest(StorageTestCase):
         entity = Entity()
         entity.PartitionKey = '003'
         entity.RowKey = 'batch_all_operations_together-1'
-        entity.test = EntityProperty('Edm.Boolean', 'true')
+        entity.test = EntityProperty(EdmType.BOOLEAN, 'true')
         entity.test2 = 'value'
         entity.test3 = 3
-        entity.test4 = EntityProperty('Edm.Int64', '1234567890')
+        entity.test4 = EntityProperty(EdmType.INT64, '1234567890')
         entity.test5 = datetime.utcnow()
         self.ts.insert_entity(self.table_name, entity)
         entity.RowKey = 'batch_all_operations_together-2'
@@ -1581,13 +1610,13 @@ class StorageTableTest(StorageTestCase):
             {
                 'PartitionKey': 'test',
                 'RowKey': 'test1',
-                'binary': EntityProperty('Edm.Binary', binary_data)
+                'binary': EntityProperty(EdmType.BINARY, binary_data)
             })
         resp = self.ts.get_entity(self.table_name, 'test', 'test1')
 
         # Assert
         self.assertIsNotNone(resp)
-        self.assertEqual(resp.binary.type, 'Edm.Binary')
+        self.assertEqual(resp.binary.type, EdmType.BINARY)
         self.assertEqual(resp.binary.value, binary_data)
 
     @record

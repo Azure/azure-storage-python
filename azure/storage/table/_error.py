@@ -36,6 +36,7 @@ _ERROR_INVALID_PROPERTY_RESOLVER = \
     'The specified property resolver returned an invalid type. Name: {0}, Value: {1}, ' + \
     'EdmType: {2}'
 _ERROR_INVALID_ENTITY = 'The entity must be either in dict format or an entity object.'
+_ERROR_VALUE_TOO_LARGE = '{0} is too large to be cast to type {1}.'
 
 def _validate_dict_or_entity(entity):
     # Entity inherits from dict, so just validating dict is fine

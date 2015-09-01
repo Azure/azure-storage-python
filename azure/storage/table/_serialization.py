@@ -34,6 +34,8 @@ from .._common_conversion import (
 from .._serialization import _update_storage_header
 from ._error import (
     _ERROR_CANNOT_SERIALIZE_VALUE_TO_ENTITY,
+    _ERROR_TYPE_NOT_SUPPORTED,
+    _ERROR_VALUE_TOO_LARGE,
 )
 from .models import (
     Entity,
@@ -70,14 +72,11 @@ def _update_storage_table_header(request):
     request.headers.append(('Date', current_time))
     return request.headers
 
-
-def _to_entity_int(data):
-    return EdmType.INT64, str(data)
-
+def _to_entity_binary(value):
+   return EdmType.BINARY, _encode_base64(value)
 
 def _to_entity_bool(value):
     return None, value
-
 
 def _to_entity_datetime(value):
     # Azure expects the date value passed in to be UTC.
@@ -86,7 +85,6 @@ def _to_entity_datetime(value):
     if value.tzinfo:
         value = value.astimezone(tzutc())
     return EdmType.DATETIME, value.strftime('%Y-%m-%dT%H:%M:%SZ')
-
 
 def _to_entity_float(value):
     if isnan(value):
@@ -97,38 +95,51 @@ def _to_entity_float(value):
         return EdmType.DOUBLE, '-Infinity'
     return None, value
 
+def _to_entity_guid(value):
+   return EdmType.GUID, str(value)
 
-def _to_entity_property(value):
-    if value.type == EdmType.BINARY:
-        return value.type, _encode_base64(value.value)
+def _to_entity_int32(value):
+    if value >= 2**15 or value < -(2**15):
+        raise TypeError(_ERROR_VALUE_TOO_LARGE.format(str(value), EdmType.INT32))       
+    return None, value
 
-    if value.type == EdmType.INT32:
-        return None, int(value.value)
-
-    return value.type, str(value.value)
-
-
-def _to_entity_none(value):
-    return None, None
-
+def _to_entity_int64(value):
+    if value >= 2**31 or value < -(2**31):
+        raise TypeError(_ERROR_VALUE_TOO_LARGE.format(str(value), EdmType.INT64))       
+    return EdmType.INT64, str(value)
 
 def _to_entity_str(value):
     return None, value
 
+def _to_entity_none(value):
+    return None, None
+
 # Conversion from Python type to a function which returns a tuple of the
 # type string and content string.
 _PYTHON_TO_ENTITY_CONVERSIONS = {
-    int: _to_entity_int,
+    int: _to_entity_int64,
     bool: _to_entity_bool,
     datetime: _to_entity_datetime,
     float: _to_entity_float,
-    EntityProperty: _to_entity_property,
     str: _to_entity_str,
+}
+
+# Conversion from Edm type to a function which returns a tuple of the
+# type string and content string.
+_EDM_TO_ENTITY_CONVERSIONS = {
+    EdmType.BINARY: _to_entity_binary,
+    EdmType.BOOLEAN: _to_entity_bool,
+    EdmType.DATETIME: _to_entity_datetime,
+    EdmType.DOUBLE: _to_entity_float,
+    EdmType.GUID: _to_entity_guid,
+    EdmType.INT32: _to_entity_int32,
+    EdmType.INT64: _to_entity_int64,
+    EdmType.STRING: _to_entity_str,
 }
 
 if sys.version_info < (3,):
     _PYTHON_TO_ENTITY_CONVERSIONS.update({
-        long: _to_entity_int,
+        long: _to_entity_int64,
         types.NoneType: _to_entity_none,
         unicode: _to_entity_str,
     })
@@ -159,15 +170,22 @@ def _convert_entity_to_json(source):
     # if value has type info, then set the type to value.type
     for name, value in source.items():
         mtype = ''
-        conv = _PYTHON_TO_ENTITY_CONVERSIONS.get(type(value))
-        if conv is None and sys.version_info >= (3,) and value is None:
-            conv = _to_entity_none
-        if conv is None:
-            raise TypeError(
-                _ERROR_CANNOT_SERIALIZE_VALUE_TO_ENTITY.format(
-                    type(value).__name__))
 
-        mtype, value = conv(value)
+        if isinstance(value, EntityProperty):
+            conv = _EDM_TO_ENTITY_CONVERSIONS.get(value.type)
+            if conv is None:
+                raise TypeError(
+                    _ERROR_TYPE_NOT_SUPPORTED.format(value.type))
+            mtype, value = conv(value.value)
+        else:
+            conv = _PYTHON_TO_ENTITY_CONVERSIONS.get(type(value))
+            if conv is None and sys.version_info >= (3,) and value is None:
+                conv = _to_entity_none
+            if conv is None:
+                raise TypeError(
+                    _ERROR_CANNOT_SERIALIZE_VALUE_TO_ENTITY.format(
+                        type(value).__name__))
+            mtype, value = conv(value)
 
         # form the property node
         properties[name] = value
