@@ -12,3 +12,6 @@
 - Operations which return entities (get_entity, query_entities) will return Edm.Int64 properties as plain Python ints and Edm.Int32 properties as as EntityProperty objects.
 - All table entity integer values are stored on the service with type Edm.Int64 unless the type is explicitly overridden as Edm.Int32.
 - Table batches are constructed using the Batch class rather than turning batching on and off via the TableService. The TableService can then execute these batches using commit_batch(table_name, batch). TableService no longer contains begin_batch or cancel_batch methods, and commit_batch works differently and takes different parameters.
+
+### Blob:
+- Separated lease_container and lease_blob into unique methods for each lease action.

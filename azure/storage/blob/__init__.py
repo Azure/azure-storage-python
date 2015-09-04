@@ -32,6 +32,7 @@ from .models import (
     PageList,
     ContainerSharedAccessPermissions,
     BlobSharedAccessPermissions,
+    LeaseActions,
 )
 
 from .blobservice import BlobService
