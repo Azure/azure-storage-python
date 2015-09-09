@@ -137,7 +137,7 @@ class _HTTPClient(object):
         if self.proxy_host:
             headers = None
             if self.proxy_user and self.proxy_password:
-                auth = base64.encodestring(
+                auth = base64.b64encode(
                     "{0}:{1}".format(self.proxy_user, self.proxy_password))
                 headers = {'Proxy-Authorization': 'Basic {0}'.format(auth)}
             connection.set_tunnel(proxy_host, int(proxy_port), headers)
