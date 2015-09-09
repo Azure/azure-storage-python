@@ -15,6 +15,8 @@
 import os
 import sys
 
+import requests
+
 from .constants import (
     AZURE_STORAGE_ACCOUNT,
     AZURE_STORAGE_ACCESS_KEY,
@@ -58,8 +60,7 @@ class _StorageClient(object):
         sas_token:
             Optional. Token to use to authenticate with shared access signature.
         request_session:
-            Optional. Session object to use for http requests. If this is
-            specified, it replaces the default use of httplib.
+            Optional. Session object to use for http requests.
         '''
         self.account_name = account_name
         self.account_key = account_key
@@ -100,7 +101,7 @@ class _StorageClient(object):
             service_instance=self,
             protocol=self.protocol,
             timeout=timeout,
-            request_session=request_session,
+            request_session=request_session or requests.Session(),
             user_agent=_USER_AGENT_STRING,
         )
         self._batchclient = None
