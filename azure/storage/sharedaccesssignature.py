@@ -116,7 +116,7 @@ class SharedAccessSignature(object):
             content_type,
             table_name,
         )
-        return '&'.join(['{0}={1}'.format(n, url_quote(v, '/()$=\',')) for n, v in query_dict.items() if v is not None])
+        return '&'.join(['{0}={1}'.format(n, url_quote(v)) for n, v in query_dict.items() if v is not None])
 
     def _generate_signed_query_dict(self, path, resource_type,
                                    shared_access_policy,
