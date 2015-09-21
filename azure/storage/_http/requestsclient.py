@@ -59,10 +59,8 @@ class _RequestsConnection(object):
         pass
 
     def set_tunnel(self, host, port=None, headers=None):
-        self.session.proxies['http'] = 'http://{}:{}'.format(host, port)
-        self.session.proxies['https'] = 'https://{}:{}'.format(host, port)
-        if headers:
-            self.session.headers.update(headers)
+        self.session.proxies['http'] = 'http://{}'.format(host)
+        self.session.proxies['https'] = 'https://{}'.format(host)
 
     def set_proxy_credentials(self, user, password):
         pass
