@@ -96,8 +96,8 @@ class StorageBlobTest(StorageTestCase):
         if not self.is_playback():
             if self.container_lease_id:
                 try:
-                    self.bs.lease_container(
-                        self.container_name, 'release', self.container_lease_id)
+                    self.bs.break_container_lease(
+                        self.container_name, self.container_lease_id)
                 except:
                     pass
             try:
@@ -561,7 +561,7 @@ class StorageBlobTest(StorageTestCase):
     def test_set_container_metadata_with_lease_id(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -578,10 +578,10 @@ class StorageBlobTest(StorageTestCase):
         self.assertEqual(md['x-ms-meta-number'], '43')
 
     @record
-    def test_set_container_metadata_with_non_matching_lease_id(self):
+    def test_set_container_metadata_with_lease_id_fail(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -612,7 +612,7 @@ class StorageBlobTest(StorageTestCase):
         self.bs.set_container_acl(self.container_name, None, 'container')
         self.bs.set_container_metadata(
             self.container_name, {'hello': 'world', 'number': '42'})
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -631,7 +631,7 @@ class StorageBlobTest(StorageTestCase):
         self.bs.set_container_acl(self.container_name, None, 'container')
         self.bs.set_container_metadata(
             self.container_name, {'hello': 'world', 'number': '42'})
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -651,7 +651,7 @@ class StorageBlobTest(StorageTestCase):
         self.bs.set_container_acl(self.container_name, None, 'container')
         self.bs.set_container_metadata(
             self.container_name, {'hello': 'world', 'number': '42'})
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -679,7 +679,7 @@ class StorageBlobTest(StorageTestCase):
         self.bs.set_container_acl(self.container_name, None, 'container')
         self.bs.set_container_metadata(
             self.container_name, {'hello': 'world', 'number': '42'})
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -689,7 +689,7 @@ class StorageBlobTest(StorageTestCase):
         self.assertIsNotNone(props)
         self.assertEqual(props['x-ms-meta-hello'], 'world')
         self.assertEqual(props['x-ms-meta-number'], '42')
-        self.assertEqual(props['x-ms-lease-duration'], 'fixed')
+        self.assertEqual(props['x-ms-lease-duration'], 'infinite')
         self.assertEqual(props['x-ms-lease-state'], 'leased')
         self.assertEqual(props['x-ms-lease-status'], 'locked')
 
@@ -700,7 +700,7 @@ class StorageBlobTest(StorageTestCase):
         self.bs.set_container_acl(self.container_name, None, 'container')
         self.bs.set_container_metadata(
             self.container_name, {'hello': 'world', 'number': '42'})
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -711,7 +711,7 @@ class StorageBlobTest(StorageTestCase):
         self.assertIsNotNone(props)
         self.assertEqual(props['x-ms-meta-hello'], 'world')
         self.assertEqual(props['x-ms-meta-number'], '42')
-        self.assertEqual(props['x-ms-lease-duration'], 'fixed')
+        self.assertEqual(props['x-ms-lease-duration'], 'infinite')
         self.assertEqual(props['x-ms-lease-status'], 'locked')
         self.assertEqual(props['x-ms-lease-state'], 'leased')
 
@@ -722,7 +722,7 @@ class StorageBlobTest(StorageTestCase):
         self.bs.set_container_acl(self.container_name, None, 'container')
         self.bs.set_container_metadata(
             self.container_name, {'hello': 'world', 'number': '42'})
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -774,7 +774,7 @@ class StorageBlobTest(StorageTestCase):
     def test_get_container_acl_with_lease_id(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -789,7 +789,7 @@ class StorageBlobTest(StorageTestCase):
     def test_get_container_acl_with_non_matching_lease_id(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -827,7 +827,7 @@ class StorageBlobTest(StorageTestCase):
     def test_set_container_acl_with_lease_id(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -843,7 +843,7 @@ class StorageBlobTest(StorageTestCase):
     def test_set_container_acl_with_non_matching_lease_id(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -938,11 +938,10 @@ class StorageBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
-        lease = self.bs.lease_container(
+        lease = self.bs.release_container_lease(
             self.container_name,
-            'release',
             x_ms_lease_id=lease['x-ms-lease-id'])
         self.container_lease_id = None
 
@@ -952,14 +951,14 @@ class StorageBlobTest(StorageTestCase):
     def test_lease_container_renew(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(
-            self.container_name, 'acquire', x_ms_lease_duration=15)
+        lease = self.bs.acquire_container_lease(
+            self.container_name, x_ms_lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
         self.sleep(10)
 
         # Act
-        renewed_lease = self.bs.lease_container(
-            self.container_name, 'renew', x_ms_lease_id=lease['x-ms-lease-id'])
+        renewed_lease = self.bs.renew_container_lease(
+            self.container_name, x_ms_lease_id=lease['x-ms-lease-id'])
 
         # Assert
         self.assertEqual(lease['x-ms-lease-id'],
@@ -976,15 +975,14 @@ class StorageBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        lease = self.bs.lease_container(
-            self.container_name, 'acquire', x_ms_lease_duration=15)
+        lease = self.bs.acquire_container_lease(
+            self.container_name, x_ms_lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Assert
-        self.bs.lease_container(self.container_name,
-                                'break',
-                                x_ms_lease_id=lease['x-ms-lease-id'],
-                                x_ms_lease_break_period=5)
+        self.bs.break_container_lease(self.container_name,
+                                      x_ms_lease_id=lease['x-ms-lease-id'],
+                                      x_ms_lease_break_period=5)
         self.sleep(5)
         with self.assertRaises(AzureHttpError):
             self.bs.delete_container(
@@ -994,30 +992,15 @@ class StorageBlobTest(StorageTestCase):
     def test_lease_container_break_released_lease_fails(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
-        self.bs.lease_container(
-            self.container_name, 'release', lease['x-ms-lease-id'])
+        self.bs.release_container_lease(
+            self.container_name, lease['x-ms-lease-id'])
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.lease_container(
-                self.container_name, 'break', lease['x-ms-lease-id'])
-
-        # Assert
-
-    @record
-    def test_lease_container_acquire_after_break_fails(self):
-        # Arrange
-        self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
-        self.container_lease_id = lease['x-ms-lease-id']
-        self.bs.lease_container(
-            self.container_name, 'break', lease['x-ms-lease-id'])
-
-        # Act
-        with self.assertRaises(AzureHttpError):
-            self.bs.lease_container(self.container_name, 'acquire')
+            self.bs.break_container_lease(
+                self.container_name, lease['x-ms-lease-id'])
 
         # Assert
 
@@ -1027,15 +1010,15 @@ class StorageBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        lease = self.bs.lease_container(
-            self.container_name, 'acquire', x_ms_lease_duration=15)
+        lease = self.bs.acquire_container_lease(
+            self.container_name, x_ms_lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Assert
         with self.assertRaises(AzureHttpError):
-            self.bs.lease_container(self.container_name, 'acquire')
+            self.bs.acquire_container_lease(self.container_name)
         self.sleep(15)
-        lease = self.bs.lease_container(self.container_name, 'acquire')
+        lease = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease['x-ms-lease-id']
 
     @record
@@ -1045,8 +1028,8 @@ class StorageBlobTest(StorageTestCase):
 
         # Act
         lease_id = '55e97f64-73e8-4390-838d-d9e84a374321'
-        lease = self.bs.lease_container(
-            self.container_name, 'acquire', x_ms_proposed_lease_id=lease_id)
+        lease = self.bs.acquire_container_lease(
+            self.container_name, x_ms_proposed_lease_id=lease_id)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Assert
@@ -1060,12 +1043,11 @@ class StorageBlobTest(StorageTestCase):
 
         # Act
         lease_id = '29e0b239-ecda-4f69-bfa3-95f6af91464c'
-        lease1 = self.bs.lease_container(self.container_name, 'acquire')
+        lease1 = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease1['x-ms-lease-id']
-        lease2 = self.bs.lease_container(self.container_name,
-                                         'change',
-                                         x_ms_lease_id=lease1['x-ms-lease-id'],
-                                         x_ms_proposed_lease_id=lease_id)
+        lease2 = self.bs.change_container_lease(self.container_name,
+                                                x_ms_lease_id=lease1['x-ms-lease-id'],
+                                                x_ms_proposed_lease_id=lease_id)
         self.container_lease_id = lease2['x-ms-lease-id']
 
         # Assert
@@ -1124,8 +1106,8 @@ class StorageBlobTest(StorageTestCase):
     def test_delete_container_with_lease_id(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(
-            self.container_name, 'acquire', x_ms_lease_duration=15)
+        lease = self.bs.acquire_container_lease(
+            self.container_name, x_ms_lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -1141,8 +1123,8 @@ class StorageBlobTest(StorageTestCase):
     def test_delete_container_without_lease_id(self):
         # Arrange
         self.bs.create_container(self.container_name)
-        lease = self.bs.lease_container(
-            self.container_name, 'acquire', x_ms_lease_duration=15)
+        lease = self.bs.acquire_container_lease(
+            self.container_name, x_ms_lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -1293,7 +1275,7 @@ class StorageBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         data = b'hello world'
         self.bs.put_blob(self.container_name, 'blob1', data, 'BlockBlob')
-        lease = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
+        lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
         resp = self.bs.list_blobs(self.container_name)
@@ -1306,7 +1288,7 @@ class StorageBlobTest(StorageTestCase):
         self.assertIsNotNone(resp[0])
         self.assertNamedItemInContainer(resp, 'blob1')
         self.assertEqual(resp[0].properties.content_length, 11)
-        self.assertEqual(resp[0].properties.lease_duration, 'fixed')
+        self.assertEqual(resp[0].properties.lease_duration, 'infinite')
         self.assertEqual(resp[0].properties.lease_status, 'locked')
         self.assertEqual(resp[0].properties.lease_state, 'leased')
 
@@ -1594,7 +1576,7 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        lease = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
+        lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
         lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -1710,13 +1692,13 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        lease = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
+        lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
         lease_id = lease['x-ms-lease-id']
 
         # Act
         blob = self.bs.get_blob(
             self.container_name, 'blob1', x_ms_lease_id=lease_id)
-        self.bs.lease_blob(self.container_name, 'blob1', 'release', lease_id)
+        self.bs.release_blob_lease(self.container_name, 'blob1', lease_id)
 
         # Assert
         self.assertIsInstance(blob, BlobResult)
@@ -1727,7 +1709,7 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
+        self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
         # get_blob is allowed without lease id
@@ -1819,11 +1801,31 @@ class StorageBlobTest(StorageTestCase):
         self.assertEqual(props['x-ms-lease-status'], 'unlocked')
 
     @record
+    def test_get_blob_properties_with_snapshot(self):
+        # Arrange
+        self._create_container(self.container_name)
+        blob_name = 'blob1'
+        data = b'hello world'
+        self.bs.put_blob(self.container_name, blob_name, data, 'BlockBlob')
+        res = self.bs.snapshot_blob(self.container_name, blob_name)
+        snapshot = res['x-ms-snapshot']
+        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
+        self.assertEqual(len(blobs), 2)
+
+        # Act
+        props = self.bs.get_blob_properties(self.container_name, blob_name, snapshot=snapshot)
+
+        # Assert
+        self.assertIsNotNone(props)
+        self.assertEqual(props['x-ms-blob-type'], 'BlockBlob')
+        self.assertEqual(props['content-length'], '11')
+
+    @record
     def test_get_blob_properties_with_leased_blob(self):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        lease = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
+        lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
         props = self.bs.get_blob_properties(self.container_name, 'blob1')
@@ -1834,7 +1836,7 @@ class StorageBlobTest(StorageTestCase):
         self.assertEqual(props['content-length'], '11')
         self.assertEqual(props['x-ms-lease-status'], 'locked')
         self.assertEqual(props['x-ms-lease-state'], 'leased')
-        self.assertEqual(props['x-ms-lease-duration'], 'fixed')
+        self.assertEqual(props['x-ms-lease-duration'], 'infinite')
 
     @record
     def test_get_blob_properties_with_non_existing_container(self):
@@ -2120,10 +2122,10 @@ class StorageBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        resp1 = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
-        resp2 = self.bs.lease_blob(
-            self.container_name, 'blob1', 'release', resp1['x-ms-lease-id'])
-        resp3 = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
+        resp1 = self.bs.acquire_blob_lease(self.container_name, 'blob1')
+        resp2 = self.bs.release_blob_lease(
+            self.container_name, 'blob1', resp1['x-ms-lease-id'])
+        resp3 = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2137,8 +2139,8 @@ class StorageBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        resp1 = self.bs.lease_blob(
-            self.container_name, 'blob1', 'acquire', x_ms_lease_duration=15)
+        resp1 = self.bs.acquire_blob_lease(
+            self.container_name, 'blob1', x_ms_lease_duration=15)
         resp2 = self.bs.put_blob(self.container_name, 'blob1', b'hello 2',
                                  'BlockBlob',
                                  x_ms_lease_id=resp1['x-ms-lease-id'])
@@ -2159,8 +2161,8 @@ class StorageBlobTest(StorageTestCase):
 
         # Act
         lease_id = 'a0e6c241-96ea-45a3-a44b-6ae868bc14d0'
-        resp1 = self.bs.lease_blob(
-            self.container_name, 'blob1', 'acquire',
+        resp1 = self.bs.acquire_blob_lease(
+            self.container_name, 'blob1',
             x_ms_proposed_lease_id=lease_id)
 
         # Assert
@@ -2175,8 +2177,8 @@ class StorageBlobTest(StorageTestCase):
 
         # Act
         lease_id = 'a0e6c241-96ea-45a3-a44b-6ae868bc14d0'
-        resp1 = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
-        resp2 = self.bs.lease_blob(self.container_name, 'blob1', 'change',
+        resp1 = self.bs.acquire_blob_lease(self.container_name, 'blob1')
+        resp2 = self.bs.change_blob_lease(self.container_name, 'blob1',
                                    x_ms_lease_id=resp1['x-ms-lease-id'],
                                    x_ms_proposed_lease_id=lease_id)
 
@@ -2193,12 +2195,12 @@ class StorageBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        resp1 = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
-        resp2 = self.bs.lease_blob(
-            self.container_name, 'blob1', 'release', resp1['x-ms-lease-id'])
+        resp1 = self.bs.acquire_blob_lease(self.container_name, 'blob1')
+        resp2 = self.bs.release_blob_lease(
+            self.container_name, 'blob1', resp1['x-ms-lease-id'])
         with self.assertRaises(AzureConflictHttpError):
-            self.bs.lease_blob(self.container_name, 'blob1',
-                               'renew', resp1['x-ms-lease-id'])
+            self.bs.renew_blob_lease(self.container_name, 'blob1',
+                               resp1['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2211,10 +2213,10 @@ class StorageBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        resp1 = self.bs.lease_blob(self.container_name, 'blob1', 'acquire',
+        resp1 = self.bs.acquire_blob_lease(self.container_name, 'blob1',
                                    x_ms_lease_duration=15)
-        resp2 = self.bs.lease_blob(self.container_name, 'blob1',
-                                   'break', resp1['x-ms-lease-id'],
+        resp2 = self.bs.break_blob_lease(self.container_name, 'blob1',
+                                   resp1['x-ms-lease-id'],
                                    x_ms_lease_break_period=5)
         resp3 = self.bs.put_blob(self.container_name, 'blob1', b'hello 2',
                                  'BlockBlob',
@@ -2234,29 +2236,14 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        lease = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
-        self.bs.lease_blob(self.container_name, 'blob1',
-                           'release', lease['x-ms-lease-id'])
+        lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
+        self.bs.release_blob_lease(self.container_name, 'blob1',
+                           lease['x-ms-lease-id'])
 
         # Act
         with self.assertRaises(AzureConflictHttpError):
-            self.bs.lease_blob(self.container_name, 'blob1',
-                               'break', lease['x-ms-lease-id'])
-
-        # Assert
-
-    @record
-    def test_lease_blob_acquire_after_break_fails(self):
-        # Arrange
-        self._create_container_and_block_blob(
-            self.container_name, 'blob1', b'hello world')
-        lease = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
-        self.bs.lease_blob(self.container_name, 'blob1',
-                           'break', lease['x-ms-lease-id'])
-
-        # Act
-        with self.assertRaises(AzureConflictHttpError):
-            self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
+            self.bs.break_blob_lease(self.container_name, 'blob1',
+                               lease['x-ms-lease-id'])
 
         # Assert
 
@@ -2267,9 +2254,9 @@ class StorageBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        resp1 = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
-        resp2 = self.bs.lease_blob(
-            self.container_name, 'blob1', 'renew', resp1['x-ms-lease-id'])
+        resp1 = self.bs.acquire_blob_lease(self.container_name, 'blob1')
+        resp2 = self.bs.renew_blob_lease(
+            self.container_name, 'blob1', resp1['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2280,13 +2267,13 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        resp1 = self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
+        resp1 = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.lease_blob(self.container_name, 'blob1', 'acquire')
-        resp2 = self.bs.lease_blob(
-            self.container_name, 'blob1', 'release', resp1['x-ms-lease-id'])
+            self.bs.acquire_blob_lease(self.container_name, 'blob1')
+        resp2 = self.bs.release_blob_lease(
+            self.container_name, 'blob1', resp1['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(resp1)

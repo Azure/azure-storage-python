@@ -221,3 +221,21 @@ class BlobSharedAccessPermissions(object):
 
     '''Delete the blob.'''
     DELETE = 'd'
+
+class LeaseActions(object):
+    '''Actions for a lease'''
+
+    '''Acquire the lease.'''
+    Acquire = 'acquire'
+
+    '''Renew the lease.'''
+    Renew = 'renew'
+
+    '''Release the lease.'''
+    Release = 'release'
+
+    '''Break the lease.'''
+    Break = 'break'
+
+    '''Change the lease ID.'''
+    Change = 'change'

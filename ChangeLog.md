@@ -4,6 +4,7 @@
 
 ## Version X.X.X:
 
+### Table:
 - Simplified tableservice *_entity functions by removing partition_key, row_key, and content_type parameters where possible.
 - tableservice *_entity functions that returned dictionaries instead return the etag.
 - tableservice insert_entity and create_table operations no longer echo content from the service, improving performance.
@@ -12,3 +13,8 @@
 - All table entity integer values are stored on the service with type Edm.Int64 unless the type is explicitly overridden as Edm.Int32.
 - Table Entity class extends dict but also allows property access as if it were an object to allow more flexible usage.
 - Table batches are constructed using the Batch class rather than turning batching on and off via the TableService. The TableService can then execute these batches using commit_batch(table_name, batch).
+
+### Blob:
+- Added snapshot support for the get_blob_properties API.
+- Separated lease_container and lease_blob into unique methods for each lease action.
+- Added access condition support for all applicable APIs.

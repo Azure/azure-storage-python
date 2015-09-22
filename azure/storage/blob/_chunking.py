@@ -18,7 +18,9 @@ import threading
 from time import sleep
 from .._common_conversion import _encode_base64
 from .._common_serialization import url_quote
-
+from azure.common import (
+    AzureHttpError,
+)
 
 class _BlobChunkDownloader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
@@ -80,7 +82,7 @@ class _BlobChunkDownloader(object):
                     self.blob_name,
                     x_ms_range=range_id
                 )
-            except AzureHttpException:
+            except AzureHttpError:
                 if retries > 0:
                     retries -= 1
                     sleep(self.retry_wait)
@@ -172,7 +174,7 @@ class _BlobChunkUploader(object):
                 range_id = self._upload_chunk(chunk_offset, chunk_data) 
                 self._update_progress(len(chunk_data))
                 return range_id
-            except AzureHttpException:
+            except AzureHttpError:
                 if retries > 0:
                     retries -= 1
                     sleep(self.retry_wait)
@@ -188,7 +190,7 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
             self.blob_name,
             chunk_data,
             range_id,
-            x_ms_lease_id=self.x_ms_lease_id
+            x_ms_lease_id=self.x_ms_lease_id,
         )
         return range_id
 
@@ -202,7 +204,7 @@ class _PageBlobChunkUploader(_BlobChunkUploader):
             chunk_data,
             range_id,
             'update',
-            x_ms_lease_id=self.x_ms_lease_id
+            x_ms_lease_id=self.x_ms_lease_id,
         )
         return range_id
 
