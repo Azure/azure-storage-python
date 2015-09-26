@@ -90,52 +90,6 @@ class StorageQueueTest(StorageTestCase):
         )
 
     @record
-    def test_get_service_properties(self):
-        # This api doesn't apply to local storage
-        if self.qs.use_local_storage:
-            return
-
-        # Action
-        properties = self.qs.get_queue_service_properties()
-
-        # Asserts
-        self.assertIsNotNone(properties)
-        self.assertIsNotNone(properties.logging)
-        self.assertIsNotNone(properties.logging.retention_policy)
-        self.assertIsNotNone(properties.logging.version)
-        self.assertIsNotNone(properties.hour_metrics)
-        self.assertIsNotNone(properties.hour_metrics.retention_policy)
-        self.assertIsNotNone(properties.hour_metrics.version)
-        self.assertIsNotNone(properties.minute_metrics)
-        self.assertIsNotNone(properties.minute_metrics.retention_policy)
-        self.assertIsNotNone(properties.minute_metrics.version)
-
-    @record
-    def test_set_service_properties(self):
-        # This api doesn't apply to local storage
-        if self.qs.use_local_storage:
-            return
-
-        # Action
-        queue_properties = self.qs.get_queue_service_properties()
-        queue_properties.logging.read = True
-        self.qs.set_queue_service_properties(queue_properties)
-        properties = self.qs.get_queue_service_properties()
-
-        # Asserts
-        self.assertIsNotNone(properties)
-        self.assertIsNotNone(properties.logging)
-        self.assertIsNotNone(properties.logging.retention_policy)
-        self.assertIsNotNone(properties.logging.version)
-        self.assertIsNotNone(properties.hour_metrics)
-        self.assertIsNotNone(properties.hour_metrics.retention_policy)
-        self.assertIsNotNone(properties.hour_metrics.version)
-        self.assertIsNotNone(properties.minute_metrics)
-        self.assertIsNotNone(properties.minute_metrics.retention_policy)
-        self.assertIsNotNone(properties.minute_metrics.version)
-        self.assertTrue(properties.logging.read)
-
-    @record
     def test_create_queue(self):
         # Action
         self.qs.create_queue(self.creatable_queues[0])

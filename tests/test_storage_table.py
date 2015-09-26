@@ -37,7 +37,6 @@ from azure.storage import (
     SharedAccessPolicy,
     SignedIdentifier,
     SignedIdentifiers,
-    StorageServiceProperties,
 )
 from azure.storage.table import (
     Entity,
@@ -285,72 +284,6 @@ class StorageTableTest(StorageTestCase):
                 permission
             )
         )
-
-    #--Test cases for table service -------------------------------------------
-    @record
-    def test_get_set_table_service_properties(self):
-        table_properties = self.ts.get_table_service_properties()
-        self.ts.set_table_service_properties(table_properties)
-
-        tests = [('logging.delete', True),
-                 ('logging.delete', False),
-                 ('logging.read', True),
-                 ('logging.read', False),
-                 ('logging.write', True),
-                 ('logging.write', False),
-                 ]
-        for path, value in tests:
-            # print path
-            cur = table_properties
-            for component in path.split('.')[:-1]:
-                cur = getattr(cur, component)
-
-            last_attr = path.split('.')[-1]
-            setattr(cur, last_attr, value)
-            self.ts.set_table_service_properties(table_properties)
-
-            retry_count = 0
-            while retry_count < MAX_RETRY:
-                table_properties = self.ts.get_table_service_properties()
-                cur = table_properties
-                for component in path.split('.'):
-                    cur = getattr(cur, component)
-                if value == cur:
-                    break
-                self.sleep(1)
-                retry_count += 1
-
-            self.assertEqual(value, cur)
-
-    @record
-    def test_table_service_retention_single_set(self):
-        table_properties = self.ts.get_table_service_properties()
-        table_properties.logging.retention_policy.enabled = False
-        table_properties.logging.retention_policy.days = 5
-
-        self.assertRaises(AzureHttpError,
-                          self.ts.set_table_service_properties,
-                          table_properties)
-
-        table_properties = self.ts.get_table_service_properties()
-        table_properties.logging.retention_policy.days = None
-        table_properties.logging.retention_policy.enabled = True
-
-        self.assertRaises(AzureHttpError,
-                          self.ts.set_table_service_properties,
-                          table_properties)
-
-    @record
-    def test_table_service_set_both(self):
-        table_properties = self.ts.get_table_service_properties()
-        table_properties.logging.retention_policy.enabled = True
-        table_properties.logging.retention_policy.days = 5
-        self.ts.set_table_service_properties(table_properties)
-        table_properties = self.ts.get_table_service_properties()
-        self.assertEqual(
-            True, table_properties.logging.retention_policy.enabled)
-
-        self.assertEqual(5, table_properties.logging.retention_policy.days)
 
     #--Test cases for tables --------------------------------------------------
     @record
