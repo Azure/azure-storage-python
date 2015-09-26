@@ -48,7 +48,9 @@ from .._http import (
 )
 from ..models import (
     SignedIdentifiers,
-    StorageServiceProperties,
+    Logging,
+    Metrics,
+    CorsRule,
 )
 from .models import (
     Queue,
@@ -64,6 +66,10 @@ from ..connection import (
 )
 from .._serialization import (
     _convert_signed_identifiers_to_xml,
+    _convert_service_properties_to_xml,
+)
+from .._deserialization import (
+    _convert_xml_to_service_properties,
 )
 from ._serialization import (
     _update_storage_queue_header,
@@ -166,7 +172,7 @@ class QueueService(_StorageClient):
     def get_queue_service_properties(self, timeout=None):
         '''
         Gets the properties of a storage account's Queue Service, including
-        Windows Azure Storage Analytics.
+        Azure Storage Analytics.
 
         timeout:
             Optional. The timeout parameter is expressed in seconds.
@@ -182,8 +188,7 @@ class QueueService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_response(
-            response, StorageServiceProperties)
+        return _convert_xml_to_service_properties(response.body)
 
     def list_queues(self, prefix=None, marker=None, maxresults=None,
                     include=None):
@@ -593,26 +598,36 @@ class QueueService(_StorageClient):
             response,
             filter=['x-ms-popreceipt', 'x-ms-time-next-visible'])
 
-    def set_queue_service_properties(self, storage_service_properties,
-                                     timeout=None):
+    def set_queue_service_properties(self, logging=None, hour_metrics=None, 
+                                    minute_metrics=None, cors=None, timeout=None):
         '''
         Sets the properties of a storage account's Queue service, including
-        Windows Azure Storage Analytics.
+        Azure Storage Analytics. If an element (ex Logging) is left as None, the 
+        existing settings on the service for that functionality are preserved.
 
-        storage_service_properties:
-            StorageServiceProperties object.
-        timeout:
-            Optional. The timeout parameter is expressed in seconds.
+        :param Logging logging:
+            Groups the Azure Analytics Logging settings.
+        :param Metrics hour_metrics:
+            The hour metrics settings provide a summary of request 
+            statistics grouped by API in hourly aggregates for blobs.
+        :param Metrics minute_metrics:
+            The minute metrics settings provide request statistics 
+            for each minute for blobs.
+        :param cors:
+            You can include up to five CorsRule elements in the 
+            list. If an empty list is specified, all CORS rules will be deleted, 
+            and CORS will be disabled for the service.
+        :type cors: list of :class:`CorsRule`
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
-        _validate_not_none('storage_service_properties',
-                           storage_service_properties)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/?restype=service&comp=properties'
         request.query = [('timeout', _int_or_none(timeout))]
         request.body = _get_request_body(
-            _convert_class_to_xml(storage_service_properties))
+            _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(

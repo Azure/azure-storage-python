@@ -12,13 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+import sys
+if sys.version_info >= (3,):
+    from io import BytesIO
+else:
+    from cStringIO import StringIO as BytesIO
+
+try:
+    from xml.etree import cElementTree as ETree
+except ImportError:
+    from xml.etree import ElementTree as ETree
+
 from ._common_error import (
     _general_error_handler,
 )
 from .constants import (
     X_MS_VERSION,
 )
-
 
 def _storage_error_handler(http_error):
     ''' Simple error handler for storage service. '''
@@ -43,6 +53,134 @@ def _convert_signed_identifiers_to_xml(signed_identifiers):
         xml += '</SignedIdentifier>'
 
     return xml + '</SignedIdentifiers>'
+
+def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors, target_version=None):
+    '''
+    <?xml version="1.0" encoding="utf-8"?>
+    <StorageServiceProperties>
+        <Logging>
+            <Version>version-number</Version>
+            <Delete>true|false</Delete>
+            <Read>true|false</Read>
+            <Write>true|false</Write>
+            <RetentionPolicy>
+                <Enabled>true|false</Enabled>
+                <Days>number-of-days</Days>
+            </RetentionPolicy>
+        </Logging>
+        <HourMetrics>
+            <Version>version-number</Version>
+            <Enabled>true|false</Enabled>
+            <IncludeAPIs>true|false</IncludeAPIs>
+            <RetentionPolicy>
+                <Enabled>true|false</Enabled>
+                <Days>number-of-days</Days>
+            </RetentionPolicy>
+        </HourMetrics>
+        <MinuteMetrics>
+            <Version>version-number</Version>
+            <Enabled>true|false</Enabled>
+            <IncludeAPIs>true|false</IncludeAPIs>
+            <RetentionPolicy>
+                <Enabled>true|false</Enabled>
+                <Days>number-of-days</Days>
+            </RetentionPolicy>
+        </MinuteMetrics>
+        <Cors>
+            <CorsRule>
+                <AllowedOrigins>comma-separated-list-of-allowed-origins</AllowedOrigins>
+                <AllowedMethods>comma-separated-list-of-HTTP-verb</AllowedMethods>
+                <MaxAgeInSeconds>max-caching-age-in-seconds</MaxAgeInSeconds>
+                <ExposedHeaders>comma-seperated-list-of-response-headers</ExposedHeaders>
+                <AllowedHeaders>comma-seperated-list-of-request-headers</AllowedHeaders>
+            </CorsRule>
+        </Cors>
+    </StorageServiceProperties>
+    '''
+    service_properties_element = ETree.Element('StorageServiceProperties');
+
+    # Logging
+    if logging:
+        logging_element = ETree.SubElement(service_properties_element, 'Logging')
+        ETree.SubElement(logging_element, 'Version').text = logging.version
+        ETree.SubElement(logging_element, 'Delete').text = str(logging.delete)
+        ETree.SubElement(logging_element, 'Read').text = str(logging.read)
+        ETree.SubElement(logging_element, 'Write').text = str(logging.write)
+
+        retention_element = ETree.SubElement(logging_element, 'RetentionPolicy')
+        _convert_retention_policy_to_xml(logging.retention_policy, retention_element)
+
+    # HourMetrics
+    if hour_metrics:
+        hour_metrics_element = ETree.SubElement(service_properties_element, 'HourMetrics')
+        _convert_metrics_to_xml(hour_metrics, hour_metrics_element)
+
+    # MinuteMetrics
+    if minute_metrics:
+        minute_metrics_element = ETree.SubElement(service_properties_element, 'MinuteMetrics')
+        _convert_metrics_to_xml(minute_metrics, minute_metrics_element)
+
+    # CORS
+    # Make sure to still serialize empty list
+    if cors is not None:
+        cors_element = ETree.SubElement(service_properties_element, 'Cors')
+        for rule in cors:
+            cors_rule = ETree.SubElement(cors_element, 'CorsRule')
+            ETree.SubElement(cors_rule, 'AllowedOrigins').text = ",".join(rule.allowed_origins)
+            ETree.SubElement(cors_rule, 'AllowedMethods').text = ",".join(rule.allowed_methods)
+            ETree.SubElement(cors_rule, 'MaxAgeInSeconds').text = str(rule.max_age_in_seconds)
+            ETree.SubElement(cors_rule, 'ExposedHeaders').text = ",".join(rule.exposed_headers)
+            ETree.SubElement(cors_rule, 'AllowedHeaders').text = ",".join(rule.allowed_headers)
+
+    # Target version
+    if target_version:
+        ETree.SubElement(service_properties_element, 'DefaultServiceVersion').text = target_version
+
+
+    # Add xml declaration and serialize
+    stream = BytesIO()
+    ETree.ElementTree(service_properties_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
+
+    # Close StringIO object and return xml value
+    output = stream.getvalue()
+    stream.close()
+    return output
+
+def _convert_metrics_to_xml(metrics, root):
+    '''
+    <Version>version-number</Version>
+    <Enabled>true|false</Enabled>
+    <IncludeAPIs>true|false</IncludeAPIs>
+    <RetentionPolicy>
+        <Enabled>true|false</Enabled>
+        <Days>number-of-days</Days>
+    </RetentionPolicy>
+    '''
+    # Version
+    ETree.SubElement(root, 'Version').text = metrics.version
+
+    # Enabled
+    ETree.SubElement(root, 'Enabled').text = str(metrics.enabled)
+
+    # IncludeAPIs
+    if metrics.include_apis:
+        ETree.SubElement(root, 'IncludeAPIs').text = str(metrics.include_apis)
+
+    # RetentionPolicy
+    retention_element = ETree.SubElement(root, 'RetentionPolicy')
+    _convert_retention_policy_to_xml(metrics.retention_policy, retention_element)
+
+def _convert_retention_policy_to_xml(retention_policy, root):
+    '''
+    <Enabled>true|false</Enabled>
+    <Days>number-of-days</Days>
+    '''
+    # Enabled
+    ETree.SubElement(root, 'Enabled').text = str(retention_policy.enabled)
+
+    # Days
+    if retention_policy.enabled and retention_policy.days:
+        ETree.SubElement(root, 'Days').text = str(retention_policy.days)
 
 
 def _update_storage_header(request):

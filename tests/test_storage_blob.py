@@ -32,12 +32,11 @@ from azure.storage import (
     DEV_ACCOUNT_KEY,
     AccessPolicy,
     Logging,
-    HourMetrics,
-    MinuteMetrics,
+    Metrics,
     SharedAccessPolicy,
     SignedIdentifier,
     SignedIdentifiers,
-    StorageServiceProperties,
+    ServiceProperties,
 )
 from azure.storage.blob import (
     BLOB_SERVICE_HOST_BASE,
@@ -1139,8 +1138,7 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
 
         # Act
-        props = StorageServiceProperties()
-        props.hour_metrics.enabled = False
+        props = ServiceProperties(hour_metrics=Metrics())
         resp = self.bs.set_blob_service_properties(props)
 
         # Assert
@@ -1153,8 +1151,7 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
 
         # Act
-        props = StorageServiceProperties()
-        props.logging.write = True
+        props = ServiceProperties(logging=Logging(write=True))
         resp = self.bs.set_blob_service_properties(props, 5)
 
         # Assert

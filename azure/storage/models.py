@@ -20,6 +20,9 @@ from ._common_models import (
     WindowsAzureData,
     _list_of,
 )
+from ._common_error import (
+    _validate_not_none,
+)
 
 
 class AzureBatchValidationError(AzureException):
@@ -47,74 +50,133 @@ class EnumResultsBase(object):
         self.next_marker = u''
 
 
-class RetentionPolicy(WindowsAzureData):
+class RetentionPolicy(object):
 
-    ''' RetentionPolicy in service properties. '''
+    '''
+    RetentionPolicy class to be used with ServiceProperties.
+    
+    :param bool enabled: 
+        Indicates whether a retention policy is enabled for the 
+        storage service. If disabled, logging and metrics data will be retained 
+        infinitely by the service unless explicitly deleted.
+    :param int days: 
+        Required if enabled is true. Indicates the number of 
+        days that metrics or logging data should be retained. All data older 
+        than this value will be deleted. The minimum value you can specify is 1; 
+        the largest value is 365 (one year).
+    '''
 
-    def __init__(self):
-        self.enabled = False
-        self.__dict__['days'] = None
+    def __init__(self, enabled=False, days=None):
+        _validate_not_none("enabled", enabled)
+        if enabled:
+            _validate_not_none("days", days)
 
-    def get_days(self):
-        # convert days to int value
-        return int(self.__dict__['days'])
-
-    def set_days(self, value):
-        ''' set default days if days is set to empty. '''
-        self.__dict__['days'] = value
-
-    days = property(fget=get_days, fset=set_days)
+        self.enabled = enabled
+        self.days = days
 
 
-class Logging(WindowsAzureData):
+class Logging(object):
 
-    ''' Logging class in service properties. '''
+    '''
+    Logging class to be used with ServiceProperties.
 
-    def __init__(self):
+    :param bool delete: 
+        Indicates whether all delete requests should be logged.
+    :param bool read: 
+        Indicates whether all read requests should be logged.
+    :param bool write: 
+        Indicates whether all write requests should be logged.
+    :param RetentionPolicy retention_policy: 
+        The retention policy for the metrics.
+    '''
+
+    def __init__(self, delete=False, read=False, write=False,
+                 retention_policy=None):
+        _validate_not_none("read", read)
+        _validate_not_none("write", write)
+        _validate_not_none("delete", delete)
+
         self.version = u'1.0'
-        self.delete = False
-        self.read = False
-        self.write = False
-        self.retention_policy = RetentionPolicy()
+        self.delete = delete
+        self.read = read
+        self.write = write
+        self.retention_policy = retention_policy if retention_policy else RetentionPolicy()
 
 
-class HourMetrics(WindowsAzureData):
+class Metrics(object):
 
-    ''' Hour Metrics class in service properties. '''
+    ''' 
+    Metrics class to be used with ServiceProperties.
 
-    def __init__(self):
+    :param bool enabled: 
+        Indicates whether metrics are enabled for 
+        the service.
+    :param bool include_apis: 
+        Required if enabled is True. Indicates whether metrics 
+        should generate summary statistics for called API operations.
+    :param RetentionPolicy retention_policy: 
+        The retention policy for the metrics.
+    '''
+
+    def __init__(self, enabled=False, include_apis=None,
+                 retention_policy=None):
+        _validate_not_none("enabled", enabled)
+        if enabled:
+            _validate_not_none("include_apis", include_apis)
+
         self.version = u'1.0'
-        self.enabled = False
-        self.include_apis = None
-        self.retention_policy = RetentionPolicy()
+        self.enabled = enabled
+        self.include_apis = include_apis
+        self.retention_policy = retention_policy if retention_policy else RetentionPolicy()
 
 
-class MinuteMetrics(WindowsAzureData):
+class CorsRule(object):
 
-    ''' Minute Metrics class in service properties. '''
+    '''
+    Cors Rule class to be used with ServiceProperties.
+    
+    :param allowed_origins: 
+        A list of origin domains that will be allowed via CORS, or "*" to allow 
+        all domains. The list of must contain at least one entry. Limited to 64 
+        origin domains. Each allowed origin can have up to 256 characters.
+    :type allowed_origins: list of str
+    :param allowed_methods:
+        A list of HTTP methods that are allowed to be executed by the origin. 
+        The list of must contain at least one entry. For Azure Storage, 
+        permitted methods are DELETE, GET, HEAD, MERGE, POST, OPTIONS or PUT.
+    :type allowed_methods: list of str
+    :param int max_age_in_seconds:
+        The number of seconds that the client/browser should cache a 
+        preflight response.
+    :param exposed_headers:
+        Defaults to an empty list. A list of response headers to expose to CORS 
+        clients. Limited to 64 defined headers and two prefixed headers. Each 
+        header can be up to 256 characters.
+    :type exposed_headers: list of str
+    :param allowed_headers:
+        Defaults to an empty list. A list of headers allowed to be part of 
+        the cross-origin request. Limited to 64 defined headers and 2 prefixed 
+        headers. Each header can be up to 256 characters.
+    :type allowed_headers: list of str
+    '''
 
-    def __init__(self):
-        self.version = u'1.0'
-        self.enabled = False
-        self.include_apis = None
-        self.retention_policy = RetentionPolicy()
+    def __init__(self, allowed_origins, allowed_methods, max_age_in_seconds=0,
+                 exposed_headers=None, allowed_headers=None):
+        _validate_not_none("allowed_origins", allowed_origins)
+        _validate_not_none("allowed_methods", allowed_methods)
+        _validate_not_none("max_age_in_seconds", max_age_in_seconds)
+
+        self.allowed_origins = allowed_origins if allowed_origins else list()
+        self.allowed_methods = allowed_methods if allowed_methods else list()
+        self.max_age_in_seconds = max_age_in_seconds
+        self.exposed_headers = exposed_headers if exposed_headers else list()
+        self.allowed_headers = allowed_headers if allowed_headers else list()
 
 
-class StorageServiceProperties(WindowsAzureData):
+class ServiceProperties(object):
+    ''' Only for IntelliSense and telling user the return type. '''
 
-    ''' Storage Service Propeties class. '''
-
-    def __init__(self):
-        self.logging = Logging()
-        self.hour_metrics = HourMetrics()
-        self.minute_metrics = MinuteMetrics()
-
-    @property
-    def metrics(self):
-        import warnings
-        warnings.warn(
-            'The metrics attribute has been deprecated. Use hour_metrics and minute_metrics instead.')
-        return self.hour_metrics
+    pass
 
 
 class AccessPolicy(WindowsAzureData):

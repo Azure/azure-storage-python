@@ -39,7 +39,9 @@ from .._common_serialization import (
 from .._http import HTTPRequest
 from ..models import (
     SignedIdentifiers,
-    StorageServiceProperties,
+    Logging,
+    Metrics,
+    CorsRule,
 )
 from .models import (
     TableSharedAccessPermissions,
@@ -55,6 +57,10 @@ from ..connection import (
 )
 from .._serialization import (
     _convert_signed_identifiers_to_xml,
+    _convert_service_properties_to_xml,
+)
+from .._deserialization import (
+    _convert_xml_to_service_properties,
 )
 from ._serialization import (
     _convert_table_to_json,
@@ -187,7 +193,7 @@ class TableService(_StorageClient):
     def get_table_service_properties(self):
         '''
         Gets the properties of a storage account's Table service, including
-        Windows Azure Storage Analytics.
+        Azure Storage Analytics.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -198,31 +204,41 @@ class TableService(_StorageClient):
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_response(
-            response, StorageServiceProperties)
+        return _convert_xml_to_service_properties(response.body)
 
-    def set_table_service_properties(self, storage_service_properties):
+    def set_table_service_properties(self, logging=None, hour_metrics=None, 
+                                    minute_metrics=None, cors=None):
         '''
-        Sets the properties of a storage account's Table Service, including
-        Windows Azure Storage Analytics.
+        Sets the properties of a storage account's Table service, including
+        Azure Storage Analytics. If an element (ex Logging) is left as None, the 
+        existing settings on the service for that functionality are preserved.
 
-        storage_service_properties:
-            StorageServiceProperties object.
+        :param Logging logging:
+            Groups the Azure Analytics Logging settings.
+        :param Metrics hour_metrics:
+            The hour metrics settings provide a summary of request 
+            statistics grouped by API in hourly aggregates for blobs.
+        :param Metrics minute_metrics:
+            The minute metrics settings provide request statistics 
+            for each minute for blobs.
+        :param cors:
+            You can include up to five CorsRule elements in the 
+            list. If an empty list is specified, all CORS rules will be deleted, 
+            and CORS will be disabled for the service.
+        :type cors: list of :class:`CorsRule`
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
-        _validate_not_none('storage_service_properties',
-                           storage_service_properties)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/?restype=service&comp=properties'
         request.body = _get_request_body(
-            _convert_class_to_xml(storage_service_properties))
+            _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
-
-        return _parse_response_for_dict(response)
+        self._perform_request(request)
 
     def query_tables(self, table_name=None, top=None, next_table_name=None):
         '''
