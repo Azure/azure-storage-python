@@ -114,7 +114,7 @@ class StorageTableBatchTest(StorageTestCase):
                 'optional': None,
                 'ratio': 3.1,
                 'evenratio': 3.0,
-                'large': 9333111000,
+                'large': 933311100,
                 'Birthday': datetime(1973, 10, 4),
                 'birthday': datetime(1970, 10, 4),
                 'other': EntityProperty(EdmType.INT32, 20),
@@ -148,7 +148,7 @@ class StorageTableBatchTest(StorageTestCase):
         self.assertFalse(hasattr(entity, "aquarius"))
         self.assertEqual(entity.ratio, 3.1)
         self.assertEqual(entity.evenratio, 3.0)
-        self.assertEqual(entity.large, 9333111000)
+        self.assertEqual(entity.large, 933311100)
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1970, 10, 4, tzinfo=tzutc()))
         self.assertIsInstance(entity.other, EntityProperty)
@@ -497,7 +497,7 @@ class StorageTableBatchTest(StorageTestCase):
         entity.RowKey = 'batch_all_operations_together-4'
         self.ts.insert_entity(self.table_name, entity)
 
-        with self.ts.create_batch(self.table_name) as batch:
+        with self.ts.batch(self.table_name) as batch:
             entity.RowKey = 'batch_all_operations_together'
             batch.insert_entity(entity)
             entity.RowKey = 'batch_all_operations_together-1'
