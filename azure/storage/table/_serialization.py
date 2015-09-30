@@ -108,12 +108,20 @@ def _to_entity_guid(value):
    return EdmType.GUID, str(value)
 
 def _to_entity_int32(value):
+    if sys.version_info < (3,):
+        value = long(value)
+    else:
+        value = int(value)
     if value >= 2**15 or value < -(2**15):
         raise TypeError(_ERROR_VALUE_TOO_LARGE.format(str(value), EdmType.INT32))       
     return None, value
 
 def _to_entity_int64(value):
-    if value >= 2**31 or value < -(2**31):
+    if sys.version_info < (3,):
+        ivalue = long(value)
+    else:
+        ivalue = int(value)
+    if ivalue >= 2**31 or ivalue < -(2**31):
         raise TypeError(_ERROR_VALUE_TOO_LARGE.format(str(value), EdmType.INT64))       
     return EdmType.INT64, str(value)
 
