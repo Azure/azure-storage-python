@@ -31,7 +31,6 @@ from .._common_error import (
 )
 from .._common_serialization import (
     xml_escape,
-    _convert_class_to_xml,
     _get_request_body,
     _parse_response_for_dict_filter,
     _parse_response_for_dict_prefix,
