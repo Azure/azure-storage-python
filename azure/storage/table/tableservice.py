@@ -28,7 +28,6 @@ from .._common_error import (
     _ERROR_STORAGE_MISSING_INFO,
 )
 from .._common_serialization import (
-    _convert_class_to_xml,
     _get_request_body,
     _parse_response_for_dict,
     _parse_response_for_dict_filter,
@@ -361,7 +360,7 @@ class TableService(_StorageClient):
         table_name:
             Name of existing table.
         signed_identifiers:
-            SignedIdentifers instance
+            list of SignedIdentifiers
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()

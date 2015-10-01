@@ -30,7 +30,6 @@ from .._common_conversion import (
     _str_or_none,
 )
 from .._common_serialization import (
-    _convert_class_to_xml,
     _get_request_body,
     _get_request_body_bytes_only,
     _parse_response_for_dict,

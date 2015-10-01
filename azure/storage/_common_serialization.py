@@ -84,33 +84,6 @@ def _get_serialization_name(element_name):
     return ''.join(name.capitalize() for name in element_name.split('_'))
 
 
-def _convert_class_to_xml(source, xml_prefix=True):
-    if source is None:
-        return ''
-
-    xmlstr = ''
-    if xml_prefix:
-        xmlstr = '<?xml version="1.0" encoding="utf-8"?>'
-
-    if isinstance(source, list):
-        for value in source:
-            xmlstr += _convert_class_to_xml(value, False)
-    elif isinstance(source, WindowsAzureData):
-        class_name = source.__class__.__name__
-        xmlstr += '<' + class_name + '>'
-        for name, value in vars(source).items():
-            if value is not None:
-                if isinstance(value, list) or \
-                    isinstance(value, WindowsAzureData):
-                    xmlstr += _convert_class_to_xml(value, False)
-                else:
-                    xmlstr += ('<' + _get_serialization_name(name) + '>' +
-                               xml_escape(str(value)) + '</' +
-                               _get_serialization_name(name) + '>')
-        xmlstr += '</' + class_name + '>'
-    return xmlstr
-
-
 def _set_continuation_from_response_headers(feeds, response):
     x_ms_continuation = HeaderDict()
     for name, value in response.headers:
