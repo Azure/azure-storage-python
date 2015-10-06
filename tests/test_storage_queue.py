@@ -165,13 +165,9 @@ class StorageQueueTest(StorageTestCase):
     def test_list_queues(self):
         # Action
         queues = self.qs.list_queues()
-        for queue in queues:
-            pass
 
         # Asserts
         self.assertIsNotNone(queues)
-        self.assertEqual('', queues.marker)
-        self.assertEqual(0, queues.max_results)
         self.assertTrue(len(self.test_queues) <= len(queues))
 
     @record
@@ -186,19 +182,32 @@ class StorageQueueTest(StorageTestCase):
         # Asserts
         self.assertIsNotNone(queues_1)
         self.assertEqual(3, len(queues_1))
-        self.assertEqual(3, queues_1.max_results)
-        self.assertEqual('', queues_1.marker)
         self.assertIsNotNone(queues_1[0])
         self.assertIsNone(queues_1[0].metadata)
         self.assertNotEqual('', queues_1[0].name)
         # Asserts
         self.assertIsNotNone(queues_2)
         self.assertTrue(len(self.test_queues) - 3 <= len(queues_2))
-        self.assertEqual(0, queues_2.max_results)
-        self.assertEqual(queues_1.next_marker, queues_2.marker)
         self.assertIsNotNone(queues_2[0])
         self.assertIsNotNone(queues_2[0].metadata)
         self.assertNotEqual('', queues_2[0].name)
+
+    @record
+    def test_list_queues_with_metadata(self):
+        # Action
+        self.qs.create_queue(self.creatable_queues[1])
+        self.qs.set_queue_metadata(
+            self.creatable_queues[1],
+            x_ms_meta_name_values={'val1': 'test', 'val2': 'blah'})
+
+        queue = self.qs.list_queues(self.creatable_queues[1], maxresults=1, include='metadata')[0]
+
+        # Asserts
+        self.assertIsNotNone(queue)
+        self.assertEqual(self.creatable_queues[1], queue.name)
+        self.assertIsNotNone(queue.metadata)
+        self.assertEqual(len(queue.metadata), 2)
+        self.assertEqual(queue.metadata['val1'], 'test')
 
     @record
     def test_set_queue_metadata(self):
@@ -243,9 +252,10 @@ class StorageQueueTest(StorageTestCase):
         self.assertEqual('message1', message.message_text)
         self.assertNotEqual('', message.pop_receipt)
         self.assertEqual('1', message.dequeue_count)
-        self.assertNotEqual('', message.insertion_time)
-        self.assertNotEqual('', message.expiration_time)
-        self.assertNotEqual('', message.time_next_visible)
+
+        self.assertIsInstance(message.insertion_time, datetime.date)
+        self.assertIsInstance(message.expiration_time, datetime.date)
+        self.assertIsInstance(message.time_next_visible, datetime.date)
 
     @record
     def test_get_messages_with_options(self):
@@ -287,11 +297,11 @@ class StorageQueueTest(StorageTestCase):
         self.assertIsNotNone(message)
         self.assertNotEqual('', message.message_id)
         self.assertNotEqual('', message.message_text)
-        self.assertEqual('', message.pop_receipt)
+        self.assertIsNone(message.pop_receipt)
         self.assertEqual('0', message.dequeue_count)
         self.assertNotEqual('', message.insertion_time)
         self.assertNotEqual('', message.expiration_time)
-        self.assertEqual('', message.time_next_visible)
+        self.assertIsNone(message.time_next_visible)
 
     @record
     def test_peek_messages_with_options(self):
@@ -309,11 +319,11 @@ class StorageQueueTest(StorageTestCase):
             self.assertIsNotNone(message)
             self.assertNotEqual('', message.message_id)
             self.assertNotEqual('', message.message_text)
-            self.assertEqual('', message.pop_receipt)
+            self.assertIsNone(message.pop_receipt)
             self.assertEqual('0', message.dequeue_count)
             self.assertNotEqual('', message.insertion_time)
             self.assertNotEqual('', message.expiration_time)
-            self.assertEqual('', message.time_next_visible)
+            self.assertIsNone(message.time_next_visible)
 
     @record
     def test_clear_messages(self):

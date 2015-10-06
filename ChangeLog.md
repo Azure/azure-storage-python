@@ -18,3 +18,7 @@
 - Added snapshot support for the get_blob_properties API.
 - Separated lease_container and lease_blob into unique methods for each lease action.
 - Added access condition support for all applicable APIs.
+
+### Queue:
+- The list_queues operation returns a list of Queue objects. The list returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
+- The peek_messages and get_messages operations return a list of QueueMessage objects. QueueMessage objects contain the same fields as previously, but insertion_time, expiration_time, and time_next_visible are returned as UTC dates rather than strings.
