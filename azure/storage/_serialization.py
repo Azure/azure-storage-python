@@ -138,12 +138,10 @@ def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, co
 
 
     # Add xml declaration and serialize
-    stream = BytesIO()
-    ETree.ElementTree(service_properties_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
-
-    # Close StringIO object and return xml value
-    output = stream.getvalue()
-    stream.close()
+    with BytesIO() as stream:
+        ETree.ElementTree(service_properties_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
+        output = stream.getvalue()
+    
     return output
 
 def _convert_metrics_to_xml(metrics, root):

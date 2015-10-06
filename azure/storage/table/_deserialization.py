@@ -28,11 +28,13 @@ from .._http import HTTPResponse
 from azure.common import (
     AzureException,
 )
+from .._common_models import (
+    HeaderDict,
+)
 from ..models import (
     AzureBatchOperationError,
 )
 from .._common_serialization import (
-    _set_continuation_from_response_headers,
     _extract_etag,
 )
 from .._common_conversion import (
@@ -48,11 +50,17 @@ from .models import (
     Table,
     EdmType,
 )
+from ..models import (
+    _list,
+)
 
-
-class _list(list):
-    '''Used so that a continuation token can be set on the return object'''
-    pass
+def _set_continuation_from_response_headers(feeds, response):
+    x_ms_continuation = HeaderDict()
+    for name, value in response.headers:
+        if name.startswith('x-ms-continuation'):
+            x_ms_continuation[name[len('x-ms-continuation') + 1:]] = value
+    if x_ms_continuation:
+        setattr(feeds, 'x_ms_continuation', x_ms_continuation)
 
 # Tables of conversions to and from entity types.  We support specific
 # datatypes, and beyond that the user can use an EntityProperty to get

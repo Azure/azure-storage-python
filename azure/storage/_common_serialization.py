@@ -84,15 +84,6 @@ def _get_serialization_name(element_name):
     return ''.join(name.capitalize() for name in element_name.split('_'))
 
 
-def _set_continuation_from_response_headers(feeds, response):
-    x_ms_continuation = HeaderDict()
-    for name, value in response.headers:
-        if 'x-ms-continuation' in name:
-            x_ms_continuation[name[len('x-ms-continuation') + 1:]] = value
-    if x_ms_continuation:
-        setattr(feeds, 'x_ms_continuation', x_ms_continuation)
-
-
 def _get_request_body_bytes_only(param_name, param_value):
     '''Validates the request body passed in and converts it to bytes
     if our policy allows it.'''

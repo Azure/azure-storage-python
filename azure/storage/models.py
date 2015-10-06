@@ -25,6 +25,11 @@ from ._common_error import (
 )
 
 
+class _list(list):
+    '''Used so that a continuation token can be set on the return object'''
+    pass
+
+
 class AzureBatchValidationError(AzureException):
 
     '''Indicates that a batch operation cannot proceed due to invalid input'''

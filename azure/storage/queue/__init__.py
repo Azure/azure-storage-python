@@ -18,9 +18,7 @@ from ..constants import (
 )
 
 from .models import (
-    QueueEnumResults,
     Queue,
-    QueueMessagesList,
     QueueMessage,
     QueueSharedAccessPermissions,
 )

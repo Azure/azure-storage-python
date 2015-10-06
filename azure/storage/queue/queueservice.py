@@ -53,8 +53,6 @@ from ..models import (
 )
 from .models import (
     Queue,
-    QueueEnumResults,
-    QueueMessagesList,
 )
 from ..auth import (
     StorageSASAuthentication,
@@ -72,6 +70,11 @@ from .._deserialization import (
 )
 from ._serialization import (
     _update_storage_queue_header,
+    _convert_queue_message_xml,
+)
+from ._deserialization import (
+    _convert_xml_to_queues,
+    _convert_xml_to_queue_messages,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -227,8 +230,7 @@ class QueueService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_enum_results_list(
-            response, QueueEnumResults, "Queues", Queue)
+        return _convert_xml_to_queues(response)
 
     def create_queue(self, queue_name, x_ms_meta_name_values=None,
                      fail_on_exist=False):
@@ -425,11 +427,7 @@ class QueueService(_StorageClient):
             ('visibilitytimeout', _str_or_none(visibilitytimeout)),
             ('messagettl', _str_or_none(messagettl))
         ]
-        request.body = _get_request_body(
-            '<?xml version="1.0" encoding="utf-8"?> \
-<QueueMessage> \
-    <MessageText>' + xml_escape(_str(message_text)) + '</MessageText> \
-</QueueMessage>')
+        request.body = _get_request_body(_convert_queue_message_xml(message_text))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
@@ -471,8 +469,7 @@ class QueueService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_response(
-            response, QueueMessagesList)
+        return _convert_xml_to_queue_messages(response)
 
     def peek_messages(self, queue_name, numofmessages=None):
         '''
@@ -498,8 +495,7 @@ class QueueService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_response(
-            response, QueueMessagesList)
+        return _convert_xml_to_queue_messages(response)
 
     def delete_message(self, queue_name, message_id, popreceipt):
         '''
@@ -582,11 +578,7 @@ class QueueService(_StorageClient):
             ('popreceipt', _str_or_none(popreceipt)),
             ('visibilitytimeout', _str_or_none(visibilitytimeout))
         ]
-        request.body = _get_request_body(
-            '<?xml version="1.0" encoding="utf-8"?> \
-<QueueMessage> \
-    <MessageText>' + xml_escape(_str(message_text)) + '</MessageText> \
-</QueueMessage>')
+        request.body = _get_request_body(_convert_queue_message_xml(message_text))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
