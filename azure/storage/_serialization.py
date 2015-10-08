@@ -13,6 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import sys
+from datetime import date
 if sys.version_info >= (3,):
     from io import BytesIO
 else:
@@ -29,6 +30,9 @@ from ._common_error import (
 from .constants import (
     X_MS_VERSION,
 )
+from ._common_serialization import (
+    _to_utc_datetime,
+)
 
 def _storage_error_handler(http_error):
     ''' Simple error handler for storage service. '''
@@ -38,21 +42,39 @@ def _storage_error_handler(http_error):
 def _convert_signed_identifiers_to_xml(signed_identifiers):
     if signed_identifiers is None:
         return ''
-    xml = '<?xml version="1.0" encoding="utf-8"?><SignedIdentifiers>'
-    for signed_identifier in signed_identifiers:
-        xml += '<SignedIdentifier>'
-        xml += '<Id>{0}</Id>'.format(signed_identifier.id)
-        xml += '<AccessPolicy>'
-        if signed_identifier.access_policy.start:
-            xml += '<Start>{0}</Start>'.format(signed_identifier.access_policy.start)
-        if signed_identifier.access_policy.expiry:
-            xml += '<Expiry>{0}</Expiry>'.format(signed_identifier.access_policy.expiry)
-        if signed_identifier.access_policy.permission:
-            xml += '<Permission>{0}</Permission>'.format(signed_identifier.access_policy.permission)
-        xml += '</AccessPolicy>'
-        xml += '</SignedIdentifier>'
 
-    return xml + '</SignedIdentifiers>'
+    sis = ETree.Element('SignedIdentifiers');
+    for id, access_policy in signed_identifiers.items():
+        # Root signed identifers element
+        si = ETree.SubElement(sis, 'SignedIdentifier')
+
+        # Id element
+        ETree.SubElement(si, 'Id').text = id
+
+        # Access policy element
+        policy = ETree.SubElement(si, 'AccessPolicy')
+
+        if access_policy.start:
+            start = access_policy.start
+            if isinstance(access_policy.start, date):
+                start = _to_utc_datetime(start)
+            ETree.SubElement(policy, 'Start').text = start
+
+        if access_policy.expiry:
+            expiry = access_policy.expiry
+            if isinstance(access_policy.expiry, date):
+                expiry = _to_utc_datetime(expiry)
+            ETree.SubElement(policy, 'Expiry').text = expiry
+        
+        if access_policy.permission:
+            ETree.SubElement(policy, 'Permission').text = access_policy.permission
+
+    # Add xml declaration and serialize
+    with BytesIO() as stream:
+        ETree.ElementTree(sis).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
+        output = stream.getvalue()
+    
+    return output
 
 def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors, target_version=None):
     '''

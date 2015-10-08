@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+from dateutil import parser
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -23,7 +24,34 @@ from .models import (
     Metrics,
     CorsRule,
     RetentionPolicy,
+    AccessPolicy,
 )
+
+def _convert_xml_to_signed_identifiers(xml):
+    list_element = ETree.fromstring(xml)
+    signed_identifiers = dict()
+
+    for signed_identifier_element in list_element.findall('SignedIdentifier'):
+        # Id element
+        id = signed_identifier_element.find('Id').text
+
+        # Access policy element
+        access_policy = AccessPolicy()
+        access_policy_element = signed_identifier_element.find('AccessPolicy')
+
+        start_element = access_policy_element.find('Start')
+        if start_element is not None:
+            access_policy.start = parser.parse(start_element.text)
+
+        expiry_element = access_policy_element.find('Expiry')
+        if expiry_element is not None:
+            access_policy.expiry = parser.parse(expiry_element.text)
+
+        access_policy.permission = access_policy_element.findtext('Permission')
+
+        signed_identifiers[id] = access_policy
+
+    return signed_identifiers
 
 def _convert_xml_to_service_properties(xml):
     '''

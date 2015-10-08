@@ -34,6 +34,7 @@ from .._common_conversion import (
 )
 from .._common_serialization import (
     _update_request_uri_query_local_storage,
+    _to_utc_datetime,
 )
 from .._serialization import _update_storage_header
 from ._error import (
@@ -88,12 +89,7 @@ def _to_entity_bool(value):
     return None, value
 
 def _to_entity_datetime(value):
-    # Azure expects the date value passed in to be UTC.
-    # Azure will always return values as UTC.
-    # If a date is passed in without timezone info, it is assumed to be UTC.
-    if value.tzinfo:
-        value = value.astimezone(tzutc())
-    return EdmType.DATETIME, value.strftime('%Y-%m-%dT%H:%M:%SZ')
+    return EdmType.DATETIME, _to_utc_datetime(value)
 
 def _to_entity_float(value):
     if isnan(value):

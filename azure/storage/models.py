@@ -184,42 +184,52 @@ class ServiceProperties(object):
     pass
 
 
-class AccessPolicy(WindowsAzureData):
+class AccessPolicy(object):
 
-    ''' Access Policy class in service properties. '''
+    ''' 
+    Access Policy class used by the set and get acl methods in each service.
 
-    def __init__(self, start=u'', expiry=u'', permission=u'',
-                 start_pk=u'', start_rk=u'', end_pk=u'', end_rk=u''):
+    A stored access policy can specify the start time, expiry time, and 
+    permissions for the Shared Access Signatures with which it's associated. 
+    Depending on how you want to control access to your table resource, you can 
+    specify all of these parameters within the stored access policy, and omit 
+    them from the URL for the Shared Access Signature. Doing so permits you to 
+    modify the associated signature's behavior at any time, as well as to revoke 
+    it. Or you can specify one or more of the access policy parameters within 
+    the stored access policy, and the others on the URL. Finally, you can 
+    specify all of the parameters on the URL. In this case, you can use the 
+    stored access policy to revoke the signature, but not to modify its behavior.
+
+    Together the Shared Access Signature and the stored access policy must 
+    include all fields required to authenticate the signature. If any required 
+    fields are missing, the request will fail. Likewise, if a field is specified 
+    both in the Shared Access Signature URL and in the stored access policy, the 
+    request will fail with status code 400 (Bad Request).
+
+    :param str permission:
+        The permissions associated with the shared access signature. The 
+        user is restricted to operations allowed by the permissions. 
+        Required unless an id is given referencing a stored access policy 
+        which contains this field. This field must be omitted if it has been 
+        specified in an associated stored access policy.
+    :param expiry:
+        The time at which the shared access signature becomes invalid. 
+        Required unless an id is given referencing a stored access policy 
+        which contains this field. This field must be omitted if it has 
+        been specified in an associated stored access policy. Azure will always 
+        convert values to UTC. If a date is passed in without timezone info, it 
+        is assumed to be UTC.
+    :type expiry: date or str
+    :param start:
+        The time at which the shared access signature becomes valid. If 
+        omitted, start time for this call is assumed to be the time when the 
+        storage service receives the request. Azure will always convert values 
+        to UTC. If a date is passed in without timezone info, it is assumed to 
+        be UTC.
+    :type start: date or str
+    '''
+
+    def __init__(self, permission=None, expiry=None, start=None):
         self.start = start
         self.expiry = expiry
-        self.permission = permission
-        self.start_pk = start_pk
-        self.start_rk = start_rk
-        self.end_pk = end_pk
-        self.end_rk = end_rk
-
-
-class SignedIdentifier(WindowsAzureData):
-
-    ''' Signed Identifier class for service properties. '''
-
-    def __init__(self):
-        self.id = u''
-        self.access_policy = AccessPolicy()
-
-
-class SignedIdentifiers(WindowsAzureData):
-
-    ''' SignedIdentifier list. '''
-
-    def __init__(self):
-        self.signed_identifiers = _list_of(SignedIdentifier)
-
-    def __iter__(self):
-        return iter(self.signed_identifiers)
-
-    def __len__(self):
-        return len(self.signed_identifiers)
-
-    def __getitem__(self, index):
-        return self.signed_identifiers[index]
+        self.permissions = permissions

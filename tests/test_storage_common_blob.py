@@ -15,13 +15,12 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import base64
-import datetime
 import os
 import random
 import requests
 import sys
 import unittest
-
+from datetime import datetime, timedelta
 from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
@@ -33,9 +32,6 @@ from azure.storage import (
     AccessPolicy,
     Logging,
     Metrics,
-    SharedAccessPolicy,
-    SignedIdentifier,
-    SignedIdentifiers,
     ServiceProperties,
 )
 from azure.storage.blob import (
@@ -224,18 +220,6 @@ class StorageCommonBlobTest(StorageTestCase):
             text = text + u' ' + words[index]
 
         return text
-
-    def _get_shared_access_policy(self, permission):
-        date_format = "%Y-%m-%dT%H:%M:%SZ"
-        start = datetime.datetime.utcnow() - datetime.timedelta(minutes=1)
-        expiry = start + datetime.timedelta(hours=1)
-        return SharedAccessPolicy(
-            AccessPolicy(
-                start.strftime(date_format),
-                expiry.strftime(date_format),
-                permission
-            )
-        )
 
     class NonSeekableFile(object):
         def __init__(self, wrapped_file):
@@ -733,21 +717,6 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
-
-    @record
-    def test_get_container_acl_iter(self):
-        # Arrange
-        self.bs.create_container(self.container_name)
-
-        # Act
-        acl = self.bs.get_container_acl(self.container_name)
-        for signed_identifier in acl:
-            pass
-
-        # Assert
-        self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
         self.assertEqual(len(acl), 0)
 
     @record
@@ -763,7 +732,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
+        self.assertEqual(len(acl), 0)
 
     @record
     def test_get_container_acl_with_non_matching_lease_id(self):
@@ -867,15 +836,13 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        identifiers = SignedIdentifiers()
-
-        resp = self.bs.set_container_acl(self.container_name, identifiers)
+        resp = self.bs.set_container_acl(self.container_name, dict())
 
         # Assert
         self.assertIsNone(resp)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
+        self.assertEqual(len(acl), 0)
 
     @record
     def test_set_container_acl_with_signed_identifiers(self):
@@ -883,13 +850,12 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        si = SignedIdentifier()
-        si.id = 'testid'
-        si.access_policy.start = '2011-10-11'
-        si.access_policy.expiry = '2011-10-12'
-        si.access_policy.permission = ContainerSharedAccessPermissions.READ
-        identifiers = SignedIdentifiers()
-        identifiers.signed_identifiers.append(si)
+        identifiers = dict()
+        identifiers['testid'] = AccessPolicy(
+            permission=ContainerSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),  
+            start=datetime.utcnow() - timedelta(minutes=1),  
+            )
 
         resp = self.bs.set_container_acl(self.container_name, identifiers)
 
@@ -897,10 +863,8 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNone(resp)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 1)
         self.assertEqual(len(acl), 1)
-        self.assertEqual(acl.signed_identifiers[0].id, 'testid')
-        self.assertEqual(acl[0].id, 'testid')
+        self.assertTrue('testid' in acl)
 
     @record
     def test_set_container_acl_with_non_existing_container(self):
@@ -1119,8 +1083,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
 
         # Act
-        props = ServiceProperties(hour_metrics=Metrics())
-        resp = self.bs.set_blob_service_properties(props)
+        resp = self.bs.set_blob_service_properties(hour_metrics=Metrics())
 
         # Assert
         self.assertIsNone(resp)
@@ -1132,8 +1095,9 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
 
         # Act
-        props = ServiceProperties(logging=Logging(write=True))
-        resp = self.bs.set_blob_service_properties(props, 5)
+        resp = self.bs.set_blob_service_properties(
+            logging=Logging(write=True), 
+            timeout=5)
 
         # Assert
         self.assertIsNone(resp)
@@ -1150,8 +1114,8 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(props)
         self.assertIsInstance(props.logging, Logging)
-        self.assertIsInstance(props.minute_metrics, MinuteMetrics)
-        self.assertIsInstance(props.hour_metrics, HourMetrics)
+        self.assertIsInstance(props.minute_metrics, Metrics)
+        self.assertIsInstance(props.hour_metrics, Metrics)
 
     @record
     def test_get_blob_service_properties_with_timeout(self):
@@ -1163,8 +1127,8 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(props)
         self.assertIsInstance(props.logging, Logging)
-        self.assertIsInstance(props.minute_metrics, MinuteMetrics)
-        self.assertIsInstance(props.hour_metrics, HourMetrics)
+        self.assertIsInstance(props.minute_metrics, Metrics)
+        self.assertIsInstance(props.hour_metrics, Metrics)
 
     #-- Common test cases for blobs ----------------------------------------------
     @record
@@ -1975,11 +1939,14 @@ class StorageCommonBlobTest(StorageTestCase):
         source_blob_name = 'sourceblob'
         self._create_remote_container_and_block_blob(
             source_blob_name, data, None)
+
         sas_token = self.bs2.generate_shared_access_signature(
             self.remote_container_name,
             source_blob_name,
-            self._get_shared_access_policy(BlobSharedAccessPermissions.READ),
+            permissions=BlobSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),          
         )
+
         source_blob_url = self.bs2.make_blob_url(
             self.remote_container_name,
             source_blob_name,
@@ -2415,10 +2382,12 @@ class StorageCommonBlobTest(StorageTestCase):
             blob_name,
             data,
         )
+        
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            self._get_shared_access_policy(BlobSharedAccessPermissions.READ),
+            permissions=BlobSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
         # Act
@@ -2448,21 +2417,19 @@ class StorageCommonBlobTest(StorageTestCase):
             data,
         )
 
-        si = SignedIdentifier()
-        si.id = 'testid'
-        si.access_policy.start = '2011-10-11'
-        si.access_policy.expiry = '2018-10-12'
-        si.access_policy.permission = BlobSharedAccessPermissions.READ
-        identifiers = SignedIdentifiers()
-        identifiers.signed_identifiers.append(si)
+        access_policy = AccessPolicy()
+        access_policy.start = '2011-10-11'
+        access_policy.expiry = '2018-10-12'
+        access_policy.permission = BlobSharedAccessPermissions.READ
+        identifiers = {'testid': access_policy}
 
         resp = self.bs.set_container_acl(self.container_name, identifiers)
 
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            SharedAccessPolicy(signed_identifier=si.id),
-        )
+            id='testid'
+            )
 
         # Act
         service = BlockBlobService(
@@ -2490,10 +2457,12 @@ class StorageCommonBlobTest(StorageTestCase):
             blob_name,
             data,
         )
+
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            self._get_shared_access_policy(BlobSharedAccessPermissions.READ),
+            permissions=BlobSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
         # Act
@@ -2522,10 +2491,12 @@ class StorageCommonBlobTest(StorageTestCase):
             blob_name,
             data,
         )
+
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            self._get_shared_access_policy(BlobSharedAccessPermissions.READ),
+            permissions=BlobSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
             cache_control='no-cache',
             content_disposition='inline',
             content_encoding='utf-8',
@@ -2564,10 +2535,12 @@ class StorageCommonBlobTest(StorageTestCase):
             blob_name,
             data,
         )
+
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            self._get_shared_access_policy(BlobSharedAccessPermissions.WRITE),
+            permissions=BlobSharedAccessPermissions.WRITE,
+            expiry=datetime.utcnow() + timedelta(hours=1),
         )
         url = self.bs.make_blob_url(
             self.container_name,
@@ -2598,10 +2571,12 @@ class StorageCommonBlobTest(StorageTestCase):
             blob_name,
             data,
         )
+
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            self._get_shared_access_policy(BlobSharedAccessPermissions.DELETE),
+            permissions=BlobSharedAccessPermissions.DELETE,
+            expiry=datetime.utcnow() + timedelta(hours=1),
         )
         url = self.bs.make_blob_url(
             self.container_name,
@@ -2631,10 +2606,12 @@ class StorageCommonBlobTest(StorageTestCase):
             blob_name,
             data,
         )
+
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             None,
-            self._get_shared_access_policy(ContainerSharedAccessPermissions.READ),
+            expiry=datetime.utcnow() + timedelta(hours=1),
+            permissions=ContainerSharedAccessPermissions.READ,
         )
         url = self.bs.make_blob_url(
             self.container_name,

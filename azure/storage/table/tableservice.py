@@ -29,18 +29,15 @@ from .._common_error import (
 )
 from .._common_serialization import (
     _get_request_body,
-    _parse_response_for_dict,
-    _parse_response_for_dict_filter,
     _update_request_uri_query_local_storage,
-    _ETreeXmlToObject,
     _extract_etag,
 )
 from .._http import HTTPRequest
 from ..models import (
-    SignedIdentifiers,
     Logging,
     Metrics,
     CorsRule,
+    AccessPolicy,
 )
 from .models import (
     TableSharedAccessPermissions,
@@ -60,6 +57,7 @@ from .._serialization import (
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
+    _convert_xml_to_signed_identifiers,
 )
 from ._serialization import (
     _convert_table_to_json,
@@ -159,35 +157,75 @@ class TableService(_StorageClient):
         else:
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
 
-    def generate_shared_access_signature(self, table_name,
-                                         shared_access_policy=None,
-                                         ip=None, protocol=None,
-                                         sas_version=X_MS_VERSION):
+    def generate_shared_access_signature(self, table_name, permission=None, 
+                                        expiry=None, start=None, id=None,
+                                        ip=None, protocol=None,
+                                        start_pk=None, start_rk=None, 
+                                        end_pk=None, end_rk=None):
         '''
         Generates a shared access signature for the table.
         Use the returned signature with the sas_token parameter of TableService.
 
-        table_name:
+        :param str table_name:
             Required. Name of table.
-        shared_access_policy:
-            Instance of SharedAccessPolicy class.
-        ip:
+        :param str permission:
+            The permissions associated with the shared access signature. The 
+            user is restricted to operations allowed by the permissions. 
+            Permissions must be ordered query, add, update, delete.
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has been 
+            specified in an associated stored access policy.
+            See :class:`.TableSharedAccessPermissions`
+        :param expiry:
+            The time at which the shared access signature becomes invalid. 
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has 
+            been specified in an associated stored access policy. Azure will always 
+            convert values to UTC. If a date is passed in without timezone info, it 
+            is assumed to be UTC.
+        :type expiry: date or str
+        :param start:
+            The time at which the shared access signature becomes valid. If 
+            omitted, start time for this call is assumed to be the time when the 
+            storage service receives the request. Azure will always convert values 
+            to UTC. If a date is passed in without timezone info, it is assumed to 
+            be UTC.
+        :type start: date or str
+        :param str id:
+            A unique value up to 64 characters in length that correlates to a 
+            stored access policy. To create a stored access policy, use 
+            set_blob_service_properties.
+        :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
             or address range specified on the SAS token, the request is not authenticated.
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
-        protocol:
+        :param str protocol:
             Specifies the protocol permitted for a request made. Possible values are
             both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
             is https,http. Note that HTTP only is not a permitted value.
-        sas_version:
-            x-ms-version for storage service, or None to get a signed query
-            string compatible with pre 2012-02-12 clients, where the version
-            is not included in the query string.
+        :param str start_pk
+            The minimum partition key accessible with this shared access 
+            signature. startpk must accompany startrk. Key values are inclusive. 
+            If omitted, there is no lower bound on the table entities that can 
+            be accessed.
+        :param str start_rk
+            The minimum row key accessible with this shared access signature. 
+            startpk must accompany startrk. Key values are inclusive. If 
+            omitted, there is no lower bound on the table entities that can be 
+            accessed.
+        :param str end_pk
+            The maximum partition key accessible with this shared access 
+            signature. endpk must accompany endrk. Key values are inclusive. If 
+            omitted, there is no upper bound on the table entities that can be 
+            accessed.
+        :param str end_rk
+            The maximum row key accessible with this shared access signature. 
+            endpk must accompany endrk. Key values are inclusive. If omitted, 
+            there is no upper bound on the table entities that can be accessed.
         '''
         _validate_not_none('table_name', table_name)
-        _validate_not_none('shared_access_policy', shared_access_policy)
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
@@ -196,11 +234,17 @@ class TableService(_StorageClient):
             'table',
             table_name,
             None,
-            shared_access_policy,
+            permission, 
+            expiry,
+            start, 
+            id,
             ip,
             protocol,
-            sas_version,
             table_name=table_name,
+            start_pk=start_pk,
+            start_rk=start_rk,
+            end_pk=end_pk,
+            end_rk=end_rk,
         )
 
     def get_table_service_properties(self):
@@ -351,8 +395,10 @@ class TableService(_StorageClient):
         Returns details about any stored access policies specified on the
         table that may be used with Shared Access Signatures.
 
-        table_name:
+        :param str table_name:
             Name of existing table.
+        :return: A dictionary of access policies associated with the table.
+        :rtype: dict of str to :class:`.AccessPolicy`:
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
@@ -364,17 +410,20 @@ class TableService(_StorageClient):
         request.headers = _update_storage_table_header(request)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_response(response, SignedIdentifiers)
+        return _convert_xml_to_signed_identifiers(response.body)
 
     def set_table_acl(self, table_name, signed_identifiers=None):
         '''
         Sets stored access policies for the table that may be used with
         Shared Access Signatures.
 
-        table_name:
+        :param str table_name:
             Name of existing table.
-        signed_identifiers:
-            list of SignedIdentifiers
+        :param signed_identifiers:
+            A dictionary of access policies to associate with the table. The 
+            dictionary may contain up to 5 elements. An empty dictionary 
+            will clear the access policies set on the service. 
+        :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()

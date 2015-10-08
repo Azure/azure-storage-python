@@ -15,14 +15,11 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import sys
-import datetime
 import unittest
+from datetime import datetime, timedelta
 from requests import Session
 from azure.storage import (
     AccessPolicy,
-    SharedAccessPolicy,
-    SignedIdentifier,
-    SignedIdentifiers,
 )
 from azure.storage.queue import (
     QueueService,
@@ -76,18 +73,6 @@ class StorageQueueTest(StorageTestCase):
                 except:
                     pass
         return super(StorageQueueTest, self).tearDown()
-
-    def _get_shared_access_policy(self, permission):
-        date_format = "%Y-%m-%dT%H:%M:%SZ"
-        start = datetime.datetime.utcnow() - datetime.timedelta(minutes=1)
-        expiry = start + datetime.timedelta(hours=1)
-        return SharedAccessPolicy(
-            AccessPolicy(
-                start.strftime(date_format),
-                expiry.strftime(date_format),
-                permission
-            )
-        )
 
     @record
     def test_create_queue(self):
@@ -388,7 +373,9 @@ class StorageQueueTest(StorageTestCase):
         self.qs.put_message(self.test_queues[0], 'message1')
         token = self.qs.generate_shared_access_signature(
             self.test_queues[0],
-            self._get_shared_access_policy(QueueSharedAccessPermissions.READ),
+            QueueSharedAccessPermissions.READ,
+            datetime.utcnow() + timedelta(hours=1),
+            datetime.utcnow() - timedelta(minutes=5)
         )
 
         # Act
@@ -415,7 +402,8 @@ class StorageQueueTest(StorageTestCase):
         # Arrange
         token = self.qs.generate_shared_access_signature(
             self.test_queues[0],
-            self._get_shared_access_policy(QueueSharedAccessPermissions.ADD),
+            QueueSharedAccessPermissions.ADD,
+            datetime.utcnow() + timedelta(hours=1),
         )
 
         # Act
@@ -439,7 +427,8 @@ class StorageQueueTest(StorageTestCase):
         self.qs.put_message(self.test_queues[0], 'message1')
         token = self.qs.generate_shared_access_signature(
             self.test_queues[0],
-            self._get_shared_access_policy(QueueSharedAccessPermissions.UPDATE),
+            QueueSharedAccessPermissions.UPDATE,
+            datetime.utcnow() + timedelta(hours=1),
         )
         result = self.qs.get_messages(self.test_queues[0])
 
@@ -470,7 +459,8 @@ class StorageQueueTest(StorageTestCase):
         self.qs.put_message(self.test_queues[0], 'message1')
         token = self.qs.generate_shared_access_signature(
             self.test_queues[0],
-            self._get_shared_access_policy(QueueSharedAccessPermissions.PROCESS),
+            QueueSharedAccessPermissions.PROCESS,
+            datetime.utcnow() + timedelta(hours=1),
         )
 
         # Act
@@ -495,13 +485,12 @@ class StorageQueueTest(StorageTestCase):
             return
 
         # Arrange
-        si = SignedIdentifier()
-        si.id = 'testid'
-        si.access_policy.start = '2011-10-11'
-        si.access_policy.expiry = '2018-10-12'
-        si.access_policy.permission = QueueSharedAccessPermissions.READ
-        identifiers = SignedIdentifiers()
-        identifiers.signed_identifiers.append(si)
+        access_policy = AccessPolicy()
+        access_policy.start = '2011-10-11'
+        access_policy.expiry = '2018-10-12'
+        access_policy.permission = QueueSharedAccessPermissions.READ
+
+        identifiers = {'testid': access_policy}
 
         resp = self.qs.set_queue_acl(self.test_queues[0], identifiers)
 
@@ -509,7 +498,7 @@ class StorageQueueTest(StorageTestCase):
 
         token = self.qs.generate_shared_access_signature(
             self.test_queues[0],
-            SharedAccessPolicy(signed_identifier=si.id),
+            id='testid'
         )
 
         # Act
@@ -537,7 +526,7 @@ class StorageQueueTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
+        self.assertEqual(len(acl), 0)
 
     @record
     def test_get_queue_acl_iter(self):
@@ -550,7 +539,6 @@ class StorageQueueTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
         self.assertEqual(len(acl), 0)
 
     @record
@@ -580,28 +568,23 @@ class StorageQueueTest(StorageTestCase):
         # Arrange
 
         # Act
-        identifiers = SignedIdentifiers()
-
-        resp = self.qs.set_queue_acl(self.test_queues[0], identifiers)
+        resp = self.qs.set_queue_acl(self.test_queues[0], dict())
 
         # Assert
         self.assertIsNone(resp)
         acl = self.qs.get_queue_acl(self.test_queues[0])
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
+        self.assertEqual(len(acl), 0)
 
     @record
     def test_set_queue_acl_with_signed_identifiers(self):
         # Arrange
 
         # Act
-        si = SignedIdentifier()
-        si.id = 'testid'
-        si.access_policy.start = '2011-10-11'
-        si.access_policy.expiry = '2011-10-12'
-        si.access_policy.permission = QueueSharedAccessPermissions.READ
-        identifiers = SignedIdentifiers()
-        identifiers.signed_identifiers.append(si)
+        access_policy = AccessPolicy(permission=QueueSharedAccessPermissions.READ,
+                                     expiry='2011-10-12',
+                                     start='2011-10-11')
+        identifiers = {'testid': access_policy}
 
         resp = self.qs.set_queue_acl(self.test_queues[0], identifiers)
 
@@ -609,10 +592,8 @@ class StorageQueueTest(StorageTestCase):
         self.assertIsNone(resp)
         acl = self.qs.get_queue_acl(self.test_queues[0])
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 1)
         self.assertEqual(len(acl), 1)
-        self.assertEqual(acl.signed_identifiers[0].id, 'testid')
-        self.assertEqual(acl[0].id, 'testid')
+        self.assertTrue('testid' in acl)
 
     @record
     def test_set_queue_acl_with_non_existing_queue(self):

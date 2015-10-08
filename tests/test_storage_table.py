@@ -34,9 +34,6 @@ from azure.common import (
 )
 from azure.storage import (
     AccessPolicy,
-    SharedAccessPolicy,
-    SignedIdentifier,
-    SignedIdentifiers,
 )
 from azure.storage.table import (
     Entity,
@@ -271,19 +268,7 @@ class StorageTableTest(StorageTestCase):
         if name == 'Birthday' or name == 'birthday':
             return EdmType.DATETIME
         if name == 'clsid':
-            return EdmType.GUID
-
-    def _get_shared_access_policy(self, permission):
-        date_format = "%Y-%m-%dT%H:%M:%SZ"
-        start = datetime.utcnow() - timedelta(minutes=1)
-        expiry = start + timedelta(hours=1)
-        return SharedAccessPolicy(
-            AccessPolicy(
-                start.strftime(date_format),
-                expiry.strftime(date_format),
-                permission
-            )
-        )
+            return EdmType.GUID     
 
     #--Test cases for tables --------------------------------------------------
     @record
@@ -1304,7 +1289,9 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 2)
         token = self.ts.generate_shared_access_signature(
             self.table_name,
-            self._get_shared_access_policy(TableSharedAccessPermissions.QUERY),
+            TableSharedAccessPermissions.QUERY,
+            datetime.utcnow() + timedelta(hours=1),
+            datetime.utcnow() - timedelta(minutes=1),
         )
 
         # Act
@@ -1331,8 +1318,12 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table(self.table_name)
-        policy = self._get_shared_access_policy(TableSharedAccessPermissions.ADD)
-        token = self.ts.generate_shared_access_signature(self.table_name, policy)
+        token = self.ts.generate_shared_access_signature(
+            self.table_name,
+            TableSharedAccessPermissions.ADD,
+            datetime.utcnow() + timedelta(hours=1),
+            datetime.utcnow() - timedelta(minutes=1),
+        )
 
         # Act
         service = TableService(
@@ -1361,12 +1352,13 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table(self.table_name)
-        policy = self._get_shared_access_policy(TableSharedAccessPermissions.ADD)
-        policy.access_policy.start_pk = 'test'
-        policy.access_policy.end_pk = 'test'
-        policy.access_policy.start_rk = 'test1'
-        policy.access_policy.end_rk = 'test1'
-        token = self.ts.generate_shared_access_signature(self.table_name, policy)
+        token = self.ts.generate_shared_access_signature(
+            self.table_name,
+            TableSharedAccessPermissions.ADD,
+            datetime.utcnow() + timedelta(hours=1),
+            start_pk='test', start_rk='test1',
+            end_pk='test', end_rk='test1',
+        )
 
         # Act
         service = TableService(
@@ -1395,12 +1387,13 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table(self.table_name)
-        policy = self._get_shared_access_policy(TableSharedAccessPermissions.ADD)
-        policy.access_policy.start_pk = 'test'
-        policy.access_policy.end_pk = 'test'
-        policy.access_policy.start_rk = 'test1'
-        policy.access_policy.end_rk = 'test1'
-        token = self.ts.generate_shared_access_signature(self.table_name, policy)
+        token = self.ts.generate_shared_access_signature(
+            self.table_name,
+            TableSharedAccessPermissions.ADD,
+            datetime.utcnow() + timedelta(hours=1),
+            start_pk='test', start_rk='test1',
+            end_pk='test', end_rk='test1',
+        )
 
         # Act
         service = TableService(
@@ -1427,8 +1420,11 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table_with_default_entities(self.table_name, 1)
-        policy = self._get_shared_access_policy(TableSharedAccessPermissions.UPDATE)
-        token = self.ts.generate_shared_access_signature(self.table_name, policy)
+        token = self.ts.generate_shared_access_signature(
+            self.table_name,
+            TableSharedAccessPermissions.UPDATE,
+            datetime.utcnow() + timedelta(hours=1),
+        )
 
         # Act
         service = TableService(
@@ -1451,8 +1447,11 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table_with_default_entities(self.table_name, 1)
-        policy = self._get_shared_access_policy(TableSharedAccessPermissions.DELETE)
-        token = self.ts.generate_shared_access_signature(self.table_name, policy)
+        token = self.ts.generate_shared_access_signature(
+            self.table_name,
+            TableSharedAccessPermissions.DELETE,
+            datetime.utcnow() + timedelta(hours=1),
+        )
 
         # Act
         service = TableService(
@@ -1475,19 +1474,17 @@ class StorageTableTest(StorageTestCase):
         # Arrange
         self._create_table_with_default_entities(self.table_name, 2)
 
-        si = SignedIdentifier()
-        si.id = 'testid'
-        si.access_policy.start = '2011-10-11'
-        si.access_policy.expiry = '2018-10-12'
-        si.access_policy.permission = TableSharedAccessPermissions.QUERY
-        identifiers = SignedIdentifiers()
-        identifiers.signed_identifiers.append(si)
+        access_policy = AccessPolicy()
+        access_policy.start = '2011-10-11'
+        access_policy.expiry = '2018-10-12'
+        access_policy.permission = TableSharedAccessPermissions.QUERY
+        identifiers = {'testid': access_policy}
 
         resp = self.ts.set_table_acl(self.table_name, identifiers)
 
         token = self.ts.generate_shared_access_signature(
             self.table_name,
-            SharedAccessPolicy(signed_identifier=si.id),
+            id='testid',
         )
 
         # Act
@@ -1516,7 +1513,7 @@ class StorageTableTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
+        self.assertEqual(len(acl), 0)
 
     @record
     def test_get_table_acl_iter(self):
@@ -1530,7 +1527,6 @@ class StorageTableTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
         self.assertEqual(len(acl), 0)
 
     @record
@@ -1562,15 +1558,13 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
-        identifiers = SignedIdentifiers()
-
-        resp = self.ts.set_table_acl(self.table_name, identifiers)
+        resp = self.ts.set_table_acl(self.table_name, dict())
 
         # Assert
         self.assertIsNone(resp)
         acl = self.ts.get_table_acl(self.table_name)
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 0)
+        self.assertEqual(len(acl), 0)
 
     @record
     def test_set_table_acl_with_signed_identifiers(self):
@@ -1578,13 +1572,10 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 1)
 
         # Act
-        si = SignedIdentifier()
-        si.id = 'testid'
-        si.access_policy.start = '2011-10-11'
-        si.access_policy.expiry = '2011-10-12'
-        si.access_policy.permission = TableSharedAccessPermissions.QUERY
-        identifiers = SignedIdentifiers()
-        identifiers.signed_identifiers.append(si)
+        identifiers = dict()
+        identifiers['testid'] = AccessPolicy(start='2011-10-11', 
+                                             expiry='2011-10-12', 
+                                             permission=TableSharedAccessPermissions.QUERY)
 
         resp = self.ts.set_table_acl(self.table_name, identifiers)
 
@@ -1592,10 +1583,8 @@ class StorageTableTest(StorageTestCase):
         self.assertIsNone(resp)
         acl = self.ts.get_table_acl(self.table_name)
         self.assertIsNotNone(acl)
-        self.assertEqual(len(acl.signed_identifiers), 1)
         self.assertEqual(len(acl), 1)
-        self.assertEqual(acl.signed_identifiers[0].id, 'testid')
-        self.assertEqual(acl[0].id, 'testid')
+        self.assertTrue('testid' in acl)
 
     @record
     def test_set_table_acl_with_non_existing_table(self):

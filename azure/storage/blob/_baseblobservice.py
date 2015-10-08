@@ -37,10 +37,10 @@ from .._common_serialization import (
 from .._http import HTTPRequest
 from ._chunking import _download_blob_chunks
 from ..models import (
-    SignedIdentifiers,
     Logging,
     Metrics,
     CorsRule,
+    AccessPolicy,
 )
 from .models import (
     Container,
@@ -65,6 +65,7 @@ from .._serialization import (
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
+    _convert_xml_to_signed_identifiers,
 )
 from ._serialization import (
     _create_blob_result,
@@ -181,10 +182,15 @@ class _BaseBlobService(_StorageClient):
 
         return url
 
-    def generate_shared_access_signature(self, container_name, blob_name=None,
-                                         shared_access_policy=None, ip=None,
+    def generate_shared_access_signature(self,
+                                         container_name,
+                                         blob_name=None,
+                                         permission=None, 
+                                         expiry=None,
+                                         start=None, 
+                                         id=None,
+                                         ip=None,
                                          protocol=None,
-                                         sas_version=X_MS_VERSION,
                                          cache_control=None,
                                          content_disposition=None,
                                          content_encoding=None,
@@ -194,44 +200,65 @@ class _BaseBlobService(_StorageClient):
         Generates a shared access signature for the container or blob.
         Use the returned signature with the sas_token parameter of _BaseBlobService.
 
-        container_name:
-            Required. Name of container.
-        blob_name:
-            Optional. Name of blob.
-        shared_access_policy:
-            Instance of SharedAccessPolicy class.
-        ip:
+        :param str container_name:
+            Name of container.
+        :param str blob_name:
+            Name of blob.
+        :param str permission:
+            The permissions associated with the shared access signature. The 
+            user is restricted to operations allowed by the permissions.
+            Permissions must be ordered read, write, delete, list.
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has been 
+            specified in an associated stored access policy.
+            See :class:`.ContainerSharedAccessPermissions` and 
+            :class:`.BlobSharedAccessPermissions`
+        :param expiry:
+            The time at which the shared access signature becomes invalid. 
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has 
+            been specified in an associated stored access policy. Azure will always 
+            convert values to UTC. If a date is passed in without timezone info, it 
+            is assumed to be UTC.
+        :type expiry: date or str
+        :param start:
+            The time at which the shared access signature becomes valid. If 
+            omitted, start time for this call is assumed to be the time when the 
+            storage service receives the request. Azure will always convert values 
+            to UTC. If a date is passed in without timezone info, it is assumed to 
+            be UTC.
+        :type start: date or str
+        :param str id:
+            A unique value up to 64 characters in length that correlates to a 
+            stored access policy. To create a stored access policy, use 
+            set_blob_service_properties.
+        :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
             or address range specified on the SAS token, the request is not authenticated.
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
-        protocol:
+        :param str protocol:
             Specifies the protocol permitted for a request made. Possible values are
             both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
             is https,http. Note that HTTP only is not a permitted value.
-        sas_version:
-            x-ms-version for storage service, or None to get a signed query
-            string compatible with pre 2012-02-12 clients, where the version
-            is not included in the query string.
-        cache_control:
+        :param str cache_control:
             Response header value for Cache-Control when resource is accessed
             using this shared access signature.
-        content_disposition:
+        :param str content_disposition:
             Response header value for Content-Disposition when resource is accessed
             using this shared access signature.
-        content_encoding:
+        :param str content_encoding:
             Response header value for Content-Encoding when resource is accessed
             using this shared access signature.
-        content_language:
+        :param str content_language:
             Response header value for Content-Language when resource is accessed
             using this shared access signature.
-        content_type:
+        :param str content_type:
             Response header value for Content-Type when resource is accessed
             using this shared access signature.
         '''
         _validate_not_none('container_name', container_name)
-        _validate_not_none('shared_access_policy', shared_access_policy)
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
@@ -247,10 +274,12 @@ class _BaseBlobService(_StorageClient):
             'blob',
             resource_path,
             resource_type,
-            shared_access_policy,
+            permission, 
+            expiry,
+            start, 
+            id,
             ip,
             protocol,
-            sas_version,
             cache_control,
             content_disposition,
             content_encoding,
@@ -425,11 +454,13 @@ class _BaseBlobService(_StorageClient):
         '''
         Gets the permissions for the specified container.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        x_ms_lease_id:
+        :param str x_ms_lease_id:
             If specified, get_container_acl only succeeds if the
             container's lease is active and matches this ID.
+        :return: A dictionary of access policies associated with the container.
+        :rtype: dict of str to :class:`.AccessPolicy`:
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -444,28 +475,31 @@ class _BaseBlobService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_response(
-            response, SignedIdentifiers)
+        return _convert_xml_to_signed_identifiers(response.body)
 
     def set_container_acl(self, container_name, signed_identifiers=None,
                           x_ms_blob_public_access=None, x_ms_lease_id=None,
                           if_modified_since=None, if_unmodified_since=None):
         '''
-        Sets the permissions for the specified container.
+        Sets the permissions for the specified container or stored access 
+        policies that may be used with Shared Access Signatures.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        signed_identifiers:
-            SignedIdentifers instance
-        x_ms_blob_public_access:
-            Optional. Possible values include: container, blob
-        x_ms_lease_id:
+        :param signed_identifiers:
+            A dictionary of access policies to associate with the container. The 
+            dictionary may contain up to 5 elements. An empty dictionary 
+            will clear the access policies set on the service. 
+        :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
+        :param str x_ms_blob_public_access:
+            Possible values include: container, blob
+        :param str x_ms_lease_id:
             If specified, set_container_acl only succeeds if the
             container's lease is active and matches this ID.
-        if_modified_since:
-            Optional. Datetime string.
-        if_unmodified_since:
-            Optional. DateTime string.
+        :param str if_modified_since:
+            Datetime string.
+        :param str if_unmodified_since:
+            DateTime string.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()

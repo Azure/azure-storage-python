@@ -17,22 +17,22 @@ import unittest
 from azure.storage import (
     DEV_ACCOUNT_NAME,
     DEV_ACCOUNT_KEY,
-    AccessPolicy,
-    SharedAccessPolicy,
     SharedAccessSignature,
 )
 from azure.storage.sharedaccesssignature import (
     QueryStringConstants,
     ResourceType,
 )
-from testutils.common_extendedtestcase import (
-    ExtendedTestCase,
+from tests.common_recordingtestcase import (
+    TestMode,
+    record,
 )
+from tests.storage_testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 
 
-class StorageSASTest(ExtendedTestCase):
+class StorageSASTest(StorageTestCase):
 
     def setUp(self):
         self.sas = SharedAccessSignature(DEV_ACCOUNT_NAME, DEV_ACCOUNT_KEY)
@@ -41,15 +41,12 @@ class StorageSASTest(ExtendedTestCase):
         return super(StorageSASTest, self).tearDown()
 
     def test_generate_signed_query_dict_container_with_access_policy(self):
-        accss_plcy = AccessPolicy()
-        accss_plcy.start = '2011-10-11'
-        accss_plcy.expiry = '2011-10-12'
-        accss_plcy.permission = 'r'
-
         query = self.sas._generate_signed_query_dict(
             'images',
             ResourceType.RESOURCE_CONTAINER,
-            SharedAccessPolicy(accss_plcy),
+            'r',
+            '2011-10-12',
+            '2011-10-11',
         )
 
         self.assertEqual(query[QueryStringConstants.SIGNED_START], '2011-10-11')
@@ -65,7 +62,7 @@ class StorageSASTest(ExtendedTestCase):
         query = self.sas._generate_signed_query_dict(
             'images',
             ResourceType.RESOURCE_CONTAINER,
-            SharedAccessPolicy(signed_identifier=signed_identifier),
+            id=signed_identifier,
         )
 
         self.assertEqual(query[QueryStringConstants.SIGNED_RESOURCE], ResourceType.RESOURCE_CONTAINER)
@@ -74,15 +71,12 @@ class StorageSASTest(ExtendedTestCase):
                          'BbzpLHe+JxNAsW/v6LttP5x9DdGMvXsZpm2chKblr3s=')
 
     def test_generate_signed_query_dict_blob_with_access_policy_and_headers(self):
-        accss_plcy = AccessPolicy()
-        accss_plcy.start = '2011-10-11T11:03:40Z'
-        accss_plcy.expiry = '2011-10-12T11:53:40Z'
-        accss_plcy.permission = 'r'
-
         query = self.sas._generate_signed_query_dict(
             'images/pic1.png',
             ResourceType.RESOURCE_BLOB,
-            SharedAccessPolicy(accss_plcy),
+            'r',
+            '2011-10-12T11:53:40Z',
+            '2011-10-11T11:03:40Z',
             content_disposition='file; attachment',
             content_type='binary',
         )
@@ -98,15 +92,12 @@ class StorageSASTest(ExtendedTestCase):
 
 
     def test_generate_signed_query_dict_blob_with_access_policy(self):
-        accss_plcy = AccessPolicy()
-        accss_plcy.start = '2011-10-11'
-        accss_plcy.expiry = '2011-10-12'
-        accss_plcy.permission = 'w'
-
         query = self.sas._generate_signed_query_dict(
             'images/pic1.png',
             ResourceType.RESOURCE_BLOB,
-            SharedAccessPolicy(accss_plcy),
+            'w',
+            '2011-10-12',
+            '2011-10-11',
         )
 
         self.assertEqual(query[QueryStringConstants.SIGNED_START], '2011-10-11')
@@ -122,7 +113,7 @@ class StorageSASTest(ExtendedTestCase):
         query = self.sas._generate_signed_query_dict(
             'images',
             ResourceType.RESOURCE_CONTAINER,
-            SharedAccessPolicy(signed_identifier=signed_identifier),
+            id=signed_identifier,
         )
 
         self.assertEqual(query[QueryStringConstants.SIGNED_RESOURCE], ResourceType.RESOURCE_CONTAINER)
