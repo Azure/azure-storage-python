@@ -239,3 +239,12 @@ class LeaseActions(object):
 
     '''Change the lease ID.'''
     Change = 'change'
+
+class BlobTypes(object):
+    '''Blob type options'''
+
+    '''Block blob type.'''
+    BlockBlob = 'BlockBlob'
+
+    '''Page blob type.'''
+    PageBlob = 'PageBlob'

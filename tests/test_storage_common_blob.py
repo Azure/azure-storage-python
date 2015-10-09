@@ -42,7 +42,7 @@ from azure.storage.blob import (
     BLOB_SERVICE_HOST_BASE,
     BlobBlockList,
     BlobResult,
-    BlobService,
+    BlockBlobService,
     BlobSharedAccessPermissions,
     ContainerSharedAccessPermissions,
     PageList,
@@ -63,16 +63,16 @@ from tests.storage_testcase import StorageTestCase
 #------------------------------------------------------------------------------
 
 
-class StorageBlobTest(StorageTestCase):
+class StorageCommonBlobTest(StorageTestCase):
 
     def setUp(self):
-        super(StorageBlobTest, self).setUp()
+        super(StorageCommonBlobTest, self).setUp()
 
-        self.bs = self._create_storage_service(BlobService, self.settings)
+        self.bs = self._create_storage_service(BlockBlobService, self.settings)
 
         if self.settings.REMOTE_STORAGE_ACCOUNT_NAME and self.settings.REMOTE_STORAGE_ACCOUNT_KEY:
             self.bs2 = self._create_storage_service(
-                BlobService,
+                BlockBlobService,
                 self.settings,
                 self.settings.REMOTE_STORAGE_ACCOUNT_NAME,
                 self.settings.REMOTE_STORAGE_ACCOUNT_KEY,
@@ -123,7 +123,7 @@ class StorageBlobTest(StorageTestCase):
                 except:
                     pass
 
-        return super(StorageBlobTest, self).tearDown()
+        return super(StorageCommonBlobTest, self).tearDown()
 
     #--Helpers-----------------------------------------------------------------
     def _create_container(self, container_name):
@@ -132,22 +132,12 @@ class StorageBlobTest(StorageTestCase):
     def _create_container_and_block_blob(self, container_name, blob_name,
                                          blob_data):
         self._create_container(container_name)
-        resp = self.bs.put_blob(
-            container_name, blob_name, blob_data, 'BlockBlob')
+        resp = self.bs.put_blob(container_name, blob_name, blob_data)
         self.assertIsNone(resp)
 
-    def _create_container_and_page_blob(self, container_name, blob_name,
-                                        content_length):
-        self._create_container(container_name)
-        resp = self.bs.put_blob(self.container_name, blob_name, b'',
-                                'PageBlob',
-                                x_ms_blob_content_length=str(content_length))
-        self.assertIsNone(resp)
+    def _create_container_and_block_blob_with_random_data(
+        self, container_name, blob_name, block_count, block_size):
 
-    def _create_container_and_block_blob_with_random_data(self, container_name,
-                                                          blob_name,
-                                                          block_count,
-                                                          block_size):
         self._create_container_and_block_blob(container_name, blob_name, '')
         block_list = []
         for i in range(0, block_count):
@@ -222,12 +212,6 @@ class StorageBlobTest(StorageTestCase):
             result[i] = rand.randint(0, 255)
         return bytes(result)
 
-    def _get_oversized_page_blob_binary_data(self):
-        '''Returns random binary data exceeding the size threshold for
-        chunking blob upload.'''
-        size = self.bs._BLOB_MAX_DATA_SIZE + 16384
-        return self._get_random_bytes(size)
-
     def _get_oversized_text_data(self):
         '''Returns random unicode text data exceeding the size threshold for
         chunking blob upload.'''
@@ -279,7 +263,7 @@ class StorageBlobTest(StorageTestCase):
 
         # Act
         with self.assertRaises(ValueError):
-            bs = BlobService()
+            bs = BlockBlobService()
 
         # Assert
 
@@ -292,7 +276,7 @@ class StorageBlobTest(StorageTestCase):
             AZURE_STORAGE_ACCESS_KEY] = self.settings.STORAGE_ACCOUNT_KEY
 
         # Act
-        bs = BlobService()
+        bs = BlockBlobService()
 
         if AZURE_STORAGE_ACCOUNT in os.environ:
             del os.environ[AZURE_STORAGE_ACCOUNT]
@@ -311,7 +295,7 @@ class StorageBlobTest(StorageTestCase):
         os.environ[EMULATED] = 'true'
 
         # Act
-        bs = BlobService()
+        bs = BlockBlobService()
 
         if EMULATED in os.environ:
             del os.environ[EMULATED]
@@ -329,7 +313,7 @@ class StorageBlobTest(StorageTestCase):
 
         # Act
         with self.assertRaises(ValueError):
-            bs = BlobService()
+            bs = BlockBlobService()
 
         if EMULATED in os.environ:
             del os.environ[EMULATED]
@@ -346,7 +330,7 @@ class StorageBlobTest(StorageTestCase):
             AZURE_STORAGE_ACCESS_KEY] = self.settings.STORAGE_ACCOUNT_KEY
 
         # Act
-        bs = BlobService()
+        bs = BlockBlobService()
 
         if EMULATED in os.environ:
             del os.environ[EMULATED]
@@ -369,7 +353,7 @@ class StorageBlobTest(StorageTestCase):
                             self.settings.STORAGE_ACCOUNT_KEY)
         
         # Act
-        bs = BlobService(connection_string = connection_string)
+        bs = BlockBlobService(connection_string = connection_string)
         
         # Assert
         self.assertIsNotNone(bs)
@@ -1185,7 +1169,7 @@ class StorageBlobTest(StorageTestCase):
         self.assertIsInstance(props.minute_metrics, MinuteMetrics)
         self.assertIsInstance(props.hour_metrics, HourMetrics)
 
-    #--Test cases for blobs ----------------------------------------------
+    #-- Common test cases for blobs ----------------------------------------------
     @record
     def test_make_blob_url(self):
         # Arrange
@@ -1248,8 +1232,8 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'blob2', data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, 'blob1', data, )
+        self.bs.put_blob(self.container_name, 'blob2', data, )
 
         # Act
         resp = self.bs.list_blobs(self.container_name)
@@ -1271,7 +1255,7 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, 'blob1', data, )
         lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
@@ -1294,9 +1278,9 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'bloba1', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'bloba2', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'blobb1', data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, 'bloba1', data, )
+        self.bs.put_blob(self.container_name, 'bloba2', data, )
+        self.bs.put_blob(self.container_name, 'blobb1', data, )
 
         # Act
         resp = self.bs.list_blobs(self.container_name, 'bloba')
@@ -1316,25 +1300,25 @@ class StorageBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         data = b'hello world'
         self.bs.put_blob(self.container_name,
-                         'documents/music/pop/thriller.mp3', data, 'BlockBlob')
+                         'documents/music/pop/thriller.mp3', data, )
         self.bs.put_blob(self.container_name,
                          'documents/music/rock/stairwaytoheaven.mp3', data,
-                         'BlockBlob')
+                         )
         self.bs.put_blob(self.container_name,
-                         'documents/music/rock/hurt.mp3', data, 'BlockBlob')
+                         'documents/music/rock/hurt.mp3', data, )
         self.bs.put_blob(self.container_name,
                          'documents/music/rock/metallica/one.mp3', data,
-                         'BlockBlob')
+                         )
         self.bs.put_blob(self.container_name,
-                         'documents/music/unsorted1.mp3', data, 'BlockBlob')
+                         'documents/music/unsorted1.mp3', data, )
         self.bs.put_blob(self.container_name,
-                         'documents/music/unsorted2.mp3', data, 'BlockBlob')
+                         'documents/music/unsorted2.mp3', data, )
         self.bs.put_blob(self.container_name,
                          'documents/pictures/birthday/kid.jpg', data,
-                         'BlockBlob')
+                         )
         self.bs.put_blob(self.container_name,
                          'documents/pictures/birthday/cake.jpg', data,
-                         'BlockBlob')
+                         )
 
         # Act
         resp = self.bs.list_blobs(
@@ -1361,10 +1345,10 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'bloba1', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'bloba2', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'bloba3', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'blobb1', data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, 'bloba1', data, )
+        self.bs.put_blob(self.container_name, 'bloba2', data, )
+        self.bs.put_blob(self.container_name, 'bloba3', data, )
+        self.bs.put_blob(self.container_name, 'blobb1', data, )
 
         # Act
         blobs = self.bs.list_blobs(self.container_name, None, None, 2)
@@ -1380,10 +1364,10 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'bloba1', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'bloba2', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'bloba3', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'blobb1', data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, 'bloba1', data, )
+        self.bs.put_blob(self.container_name, 'bloba2', data, )
+        self.bs.put_blob(self.container_name, 'bloba3', data, )
+        self.bs.put_blob(self.container_name, 'blobb1', data, )
 
         # Act
         blobs1 = self.bs.list_blobs(self.container_name, None, None, 2)
@@ -1403,8 +1387,8 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data, 'BlockBlob')
-        self.bs.put_blob(self.container_name, 'blob2', data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, 'blob1', data, )
+        self.bs.put_blob(self.container_name, 'blob2', data, )
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
         # Act
@@ -1424,9 +1408,9 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data, 'BlockBlob',
+        self.bs.put_blob(self.container_name, 'blob1', data,
                          x_ms_meta_name_values={'number': '1', 'name': 'bob'})
-        self.bs.put_blob(self.container_name, 'blob2', data, 'BlockBlob',
+        self.bs.put_blob(self.container_name, 'blob2', data,
                          x_ms_meta_name_values={'number': '2', 'name': 'car'})
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
@@ -1450,7 +1434,7 @@ class StorageBlobTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-        self.bs.put_blob(self.container_name, 'blob2', data, 'BlockBlob',
+        self.bs.put_blob(self.container_name, 'blob2', data,
                          x_ms_meta_name_values={'number': '2', 'name': 'car'})
 
         # Act
@@ -1468,7 +1452,6 @@ class StorageBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         data = b'hello world'
         self.bs.put_blob(self.container_name, 'blob1', data,
-                         'BlockBlob',
                          x_ms_meta_name_values={'status': 'original'})
         sourceblob = 'https://{0}.blob.core.windows.net/{1}/{2}'.format(
             self.settings.STORAGE_ACCOUNT_NAME,
@@ -1490,7 +1473,7 @@ class StorageBlobTest(StorageTestCase):
         self.assertEqual(blobs[1].properties.content_encoding, '')
         self.assertEqual(blobs[1].properties.content_language, '')
         self.assertNotEqual(blobs[1].properties.content_md5, '')
-        self.assertEqual(blobs[1].properties.blob_type, 'BlockBlob')
+        self.assertEqual(blobs[1].properties.blob_type, self.bs.blob_type)
         self.assertEqual(blobs[1].properties.lease_status, 'unlocked')
         self.assertEqual(blobs[1].properties.lease_state, 'available')
         self.assertNotEqual(blobs[1].properties.copy_id, '')
@@ -1504,9 +1487,9 @@ class StorageBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data, 'BlockBlob',
+        self.bs.put_blob(self.container_name, 'blob1', data,
                          x_ms_meta_name_values={'number': '1', 'name': 'bob'})
-        self.bs.put_blob(self.container_name, 'blob2', data, 'BlockBlob',
+        self.bs.put_blob(self.container_name, 'blob2', data,
                          x_ms_meta_name_values={'number': '2', 'name': 'car'})
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
@@ -1530,45 +1513,6 @@ class StorageBlobTest(StorageTestCase):
         self.assertEqual(blobs[2].metadata['name'], 'car')
 
     @record
-    def test_put_blob_block_blob(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        data = b'hello world'
-        resp = self.bs.put_blob(
-            self.container_name, 'blob1', data, 'BlockBlob')
-
-        # Assert
-        self.assertIsNone(resp)
-
-    @record
-    def test_put_blob_block_blob_unicode(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        data = u'hello world'
-        with self.assertRaises(TypeError):
-            resp = self.bs.put_blob(
-                self.container_name, 'blob1', data, 'BlockBlob')
-
-        # Assert
-
-    @record
-    def test_put_blob_page_blob(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        resp = self.bs.put_blob(self.container_name, 'blob1',
-                                b'', 'PageBlob',
-                                x_ms_blob_content_length='1024')
-
-        # Assert
-        self.assertIsNone(resp)
-
-    @record
     def test_put_blob_with_lease_id(self):
         # Arrange
         self._create_container_and_block_blob(
@@ -1579,7 +1523,7 @@ class StorageBlobTest(StorageTestCase):
         # Act
         data = b'hello world again'
         resp = self.bs.put_blob(
-            self.container_name, 'blob1', data, 'BlockBlob',
+            self.container_name, 'blob1', data,
             x_ms_lease_id=lease_id)
 
         # Assert
@@ -1596,7 +1540,7 @@ class StorageBlobTest(StorageTestCase):
         # Act
         data = b'hello world'
         resp = self.bs.put_blob(
-            self.container_name, 'blob1', data, 'BlockBlob',
+            self.container_name, 'blob1', data,
             x_ms_meta_name_values={'hello': 'world', 'number': '42'})
 
         # Assert
@@ -1640,7 +1584,7 @@ class StorageBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
         snapshot = self.bs.snapshot_blob(self.container_name, 'blob1')
         self.bs.put_blob(self.container_name, 'blob1',
-                         b'hello world again', 'BlockBlob')
+                         b'hello world again', )
 
         # Act
         blob_previous = self.bs.get_blob(
@@ -1793,7 +1737,7 @@ class StorageBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], 'BlockBlob')
+        self.assertEqual(props['x-ms-blob-type'], self.bs.blob_type)
         self.assertEqual(props['content-length'], '11')
         self.assertEqual(props['x-ms-lease-status'], 'unlocked')
 
@@ -1803,7 +1747,7 @@ class StorageBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         blob_name = 'blob1'
         data = b'hello world'
-        self.bs.put_blob(self.container_name, blob_name, data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, blob_name, data, )
         res = self.bs.snapshot_blob(self.container_name, blob_name)
         snapshot = res['x-ms-snapshot']
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
@@ -1814,7 +1758,7 @@ class StorageBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], 'BlockBlob')
+        self.assertEqual(props['x-ms-blob-type'], self.bs.blob_type)
         self.assertEqual(props['content-length'], '11')
 
     @record
@@ -1829,7 +1773,7 @@ class StorageBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], 'BlockBlob')
+        self.assertEqual(props['x-ms-blob-type'], self.bs.blob_type)
         self.assertEqual(props['content-length'], '11')
         self.assertEqual(props['x-ms-lease-status'], 'locked')
         self.assertEqual(props['x-ms-lease-state'], 'leased')
@@ -1917,7 +1861,7 @@ class StorageBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         blob_name = 'blob1'
         data = b'hello world'
-        self.bs.put_blob(self.container_name, blob_name, data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, blob_name, data, )
         res = self.bs.snapshot_blob(self.container_name, blob_name)
         snapshot = res['x-ms-snapshot']
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
@@ -1938,7 +1882,7 @@ class StorageBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         blob_name = 'blob1'
         data = b'hello world'
-        self.bs.put_blob(self.container_name, blob_name, data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, blob_name, data, )
         self.bs.snapshot_blob(self.container_name, blob_name)
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
         self.assertEqual(len(blobs), 2)
@@ -1958,7 +1902,7 @@ class StorageBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         blob_name = 'blob1'
         data = b'hello world'
-        self.bs.put_blob(self.container_name, blob_name, data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, blob_name, data, )
         self.bs.snapshot_blob(self.container_name, blob_name)
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
         self.assertEqual(len(blobs), 2)
@@ -2139,12 +2083,11 @@ class StorageBlobTest(StorageTestCase):
         resp1 = self.bs.acquire_blob_lease(
             self.container_name, 'blob1', x_ms_lease_duration=15)
         resp2 = self.bs.put_blob(self.container_name, 'blob1', b'hello 2',
-                                 'BlockBlob',
                                  x_ms_lease_id=resp1['x-ms-lease-id'])
         self.sleep(15)
         with self.assertRaises(AzureHttpError):
             self.bs.put_blob(self.container_name, 'blob1', b'hello 3',
-                             'BlockBlob', x_ms_lease_id=resp1['x-ms-lease-id'])
+                             x_ms_lease_id=resp1['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2216,12 +2159,11 @@ class StorageBlobTest(StorageTestCase):
                                    resp1['x-ms-lease-id'],
                                    x_ms_lease_break_period=5)
         resp3 = self.bs.put_blob(self.container_name, 'blob1', b'hello 2',
-                                 'BlockBlob',
                                  x_ms_lease_id=resp1['x-ms-lease-id'])
         self.sleep(5)
         with self.assertRaises(AzureHttpError):
             self.bs.put_blob(self.container_name, 'blob1', b'hello 3',
-                             'BlockBlob', x_ms_lease_id=resp1['x-ms-lease-id'])
+                             x_ms_lease_id=resp1['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2275,343 +2217,6 @@ class StorageBlobTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(resp1)
         self.assertIsNotNone(resp2)
-
-    @record
-    def test_put_block(self):
-        # Arrange
-        self._create_container_and_block_blob(
-            self.container_name, 'blob1', b'')
-
-        # Act
-        for i in range(5):
-            resp = self.bs.put_block(self.container_name,
-                                     'blob1',
-                                     u'block {0}'.format(i).encode('utf-8'),
-                                     str(i))
-            self.assertIsNone(resp)
-
-        # Assert
-
-    @record
-    def test_put_block_unicode(self):
-        # Arrange
-        self._create_container_and_block_blob(
-            self.container_name, 'blob1', b'')
-
-        # Act
-        with self.assertRaises(TypeError):
-            resp = self.bs.put_block(self.container_name, 'blob1', u'啊齄', '1')
-
-        # Assert
-
-    @record
-    def test_put_block_list(self):
-        # Arrange
-        self._create_container_and_block_blob(
-            self.container_name, 'blob1', b'')
-        self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
-        self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
-        self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-
-        # Act
-        resp = self.bs.put_block_list(
-            self.container_name, 'blob1', ['1', '2', '3'])
-
-        # Assert
-        self.assertIsNone(resp)
-        blob = self.bs.get_blob(self.container_name, 'blob1')
-        self.assertEqual(blob, b'AAABBBCCC')
-
-    @record
-    def test_put_block_list_invalid_block_id(self):
-        # Arrange
-        self._create_container_and_block_blob(
-            self.container_name, 'blob1', b'')
-        self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
-        self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
-        self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-
-        # Act
-        try:
-            resp = self.bs.put_block_list(
-                self.container_name, 'blob1', ['1', '2', '4'])
-            self.assertTrue(False)
-        except AzureHttpError as e:
-            self.assertGreaterEqual(
-                str(e).find('specified block list is invalid'), 0)
-
-        # Assert
-
-    @record
-    def test_get_block_list_no_blocks(self):
-        # Arrange
-        self._create_container_and_block_blob(
-            self.container_name, 'blob1', b'')
-
-        # Act
-        block_list = self.bs.get_block_list(
-            self.container_name, 'blob1', None, 'all')
-
-        # Assert
-        self.assertIsNotNone(block_list)
-        self.assertIsInstance(block_list, BlobBlockList)
-        self.assertEqual(len(block_list.uncommitted_blocks), 0)
-        self.assertEqual(len(block_list.committed_blocks), 0)
-
-    @record
-    def test_get_block_list_uncommitted_blocks(self):
-        # Arrange
-        self._create_container_and_block_blob(
-            self.container_name, 'blob1', b'')
-        self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
-        self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
-        self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-
-        # Act
-        block_list = self.bs.get_block_list(
-            self.container_name, 'blob1', None, 'all')
-
-        # Assert
-        self.assertIsNotNone(block_list)
-        self.assertIsInstance(block_list, BlobBlockList)
-        self.assertEqual(len(block_list.uncommitted_blocks), 3)
-        self.assertEqual(len(block_list.committed_blocks), 0)
-        self.assertEqual(block_list.uncommitted_blocks[0].id, '1')
-        self.assertEqual(block_list.uncommitted_blocks[0].size, 3)
-        self.assertEqual(block_list.uncommitted_blocks[1].id, '2')
-        self.assertEqual(block_list.uncommitted_blocks[1].size, 3)
-        self.assertEqual(block_list.uncommitted_blocks[2].id, '3')
-        self.assertEqual(block_list.uncommitted_blocks[2].size, 3)
-
-    @record
-    def test_get_block_list_committed_blocks(self):
-        # Arrange
-        self._create_container_and_block_blob(
-            self.container_name, 'blob1', b'')
-        self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
-        self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
-        self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-        self.bs.put_block_list(self.container_name, 'blob1', ['1', '2', '3'])
-
-        # Act
-        block_list = self.bs.get_block_list(
-            self.container_name, 'blob1', None, 'all')
-
-        # Assert
-        self.assertIsNotNone(block_list)
-        self.assertIsInstance(block_list, BlobBlockList)
-        self.assertEqual(len(block_list.uncommitted_blocks), 0)
-        self.assertEqual(len(block_list.committed_blocks), 3)
-        self.assertEqual(block_list.committed_blocks[0].id, '1')
-        self.assertEqual(block_list.committed_blocks[0].size, 3)
-        self.assertEqual(block_list.committed_blocks[1].id, '2')
-        self.assertEqual(block_list.committed_blocks[1].size, 3)
-        self.assertEqual(block_list.committed_blocks[2].id, '3')
-        self.assertEqual(block_list.committed_blocks[2].size, 3)
-
-    @record
-    def test_put_page_update(self):
-        # Arrange
-        self._create_container_and_page_blob(
-            self.container_name, 'blob1', 1024)
-
-        # Act
-        data = b'abcdefghijklmnop' * 32
-        resp = self.bs.put_page(
-            self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-
-        # Assert
-        self.assertIsNone(resp)
-
-    @record
-    def test_put_page_clear(self):
-        # Arrange
-        self._create_container_and_page_blob(
-            self.container_name, 'blob1', 1024)
-
-        # Act
-        resp = self.bs.put_page(
-            self.container_name, 'blob1', b'', 'bytes=0-511', 'clear')
-
-        # Assert
-        self.assertIsNone(resp)
-
-    @record
-    def test_put_page_if_sequence_number_lt_success(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'ab' * 256
-        start_sequence = 10
-        self.bs.put_blob(self.container_name, 'blob1', None, 'PageBlob',
-                         x_ms_blob_content_length=512,
-                         x_ms_blob_sequence_number=start_sequence)
-
-        # Act
-        self.bs.put_page(self.container_name, 'blob1', data, 'bytes=0-511',
-                         'update',
-                         x_ms_if_sequence_number_lt=start_sequence + 1)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, 'blob1', data)
-
-    @record
-    def test_put_page_if_sequence_number_lt_failure(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'ab' * 256
-        start_sequence = 10
-        self.bs.put_blob(self.container_name, 'blob1', None, 'PageBlob',
-                         x_ms_blob_content_length=512,
-                         x_ms_blob_sequence_number=start_sequence)
-
-        # Act
-        with self.assertRaises(AzureHttpError):
-            self.bs.put_page(self.container_name, 'blob1', data, 'bytes=0-511',
-                             'update',
-                             x_ms_if_sequence_number_lt=start_sequence)
-
-        # Assert
-
-    @record
-    def test_put_page_if_sequence_number_lte_success(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'ab' * 256
-        start_sequence = 10
-        self.bs.put_blob(self.container_name, 'blob1', None, 'PageBlob',
-                         x_ms_blob_content_length=512,
-                         x_ms_blob_sequence_number=start_sequence)
-
-        # Act
-        self.bs.put_page(self.container_name, 'blob1', data, 'bytes=0-511',
-                         'update', x_ms_if_sequence_number_lte=start_sequence)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, 'blob1', data)
-
-    @record
-    def test_put_page_if_sequence_number_lte_failure(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'ab' * 256
-        start_sequence = 10
-        self.bs.put_blob(self.container_name, 'blob1', None, 'PageBlob',
-                         x_ms_blob_content_length=512,
-                         x_ms_blob_sequence_number=start_sequence)
-
-        # Act
-        with self.assertRaises(AzureHttpError):
-            self.bs.put_page(self.container_name, 'blob1', data, 'bytes=0-511',
-                             'update',
-                             x_ms_if_sequence_number_lte=start_sequence - 1)
-
-        # Assert
-
-    @record
-    def test_put_page_if_sequence_number_eq_success(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'ab' * 256
-        start_sequence = 10
-        self.bs.put_blob(self.container_name, 'blob1', None, 'PageBlob',
-                         x_ms_blob_content_length=512,
-                         x_ms_blob_sequence_number=start_sequence)
-
-        # Act
-        self.bs.put_page(self.container_name, 'blob1', data, 'bytes=0-511',
-                         'update', x_ms_if_sequence_number_eq=start_sequence)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, 'blob1', data)
-
-    @record
-    def test_put_page_if_sequence_number_eq_failure(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'ab' * 256
-        start_sequence = 10
-        self.bs.put_blob(self.container_name, 'blob1', None, 'PageBlob',
-                         x_ms_blob_content_length=512,
-                         x_ms_blob_sequence_number=start_sequence)
-
-        # Act
-        with self.assertRaises(AzureHttpError):
-            self.bs.put_page(self.container_name, 'blob1', data, 'bytes=0-511',
-                             'update',
-                             x_ms_if_sequence_number_eq=start_sequence - 1)
-
-        # Assert
-
-    @record
-    def test_put_page_unicode(self):
-        # Arrange
-        self._create_container_and_page_blob(self.container_name, 'blob1', 512)
-
-        # Act
-        data = u'abcdefghijklmnop' * 32
-        with self.assertRaises(TypeError):
-            self.bs.put_page(self.container_name, 'blob1',
-                             data, 'bytes=0-511', 'update')
-
-        # Assert
-
-    @record
-    def test_get_page_ranges_no_pages(self):
-        # Arrange
-        self._create_container_and_page_blob(
-            self.container_name, 'blob1', 1024)
-
-        # Act
-        ranges = self.bs.get_page_ranges(self.container_name, 'blob1')
-
-        # Assert
-        self.assertIsNotNone(ranges)
-        self.assertIsInstance(ranges, PageList)
-        self.assertEqual(len(ranges.page_ranges), 0)
-
-    @record
-    def test_get_page_ranges_2_pages(self):
-        # Arrange
-        self._create_container_and_page_blob(
-            self.container_name, 'blob1', 2048)
-        data = b'abcdefghijklmnop' * 32
-        resp1 = self.bs.put_page(
-            self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-        resp2 = self.bs.put_page(
-            self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
-
-        # Act
-        ranges = self.bs.get_page_ranges(self.container_name, 'blob1')
-
-        # Assert
-        self.assertIsNotNone(ranges)
-        self.assertIsInstance(ranges, PageList)
-        self.assertEqual(len(ranges.page_ranges), 2)
-        self.assertEqual(ranges.page_ranges[0].start, 0)
-        self.assertEqual(ranges.page_ranges[0].end, 511)
-        self.assertEqual(ranges.page_ranges[1].start, 1024)
-        self.assertEqual(ranges.page_ranges[1].end, 1535)
-
-    @record
-    def test_get_page_ranges_iter(self):
-        # Arrange
-        self._create_container_and_page_blob(
-            self.container_name, 'blob1', 2048)
-        data = b'abcdefghijklmnop' * 32
-        resp1 = self.bs.put_page(
-            self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-        resp2 = self.bs.put_page(
-            self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
-
-        # Act
-        ranges = self.bs.get_page_ranges(self.container_name, 'blob1')
-        for range in ranges:
-            pass
-
-        # Assert
-        self.assertEqual(len(ranges), 2)
-        self.assertIsInstance(ranges[0], PageRange)
-        self.assertIsInstance(ranges[1], PageRange)
 
     @record
     def test_with_filter(self):
@@ -2703,14 +2308,14 @@ class StorageBlobTest(StorageTestCase):
         self.assertEqual(blob, b'hello world')
 
     @record
-    def test_put_blob_block_blob_unicode_data(self):
+    def test_put_blob_blob_unicode_data(self):
         # Arrange
         self._create_container(self.container_name)
 
         # Act
         data = u'hello world啊齄丂狛狜'.encode('utf-8')
         resp = self.bs.put_blob(
-            self.container_name, 'blob1', data, 'BlockBlob')
+            self.container_name, 'blob1', data, )
 
         # Assert
         self.assertIsNone(resp)
@@ -2770,7 +2375,7 @@ class StorageBlobTest(StorageTestCase):
         data = b'a public blob can be read without a shared access signature'
         blob_name = 'blob1.txt'
         self.bs.create_container(self.container_name, None, 'blob')
-        self.bs.put_blob(self.container_name, blob_name, data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, blob_name, data, )
 
         # Act
         url = self.bs.make_blob_url(self.container_name, blob_name)
@@ -2786,10 +2391,10 @@ class StorageBlobTest(StorageTestCase):
         data = b'public access blob'
         blob_name = 'blob1.txt'
         self.bs.create_container(self.container_name, None, 'blob')
-        self.bs.put_blob(self.container_name, blob_name, data, 'BlockBlob')
+        self.bs.put_blob(self.container_name, blob_name, data, )
 
         # Act
-        service = BlobService(
+        service = BlockBlobService(
             self.settings.STORAGE_ACCOUNT_NAME,
             request_session=requests.Session(),
         )
@@ -2820,7 +2425,7 @@ class StorageBlobTest(StorageTestCase):
         )
 
         # Act
-        service = BlobService(
+        service = BlockBlobService(
             self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
             request_session=requests.Session(),
@@ -2863,7 +2468,7 @@ class StorageBlobTest(StorageTestCase):
         )
 
         # Act
-        service = BlobService(
+        service = BlockBlobService(
             self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
             request_session=requests.Session(),
@@ -2974,7 +2579,7 @@ class StorageBlobTest(StorageTestCase):
         )
 
         # Act
-        headers = {'x-ms-blob-type': 'BlockBlob'}
+        headers = {'x-ms-blob-type': self.bs.blob_type}
         response = requests.put(url, headers=headers, data=updated_data)
 
         # Assert
@@ -3210,7 +2815,7 @@ class StorageBlobTest(StorageTestCase):
 
         # Act
         with open(file_path, 'wb') as stream:
-            non_seekable_stream = StorageBlobTest.NonSeekableFile(stream)
+            non_seekable_stream = StorageCommonBlobTest.NonSeekableFile(stream)
             resp = self.bs.get_blob_to_file(
                 self.container_name, blob_name, non_seekable_stream,
                 max_connections=1)
@@ -3235,7 +2840,7 @@ class StorageBlobTest(StorageTestCase):
 
         # Act
         with open(file_path, 'wb') as stream:
-            non_seekable_stream = StorageBlobTest.NonSeekableFile(stream)
+            non_seekable_stream = StorageCommonBlobTest.NonSeekableFile(stream)
 
             # Parallel downloads require that the file be seekable
             with self.assertRaises(AttributeError):
@@ -3351,7 +2956,7 @@ class StorageBlobTest(StorageTestCase):
             self.assertEqual(data, actual)
 
     @record
-    def test_get_blob_to_path_chunked_downlad(self):
+    def test_get_blob_to_path_chunked_download(self):
         # Arrange
         blob_name = 'blob1'
         data = self._get_oversized_binary_data()
@@ -3369,7 +2974,7 @@ class StorageBlobTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(data, actual)
 
-    def test_get_blob_to_path_chunked_downlad_parallel(self):
+    def test_get_blob_to_path_chunked_download_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -3419,7 +3024,7 @@ class StorageBlobTest(StorageTestCase):
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
-    def test_get_blob_to_path_with_progress_chunked_downlad(self):
+    def test_get_blob_to_path_with_progress_chunked_download(self):
         # Arrange
         blob_name = 'blob1'
         data = self._get_oversized_binary_data()
@@ -3595,1094 +3200,6 @@ class StorageBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(text, resp)
         self.assertEqual(progress, self._get_expected_progress(len(data)))
-
-    @record
-    def test_put_block_blob_from_bytes(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        data = b'abcdefghijklmnopqrstuvwxyz'
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, 'blob1', data)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(data, self.bs.get_blob(self.container_name, 'blob1'))
-
-    @record
-    def test_put_block_blob_from_bytes_with_progress(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'abcdefghijklmnopqrstuvwxyz'
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, 'blob1', data, progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(data, self.bs.get_blob(self.container_name, 'blob1'))
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
-
-    @record
-    def test_put_block_blob_from_bytes_with_index(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        data = b'abcdefghijklmnopqrstuvwxyz'
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, 'blob1', data, 3)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(b'defghijklmnopqrstuvwxyz',
-                         self.bs.get_blob(self.container_name, 'blob1'))
-
-    @record
-    def test_put_block_blob_from_bytes_with_index_and_count(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        data = b'abcdefghijklmnopqrstuvwxyz'
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, 'blob1', data, 3, 5)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(
-            b'defgh', self.bs.get_blob(self.container_name, 'blob1'))
-
-    @record
-    def test_put_block_blob_from_bytes_with_index_and_count_and_properties(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        data = b'abcdefghijklmnopqrstuvwxyz'
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, 'blob1', data, 3, 5,
-            x_ms_blob_content_type='image/png',
-            x_ms_blob_content_language='spanish')
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(
-            b'defgh', self.bs.get_blob(self.container_name, 'blob1'))
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
-
-    @record
-    def test_put_block_blob_from_bytes_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-
-        # Act
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, blob_name, data)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    def test_put_block_blob_from_bytes_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-
-        # Act
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, blob_name, data,
-            max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_put_block_blob_from_bytes_chunked_upload_with_properties(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-
-        # Act
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, blob_name, data,
-            x_ms_blob_content_type='image/png',
-            x_ms_blob_content_language='spanish')
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
-
-    @record
-    def test_put_block_blob_from_bytes_with_progress_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, blob_name, data, progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
-
-    @record
-    def test_put_block_blob_from_bytes_chunked_upload_with_index_and_count(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        index = 33
-        blob_size = len(data) - 66
-
-        # Act
-        resp = self.bs.put_block_blob_from_bytes(
-            self.container_name, blob_name, data, index, blob_size)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name,
-                             data[index:index + blob_size])
-
-    @record
-    def test_put_block_blob_from_path_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        resp = self.bs.put_block_blob_from_path(
-            self.container_name, blob_name, file_path)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    def test_put_block_blob_from_path_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        resp = self.bs.put_block_blob_from_path(
-            self.container_name, blob_name, file_path,
-            max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_put_block_blob_from_path_with_progress_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        resp = self.bs.put_block_blob_from_path(
-            self.container_name, blob_name, file_path,
-            progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
-
-    @record
-    def test_put_block_blob_from_path_chunked_upload_with_properties(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        resp = self.bs.put_block_blob_from_path(
-            self.container_name, blob_name, file_path,
-            x_ms_blob_content_type='image/png',
-            x_ms_blob_content_language='spanish')
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        props = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
-
-    @record
-    def test_put_block_blob_from_file_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, stream)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    def test_put_block_blob_from_file_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, stream,
-                max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_put_block_blob_from_file_non_seekable_chunked_upload_known_size(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-        blob_size = len(data) - 66
-
-        # Act
-        with open(file_path, 'rb') as stream:
-            non_seekable_file = StorageBlobTest.NonSeekableFile(stream)
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, non_seekable_file,
-                count=blob_size, max_connections=1)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    @record
-    def test_put_block_blob_from_file_non_seekable_chunked_upload_unknown_size(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        with open(file_path, 'rb') as stream:
-            non_seekable_file = StorageBlobTest.NonSeekableFile(stream)
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, non_seekable_file,
-                max_connections=1)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    def test_put_block_blob_from_file_non_seekable_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        with open(file_path, 'rb') as stream:
-            non_seekable_file = StorageBlobTest.NonSeekableFile(stream)
-
-            # Parallel uploads require that the file be seekable
-            with self.assertRaises(AttributeError):
-                resp = self.bs.put_block_blob_from_file(
-                    self.container_name, blob_name, non_seekable_file,
-                    max_connections=10)
-
-        # Assert
-
-    @record
-    def test_put_block_blob_from_file_with_progress_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, stream,
-                progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(
-            progress,
-            self._get_expected_progress(len(data), unknown_size=True))
-
-    def test_put_block_blob_from_file_with_progress_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, stream,
-                progress_callback=callback,
-                max_connections=5)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, sorted(progress))
-        self.assertGreater(len(progress), 0)
-
-    @record
-    def test_put_block_blob_from_file_chunked_upload_with_count(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data) - 301
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, stream, blob_size)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    def test_put_block_blob_from_file_chunked_upload_with_count_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data) - 301
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, stream, blob_size,
-                max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    @record
-    def test_put_block_blob_from_file_chunked_upload_with_count_and_properties(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data) - 301
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, stream, blob_size,
-                x_ms_blob_content_type='image/png',
-                x_ms_blob_content_language='spanish')
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-        props = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
-
-    @record
-    def test_put_block_blob_from_file_chunked_upload_with_properties(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_block_blob_from_file(
-                self.container_name, blob_name, stream,
-                x_ms_blob_content_type='image/png',
-                x_ms_blob_content_language='spanish')
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        props = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
-
-    @record
-    def test_put_block_blob_from_text(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        text = u'hello 啊齄丂狛狜 world'
-        data = text.encode('utf-8')
-
-        # Act
-        resp = self.bs.put_block_blob_from_text(
-            self.container_name, blob_name, text)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_put_block_blob_from_text_with_encoding(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        text = u'hello 啊齄丂狛狜 world'
-        data = text.encode('utf-16')
-
-        # Act
-        resp = self.bs.put_block_blob_from_text(
-            self.container_name, blob_name, text, 'utf-16')
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_put_block_blob_from_text_with_encoding_and_progress(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        text = u'hello 啊齄丂狛狜 world'
-        data = text.encode('utf-16')
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        resp = self.bs.put_block_blob_from_text(
-            self.container_name, blob_name, text, 'utf-16',
-            progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
-
-    @record
-    def test_put_block_blob_from_text_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_text_data()
-        encoded_data = data.encode('utf-8')
-
-        # Act
-        resp = self.bs.put_block_blob_from_text(
-            self.container_name, blob_name, data)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(
-            self.container_name, blob_name, len(encoded_data))
-        self.assertBlobEqual(self.container_name, blob_name, encoded_data)
-
-    def test_put_block_blob_from_text_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_text_data()
-        encoded_data = data.encode('utf-8')
-
-        # Act
-        resp = self.bs.put_block_blob_from_text(
-            self.container_name, blob_name, data,
-            max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(
-            self.container_name, blob_name, len(encoded_data))
-        self.assertBlobEqual(self.container_name, blob_name, encoded_data)
-
-    @record
-    def test_put_page_blob_from_bytes(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        data = self._get_random_bytes(2048)
-        resp = self.bs.put_page_blob_from_bytes(
-            self.container_name, 'blob1', data)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(data, self.bs.get_blob(self.container_name, 'blob1'))
-
-    @record
-    def test_put_page_blob_from_bytes_with_progress(self):
-        # Arrange
-        self._create_container(self.container_name)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        data = self._get_random_bytes(2048)
-        resp = self.bs.put_page_blob_from_bytes(
-            self.container_name, 'blob1', data, progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(data, self.bs.get_blob(self.container_name, 'blob1'))
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
-
-    @record
-    def test_put_page_blob_from_bytes_with_index(self):
-        # Arrange
-        self._create_container(self.container_name)
-        index = 1024
-
-        # Act
-        data = self._get_random_bytes(2048)
-        resp = self.bs.put_page_blob_from_bytes(
-            self.container_name, 'blob1', data, index)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(data[index:],
-                         self.bs.get_blob(self.container_name, 'blob1'))
-
-    @record
-    def test_put_page_blob_from_bytes_with_index_and_count(self):
-        # Arrange
-        self._create_container(self.container_name)
-        index = 512
-        count = 1024
-
-        # Act
-        data = self._get_random_bytes(2048)
-        resp = self.bs.put_page_blob_from_bytes(
-            self.container_name, 'blob1', data, index, count)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertEqual(data[index:index + count],
-                         self.bs.get_blob(self.container_name, 'blob1'))
-
-    @record
-    def test_put_page_blob_from_bytes_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-
-        # Act
-        resp = self.bs.put_page_blob_from_bytes(
-            self.container_name, blob_name, data)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    def test_put_page_blob_from_bytes_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-
-        # Act
-        resp = self.bs.put_page_blob_from_bytes(
-            self.container_name, blob_name, data,
-            max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_put_page_blob_from_bytes_chunked_upload_with_index_and_count(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        index = 512
-        count = len(data) - 1024
-
-        # Act
-        resp = self.bs.put_page_blob_from_bytes(
-            self.container_name, blob_name, data, index, count)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, count)
-        self.assertBlobEqual(self.container_name,
-                             blob_name, data[index:index + count])
-
-    def test_put_page_blob_from_bytes_chunked_upload_with_index_and_count_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        index = 512
-        count = len(data) - 1024
-
-        # Act
-        resp = self.bs.put_page_blob_from_bytes(
-            self.container_name, blob_name, data, index, count,
-            max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, count)
-        self.assertBlobEqual(self.container_name,
-                             blob_name, data[index:index + count])
-
-    @record
-    def test_put_page_blob_from_path_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        resp = self.bs.put_page_blob_from_path(
-            self.container_name, blob_name, file_path)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    def test_put_page_blob_from_path_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        resp = self.bs.put_page_blob_from_path(
-            self.container_name, blob_name, file_path,
-            max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_put_page_blob_from_path_with_progress_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        resp = self.bs.put_page_blob_from_path(
-            self.container_name, blob_name, file_path,
-            progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
-        self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
-
-    @record
-    def test_put_page_blob_from_file_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data)
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_page_blob_from_file(
-                self.container_name, blob_name, stream, blob_size)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    def test_put_page_blob_from_file_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data)
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_page_blob_from_file(
-                self.container_name, blob_name, stream, blob_size,
-                max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    @record
-    def test_put_page_blob_from_file_non_seekable_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data)
-        with open(file_path, 'rb') as stream:
-            non_seekable_file = StorageBlobTest.NonSeekableFile(stream)
-            resp = self.bs.put_page_blob_from_file(
-                self.container_name, blob_name, non_seekable_file, blob_size,
-                max_connections=1)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    def test_put_page_blob_from_file_non_seekable_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data)
-        with open(file_path, 'rb') as stream:
-            non_seekable_file = StorageBlobTest.NonSeekableFile(stream)
-
-            # Parallel uploads require that the file be seekable
-            with self.assertRaises(AttributeError):
-                resp = self.bs.put_page_blob_from_file(
-                    self.container_name, blob_name, non_seekable_file, blob_size,
-                    max_connections=10)
-
-        # Assert
-
-    @record
-    def test_put_page_blob_from_file_with_progress_chunked_upload(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        blob_size = len(data)
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_page_blob_from_file(
-                self.container_name, blob_name, stream, blob_size,
-                progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
-
-    def test_put_page_blob_from_file_with_progress_chunked_upload_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        blob_size = len(data)
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_page_blob_from_file(
-                self.container_name, blob_name, stream, blob_size,
-                progress_callback=callback,
-                max_connections=5)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-        self.assertEqual(progress, sorted(progress))
-        self.assertGreater(len(progress), 0)
-
-    @record
-    def test_put_page_blob_from_file_chunked_upload_truncated(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data) - 512
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_page_blob_from_file(
-                self.container_name, blob_name, stream, blob_size)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    def test_put_page_blob_from_file_chunked_upload_truncated_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
-            return
-
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data) - 512
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_page_blob_from_file(
-                self.container_name, blob_name, stream, blob_size,
-                max_connections=10)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    @record
-    def test_put_page_blob_from_file_with_progress_chunked_upload_truncated(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_page_blob_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        blob_size = len(data) - 512
-        with open(file_path, 'rb') as stream:
-            resp = self.bs.put_page_blob_from_file(
-                self.container_name, blob_name, stream, blob_size,
-                progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-        self.assertEqual(progress, self._get_expected_progress(blob_size))
-
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
