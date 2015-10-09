@@ -26,7 +26,7 @@ from azure.storage import (
     RetentionPolicy,
 )
 from azure.storage.blob import (
-    BlobService,
+    BlockBlobService,
 )
 from azure.storage.queue import (
     QueueService,
@@ -49,7 +49,7 @@ class ServicePropertiesTest(StorageTestCase):
     def setUp(self):
         super(ServicePropertiesTest, self).setUp()
 
-        self.bs = self._create_storage_service(BlobService, self.settings)
+        self.bs = self._create_storage_service(BlockBlobService, self.settings)
         self.qs = self._create_storage_service(QueueService, self.settings)
         self.ts = self._create_storage_service(TableService, self.settings)
 

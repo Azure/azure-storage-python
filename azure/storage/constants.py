@@ -16,7 +16,7 @@ __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
 __version__ = '0.20.0rc2'
 
 # x-ms-version for storage service.
-X_MS_VERSION = '2014-02-14'
+X_MS_VERSION = '2015-04-05'
 
 _USER_AGENT_STRING = 'pyazure/' + __version__
 

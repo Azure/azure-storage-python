@@ -16,59 +16,30 @@ from azure.common import (
     AzureHttpError,
 )
 from .._common_error import (
-    _dont_fail_not_exist,
-    _dont_fail_on_exist,
     _validate_not_none,
     _validate_type_bytes,
     _ERROR_VALUE_NEGATIVE,
     _ERROR_PAGE_BLOB_SIZE_ALIGNMENT,
 )
 from .._common_conversion import (
-    _encode_base64,
     _int_or_none,
     _str,
     _str_or_none,
 )
-from abc import (
-    ABCMeta,
-    abstractmethod
-)
 from .._common_serialization import (
-    _convert_class_to_xml,
-    _get_request_body,
     _get_request_body_bytes_only,
-    _parse_response_for_dict,
-    _parse_response_for_dict_filter,
-    _parse_response_for_dict_prefix,
     _update_request_uri_query_local_storage,
     _ETreeXmlToObject,
 )
 from .._http import HTTPRequest
 from ._chunking import (
-    _BlockBlobChunkUploader,
     _PageBlobChunkUploader,
-    _download_blob_chunks,
     _upload_blob_chunks,
 )
-from ..models import (
-    SignedIdentifiers,
-    StorageServiceProperties,
-)
 from .models import (
-    Container,
-    ContainerEnumResults,
     PageList,
     PageRange,
-    LeaseActions,
-    BlobTypes,
-)
-from ..auth import (
-    StorageSASAuthentication,
-    StorageSharedKeyAuthentication,
-    StorageNoAuthentication,
-)
-from ..connection import (
-    StorageConnectionParameters,
+    _BlobTypes,
 )
 from ..constants import (
     BLOB_SERVICE_HOST_BASE,
@@ -76,21 +47,8 @@ from ..constants import (
     DEV_BLOB_HOST,
     X_MS_VERSION,
 )
-from .._serialization import (
-    _convert_signed_identifiers_to_xml,
-)
-from ._serialization import (
-    _convert_block_list_to_xml,
-    _convert_response_to_block_list,
-    _create_blob_result,
-    _parse_blob_enum_results_list,
-    _update_storage_blob_header,
-)
-from ..sharedaccesssignature import (
-    SharedAccessSignature,
-    ResourceType,
-)
-from ._baseblobservice import BaseBlobService
+from ._serialization import _update_storage_blob_header
+from ._baseblobservice import _BaseBlobService
 from os import path
 import sys
 if sys.version_info >= (3,):
@@ -102,7 +60,7 @@ else:
 _PAGE_SIZE = 512
 
 
-class PageBlobService(BaseBlobService):
+class PageBlobService(_BaseBlobService):
     
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=BLOB_SERVICE_HOST_BASE, dev_host=DEV_BLOB_HOST,
@@ -136,14 +94,13 @@ class PageBlobService(BaseBlobService):
             Optional. Session object to use for http requests. If this is
             specified, it replaces the default use of httplib.
         '''
-        self.blob_type = BlobTypes.PageBlob
+        self.blob_type = _BlobTypes.PageBlob
         super(PageBlobService, self).__init__(
             account_name, account_key, protocol, host_base, dev_host,
             timeout, sas_token, connection_string, request_session)
 
     def put_blob(self, container_name, blob_name, x_ms_blob_content_length,
-                 content_encoding=None, content_language=None,
-                 content_md5=None, cache_control=None,
+                 content_encoding=None, content_language=None, cache_control=None,
                  x_ms_blob_content_type=None, x_ms_blob_content_encoding=None,
                  x_ms_blob_content_language=None, x_ms_blob_content_md5=None,
                  x_ms_blob_cache_control=None, x_ms_meta_name_values=None,
@@ -153,7 +110,7 @@ class PageBlobService(BaseBlobService):
         '''
         Creates a new page blob.
 
-        See put_page_blob_from_* for high level functions that handle the
+        See put_blob_from_* for high level functions that handle the
         creation and upload of large blobs with automatic chunking and
         progress notifications.
 
@@ -172,12 +129,6 @@ class PageBlobService(BaseBlobService):
             can use this value when returned to decode the blob content.
         content_language:
             Optional. Specifies the natural languages used by this resource.
-        content_md5:
-            Optional. An MD5 hash of the blob content. This hash is used to
-            verify the integrity of the blob during transport. When this header
-            is specified, the storage service checks the hash that has arrived
-            with the one that was sent. If the two hashes do not match, the
-            operation will fail with error code 400 (Bad Request).
         cache_control:
             Optional. The Blob service stores this value but does not use or
             modify it.
@@ -213,12 +164,11 @@ class PageBlobService(BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(container_name) + '/' + _str(blob_name) + ''
+        request.path = '/' + _str(container_name) + '/' + _str(blob_name)
         request.headers = [
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
             ('Content-Encoding', _str_or_none(content_encoding)),
             ('Content-Language', _str_or_none(content_language)),
-            ('Content-MD5', _str_or_none(content_md5)),
             ('Cache-Control', _str_or_none(cache_control)),
             ('x-ms-blob-content-type', _str_or_none(x_ms_blob_content_type)),
             ('x-ms-blob-content-encoding',
@@ -243,381 +193,6 @@ class PageBlobService(BaseBlobService):
         request.headers = _update_storage_blob_header(
             request, self.authentication)
         self._perform_request(request)
-
-    def put_blob_from_path(self, container_name, blob_name, file_path,
-                           content_encoding=None, content_language=None,
-                           content_md5=None, cache_control=None,
-                           x_ms_blob_content_type=None,
-                           x_ms_blob_content_encoding=None,
-                           x_ms_blob_content_language=None,
-                           x_ms_blob_content_md5=None,
-                           x_ms_blob_cache_control=None,
-                           x_ms_meta_name_values=None,
-                           x_ms_lease_id=None, x_ms_blob_sequence_number=None,
-                           progress_callback=None, max_connections=1,
-                           max_retries=5, retry_wait=1.0,
-                           if_modified_since=None, if_unmodified_since=None,
-                           if_match=None, if_none_match=None):
-        '''
-        Creates a new page blob from a file path, or updates the content of an
-        existing page blob, with automatic chunking and progress notifications.
-
-        container_name:
-            Name of existing container.
-        blob_name:
-            Name of blob to create or update.
-        file_path:
-            Path of the file to upload as the blob content.
-        content_encoding:
-            Optional. Specifies which content encodings have been applied to
-            the blob. This value is returned to the client when the Get Blob
-            (REST API) operation is performed on the blob resource. The client
-            can use this value when returned to decode the blob content.
-        content_language:
-            Optional. Specifies the natural languages used by this resource.
-        content_md5:
-            Optional. An MD5 hash of the blob content. This hash is used to
-            verify the integrity of the blob during transport. When this header
-            is specified, the storage service checks the hash that has arrived
-            with the one that was sent. If the two hashes do not match, the
-            operation will fail with error code 400 (Bad Request).
-        cache_control:
-            Optional. The Blob service stores this value but does not use or
-            modify it.
-        x_ms_blob_content_type:
-            Optional. Set the blob's content type.
-        x_ms_blob_content_encoding:
-            Optional. Set the blob's content encoding.
-        x_ms_blob_content_language:
-            Optional. Set the blob's content language.
-        x_ms_blob_content_md5:
-            Optional. Set the blob's MD5 hash.
-        x_ms_blob_cache_control:
-            Optional. Sets the blob's cache control.
-        x_ms_meta_name_values:
-            A dict containing name, value for metadata.
-        x_ms_lease_id:
-            Required if the blob has an active lease.
-        x_ms_blob_sequence_number:
-            Optional. Set for page blobs only. The sequence number is a
-            user-controlled value that you can use to track requests. The
-            value of the sequence number must be between 0 and 2^63 - 1. The
-            default value is 0.
-        progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the blob, or None if the total size is unknown.
-        max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
-        max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
-            Sleep time in secs between retries.
-        if_modified_since:
-            Optional. Datetime string.
-        if_unmodified_since:
-            Optional. DateTime string.
-        if_match:
-            Optional. An ETag value.
-        if_none_match:
-            Optional. An ETag value.
-        '''
-        _validate_not_none('container_name', container_name)
-        _validate_not_none('blob_name', blob_name)
-        _validate_not_none('file_path', file_path)
-
-        count = path.getsize(file_path)
-        with open(file_path, 'rb') as stream:
-            self.put_blob_from_file(container_name,
-                                    blob_name,
-                                    stream,
-                                    count,
-                                    content_encoding,
-                                    content_language,
-                                    content_md5,
-                                    cache_control,
-                                    x_ms_blob_content_type,
-                                    x_ms_blob_content_encoding,
-                                    x_ms_blob_content_language,
-                                    x_ms_blob_content_md5,
-                                    x_ms_blob_cache_control,
-                                    x_ms_meta_name_values,
-                                    x_ms_lease_id,
-                                    x_ms_blob_sequence_number,
-                                    progress_callback,
-                                    max_connections,
-                                    max_retries,
-                                    retry_wait,
-                                    if_modified_since,
-                                    if_unmodified_since,
-                                    if_match,
-                                    if_none_match)
-
-    def put_blob_from_file(self, container_name, blob_name, stream, count,
-                           content_encoding=None, content_language=None,
-                           content_md5=None, cache_control=None,
-                           x_ms_blob_content_type=None,
-                           x_ms_blob_content_encoding=None,
-                           x_ms_blob_content_language=None,
-                           x_ms_blob_content_md5=None,
-                           x_ms_blob_cache_control=None,
-                           x_ms_meta_name_values=None,
-                           x_ms_lease_id=None, x_ms_blob_sequence_number=None,
-                           progress_callback=None, max_connections=1,
-                           max_retries=5, retry_wait=1.0,
-                           if_modified_since=None, if_unmodified_since=None,
-                           if_match=None, if_none_match=None):
-        '''
-        Creates a new page blob from a file/stream, or updates the content of an
-        existing page blob, with automatic chunking and progress notifications.
-
-        container_name:
-            Name of existing container.
-        blob_name:
-            Name of blob to create or update.
-        stream:
-            Opened file/stream to upload as the blob content.
-        count:
-            Number of bytes to read from the stream. This is required, a page
-            blob cannot be created if the count is unknown.
-        content_encoding:
-            Optional. Specifies which content encodings have been applied to
-            the blob. This value is returned to the client when the Get Blob
-            (REST API) operation is performed on the blob resource. The client
-            can use this value when returned to decode the blob content.
-        content_language:
-            Optional. Specifies the natural languages used by this resource.
-        content_md5:
-            Optional. An MD5 hash of the blob content. This hash is used to
-            verify the integrity of the blob during transport. When this header
-            is specified, the storage service checks the hash that has arrived
-            with the one that was sent. If the two hashes do not match, the
-            operation will fail with error code 400 (Bad Request).
-        cache_control:
-            Optional. The Blob service stores this value but does not use or
-            modify it.
-        x_ms_blob_content_type:
-            Optional. Set the blob's content type.
-        x_ms_blob_content_encoding:
-            Optional. Set the blob's content encoding.
-        x_ms_blob_content_language:
-            Optional. Set the blob's content language.
-        x_ms_blob_content_md5:
-            Optional. Set the blob's MD5 hash.
-        x_ms_blob_cache_control:
-            Optional. Sets the blob's cache control.
-        x_ms_meta_name_values:
-            A dict containing name, value for metadata.
-        x_ms_lease_id:
-            Required if the blob has an active lease.
-        x_ms_blob_sequence_number:
-            Optional. Set for page blobs only. The sequence number is a
-            user-controlled value that you can use to track requests. The
-            value of the sequence number must be between 0 and 2^63 - 1. The
-            default value is 0.
-        progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the blob, or None if the total size is unknown.
-        max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
-            Note that parallel upload requires the stream to be seekable.
-        max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
-            Sleep time in secs between retries.
-        if_modified_since:
-            Optional. Datetime string.
-        if_unmodified_since:
-            Optional. DateTime string.
-        if_match:
-            Optional. An ETag value.
-        if_none_match:
-            Optional. An ETag value.
-        '''
-        _validate_not_none('container_name', container_name)
-        _validate_not_none('blob_name', blob_name)
-        _validate_not_none('stream', stream)
-        _validate_not_none('count', count)
-
-        if count < 0:
-            raise ValueError(_ERROR_VALUE_NEGATIVE.format('count'))
-
-        if count % _PAGE_SIZE != 0:
-            raise ValueError(_ERROR_PAGE_BLOB_SIZE_ALIGNMENT.format(count))
-
-        self.put_blob(
-            container_name,
-            blob_name,
-            count,
-            content_encoding,
-            content_language,
-            content_md5,
-            cache_control,
-            x_ms_blob_content_type,
-            x_ms_blob_content_encoding,
-            x_ms_blob_content_language,
-            x_ms_blob_content_md5,
-            x_ms_blob_cache_control,
-            x_ms_meta_name_values,
-            x_ms_lease_id,
-            x_ms_blob_sequence_number,
-            if_modified_since,
-            if_unmodified_since,
-            if_match,
-            if_none_match
-        )
-
-        _upload_blob_chunks(
-            self,
-            container_name,
-            blob_name,
-            count,
-            self._BLOB_MAX_CHUNK_DATA_SIZE,
-            stream,
-            max_connections,
-            max_retries,
-            retry_wait,
-            progress_callback,
-            x_ms_lease_id,
-            _PageBlobChunkUploader,
-        )
-
-    def put_blob_from_bytes(self, container_name, blob_name, blob,
-                            index=0, count=None, content_encoding=None,
-                            content_language=None, content_md5=None,
-                            cache_control=None,
-                            x_ms_blob_content_type=None,
-                            x_ms_blob_content_encoding=None,
-                            x_ms_blob_content_language=None,
-                            x_ms_blob_content_md5=None,
-                            x_ms_blob_cache_control=None,
-                            x_ms_meta_name_values=None,
-                            x_ms_lease_id=None, x_ms_blob_sequence_number=None,
-                            progress_callback=None, max_connections=1,
-                            max_retries=5, retry_wait=1.0,
-                            if_modified_since=None, if_unmodified_since=None,
-                            if_match=None, if_none_match=None):
-        '''
-        Creates a new page blob from an array of bytes, or updates the content
-        of an existing page blob, with automatic chunking and progress
-        notifications.
-
-        container_name:
-            Name of existing container.
-        blob_name:
-            Name of blob to create or update.
-        blob:
-            Content of blob as an array of bytes.
-        index:
-            Start index in the array of bytes.
-        count:
-            Number of bytes to upload. Set to None or negative value to upload
-            all bytes starting from index.
-        content_encoding:
-            Optional. Specifies which content encodings have been applied to
-            the blob. This value is returned to the client when the Get Blob
-            (REST API) operation is performed on the blob resource. The client
-            can use this value when returned to decode the blob content.
-        content_language:
-            Optional. Specifies the natural languages used by this resource.
-        content_md5:
-            Optional. An MD5 hash of the blob content. This hash is used to
-            verify the integrity of the blob during transport. When this header
-            is specified, the storage service checks the hash that has arrived
-            with the one that was sent. If the two hashes do not match, the
-            operation will fail with error code 400 (Bad Request).
-        cache_control:
-            Optional. The Blob service stores this value but does not use or
-            modify it.
-        x_ms_blob_content_type:
-            Optional. Set the blob's content type.
-        x_ms_blob_content_encoding:
-            Optional. Set the blob's content encoding.
-        x_ms_blob_content_language:
-            Optional. Set the blob's content language.
-        x_ms_blob_content_md5:
-            Optional. Set the blob's MD5 hash.
-        x_ms_blob_cache_control:
-            Optional. Sets the blob's cache control.
-        x_ms_meta_name_values:
-            A dict containing name, value for metadata.
-        x_ms_lease_id:
-            Required if the blob has an active lease.
-        x_ms_blob_sequence_number:
-            Optional. Set for page blobs only. The sequence number is a
-            user-controlled value that you can use to track requests. The
-            value of the sequence number must be between 0 and 2^63 - 1. The
-            default value is 0.
-        progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the blob, or None if the total size is unknown.
-        max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
-        max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
-            Sleep time in secs between retries.
-        if_modified_since:
-            Optional. Datetime string.
-        if_unmodified_since:
-            Optional. DateTime string.
-        if_match:
-            Optional. An ETag value.
-        if_none_match:
-            Optional. An ETag value.
-        '''
-        _validate_not_none('container_name', container_name)
-        _validate_not_none('blob_name', blob_name)
-        _validate_not_none('blob', blob)
-        _validate_type_bytes('blob', blob)
-
-        if index < 0:
-            raise IndexError(_ERROR_VALUE_NEGATIVE.format('index'))
-
-        if count is None or count < 0:
-            count = len(blob) - index
-
-        stream = BytesIO(blob)
-        stream.seek(index)
-
-        self.put_blob_from_file(container_name,
-                                blob_name,
-                                stream,
-                                count,
-                                content_encoding,
-                                content_language,
-                                content_md5,
-                                cache_control,
-                                x_ms_blob_content_type,
-                                x_ms_blob_content_encoding,
-                                x_ms_blob_content_language,
-                                x_ms_blob_content_md5,
-                                x_ms_blob_cache_control,
-                                x_ms_meta_name_values,
-                                x_ms_lease_id,
-                                x_ms_blob_sequence_number,
-                                progress_callback,
-                                max_connections,
-                                max_retries,
-                                retry_wait,
-                                if_modified_since,
-                                if_unmodified_since,
-                                if_match,
-                                if_none_match)
 
     def put_page(self, container_name, blob_name, page, x_ms_range,
                  x_ms_page_write, timeout=None, content_md5=None,
@@ -790,3 +365,359 @@ class PageBlobService(BaseBlobService):
         response = self._perform_request(request)
 
         return _ETreeXmlToObject.parse_simple_list(response, PageList, PageRange, "page_ranges")
+
+    #----Convenience APIs-----------------------------------------------------
+
+    def put_blob_from_path(self, container_name, blob_name, file_path,
+                           content_encoding=None, content_language=None,
+                           cache_control=None,
+                           x_ms_blob_content_type=None,
+                           x_ms_blob_content_encoding=None,
+                           x_ms_blob_content_language=None,
+                           x_ms_blob_content_md5=None,
+                           x_ms_blob_cache_control=None,
+                           x_ms_meta_name_values=None,
+                           x_ms_lease_id=None, x_ms_blob_sequence_number=None,
+                           progress_callback=None, max_connections=1,
+                           max_retries=5, retry_wait=1.0,
+                           if_modified_since=None, if_unmodified_since=None,
+                           if_match=None, if_none_match=None):
+        '''
+        Creates a new blob from a file path, or updates the content of an
+        existing blob, with automatic chunking and progress notifications.
+
+        container_name:
+            Name of existing container.
+        blob_name:
+            Name of blob to create or update.
+        file_path:
+            Path of the file to upload as the blob content.
+        content_encoding:
+            Optional. Specifies which content encodings have been applied to
+            the blob. This value is returned to the client when the Get Blob
+            (REST API) operation is performed on the blob resource. The client
+            can use this value when returned to decode the blob content.
+        content_language:
+            Optional. Specifies the natural languages used by this resource.
+        cache_control:
+            Optional. The Blob service stores this value but does not use or
+            modify it.
+        x_ms_blob_content_type:
+            Optional. Set the blob's content type.
+        x_ms_blob_content_encoding:
+            Optional. Set the blob's content encoding.
+        x_ms_blob_content_language:
+            Optional. Set the blob's content language.
+        x_ms_blob_content_md5:
+            Optional. Set the blob's MD5 hash.
+        x_ms_blob_cache_control:
+            Optional. Sets the blob's cache control.
+        x_ms_meta_name_values:
+            A dict containing name, value for metadata.
+        x_ms_lease_id:
+            Required if the blob has an active lease.
+        x_ms_blob_sequence_number:
+            Optional. Set for page blobs only. The sequence number is a
+            user-controlled value that you can use to track requests. The
+            value of the sequence number must be between 0 and 2^63 - 1. The
+            default value is 0.
+        progress_callback:
+            Callback for progress with signature function(current, total) where
+            current is the number of bytes transfered so far, and total is the
+            size of the blob, or None if the total size is unknown.
+        max_connections:
+            Maximum number of parallel connections to use when the blob size
+            exceeds 64MB.
+            Set to 1 to upload the blob chunks sequentially.
+            Set to 2 or more to upload the blob chunks in parallel. This uses
+            more system resources but will upload faster.
+        max_retries:
+            Number of times to retry upload of blob chunk if an error occurs.
+        retry_wait:
+            Sleep time in secs between retries.
+        if_modified_since:
+            Optional. Datetime string.
+        if_unmodified_since:
+            Optional. DateTime string.
+        if_match:
+            Optional. An ETag value.
+        if_none_match:
+            Optional. An ETag value.
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('file_path', file_path)
+
+        count = path.getsize(file_path)
+        with open(file_path, 'rb') as stream:
+            self.put_blob_from_stream(
+                container_name=container_name,
+                blob_name=blob_name,
+                stream=stream,
+                count=count,
+                content_encoding=content_encoding,
+                content_language=content_language,
+                cache_control=cache_control,
+                x_ms_blob_content_type=x_ms_blob_content_type,
+                x_ms_blob_content_encoding=x_ms_blob_content_encoding,
+                x_ms_blob_content_language=x_ms_blob_content_language,
+                x_ms_blob_content_md5=x_ms_blob_content_md5,
+                x_ms_blob_cache_control=x_ms_blob_cache_control,
+                x_ms_meta_name_values=x_ms_meta_name_values,
+                x_ms_lease_id=x_ms_lease_id,
+                x_ms_blob_sequence_number=x_ms_blob_sequence_number,
+                progress_callback=progress_callback,
+                max_connections=max_connections,
+                max_retries=max_retries,
+                retry_wait=retry_wait,
+                if_modified_since=if_modified_since,
+                if_unmodified_since=if_unmodified_since,
+                if_match=if_match,
+                if_none_match=if_none_match)
+
+    def put_blob_from_stream(self, container_name, blob_name, stream, count,
+                           content_encoding=None, content_language=None,
+                           cache_control=None, x_ms_blob_content_type=None,
+                           x_ms_blob_content_encoding=None,
+                           x_ms_blob_content_language=None,
+                           x_ms_blob_content_md5=None,
+                           x_ms_blob_cache_control=None,
+                           x_ms_meta_name_values=None,
+                           x_ms_lease_id=None, x_ms_blob_sequence_number=None,
+                           progress_callback=None, max_connections=1,
+                           max_retries=5, retry_wait=1.0,
+                           if_modified_since=None, if_unmodified_since=None,
+                           if_match=None, if_none_match=None):
+        '''
+        Creates a new blob from a file/stream, or updates the content of an
+        existing blob, with automatic chunking and progress notifications.
+
+        container_name:
+            Name of existing container.
+        blob_name:
+            Name of blob to create or update.
+        stream:
+            Opened file/stream to upload as the blob content.
+        count:
+            Number of bytes to read from the stream. This is required, a page
+            blob cannot be created if the count is unknown.
+        content_encoding:
+            Optional. Specifies which content encodings have been applied to
+            the blob. This value is returned to the client when the Get Blob
+            (REST API) operation is performed on the blob resource. The client
+            can use this value when returned to decode the blob content.
+        content_language:
+            Optional. Specifies the natural languages used by this resource.
+        cache_control:
+            Optional. The Blob service stores this value but does not use or
+            modify it.
+        x_ms_blob_content_type:
+            Optional. Set the blob's content type.
+        x_ms_blob_content_encoding:
+            Optional. Set the blob's content encoding.
+        x_ms_blob_content_language:
+            Optional. Set the blob's content language.
+        x_ms_blob_content_md5:
+            Optional. Set the blob's MD5 hash.
+        x_ms_blob_cache_control:
+            Optional. Sets the blob's cache control.
+        x_ms_meta_name_values:
+            A dict containing name, value for metadata.
+        x_ms_lease_id:
+            Required if the blob has an active lease.
+        x_ms_blob_sequence_number:
+            Optional. Set for page blobs only. The sequence number is a
+            user-controlled value that you can use to track requests. The
+            value of the sequence number must be between 0 and 2^63 - 1. The
+            default value is 0.
+        progress_callback:
+            Callback for progress with signature function(current, total) where
+            current is the number of bytes transfered so far, and total is the
+            size of the blob, or None if the total size is unknown.
+        max_connections:
+            Maximum number of parallel connections to use when the blob size
+            exceeds 64MB.
+            Set to 1 to upload the blob chunks sequentially.
+            Set to 2 or more to upload the blob chunks in parallel. This uses
+            more system resources but will upload faster.
+            Note that parallel upload requires the stream to be seekable.
+        max_retries:
+            Number of times to retry upload of blob chunk if an error occurs.
+        retry_wait:
+            Sleep time in secs between retries.
+        if_modified_since:
+            Optional. Datetime string.
+        if_unmodified_since:
+            Optional. DateTime string.
+        if_match:
+            Optional. An ETag value.
+        if_none_match:
+            Optional. An ETag value.
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('stream', stream)
+        _validate_not_none('count', count)
+
+        if count < 0:
+            raise ValueError(_ERROR_VALUE_NEGATIVE.format('count'))
+
+        if count % _PAGE_SIZE != 0:
+            raise ValueError(_ERROR_PAGE_BLOB_SIZE_ALIGNMENT.format(count))
+
+        self.put_blob(
+            container_name=container_name,
+            blob_name=blob_name,
+            x_ms_blob_content_length=count,
+            content_encoding=content_encoding,
+            content_language=content_language,
+            cache_control=cache_control,
+            x_ms_blob_content_type=x_ms_blob_content_type,
+            x_ms_blob_content_encoding=x_ms_blob_content_encoding,
+            x_ms_blob_content_language=x_ms_blob_content_language,
+            x_ms_blob_content_md5=x_ms_blob_content_md5,
+            x_ms_blob_cache_control=x_ms_blob_cache_control,
+            x_ms_meta_name_values=x_ms_meta_name_values,
+            x_ms_lease_id=x_ms_lease_id,
+            x_ms_blob_sequence_number=x_ms_blob_sequence_number,
+            if_modified_since=if_modified_since,
+            if_unmodified_since=if_unmodified_since,
+            if_match=if_match,
+            if_none_match=if_none_match
+        )
+
+        _upload_blob_chunks(
+            blob_service=self,
+            container_name=container_name,
+            blob_name=blob_name,
+            blob_size=count,
+            block_size=self._BLOB_MAX_CHUNK_DATA_SIZE,
+            stream=stream,
+            max_connections=max_connections,
+            max_retries=max_retries,
+            retry_wait=retry_wait,
+            progress_callback=progress_callback,
+            x_ms_lease_id=x_ms_lease_id,
+            uploader_class=_PageBlobChunkUploader,
+        )
+
+    def put_blob_from_bytes(self, container_name, blob_name, blob,
+                            index=0, count=None, content_encoding=None,
+                            content_language=None, cache_control=None,
+                            x_ms_blob_content_type=None,
+                            x_ms_blob_content_encoding=None,
+                            x_ms_blob_content_language=None,
+                            x_ms_blob_content_md5=None,
+                            x_ms_blob_cache_control=None,
+                            x_ms_meta_name_values=None,
+                            x_ms_lease_id=None, x_ms_blob_sequence_number=None,
+                            progress_callback=None, max_connections=1,
+                            max_retries=5, retry_wait=1.0,
+                            if_modified_since=None, if_unmodified_since=None,
+                            if_match=None, if_none_match=None):
+        '''
+        Creates a new blob from an array of bytes, or updates the content
+        of an existing blob, with automatic chunking and progress
+        notifications.
+
+        container_name:
+            Name of existing container.
+        blob_name:
+            Name of blob to create or update.
+        blob:
+            Content of blob as an array of bytes.
+        index:
+            Start index in the array of bytes.
+        count:
+            Number of bytes to upload. Set to None or negative value to upload
+            all bytes starting from index.
+        content_encoding:
+            Optional. Specifies which content encodings have been applied to
+            the blob. This value is returned to the client when the Get Blob
+            (REST API) operation is performed on the blob resource. The client
+            can use this value when returned to decode the blob content.
+        content_language:
+            Optional. Specifies the natural languages used by this resource.
+        cache_control:
+            Optional. The Blob service stores this value but does not use or
+            modify it.
+        x_ms_blob_content_type:
+            Optional. Set the blob's content type.
+        x_ms_blob_content_encoding:
+            Optional. Set the blob's content encoding.
+        x_ms_blob_content_language:
+            Optional. Set the blob's content language.
+        x_ms_blob_content_md5:
+            Optional. Set the blob's MD5 hash.
+        x_ms_blob_cache_control:
+            Optional. Sets the blob's cache control.
+        x_ms_meta_name_values:
+            A dict containing name, value for metadata.
+        x_ms_lease_id:
+            Required if the blob has an active lease.
+        x_ms_blob_sequence_number:
+            Optional. Set for page blobs only. The sequence number is a
+            user-controlled value that you can use to track requests. The
+            value of the sequence number must be between 0 and 2^63 - 1. The
+            default value is 0.
+        progress_callback:
+            Callback for progress with signature function(current, total) where
+            current is the number of bytes transfered so far, and total is the
+            size of the blob, or None if the total size is unknown.
+        max_connections:
+            Maximum number of parallel connections to use when the blob size
+            exceeds 64MB.
+            Set to 1 to upload the blob chunks sequentially.
+            Set to 2 or more to upload the blob chunks in parallel. This uses
+            more system resources but will upload faster.
+        max_retries:
+            Number of times to retry upload of blob chunk if an error occurs.
+        retry_wait:
+            Sleep time in secs between retries.
+        if_modified_since:
+            Optional. Datetime string.
+        if_unmodified_since:
+            Optional. DateTime string.
+        if_match:
+            Optional. An ETag value.
+        if_none_match:
+            Optional. An ETag value.
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('blob', blob)
+        _validate_type_bytes('blob', blob)
+
+        if index < 0:
+            raise IndexError(_ERROR_VALUE_NEGATIVE.format('index'))
+
+        if count is None or count < 0:
+            count = len(blob) - index
+
+        stream = BytesIO(blob)
+        stream.seek(index)
+
+        self.put_blob_from_stream(
+            container_name=container_name,
+            blob_name=blob_name,
+            stream=stream,
+            count=count,
+            content_encoding=content_encoding,
+            content_language=content_language,
+            cache_control=cache_control,
+            x_ms_blob_content_type=x_ms_blob_content_type,
+            x_ms_blob_content_encoding=x_ms_blob_content_encoding,
+            x_ms_blob_content_language=x_ms_blob_content_language,
+            x_ms_blob_content_md5=x_ms_blob_content_md5,
+            x_ms_blob_cache_control=x_ms_blob_cache_control,
+            x_ms_meta_name_values=x_ms_meta_name_values,
+            x_ms_lease_id=x_ms_lease_id,
+            x_ms_blob_sequence_number=x_ms_blob_sequence_number,
+            progress_callback=progress_callback,
+            max_connections=max_connections,
+            max_retries=max_retries,
+            retry_wait=retry_wait,
+            if_modified_since=if_modified_since,
+            if_unmodified_since=if_unmodified_since,
+            if_match=if_match,
+            if_none_match=if_none_match)

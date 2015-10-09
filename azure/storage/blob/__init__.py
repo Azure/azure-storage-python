@@ -33,8 +33,8 @@ from .models import (
     ContainerSharedAccessPermissions,
     BlobSharedAccessPermissions,
     LeaseActions,
-    BlobTypes,
 )
 
 from .blockblobservice import BlockBlobService
 from .pageblobservice import PageBlobService
+from .appendblobservice import AppendBlobService

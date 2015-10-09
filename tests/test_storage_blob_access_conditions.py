@@ -22,38 +22,13 @@ import requests
 import sys
 import unittest
 
-from azure.common import (
-    AzureHttpError,
-    AzureConflictHttpError,
-    AzureMissingResourceHttpError,
-)
-from azure.storage import (
-    DEV_ACCOUNT_NAME,
-    DEV_ACCOUNT_KEY,
-    AccessPolicy,
-    Logging,
-    HourMetrics,
-    MinuteMetrics,
-    SharedAccessPolicy,
-    SignedIdentifier,
-    SignedIdentifiers,
-    StorageServiceProperties,
-)
+from azure.common import AzureHttpError
 from azure.storage.blob import (
-    BLOB_SERVICE_HOST_BASE,
-    BlobBlockList,
     BlobResult,
     BlockBlobService,
     PageBlobService,
-    BlobSharedAccessPermissions,
-    ContainerSharedAccessPermissions,
-    PageList,
+    AppendBlobService,
     PageRange,
-)
-from azure.storage.storageclient import (
-    AZURE_STORAGE_ACCESS_KEY,
-    AZURE_STORAGE_ACCOUNT,
-    EMULATED,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -70,6 +45,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         self.bs = self._create_storage_service(BlockBlobService, self.settings)
         self.pbs = self._create_storage_service(PageBlobService, self.settings)
+        self.abs = self._create_storage_service(AppendBlobService, self.settings)
         self.container_name = self.get_resource_name('utcontainer')
 
     def tearDown(self):
@@ -102,6 +78,11 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                                         content_length):
         self._create_container(container_name)
         resp = self.pbs.put_blob(self.container_name, blob_name, str(content_length))
+        self.assertIsNone(resp)
+
+    def _create_container_and_append_blob(self, container_name, blob_name):
+        self._create_container(container_name)
+        resp = self.abs.put_blob(container_name, blob_name)
         self.assertIsNone(resp)
 
     class NonSeekableFile(object):
@@ -2016,6 +1997,144 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         with self.assertRaises(AzureHttpError):
             self.pbs.get_page_ranges(self.container_name, 'blob1',
                                     if_none_match=etag)
+
+        # Assert
+
+    @record
+    def test_append_block_with_if_modified(self):
+        # Arrange
+        self._create_container_and_append_blob(self.container_name, 'blob1')
+        test_datetime = (datetime.datetime.utcnow() -
+                         datetime.timedelta(minutes=15))\
+                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+        # Act
+        for i in range(5):
+            resp = self.abs.append_block(
+                self.container_name, 'blob1',
+                u'block {0}'.format(i).encode('utf-8'),
+                if_modified_since=test_datetime)
+            self.assertIsNone(resp)
+
+        # Assert
+        blob = self.bs.get_blob(self.container_name, 'blob1')
+        self.assertEqual(b'block 0block 1block 2block 3block 4', blob)
+
+    @record
+    def test_append_block_with_if_modified_fail(self):
+        # Arrange
+        self._create_container_and_append_blob(self.container_name, 'blob1')
+        test_datetime = (datetime.datetime.utcnow() +
+                         datetime.timedelta(minutes=15))\
+                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+        # Act
+        with self.assertRaises(AzureHttpError):
+            for i in range(5):
+                resp = self.abs.append_block(
+                    self.container_name, 'blob1',
+                    u'block {0}'.format(i).encode('utf-8'),
+                    if_modified_since=test_datetime)
+
+        # Assert
+
+    @record
+    def test_append_block_with_if_unmodified(self):
+        # Arrange
+        self._create_container_and_append_blob(self.container_name, 'blob1')
+        test_datetime = (datetime.datetime.utcnow() +
+                         datetime.timedelta(minutes=15))\
+                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+        # Act
+        for i in range(5):
+            resp = self.abs.append_block(
+                self.container_name, 'blob1',
+                u'block {0}'.format(i).encode('utf-8'),
+                if_unmodified_since=test_datetime)
+            self.assertIsNone(resp)
+
+        # Assert
+        blob = self.bs.get_blob(self.container_name, 'blob1')
+        self.assertEqual(b'block 0block 1block 2block 3block 4', blob)
+
+    @record
+    def test_append_block_with_if_unmodified_fail(self):
+        # Arrange
+        self._create_container_and_append_blob(self.container_name, 'blob1')
+        test_datetime = (datetime.datetime.utcnow() -
+                         datetime.timedelta(minutes=15))\
+                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+        # Act
+        with self.assertRaises(AzureHttpError):
+            for i in range(5):
+                resp = self.abs.append_block(
+                    self.container_name, 'blob1',
+                    u'block {0}'.format(i).encode('utf-8'),
+                    if_unmodified_since=test_datetime)
+
+        # Assert
+
+    @record
+    def test_append_block_with_if_match(self):
+        # Arrange
+        self._create_container_and_append_blob(self.container_name, 'blob1')
+
+        # Act
+        for i in range(5):
+            etag = self.abs.get_blob_properties(self.container_name, 'blob1')['ETag']
+            resp = self.abs.append_block(
+                self.container_name, 'blob1',
+                u'block {0}'.format(i).encode('utf-8'),
+                if_match=etag)
+            self.assertIsNone(resp)
+
+        # Assert
+        blob = self.bs.get_blob(self.container_name, 'blob1')
+        self.assertEqual(b'block 0block 1block 2block 3block 4', blob)
+
+    @record
+    def test_append_block_with_if_match_fail(self):
+        # Arrange
+        self._create_container_and_append_blob(self.container_name, 'blob1')
+
+        # Act
+        with self.assertRaises(AzureHttpError):
+            for i in range(5):
+                resp = self.abs.append_block(
+                    self.container_name, 'blob1',
+                    u'block {0}'.format(i).encode('utf-8'),
+                    if_match='0x111111111111111')
+
+        # Assert
+
+    @record
+    def test_append_block_with_if_none_match(self):
+        # Arrange
+        self._create_container_and_append_blob(self.container_name, 'blob1')
+
+        # Act
+        for i in range(5):
+            resp = self.abs.append_block(
+                self.container_name, 'blob1',
+                u'block {0}'.format(i).encode('utf-8'),
+                if_none_match='0x8D2C9167D53FC2C')
+            self.assertIsNone(resp)
+
+        # Assert
+        blob = self.bs.get_blob(self.container_name, 'blob1')
+        self.assertEqual(b'block 0block 1block 2block 3block 4', blob)
+
+    @record
+    def test_append_block_with_if_none_match_fail(self):
+        # Arrange
+        self._create_container_and_append_blob(self.container_name, 'blob1')
+
+        # Act
+        with self.assertRaises(AzureHttpError):
+            for i in range(5):
+                etag = self.abs.get_blob_properties(self.container_name, 'blob1')['ETag']
+                resp = self.abs.append_block(
+                    self.container_name, 'blob1',
+                    u'block {0}'.format(i).encode('utf-8'),
+                    if_none_match=etag)
 
         # Assert
 

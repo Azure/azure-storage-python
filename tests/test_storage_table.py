@@ -1408,7 +1408,7 @@ class StorageTableTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        with self.assertRaises(AzureMissingResourceHttpError):
+        with self.assertRaises(AzureHttpError):
             service.insert_entity(
                 self.table_name,
                 {

@@ -19,23 +19,15 @@ from .._common_error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
-    _validate_type_bytes,
-    _ERROR_VALUE_NEGATIVE,
-    _ERROR_PAGE_BLOB_SIZE_ALIGNMENT,
 )
 from .._common_conversion import (
-    _encode_base64,
     _int_or_none,
     _str,
     _str_or_none,
 )
-from abc import (
-    ABCMeta,
-    abstractmethod
-)
+from abc import ABCMeta
 from .._common_serialization import (
     _get_request_body,
-    _get_request_body_bytes_only,
     _parse_response_for_dict,
     _parse_response_for_dict_filter,
     _parse_response_for_dict_prefix,
@@ -43,12 +35,7 @@ from .._common_serialization import (
     _ETreeXmlToObject,
 )
 from .._http import HTTPRequest
-from ._chunking import (
-    _BlockBlobChunkUploader,
-    _PageBlobChunkUploader,
-    _download_blob_chunks,
-    _upload_blob_chunks,
-)
+from ._chunking import _download_blob_chunks
 from ..models import (
     SignedIdentifiers,
     Logging,
@@ -58,8 +45,6 @@ from ..models import (
 from .models import (
     Container,
     ContainerEnumResults,
-    PageList,
-    PageRange,
     LeaseActions,
 )
 from ..auth import (
@@ -82,8 +67,6 @@ from .._deserialization import (
     _convert_xml_to_service_properties,
 )
 from ._serialization import (
-    _convert_block_list_to_xml,
-    _convert_response_to_block_list,
     _create_blob_result,
     _parse_blob_enum_results_list,
     _update_storage_blob_header,
@@ -100,16 +83,13 @@ if sys.version_info >= (3,):
 else:
     from cStringIO import StringIO as BytesIO
 
-# Keep this value sync with _ERROR_PAGE_BLOB_SIZE_ALIGNMENT
-_PAGE_SIZE = 512
-
-
-class BaseBlobService(_StorageClient):
+class _BaseBlobService(_StorageClient):
 
     '''
     This is the main class managing Blob resources.
     '''
 
+    __metaclass__ = ABCMeta
     _BLOB_MAX_DATA_SIZE = 64 * 1024 * 1024
     _BLOB_MAX_CHUNK_DATA_SIZE = 4 * 1024 * 1024
 
@@ -118,8 +98,6 @@ class BaseBlobService(_StorageClient):
                  timeout=DEFAULT_HTTP_TIMEOUT, sas_token=None, connection_string=None,
                  request_session=None):
         '''
-        blob_type:
-            Blob type used for all operations in this service.
         account_name:
             your storage account name, required for all operations.
         account_key:
@@ -154,7 +132,7 @@ class BaseBlobService(_StorageClient):
             protocol = connection_params.protocol.lower()
             host_base = connection_params.host_base_blob
             
-        super(BaseBlobService, self).__init__(
+        super(_BaseBlobService, self).__init__(
             account_name, account_key, protocol, host_base, dev_host, timeout, sas_token, request_session)
 
         if self.account_key:
@@ -178,13 +156,13 @@ class BaseBlobService(_StorageClient):
             Name of blob.
         account_name:
             Name of the storage account. If not specified, uses the account
-            specified when BaseBlobService was initialized.
+            specified when _BaseBlobService was initialized.
         protocol:
             Protocol to use: 'http' or 'https'. If not specified, uses the
-            protocol specified when BaseBlobService was initialized.
+            protocol specified when _BaseBlobService was initialized.
         host_base:
             Live host base url.  If not specified, uses the host base specified
-            when BaseBlobService was initialized.
+            when _BaseBlobService was initialized.
         sas_token:
             Shared access signature token created with
             generate_shared_access_signature.
@@ -204,7 +182,8 @@ class BaseBlobService(_StorageClient):
         return url
 
     def generate_shared_access_signature(self, container_name, blob_name=None,
-                                         shared_access_policy=None,
+                                         shared_access_policy=None, ip=None,
+                                         protocol=None,
                                          sas_version=X_MS_VERSION,
                                          cache_control=None,
                                          content_disposition=None,
@@ -213,7 +192,7 @@ class BaseBlobService(_StorageClient):
                                          content_type=None):
         '''
         Generates a shared access signature for the container or blob.
-        Use the returned signature with the sas_token parameter of BaseBlobService.
+        Use the returned signature with the sas_token parameter of _BaseBlobService.
 
         container_name:
             Required. Name of container.
@@ -221,6 +200,16 @@ class BaseBlobService(_StorageClient):
             Optional. Name of blob.
         shared_access_policy:
             Instance of SharedAccessPolicy class.
+        ip:
+            Specifies an IP address or a range of IP addresses from which to accept requests.
+            If the IP address from which the request originates does not match the IP address
+            or address range specified on the SAS token, the request is not authenticated.
+            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
+            restricts the request to those IP addresses.
+        protocol:
+            Specifies the protocol permitted for a request made. Possible values are
+            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
+            is https,http. Note that HTTP only is not a permitted value.
         sas_version:
             x-ms-version for storage service, or None to get a signed query
             string compatible with pre 2012-02-12 clients, where the version
@@ -255,9 +244,12 @@ class BaseBlobService(_StorageClient):
 
         sas = SharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_signed_query_string(
+            'blob',
             resource_path,
             resource_type,
             shared_access_policy,
+            ip,
+            protocol,
             sas_version,
             cache_control,
             content_disposition,

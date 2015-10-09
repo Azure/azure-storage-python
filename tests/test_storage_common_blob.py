@@ -40,13 +40,10 @@ from azure.storage import (
 )
 from azure.storage.blob import (
     BLOB_SERVICE_HOST_BASE,
-    BlobBlockList,
     BlobResult,
     BlockBlobService,
     BlobSharedAccessPermissions,
     ContainerSharedAccessPermissions,
-    PageList,
-    PageRange,
 )
 from azure.storage.storageclient import (
     AZURE_STORAGE_ACCESS_KEY,

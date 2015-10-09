@@ -22,38 +22,15 @@ import requests
 import sys
 import unittest
 
-from azure.common import (
-    AzureHttpError,
-    AzureConflictHttpError,
-    AzureMissingResourceHttpError,
-)
+from azure.common import AzureHttpError
 from azure.storage import (
-    DEV_ACCOUNT_NAME,
-    DEV_ACCOUNT_KEY,
     AccessPolicy,
-    Logging,
-    HourMetrics,
-    MinuteMetrics,
     SharedAccessPolicy,
-    SignedIdentifier,
-    SignedIdentifiers,
-    StorageServiceProperties,
 )
 from azure.storage.blob import (
-    BLOB_SERVICE_HOST_BASE,
-    BlobBlockList,
-    BlobResult,
-    BlockBlobService,
     PageBlobService,
-    BlobSharedAccessPermissions,
-    ContainerSharedAccessPermissions,
     PageList,
     PageRange,
-)
-from azure.storage.storageclient import (
-    AZURE_STORAGE_ACCESS_KEY,
-    AZURE_STORAGE_ACCOUNT,
-    EMULATED,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -199,7 +176,7 @@ class StoragePageBlobTest(StorageTestCase):
         rand = random.Random(self.checksum)
         size = self.bs._BLOB_MAX_DATA_SIZE + 12345
         text = u''
-        words = [u'hello', u'world', u'python', u'?????']
+        words = [u'hello', u'world', u'python', u'啊齄丂狛狜']
         while (len(text) < size):
             index = rand.randint(0, len(words) - 1)
             text = text + u' ' + words[index]
@@ -690,7 +667,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
-    def test_put_blob_from_file_chunked_upload(self):
+    def test_put_blob_from_stream_chunked_upload(self):
         # Arrange
         self._create_container(self.container_name)
         blob_name = 'blob1'
@@ -702,7 +679,7 @@ class StoragePageBlobTest(StorageTestCase):
         # Act
         blob_size = len(data)
         with open(file_path, 'rb') as stream:
-            resp = self.bs.put_blob_from_file(
+            resp = self.bs.put_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size)
 
         # Assert
@@ -710,7 +687,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
-    def test_put_blob_from_file_chunked_upload_parallel(self):
+    def test_put_blob_from_stream_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -726,7 +703,7 @@ class StoragePageBlobTest(StorageTestCase):
         # Act
         blob_size = len(data)
         with open(file_path, 'rb') as stream:
-            resp = self.bs.put_blob_from_file(
+            resp = self.bs.put_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size,
                 max_connections=10)
 
@@ -736,7 +713,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
     @record
-    def test_put_blob_from_file_non_seekable_chunked_upload(self):
+    def test_put_blob_from_stream_non_seekable_chunked_upload(self):
         # Arrange
         self._create_container(self.container_name)
         blob_name = 'blob1'
@@ -749,7 +726,7 @@ class StoragePageBlobTest(StorageTestCase):
         blob_size = len(data)
         with open(file_path, 'rb') as stream:
             non_seekable_file = StoragePageBlobTest.NonSeekableFile(stream)
-            resp = self.bs.put_blob_from_file(
+            resp = self.bs.put_blob_from_stream(
                 self.container_name, blob_name, non_seekable_file, blob_size,
                 max_connections=1)
 
@@ -758,7 +735,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
-    def test_put_blob_from_file_non_seekable_chunked_upload_parallel(self):
+    def test_put_blob_from_stream_non_seekable_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -778,14 +755,14 @@ class StoragePageBlobTest(StorageTestCase):
 
             # Parallel uploads require that the file be seekable
             with self.assertRaises(AttributeError):
-                resp = self.bs.put_blob_from_file(
+                resp = self.bs.put_blob_from_stream(
                     self.container_name, blob_name, non_seekable_file, blob_size,
                     max_connections=10)
 
         # Assert
 
     @record
-    def test_put_blob_from_file_with_progress_chunked_upload(self):
+    def test_put_blob_from_stream_with_progress_chunked_upload(self):
         # Arrange
         self._create_container(self.container_name)
         blob_name = 'blob1'
@@ -802,7 +779,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         blob_size = len(data)
         with open(file_path, 'rb') as stream:
-            resp = self.bs.put_blob_from_file(
+            resp = self.bs.put_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size,
                 progress_callback=callback)
 
@@ -812,7 +789,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
-    def test_put_blob_from_file_with_progress_chunked_upload_parallel(self):
+    def test_put_blob_from_stream_with_progress_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -833,7 +810,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         blob_size = len(data)
         with open(file_path, 'rb') as stream:
-            resp = self.bs.put_blob_from_file(
+            resp = self.bs.put_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size,
                 progress_callback=callback,
                 max_connections=5)
@@ -846,7 +823,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertGreater(len(progress), 0)
 
     @record
-    def test_put_blob_from_file_chunked_upload_truncated(self):
+    def test_put_blob_from_stream_chunked_upload_truncated(self):
         # Arrange
         self._create_container(self.container_name)
         blob_name = 'blob1'
@@ -858,7 +835,7 @@ class StoragePageBlobTest(StorageTestCase):
         # Act
         blob_size = len(data) - 512
         with open(file_path, 'rb') as stream:
-            resp = self.bs.put_blob_from_file(
+            resp = self.bs.put_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size)
 
         # Assert
@@ -866,7 +843,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
-    def test_put_blob_from_file_chunked_upload_truncated_parallel(self):
+    def test_put_blob_from_stream_chunked_upload_truncated_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -882,7 +859,7 @@ class StoragePageBlobTest(StorageTestCase):
         # Act
         blob_size = len(data) - 512
         with open(file_path, 'rb') as stream:
-            resp = self.bs.put_blob_from_file(
+            resp = self.bs.put_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size,
                 max_connections=10)
 
@@ -892,7 +869,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
     @record
-    def test_put_blob_from_file_with_progress_chunked_upload_truncated(self):
+    def test_put_blob_from_stream_with_progress_chunked_upload_truncated(self):
         # Arrange
         self._create_container(self.container_name)
         blob_name = 'blob1'
@@ -909,7 +886,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         blob_size = len(data) - 512
         with open(file_path, 'rb') as stream:
-            resp = self.bs.put_blob_from_file(
+            resp = self.bs.put_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size,
                 progress_callback=callback)
 

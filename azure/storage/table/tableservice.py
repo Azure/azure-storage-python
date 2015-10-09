@@ -161,6 +161,7 @@ class TableService(_StorageClient):
 
     def generate_shared_access_signature(self, table_name,
                                          shared_access_policy=None,
+                                         ip=None, protocol=None,
                                          sas_version=X_MS_VERSION):
         '''
         Generates a shared access signature for the table.
@@ -170,6 +171,16 @@ class TableService(_StorageClient):
             Required. Name of table.
         shared_access_policy:
             Instance of SharedAccessPolicy class.
+        ip:
+            Specifies an IP address or a range of IP addresses from which to accept requests.
+            If the IP address from which the request originates does not match the IP address
+            or address range specified on the SAS token, the request is not authenticated.
+            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
+            restricts the request to those IP addresses.
+        protocol:
+            Specifies the protocol permitted for a request made. Possible values are
+            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
+            is https,http. Note that HTTP only is not a permitted value.
         sas_version:
             x-ms-version for storage service, or None to get a signed query
             string compatible with pre 2012-02-12 clients, where the version
@@ -182,9 +193,12 @@ class TableService(_StorageClient):
 
         sas = SharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_signed_query_string(
+            'table',
             table_name,
             None,
             shared_access_policy,
+            ip,
+            protocol,
             sas_version,
             table_name=table_name,
         )

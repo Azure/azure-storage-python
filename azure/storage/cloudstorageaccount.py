@@ -38,6 +38,10 @@ class CloudStorageAccount(object):
         from .blob.pageblobservice import PageBlobService
         return PageBlobService(self.account_name, self.account_key)
 
+    def create_append_blob_service(self):
+        from .blob.appendblobservice import AppendBlobService
+        return AppendBlobService(self.account_name, self.account_key)
+
     def create_table_service(self):
         from .table.tableservice import TableService
         return TableService(self.account_name, self.account_key)

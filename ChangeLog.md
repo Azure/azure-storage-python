@@ -19,6 +19,7 @@
 - Separated lease_container and lease_blob into unique methods for each lease action.
 - Added access condition support for all applicable APIs.
 - Refactored the blob service into a block blob and page blob service.
+- Added Append Blob support.
 
 ### Queue:
 - The list_queues operation returns a list of Queue objects. The list returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.

@@ -23,13 +23,15 @@ class ResourceType(object):
 
 
 class QueryStringConstants(object):
-    SIGNED_VERSION = 'sv'
+    SIGNED_SIGNATURE = 'sig'
+    SIGNED_PERMISSION = 'sp'
     SIGNED_START = 'st'
     SIGNED_EXPIRY = 'se'
     SIGNED_RESOURCE = 'sr'
-    SIGNED_PERMISSION = 'sp'
     SIGNED_IDENTIFIER = 'si'
-    SIGNED_SIGNATURE = 'sig'
+    SIGNED_IP = 'sip'
+    SIGNED_PROTOCOL = 'spr'
+    SIGNED_VERSION = 'sv'
     SIGNED_CACHE_CONTROL = 'rscc'
     SIGNED_CONTENT_DISPOSITION = 'rscd'
     SIGNED_CONTENT_ENCODING = 'rsce'
@@ -66,8 +68,8 @@ class SharedAccessSignature(object):
         self.account_name = account_name
         self.account_key = account_key
 
-    def generate_signed_query_string(self, path, resource_type,
-                                     shared_access_policy,
+    def generate_signed_query_string(self, service, path, resource_type,
+                                     shared_access_policy, ip=None, protocol=None,
                                      version=X_MS_VERSION,
                                      cache_control=None, content_disposition=None,
                                      content_encoding=None, content_language=None,
@@ -76,12 +78,22 @@ class SharedAccessSignature(object):
         Generates the query string for path, resource type and shared access
         policy.
 
+        service:
+            The storage service for sas.
         path:
             the resource
         resource_type:
             'b' for blob, 'c' for container, None for queue/table
         shared_access_policy:
             shared access policy
+        ip:
+            Specifies an IP address or a range of IP addresses from which to accept requests.
+            If the IP address from which the request originates does not match the IP address
+            or address range specified on the SAS token, the request is not authenticated.
+        protocol:
+            Specifies the protocol permitted for a request made. Possible values are
+            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
+            is https,http. Note that HTTP only is not a permitted value.
         version:
             x-ms-version for storage service, or None to get a signed query
             string compatible with pre 2012-02-12 clients, where the version
@@ -105,22 +117,24 @@ class SharedAccessSignature(object):
             Name of table.
         '''
         query_dict = self._generate_signed_query_dict(
+            service,
             path,
             resource_type,
             shared_access_policy,
-            version,
-            cache_control,
-            content_disposition,
-            content_encoding,
-            content_language,
-            content_type,
-            table_name,
-        )
+            ip=ip,
+            protocol=protocol,
+            version=version,
+            cache_control=cache_control,
+            content_disposition=content_disposition,
+            content_encoding=content_encoding,
+            content_language=content_language,
+            content_type=content_type,
+            table_name=table_name)
         return '&'.join(['{0}={1}'.format(n, url_quote(v, '/()$=\',')) for n, v in query_dict.items() if v is not None])
 
-    def _generate_signed_query_dict(self, path, resource_type,
-                                   shared_access_policy,
-                                   version=X_MS_VERSION,
+    def _generate_signed_query_dict(self, service, path, resource_type,
+                                   shared_access_policy, ip=None,
+                                   protocol=None, version=X_MS_VERSION,
                                    cache_control=None, content_disposition=None,
                                    content_encoding=None, content_language=None,
                                    content_type=None, table_name=None):
@@ -144,6 +158,8 @@ class SharedAccessSignature(object):
 
             add_query(QueryStringConstants.SIGNED_IDENTIFIER, shared_access_policy.id)
 
+        add_query(QueryStringConstants.SIGNED_IP, ip)
+        add_query(QueryStringConstants.SIGNED_PROTOCOL, protocol)
         add_query(QueryStringConstants.SIGNED_VERSION, version)
         add_query(QueryStringConstants.SIGNED_RESOURCE, resource_type)
         add_query(QueryStringConstants.SIGNED_CACHE_CONTROL, cache_control)
@@ -154,14 +170,14 @@ class SharedAccessSignature(object):
         add_query(QueryStringConstants.TABLE_NAME, table_name)
 
         query_dict[QueryStringConstants.SIGNED_SIGNATURE] = self._generate_signature(
-            path, resource_type, shared_access_policy, version, cache_control,
-            content_disposition, content_encoding, content_language,
-            content_type, table_name)
+            service, path, resource_type, shared_access_policy, ip, protocol,
+            version, cache_control, content_disposition, content_encoding,
+            content_language, content_type, table_name)
 
         return query_dict
 
-    def _generate_signature(self, path, resource_type, shared_access_policy,
-                            version=X_MS_VERSION,
+    def _generate_signature(self, service, path, resource_type, shared_access_policy,
+                            ip=None, protocol=None, version=X_MS_VERSION,
                             cache_control=None, content_disposition=None,
                             content_encoding=None, content_language=None,
                             content_type=None, table_name=None):
@@ -174,7 +190,7 @@ class SharedAccessSignature(object):
         if path[0] != '/':
             path = '/' + path
 
-        canonicalized_resource = '/' + self.account_name + path
+        canonicalized_resource = '/' + service + '/' + self.account_name + path
 
         # Form the string to sign from shared_access_policy and canonicalized
         # resource. The order of values is important.
@@ -186,6 +202,8 @@ class SharedAccessSignature(object):
              get_value_to_append(ap.expiry if ap else '') +
              get_value_to_append(canonicalized_resource) +
              get_value_to_append(shared_access_policy.id) +
+             get_value_to_append(ip) +
+             get_value_to_append(protocol) +
              get_value_to_append(version))
 
         if resource_type:
