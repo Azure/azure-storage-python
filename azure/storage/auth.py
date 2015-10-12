@@ -24,6 +24,8 @@ class _StorageSharedKeyAuthentication(object):
 
     def _get_headers(self, request, headers_to_sign):
         headers = dict((name.lower(), value) for name, value in request.headers if value)
+        if 'content-length' in headers and headers['content-length'] == '0':
+            del headers['content-length']
         return '\n'.join(headers.get(x, '') for x in headers_to_sign) + '\n'
 
     def _get_verb(self, request):

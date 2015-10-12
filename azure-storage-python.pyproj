@@ -22,8 +22,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="azure\storage\auth.py" />
-    <Compile Include="azure\storage\blob\blobservice.py" />
+    <Compile Include="azure\storage\blob\appendblobservice.py" />
+    <Compile Include="azure\storage\blob\blockblobservice.py" />
     <Compile Include="azure\storage\blob\models.py" />
+    <Compile Include="azure\storage\blob\pageblobservice.py" />
+    <Compile Include="azure\storage\blob\_baseblobservice.py" />
     <Compile Include="azure\storage\blob\_chunking.py" />
     <Compile Include="azure\storage\blob\_serialization.py" />
     <Compile Include="azure\storage\blob\__init__.py" />
@@ -76,9 +79,12 @@
     <Compile Include="tests\storage_testcase.py" />
     <Compile Include="tests\test_storage_account.py" />
     <Compile Include="tests\test_service_properties.py" />
-    <Compile Include="tests\test_storage_blob.py" />
+    <Compile Include="tests\test_storage_append_blob.py" />
+    <Compile Include="tests\test_storage_common_blob.py" />
     <Compile Include="tests\test_storage_blob_access_conditions.py" />
+    <Compile Include="tests\test_storage_block_blob.py" />
     <Compile Include="tests\test_storage_file.py" />
+    <Compile Include="tests\test_storage_page_blob.py" />
     <Compile Include="tests\test_storage_queue.py" />
     <Compile Include="tests\test_storage_sas.py" />
     <Compile Include="tests\test_storage_table_batch.py" />
@@ -102,12 +108,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="BreakingChanges.md" />
+    <Content Include="ChangeLog.md" />
     <Content Include="doc\file.rst" />
     <Content Include="doc\table.rst" />
     <Content Include="doc\queue.rst" />
-    <Content Include="doc\blob.rst">
-      <SubType>Code</SubType>
-    </Content>
+    <Content Include="doc\blob.rst" />
     <Content Include="doc\BuildDocs.bat" />
     <Content Include="doc\index.rst" />
     <Content Include="doc\InstallDocDependencies.bat" />

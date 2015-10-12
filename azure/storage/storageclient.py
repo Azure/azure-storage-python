@@ -35,7 +35,7 @@ from ._common_error import (
 class _StorageClient(object):
 
     '''
-    This is the base class for BlobManager, TableManager and QueueManager.
+    This is the base class for BlobManager, TableManager, QueueManager, and FileManager.
     '''
 
     def __init__(self, account_name=None, account_key=None, protocol='https',

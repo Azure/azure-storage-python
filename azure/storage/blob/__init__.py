@@ -35,4 +35,6 @@ from .models import (
     LeaseActions,
 )
 
-from .blobservice import BlobService
+from .blockblobservice import BlockBlobService
+from .pageblobservice import PageBlobService
+from .appendblobservice import AppendBlobService
