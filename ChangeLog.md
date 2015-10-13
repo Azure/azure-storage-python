@@ -6,8 +6,8 @@
 
 ### All:
 - set and get acl methods take and return dictionaries mapping an id to an AccessPolicy object rather than a SignedIdentifiers object.
-- generate_shared_access_signature methods take permissions, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
-- generate_signed_query_string on SharedAccessSignature takes permissions, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
+- generate_shared_access_signature methods take permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
+- generate_signed_query_string on SharedAccessSignature takes permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
 - expiry and start, whether as part of AccessPolicy or params in generateSharedAccessSignature, may be given as UTC date objects or as strings.
 
 ### Table:

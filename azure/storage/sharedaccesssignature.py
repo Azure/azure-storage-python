@@ -64,7 +64,7 @@ class SharedAccessSignature(object):
         self.account_name = account_name
         self.account_key = account_key
 
-    def generate_signed_query_string(self, path, resource_type,
+    def generate_signed_query_string(self, service, path, resource_type,
                                     permission=None,                                   
                                     expiry=None,
                                     start=None, 
@@ -79,6 +79,8 @@ class SharedAccessSignature(object):
         Generates the query string for path, resource type and shared access
         parameters.
 
+        :param str service:
+            The service to generate the sas for.
         :param str path:
             The path to the resource.
         :param str resource_type:
@@ -178,7 +180,7 @@ class SharedAccessSignature(object):
         )
         return '&'.join(['{0}={1}'.format(n, url_quote(v, '/()$=\',')) for n, v in query_dict.items() if v is not None])
 
-    def _generate_signed_query_dict(self, path, resource_type,
+    def _generate_signed_query_dict(self, service, path, resource_type,
                                     permission=None, expiry=None, start=None,
                                     id=None, ip=None, protocol=None,
                                     cache_control=None, content_disposition=None,
@@ -220,13 +222,13 @@ class SharedAccessSignature(object):
         add_query(QueryStringConstants.END_RK, end_rk)
 
         query_dict[QueryStringConstants.SIGNED_SIGNATURE] = self._generate_signature(
-            path, resource_type, permission, expiry, start, id, ip, protocol,
+            service, path, resource_type, permission, expiry, start, id, ip, protocol,
             cache_control, content_disposition, content_encoding, content_language,
             content_type, table_name, start_pk, start_rk, end_pk, end_rk)
 
         return query_dict
 
-    def _generate_signature(self, path, resource_type, permission=None, 
+    def _generate_signature(self, service, path, resource_type, permission=None, 
                             expiry=None, start=None, id=None, ip=None, protocol=None,
                             cache_control=None, content_disposition=None,
                             content_encoding=None, content_language=None,

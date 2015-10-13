@@ -25,7 +25,6 @@ import unittest
 from azure.common import AzureHttpError
 from azure.storage import (
     AccessPolicy,
-    SharedAccessPolicy,
 )
 from azure.storage.blob import (
     BLOB_SERVICE_HOST_BASE,

@@ -1943,7 +1943,7 @@ class StorageCommonBlobTest(StorageTestCase):
         sas_token = self.bs2.generate_shared_access_signature(
             self.remote_container_name,
             source_blob_name,
-            permissions=BlobSharedAccessPermissions.READ,
+            permission=BlobSharedAccessPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),          
         )
 
@@ -2386,7 +2386,7 @@ class StorageCommonBlobTest(StorageTestCase):
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            permissions=BlobSharedAccessPermissions.READ,
+            permission=BlobSharedAccessPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -2461,7 +2461,7 @@ class StorageCommonBlobTest(StorageTestCase):
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            permissions=BlobSharedAccessPermissions.READ,
+            permission=BlobSharedAccessPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -2495,7 +2495,7 @@ class StorageCommonBlobTest(StorageTestCase):
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            permissions=BlobSharedAccessPermissions.READ,
+            permission=BlobSharedAccessPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
             cache_control='no-cache',
             content_disposition='inline',
@@ -2539,7 +2539,7 @@ class StorageCommonBlobTest(StorageTestCase):
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            permissions=BlobSharedAccessPermissions.WRITE,
+            permission=BlobSharedAccessPermissions.WRITE,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
         url = self.bs.make_blob_url(
@@ -2575,7 +2575,7 @@ class StorageCommonBlobTest(StorageTestCase):
         token = self.bs.generate_shared_access_signature(
             self.container_name,
             blob_name,
-            permissions=BlobSharedAccessPermissions.DELETE,
+            permission=BlobSharedAccessPermissions.DELETE,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
         url = self.bs.make_blob_url(
@@ -2611,7 +2611,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name,
             None,
             expiry=datetime.utcnow() + timedelta(hours=1),
-            permissions=ContainerSharedAccessPermissions.READ,
+            permission=ContainerSharedAccessPermissions.READ,
         )
         url = self.bs.make_blob_url(
             self.container_name,

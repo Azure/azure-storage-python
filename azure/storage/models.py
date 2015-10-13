@@ -232,4 +232,4 @@ class AccessPolicy(object):
     def __init__(self, permission=None, expiry=None, start=None):
         self.start = start
         self.expiry = expiry
-        self.permissions = permissions
+        self.permission = permission

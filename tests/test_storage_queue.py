@@ -238,9 +238,9 @@ class StorageQueueTest(StorageTestCase):
         self.assertNotEqual('', message.pop_receipt)
         self.assertEqual('1', message.dequeue_count)
 
-        self.assertIsInstance(message.insertion_time, datetime.date)
-        self.assertIsInstance(message.expiration_time, datetime.date)
-        self.assertIsInstance(message.time_next_visible, datetime.date)
+        self.assertIsInstance(message.insertion_time, datetime)
+        self.assertIsInstance(message.expiration_time, datetime)
+        self.assertIsInstance(message.time_next_visible, datetime)
 
     @record
     def test_get_messages_with_options(self):

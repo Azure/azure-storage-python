@@ -23,10 +23,6 @@ import sys
 import unittest
 
 from azure.common import AzureHttpError
-from azure.storage import (
-    AccessPolicy,
-    SharedAccessPolicy,
-)
 from azure.storage.blob import (
     PageBlobService,
     PageList,
@@ -182,18 +178,6 @@ class StoragePageBlobTest(StorageTestCase):
             text = text + u' ' + words[index]
 
         return text
-
-    def _get_shared_access_policy(self, permission):
-        date_format = "%Y-%m-%dT%H:%M:%SZ"
-        start = datetime.datetime.utcnow() - datetime.timedelta(minutes=1)
-        expiry = start + datetime.timedelta(hours=1)
-        return SharedAccessPolicy(
-            AccessPolicy(
-                start.strftime(date_format),
-                expiry.strftime(date_format),
-                permission
-            )
-        )
 
     class NonSeekableFile(object):
         def __init__(self, wrapped_file):
