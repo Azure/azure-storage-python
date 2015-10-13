@@ -140,7 +140,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-					datetime.timedelta(minutes=15))\
+                    datetime.timedelta(minutes=15))\
                    .strftime('%a, %d %b %Y %H:%M:%S GMT')
         # Act
         resp = self.bs.set_container_acl(self.container_name,
@@ -156,7 +156,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-					datetime.timedelta(minutes=15))\
+                    datetime.timedelta(minutes=15))\
                    .strftime('%a, %d %b %Y %H:%M:%S GMT')
         # Act
         with self.assertRaises(AzureHttpError):
@@ -268,7 +268,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-					datetime.timedelta(minutes=15))\
+                    datetime.timedelta(minutes=15))\
                    .strftime('%a, %d %b %Y %H:%M:%S GMT')
         # Act
         deleted = self.bs.delete_container(self.container_name,
@@ -284,7 +284,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-					datetime.timedelta(minutes=15))\
+                    datetime.timedelta(minutes=15))\
                    .strftime('%a, %d %b %Y %H:%M:%S GMT')
         # Act
         with self.assertRaises(AzureHttpError):
@@ -298,7 +298,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-					datetime.timedelta(minutes=15))\
+                    datetime.timedelta(minutes=15))\
                    .strftime('%a, %d %b %Y %H:%M:%S GMT')
         # Act
         deleted = self.bs.delete_container(self.container_name,
@@ -314,7 +314,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-					datetime.timedelta(minutes=15))\
+                    datetime.timedelta(minutes=15))\
                    .strftime('%a, %d %b %Y %H:%M:%S GMT')
         # Act
         with self.assertRaises(AzureHttpError):

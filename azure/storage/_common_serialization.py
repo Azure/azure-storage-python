@@ -24,6 +24,7 @@ else:
     from urllib.parse import unquote as url_unquote
 
 from datetime import datetime
+from dateutil.tz import tzutc
 from xml.sax.saxutils import escape as xml_escape
 
 try:
@@ -56,6 +57,14 @@ def _get_etree_text(element):
 
 def _to_datetime(strtime):
     return datetime.strptime(strtime, "%Y-%m-%dT%H:%M:%S.%f")
+
+def _to_utc_datetime(value):
+    # Azure expects the date value passed in to be UTC.
+    # Azure will always return values as UTC.
+    # If a date is passed in without timezone info, it is assumed to be UTC.
+    if value.tzinfo:
+        value = value.astimezone(tzutc())
+    return value.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 _KNOWN_SERIALIZATION_XFORMS = {
     'include_apis': 'IncludeAPIs',

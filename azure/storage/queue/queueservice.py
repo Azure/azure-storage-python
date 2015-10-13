@@ -46,10 +46,10 @@ from .._http import (
     HTTPRequest,
 )
 from ..models import (
-    SignedIdentifiers,
     Logging,
     Metrics,
     CorsRule,
+    AccessPolicy,
 )
 from .models import (
     Queue,
@@ -67,6 +67,7 @@ from .._serialization import (
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
+    _convert_xml_to_signed_identifiers,
 )
 from ._serialization import (
     _update_storage_queue_header,
@@ -143,34 +144,56 @@ class QueueService(_StorageClient):
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
 
     def generate_shared_access_signature(self, queue_name,
-                                         shared_access_policy=None,
-                                         ip=None, protocol=None,
-                                         sas_version=X_MS_VERSION):
+                                         permission=None, 
+                                         expiry=None,                                       
+                                         start=None,
+                                         id=None,
+                                         ip=None, protocol=None,):
         '''
         Generates a shared access signature for the queue.
         Use the returned signature with the sas_token parameter of QueueService.
 
-        queue_name:
-            Required. Name of queue.
-        shared_access_policy:
-            Instance of SharedAccessPolicy class.
-        ip:
+        :param str queue_name:
+            Name of queue.
+        :param str permission:
+            The permissions associated with the shared access signature. The 
+            user is restricted to operations allowed by the permissions.
+            Permissions must be ordered read, add, update, process.
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has been 
+            specified in an associated stored access policy.
+            See :class:`.QueueSharedAccessPermissions`
+        :param expiry:
+            The time at which the shared access signature becomes invalid. 
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has 
+            been specified in an associated stored access policy. Azure will always 
+            convert values to UTC. If a date is passed in without timezone info, it 
+            is assumed to be UTC.
+        :type expiry: date or str
+        :param start:
+            The time at which the shared access signature becomes valid. If 
+            omitted, start time for this call is assumed to be the time when the 
+            storage service receives the request. Azure will always convert values 
+            to UTC. If a date is passed in without timezone info, it is assumed to 
+            be UTC.
+        :type start: date or str
+        :param str id:
+            A unique value up to 64 characters in length that correlates to a 
+            stored access policy. To create a stored access policy, use 
+            set_blob_service_properties.
+        :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
             or address range specified on the SAS token, the request is not authenticated.
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
-        protocol:
+        :param str protocol:
             Specifies the protocol permitted for a request made. Possible values are
             both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
             is https,http. Note that HTTP only is not a permitted value.
-        sas_version:
-            x-ms-version for storage service, or None to get a signed query
-            string compatible with pre 2012-02-12 clients, where the version
-            is not included in the query string.
         '''
         _validate_not_none('queue_name', queue_name)
-        _validate_not_none('shared_access_policy', shared_access_policy)
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
@@ -179,10 +202,12 @@ class QueueService(_StorageClient):
             'queue',
             queue_name,
             None,
-            shared_access_policy,
+            permission, 
+            expiry,
+            start, 
+            id,
             ip,
             protocol,
-            sas_version,
         )
 
     def get_queue_service_properties(self, timeout=None):
@@ -365,8 +390,10 @@ class QueueService(_StorageClient):
         Returns details about any stored access policies specified on the
         queue that may be used with Shared Access Signatures.
 
-        queue_name:
+        :param str queue_name:
             Name of existing queue.
+        :return: A dictionary of access policies associated with the queue.
+        :rtype: dict of str to :class:`.AccessPolicy`:
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -379,17 +406,20 @@ class QueueService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_response(response, SignedIdentifiers)
+        return _convert_xml_to_signed_identifiers(response.body)
 
     def set_queue_acl(self, queue_name, signed_identifiers=None):
         '''
         Sets stored access policies for the queue that may be used with
         Shared Access Signatures.
 
-        queue_name:
+        :param str queue_name:
             Name of existing queue.
-        signed_identifiers:
-            SignedIdentifers instance
+        :param signed_identifiers:
+            A dictionary of access policies to associate with the queue. The 
+            dictionary may contain up to 5 elements. An empty dictionary  
+            will clear the access policies set on the service. 
+        :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()

@@ -4,6 +4,12 @@
 
 ## Version X.X.X:
 
+### All:
+- set and get acl methods take and return dictionaries mapping an id to an AccessPolicy object rather than a SignedIdentifiers object.
+- generate_shared_access_signature methods take permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
+- generate_signed_query_string on SharedAccessSignature takes permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
+- expiry and start, whether as part of AccessPolicy or params in generateSharedAccessSignature, may be given as UTC date objects or as strings.
+
 ### Table:
 - Simplified tableservice *_entity functions by removing partition_key, row_key, and content_type parameters where possible.
 - tableservice *_entity functions that returned dictionaries instead return the etag.
@@ -13,6 +19,7 @@
 - All table entity integer values are stored on the service with type Edm.Int64 unless the type is explicitly overridden as Edm.Int32.
 - Table Entity class extends dict but also allows property access as if it were an object to allow more flexible usage.
 - Table batches are constructed using the Batch class rather than turning batching on and off via the TableService. The TableService can then execute these batches using commit_batch(table_name, batch).
+- Table sas generation requires start/end pk/rk to be specified as direct parameters to the method rather than as part of an AccessPolicy.
 
 ### Blob:
 - Added snapshot support for the get_blob_properties API.

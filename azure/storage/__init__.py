@@ -30,14 +30,11 @@ from .models import (
     CorsRule,
     ServiceProperties,
     AccessPolicy,
-    SignedIdentifier,
-    SignedIdentifiers,
 )
 
 from .cloudstorageaccount import CloudStorageAccount
 from .sharedaccesssignature import (
     SharedAccessSignature,
-    SharedAccessPolicy,
 )
 from .auth import (
     _StorageSharedKeyAuthentication,
