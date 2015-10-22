@@ -157,7 +157,7 @@ class _StorageClient(object):
     def _perform_request_worker(self, request):
         return self._httpclient.perform_request(request)
 
-    def _perform_request(self, request, text_encoding='utf-8'):
+    def _perform_request(self, request, encoding='utf-8'):
         '''
         Sends the request and return response. Catches HTTPError and hand it
         to error handler
@@ -166,8 +166,8 @@ class _StorageClient(object):
             resp = self._filter(request)
 
             if sys.version_info >= (3,) and isinstance(resp, bytes) and \
-                text_encoding:
-                resp = resp.decode(text_encoding)
+                encoding:
+                resp = resp.decode(encoding)
 
         except HTTPError as ex:
             _storage_error_handler(ex)

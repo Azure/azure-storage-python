@@ -29,7 +29,7 @@ True
 How to: Upload a Blob into a Container
 --------------------------------------
 >>> myblob = b'hello blob'
->>> blob_service.put_blob('mycontainer', 'myblob', myblob, x_ms_blob_type='BlockBlob')
+>>> blob_service.create_blob_from_bytes('mycontainer', 'myblob', myblob, x_ms_blob_type='BlockBlob')
 
 How to: List the Blobs in a Container
 -------------------------------------
@@ -55,7 +55,7 @@ True
 True
 
 """
-import tests.storage_settings_real as settings
+import tests.settings_real as settings
 
 name = settings.STORAGE_ACCOUNT_NAME
 key = settings.STORAGE_ACCOUNT_KEY

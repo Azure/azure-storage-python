@@ -20,7 +20,7 @@ from tests.common_recordingtestcase import (
     RecordingTestCase,
     TestMode,
 )
-import tests.storage_settings_fake as fake_settings
+import tests.settings_fake as fake_settings
 
 class StorageTestCase(RecordingTestCase):
 
@@ -33,7 +33,7 @@ class StorageTestCase(RecordingTestCase):
         if TestMode.is_playback(self.test_mode):
             self.settings = self.fake_settings
         else:
-            import tests.storage_settings_real as real_settings
+            import tests.settings_real as real_settings
             self.settings = real_settings
 
     def _scrub(self, val):

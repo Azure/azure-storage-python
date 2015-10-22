@@ -62,7 +62,7 @@ class StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
                 [
                     'content-encoding', 'content-language', 'content-length',
                     'content-md5', 'content-type', 'date', 'if-modified-since',
-                    'if-match', 'if-none-match', 'if-unmodified-since', 'range'
+                    'if-match', 'if-none-match', 'if-unmodified-since', 'byte_range'
                 ]
             ) + \
             self._get_canonicalized_headers(request) + \

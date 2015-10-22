@@ -18,9 +18,7 @@ import sys
 import unittest
 from datetime import datetime, timedelta
 from requests import Session
-from azure.storage import (
-    AccessPolicy,
-)
+from azure.storage import AccessPolicy
 from azure.storage.queue import (
     QueueService,
     QueueSharedAccessPermissions,
@@ -34,7 +32,7 @@ from tests.common_recordingtestcase import (
     TestMode,
     record,
 )
-from tests.storage_testcase import StorageTestCase
+from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 TEST_QUEUE_PREFIX = 'mytestqueue'
@@ -158,7 +156,7 @@ class StorageQueueTest(StorageTestCase):
     @record
     def test_list_queues_with_options(self):
         # Action
-        queues_1 = self.qs.list_queues(prefix=TEST_QUEUE_PREFIX, maxresults=3)
+        queues_1 = self.qs.list_queues(prefix=TEST_QUEUE_PREFIX, max_results=3)
         queues_2 = self.qs.list_queues(
             prefix=TEST_QUEUE_PREFIX,
             marker=queues_1.next_marker,
@@ -185,7 +183,7 @@ class StorageQueueTest(StorageTestCase):
             self.creatable_queues[1],
             x_ms_meta_name_values={'val1': 'test', 'val2': 'blah'})
 
-        queue = self.qs.list_queues(self.creatable_queues[1], maxresults=1, include='metadata')[0]
+        queue = self.qs.list_queues(self.creatable_queues[1], max_results=1, include='metadata')[0]
 
         # Asserts
         self.assertIsNotNone(queue)

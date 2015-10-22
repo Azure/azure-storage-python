@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from azure.common import (
-    AzureHttpError,
-)
+from azure.common import AzureHttpError
 from .._common_error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
@@ -104,18 +102,18 @@ class _BaseBlobService(_StorageClient):
         account_key:
             your storage account key, required for all operations.
         protocol:
-            Optional. Protocol. Defaults to https.
+            Protocol. Defaults to https.
         host_base:
-            Optional. Live host base url. Defaults to Azure url. Override this
+            Live host base url. Defaults to Azure url. Override this
             for on-premise.
         dev_host:
-            Optional. Dev host url. Defaults to localhost.
+            Dev host url. Defaults to localhost.
         timeout:
-            Optional. Timeout for the http request, in seconds.
+            Timeout for the http request, in seconds.
         sas_token:
-            Optional. Token to use to authenticate with shared access signature.
+            Token to use to authenticate with shared access signature.
         connection_string:
-            Optional. If specified, the first four parameters (account_name,
+            If specified, the first four parameters (account_name,
             account_key, protocol, host_base) may be overridden
             by values specified in the connection_string. The next three parameters
             (dev_host, timeout, sas_token) cannot be specified with a
@@ -123,7 +121,7 @@ class _BaseBlobService(_StorageClient):
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
         request_session:
-            Optional. Session object to use for http requests. If this is
+            Session object to use for http requests. If this is
             specified, it replaces the default use of httplib.
         '''
         if connection_string is not None:
@@ -182,20 +180,12 @@ class _BaseBlobService(_StorageClient):
 
         return url
 
-    def generate_shared_access_signature(self,
-                                         container_name,
-                                         blob_name=None,
-                                         permission=None, 
-                                         expiry=None,
-                                         start=None, 
-                                         id=None,
-                                         ip=None,
-                                         protocol=None,
-                                         cache_control=None,
-                                         content_disposition=None,
-                                         content_encoding=None,
-                                         content_language=None,
-                                         content_type=None):
+    def generate_shared_access_signature(
+        self, container_name, blob_name=None, permission=None, 
+        expiry=None, start=None, id=None, ip=None, protocol=None,
+        cache_control=None, content_disposition=None,
+        content_encoding=None, content_language=None,
+        content_type=None):
         '''
         Generates a shared access signature for the container or blob.
         Use the returned signature with the sas_token parameter of _BaseBlobService.
@@ -287,22 +277,22 @@ class _BaseBlobService(_StorageClient):
             content_type,
         )
 
-    def list_containers(self, prefix=None, marker=None, maxresults=None,
+    def list_containers(self, prefix=None, marker=None, max_results=None,
                         include=None):
         '''
         The List Containers operation returns a list of the containers under
         the specified account.
 
         prefix:
-            Optional. Filters the results to return only containers whose names
+            Filters the results to return only containers whose names
             begin with the specified prefix.
         marker:
-            Optional. A string value that identifies the portion of the list to
+            A string value that identifies the portion of the list to
             be returned with the next list operation.
-        maxresults:
-            Optional. Specifies the maximum number of containers to return.
+        max_results:
+            Specifies the maximum number of containers to return.
         include:
-            Optional. Include this parameter to specify that the container's
+            Include this parameter to specify that the container's
             metadata be returned as part of the response body. set this
             parameter to string 'metadata' to get container's metadata.
         '''
@@ -313,7 +303,7 @@ class _BaseBlobService(_StorageClient):
         request.query = [
             ('prefix', _str_or_none(prefix)),
             ('marker', _str_or_none(marker)),
-            ('maxresults', _int_or_none(maxresults)),
+            ('maxresults', _int_or_none(max_results)),
             ('include', _str_or_none(include))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
@@ -325,19 +315,19 @@ class _BaseBlobService(_StorageClient):
         return _ETreeXmlToObject.parse_enum_results_list(
             response, ContainerEnumResults, "Containers", Container)
 
-    def create_container(self, container_name, x_ms_meta_name_values=None,
-                         x_ms_blob_public_access=None, fail_on_exist=False):
+    def create_container(self, container_name, metadata=None,
+                         blob_public_access=None, fail_on_exist=False):
         '''
         Creates a new container under the specified account. If the container
         with the same name already exists, the operation fails.
 
         container_name:
             Name of container to create.
-        x_ms_meta_name_values:
-            Optional. A dict with name_value pairs to associate with the
+        metadata:
+            A dict with name_value pairs to associate with the
             container as metadata. Example:{'Category':'test'}
-        x_ms_blob_public_access:
-            Optional. Possible values include: container, blob
+        blob_public_access:
+            Possible values include: container, blob
         fail_on_exist:
             specify whether to throw an exception when the container exists.
         '''
@@ -347,8 +337,8 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + _str(container_name) + '?restype=container'
         request.headers = [
-            ('x-ms-meta-name-values', x_ms_meta_name_values),
-            ('x-ms-blob-public-access', _str_or_none(x_ms_blob_public_access))
+            ('x-ms-meta-name-values', metadata),
+            ('x-ms-blob-public-access', _str_or_none(blob_public_access))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -365,14 +355,14 @@ class _BaseBlobService(_StorageClient):
             self._perform_request(request)
             return True
 
-    def get_container_properties(self, container_name, x_ms_lease_id=None):
+    def get_container_properties(self, container_name, lease_id=None):
         '''
         Returns all user-defined metadata and system properties for the
         specified container.
 
         container_name:
             Name of existing container.
-        x_ms_lease_id:
+        lease_id:
             If specified, get_container_properties only succeeds if the
             container's lease is active and matches this ID.
         '''
@@ -381,7 +371,7 @@ class _BaseBlobService(_StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/' + _str(container_name) + '?restype=container'
-        request.headers = [('x-ms-lease-id', _str_or_none(x_ms_lease_id))]
+        request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
@@ -390,14 +380,14 @@ class _BaseBlobService(_StorageClient):
 
         return _parse_response_for_dict(response)
 
-    def get_container_metadata(self, container_name, x_ms_lease_id=None):
+    def get_container_metadata(self, container_name, lease_id=None):
         '''
         Returns all user-defined metadata for the specified container. The
         metadata will be in returned dictionary['x-ms-meta-(name)'].
 
         container_name:
             Name of existing container.
-        x_ms_lease_id:
+        lease_id:
             If specified, get_container_metadata only succeeds if the
             container's lease is active and matches this ID.
         '''
@@ -407,7 +397,7 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + \
             _str(container_name) + '?restype=container&comp=metadata'
-        request.headers = [('x-ms-lease-id', _str_or_none(x_ms_lease_id))]
+        request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
@@ -416,22 +406,22 @@ class _BaseBlobService(_StorageClient):
 
         return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
 
-    def set_container_metadata(self, container_name, x_ms_meta_name_values=None,
-                               x_ms_lease_id=None, if_modified_since=None):
+    def set_container_metadata(self, container_name, metadata=None,
+                               lease_id=None, if_modified_since=None):
         '''
         Sets one or more user-defined name-value pairs for the specified
         container.
 
         container_name:
             Name of existing container.
-        x_ms_meta_name_values:
+        metadata:
             A dict containing name, value for metadata.
             Example: {'category':'test'}
-        x_ms_lease_id:
+        lease_id:
             If specified, set_container_metadata only succeeds if the
             container's lease is active and matches this ID.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -440,9 +430,9 @@ class _BaseBlobService(_StorageClient):
         request.path = '/' + \
             _str(container_name) + '?restype=container&comp=metadata'
         request.headers = [
-            ('x-ms-meta-name-values', x_ms_meta_name_values),
+            ('x-ms-meta-name-values', metadata),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -450,13 +440,13 @@ class _BaseBlobService(_StorageClient):
             request, self.authentication)
         self._perform_request(request)
 
-    def get_container_acl(self, container_name, x_ms_lease_id=None):
+    def get_container_acl(self, container_name, lease_id=None):
         '''
         Gets the permissions for the specified container.
 
         :param str container_name:
             Name of existing container.
-        :param str x_ms_lease_id:
+        :param lease_id:
             If specified, get_container_acl only succeeds if the
             container's lease is active and matches this ID.
         :return: A dictionary of access policies associated with the container.
@@ -468,7 +458,7 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + \
             _str(container_name) + '?restype=container&comp=acl'
-        request.headers = [('x-ms-lease-id', _str_or_none(x_ms_lease_id))]
+        request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
@@ -478,7 +468,7 @@ class _BaseBlobService(_StorageClient):
         return _convert_xml_to_signed_identifiers(response.body)
 
     def set_container_acl(self, container_name, signed_identifiers=None,
-                          x_ms_blob_public_access=None, x_ms_lease_id=None,
+                          blob_public_access=None, lease_id=None,
                           if_modified_since=None, if_unmodified_since=None):
         '''
         Sets the permissions for the specified container or stored access 
@@ -491,9 +481,9 @@ class _BaseBlobService(_StorageClient):
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
         :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
-        :param str x_ms_blob_public_access:
+        :param str blob_public_access:
             Possible values include: container, blob
-        :param str x_ms_lease_id:
+        :param str lease_id:
             If specified, set_container_acl only succeeds if the
             container's lease is active and matches this ID.
         :param str if_modified_since:
@@ -508,10 +498,10 @@ class _BaseBlobService(_StorageClient):
         request.path = '/' + \
             _str(container_name) + '?restype=container&comp=acl'
         request.headers = [
-            ('x-ms-blob-public-access', _str_or_none(x_ms_blob_public_access)),
+            ('x-ms-blob-public-access', _str_or_none(blob_public_access)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
@@ -522,7 +512,7 @@ class _BaseBlobService(_StorageClient):
         self._perform_request(request)
 
     def delete_container(self, container_name, fail_not_exist=False,
-                         x_ms_lease_id=None, if_modified_since=None,
+                         lease_id=None, if_modified_since=None,
                          if_unmodified_since=None):
         '''
         Marks the specified container for deletion.
@@ -532,12 +522,12 @@ class _BaseBlobService(_StorageClient):
         fail_not_exist:
             Specify whether to throw an exception when the container doesn't
             exist.
-        x_ms_lease_id:
+        lease_id:
             Required if the container has an active lease.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -545,7 +535,7 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + _str(container_name) + '?restype=container'
         request.headers = [
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),          
         ]
@@ -564,30 +554,28 @@ class _BaseBlobService(_StorageClient):
             self._perform_request(request)
             return True
 
-    def _lease_container_impl(self, container_name, x_ms_lease_action,
-                              x_ms_lease_id, x_ms_lease_duration,
-                              x_ms_lease_break_period,
-                              x_ms_proposed_lease_id,
-                              if_modified_since,
-                              if_unmodified_since):
+    def _lease_container_impl(
+        self, container_name, lease_action, lease_id, lease_duration,
+        lease_break_period, proposed_lease_id, if_modified_since,
+        if_unmodified_since):
         '''
         Establishes and manages a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
 
         container_name:
             Name of existing container.
-        x_ms_lease_action:
+        lease_action:
             Possible LeaseActions values: acquire|renew|release|break|change
-        x_ms_lease_id:
+        lease_id:
             Required if the container has an active lease.
-        x_ms_lease_duration:
+        lease_duration:
             Specifies the duration of the lease, in seconds, or negative one
             (-1) for a lease that never expires. A non-infinite lease can be
             between 15 and 60 seconds. A lease duration cannot be changed
             using renew or change. For backwards compatibility, the default is
             60, and the value is only used on an acquire operation.
-        x_ms_lease_break_period:
-            Optional. For a break operation, this is the proposed duration of
+        lease_break_period:
+            For a break operation, this is the proposed duration of
             seconds that the lease should continue before it is broken, between
             0 and 60 seconds. This break period is only used if it is shorter
             than the time remaining on the lease. If longer, the time remaining
@@ -596,7 +584,7 @@ class _BaseBlobService(_StorageClient):
             the break period. If this header does not appear with a break
             operation, a fixed-duration lease breaks after the remaining lease
             period elapses, and an infinite lease breaks immediately.
-        x_ms_proposed_lease_id:
+        proposed_lease_id:
             Optional for acquire, required for change. Proposed lease ID, in a
             GUID string format.
         if_modified_since:
@@ -605,18 +593,18 @@ class _BaseBlobService(_StorageClient):
             DateTime string.
         '''
         _validate_not_none('container_name', container_name)
-        _validate_not_none('x_ms_lease_action', x_ms_lease_action)
+        _validate_not_none('lease_action', lease_action)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + \
             _str(container_name) + '?restype=container&comp=lease'
         request.headers = [
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
-            ('x-ms-lease-action', _str_or_none(x_ms_lease_action)),
-            ('x-ms-lease-duration', _str_or_none(x_ms_lease_duration)),
-            ('x-ms-lease-break-period', _str_or_none(x_ms_lease_break_period)),
-            ('x-ms-proposed-lease-id', _str_or_none(x_ms_proposed_lease_id)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-lease-action', _str_or_none(lease_action)),
+            ('x-ms-lease-duration', _str_or_none(lease_duration)),
+            ('x-ms-lease-break-period', _str_or_none(lease_break_period)),
+            ('x-ms-proposed-lease-id', _str_or_none(proposed_lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
         ]
@@ -630,114 +618,111 @@ class _BaseBlobService(_StorageClient):
             response,
             filter=['x-ms-lease-id', 'x-ms-lease-time'])
 
-    def acquire_container_lease(self, container_name,
-                                x_ms_lease_duration=-1,
-                                x_ms_proposed_lease_id=None,
-                                if_modified_since=None,
-                                if_unmodified_since=None):
+    def acquire_container_lease(
+        self, container_name, lease_duration=-1, proposed_lease_id=None,
+        if_modified_since=None, if_unmodified_since=None):
         '''
         Acquires a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds or infinite.
 
         container_name:
             Name of existing container.
-        x_ms_lease_duration:
-            Optional. Specifies the duration of the lease, in seconds, or negative one
+        lease_duration:
+            Specifies the duration of the lease, in seconds, or negative one
             (-1) for a lease that never expires. A non-infinite lease can be
             between 15 and 60 seconds. A lease duration cannot be changed
             using renew or change. Default is -1 (infinite lease).
-        x_ms_proposed_lease_id:
-            Optional. Proposed lease ID, in a GUID string format.
+        proposed_lease_id:
+            Proposed lease ID, in a GUID string format.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         '''
-        _validate_not_none('x_ms_lease_duration', x_ms_lease_duration)
-        if x_ms_lease_duration is not -1 and\
-           (x_ms_lease_duration < 15 or x_ms_lease_duration > 60):
-            raise ValueError("x_ms_lease_duration param needs to be between 15 and 60 or -1.")
+        _validate_not_none('lease_duration', lease_duration)
+        if lease_duration is not -1 and\
+           (lease_duration < 15 or lease_duration > 60):
+            raise ValueError("lease_duration param needs to be between 15 and 60 or -1.")
 
         return self._lease_container_impl(container_name, 
                                           LeaseActions.Acquire,
-                                          None, # x_ms_lease_id
-                                          x_ms_lease_duration,
-                                          None, # x_ms_lease_break_period
-                                          x_ms_proposed_lease_id,
+                                          None, # lease_id
+                                          lease_duration,
+                                          None, # lease_break_period
+                                          proposed_lease_id,
                                           if_modified_since,
                                           if_unmodified_since)
 
-    def renew_container_lease(self, container_name, x_ms_lease_id,
-                              if_modified_since=None,
-                              if_unmodified_since=None):
+    def renew_container_lease(
+        self, container_name, lease_id, if_modified_since=None,
+        if_unmodified_since=None):
         '''
         Renews a lock on a container for delete operations.
 
         container_name:
             Name of existing container.
-        x_ms_lease_id:
+        lease_id:
             Lease ID for active lease.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         '''
-        _validate_not_none('x_ms_lease_id', x_ms_lease_id)
+        _validate_not_none('lease_id', lease_id)
 
         return self._lease_container_impl(container_name, 
                                           LeaseActions.Renew,
-                                          x_ms_lease_id,
-                                          None, # x_ms_lease_duration
-                                          None, # x_ms_lease_break_period
-                                          None, # x_ms_proposed_lease_id
+                                          lease_id,
+                                          None, # lease_duration
+                                          None, # lease_break_period
+                                          None, # proposed_lease_id
                                           if_modified_since,
                                           if_unmodified_since)
 
-    def release_container_lease(self, container_name, x_ms_lease_id,
-                                if_modified_since=None,
-                                if_unmodified_since=None):
+    def release_container_lease(
+        self, container_name, lease_id, if_modified_since=None,
+        if_unmodified_since=None):
         '''
         Releases a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
 
         container_name:
             Name of existing container.
-        x_ms_lease_id:
+        lease_id:
             Lease ID for active lease.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
-        _validate_not_none('x_ms_lease_id', x_ms_lease_id)
+        _validate_not_none('lease_id', lease_id)
 
         return self._lease_container_impl(container_name, 
                                           LeaseActions.Release,
-                                          x_ms_lease_id,
-                                          None, # x_ms_lease_duration
-                                          None, # x_ms_lease_break_period
-                                          None, # x_ms_proposed_lease_id
+                                          lease_id,
+                                          None, # lease_duration
+                                          None, # lease_break_period
+                                          None, # proposed_lease_id
                                           if_modified_since,
                                           if_unmodified_since)
 
-    def break_container_lease(self, container_name, x_ms_lease_id,
-                              x_ms_lease_break_period=None,
-                              if_modified_since=None,
-                              if_unmodified_since=None):
+    def break_container_lease(
+        self, container_name, lease_id, lease_break_period=None,
+        if_modified_since=None, if_unmodified_since=None):
         '''
         Breaks a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
 
         container_name:
             Name of existing container.
-        x_ms_lease_id:
+        lease_id:
             Lease ID for active lease.
-        x_ms_lease_break_period:
-            Optional. This is the proposed duration of seconds that the lease
+        lease_break_period:
+            This is the proposed duration of seconds that the lease
             should continue before it is broken, between 0 and 60 seconds. This
             break period is only used if it is shorter than the time remaining
             on the lease. If longer, the time remaining on the lease is used.
@@ -747,79 +732,78 @@ class _BaseBlobService(_StorageClient):
             operation, a fixed-duration lease breaks after the remaining lease
             period elapses, and an infinite lease breaks immediately.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         '''
-        _validate_not_none('x_ms_lease_id', x_ms_lease_id)
-        if (x_ms_lease_break_period is not None) and (x_ms_lease_break_period < 0 or x_ms_lease_break_period > 60):
-            raise ValueError("x_ms_lease_break_period param needs to be between 0 and 60.")
+        _validate_not_none('lease_id', lease_id)
+        if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
+            raise ValueError("lease_break_period param needs to be between 0 and 60.")
         
         return self._lease_container_impl(container_name, 
                                           LeaseActions.Break,
-                                          x_ms_lease_id,
-                                          None, # x_ms_lease_duration
-                                          x_ms_lease_break_period,
-                                          None, # x_ms_proposed_lease_id
+                                          lease_id,
+                                          None, # lease_duration
+                                          lease_break_period,
+                                          None, # proposed_lease_id
                                           if_modified_since,
                                           if_unmodified_since)
 
-    def change_container_lease(self, container_name, x_ms_lease_id,
-                               x_ms_proposed_lease_id,
-                               if_modified_since=None,
-                               if_unmodified_since=None):
+    def change_container_lease(
+        self, container_name, lease_id, proposed_lease_id,
+        if_modified_since=None, if_unmodified_since=None):
         '''
         Changes a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
 
         container_name:
             Name of existing container.
-        x_ms_lease_id:
+        lease_id:
             Lease ID for active lease.
-        x_ms_proposed_lease_id:
+        proposed_lease_id:
             Proposed lease ID, in a GUID string format.
             period elapses, and an infinite lease breaks immediately.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         '''
-        _validate_not_none('x_ms_lease_id', x_ms_lease_id)
+        _validate_not_none('lease_id', lease_id)
 
         return self._lease_container_impl(container_name, 
                                           LeaseActions.Change,
-                                          x_ms_lease_id,
-                                          None, # x_ms_lease_duration
-                                          None, # x_ms_lease_break_period
-                                          x_ms_proposed_lease_id,
+                                          lease_id,
+                                          None, # lease_duration
+                                          None, # lease_break_period
+                                          proposed_lease_id,
                                           if_modified_since,
                                           if_unmodified_since)
 
     def list_blobs(self, container_name, prefix=None, marker=None,
-                   maxresults=None, include=None, delimiter=None):
+                   max_results=None, include=None, delimiter=None):
         '''
         Returns the list of blobs under the specified container.
 
         container_name:
             Name of existing container.
         prefix:
-            Optional. Filters the results to return only blobs whose names
+            Filters the results to return only blobs whose names
             begin with the specified prefix.
         marker:
-            Optional. A string value that identifies the portion of the list
+            A string value that identifies the portion of the list
             to be returned with the next list operation. The operation returns
             a marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of list items. The marker value is
             opaque to the client.
-        maxresults:
-            Optional. Specifies the maximum number of blobs to return,
+        max_results:
+            Specifies the maximum number of blobs to return,
             including all BlobPrefix elements. If the request does not specify
-            maxresults or specifies a value greater than 5,000, the server will
-            return up to 5,000 items. Setting maxresults to a value less than
+            max_results or specifies a value greater than 5,000, the server will
+            return up to 5,000 items. Setting max_results to a value less than
             or equal to zero results in error response code 400 (Bad Request).
         include:
-            Optional. Specifies one or more datasets to include in the
+            Specifies one or more datasets to include in the
             response. To specify more than one of these options on the URI,
             you must separate each option with a comma. Valid values are:
                 snapshots:
@@ -837,7 +821,7 @@ class _BaseBlobService(_StorageClient):
                     related to any current or previous Copy Blob operation
                     should be included in the response.
         delimiter:
-            Optional. When the request includes this parameter, the operation
+            When the request includes this parameter, the operation
             returns a BlobPrefix element in the response body that acts as a
             placeholder for all blobs whose names begin with the same
             substring up to the appearance of the delimiter character. The
@@ -853,7 +837,7 @@ class _BaseBlobService(_StorageClient):
             ('prefix', _str_or_none(prefix)),
             ('delimiter', _str_or_none(delimiter)),
             ('marker', _str_or_none(marker)),
-            ('maxresults', _int_or_none(maxresults)),
+            ('maxresults', _int_or_none(max_results)),
             ('include', _str_or_none(include))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
@@ -864,9 +848,9 @@ class _BaseBlobService(_StorageClient):
 
         return _parse_blob_enum_results_list(response)
 
-    def set_blob_service_properties(self, logging=None, hour_metrics=None, 
-                                    minute_metrics=None, cors=None, target_version=None,
-                                    timeout=None):
+    def set_blob_service_properties(
+        self, logging=None, hour_metrics=None, minute_metrics=None,
+        cors=None, target_version=None, timeout=None):
         '''
         Sets the properties of a storage account's Blob service, including
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
@@ -910,7 +894,7 @@ class _BaseBlobService(_StorageClient):
         Azure Storage Analytics.
 
         timeout:
-            Optional. The timeout parameter is expressed in seconds.
+            The timeout parameter is expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -925,11 +909,10 @@ class _BaseBlobService(_StorageClient):
 
         return _convert_xml_to_service_properties(response.body)
 
-    def get_blob_properties(self, container_name, blob_name,
-                            snapshot=None, x_ms_lease_id=None,
-                            if_modified_since=None,
-                            if_unmodified_since=None,
-                            if_match=None, if_none_match=None):
+    def get_blob_properties(
+        self, container_name, blob_name, snapshot=None, lease_id=None,
+        if_modified_since=None, if_unmodified_since=None, if_match=None,
+        if_none_match=None):
         '''
         Returns all user-defined metadata, standard HTTP properties, and
         system properties for the blob.
@@ -939,18 +922,18 @@ class _BaseBlobService(_StorageClient):
         blob_name:
             Name of existing blob.
         snapshot:
-            Optional. The snapshot parameter is an opaque DateTime value that,
+            The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -959,7 +942,7 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + _str(container_name) + '/' + _str(blob_name) + ''
         request.headers = [
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
@@ -975,18 +958,12 @@ class _BaseBlobService(_StorageClient):
 
         return _parse_response_for_dict(response)
 
-    def set_blob_properties(self, container_name, blob_name,
-                            x_ms_blob_cache_control=None,
-                            x_ms_blob_content_type=None,
-                            x_ms_blob_content_md5=None,
-                            x_ms_blob_content_encoding=None,
-                            x_ms_blob_content_language=None,
-                            x_ms_lease_id=None,
-                            x_ms_blob_content_disposition=None,
-                            if_modified_since=None,
-                            if_unmodified_since=None,
-                            if_match=None,
-                            if_none_match=None):
+    def set_blob_properties(
+        self, container_name, blob_name, cache_control=None,
+        content_type=None, content_md5=None, content_encoding=None,
+        content_language=None, lease_id=None, content_disposition=None,
+        if_modified_since=None, if_unmodified_since=None, if_match=None,
+        if_none_match=None):
         '''
         Sets system properties on the blob.
 
@@ -994,20 +971,20 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_blob_cache_control:
-            Optional. Modifies the cache control string for the blob.
-        x_ms_blob_content_type:
-            Optional. Sets the blob's content type.
-        x_ms_blob_content_md5:
-            Optional. Sets the blob's MD5 hash.
-        x_ms_blob_content_encoding:
-            Optional. Sets the blob's content encoding.
-        x_ms_blob_content_language:
-            Optional. Sets the blob's content language.
-        x_ms_lease_id:
+        cache_control:
+            Modifies the cache control string for the blob.
+        content_type:
+            Sets the blob's content type.
+        content_md5:
+            Sets the blob's MD5 hash.
+        content_encoding:
+            Sets the blob's content encoding.
+        content_language:
+            Sets the blob's content language.
+        lease_id:
             Required if the blob has an active lease.
-        x_ms_blob_content_disposition:
-            Optional. Sets the blob's Content-Disposition header.
+        content_disposition:
+            Sets the blob's Content-Disposition header.
             The Content-Disposition response header field conveys additional
             information about how to process the response payload, and also can
             be used to attach additional metadata. For example, if set to
@@ -1015,13 +992,13 @@ class _BaseBlobService(_StorageClient):
             response, but instead show a Save As dialog with a filename other
             than the blob name specified.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1031,20 +1008,20 @@ class _BaseBlobService(_StorageClient):
         request.path = '/' + \
             _str(container_name) + '/' + _str(blob_name) + '?comp=properties'
         request.headers = [
-            ('x-ms-blob-cache-control', _str_or_none(x_ms_blob_cache_control)),
-            ('x-ms-blob-content-type', _str_or_none(x_ms_blob_content_type)),
+            ('x-ms-blob-cache-control', _str_or_none(cache_control)),
+            ('x-ms-blob-content-type', _str_or_none(content_type)),
             ('x-ms-blob-content-disposition',
-             _str_or_none(x_ms_blob_content_disposition)),
-            ('x-ms-blob-content-md5', _str_or_none(x_ms_blob_content_md5)),
+             _str_or_none(content_disposition)),
+            ('x-ms-blob-content-md5', _str_or_none(content_md5)),
             ('x-ms-blob-content-encoding',
-             _str_or_none(x_ms_blob_content_encoding)),
+             _str_or_none(content_encoding)),
             ('x-ms-blob-content-language',
-             _str_or_none(x_ms_blob_content_language)),
+             _str_or_none(content_language)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id))
+            ('x-ms-lease-id', _str_or_none(lease_id))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -1052,11 +1029,10 @@ class _BaseBlobService(_StorageClient):
             request, self.authentication)
         self._perform_request(request)
 
-    def get_blob(self, container_name, blob_name, snapshot=None,
-                 x_ms_range=None, x_ms_lease_id=None,
-                 x_ms_range_get_content_md5=None,
-                 if_modified_since=None, if_unmodified_since=None,
-                 if_match=None, if_none_match=None):
+    def get_blob(
+        self, container_name, blob_name, snapshot=None, byte_range=None,
+        lease_id=None, range_get_content_md5=None, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None):
         '''
         Reads or downloads a blob from the system, including its metadata and
         properties.
@@ -1069,24 +1045,24 @@ class _BaseBlobService(_StorageClient):
         blob_name:
             Name of existing blob.
         snapshot:
-            Optional. The snapshot parameter is an opaque DateTime value that,
+            The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        x_ms_range:
-            Optional. Return only the bytes of the blob in the specified range.
-        x_ms_lease_id:
+        byte_range:
+            Return only the bytes of the blob in the specified range.
+        lease_id:
             Required if the blob has an active lease.
-        x_ms_range_get_content_md5:
-            Optional. When this header is set to true and specified together
+        range_get_content_md5:
+            When this header is set to true and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1095,10 +1071,10 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + _str(container_name) + '/' + _str(blob_name) + ''
         request.headers = [
-            ('x-ms-range', _str_or_none(x_ms_range)),
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
+            ('x-ms-range', _str_or_none(byte_range)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-range-get-content-md5',
-             _str_or_none(x_ms_range_get_content_md5)),
+             _str_or_none(range_get_content_md5)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
@@ -1113,12 +1089,12 @@ class _BaseBlobService(_StorageClient):
 
         return _create_blob_result(response)
 
-    def get_blob_to_path(self, container_name, blob_name, file_path,
-                         open_mode='wb', snapshot=None, x_ms_lease_id=None,
-                         progress_callback=None,
-                         max_connections=1, max_retries=5, retry_wait=1.0,
-                         if_modified_since=None, if_unmodified_since=None,
-                         if_match=None, if_none_match=None):
+    def get_blob_to_path(
+        self, container_name, blob_name, file_path, open_mode='wb',
+        snapshot=None, lease_id=None, progress_callback=None,
+        max_connections=1, max_retries=5, retry_wait=1.0,
+        if_modified_since=None, if_unmodified_since=None,
+        if_match=None, if_none_match=None):
         '''
         Downloads a blob to a file path, with automatic chunking and progress
         notifications.
@@ -1132,9 +1108,9 @@ class _BaseBlobService(_StorageClient):
         open_mode:
             Mode to use when opening the file.
         snapshot:
-            Optional. The snapshot parameter is an opaque DateTime value that,
+            The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
         progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1151,13 +1127,13 @@ class _BaseBlobService(_StorageClient):
         retry_wait:
             Sleep time in secs between retries.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1169,7 +1145,7 @@ class _BaseBlobService(_StorageClient):
                                   blob_name,
                                   stream,
                                   snapshot,
-                                  x_ms_lease_id,
+                                  lease_id,
                                   progress_callback,
                                   max_connections,
                                   max_retries,
@@ -1179,12 +1155,11 @@ class _BaseBlobService(_StorageClient):
                                   if_match,
                                   if_none_match)
 
-    def get_blob_to_file(self, container_name, blob_name, stream,
-                         snapshot=None, x_ms_lease_id=None,
-                         progress_callback=None,
-                         max_connections=1, max_retries=5, retry_wait=1.0,
-                         if_modified_since=None, if_unmodified_since=None,
-                         if_match=None, if_none_match=None):
+    def get_blob_to_file(
+        self, container_name, blob_name, stream, snapshot=None,
+        lease_id=None, progress_callback=None, max_connections=1,
+        max_retries=5, retry_wait=1.0, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None):
         '''
         Downloads a blob to a file/stream, with automatic chunking and progress
         notifications.
@@ -1196,9 +1171,9 @@ class _BaseBlobService(_StorageClient):
         stream:
             Opened file/stream to write to.
         snapshot:
-            Optional. The snapshot parameter is an opaque DateTime value that,
+            The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
         progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1216,13 +1191,13 @@ class _BaseBlobService(_StorageClient):
         retry_wait:
             Sleep time in secs between retries.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1238,7 +1213,7 @@ class _BaseBlobService(_StorageClient):
             data = self.get_blob(container_name,
                                  blob_name,
                                  snapshot,
-                                 x_ms_lease_id=x_ms_lease_id,
+                                 lease_id=lease_id,
                                  if_modified_since=if_modified_since,
                                  if_unmodified_since=if_unmodified_since,
                                  if_match=if_match,
@@ -1262,11 +1237,11 @@ class _BaseBlobService(_StorageClient):
                 progress_callback
             )
 
-    def get_blob_to_bytes(self, container_name, blob_name, snapshot=None,
-                          x_ms_lease_id=None, progress_callback=None,
-                          max_connections=1, max_retries=5, retry_wait=1.0,
-                          if_modified_since=None, if_unmodified_since=None,
-                          if_match=None, if_none_match=None):
+    def get_blob_to_bytes(
+        self, container_name, blob_name, snapshot=None, lease_id=None,
+        progress_callback=None, max_connections=1, max_retries=5,
+        retry_wait=1.0, if_modified_since=None, if_unmodified_since=None,
+        if_match=None, if_none_match=None):
         '''
         Downloads a blob as an array of bytes, with automatic chunking and
         progress notifications.
@@ -1276,9 +1251,9 @@ class _BaseBlobService(_StorageClient):
         blob_name:
             Name of existing blob.
         snapshot:
-            Optional. The snapshot parameter is an opaque DateTime value that,
+            The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
         progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1295,13 +1270,13 @@ class _BaseBlobService(_StorageClient):
         retry_wait:
             Sleep time in secs between retries.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1311,7 +1286,7 @@ class _BaseBlobService(_StorageClient):
                               blob_name,
                               stream,
                               snapshot,
-                              x_ms_lease_id,
+                              lease_id,
                               progress_callback,
                               max_connections,
                               max_retries,
@@ -1323,12 +1298,11 @@ class _BaseBlobService(_StorageClient):
 
         return stream.getvalue()
 
-    def get_blob_to_text(self, container_name, blob_name, text_encoding='utf-8',
-                         snapshot=None, x_ms_lease_id=None,
-                         progress_callback=None,
-                         max_connections=1, max_retries=5, retry_wait=1.0,
-                         if_modified_since=None, if_unmodified_since=None,
-                         if_match=None, if_none_match=None):
+    def get_blob_to_text(
+        self, container_name, blob_name, encoding='utf-8', snapshot=None,
+        lease_id=None, progress_callback=None, max_connections=1, max_retries=5,
+        retry_wait=1.0, if_modified_since=None, if_unmodified_since=None,
+        if_match=None, if_none_match=None):
         '''
         Downloads a blob as unicode text, with automatic chunking and progress
         notifications.
@@ -1337,12 +1311,12 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        text_encoding:
-            Encoding to use when decoding the blob data.
+        encoding:
+            Python encoding to use when decoding the blob data.
         snapshot:
-            Optional. The snapshot parameter is an opaque DateTime value that,
+            The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
         progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1359,22 +1333,22 @@ class _BaseBlobService(_StorageClient):
         retry_wait:
             Sleep time in secs between retries.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
-        _validate_not_none('text_encoding', text_encoding)
+        _validate_not_none('encoding', encoding)
 
         result = self.get_blob_to_bytes(container_name,
                                         blob_name,
                                         snapshot,
-                                        x_ms_lease_id,
+                                        lease_id,
                                         progress_callback,
                                         max_connections,
                                         max_retries,
@@ -1384,12 +1358,12 @@ class _BaseBlobService(_StorageClient):
                                         if_match,
                                         if_none_match)
 
-        return result.decode(text_encoding)
+        return result.decode(encoding)
 
-    def get_blob_metadata(self, container_name, blob_name, snapshot=None,
-                          x_ms_lease_id=None, if_modified_since=None,
-                          if_unmodified_since=None,
-                          if_match=None, if_none_match=None):
+    def get_blob_metadata(
+        self, container_name, blob_name, snapshot=None, lease_id=None,
+        if_modified_since=None, if_unmodified_since=None, if_match=None,
+        if_none_match=None):
         '''
         Returns all user-defined metadata for the specified blob or snapshot.
 
@@ -1398,18 +1372,18 @@ class _BaseBlobService(_StorageClient):
         blob_name:
             Name of existing blob.
         snapshot:
-            Optional. The snapshot parameter is an opaque DateTime value that,
+            The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1419,7 +1393,7 @@ class _BaseBlobService(_StorageClient):
         request.path = '/' + \
             _str(container_name) + '/' + _str(blob_name) + '?comp=metadata'
         request.headers = [
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
@@ -1435,7 +1409,7 @@ class _BaseBlobService(_StorageClient):
         return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
 
     def set_blob_metadata(self, container_name, blob_name,
-                          x_ms_meta_name_values=None, x_ms_lease_id=None,
+                          metadata=None, lease_id=None,
                           if_modified_since=None, if_unmodified_since=None,
                           if_match=None, if_none_match=None):
         '''
@@ -1446,18 +1420,18 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_meta_name_values:
+        metadata:
             Dict containing name and value pairs.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value
+            An ETag value
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1467,12 +1441,12 @@ class _BaseBlobService(_StorageClient):
         request.path = '/' + \
             _str(container_name) + '/' + _str(blob_name) + '?comp=metadata'
         request.headers = [
-            ('x-ms-meta-name-values', x_ms_meta_name_values),
+            ('x-ms-meta-name-values', metadata),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id))
+            ('x-ms-lease-id', _str_or_none(lease_id))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -1481,9 +1455,9 @@ class _BaseBlobService(_StorageClient):
         self._perform_request(request)
 
     def _lease_blob_impl(self, container_name, blob_name,
-                         x_ms_lease_action, x_ms_lease_id,
-                         x_ms_lease_duration, x_ms_lease_break_period,
-                         x_ms_proposed_lease_id, if_modified_since,
+                         lease_action, lease_id,
+                         lease_duration, lease_break_period,
+                         proposed_lease_id, if_modified_since,
                          if_unmodified_since, if_match, if_none_match):
         '''
         Establishes and manages a lock on a blob for write and delete
@@ -1493,17 +1467,17 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_lease_action:
+        lease_action:
             Possible LeaseActions acquire|renew|release|break|change
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
-        x_ms_lease_duration:
+        lease_duration:
             Specifies the duration of the lease, in seconds, or negative one
             (-1) for a lease that never expires. A non-infinite lease can be
             between 15 and 60 seconds. A lease duration cannot be changed
             using renew or change.
-        x_ms_lease_break_period:
-            Optional. For a break operation, this is the proposed duration of
+        lease_break_period:
+            For a break operation, this is the proposed duration of
             seconds that the lease should continue before it is broken, between
             0 and 60 seconds. This break period is only used if it is shorter
             than the time remaining on the lease. If longer, the time remaining
@@ -1512,7 +1486,7 @@ class _BaseBlobService(_StorageClient):
             the break period. If this header does not appear with a break
             operation, a fixed-duration lease breaks after the remaining lease
             period elapses, and an infinite lease breaks immediately.
-        x_ms_proposed_lease_id:
+        proposed_lease_id:
             Optional for acquire, required for change. Proposed lease ID, in a
             GUID string format.
         if_modified_since:
@@ -1527,18 +1501,18 @@ class _BaseBlobService(_StorageClient):
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
-        _validate_not_none('x_ms_lease_action', x_ms_lease_action)
+        _validate_not_none('lease_action', lease_action)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + \
             _str(container_name) + '/' + _str(blob_name) + '?comp=lease'
         request.headers = [
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
-            ('x-ms-lease-action', _str_or_none(x_ms_lease_action)),
-            ('x-ms-lease-duration', _str_or_none(x_ms_lease_duration)),
-            ('x-ms-lease-break-period', _str_or_none(x_ms_lease_break_period)),
-            ('x-ms-proposed-lease-id', _str_or_none(x_ms_proposed_lease_id)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-lease-action', _str_or_none(lease_action)),
+            ('x-ms-lease-duration', _str_or_none(lease_duration)),
+            ('x-ms-lease-break-period', _str_or_none(lease_break_period)),
+            ('x-ms-proposed-lease-id', _str_or_none(proposed_lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
@@ -1555,8 +1529,8 @@ class _BaseBlobService(_StorageClient):
             filter=['x-ms-lease-id', 'x-ms-lease-time'])
 
     def acquire_blob_lease(self, container_name, blob_name,
-                           x_ms_lease_duration=-1,
-                           x_ms_proposed_lease_id=None,
+                           lease_duration=-1,
+                           proposed_lease_id=None,
                            if_modified_since=None,
                            if_unmodified_since=None,
                            if_match=None,
@@ -1568,41 +1542,41 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_lease_duration:
-            Optional. Specifies the duration of the lease, in seconds, or negative one
+        lease_duration:
+            Specifies the duration of the lease, in seconds, or negative one
             (-1) for a lease that never expires. A non-infinite lease can be
             between 15 and 60 seconds. A lease duration cannot be changed
             using renew or change. Default is -1 (infinite lease).
-        x_ms_proposed_lease_id:
-            Optional. Proposed lease ID, in a GUID string format.
+        proposed_lease_id:
+            Proposed lease ID, in a GUID string format.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
-        _validate_not_none('x_ms_lease_duration', x_ms_lease_duration)
+        _validate_not_none('lease_duration', lease_duration)
 
-        if x_ms_lease_duration is not -1 and\
-           (x_ms_lease_duration < 15 or x_ms_lease_duration > 60):
-            raise ValueError("x_ms_lease_duration param needs to be between 15 and 60 or -1.")
+        if lease_duration is not -1 and\
+           (lease_duration < 15 or lease_duration > 60):
+            raise ValueError("lease_duration param needs to be between 15 and 60 or -1.")
         return self._lease_blob_impl(container_name,
                                      blob_name,
                                      LeaseActions.Acquire,
-                                     None, # x_ms_lease_id
-                                     x_ms_lease_duration,
-                                     None, # x_ms_lease_break_period
-                                     x_ms_proposed_lease_id,
+                                     None, # lease_id
+                                     lease_duration,
+                                     None, # lease_break_period
+                                     proposed_lease_id,
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
                                      if_none_match)
 
     def renew_blob_lease(self, container_name, blob_name,
-                         x_ms_lease_id, if_modified_since=None,
+                         lease_id, if_modified_since=None,
                          if_unmodified_since=None, if_match=None,
                          if_none_match=None):
         '''
@@ -1612,33 +1586,33 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_lease_id:
+        lease_id:
             Lease ID for active lease.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
-        _validate_not_none('x_ms_lease_id', x_ms_lease_id)
+        _validate_not_none('lease_id', lease_id)
 
         return self._lease_blob_impl(container_name,
                                      blob_name,
                                      LeaseActions.Renew,
-                                     x_ms_lease_id,
-                                     None, # x_ms_lease_duration
-                                     None, # x_ms_lease_break_period
-                                     None, # x_ms_proposed_lease_id
+                                     lease_id,
+                                     None, # lease_duration
+                                     None, # lease_break_period
+                                     None, # proposed_lease_id
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
                                      if_none_match)
 
     def release_blob_lease(self, container_name, blob_name,
-                           x_ms_lease_id, if_modified_since=None,
+                           lease_id, if_modified_since=None,
                            if_unmodified_since=None, if_match=None,
                            if_none_match=None):
         '''
@@ -1648,34 +1622,34 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_lease_id:
+        lease_id:
             Lease ID for active lease.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
-        _validate_not_none('x_ms_lease_id', x_ms_lease_id)
+        _validate_not_none('lease_id', lease_id)
 
         return self._lease_blob_impl(container_name,
                                      blob_name,
                                      LeaseActions.Release,
-                                     x_ms_lease_id,
-                                     None, # x_ms_lease_duration
-                                     None, # x_ms_lease_break_period
-                                     None, # x_ms_proposed_lease_id
+                                     lease_id,
+                                     None, # lease_duration
+                                     None, # lease_break_period
+                                     None, # proposed_lease_id
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
                                      if_none_match)
 
     def break_blob_lease(self, container_name, blob_name,
-                         x_ms_lease_id,
-                         x_ms_lease_break_period=None,
+                         lease_id,
+                         lease_break_period=None,
                          if_modified_since=None,
                          if_unmodified_since=None,
                          if_match=None,
@@ -1687,10 +1661,10 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_lease_id:
+        lease_id:
             Lease ID for active lease.
-        x_ms_lease_break_period:
-            Optional. For a break operation, this is the proposed duration of
+        lease_break_period:
+            For a break operation, this is the proposed duration of
             seconds that the lease should continue before it is broken, between
             0 and 60 seconds. This break period is only used if it is shorter
             than the time remaining on the lease. If longer, the time remaining
@@ -1700,33 +1674,33 @@ class _BaseBlobService(_StorageClient):
             operation, a fixed-duration lease breaks after the remaining lease
             period elapses, and an infinite lease breaks immediately.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
-        _validate_not_none('x_ms_lease_id', x_ms_lease_id)
-        if (x_ms_lease_break_period is not None) and (x_ms_lease_break_period < 0 or x_ms_lease_break_period > 60):
-            raise ValueError("x_ms_lease_break_period param needs to be between 0 and 60.")
+        _validate_not_none('lease_id', lease_id)
+        if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
+            raise ValueError("lease_break_period param needs to be between 0 and 60.")
 
         return self._lease_blob_impl(container_name,
                                      blob_name,
                                      LeaseActions.Break,
-                                     x_ms_lease_id,
-                                     None, # x_ms_lease_duration
-                                     x_ms_lease_break_period,
-                                     None, # x_ms_proposed_lease_id
+                                     lease_id,
+                                     None, # lease_duration
+                                     lease_break_period,
+                                     None, # proposed_lease_id
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
                                      if_none_match)
 
     def change_blob_lease(self, container_name, blob_name,
-                         x_ms_lease_id,
-                         x_ms_proposed_lease_id,
+                         lease_id,
+                         proposed_lease_id,
                          if_modified_since=None,
                          if_unmodified_since=None,
                          if_match=None,
@@ -1738,35 +1712,35 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
-        x_ms_proposed_lease_id:
+        proposed_lease_id:
             Proposed lease ID, in a GUID string format.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         return self._lease_blob_impl(container_name,
                                      blob_name,
                                      LeaseActions.Change,
-                                     x_ms_lease_id,
-                                     None, # x_ms_lease_duration
-                                     None, # x_ms_lease_break_period
-                                     x_ms_proposed_lease_id,
+                                     lease_id,
+                                     None, # lease_duration
+                                     None, # lease_break_period
+                                     proposed_lease_id,
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
                                      if_none_match)
 
     def snapshot_blob(self, container_name, blob_name,
-                      x_ms_meta_name_values=None, if_modified_since=None,
+                      metadata=None, if_modified_since=None,
                       if_unmodified_since=None, if_match=None,
-                      if_none_match=None, x_ms_lease_id=None):
+                      if_none_match=None, lease_id=None):
         '''
         Creates a read-only snapshot of a blob.
 
@@ -1774,17 +1748,17 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_meta_name_values:
-            Optional. Dict containing name and value pairs.
+        metadata:
+            Dict containing name and value pairs.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
             DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value
-        x_ms_lease_id:
+            An ETag value
+        lease_id:
             Required if the blob has an active lease.
         '''
         _validate_not_none('container_name', container_name)
@@ -1795,12 +1769,12 @@ class _BaseBlobService(_StorageClient):
         request.path = '/' + \
             _str(container_name) + '/' + _str(blob_name) + '?comp=snapshot'
         request.headers = [
-            ('x-ms-meta-name-values', x_ms_meta_name_values),
+            ('x-ms-meta-name-values', metadata),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id))
+            ('x-ms-lease-id', _str_or_none(lease_id))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -1812,14 +1786,14 @@ class _BaseBlobService(_StorageClient):
             response,
             filter=['x-ms-snapshot', 'etag', 'last-modified'])
 
-    def copy_blob(self, container_name, blob_name, x_ms_copy_source,
-                  x_ms_meta_name_values=None,
-                  x_ms_source_if_modified_since=None,
-                  x_ms_source_if_unmodified_since=None,
-                  x_ms_source_if_match=None, x_ms_source_if_none_match=None,
+    def copy_blob(self, container_name, blob_name, copy_source,
+                  metadata=None,
+                  source_if_modified_since=None,
+                  source_if_unmodified_since=None,
+                  source_if_match=None, source_if_none_match=None,
                   if_modified_since=None, if_unmodified_since=None,
-                  if_match=None, if_none_match=None, x_ms_lease_id=None,
-                  x_ms_source_lease_id=None):
+                  if_match=None, if_none_match=None, lease_id=None,
+                  source_lease_id=None):
         '''
         Copies a blob to a destination within the storage account.
 
@@ -1827,47 +1801,47 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        x_ms_copy_source:
+        copy_source:
             URL up to 2 KB in length that specifies a blob. A source blob in
             the same account can be private, but a blob in another account
             must be public or accept credentials included in this URL, such as
             a Shared Access Signature. Examples:
             https://myaccount.blob.core.windows.net/mycontainer/myblob
             https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
-        x_ms_meta_name_values:
-            Optional. Dict containing name and value pairs.
-        x_ms_source_if_modified_since:
-            Optional. An ETag value. Specify this conditional header to copy
+        metadata:
+            Dict containing name and value pairs.
+        source_if_modified_since:
+            An ETag value. Specify this conditional header to copy
             the source blob only if its ETag matches the value specified.
-        x_ms_source_if_unmodified_since:
-            Optional. An ETag value. Specify this conditional header to copy
+        source_if_unmodified_since:
+            An ETag value. Specify this conditional header to copy
             the blob only if its ETag does not match the value specified.
-        x_ms_source_if_match:
-            Optional. A DateTime value. Specify this conditional header to
+        source_if_match:
+            A DateTime value. Specify this conditional header to
             copy the blob only if the source blob has been modified since the
             specified date/time.
-        x_ms_source_if_none_match:
-            Optional. An ETag value. Specify this conditional header to copy
+        source_if_none_match:
+            An ETag value. Specify this conditional header to copy
             the source blob only if its ETag matches the value specified.
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
             DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value
-        x_ms_lease_id:
+            An ETag value
+        lease_id:
             Required if the blob has an active lease.
-        x_ms_source_lease_id:
-            Optional. Specify this to perform the Copy Blob operation only if
+        source_lease_id:
+            Specify this to perform the Copy Blob operation only if
             the lease ID given matches the active lease ID of the source blob.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
-        _validate_not_none('x_ms_copy_source', x_ms_copy_source)
+        _validate_not_none('copy_source', copy_source)
 
-        if x_ms_copy_source.startswith('/'):
+        if copy_source.startswith('/'):
             # Backwards compatibility for earlier versions of the SDK where
             # the copy source can be in the following formats:
             # - Blob in named container:
@@ -1879,8 +1853,8 @@ class _BaseBlobService(_StorageClient):
             # - Snapshot in root container:
             #     /accountName/blobName?snapshot=<DateTime>
             account, _, source =\
-                x_ms_copy_source.partition('/')[2].partition('/')
-            x_ms_copy_source = self.protocol + '://' + \
+                copy_source.partition('/')[2].partition('/')
+            copy_source = self.protocol + '://' + \
                 account + self.host_base + '/' + source
 
         request = HTTPRequest()
@@ -1888,21 +1862,21 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + _str(container_name) + '/' + _str(blob_name) + ''
         request.headers = [
-            ('x-ms-copy-source', _str_or_none(x_ms_copy_source)),
-            ('x-ms-meta-name-values', x_ms_meta_name_values),
+            ('x-ms-copy-source', _str_or_none(copy_source)),
+            ('x-ms-meta-name-values', metadata),
             ('x-ms-source-if-modified-since',
-             _str_or_none(x_ms_source_if_modified_since)),
+             _str_or_none(source_if_modified_since)),
             ('x-ms-source-if-unmodified-since',
-             _str_or_none(x_ms_source_if_unmodified_since)),
-            ('x-ms-source-if-match', _str_or_none(x_ms_source_if_match)),
+             _str_or_none(source_if_unmodified_since)),
+            ('x-ms-source-if-match', _str_or_none(source_if_match)),
             ('x-ms-source-if-none-match',
-             _str_or_none(x_ms_source_if_none_match)),
+             _str_or_none(source_if_none_match)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
-            ('x-ms-source-lease-id', _str_or_none(x_ms_source_lease_id))
+            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-source-lease-id', _str_or_none(source_lease_id))
         ]
 
         request.path, request.query = _update_request_uri_query_local_storage(
@@ -1913,8 +1887,8 @@ class _BaseBlobService(_StorageClient):
 
         return _parse_response_for_dict(response)
 
-    def abort_copy_blob(self, container_name, blob_name, x_ms_copy_id,
-                        x_ms_lease_id=None):
+    def abort_copy_blob(self, container_name, blob_name, copy_id,
+                        lease_id=None):
         '''
          Aborts a pending copy_blob operation, and leaves a destination blob
          with zero length and full metadata.
@@ -1923,23 +1897,23 @@ class _BaseBlobService(_StorageClient):
              Name of destination container.
          blob_name:
              Name of destination blob.
-         x_ms_copy_id:
+         copy_id:
             Copy identifier provided in the x-ms-copy-id of the original
             copy_blob operation.
-         x_ms_lease_id:
+         lease_id:
             Required if the destination blob has an active infinite lease.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
-        _validate_not_none('x_ms_copy_id', x_ms_copy_id)
+        _validate_not_none('copy_id', copy_id)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + _str(container_name) + '/' + \
             _str(blob_name) + '?comp=copy&copyid=' + \
-            _str(x_ms_copy_id)
+            _str(copy_id)
         request.headers = [
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-copy-action', 'abort'),
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
@@ -1949,8 +1923,7 @@ class _BaseBlobService(_StorageClient):
         self._perform_request(request)
 
     def delete_blob(self, container_name, blob_name, snapshot=None,
-                    timeout=None, x_ms_lease_id=None,
-                    x_ms_delete_snapshots=None,
+                    timeout=None, lease_id=None, delete_snapshots=None,
                     if_modified_since=None, if_unmodified_since=None,
                     if_match=None, if_none_match=None):
         '''
@@ -1965,15 +1938,15 @@ class _BaseBlobService(_StorageClient):
         blob_name:
             Name of existing blob.
         snapshot:
-            Optional. The snapshot parameter is an opaque DateTime value that,
+            The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to delete.
         timeout:
-            Optional. The timeout parameter is expressed in seconds.
+            The timeout parameter is expressed in seconds.
             The Blob service returns an error when the timeout interval elapses
             while processing the request.
-        x_ms_lease_id:
+        lease_id:
             Required if the blob has an active lease.
-        x_ms_delete_snapshots:
+        delete_snapshots:
             Required if the blob has associated snapshots. Specify one of the
             following two options:
                 include:
@@ -1987,13 +1960,13 @@ class _BaseBlobService(_StorageClient):
             the blob has associated snapshots, the Blob service returns status
             code 409 (Conflict).
         if_modified_since:
-            Optional. Datetime string.
+            Datetime string.
         if_unmodified_since:
-            Optional. DateTime string.
+            DateTime string.
         if_match:
-            Optional. An ETag value.
+            An ETag value.
         if_none_match:
-            Optional. An ETag value.
+            An ETag value.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -2002,8 +1975,8 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + _str(container_name) + '/' + _str(blob_name) + ''
         request.headers = [
-            ('x-ms-lease-id', _str_or_none(x_ms_lease_id)),
-            ('x-ms-delete-snapshots', _str_or_none(x_ms_delete_snapshots)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-delete-snapshots', _str_or_none(delete_snapshots)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),

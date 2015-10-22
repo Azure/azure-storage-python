@@ -28,7 +28,7 @@ from tests.common_recordingtestcase import (
     TestMode,
     record,
 )
-from tests.storage_testcase import StorageTestCase
+from tests.testcase import StorageTestCase
 
 
 #------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
     def _create_container_and_blob(self, container_name, blob_name):
         self._create_container(container_name)
-        resp = self.bs.put_blob(container_name, blob_name)
+        resp = self.bs.create_blob(container_name, blob_name)
         self.assertIsNone(resp)
 
     def _blob_exists(self, container_name, blob_name):
@@ -165,7 +165,7 @@ class StorageAppendBlobTest(StorageTestCase):
         self._create_container(self.container_name)
 
         # Act
-        resp = self.bs.put_blob(self.container_name, 'blob1')
+        resp = self.bs.create_blob(self.container_name, 'blob1')
 
         # Assert
         self.assertIsNone(resp)
@@ -179,8 +179,8 @@ class StorageAppendBlobTest(StorageTestCase):
         lease_id = lease['x-ms-lease-id']
 
         # Act
-        resp = self.bs.put_blob(
-            self.container_name, 'blob1', x_ms_lease_id=lease_id)
+        resp = self.bs.create_blob(
+            self.container_name, 'blob1', lease_id=lease_id)
 
         # Assert
         self.assertIsNone(resp)
@@ -191,9 +191,9 @@ class StorageAppendBlobTest(StorageTestCase):
         self._create_container(self.container_name)
 
         # Act
-        resp = self.bs.put_blob(
+        resp = self.bs.create_blob(
             self.container_name, 'blob1',
-            x_ms_meta_name_values={'hello': 'world', 'number': '42'})
+            metadata={'hello': 'world', 'number': '42'})
 
         # Assert
         self.assertIsNone(resp)
@@ -237,7 +237,7 @@ class StorageAppendBlobTest(StorageTestCase):
         data = b'abcdefghijklmnopqrstuvwxyz'
         resp = self.bs.append_blob_from_bytes(
             self.container_name, 'blob1', data,
-            x_ms_blob_condition_maxsize=len(data))
+            maxsize_condition=len(data))
 
         # Assert
         self.assertIsNone(resp)
@@ -302,8 +302,8 @@ class StorageAppendBlobTest(StorageTestCase):
         data = b'abcdefghijklmnopqrstuvwxyz'
         resp = self.bs.append_blob_from_bytes(
             self.container_name, 'blob1', data, 3, 5,
-            x_ms_blob_content_type='image/png',
-            x_ms_blob_content_language='spanish')
+            content_type='image/png',
+            content_language='spanish')
 
         # Assert
         self.assertIsNone(resp)
@@ -339,8 +339,8 @@ class StorageAppendBlobTest(StorageTestCase):
         # Act
         resp = self.bs.append_blob_from_bytes(
             self.container_name, blob_name, data,
-            x_ms_blob_content_type='image/png',
-            x_ms_blob_content_language='spanish')
+            content_type='image/png',
+            content_language='spanish')
 
         # Assert
         self.assertIsNone(resp)
@@ -449,8 +449,8 @@ class StorageAppendBlobTest(StorageTestCase):
         # Act
         resp = self.bs.append_blob_from_path(
             self.container_name, blob_name, file_path,
-            x_ms_blob_content_type='image/png',
-            x_ms_blob_content_language='spanish')
+            content_type='image/png',
+            content_language='spanish')
 
         # Assert
         self.assertIsNone(resp)
@@ -629,8 +629,8 @@ class StorageAppendBlobTest(StorageTestCase):
         with open(file_path, 'rb') as stream:
             resp = self.bs.append_blob_from_stream(
                 self.container_name, blob_name, stream,
-                x_ms_blob_content_type='image/png',
-                x_ms_blob_content_language='spanish')
+                content_type='image/png',
+                content_language='spanish')
 
         # Assert
         self.assertIsNone(resp)

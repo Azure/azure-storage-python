@@ -29,7 +29,7 @@ To upload a file 'localimage.png' from disk to a file named
 
     from azure.storage.file import FileService
     file_service = FileService(account_name, account_key)
-    file_service.put_file_from_path(
+    file_service.create_file_from_path(
         'myshare',
 		'uploads',
         'image.png',
@@ -49,7 +49,7 @@ upload to the Azure file.
 .. code:: python
 
     with open('localimage.png') as localfile:
-        file_service.put_file_from_stream(
+        file_service.create_file_from_stream(
             'myshare',
 		    'uploads',
             'image.png',

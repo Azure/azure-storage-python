@@ -16,29 +16,21 @@
 #--------------------------------------------------------------------------
 import unittest
 
-from azure.common import (
-    AzureHttpError,
-)
+from azure.common import AzureHttpError
 from azure.storage import (
     Logging,
     Metrics,
     CorsRule,
     RetentionPolicy,
 )
-from azure.storage.blob import (
-    BlockBlobService,
-)
-from azure.storage.queue import (
-    QueueService,
-)
-from azure.storage.table import (
-    TableService,
-)
+from azure.storage.blob import BlockBlobService
+from azure.storage.queue import QueueService
+from azure.storage.table import TableService
 from tests.common_recordingtestcase import (
     TestMode,
     record,
 )
-from tests.storage_testcase import StorageTestCase
+from tests.testcase import StorageTestCase
 
 
 #------------------------------------------------------------------------------

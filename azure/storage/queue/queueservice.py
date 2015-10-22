@@ -231,7 +231,7 @@ class QueueService(_StorageClient):
 
         return _convert_xml_to_service_properties(response.body)
 
-    def list_queues(self, prefix=None, marker=None, maxresults=None,
+    def list_queues(self, prefix=None, marker=None, max_results=None,
                     include=None):
         '''
         Lists all of the queues in a given storage account.
@@ -246,8 +246,8 @@ class QueueService(_StorageClient):
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
             queues. The marker value is opaque to the client.
-        maxresults:
-            Specifies the maximum number of queues to return. If maxresults is
+        max_results:
+            Specifies the maximum number of queues to return. If max_results is
             not specified, the server will return up to 5,000 items.
         include:
             Optional. Include this parameter to specify that the container's
@@ -260,7 +260,7 @@ class QueueService(_StorageClient):
         request.query = [
             ('prefix', _str_or_none(prefix)),
             ('marker', _str_or_none(marker)),
-            ('maxresults', _int_or_none(maxresults)),
+            ('maxresults', _int_or_none(max_results)),
             ('include', _str_or_none(include))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(

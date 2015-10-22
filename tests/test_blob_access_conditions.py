@@ -34,7 +34,7 @@ from tests.common_recordingtestcase import (
     TestMode,
     record,
 )
-from tests.storage_testcase import StorageTestCase
+from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 
@@ -71,18 +71,18 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
     def _create_container_and_block_blob(self, container_name, blob_name,
                                          blob_data):
         self._create_container(container_name)
-        resp = self.bs.put_blob(container_name, blob_name, blob_data)
+        resp = self.bs.create_blob_from_bytes(container_name, blob_name, blob_data)
         self.assertIsNone(resp)
 
     def _create_container_and_page_blob(self, container_name, blob_name,
                                         content_length):
         self._create_container(container_name)
-        resp = self.pbs.put_blob(self.container_name, blob_name, str(content_length))
+        resp = self.pbs.create_blob(self.container_name, blob_name, str(content_length))
         self.assertIsNone(resp)
 
     def _create_container_and_append_blob(self, container_name, blob_name):
         self._create_container(container_name)
-        resp = self.abs.put_blob(container_name, blob_name)
+        resp = self.abs.create_blob(container_name, blob_name)
         self.assertIsNone(resp)
 
     class NonSeekableFile(object):
@@ -208,7 +208,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         lease = self.bs.acquire_container_lease(self.container_name,
                                                 if_modified_since=test_datetime) 
         self.bs.break_container_lease(self.container_name,
-                                      x_ms_lease_id=lease['x-ms-lease-id'])
+                                      lease_id=lease['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(lease)
@@ -242,7 +242,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                                                 if_unmodified_since=test_datetime) 
         self.bs.break_container_lease(
             self.container_name,
-            x_ms_lease_id=lease['x-ms-lease-id'])
+            lease_id=lease['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(lease)
@@ -332,8 +332,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                         .strftime('%a, %d %b %Y %H:%M:%S GMT')
 
         # Act
-        resp = self.bs.put_blob(
-            self.container_name, 'blob1', data, 'BlockBlob',
+        resp = self.bs.create_blob_from_bytes(
+            self.container_name, 'blob1', data,
             if_modified_since=test_datetime)
 
         # Assert
@@ -351,8 +351,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.put_blob(
-                self.container_name, 'blob1', data, 'BlockBlob',
+            self.bs.create_blob_from_bytes(
+                self.container_name, 'blob1', data,
                 if_modified_since=test_datetime)
 
         # Assert
@@ -368,8 +368,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                         .strftime('%a, %d %b %Y %H:%M:%S GMT')
 
         # Act
-        resp = self.bs.put_blob(
-            self.container_name, 'blob1', data, 'BlockBlob',
+        resp = self.bs.create_blob_from_bytes(
+            self.container_name, 'blob1', data,
             if_unmodified_since=test_datetime)
 
         # Assert
@@ -387,8 +387,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.put_blob(
-                self.container_name, 'blob1', data, 'BlockBlob',
+            self.bs.create_blob_from_bytes(
+                self.container_name, 'blob1', data,
                 if_unmodified_since=test_datetime)
 
         # Assert
@@ -402,8 +402,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
         
         # Act
-        resp = self.bs.put_blob(
-            self.container_name, 'blob1', data, 'BlockBlob',
+        resp = self.bs.create_blob_from_bytes(
+            self.container_name, 'blob1', data,
             if_match=etag)
 
         # Assert
@@ -418,8 +418,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         
         # Act
         with self.assertRaises(AzureHttpError):
-            resp = self.bs.put_blob(
-                self.container_name, 'blob1', data, 'BlockBlob',
+            resp = self.bs.create_blob_from_bytes(
+                self.container_name, 'blob1', data,
                 if_match='0x111111111111111')
 
         # Assert
@@ -432,8 +432,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', data)
         
         # Act
-        resp = self.bs.put_blob(
-            self.container_name, 'blob1', data, 'BlockBlob',
+        resp = self.bs.create_blob_from_bytes(
+            self.container_name, 'blob1', data,
             if_none_match='0x111111111111111')
 
         # Assert
@@ -449,8 +449,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            resp = self.bs.put_blob(
-                self.container_name, 'blob1', data, 'BlockBlob',
+            resp = self.bs.create_blob_from_bytes(
+                self.container_name, 'blob1', data,
                 if_none_match=etag)
 
         # Assert
@@ -588,8 +588,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            x_ms_blob_content_language='spanish',
-            x_ms_blob_content_disposition='inline',
+            content_language='spanish',
+            content_disposition='inline',
             if_modified_since=test_datetime,
         )
 
@@ -612,8 +612,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                x_ms_blob_content_language='spanish',
-                x_ms_blob_content_disposition='inline',
+                content_language='spanish',
+                content_disposition='inline',
                 if_modified_since=test_datetime,
             )
 
@@ -631,8 +631,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            x_ms_blob_content_language='spanish',
-            x_ms_blob_content_disposition='inline',
+            content_language='spanish',
+            content_disposition='inline',
             if_unmodified_since=test_datetime,
         )
 
@@ -655,8 +655,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                x_ms_blob_content_language='spanish',
-                x_ms_blob_content_disposition='inline',
+                content_language='spanish',
+                content_disposition='inline',
                 if_unmodified_since=test_datetime,
             )
 
@@ -673,8 +673,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            x_ms_blob_content_language='spanish',
-            x_ms_blob_content_disposition='inline',
+            content_language='spanish',
+            content_disposition='inline',
             if_match=etag,
         )
 
@@ -695,8 +695,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                x_ms_blob_content_language='spanish',
-                x_ms_blob_content_disposition='inline',
+                content_language='spanish',
+                content_disposition='inline',
                 if_match='0x111111111111111',
             )
 
@@ -712,8 +712,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            x_ms_blob_content_language='spanish',
-            x_ms_blob_content_disposition='inline',
+            content_language='spanish',
+            content_disposition='inline',
             if_none_match='0x111111111111111',
         )
 
@@ -735,8 +735,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                x_ms_blob_content_language='spanish',
-                x_ms_blob_content_disposition='inline',
+                content_language='spanish',
+                content_disposition='inline',
                 if_none_match=etag,
             )
 
@@ -1399,11 +1399,11 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp1 = self.bs.acquire_blob_lease(
             self.container_name, 'blob1',
             if_modified_since=test_datetime,
-            x_ms_proposed_lease_id=test_lease_id)
+            proposed_lease_id=test_lease_id)
 
         self.bs.break_blob_lease(
             self.container_name, 'blob1',
-            x_ms_lease_id=test_lease_id)
+            lease_id=test_lease_id)
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -1439,11 +1439,11 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp1 = self.bs.acquire_blob_lease(
             self.container_name, 'blob1',
             if_unmodified_since=test_datetime,
-            x_ms_proposed_lease_id=test_lease_id)
+            proposed_lease_id=test_lease_id)
 
         self.bs.break_blob_lease(
             self.container_name, 'blob1',
-            x_ms_lease_id=test_lease_id)
+            lease_id=test_lease_id)
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -1476,12 +1476,12 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         resp1 = self.bs.acquire_blob_lease(
             self.container_name, 'blob1',
-            x_ms_proposed_lease_id=test_lease_id,
+            proposed_lease_id=test_lease_id,
             if_match=etag)
 
         self.bs.break_blob_lease(
             self.container_name, 'blob1',
-            x_ms_lease_id=test_lease_id)
+            lease_id=test_lease_id)
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -1509,12 +1509,12 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         resp1 = self.bs.acquire_blob_lease(
             self.container_name, 'blob1',
-            x_ms_proposed_lease_id=test_lease_id,
+            proposed_lease_id=test_lease_id,
             if_none_match='0x111111111111111')
 
         self.bs.break_blob_lease(
             self.container_name, 'blob1',
-            x_ms_lease_id=test_lease_id)
+            lease_id=test_lease_id)
 
 
         # Assert
@@ -1843,7 +1843,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         ranges = self.pbs.get_page_ranges(self.container_name, 'blob1',
                                          if_modified_since=test_datetime)
-        for range in ranges:
+        for byte_range in ranges:
             pass
 
         # Assert
@@ -1889,7 +1889,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         ranges = self.pbs.get_page_ranges(self.container_name, 'blob1',
                                          if_unmodified_since=test_datetime)
-        for range in ranges:
+        for byte_range in ranges:
             pass
 
         # Assert
@@ -1933,7 +1933,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         ranges = self.pbs.get_page_ranges(self.container_name, 'blob1',
                                          if_match=etag)
-        for range in ranges:
+        for byte_range in ranges:
             pass
 
         # Assert
@@ -1973,7 +1973,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         ranges = self.pbs.get_page_ranges(self.container_name, 'blob1',
                                          if_none_match='0x111111111111111')
-        for range in ranges:
+        for byte_range in ranges:
             pass
 
         # Assert

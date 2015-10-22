@@ -22,7 +22,12 @@
 ### Blob:
 - Separated lease_container and lease_blob into unique methods for each lease action.
 - Refactored the blob service into a block blob and page blob service.
+- Renamed APIs and params: All x_ms(_blob) prefexes and duplicates headers removed. x_ms_range => byte_range for applicable APIs. maxresults => max_results for applicable APIs. For append blobs and page blobs: put_blob => create_blob. For block blobs put_blob => _put_blob. x_ms_blob_condition_maxsize => maxsize_condition for append blob APIs. x_ms_blob_condition_appendpos => appendpos_condition for append blob APIs. text_encoding => encoding for applicable APIs. put_blob_from* => create_blob_from* for page and block blobs. x_ms_blob_content_md5 => transactional_content_md5 for put_block_list. blocklisttype => block_list_type for get_block_list.
 
 ### Queue:
 - The list_queues operation returns a sequence of Queue objects. The sequence returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
 - The peek_messages and get_messages operations return a list of QueueMessage objects. QueueMessage objects contain the same fields as previously, but insertion_time, expiration_time, and time_next_visible are returned as UTC dates rather than strings.
+- Renamed params: maxresults => max_results for list_queues.
+
+### File:
+- Renamed APIs and params: All x_ms prefexes have been removed. x_ms_range => byte_range for applicable APIs. maxresults => max_results for applicable APIs. x_ms_meta_name_values => metadata for applicable APIs. text_encoding => encoding for applicable APIs. list_ranges no longer uses range param.
