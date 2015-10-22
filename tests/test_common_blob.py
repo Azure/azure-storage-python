@@ -50,7 +50,7 @@ from tests.common_recordingtestcase import (
     TestMode,
     record,
 )
-from tests.storage_testcase import StorageTestCase
+from tests.testcase import StorageTestCase
 
 
 #------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ class StorageCommonBlobTest(StorageTestCase):
     def _create_container_and_block_blob(self, container_name, blob_name,
                                          blob_data):
         self._create_container(container_name)
-        resp = self.bs.put_blob(container_name, blob_name, blob_data)
+        resp = self.bs.create_blob_from_bytes (container_name, blob_name, blob_data)
         self.assertIsNone(resp)
 
     def _create_container_and_block_blob_with_random_data(
@@ -148,11 +148,11 @@ class StorageCommonBlobTest(StorageTestCase):
         return False
 
     def _create_remote_container_and_block_blob(self, source_blob_name, data,
-                                                x_ms_blob_public_access):
+                                                blob_public_access):
         self.remote_container_name = self.get_resource_name('remotectnr')
         self.bs2.create_container(
             self.remote_container_name,
-            x_ms_blob_public_access=x_ms_blob_public_access)
+            blob_public_access=blob_public_access)
         self.bs2.put_block_blob_from_bytes(
             self.remote_container_name, source_blob_name, data)
         source_blob_url = self.bs2.make_blob_url(
@@ -781,7 +781,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         resp = self.bs.set_container_acl(
-            self.container_name, x_ms_lease_id=lease['x-ms-lease-id'])
+            self.container_name, lease_id=lease['x-ms-lease-id'])
 
         # Assert
         self.assertIsNone(resp)
@@ -799,7 +799,7 @@ class StorageCommonBlobTest(StorageTestCase):
         non_matching_lease_id = '00000000-1111-2222-3333-444444444444'
         with self.assertRaises(AzureHttpError):
             self.bs.set_container_acl(
-                self.container_name, x_ms_lease_id=non_matching_lease_id)
+                self.container_name, lease_id=non_matching_lease_id)
 
         # Assert
 
@@ -886,7 +886,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.container_lease_id = lease['x-ms-lease-id']
         lease = self.bs.release_container_lease(
             self.container_name,
-            x_ms_lease_id=lease['x-ms-lease-id'])
+            lease_id=lease['x-ms-lease-id'])
         self.container_lease_id = None
 
         # Assert
@@ -896,13 +896,13 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         lease = self.bs.acquire_container_lease(
-            self.container_name, x_ms_lease_duration=15)
+            self.container_name, lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
         self.sleep(10)
 
         # Act
         renewed_lease = self.bs.renew_container_lease(
-            self.container_name, x_ms_lease_id=lease['x-ms-lease-id'])
+            self.container_name, lease_id=lease['x-ms-lease-id'])
 
         # Assert
         self.assertEqual(lease['x-ms-lease-id'],
@@ -920,17 +920,17 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         lease = self.bs.acquire_container_lease(
-            self.container_name, x_ms_lease_duration=15)
+            self.container_name, lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Assert
         self.bs.break_container_lease(self.container_name,
-                                      x_ms_lease_id=lease['x-ms-lease-id'],
-                                      x_ms_lease_break_period=5)
+                                      lease_id=lease['x-ms-lease-id'],
+                                      lease_break_period=5)
         self.sleep(5)
         with self.assertRaises(AzureHttpError):
             self.bs.delete_container(
-                self.container_name, x_ms_lease_id=lease['x-ms-lease-id'])
+                self.container_name, lease_id=lease['x-ms-lease-id'])
 
     @record
     def test_lease_container_break_released_lease_fails(self):
@@ -955,7 +955,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         lease = self.bs.acquire_container_lease(
-            self.container_name, x_ms_lease_duration=15)
+            self.container_name, lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Assert
@@ -973,7 +973,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Act
         lease_id = '55e97f64-73e8-4390-838d-d9e84a374321'
         lease = self.bs.acquire_container_lease(
-            self.container_name, x_ms_proposed_lease_id=lease_id)
+            self.container_name, proposed_lease_id=lease_id)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Assert
@@ -990,8 +990,8 @@ class StorageCommonBlobTest(StorageTestCase):
         lease1 = self.bs.acquire_container_lease(self.container_name)
         self.container_lease_id = lease1['x-ms-lease-id']
         lease2 = self.bs.change_container_lease(self.container_name,
-                                                x_ms_lease_id=lease1['x-ms-lease-id'],
-                                                x_ms_proposed_lease_id=lease_id)
+                                                lease_id=lease1['x-ms-lease-id'],
+                                                proposed_lease_id=lease_id)
         self.container_lease_id = lease2['x-ms-lease-id']
 
         # Assert
@@ -1051,12 +1051,12 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         lease = self.bs.acquire_container_lease(
-            self.container_name, x_ms_lease_duration=15)
+            self.container_name, lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
         deleted = self.bs.delete_container(
-            self.container_name, x_ms_lease_id=lease['x-ms-lease-id'])
+            self.container_name, lease_id=lease['x-ms-lease-id'])
 
         # Assert
         self.assertTrue(deleted)
@@ -1068,7 +1068,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         lease = self.bs.acquire_container_lease(
-            self.container_name, x_ms_lease_duration=15)
+            self.container_name, lease_duration=15)
         self.container_lease_id = lease['x-ms-lease-id']
 
         # Act
@@ -1193,8 +1193,8 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data, )
-        self.bs.put_blob(self.container_name, 'blob2', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blob2', data, )
 
         # Act
         resp = self.bs.list_blobs(self.container_name)
@@ -1216,7 +1216,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1', data, )
         lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
@@ -1239,9 +1239,9 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'bloba1', data, )
-        self.bs.put_blob(self.container_name, 'bloba2', data, )
-        self.bs.put_blob(self.container_name, 'blobb1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'bloba1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'bloba2', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blobb1', data, )
 
         # Act
         resp = self.bs.list_blobs(self.container_name, 'bloba')
@@ -1260,24 +1260,24 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name,
+        self.bs.create_blob_from_bytes (self.container_name,
                          'documents/music/pop/thriller.mp3', data, )
-        self.bs.put_blob(self.container_name,
+        self.bs.create_blob_from_bytes (self.container_name,
                          'documents/music/rock/stairwaytoheaven.mp3', data,
                          )
-        self.bs.put_blob(self.container_name,
+        self.bs.create_blob_from_bytes (self.container_name,
                          'documents/music/rock/hurt.mp3', data, )
-        self.bs.put_blob(self.container_name,
+        self.bs.create_blob_from_bytes (self.container_name,
                          'documents/music/rock/metallica/one.mp3', data,
                          )
-        self.bs.put_blob(self.container_name,
+        self.bs.create_blob_from_bytes (self.container_name,
                          'documents/music/unsorted1.mp3', data, )
-        self.bs.put_blob(self.container_name,
+        self.bs.create_blob_from_bytes (self.container_name,
                          'documents/music/unsorted2.mp3', data, )
-        self.bs.put_blob(self.container_name,
+        self.bs.create_blob_from_bytes (self.container_name,
                          'documents/pictures/birthday/kid.jpg', data,
                          )
-        self.bs.put_blob(self.container_name,
+        self.bs.create_blob_from_bytes (self.container_name,
                          'documents/pictures/birthday/cake.jpg', data,
                          )
 
@@ -1302,14 +1302,14 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertNamedItemInContainer(resp.prefixes, 'documents/music/rock/')
 
     @record
-    def test_list_blobs_with_maxresults(self):
+    def test_list_blobs_with_max_results(self):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'bloba1', data, )
-        self.bs.put_blob(self.container_name, 'bloba2', data, )
-        self.bs.put_blob(self.container_name, 'bloba3', data, )
-        self.bs.put_blob(self.container_name, 'blobb1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'bloba1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'bloba2', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'bloba3', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blobb1', data, )
 
         # Act
         blobs = self.bs.list_blobs(self.container_name, None, None, 2)
@@ -1321,14 +1321,14 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertNamedItemInContainer(blobs, 'bloba2')
 
     @record
-    def test_list_blobs_with_maxresults_and_marker(self):
+    def test_list_blobs_with_max_results_and_marker(self):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'bloba1', data, )
-        self.bs.put_blob(self.container_name, 'bloba2', data, )
-        self.bs.put_blob(self.container_name, 'bloba3', data, )
-        self.bs.put_blob(self.container_name, 'blobb1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'bloba1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'bloba2', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'bloba3', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blobb1', data, )
 
         # Act
         blobs1 = self.bs.list_blobs(self.container_name, None, None, 2)
@@ -1348,8 +1348,8 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data, )
-        self.bs.put_blob(self.container_name, 'blob2', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blob2', data, )
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
         # Act
@@ -1369,10 +1369,10 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data,
-                         x_ms_meta_name_values={'number': '1', 'name': 'bob'})
-        self.bs.put_blob(self.container_name, 'blob2', data,
-                         x_ms_meta_name_values={'number': '2', 'name': 'car'})
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1', data,
+                         metadata={'number': '1', 'name': 'bob'})
+        self.bs.create_blob_from_bytes (self.container_name, 'blob2', data,
+                         metadata={'number': '2', 'name': 'car'})
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
         # Act
@@ -1395,8 +1395,8 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-        self.bs.put_blob(self.container_name, 'blob2', data,
-                         x_ms_meta_name_values={'number': '2', 'name': 'car'})
+        self.bs.create_blob_from_bytes (self.container_name, 'blob2', data,
+                         metadata={'number': '2', 'name': 'car'})
 
         # Act
         blobs = self.bs.list_blobs(
@@ -1412,8 +1412,8 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data,
-                         x_ms_meta_name_values={'status': 'original'})
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1', data,
+                         metadata={'status': 'original'})
         sourceblob = 'https://{0}.blob.core.windows.net/{1}/{2}'.format(
             self.settings.STORAGE_ACCOUNT_NAME,
             self.container_name,
@@ -1448,10 +1448,10 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         self._create_container(self.container_name)
         data = b'hello world'
-        self.bs.put_blob(self.container_name, 'blob1', data,
-                         x_ms_meta_name_values={'number': '1', 'name': 'bob'})
-        self.bs.put_blob(self.container_name, 'blob2', data,
-                         x_ms_meta_name_values={'number': '2', 'name': 'car'})
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1', data,
+                         metadata={'number': '1', 'name': 'bob'})
+        self.bs.create_blob_from_bytes (self.container_name, 'blob2', data,
+                         metadata={'number': '2', 'name': 'car'})
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
         # Act
@@ -1474,7 +1474,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blobs[2].metadata['name'], 'car')
 
     @record
-    def test_put_blob_with_lease_id(self):
+    def test_create_blob_with_lease_id(self):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
@@ -1483,26 +1483,26 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         data = b'hello world again'
-        resp = self.bs.put_blob(
+        resp = self.bs.create_blob_from_bytes (
             self.container_name, 'blob1', data,
-            x_ms_lease_id=lease_id)
+            lease_id=lease_id)
 
         # Assert
         self.assertIsNone(resp)
         blob = self.bs.get_blob(
-            self.container_name, 'blob1', x_ms_lease_id=lease_id)
+            self.container_name, 'blob1', lease_id=lease_id)
         self.assertEqual(blob, b'hello world again')
 
     @record
-    def test_put_blob_with_metadata(self):
+    def test_create_blob_with_metadata(self):
         # Arrange
         self._create_container(self.container_name)
 
         # Act
         data = b'hello world'
-        resp = self.bs.put_blob(
+        resp = self.bs.create_blob_from_bytes (
             self.container_name, 'blob1', data,
-            x_ms_meta_name_values={'hello': 'world', 'number': '42'})
+            metadata={'hello': 'world', 'number': '42'})
 
         # Assert
         self.assertIsNone(resp)
@@ -1544,7 +1544,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         snapshot = self.bs.snapshot_blob(self.container_name, 'blob1')
-        self.bs.put_blob(self.container_name, 'blob1',
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1',
                          b'hello world again', )
 
         # Act
@@ -1566,7 +1566,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         blob = self.bs.get_blob(
-            self.container_name, 'blob1', x_ms_range='bytes=0-5')
+            self.container_name, 'blob1', byte_range='bytes=0-5')
 
         # Assert
         self.assertIsInstance(blob, BlobResult)
@@ -1580,8 +1580,8 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         blob = self.bs.get_blob(self.container_name, 'blob1',
-                                x_ms_range='bytes=0-5',
-                                x_ms_range_get_content_md5='true')
+                                byte_range='bytes=0-5',
+                                range_get_content_md5='true')
 
         # Assert
         self.assertIsInstance(blob, BlobResult)
@@ -1599,7 +1599,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         blob = self.bs.get_blob(
-            self.container_name, 'blob1', x_ms_lease_id=lease_id)
+            self.container_name, 'blob1', lease_id=lease_id)
         self.bs.release_blob_lease(self.container_name, 'blob1', lease_id)
 
         # Assert
@@ -1652,8 +1652,8 @@ class StorageCommonBlobTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            x_ms_blob_content_language='spanish',
-            x_ms_blob_content_disposition='inline',
+            content_language='spanish',
+            content_disposition='inline',
         )
 
         # Assert
@@ -1670,7 +1670,7 @@ class StorageCommonBlobTest(StorageTestCase):
         with self.assertRaises(AzureHttpError):
             self.bs.set_blob_properties(
                 self.container_name, 'blob1',
-                x_ms_blob_content_language='spanish')
+                content_language='spanish')
 
         # Assert
 
@@ -1683,7 +1683,7 @@ class StorageCommonBlobTest(StorageTestCase):
         with self.assertRaises(AzureHttpError):
             self.bs.set_blob_properties(
                 self.container_name, 'blob1',
-                x_ms_blob_content_language='spanish')
+                content_language='spanish')
 
         # Assert
 
@@ -1708,7 +1708,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         blob_name = 'blob1'
         data = b'hello world'
-        self.bs.put_blob(self.container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
         res = self.bs.snapshot_blob(self.container_name, blob_name)
         snapshot = res['x-ms-snapshot']
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
@@ -1822,7 +1822,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         blob_name = 'blob1'
         data = b'hello world'
-        self.bs.put_blob(self.container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
         res = self.bs.snapshot_blob(self.container_name, blob_name)
         snapshot = res['x-ms-snapshot']
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
@@ -1843,14 +1843,14 @@ class StorageCommonBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         blob_name = 'blob1'
         data = b'hello world'
-        self.bs.put_blob(self.container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
         self.bs.snapshot_blob(self.container_name, blob_name)
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
         self.assertEqual(len(blobs), 2)
 
         # Act
         self.bs.delete_blob(self.container_name, blob_name,
-                            x_ms_delete_snapshots='only')
+                            delete_snapshots='only')
 
         # Assert
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
@@ -1863,14 +1863,14 @@ class StorageCommonBlobTest(StorageTestCase):
         self._create_container(self.container_name)
         blob_name = 'blob1'
         data = b'hello world'
-        self.bs.put_blob(self.container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
         self.bs.snapshot_blob(self.container_name, blob_name)
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
         self.assertEqual(len(blobs), 2)
 
         # Act
         self.bs.delete_blob(self.container_name, blob_name,
-                            x_ms_delete_snapshots='include')
+                            delete_snapshots='include')
 
         # Assert
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
@@ -2045,13 +2045,13 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         resp1 = self.bs.acquire_blob_lease(
-            self.container_name, 'blob1', x_ms_lease_duration=15)
-        resp2 = self.bs.put_blob(self.container_name, 'blob1', b'hello 2',
-                                 x_ms_lease_id=resp1['x-ms-lease-id'])
+            self.container_name, 'blob1', lease_duration=15)
+        resp2 = self.bs.create_blob_from_bytes (self.container_name, 'blob1', b'hello 2',
+                                 lease_id=resp1['x-ms-lease-id'])
         self.sleep(15)
         with self.assertRaises(AzureHttpError):
-            self.bs.put_blob(self.container_name, 'blob1', b'hello 3',
-                             x_ms_lease_id=resp1['x-ms-lease-id'])
+            self.bs.create_blob_from_bytes (self.container_name, 'blob1', b'hello 3',
+                             lease_id=resp1['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2067,7 +2067,7 @@ class StorageCommonBlobTest(StorageTestCase):
         lease_id = 'a0e6c241-96ea-45a3-a44b-6ae868bc14d0'
         resp1 = self.bs.acquire_blob_lease(
             self.container_name, 'blob1',
-            x_ms_proposed_lease_id=lease_id)
+            proposed_lease_id=lease_id)
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2083,8 +2083,8 @@ class StorageCommonBlobTest(StorageTestCase):
         lease_id = 'a0e6c241-96ea-45a3-a44b-6ae868bc14d0'
         resp1 = self.bs.acquire_blob_lease(self.container_name, 'blob1')
         resp2 = self.bs.change_blob_lease(self.container_name, 'blob1',
-                                   x_ms_lease_id=resp1['x-ms-lease-id'],
-                                   x_ms_proposed_lease_id=lease_id)
+                                   lease_id=resp1['x-ms-lease-id'],
+                                   proposed_lease_id=lease_id)
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2118,16 +2118,16 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         resp1 = self.bs.acquire_blob_lease(self.container_name, 'blob1',
-                                   x_ms_lease_duration=15)
+                                   lease_duration=15)
         resp2 = self.bs.break_blob_lease(self.container_name, 'blob1',
                                    resp1['x-ms-lease-id'],
-                                   x_ms_lease_break_period=5)
-        resp3 = self.bs.put_blob(self.container_name, 'blob1', b'hello 2',
-                                 x_ms_lease_id=resp1['x-ms-lease-id'])
+                                   lease_break_period=5)
+        resp3 = self.bs.create_blob_from_bytes (self.container_name, 'blob1', b'hello 2',
+                                 lease_id=resp1['x-ms-lease-id'])
         self.sleep(5)
         with self.assertRaises(AzureHttpError):
-            self.bs.put_blob(self.container_name, 'blob1', b'hello 3',
-                             x_ms_lease_id=resp1['x-ms-lease-id'])
+            self.bs.create_blob_from_bytes (self.container_name, 'blob1', b'hello 3',
+                             lease_id=resp1['x-ms-lease-id'])
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -2272,13 +2272,13 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blob, b'hello world')
 
     @record
-    def test_put_blob_blob_unicode_data(self):
+    def test_create_blob_blob_unicode_data(self):
         # Arrange
         self._create_container(self.container_name)
 
         # Act
         data = u'hello world啊齄丂狛狜'.encode('utf-8')
-        resp = self.bs.put_blob(
+        resp = self.bs.create_blob_from_bytes (
             self.container_name, 'blob1', data, )
 
         # Assert
@@ -2339,7 +2339,7 @@ class StorageCommonBlobTest(StorageTestCase):
         data = b'a public blob can be read without a shared access signature'
         blob_name = 'blob1.txt'
         self.bs.create_container(self.container_name, None, 'blob')
-        self.bs.put_blob(self.container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
 
         # Act
         url = self.bs.make_blob_url(self.container_name, blob_name)
@@ -2355,7 +2355,7 @@ class StorageCommonBlobTest(StorageTestCase):
         data = b'public access blob'
         blob_name = 'blob1.txt'
         self.bs.create_container(self.container_name, None, 'blob')
-        self.bs.put_blob(self.container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
 
         # Act
         service = BlockBlobService(

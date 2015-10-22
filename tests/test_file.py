@@ -48,7 +48,7 @@ from tests.common_recordingtestcase import (
     TestMode,
     record,
 )
-from tests.storage_testcase import StorageTestCase
+from tests.testcase import StorageTestCase
 
 
 #------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ class StorageFileTest(StorageTestCase):
     def _create_share_and_file_with_text(self, share_name, file_name,
                                         text):
         self.fs.create_share(self.share_name)
-        resp = self.fs.put_file_from_text(self.share_name, None, file_name, text)
+        resp = self.fs.create_file_from_text(self.share_name, None, file_name, text)
         self.assertIsNone(resp)
 
     def _file_exists(self, share_name, file_name):
@@ -752,7 +752,7 @@ class StorageFileTest(StorageTestCase):
         # Act
         resp = self.fs.create_file(
             self.share_name, None, 'file1', 1024,
-            x_ms_meta_name_values={'hello': 'world', 'number': '42'})
+            metadata={'hello': 'world', 'number': '42'})
 
         # Assert
         self.assertIsNone(resp)
@@ -781,7 +781,7 @@ class StorageFileTest(StorageTestCase):
 
         # Act
         file = self.fs.get_file(
-            self.share_name, None, 'file1', x_ms_range='bytes=0-5')
+            self.share_name, None, 'file1', byte_range='bytes=0-5')
 
         # Assert
         self.assertIsInstance(file, FileResult)
@@ -795,8 +795,8 @@ class StorageFileTest(StorageTestCase):
 
         # Act
         file = self.fs.get_file(self.share_name, None, 'file1',
-                                x_ms_range='bytes=0-5',
-                                x_ms_range_get_content_md5='true')
+                                byte_range='bytes=0-5',
+                                range_get_content_md5='true')
 
         # Assert
         self.assertIsInstance(file, FileResult)
@@ -851,8 +851,8 @@ class StorageFileTest(StorageTestCase):
             self.share_name,
             None, 
             'file1',
-            x_ms_content_language='spanish',
-            x_ms_content_disposition='inline',
+            content_language='spanish',
+            content_disposition='inline',
         )
 
         # Assert
@@ -869,7 +869,7 @@ class StorageFileTest(StorageTestCase):
         with self.assertRaises(AzureMissingResourceHttpError):
             self.fs.set_file_properties(
                 self.share_name, None, 'file1',
-                x_ms_content_language='spanish')
+                content_language='spanish')
 
         # Assert
 
@@ -883,7 +883,7 @@ class StorageFileTest(StorageTestCase):
         with self.assertRaises(AzureMissingResourceHttpError):
             self.fs.set_file_properties(
                 self.share_name, 'dir1', 'file1',
-                x_ms_content_language='spanish')
+                content_language='spanish')
 
         # Assert
 
@@ -1071,7 +1071,7 @@ class StorageFileTest(StorageTestCase):
 
         # Act
         ranges = self.fs.list_ranges(self.share_name, None, 'file1')
-        for range in ranges:
+        for byte_range in ranges:
             pass
 
         # Assert
@@ -1761,13 +1761,13 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
-    def test_put_file_from_bytes(self):
+    def test_create_file_from_bytes(self):
         # Arrange
         self.fs.create_share(self.share_name)
 
         # Act
         data = self._get_random_bytes(2048)
-        resp = self.fs.put_file_from_bytes(
+        resp = self.fs.create_file_from_bytes(
             self.share_name, None, 'file1', data)
 
         # Assert
@@ -1775,7 +1775,7 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(data, self.fs.get_file(self.share_name, None, 'file1'))
 
     @record
-    def test_put_file_from_bytes_with_progress(self):
+    def test_create_file_from_bytes_with_progress(self):
         # Arrange
         self.fs.create_share(self.share_name)
 
@@ -1786,7 +1786,7 @@ class StorageFileTest(StorageTestCase):
             progress.append((current, total))
 
         data = self._get_random_bytes(2048)
-        resp = self.fs.put_file_from_bytes(
+        resp = self.fs.create_file_from_bytes(
             self.share_name, None, 'file1', data, progress_callback=callback)
 
         # Assert
@@ -1795,14 +1795,14 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
-    def test_put_file_from_bytes_with_index(self):
+    def test_create_file_from_bytes_with_index(self):
         # Arrange
         self.fs.create_share(self.share_name)
         index = 1024
 
         # Act
         data = self._get_random_bytes(2048)
-        resp = self.fs.put_file_from_bytes(
+        resp = self.fs.create_file_from_bytes(
             self.share_name, None, 'file1', data, index)
 
         # Assert
@@ -1811,7 +1811,7 @@ class StorageFileTest(StorageTestCase):
                          self.fs.get_file(self.share_name, None, 'file1'))
 
     @record
-    def test_put_file_from_bytes_with_index_and_count(self):
+    def test_create_file_from_bytes_with_index_and_count(self):
         # Arrange
         self.fs.create_share(self.share_name)
         index = 512
@@ -1819,7 +1819,7 @@ class StorageFileTest(StorageTestCase):
 
         # Act
         data = self._get_random_bytes(2048)
-        resp = self.fs.put_file_from_bytes(
+        resp = self.fs.create_file_from_bytes(
             self.share_name, None, 'file1', data, index, count)
 
         # Assert
@@ -1828,14 +1828,14 @@ class StorageFileTest(StorageTestCase):
                          self.fs.get_file(self.share_name, None, 'file1'))
 
     @record
-    def test_put_file_from_bytes_chunked_upload(self):
+    def test_create_file_from_bytes_chunked_upload(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
         data = self._get_oversized_file_binary_data()
 
         # Act
-        resp = self.fs.put_file_from_bytes(
+        resp = self.fs.create_file_from_bytes(
             self.share_name, None, file_name, data)
 
         # Assert
@@ -1843,7 +1843,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileLengthEqual(self.share_name, file_name, len(data))
         self.assertFileEqual(self.share_name, file_name, data)
 
-    def test_put_file_from_bytes_chunked_upload_parallel(self):
+    def test_create_file_from_bytes_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -1854,7 +1854,7 @@ class StorageFileTest(StorageTestCase):
         data = self._get_oversized_file_binary_data()
 
         # Act
-        resp = self.fs.put_file_from_bytes(
+        resp = self.fs.create_file_from_bytes(
             self.share_name, None, file_name, data,
             max_connections=10)
 
@@ -1864,7 +1864,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileEqual(self.share_name, file_name, data)
 
     @record
-    def test_put_file_from_bytes_chunked_upload_with_index_and_count(self):
+    def test_create_file_from_bytes_chunked_upload_with_index_and_count(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
@@ -1873,7 +1873,7 @@ class StorageFileTest(StorageTestCase):
         count = len(data) - 1024
 
         # Act
-        resp = self.fs.put_file_from_bytes(
+        resp = self.fs.create_file_from_bytes(
             self.share_name, None, file_name, data, index, count)
 
         # Assert
@@ -1882,7 +1882,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileEqual(self.share_name,
                              file_name, data[index:index + count])
 
-    def test_put_file_from_bytes_chunked_upload_with_index_and_count_parallel(self):
+    def test_create_file_from_bytes_chunked_upload_with_index_and_count_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -1895,7 +1895,7 @@ class StorageFileTest(StorageTestCase):
         count = len(data) - 1024
 
         # Act
-        resp = self.fs.put_file_from_bytes(
+        resp = self.fs.create_file_from_bytes(
             self.share_name, None, file_name, data, index, count,
             max_connections=10)
 
@@ -1906,7 +1906,7 @@ class StorageFileTest(StorageTestCase):
                              file_name, data[index:index + count])
 
     @record
-    def test_put_file_from_path_chunked_upload(self):
+    def test_create_file_from_path_chunked_upload(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
@@ -1916,7 +1916,7 @@ class StorageFileTest(StorageTestCase):
             stream.write(data)
 
         # Act
-        resp = self.fs.put_file_from_path(
+        resp = self.fs.create_file_from_path(
             self.share_name, None, file_name, file_path)
 
         # Assert
@@ -1924,7 +1924,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileLengthEqual(self.share_name, file_name, len(data))
         self.assertFileEqual(self.share_name, file_name, data)
 
-    def test_put_file_from_path_chunked_upload_parallel(self):
+    def test_create_file_from_path_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -1938,7 +1938,7 @@ class StorageFileTest(StorageTestCase):
             stream.write(data)
 
         # Act
-        resp = self.fs.put_file_from_path(
+        resp = self.fs.create_file_from_path(
             self.share_name, None, file_name, file_path,
             max_connections=10)
 
@@ -1948,7 +1948,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileEqual(self.share_name, file_name, data)
 
     @record
-    def test_put_file_from_path_with_progress_chunked_upload(self):
+    def test_create_file_from_path_with_progress_chunked_upload(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
@@ -1963,7 +1963,7 @@ class StorageFileTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        resp = self.fs.put_file_from_path(
+        resp = self.fs.create_file_from_path(
             self.share_name, None, file_name, file_path,
             progress_callback=callback)
 
@@ -1974,7 +1974,7 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
-    def test_put_file_from_stream_chunked_upload(self):
+    def test_create_file_from_stream_chunked_upload(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
@@ -1986,7 +1986,7 @@ class StorageFileTest(StorageTestCase):
         # Act
         file_size = len(data)
         with open(file_path, 'rb') as stream:
-            resp = self.fs.put_file_from_stream(
+            resp = self.fs.create_file_from_stream(
                 self.share_name, None, file_name, stream, file_size)
 
         # Assert
@@ -1994,7 +1994,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileLengthEqual(self.share_name, file_name, file_size)
         self.assertFileEqual(self.share_name, file_name, data[:file_size])
 
-    def test_put_file_from_stream_chunked_upload_parallel(self):
+    def test_create_file_from_stream_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -2010,7 +2010,7 @@ class StorageFileTest(StorageTestCase):
         # Act
         file_size = len(data)
         with open(file_path, 'rb') as stream:
-            resp = self.fs.put_file_from_stream(
+            resp = self.fs.create_file_from_stream(
                 self.share_name, None, file_name, stream, file_size,
                 max_connections=10)
 
@@ -2020,7 +2020,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileEqual(self.share_name, file_name, data[:file_size])
 
     @record
-    def test_put_file_from_stream_non_seekable_chunked_upload(self):
+    def test_create_file_from_stream_non_seekable_chunked_upload(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
@@ -2033,7 +2033,7 @@ class StorageFileTest(StorageTestCase):
         file_size = len(data)
         with open(file_path, 'rb') as stream:
             non_seekable_file = StorageFileTest.NonSeekableFile(stream)
-            resp = self.fs.put_file_from_stream(
+            resp = self.fs.create_file_from_stream(
                 self.share_name, None, file_name, non_seekable_file, file_size,
                 max_connections=1)
 
@@ -2042,7 +2042,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileLengthEqual(self.share_name, file_name, file_size)
         self.assertFileEqual(self.share_name, file_name, data[:file_size])
 
-    def test_put_file_from_stream_non_seekable_chunked_upload_parallel(self):
+    def test_create_file_from_stream_non_seekable_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -2062,14 +2062,14 @@ class StorageFileTest(StorageTestCase):
 
             # Parallel uploads require that the file be seekable
             with self.assertRaises(AttributeError):
-                resp = self.fs.put_file_from_stream(
+                resp = self.fs.create_file_from_stream(
                     self.share_name, None, file_name, non_seekable_file, 
                     file_size, max_connections=10)
 
         # Assert
 
     @record
-    def test_put_file_from_stream_with_progress_chunked_upload(self):
+    def test_create_file_from_stream_with_progress_chunked_upload(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
@@ -2086,7 +2086,7 @@ class StorageFileTest(StorageTestCase):
 
         file_size = len(data)
         with open(file_path, 'rb') as stream:
-            resp = self.fs.put_file_from_stream(
+            resp = self.fs.create_file_from_stream(
                 self.share_name, None, file_name, stream, file_size,
                 progress_callback=callback)
 
@@ -2096,7 +2096,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileEqual(self.share_name, file_name, data[:file_size])
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
-    def test_put_file_from_stream_with_progress_chunked_upload_parallel(self):
+    def test_create_file_from_stream_with_progress_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -2117,7 +2117,7 @@ class StorageFileTest(StorageTestCase):
 
         file_size = len(data)
         with open(file_path, 'rb') as stream:
-            resp = self.fs.put_file_from_stream(
+            resp = self.fs.create_file_from_stream(
                 self.share_name, None, file_name, stream, file_size,
                 progress_callback=callback,
                 max_connections=5)
@@ -2130,7 +2130,7 @@ class StorageFileTest(StorageTestCase):
         self.assertGreater(len(progress), 0)
 
     @record
-    def test_put_file_from_stream_chunked_upload_truncated(self):
+    def test_create_file_from_stream_chunked_upload_truncated(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
@@ -2142,7 +2142,7 @@ class StorageFileTest(StorageTestCase):
         # Act
         file_size = len(data) - 512
         with open(file_path, 'rb') as stream:
-            resp = self.fs.put_file_from_stream(
+            resp = self.fs.create_file_from_stream(
                 self.share_name, None, file_name, stream, file_size)
 
         # Assert
@@ -2150,7 +2150,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileLengthEqual(self.share_name, file_name, file_size)
         self.assertFileEqual(self.share_name, file_name, data[:file_size])
 
-    def test_put_file_from_stream_chunked_upload_truncated_parallel(self):
+    def test_create_file_from_stream_chunked_upload_truncated_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -2166,7 +2166,7 @@ class StorageFileTest(StorageTestCase):
         # Act
         file_size = len(data) - 512
         with open(file_path, 'rb') as stream:
-            resp = self.fs.put_file_from_stream(
+            resp = self.fs.create_file_from_stream(
                 self.share_name, None, file_name, stream, file_size,
                 max_connections=10)
 
@@ -2176,7 +2176,7 @@ class StorageFileTest(StorageTestCase):
         self.assertFileEqual(self.share_name, file_name, data[:file_size])
 
     @record
-    def test_put_file_from_stream_with_progress_chunked_upload_truncated(self):
+    def test_create_file_from_stream_with_progress_chunked_upload_truncated(self):
         # Arrange
         self.fs.create_share(self.share_name)
         file_name = 'file1'
@@ -2193,7 +2193,7 @@ class StorageFileTest(StorageTestCase):
 
         file_size = len(data) - 512
         with open(file_path, 'rb') as stream:
-            resp = self.fs.put_file_from_stream(
+            resp = self.fs.create_file_from_stream(
                 self.share_name, None, file_name, stream, file_size,
                 progress_callback=callback)
 

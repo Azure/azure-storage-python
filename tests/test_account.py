@@ -15,10 +15,10 @@
 import unittest
 
 from azure.storage import CloudStorageAccount
-from azure.storage.blob import BlobService
+from azure.storage.blob import BlockBlobService
 from azure.storage.queue import QueueService
 from azure.storage.table import TableService
-from testutils.common_extendedtestcase import ExtendedTestCase
+from tests.common_extendedtestcase import ExtendedTestCase
 
 #------------------------------------------------------------------------------
 
@@ -35,11 +35,11 @@ class StorageAccountTest(ExtendedTestCase):
         # Arrange
 
         # Act
-        service = self.account.create_blob_service()
+        service = self.account.create_block_blob_service()
 
         # Assert
         self.assertIsNotNone(service)
-        self.assertIsInstance(service, BlobService)
+        self.assertIsInstance(service, BlockBlobService)
         self.assertEqual(service.account_name, self.account_name)
         self.assertEqual(service.account_key, self.account_key)
 
@@ -49,7 +49,7 @@ class StorageAccountTest(ExtendedTestCase):
         # Act
         bad_account = CloudStorageAccount('', '')
         with self.assertRaises(ValueError):
-            service = bad_account.create_blob_service()
+            service = bad_account.create_block_blob_service()
 
         # Assert
 

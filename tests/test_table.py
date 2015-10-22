@@ -23,18 +23,14 @@ import os
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc, tzoffset
 from requests import Session
-from math import(
-    isnan,
-)
+from math import isnan
 from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
     AzureMissingResourceHttpError,
     AzureException,
 )
-from azure.storage import (
-    AccessPolicy,
-)
+from azure.storage import AccessPolicy
 from azure.storage.table import (
     Entity,
     EntityProperty,
@@ -47,7 +43,7 @@ from tests.common_recordingtestcase import (
     TestMode,
     record,
 )
-from tests.storage_testcase import StorageTestCase
+from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 

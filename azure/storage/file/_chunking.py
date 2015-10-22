@@ -80,7 +80,7 @@ class _FileChunkDownloader(object):
                     self.share_name,
                     self.directory_name,
                     self.file_name,
-                    x_ms_range=range_id
+                    byte_range=range_id
                 )
             except Exception:
                 if retries > 0:
