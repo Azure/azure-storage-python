@@ -1321,7 +1321,7 @@ class StorageTableTest(StorageTestCase):
         self.table_name = self.table_name + u'啊齄丂狛狜'
 
         # Act
-        with self.assertRaises(AzureHttpError):
+        with self.assertRaises(ValueError):
             # not supported - table name must be alphanumeric, lowercase
             self.ts.create_table(self.table_name)
 
@@ -1747,6 +1747,45 @@ class StorageTableTest(StorageTestCase):
 
         # Assert
 
+    @record
+    def test_create_table_long_table_name(self):
+        # Arrange
+
+        # Act
+        with self.assertRaises(ValueError):
+            self.ts.create_table(self.table_name + "1234567890123456789012345678901234567890123456789012345678903")
+
+        # Assert
+
+    @record
+    def test_create_table_short_table_name(self):
+        # Arrange
+
+        # Act
+        with self.assertRaises(ValueError):
+            self.ts.create_table(self.table_name[-2:])
+
+        # Assert
+
+    @record
+    def test_create_table_numeric_start_name(self):
+        # Arrange
+
+        # Act
+        with self.assertRaises(ValueError):
+            self.ts.create_table('0' + self.table_name)
+
+        # Assert
+
+    @record
+    def test_create_table_invalid_character_name(self):
+        # Arrange
+
+        # Act
+        with self.assertRaises(ValueError):
+            self.ts.create_table(self.table_name + '_')
+
+        # Assert
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
