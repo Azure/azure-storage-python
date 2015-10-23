@@ -31,6 +31,7 @@ try:
 except ImportError:
     from xml.etree import ElementTree as ETree
 
+from .constants import DEV_ACCOUNT_NAME
 from ._common_models import (
     WindowsAzureData,
     Feed,
