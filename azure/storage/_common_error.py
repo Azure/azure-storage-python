@@ -54,7 +54,16 @@ _ERROR_CANNOT_SERIALIZE_VALUE_TO_ENTITY = \
 _ERROR_PAGE_BLOB_SIZE_ALIGNMENT = \
     'Invalid page blob size: {0}. ' + \
     'The size must be aligned to a 512-byte boundary.'
-
+_ERROR_TABLE_NAME_TOO_LONG = \
+    'Invalid table name: {0}. ' + \
+    'The table name must be no longer than 63 character long.'
+_ERROR_TABLE_NAME_TOO_SHORT = \
+    'Invalid table name: {0}.' + \
+    'The table name must be no shorter than 3 characters long.'
+_ERROR_TABLE_NAME_INVALID = \
+    'Invalid table name: {0}.' + \
+    'The table name may contain only alphanumeric characters. ' + \
+    'The table name may not begin with a numeric character.'
 
 def _dont_fail_on_exist(error):
     ''' don't throw exception if the resource exists.

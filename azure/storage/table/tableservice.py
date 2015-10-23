@@ -25,6 +25,9 @@ from .._common_error import (
     _dont_fail_on_exist,
     _validate_not_none,
     _ERROR_STORAGE_MISSING_INFO,
+    _ERROR_TABLE_NAME_TOO_LONG,
+    _ERROR_TABLE_NAME_TOO_SHORT,
+    _ERROR_TABLE_NAME_INVALID
 )
 from .._common_serialization import (
     _convert_class_to_xml,
@@ -71,7 +74,7 @@ from ..sharedaccesssignature import (
     SharedAccessSignature,
 )
 from ..storageclient import _StorageClient
-
+import re
 
 class TableService(_StorageClient):
 
@@ -129,6 +132,8 @@ class TableService(_StorageClient):
             self.authentication = StorageSASAuthentication(self.sas_token)
         else:
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
+
+        self.table_name_pattern = re.compile('^[a-z][a-z0-9]{2,62}$', re.IGNORECASE)
 
     def generate_shared_access_signature(self, table_name,
                                          shared_access_policy=None,
@@ -265,6 +270,14 @@ class TableService(_StorageClient):
             Specify whether throw exception when table exists.
         '''
         _validate_not_none('table', table)
+        table_len = len(table)
+        # separate len check here for more detailed error
+        if table_len > 63:
+            raise ValueError(_ERROR_TABLE_NAME_TOO_LONG.format(table))
+        if table_len < 3:
+            raise ValueError(_ERROR_TABLE_NAME_TOO_SHORT.format(table))
+        if self.table_name_pattern.match(table) is None:
+            raise ValueError(_ERROR_TABLE_NAME_INVALID.format(table))
         request = HTTPRequest()
         request.method = 'POST'
         request.host = self._get_host()
