@@ -15,7 +15,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import os.path
-from requests import Session
 from tests.common_recordingtestcase import (
     RecordingTestCase,
     TestMode,
@@ -51,12 +50,10 @@ class StorageTestCase(RecordingTestCase):
         account_name = account_name or settings.STORAGE_ACCOUNT_NAME
         account_key = account_key or settings.STORAGE_ACCOUNT_KEY
         protocol = settings.PROTOCOL or 'https'
-        session = Session()
         service = service_class(
             account_name,
             account_key,
             protocol=protocol,
-            request_session=session,
         )
         self._set_service_options(service, settings)
         return service
