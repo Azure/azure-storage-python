@@ -178,7 +178,7 @@ class SharedAccessSignature(object):
             end_pk,
             end_rk,
         )
-        return '&'.join(['{0}={1}'.format(n, url_quote(v, '/()$=\',')) for n, v in query_dict.items() if v is not None])
+        return '&'.join(['{0}={1}'.format(n, url_quote(v)) for n, v in query_dict.items() if v is not None])
 
     def _generate_signed_query_dict(self, service, path, resource_type,
                                     permission=None, expiry=None, start=None,

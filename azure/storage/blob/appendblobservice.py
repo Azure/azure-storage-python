@@ -83,8 +83,7 @@ class AppendBlobService(_BaseBlobService):
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
         request_session:
-            Session object to use for http requests. If this is
-            specified, it replaces the default use of httplib.
+            Session object to use for http requests.
         '''
         self.blob_type = _BlobTypes.AppendBlob
         super(AppendBlobService, self).__init__(

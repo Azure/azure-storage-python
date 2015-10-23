@@ -134,8 +134,7 @@ class TableService(_StorageClient):
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
         request_session:
-            Optional. Session object to use for http requests. If this is
-            specified, it replaces the default use of httplib.
+            Optional. Session object to use for http requests.
         '''
         if connection_string is not None:
             connection_params = StorageConnectionParameters(connection_string)
