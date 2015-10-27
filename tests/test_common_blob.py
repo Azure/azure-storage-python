@@ -153,7 +153,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs2.create_container(
             self.remote_container_name,
             blob_public_access=blob_public_access)
-        self.bs2.put_block_blob_from_bytes(
+        self.bs2.create_blob_from_bytes(
             self.remote_container_name, source_blob_name, data)
         source_blob_url = self.bs2.make_blob_url(
             self.remote_container_name, source_blob_name)
@@ -1076,59 +1076,6 @@ class StorageCommonBlobTest(StorageTestCase):
             self.bs.delete_container(self.container_name)
 
         # Assert
-
-    #--Test cases for blob service ---------------------------------------
-    @record
-    def test_set_blob_service_properties(self):
-        # Arrange
-
-        # Act
-        resp = self.bs.set_blob_service_properties(hour_metrics=Metrics())
-
-        # Assert
-        self.assertIsNone(resp)
-        received_props = self.bs.get_blob_service_properties()
-        self.assertFalse(received_props.hour_metrics.enabled)
-
-    @record
-    def test_set_blob_service_properties_with_timeout(self):
-        # Arrange
-
-        # Act
-        resp = self.bs.set_blob_service_properties(
-            logging=Logging(write=True), 
-            timeout=5)
-
-        # Assert
-        self.assertIsNone(resp)
-        received_props = self.bs.get_blob_service_properties()
-        self.assertTrue(received_props.logging.write)
-
-    @record
-    def test_get_blob_service_properties(self):
-        # Arrange
-
-        # Act
-        props = self.bs.get_blob_service_properties()
-
-        # Assert
-        self.assertIsNotNone(props)
-        self.assertIsInstance(props.logging, Logging)
-        self.assertIsInstance(props.minute_metrics, Metrics)
-        self.assertIsInstance(props.hour_metrics, Metrics)
-
-    @record
-    def test_get_blob_service_properties_with_timeout(self):
-        # Arrange
-
-        # Act
-        props = self.bs.get_blob_service_properties(5)
-
-        # Assert
-        self.assertIsNotNone(props)
-        self.assertIsInstance(props.logging, Logging)
-        self.assertIsInstance(props.minute_metrics, Metrics)
-        self.assertIsInstance(props.hour_metrics, Metrics)
 
     #-- Common test cases for blobs ----------------------------------------------
     @record

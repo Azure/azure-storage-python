@@ -35,3 +35,4 @@
 
 ### File:
 - Renamed some APIs and parameters for better readablity and less redundancy.
+- Added new file features including support for SAS and ACL, share usage stats, directory metadata, async server side file copy, and share quota.

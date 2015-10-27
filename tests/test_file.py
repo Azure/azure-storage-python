@@ -15,13 +15,12 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import base64
-import datetime
 import os
 import random
 import requests
 import sys
 import unittest
-
+from datetime import datetime, timedelta
 from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
@@ -29,15 +28,20 @@ from azure.common import (
 )
 from azure.storage import (
     DEV_ACCOUNT_NAME,
-    DEV_ACCOUNT_KEY
+    DEV_ACCOUNT_KEY,
+    AccessPolicy,
+    Logging,
+    Metrics,
+    ServiceProperties,
 )
 from azure.storage.file import (
     FILE_SERVICE_HOST_BASE,
     FileService,
     FileResult,
     FileService,
-    RangeList,
     Range,
+    FileSharedAccessPermissions,
+    ShareSharedAccessPermissions,
 )
 from azure.storage.storageclient import (
     AZURE_STORAGE_ACCESS_KEY,
@@ -61,6 +65,16 @@ class StorageFileTest(StorageTestCase):
 
         self.fs = self._create_storage_service(FileService, self.settings)
 
+        if self.settings.REMOTE_STORAGE_ACCOUNT_NAME and self.settings.REMOTE_STORAGE_ACCOUNT_KEY:
+            self.fs2 = self._create_storage_service(
+                FileService,
+                self.settings,
+                self.settings.REMOTE_STORAGE_ACCOUNT_NAME,
+                self.settings.REMOTE_STORAGE_ACCOUNT_KEY,
+            )
+        else:
+            print("REMOTE_STORAGE_ACCOUNT_NAME and REMOTE_STORAGE_ACCOUNT_KEY not set in test settings file.")
+
         # test chunking functionality by reducing the threshold
         # for chunking and the size of each chunk, otherwise
         # the tests would take too long to execute
@@ -69,6 +83,7 @@ class StorageFileTest(StorageTestCase):
 
         self.share_name = self.get_resource_name('utshare')
         self.additional_share_names = []
+        self.remote_share_name = None
 
     def tearDown(self):
         if not self.is_playback():
@@ -80,6 +95,12 @@ class StorageFileTest(StorageTestCase):
             for name in self.additional_share_names:
                 try:
                     self.fs.delete_share(name)
+                except:
+                    pass
+
+            if self.remote_share_name:
+                try:
+                    self.fs2.delete_share(self.remote_share_name)
                 except:
                     pass
 
@@ -104,6 +125,33 @@ class StorageFileTest(StorageTestCase):
         self.fs.create_share(self.share_name)
         resp = self.fs.create_file_from_text(self.share_name, None, file_name, text)
         self.assertIsNone(resp)
+
+    def _create_remote_share_and_file(self, source_file_name, data, sas=True):
+        self.remote_share_name = self.get_resource_name('remotectnr')
+        self.fs2.create_share(self.remote_share_name)
+        self.fs2.create_file_from_bytes(self.remote_share_name, None, source_file_name, data)
+
+        sas_token = None
+        if sas:
+            sas_token = self.fs2.generate_shared_access_signature(self.remote_share_name, 
+                                                                 None, 
+                                                                 source_file_name, 
+                                                                 permission=FileSharedAccessPermissions.READ, 
+                                                                 expiry=datetime.utcnow() + timedelta(hours=1))
+        source_file_url = self.fs2.make_file_url(self.remote_share_name, None, source_file_name, sas_token=sas_token)
+        return source_file_url
+
+    def _wait_for_async_copy(self, share_name, file_name):
+        count = 0
+        props = self.fs.get_file_properties(share_name, None, file_name)
+        while props['x-ms-copy-status'] != 'success':
+            count = count + 1
+            if count > 5:
+                self.assertTrue(
+                    False, 'Timed out waiting for async copy to complete.')
+            self.sleep(5)
+            props = self.fs.get_file_properties(share_name, None, file_name)
+        self.assertEqual(props['x-ms-copy-status'], 'success')
 
     def _file_exists(self, share_name, file_name):
         resp = self.fs.list_directories_and_files(share_name)
@@ -286,6 +334,18 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(md['x-ms-meta-number'], '42')
 
     @record
+    def test_create_share_with_quota(self):
+        # Arrange
+
+        # Act
+        self.fs.create_share(self.share_name, quota=1)
+
+        # Assert
+        props = self.fs.get_share_properties(self.share_name)
+        self.assertIsNotNone(props)
+        self.assertEqual(props['x-ms-share-quota'], '1')
+
+    @record
     def test_list_shares_no_options(self):
         # Arrange
         self.fs.create_share(self.share_name)
@@ -299,6 +359,10 @@ class StorageFileTest(StorageTestCase):
         self.assertIsNotNone(shares)
         self.assertGreaterEqual(len(shares), 1)
         self.assertIsNotNone(shares[0])
+        self.assertIsNotNone(shares[0].name)
+        self.assertIsNotNone(shares[0].properties.quota)
+        self.assertIsNotNone(shares[0].properties.last_modified)
+        self.assertIsNotNone(shares[0].properties.etag)
         self.assertNamedItemInContainer(shares, self.share_name)
 
     @record
@@ -439,6 +503,19 @@ class StorageFileTest(StorageTestCase):
         # Assert
 
     @record
+    def test_set_share_properties(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+        self.fs.set_share_properties(self.share_name, 1)
+
+        # Act
+        props = self.fs.get_share_properties(self.share_name)
+
+        # Assert
+        self.assertIsNotNone(props)
+        self.assertEqual(props['x-ms-share-quota'], '1')
+
+    @record
     def test_delete_share_with_existing_share(self):
         # Arrange
         self.fs.create_share(self.share_name)
@@ -483,6 +560,20 @@ class StorageFileTest(StorageTestCase):
             self.fs.delete_share(self.share_name, True)
 
         # Assert
+
+    @record
+    def test_get_share_stats(self):
+        # Arrange
+        data = b'hello world'
+        self._create_share_and_file_with_text(
+            self.share_name, 'file1', data)
+
+        # Act
+        stats = self.fs.get_share_stats(self.share_name)
+
+        # Assert
+        self.assertIsNotNone(stats)
+        self.assertEqual(stats.share_usage, 1)
 
     #--Test cases for directories ----------------------------------------------
     @record
@@ -545,6 +636,24 @@ class StorageFileTest(StorageTestCase):
             self.fs.get_directory_properties(self.share_name, 'dir1')
 
         # Assert
+
+    @record
+    def test_get_set_directory_metadata(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+        self.fs.create_directory(self.share_name, 'dir1')
+
+        # Act
+        resp = self.fs.set_directory_metadata(
+            self.share_name, 'dir1', {'hello': 'world', 'number': '43'})
+        md = self.fs.get_directory_metadata(self.share_name, 'dir1')
+
+        # Assert
+        self.assertIsNone(resp)
+        self.assertIsNotNone(md)
+        self.assertEqual(2, len(md))
+        self.assertEqual(md['x-ms-meta-hello'], 'world')
+        self.assertEqual(md['x-ms-meta-number'], '43')
 
     @record
     def test_delete_directory_with_existing_share(self):
@@ -635,7 +744,6 @@ class StorageFileTest(StorageTestCase):
         self.assertIsNotNone(result)
         self.assertEqual(len(result.files), 1)
         self.assertEqual(len(result.directories), 1)
-        self.assertEqual(result.max_results, 2)
         self.assertNamedItemInContainer(result.directories, 'dir1')
         self.assertNamedItemInContainer(result.files, 'filea1')
         self.assertIsNotNone(result.next_marker)
@@ -1030,8 +1138,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(ranges)
-        self.assertIsInstance(ranges, RangeList)
-        self.assertEqual(len(ranges.file_ranges), 0)
+        self.assertEqual(len(ranges), 0)
 
     @record
     def test_list_ranges_2(self):
@@ -1049,12 +1156,11 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(ranges)
-        self.assertIsInstance(ranges, RangeList)
-        self.assertEqual(len(ranges.file_ranges), 2)
-        self.assertEqual(ranges.file_ranges[0].start, 0)
-        self.assertEqual(ranges.file_ranges[0].end, 511)
-        self.assertEqual(ranges.file_ranges[1].start, 1024)
-        self.assertEqual(ranges.file_ranges[1].end, 1535)
+        self.assertEqual(len(ranges), 2)
+        self.assertEqual(ranges[0].start, 0)
+        self.assertEqual(ranges[0].end, 511)
+        self.assertEqual(ranges[1].start, 1024)
+        self.assertEqual(ranges[1].end, 1535)
 
     @record
     def test_list_ranges_iter(self):
@@ -1078,6 +1184,102 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(len(ranges), 2)
         self.assertIsInstance(ranges[0], Range)
         self.assertIsInstance(ranges[1], Range)
+
+    @record
+    def test_copy_file_with_existing_file(self):
+        # Arrange
+        file_name = 'file1'
+        data = b'abcdefghijklmnopqrstuvwxyz'
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+
+        # Act
+        source_file_url = self.fs.make_file_url(self.share_name, None, file_name)
+        resp = self.fs.copy_file(self.share_name, None, 'file1copy', source_file_url)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEqual(resp['x-ms-copy-status'], 'success')
+        self.assertIsNotNone(resp['x-ms-copy-id'])
+        copy = self.fs.get_file(self.share_name, None, 'file1copy')
+        self.assertEqual(copy, data)
+
+    @record
+    def test_copy_file_async_private_file(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+        data = b'12345678' * 1024 * 1024
+        source_file_name = 'sourcefile'
+        source_file_url = self._create_remote_share_and_file(source_file_name, data, False)
+
+        # Act
+        target_file_name = 'targetfile'
+        with self.assertRaises(AzureMissingResourceHttpError):
+            self.fs.copy_file(self.share_name, None,
+                              target_file_name, source_file_url)
+
+        # Assert
+
+    @record
+    def test_copy_file_async_private_file_with_sas(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+        data = b'12345678' * 1024 * 1024
+        source_file_name = 'sourcefile'
+        source_file_url = self._create_remote_share_and_file(source_file_name, data)
+
+        # Act
+        target_file_name = 'targetfile'
+        copy_resp = self.fs.copy_file(
+            self.share_name, None, target_file_name, source_file_url)
+
+        # Assert
+        self.assertEqual(copy_resp['x-ms-copy-status'], 'pending')
+        self._wait_for_async_copy(self.share_name, target_file_name)
+        self.assertFileEqual(self.share_name, target_file_name, data)
+
+    @record
+    def test_abort_copy_file(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+        data = b'12345678' * 1024 * 1024
+        source_file_name = 'sourcefile'
+        source_file_url = self._create_remote_share_and_file(source_file_name, data)
+
+        # Act
+        target_file_name = 'targetfile'
+        copy_resp = self.fs.copy_file(
+            self.share_name, None, target_file_name, source_file_url)
+        self.assertEqual(copy_resp['x-ms-copy-status'], 'pending')
+        self.fs.abort_copy_file(
+            self.share_name, None, 'targetfile', copy_resp['x-ms-copy-id'])
+
+        # Assert
+        target_file = self.fs.get_file(self.share_name, None, target_file_name)
+        self.assertEqual(target_file, b'')
+        self.assertEqual(target_file.properties['x-ms-copy-status'], 'aborted')
+
+    @record
+    def test_abort_copy_file_with_synchronous_copy_fails(self):
+        # Arrange
+        source_file_name = 'sourcefile'
+        self._create_share_and_file_with_text(
+            self.share_name, source_file_name, b'hello world')
+        source_file_url = self.fs.make_file_url(self.share_name, None, source_file_name)
+
+        # Act
+        target_file_name = 'targetfile'
+        copy_resp = self.fs.copy_file(
+            self.share_name, None, target_file_name, source_file_url)
+        with self.assertRaises(AzureHttpError):
+            self.fs.abort_copy_file(
+                self.share_name,
+                None,
+                target_file_name,
+                copy_resp['x-ms-copy-id'])
+
+        # Assert
+        self.assertEqual(copy_resp['x-ms-copy-status'], 'success')
 
     @record
     def test_with_filter(self):
@@ -2202,6 +2404,292 @@ class StorageFileTest(StorageTestCase):
         self.assertFileLengthEqual(self.share_name, file_name, file_size)
         self.assertFileEqual(self.share_name, file_name, data[:file_size])
         self.assertEqual(progress, self._get_expected_progress(file_size))
+
+
+    #--Test cases for sas & acl ------------------------------------------------
+    @record
+    def test_sas_access_file(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with read permission on file'
+        file_name = 'file1.txt'
+        # Arrange
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+        
+        token = self.fs.generate_shared_access_signature(
+            self.share_name,
+            None,
+            file_name,
+            permission=FileSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+
+        # Act
+        service = FileService(
+            self.settings.STORAGE_ACCOUNT_NAME,
+            sas_token=token,
+            request_session=requests.Session(),
+        )
+        self._set_service_options(service, self.settings)
+        result = service.get_file_to_bytes(self.share_name, None, file_name)
+
+        # Assert
+        self.assertEqual(data, result)
+
+    @record
+    def test_sas_signed_identifier(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with signed identifier'
+        file_name = 'file1.txt'
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+
+        access_policy = AccessPolicy()
+        access_policy.start = '2011-10-11'
+        access_policy.expiry = '2018-10-12'
+        access_policy.permission = FileSharedAccessPermissions.READ
+        identifiers = {'testid': access_policy}
+
+        resp = self.fs.set_share_acl(self.share_name, identifiers)
+
+        token = self.fs.generate_shared_access_signature(
+            self.share_name,
+            None,
+            file_name,
+            id='testid'
+            )
+
+        # Act
+        service = FileService(
+            self.settings.STORAGE_ACCOUNT_NAME,
+            sas_token=token,
+            request_session=requests.Session(),
+        )
+        self._set_service_options(service, self.settings)
+        result = service.get_file_to_bytes(self.share_name, None, file_name)
+
+        # Assert
+        self.assertEqual(data, result)
+
+    @record
+    def test_shared_read_access_file(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with read permission on file'
+        file_name = 'file1.txt'
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+
+        token = self.fs.generate_shared_access_signature(
+            self.share_name,
+            None,
+            file_name,
+            permission=FileSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+
+        # Act
+        url = self.fs.make_file_url(
+            self.share_name,
+            None,
+            file_name,
+            sas_token=token,
+        )
+        response = requests.get(url)
+
+        # Assert
+        self.assertTrue(response.ok)
+        self.assertEqual(data, response.content)
+
+    @record
+    def test_shared_read_access_file_with_content_query_params(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with read permission on file'
+        file_name = 'file1.txt'
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+
+        token = self.fs.generate_shared_access_signature(
+            self.share_name,
+            None,
+            file_name,
+            permission=FileSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+            cache_control='no-cache',
+            content_disposition='inline',
+            content_encoding='utf-8',
+            content_language='fr',
+            content_type='text',
+        )
+        url = self.fs.make_file_url(
+            self.share_name,
+            None,
+            file_name,
+            sas_token=token,
+        )
+
+        # Act
+        response = requests.get(url)
+
+        # Assert
+        self.assertEqual(data, response.content)
+        self.assertEqual(response.headers['cache-control'], 'no-cache')
+        self.assertEqual(response.headers['content-disposition'], 'inline')
+        self.assertEqual(response.headers['content-encoding'], 'utf-8')
+        self.assertEqual(response.headers['content-language'], 'fr')
+        self.assertEqual(response.headers['content-type'], 'text')
+
+    @record
+    def test_shared_write_access_file(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with write permission on file'
+        updated_data = b'updated file data'
+        file_name = 'file1.txt'
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+
+        token = self.fs.generate_shared_access_signature(
+            self.share_name,
+            None,
+            file_name,
+            permission=FileSharedAccessPermissions.WRITE,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+        url = self.fs.make_file_url(
+            self.share_name,
+            None,
+            file_name,
+            sas_token=token,
+        )
+
+        # Act
+        headers={'x-ms-range': 'bytes=0-16', 'x-ms-write': 'update'} 
+        response = requests.put(url + '&comp=range', headers=headers, data=updated_data)
+
+        # Assert
+        self.assertTrue(response.ok)
+        file = self.fs.get_file(self.share_name, None, 'file1.txt')
+        self.assertEqual(b'updated file datanature with write permission on file', file)
+
+    @record
+    def test_shared_delete_access_file(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with delete permission on file'
+        file_name = 'file1.txt'
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+
+        token = self.fs.generate_shared_access_signature(
+            self.share_name,
+            None,
+            file_name,
+            permission=FileSharedAccessPermissions.DELETE,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+        url = self.fs.make_file_url(
+            self.share_name,
+            None,
+            file_name,
+            sas_token=token,
+        )
+
+        # Act
+        response = requests.delete(url)
+
+        # Assert
+        self.assertTrue(response.ok)
+        with self.assertRaises(AzureMissingResourceHttpError):
+            file = self.fs.get_file(self.share_name, None, file_name)
+
+    @record
+    def test_shared_access_share(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with read permission on share'
+        file_name = 'file1.txt'
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+
+        token = self.fs.generate_shared_access_signature(
+            self.share_name,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+            permission=ShareSharedAccessPermissions.READ,
+        )
+        url = self.fs.make_file_url(
+            self.share_name,
+            None,
+            file_name,
+            sas_token=token,
+        )
+
+        # Act
+        response = requests.get(url)
+
+        # Assert
+        self.assertTrue(response.ok)
+        self.assertEqual(data, response.content)
+
+    @record
+    def test_set_share_acl_with_empty_signed_identifiers(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+
+        # Act
+        resp = self.fs.set_share_acl(self.share_name, dict())
+
+        # Assert
+        self.assertIsNone(resp)
+        acl = self.fs.get_share_acl(self.share_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 0)
+
+    @record
+    def test_set_share_acl_with_signed_identifiers(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+
+        # Act
+        identifiers = dict()
+        identifiers['testid'] = AccessPolicy(
+            permission=ShareSharedAccessPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),  
+            start=datetime.utcnow() - timedelta(minutes=1),  
+            )
+
+        resp = self.fs.set_share_acl(self.share_name, identifiers)
+
+        # Assert
+        self.assertIsNone(resp)
+        acl = self.fs.get_share_acl(self.share_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 1)
+        self.assertTrue('testid' in acl)
 
 
 #------------------------------------------------------------------------------

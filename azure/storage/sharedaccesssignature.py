@@ -25,6 +25,8 @@ from .constants import X_MS_VERSION
 class ResourceType(object):
     RESOURCE_BLOB = 'b'
     RESOURCE_CONTAINER = 'c'
+    RESOURCE_FILE = 'f'
+    RESOURCE_SHARE = 's'
 
 
 class QueryStringConstants(object):
