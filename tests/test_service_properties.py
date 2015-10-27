@@ -26,6 +26,7 @@ from azure.storage import (
 from azure.storage.blob import BlockBlobService
 from azure.storage.queue import QueueService
 from azure.storage.table import TableService
+from azure.storage.file import FileService
 from tests.common_recordingtestcase import (
     TestMode,
     record,
@@ -44,6 +45,7 @@ class ServicePropertiesTest(StorageTestCase):
         self.bs = self._create_storage_service(BlockBlobService, self.settings)
         self.qs = self._create_storage_service(QueueService, self.settings)
         self.ts = self._create_storage_service(TableService, self.settings)
+        self.fs = self._create_storage_service(FileService, self.settings)
 
     def tearDown(self):
         return super(ServicePropertiesTest, self).tearDown()
@@ -137,6 +139,21 @@ class ServicePropertiesTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         self._assert_properties_default(self.ts.get_table_service_properties())
+
+    @record
+    def test_file_service_properties(self):
+        # Arrange
+
+        # Act
+        resp = self.fs.set_file_service_properties(hour_metrics=Metrics(),
+                                  minute_metrics=Metrics(), cors=list())
+
+        # Assert
+        self.assertIsNone(resp)
+        props = self.fs.get_file_service_properties()
+        self._assert_metrics_equal(props.hour_metrics, Metrics())
+        self._assert_metrics_equal(props.minute_metrics, Metrics())
+        self._assert_cors_equal(props.cors, list())
 
     #--Test cases per feature ---------------------------------------
     @record

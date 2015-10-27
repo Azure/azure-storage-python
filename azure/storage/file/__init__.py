@@ -18,16 +18,17 @@ from ..constants import (
 )
 
 from .models import (
-    ShareEnumResults,
     Share,
-    Properties,
-    FileAndDirectoryEnumResults,
+    ShareProperties,
+    FileAndDirectoryResults,
     FileResult,
     File,
     FileProperties,
     Directory,
     Range,
-    RangeList,
+    ShareStats,
+    ShareSharedAccessPermissions,
+    FileSharedAccessPermissions,
 )
 
 from .fileservice import FileService

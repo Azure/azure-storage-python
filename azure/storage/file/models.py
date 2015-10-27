@@ -12,53 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from .._common_models import (
-    WindowsAzureData,
-    _list_of,
-)
-from ..models import (
-    EnumResultsBase,
-)
 
-class ShareEnumResults(EnumResultsBase):
-
-    ''' File Share list. '''
-
-    def __init__(self):
-        EnumResultsBase.__init__(self)
-        self.shares = _list_of(Share)
-
-    def __iter__(self):
-        return iter(self.shares)
-
-    def __len__(self):
-        return len(self.shares)
-
-    def __getitem__(self, index):
-        return self.shares[index]
-
-
-class Share(WindowsAzureData):
+class Share(object):
 
     ''' File share class. '''
 
     def __init__(self):
-        self.name = u''
-        self.url = u''
-        self.properties = Properties()
-        self.metadata = {}
+        self.name = None
+        self.properties = ShareProperties()
+        self.metadata = None
 
 
-class Properties(WindowsAzureData):
+class ShareProperties(object):
 
     ''' File share's properties class. '''
 
     def __init__(self):
-        self.last_modified = u''
-        self.etag = u''
+        self.last_modified = None
+        self.etag = None
+        self.quota = None
 
 
-class FileAndDirectoryEnumResults(EnumResultsBase):
+class FileAndDirectoryResults(object):
 
     ''' 
     Enum result class holding a list of files
@@ -66,9 +41,8 @@ class FileAndDirectoryEnumResults(EnumResultsBase):
     '''
 
     def __init__(self):
-        EnumResultsBase.__init__(self)
-        self.files = _list_of(File)
-        self.directories = _list_of(Directory)
+        self.files = list()
+        self.directories = list()
 
 
 class FileResult(bytes):
@@ -80,62 +54,103 @@ class FileResult(bytes):
         self.properties = properties
 
 
-class File(WindowsAzureData):
+class File(object):
 
     ''' File class. '''
 
     def __init__(self):
-        self.name = u''
-        self.url = u''
+        self.name = None
         self.properties = FileProperties()
-        self.metadata = {}
+        self.metadata = None
 
 
-class FileProperties(WindowsAzureData):
+class FileProperties(object):
 
     ''' File Properties '''
 
     def __init__(self):
-        self.last_modified = u''
-        self.etag = u''
-        self.content_length = 0
-        self.content_type = u''
-        self.content_encoding = u''
-        self.content_language = u''
-        self.content_md5 = u''
-        self.content_disposition = u''
-        self.cache_control = u''
+        self.last_modified = None
+        self.etag = None
+        self.content_length = None
+        self.content_type = None
+        self.content_encoding = None
+        self.content_language = None
+        self.content_md5 = None
+        self.content_disposition = None
+        self.cache_control = None
 
 
-class Directory(WindowsAzureData):
+class Directory(object):
 
     ''' Directory class. '''
 
     def __init__(self):
-        self.name = ''
+        self.name = None
 
 
-class Range(WindowsAzureData):
+class Range(object):
 
     ''' File Range. '''
 
     def __init__(self):
-        self.start = 0
-        self.end = 0
+        self.start = None
+        self.end = None
 
+class ShareStats(object):
 
-class RangeList(object):
-
-    ''' Range list for range file. '''
+    ''' Share Stats. '''
 
     def __init__(self):
-        self.file_ranges = _list_of(Range)
+        self.share_usage = None
 
-    def __iter__(self):
-        return iter(self.file_ranges)
+class ShareSharedAccessPermissions(object):
+    '''Permissions for a share.'''
 
-    def __len__(self):
-        return len(self.file_ranges)
+    '''
+    Read the content, properties or metadata of any file in the share. Use any 
+    file in the share as the source of a copy operation.
+    '''
+    READ = 'r'
 
-    def __getitem__(self, index):
-        return self.file_ranges[index]
+    '''
+    For any file in the share, create or write content, properties or metadata. 
+    Resize the file. Use the file as the destination of a copy operation within 
+    the same account.
+    Note: You cannot grant permissions to read or write share properties or 
+    metadata with a service SAS. Use an account SAS instead.
+    '''
+    WRITE = 'w'
+
+    '''
+    Delete any file in the share.
+    Note: You cannot grant permissions to delete a share with a service SAS. Use 
+    an account SAS instead.
+    '''
+    DELETE = 'd'
+
+    '''List files and directories in the share.'''
+    LIST = 'l'
+
+
+class FileSharedAccessPermissions(object):
+    '''Permissions for a file.'''
+
+    '''
+    Read the content, properties, metadata. Use the file as the source of a copy 
+    operation.
+    '''
+    READ = 'r'
+
+    '''
+    Create a new file or copy a file to a new file.
+    '''
+    CREATE = 'c'
+
+    '''
+    Create or write content, properties, metadata. Resize the file. Use the file 
+    as the destination of a copy operation within the same account.
+    '''
+    WRITE = 'w'
+
+    '''Delete the file.'''
+    DELETE = 'd'

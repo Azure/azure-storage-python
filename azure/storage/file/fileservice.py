@@ -31,23 +31,31 @@ from .._common_serialization import (
     _get_request_body,
     _get_request_body_bytes_only,
     _parse_response_for_dict,
-    _parse_response_for_dict_filter,
     _parse_response_for_dict_prefix,
     _update_request_uri_query_local_storage,
-    _ETreeXmlToObject,
+)
+from .._serialization import (
+    _convert_signed_identifiers_to_xml,
+    _convert_service_properties_to_xml,
+)
+from .._deserialization import (
+    _convert_xml_to_service_properties,
+    _convert_xml_to_signed_identifiers,
+)
+from ..models import (
+    Metrics,
+    CorsRule,
+    AccessPolicy,
 )
 from .._http import HTTPRequest
 from ._chunking import (
     _download_file_chunks,
     _upload_file_chunks,
 )
-from .models import (
-    Share,
-    ShareEnumResults,
-    RangeList,
-    Range,
+from ..auth import (
+    StorageSharedKeyAuthentication,
+    StorageSASAuthentication,
 )
-from ..auth import StorageSharedKeyAuthentication
 from ..connection import StorageConnectionParameters
 from ..constants import (
     FILE_SERVICE_HOST_BASE,
@@ -57,8 +65,13 @@ from ..constants import (
 )
 from ._serialization import (
     _create_file_result,
-    _parse_file_enum_results_list,
     _update_storage_file_header,
+)
+from ._deserialization import (
+    _convert_xml_to_shares,
+    _convert_xml_to_directories_and_files,
+    _convert_xml_to_ranges,
+    _convert_xml_to_share_stats,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -83,7 +96,7 @@ class FileService(_StorageClient):
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=FILE_SERVICE_HOST_BASE, dev_host=DEV_FILE_HOST,
-                 timeout=DEFAULT_HTTP_TIMEOUT, connection_string=None,
+                 timeout=DEFAULT_HTTP_TIMEOUT, sas_token=None, connection_string=None,
                  request_session=None):
         '''
         account_name:
@@ -99,6 +112,8 @@ class FileService(_StorageClient):
             Dev host url. Defaults to localhost.
         timeout:
             Timeout for the http request, in seconds.
+        sas_token:
+            Token to use to authenticate with shared access signature.
         connection_string:
             If specified, the first four parameters (account_name,
             account_key, protocol, host_base) may be overridden
@@ -118,18 +133,21 @@ class FileService(_StorageClient):
             host_base = connection_params.host_base_file
             
         super(FileService, self).__init__(
-            account_name, account_key, protocol, host_base, dev_host, timeout, None, request_session)
+            account_name, account_key, protocol, host_base, dev_host, timeout, sas_token, request_session)
 
         if self.account_key:
             self.authentication = StorageSharedKeyAuthentication(
                 self.account_name,
                 self.account_key,
             )
+        elif self.sas_token:
+            self.authentication = StorageSASAuthentication(self.sas_token)
         else:
-            raise TypeError(_ERROR_STORAGE_MISSING_INFO)
+            raise ValueError(_ERROR_STORAGE_MISSING_INFO)
 
     def make_file_url(self, share_name, directory_name, file_name, 
-                      account_name=None, protocol=None, host_base=None):
+                      account_name=None, protocol=None, host_base=None, 
+                      sas_token=None):
         '''
         Creates the url to access a file.
 
@@ -148,6 +166,9 @@ class FileService(_StorageClient):
         host_base:
             Live host base url.  If not specified, uses the host base specified
             when FileService was initialized.
+        sas_token:
+            Shared access signature token created with
+            generate_shared_access_signature.
         '''
 
         if directory_name is None:
@@ -168,9 +189,178 @@ class FileService(_StorageClient):
                 file_name,
             )
 
+        if sas_token:
+            url += '?' + sas_token
+
         return url
 
-    def list_shares(self, prefix=None, marker=None, max_results=None,
+    def generate_shared_access_signature(self, share_name, 
+                                         directory_name=None, 
+                                         file_name=None,
+                                         permission=None, 
+                                         expiry=None,
+                                         start=None, 
+                                         id=None,
+                                         ip=None,
+                                         protocol=None,
+                                         cache_control=None,
+                                         content_disposition=None,
+                                         content_encoding=None,
+                                         content_language=None,
+                                         content_type=None):
+        '''
+        Generates a shared access signature for the share or file.
+        Use the returned signature with the sas_token parameter of FileService.
+
+        :param str share_name:
+            Name of share.
+        :param str directory_name:
+            Name of directory. SAS tokens cannot be created for directories, so 
+            this parameter should only be present if file_name is provided.
+        :param str file_name:
+            Name of file.
+        :param str permission:
+            The permissions associated with the shared access signature. The 
+            user is restricted to operations allowed by the permissions.
+            Permissions must be ordered read, create, write, delete, list.
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has been 
+            specified in an associated stored access policy.
+            See :class:`.ShareSharedAccessPermissions` and 
+            :class:`.FileSharedAccessPermissions`
+        :param expiry:
+            The time at which the shared access signature becomes invalid. 
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has 
+            been specified in an associated stored access policy. Azure will always 
+            convert values to UTC. If a date is passed in without timezone info, it 
+            is assumed to be UTC.
+        :type expiry: date or str
+        :param start:
+            The time at which the shared access signature becomes valid. If 
+            omitted, start time for this call is assumed to be the time when the 
+            storage service receives the request. Azure will always convert values 
+            to UTC. If a date is passed in without timezone info, it is assumed to 
+            be UTC.
+        :type start: date or str
+        :param str id:
+            A unique value up to 64 characters in length that correlates to a 
+            stored access policy. To create a stored access policy, use 
+            set_file_service_properties.
+        :param str ip:
+            Specifies an IP address or a range of IP addresses from which to accept requests.
+            If the IP address from which the request originates does not match the IP address
+            or address range specified on the SAS token, the request is not authenticated.
+            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
+            restricts the request to those IP addresses.
+        :param str protocol:
+            Specifies the protocol permitted for a request made. Possible values are
+            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
+            is https,http. Note that HTTP only is not a permitted value.
+        :param str cache_control:
+            Response header value for Cache-Control when resource is accessed
+            using this shared access signature.
+        :param str content_disposition:
+            Response header value for Content-Disposition when resource is accessed
+            using this shared access signature.
+        :param str content_encoding:
+            Response header value for Content-Encoding when resource is accessed
+            using this shared access signature.
+        :param str content_language:
+            Response header value for Content-Language when resource is accessed
+            using this shared access signature.
+        :param str content_type:
+            Response header value for Content-Type when resource is accessed
+            using this shared access signature.
+        '''
+        _validate_not_none('share_name', share_name)
+        _validate_not_none('self.account_name', self.account_name)
+        _validate_not_none('self.account_key', self.account_key)
+
+        if file_name:
+            resource_type = ResourceType.RESOURCE_FILE
+            resource_path = share_name
+            if directory_name is not None:
+                resource_path += '/' + _str(directory_name)
+            resource_path += '/' + _str(file_name)
+        else:
+            resource_type = ResourceType.RESOURCE_SHARE
+            resource_path = share_name
+
+        sas = SharedAccessSignature(self.account_name, self.account_key)
+        return sas.generate_signed_query_string(
+            'file',
+            resource_path,
+            resource_type,
+            permission, 
+            expiry,
+            start, 
+            id,
+            ip,
+            protocol,
+            cache_control,
+            content_disposition,
+            content_encoding,
+            content_language,
+            content_type,
+        )
+
+    def set_file_service_properties(self, hour_metrics=None, minute_metrics=None, 
+                                    cors=None, timeout=None):
+        '''
+        Sets the properties of a storage account's File service, including
+        Azure Storage Analytics. If an element (ex HourMetrics) is left as None, the 
+        existing settings on the service for that functionality are preserved.
+
+        :param Metrics hour_metrics:
+            The hour metrics settings provide a summary of request 
+            statistics grouped by API in hourly aggregates for files.
+        :param Metrics minute_metrics:
+            The minute metrics settings provide request statistics 
+            for each minute for files.
+        :param cors:
+            You can include up to five CorsRule elements in the 
+            list. If an empty list is specified, all CORS rules will be deleted, 
+            and CORS will be disabled for the service.
+        :type cors: list of :class:`CorsRule`
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host = self._get_host()
+        request.path = '/?restype=service&comp=properties'
+        request.query = [('timeout', _int_or_none(timeout))]
+        request.body = _get_request_body(
+            _convert_service_properties_to_xml(None, hour_metrics, minute_metrics, cors))
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        self._perform_request(request)
+
+    def get_file_service_properties(self, timeout=None):
+        '''
+        Gets the properties of a storage account's File service, including
+        Azure Storage Analytics.
+
+        timeout:
+            Optional. The timeout parameter is expressed in seconds.
+        '''
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self._get_host()
+        request.path = '/?restype=service&comp=properties'
+        request.query = [('timeout', _int_or_none(timeout))]
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        response = self._perform_request(request)
+
+        return _convert_xml_to_service_properties(response.body)
+
+    def list_shares(self, prefix=None, marker=None, max_results=None, 
                     include=None):
         '''
         The List Shares operation returns a list of the shares under
@@ -205,11 +395,10 @@ class FileService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_enum_results_list(
-            response, ShareEnumResults, "Shares", Share)
+        return _convert_xml_to_shares(response)
 
-    def create_share(self, share_name, metadata=None,
-                     fail_on_exist=False):
+    def create_share(self, share_name, metadata=None, quota=None,
+                         fail_on_exist=False):
         '''
         Creates a new share under the specified account. If the share
         with the same name already exists, the operation fails on the
@@ -221,6 +410,9 @@ class FileService(_StorageClient):
         metadata:
             A dict with name_value pairs to associate with the
             share as metadata. Example:{'Category':'test'}
+        quota:
+            Specifies the maximum size of the share, in gigabytes. Must be 
+            greater than 0, and less than or equal to 5TB (5120).
         fail_on_exist:
             Specify whether to throw an exception when the share exists.
             False by default.
@@ -230,7 +422,9 @@ class FileService(_StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + _str(share_name) + '?restype=share'
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        request.headers = [
+            ('x-ms-meta-name-values', metadata),
+            ('x-ms-share-quota', _int_or_none(quota))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
@@ -266,6 +460,30 @@ class FileService(_StorageClient):
         response = self._perform_request(request)
 
         return _parse_response_for_dict(response)
+
+    def set_share_properties(self, share_name, quota):
+        '''
+        Sets service-defined properties for the specified share.
+
+        share_name:
+            Name of existing share.
+        quota:
+            Specifies the maximum size of the share, in gigabytes. Must be 
+            greater than 0, and less than or equal to 5 TB (5120 GB).
+        '''
+        _validate_not_none('share_name', share_name)
+        _validate_not_none('quota', quota)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host = self._get_host()
+        request.path = '/' + \
+            _str(share_name) + '?restype=share&comp=properties'
+        request.headers = [('x-ms-share-quota', _int_or_none(quota))]
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        self._perform_request(request)
 
     def get_share_metadata(self, share_name):
         '''
@@ -312,6 +530,79 @@ class FileService(_StorageClient):
         request.headers = _update_storage_file_header(
             request, self.authentication)
         self._perform_request(request)
+
+    def get_share_acl(self, share_name):
+        '''
+        Gets the permissions for the specified share.
+
+        :param str share_name:
+            Name of existing share.
+        :return: A dictionary of access policies associated with the share.
+        :rtype: dict of str to :class:`.AccessPolicy`:
+        '''
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self._get_host()
+        request.path = '/' + \
+            _str(share_name) + '?restype=share&comp=acl'
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        response = self._perform_request(request)
+
+        return _convert_xml_to_signed_identifiers(response.body)
+
+    def set_share_acl(self, share_name, signed_identifiers=None):
+        '''
+        Sets the permissions for the specified share or stored access 
+        policies that may be used with Shared Access Signatures.
+
+        :param str share_name:
+            Name of existing share.
+        :param signed_identifiers:
+            A dictionary of access policies to associate with the share. The 
+            dictionary may contain up to 5 elements. An empty dictionary 
+            will clear the access policies set on the service. 
+        :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
+        '''
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host = self._get_host()
+        request.path = '/' + \
+            _str(share_name) + '?restype=share&comp=acl'
+        request.body = _get_request_body(
+            _convert_signed_identifiers_to_xml(signed_identifiers))
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        self._perform_request(request)
+
+    def get_share_stats(self, share_name):
+        '''
+        Gets statistics related to the share.
+
+        :param str share_name:
+            Name of existing share.
+        :return: Returns statistics related to the share.
+        :rtype: ShareStats
+        '''
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self._get_host()
+        request.path = '/' + \
+            _str(share_name) + '?restype=share&comp=stats'
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        response = self._perform_request(request)
+
+        return _convert_xml_to_share_stats(response)
 
     def delete_share(self, share_name, fail_not_exist=False):
         '''
@@ -452,6 +743,56 @@ class FileService(_StorageClient):
 
         return _parse_response_for_dict(response)
 
+    def get_directory_metadata(self, share_name, directory_name):
+        '''
+        Returns all user-defined metadata for the specified directory.
+
+        share_name:
+            Name of existing share.
+        directory_name:
+            The path to the directory.
+        '''
+        _validate_not_none('share_name', share_name)
+        _validate_not_none('directory_name', directory_name)
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self._get_host()
+        request.path = '/' + _str(share_name) + \
+            '/' + _str(directory_name) + '?restype=directory&comp=metadata'
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        response = self._perform_request(request)
+
+        return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
+
+    def set_directory_metadata(self, share_name, directory_name, metadata=None):
+        '''
+        Sets user-defined metadata for the specified directory as one or more
+        name-value pairs.
+
+        share_name:
+            Name of existing share.
+        directory_name:
+            The path to the directory.
+        metadata:
+            Dict containing name and value pairs.
+        '''
+        _validate_not_none('share_name', share_name)
+        _validate_not_none('directory_name', directory_name)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host = self._get_host()
+        request.path = '/' + _str(share_name) + \
+            '/' + _str(directory_name) + '?restype=directory&comp=metadata'
+        request.headers = [('x-ms-meta-name-values', metadata)]
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        self._perform_request(request)
+
     def list_directories_and_files(self, share_name, directory_name=None, 
                                    marker=None, max_results=None):
         '''
@@ -495,7 +836,7 @@ class FileService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _parse_file_enum_results_list(response)
+        return _convert_xml_to_directories_and_files(response)
 
     def get_file_properties(self, share_name, directory_name, file_name):
         '''
@@ -679,6 +1020,84 @@ class FileService(_StorageClient):
             request, self.authentication)
         self._perform_request(request)
 
+    def copy_file(self, share_name, directory_name, file_name, copy_source,
+                  metadata=None):
+        '''
+        Copies a file to a destination within the storage account.
+
+        share_name:
+            Name of existing share.
+        directory_name:
+            The path to the directory.
+        file_name:
+            Name of existing file.
+        copy_source:
+            Specifies the URL of the source file or file, up to 2 KB in length. 
+            A source file in the same account can be private, but a file in another account
+            must be public or accept credentials included in this URL, such as
+            a Shared Access Signature.
+        metadata:
+            Optional. Dict containing name and value pairs.
+        '''
+        _validate_not_none('share_name', share_name)
+        _validate_not_none('file_name', file_name)
+        _validate_not_none('copy_source', copy_source)
+
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host = self._get_host()
+        request.path = '/' + _str(share_name)
+        if directory_name is not None:
+            request.path += '/' + _str(directory_name)
+        request.path += '/' + _str(file_name)
+        request.headers = [
+            ('x-ms-copy-source', _str_or_none(copy_source)),
+            ('x-ms-meta-name-values', metadata),
+        ]
+
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        response = self._perform_request(request)
+
+        return _parse_response_for_dict(response)
+
+    def abort_copy_file(self, share_name, directory_name, file_name, copy_id):
+        '''
+         Aborts a pending copy_file operation, and leaves a destination file
+         with zero length and full metadata.
+
+         share_name:
+             Name of destination share.
+        directory_name:
+            The path to the directory.
+         file_name:
+             Name of destination file.
+         copy_id:
+            Copy identifier provided in the copy_id of the original
+            copy_file operation.
+        '''
+        _validate_not_none('share_name', share_name)
+        _validate_not_none('file_name', file_name)
+        _validate_not_none('copy_id', copy_id)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host = self._get_host()
+        request.path = '/' + _str(share_name)
+        if directory_name is not None:
+            request.path += '/' + _str(directory_name)
+        request.path += '/' + _str(file_name) + '?comp=copy&copyid=' + \
+            _str(copy_id)
+        request.headers = [
+            ('x-ms-copy-action', 'abort'),
+        ]
+        request.path, request.query = _update_request_uri_query_local_storage(
+            request, self.use_local_storage)
+        request.headers = _update_storage_file_header(
+            request, self.authentication)
+        self._perform_request(request)
+
     def delete_file(self, share_name, directory_name, file_name):
         '''
         Marks the specified file for deletion. The file is later
@@ -838,7 +1257,7 @@ class FileService(_StorageClient):
         directory_name:
             The path to the directory.
         file_name:
-            Name of blob to create or update.
+            Name of file to create or update.
         text:
             Text to upload to the blob.
         encoding:
@@ -1397,4 +1816,4 @@ class FileService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_simple_list(response, RangeList, Range, "file_ranges")
+        return _convert_xml_to_ranges(response)

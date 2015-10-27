@@ -31,3 +31,5 @@
 
 ### File:
 - Renamed APIs and params: All x_ms prefexes have been removed. x_ms_range => byte_range for applicable APIs. maxresults => max_results for applicable APIs. x_ms_meta_name_values => metadata for applicable APIs. text_encoding => encoding for applicable APIs. list_ranges no longer uses range param.
+- Added sas_token parameter to FileService constructor before the connection_string param. Added quota parameter to create_share before the fail_on_exist param.
+- Changed list_ranges to return the list of file ranges directly rather than nested within a RangeList object.
