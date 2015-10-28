@@ -59,7 +59,7 @@ def _convert_xml_to_shares(response):
     list_element = ETree.fromstring(response.body)
     
     # Set next marker
-    next_marker = list_element.findtext('NextMarker')
+    next_marker = list_element.findtext('NextMarker') or None
     setattr(shares, 'next_marker', next_marker)
 
     shares_element = list_element.find('Shares')
@@ -114,7 +114,7 @@ def _convert_xml_to_directories_and_files(response):
     list_element = ETree.fromstring(response.body)
     
     # Set next marker
-    next_marker = list_element.findtext('NextMarker')
+    next_marker = list_element.findtext('NextMarker') or None
     setattr(entries, 'next_marker', next_marker)
 
     entries_element = list_element.find('Entries')
