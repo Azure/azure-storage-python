@@ -49,7 +49,7 @@ def _convert_xml_to_queues(response):
     list_element = ETree.fromstring(response.body)
     
     # Set next marker
-    next_marker = list_element.findtext('NextMarker')
+    next_marker = list_element.findtext('NextMarker') or None
     setattr(queues, 'next_marker', next_marker)
 
     queues_element = list_element.find('Queues')
