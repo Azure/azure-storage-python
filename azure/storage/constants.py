@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+import platform
+
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
 __version__ = '0.20.0rc2'
 
 # x-ms-version for storage service.
 X_MS_VERSION = '2015-04-05'
 
-_USER_AGENT_STRING = 'pyazure/' + __version__
+# UserAgent string sample: 'Azure-Storage/0.20.0rc2 (Python CPython 3.4.2; Windows 8)'
+_USER_AGENT_STRING = 'Azure-Storage/{} (Python {} {}; {} {})'.format(__version__, platform.python_implementation(), platform.python_version(), platform.system(), platform.release())
 
 # Live ServiceClient URLs
 BLOB_SERVICE_HOST_BASE = '.blob.core.windows.net'
