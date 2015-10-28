@@ -9,6 +9,7 @@
 - generate_shared_access_signature methods take permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
 - generate_signed_query_string on SharedAccessSignature takes permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
 - expiry and start, whether as part of AccessPolicy or params in generateSharedAccessSignature, may be given as UTC date objects or as strings.
+- UserAgent string has changed to conform to the Azure Storage standard.
 
 ### Table:
 - Simplified tableservice *_entity functions by removing partition_key, row_key, and content_type parameters where possible.

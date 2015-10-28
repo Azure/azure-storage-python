@@ -8,6 +8,7 @@
 - set and get acl methods take and return dictionaries mapping an id to an AccessPolicy object rather than a SignedIdentifiers object.
 - generate_shared_access_signature methods take permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
 - generate_signed_query_string on SharedAccessSignature takes permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
+- UserAgent string has changed to conform to the Azure Storage standard.
 
 ### Table:
 - Entity insert, update, merge, delete, insert_or_replace and insert_or_merge operations do not take a content_type parameter.
