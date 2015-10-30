@@ -210,13 +210,26 @@ class _PageBlobChunkUploader(_BlobChunkUploader):
 
 class _AppendBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_offset, chunk_data):
-        self.blob_service.append_block(
-            self.container_name,
-            self.blob_name,
-            chunk_data,
-            lease_id=self.lease_id,
-            maxsize_condition=self.maxsize_condition,
-        )
+        if not hasattr(self, 'current_length'):
+            resp = self.blob_service.append_block(
+                self.container_name,
+                self.blob_name,
+                chunk_data,
+                lease_id=self.lease_id,
+                maxsize_condition=self.maxsize_condition,
+            )
+
+            self.current_length = int(resp['x-ms-blob-append-offset'])
+        else:
+            resp = self.blob_service.append_block(
+                self.container_name,
+                self.blob_name,
+                chunk_data,
+                lease_id=self.lease_id,
+                maxsize_condition=self.maxsize_condition,
+                appendpos_condition=self.current_length + chunk_offset,
+            )
+
 
 def _download_blob_chunks(blob_service, container_name, blob_name,
                           blob_size, block_size, stream, max_connections,

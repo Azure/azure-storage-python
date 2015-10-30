@@ -1835,9 +1835,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         test_datetime = (datetime.datetime.utcnow() -
                          datetime.timedelta(minutes=15))\
                         .strftime('%a, %d %b %Y %H:%M:%S GMT')
-        resp1 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-        resp2 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
 
         # Act
@@ -1881,9 +1881,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         test_datetime = (datetime.datetime.utcnow() +
                          datetime.timedelta(minutes=15))\
                         .strftime('%a, %d %b %Y %H:%M:%S GMT')
-        resp1 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-        resp2 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
 
         # Act
@@ -1924,9 +1924,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
-        resp1 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-        resp2 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
         etag = self.pbs.get_blob_properties(self.container_name, 'blob1')['ETag']
 
@@ -1947,9 +1947,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
-        resp1 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-        resp2 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
 
         # Act
@@ -1965,9 +1965,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
-        resp1 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-        resp2 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
 
         # Act
@@ -1987,9 +1987,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
-        resp1 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=0-511', 'update')
-        resp2 = self.pbs.put_page(
+        self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
         etag = self.pbs.get_blob_properties(self.container_name, 'blob1')['ETag']
 
@@ -2013,7 +2013,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                 self.container_name, 'blob1',
                 u'block {0}'.format(i).encode('utf-8'),
                 if_modified_since=test_datetime)
-            self.assertIsNone(resp)
+            self.assertIsNotNone(resp)
 
         # Assert
         blob = self.bs.get_blob(self.container_name, 'blob1')
@@ -2049,7 +2049,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                 self.container_name, 'blob1',
                 u'block {0}'.format(i).encode('utf-8'),
                 if_unmodified_since=test_datetime)
-            self.assertIsNone(resp)
+            self.assertIsNotNone(resp)
 
         # Assert
         blob = self.bs.get_blob(self.container_name, 'blob1')
@@ -2084,7 +2084,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                 self.container_name, 'blob1',
                 u'block {0}'.format(i).encode('utf-8'),
                 if_match=etag)
-            self.assertIsNone(resp)
+            self.assertIsNotNone(resp)
 
         # Assert
         blob = self.bs.get_blob(self.container_name, 'blob1')
@@ -2116,7 +2116,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                 self.container_name, 'blob1',
                 u'block {0}'.format(i).encode('utf-8'),
                 if_none_match='0x8D2C9167D53FC2C')
-            self.assertIsNone(resp)
+            self.assertIsNotNone(resp)
 
         # Assert
         blob = self.bs.get_blob(self.container_name, 'blob1')

@@ -211,11 +211,26 @@ class StorageAppendBlobTest(StorageTestCase):
             resp = self.bs.append_block(self.container_name,
                                         'blob1',
                                         u'block {0}'.format(i).encode('utf-8'))
-            self.assertIsNone(resp)
+            keys = (
+                'x-ms-blob-append-offset',
+                'x-ms-blob-committed-block-count',
+            )
+            
+            self.assertDictContainsKeys(keys, resp)
 
         # Assert
         blob = self.bs.get_blob(self.container_name, 'blob1')
         self.assertEqual(b'block 0block 1block 2block 3block 4', blob)
+
+    def assertDictContainsKeys(self, keys, dictionary, msg=None):
+        if all (k in dictionary for k in keys):
+            return
+        
+        standardMsg = ''
+        if missing:
+            standardMsg = 'Missing: some keys were not found in dictionary.'
+
+        self.fail(self._formatMessage(msg, standardMsg))
 
     @record
     def test_append_block_unicode(self):
