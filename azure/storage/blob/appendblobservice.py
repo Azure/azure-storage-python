@@ -28,6 +28,7 @@ from .._common_conversion import (
 from .._common_serialization import (
     _get_request_body_bytes_only,
     _update_request_uri_query_local_storage,
+    _parse_response_for_dict,
 )
 from .._http import HTTPRequest
 from ._chunking import (
@@ -230,7 +231,9 @@ class AppendBlobService(_BaseBlobService):
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
-        self._perform_request(request)
+        response = self._perform_request(request)
+
+        return _parse_response_for_dict(response)
 
     #----Convenience APIs----------------------------------------------
 

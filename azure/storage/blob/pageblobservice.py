@@ -181,7 +181,7 @@ class PageBlobService(_BaseBlobService):
         self._perform_request(request)
 
     def put_page(
-        self, container_name, blob_name, page, range,
+        self, container_name, blob_name, page, byte_range,
         page_write, timeout=None, content_md5=None,
         lease_id=None, if_sequence_number_lte=None,
         if_sequence_number_lt=None, if_sequence_number_eq=None,
@@ -196,8 +196,8 @@ class PageBlobService(_BaseBlobService):
             Name of existing blob.
         page:
             Content of the page.
-        range:
-            Required. Specifies the range of bytes to be written as a page.
+        byte_range:
+            Specifies the range of bytes to be written as a page.
             Both the start and end of the range must be specified. Must be in
             format:
                 bytes=startByte-endByte. Given that pages must be aligned
@@ -205,7 +205,7 @@ class PageBlobService(_BaseBlobService):
             512 and the end offset must be a modulus of 512-1. Examples of
             valid byte ranges are 0-511, 512-1023, etc.
         page_write:
-            Required. You may specify one of the following options:
+            You may specify one of the following options:
                 update (lower case):
                     Writes the bytes specified by the request body into the
                     specified range. The Range and Content-Length headers must
@@ -217,7 +217,7 @@ class PageBlobService(_BaseBlobService):
                     value that indicates the range to clear, up to maximum
                     blob size.
         timeout:
-            the timeout parameter is expressed in seconds.
+            The timeout parameter is expressed in seconds.
         content_md5:
             An MD5 hash of the page content. This hash is used to
             verify the integrity of the page during transport. When this header
@@ -259,7 +259,7 @@ class PageBlobService(_BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('page', page)
-        _validate_not_none('range', range)
+        _validate_not_none('range', byte_range)
         _validate_not_none('page_write', page_write)
         request = HTTPRequest()
         request.method = 'PUT'
@@ -267,7 +267,7 @@ class PageBlobService(_BaseBlobService):
         request.path = '/' + \
             _str(container_name) + '/' + _str(blob_name) + '?comp=page'
         request.headers = [
-            ('x-ms-range', _str_or_none(range)),
+            ('x-ms-range', _str_or_none(byte_range)),
             ('Content-MD5', _str_or_none(content_md5)),
             ('x-ms-page-write', _str_or_none(page_write)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
