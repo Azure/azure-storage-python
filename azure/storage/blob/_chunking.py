@@ -15,6 +15,10 @@
 import sys
 import threading
 
+from azure.common import (
+    AzureHttpError,
+)
+
 from time import sleep
 from .._common_conversion import _encode_base64
 from .._common_serialization import url_quote
@@ -80,7 +84,7 @@ class _BlobChunkDownloader(object):
                     self.blob_name,
                     x_ms_range=range_id
                 )
-            except AzureHttpException:
+            except AzureHttpError:
                 if retries > 0:
                     retries -= 1
                     sleep(self.retry_wait)
@@ -172,7 +176,7 @@ class _BlobChunkUploader(object):
                 range_id = self._upload_chunk(chunk_offset, chunk_data) 
                 self._update_progress(len(chunk_data))
                 return range_id
-            except AzureHttpException:
+            except AzureHttpError:
                 if retries > 0:
                     retries -= 1
                     sleep(self.retry_wait)
