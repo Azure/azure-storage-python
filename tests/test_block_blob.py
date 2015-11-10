@@ -26,8 +26,10 @@ from azure.common import AzureHttpError
 from azure.storage import AccessPolicy
 from azure.storage.blob import (
     BLOB_SERVICE_HOST_BASE,
+    BlobBlock,
     BlobBlockList,
     BlockBlobService,
+    Settings,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -143,23 +145,23 @@ class StorageBlockBlobTest(StorageTestCase):
 
     def _wait_for_async_copy(self, container_name, blob_name):
         count = 0
-        props = self.bs.get_blob_properties(container_name, blob_name)
-        while props['x-ms-copy-status'] != 'success':
+        props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        while props.copy.status != 'success':
             count = count + 1
             if count > 5:
                 self.assertTrue(
                     False, 'Timed out waiting for async copy to complete.')
             self.sleep(5)
-            props = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(props['x-ms-copy-status'], 'success')
+            props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(props.copy.status, 'success')
 
     def assertBlobEqual(self, container_name, blob_name, expected_data):
         actual_data = self.bs.get_blob(container_name, blob_name)
         self.assertEqual(actual_data, expected_data)
 
     def assertBlobLengthEqual(self, container_name, blob_name, expected_length):
-        props = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(int(props['content-length']), expected_length)
+        props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(int(props.content_length), expected_length)
 
     def _get_oversized_binary_data(self):
         '''Returns random binary data exceeding the size threshold for
@@ -297,8 +299,8 @@ class StorageBlockBlobTest(StorageTestCase):
         for i in range(5):
             resp = self.bs.put_block(self.container_name,
                                      'blob1',
-                                     u'block {0}'.format(i).encode('utf-8'),
-                                     str(i))
+                                     'block {0}'.format(i).encode('utf-8'),
+                                     i)
             self.assertIsNone(resp)
 
         # Assert
@@ -326,7 +328,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Act
         resp = self.bs.put_block_list(
-            self.container_name, 'blob1', ['1', '2', '3'])
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')])
 
         # Assert
         self.assertIsNone(resp)
@@ -345,7 +347,7 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         try:
             resp = self.bs.put_block_list(
-                self.container_name, 'blob1', ['1', '2', '4'])
+                self.container_name, 'blob1', [ BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='4')])
             self.assertTrue(False)
         except AzureHttpError as e:
             self.assertGreaterEqual(
@@ -402,7 +404,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-        self.bs.put_block_list(self.container_name, 'blob1', ['1', '2', '3'])
+        self.bs.put_block_list(
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')])
 
         # Act
         block_list = self.bs.get_block_list(
@@ -493,16 +496,17 @@ class StorageBlockBlobTest(StorageTestCase):
         data = b'abcdefghijklmnopqrstuvwxyz'
         resp = self.bs.create_blob_from_bytes(
             self.container_name, 'blob1', data, 3, 5,
-            content_type='image/png',
-            content_language='spanish')
+            settings=Settings(
+                content_type='image/png',
+                content_language='spanish'))
 
         # Assert
         self.assertIsNone(resp)
         self.assertEqual(
             b'defgh', self.bs.get_blob(self.container_name, 'blob1'))
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(props.settings.content_type, 'image/png')
+        self.assertEqual(props.settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_bytes_chunked_upload(self):
@@ -550,16 +554,17 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         resp = self.bs.create_blob_from_bytes(
             self.container_name, blob_name, data,
-            content_type='image/png',
-            content_language='spanish')
+            settings=Settings(
+                content_type='image/png',
+                content_language='spanish'))
 
         # Assert
         self.assertIsNone(resp)
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(props.settings.content_type, 'image/png')
+        self.assertEqual(props.settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_bytes_with_progress_chunked_upload(self):
@@ -683,16 +688,17 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         resp = self.bs.create_blob_from_path(
             self.container_name, blob_name, file_path,
-            content_type='image/png',
-            content_language='spanish')
+            settings=Settings(
+                content_type='image/png',
+                content_language='spanish'))
 
         # Assert
         self.assertIsNone(resp)
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
-        props = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(props.settings.content_type, 'image/png')
+        self.assertEqual(props.settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_stream_chunked_upload(self):
@@ -930,16 +936,17 @@ class StorageBlockBlobTest(StorageTestCase):
         with open(file_path, 'rb') as stream:
             resp = self.bs.create_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size,
-                content_type='image/png',
-                content_language='spanish')
+                settings=Settings(
+                    content_type='image/png',
+                    content_language='spanish'))
 
         # Assert
         self.assertIsNone(resp)
         self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-        props = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(props.settings.content_type, 'image/png')
+        self.assertEqual(props.settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_stream_chunked_upload_with_properties(self):
@@ -955,16 +962,17 @@ class StorageBlockBlobTest(StorageTestCase):
         with open(file_path, 'rb') as stream:
             resp = self.bs.create_blob_from_stream(
                 self.container_name, blob_name, stream,
-                content_type='image/png',
-                content_language='spanish')
+                settings=Settings(
+                    content_type='image/png',
+                    content_language='spanish'))
 
         # Assert
         self.assertIsNone(resp)
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
-        props = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props['content-type'], 'image/png')
-        self.assertEqual(props['content-language'], 'spanish')
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(props.settings.content_type, 'image/png')
+        self.assertEqual(props.settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_text(self):

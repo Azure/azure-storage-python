@@ -24,11 +24,13 @@ import unittest
 
 from azure.common import AzureHttpError
 from azure.storage.blob import (
-    BlobResult,
+    Blob,
+    BlobBlock,
     BlockBlobService,
     PageBlobService,
     AppendBlobService,
     PageRange,
+    Settings,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -399,7 +401,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         data = b'hello world'
         self._create_container_and_block_blob(
             self.container_name, 'blob1', data)
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
         
         # Act
         resp = self.bs.create_blob_from_bytes(
@@ -445,7 +447,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         data = b'hello world'
         self._create_container_and_block_blob(
             self.container_name, 'blob1', data)
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -469,7 +471,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                                 if_modified_since=test_datetime)
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -502,7 +504,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                                 if_unmodified_since=test_datetime)
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -526,13 +528,13 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         blob = self.bs.get_blob(self.container_name, 'blob1', if_match=etag)
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -559,7 +561,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                                 if_none_match='0x111111111111111')
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -567,7 +569,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -588,16 +590,17 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            content_language='spanish',
-            content_disposition='inline',
+            settings=Settings(
+                content_language='spanish',
+                content_disposition='inline'),
             if_modified_since=test_datetime,
         )
 
         # Assert
         self.assertIsNone(resp)
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-language'], 'spanish')
-        self.assertEqual(props['content-disposition'], 'inline')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_if_modified_fail(self):
@@ -612,8 +615,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                content_language='spanish',
-                content_disposition='inline',
+                settings=Settings(
+                    content_language='spanish',
+                    content_disposition='inline'),
                 if_modified_since=test_datetime,
             )
 
@@ -631,16 +635,17 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            content_language='spanish',
-            content_disposition='inline',
+            settings=Settings(
+                content_language='spanish',
+                content_disposition='inline'),
             if_unmodified_since=test_datetime,
         )
 
         # Assert
         self.assertIsNone(resp)
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-language'], 'spanish')
-        self.assertEqual(props['content-disposition'], 'inline')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_if_unmodified_fail(self):
@@ -655,8 +660,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                content_language='spanish',
-                content_disposition='inline',
+                settings=Settings(
+                    content_language='spanish',
+                    content_disposition='inline'),
                 if_unmodified_since=test_datetime,
             )
 
@@ -667,22 +673,23 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            content_language='spanish',
-            content_disposition='inline',
+            settings=Settings(
+                content_language='spanish',
+                content_disposition='inline'),
             if_match=etag,
         )
 
         # Assert
         self.assertIsNone(resp)
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-language'], 'spanish')
-        self.assertEqual(props['content-disposition'], 'inline')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_if_match_fail(self):
@@ -695,8 +702,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                content_language='spanish',
-                content_disposition='inline',
+                settings=Settings(
+                    content_language='spanish',
+                    content_disposition='inline'),
                 if_match='0x111111111111111',
             )
 
@@ -712,31 +720,33 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            content_language='spanish',
-            content_disposition='inline',
+            settings=Settings(
+                content_language='spanish',
+                content_disposition='inline'),
             if_none_match='0x111111111111111',
         )
 
         # Assert
         self.assertIsNone(resp)
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-language'], 'spanish')
-        self.assertEqual(props['content-disposition'], 'inline')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_if_none_match_fail(self):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                content_language='spanish',
-                content_disposition='inline',
+                settings=Settings(
+                    content_language='spanish',
+                    content_disposition='inline'),
                 if_none_match=etag,
             )
 
@@ -751,14 +761,14 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))\
                         .strftime('%a, %d %b %Y %H:%M:%S GMT')
         # Act
-        props = self.bs.get_blob_properties(self.container_name, 'blob1',
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1',
                                             if_modified_since=test_datetime)
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], 'BlockBlob')
-        self.assertEqual(props['content-length'], '11')
-        self.assertEqual(props['x-ms-lease-status'], 'unlocked')
+        self.assertEqual(props.blob_type, 'BlockBlob')
+        self.assertEqual(props.content_length, 11)
+        self.assertEqual(props.lease.status, 'unlocked')
 
     @record
     def test_get_blob_properties_with_if_modified_fail(self):
@@ -784,14 +794,14 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))\
                         .strftime('%a, %d %b %Y %H:%M:%S GMT')
         # Act
-        props = self.bs.get_blob_properties(self.container_name, 'blob1',
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1',
                                             if_unmodified_since=test_datetime)
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], 'BlockBlob')
-        self.assertEqual(props['content-length'], '11')
-        self.assertEqual(props['x-ms-lease-status'], 'unlocked')
+        self.assertEqual(props.blob_type, 'BlockBlob')
+        self.assertEqual(props.content_length, 11)
+        self.assertEqual(props.lease.status, 'unlocked')
 
     @record
     def test_get_blob_properties_with_if_unmodified_fail(self):
@@ -813,17 +823,17 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
-        props = self.bs.get_blob_properties(self.container_name, 'blob1',
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1',
                                             if_match=etag)
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], 'BlockBlob')
-        self.assertEqual(props['content-length'], '11')
-        self.assertEqual(props['x-ms-lease-status'], 'unlocked')
+        self.assertEqual(props.blob_type, 'BlockBlob')
+        self.assertEqual(props.content_length, 11)
+        self.assertEqual(props.lease.status, 'unlocked')
 
     @record
     def test_get_blob_properties_with_if_match_fail(self):
@@ -845,21 +855,21 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        props = self.bs.get_blob_properties(self.container_name, 'blob1',
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1',
                                             if_none_match='0x111111111111111')
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], 'BlockBlob')
-        self.assertEqual(props['content-length'], '11')
-        self.assertEqual(props['x-ms-lease-status'], 'unlocked')
+        self.assertEqual(props.blob_type, 'BlockBlob')
+        self.assertEqual(props.content_length, 11)
+        self.assertEqual(props.lease.status, 'unlocked')
 
     @record
     def test_get_blob_properties_with_if_none_match_fail(self):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -937,7 +947,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         md = self.bs.get_blob_metadata(self.container_name, 'blob1', if_match=etag)
@@ -976,7 +986,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1076,7 +1086,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
         
         # Act
         resp = self.bs.set_blob_metadata(
@@ -1135,7 +1145,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
         
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1216,7 +1226,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         resp = self.bs.delete_blob(self.container_name, 'blob1', if_match=etag)
@@ -1255,7 +1265,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1334,7 +1344,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         resp = self.bs.snapshot_blob(self.container_name, 'blob1',
@@ -1376,7 +1386,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1470,7 +1480,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
         test_lease_id = '00000000-1111-2222-3333-444444444444'
 
         # Act
@@ -1525,7 +1535,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1548,7 +1558,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         resp = self.bs.put_block_list(
-            self.container_name, 'blob1', ['1', '2', '3'],
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
             if_modified_since=test_datetime)
 
         # Assert
@@ -1571,7 +1581,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.put_block_list(
-                self.container_name, 'blob1', ['1', '2', '3'],
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
                 if_modified_since=test_datetime)
 
         # Assert
@@ -1590,7 +1600,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         resp = self.bs.put_block_list(
-            self.container_name, 'blob1', ['1', '2', '3'],
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
             if_unmodified_since=test_datetime)
 
         # Assert
@@ -1613,7 +1623,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.put_block_list(
-                self.container_name, 'blob1', ['1', '2', '3'],
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
                 if_unmodified_since=test_datetime)
 
         # Assert
@@ -1626,11 +1636,11 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         resp = self.bs.put_block_list(
-            self.container_name, 'blob1', ['1', '2', '3'],
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
             if_match=etag)
 
         # Assert
@@ -1650,7 +1660,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.put_block_list(
-                self.container_name, 'blob1', ['1', '2', '3'],
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
                 if_match='0x111111111111111')
 
         # Assert
@@ -1666,7 +1676,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         resp = self.bs.put_block_list(
-            self.container_name, 'blob1', ['1', '2', '3'],
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
             if_none_match='0x111111111111111')
 
         # Assert
@@ -1682,12 +1692,12 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'AAA', '1')
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.put_block_list(
-                self.container_name, 'blob1', ['1', '2', '3'],
+            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
                 if_none_match=etag)
 
         # Assert
@@ -1770,7 +1780,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 1024)
         data = b'abcdefghijklmnop' * 32
-        etag = self.bs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.bs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         resp = self.pbs.put_page(
@@ -1816,7 +1826,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 1024)
         data = b'abcdefghijklmnop' * 32
-        etag = self.pbs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.pbs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1928,7 +1938,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', data, 'bytes=0-511', 'update')
         self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
-        etag = self.pbs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.pbs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         ranges = self.pbs.get_page_ranges(self.container_name, 'blob1',
@@ -1991,7 +2001,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', data, 'bytes=0-511', 'update')
         self.pbs.put_page(
             self.container_name, 'blob1', data, 'bytes=1024-1535', 'update')
-        etag = self.pbs.get_blob_properties(self.container_name, 'blob1')['ETag']
+        etag = self.pbs.get_blob_properties(self.container_name, 'blob1')[0].etag
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -2079,7 +2089,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         for i in range(5):
-            etag = self.abs.get_blob_properties(self.container_name, 'blob1')['ETag']
+            etag = self.abs.get_blob_properties(self.container_name, 'blob1')[0].etag
             resp = self.abs.append_block(
                 self.container_name, 'blob1',
                 u'block {0}'.format(i).encode('utf-8'),
@@ -2130,7 +2140,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Act
         with self.assertRaises(AzureHttpError):
             for i in range(5):
-                etag = self.abs.get_blob_properties(self.container_name, 'blob1')['ETag']
+                etag = self.abs.get_blob_properties(self.container_name, 'blob1')[0].etag
                 resp = self.abs.append_block(
                     self.container_name, 'blob1',
                     u'block {0}'.format(i).encode('utf-8'),

@@ -30,7 +30,6 @@ from .._common_serialization import (
     _parse_response_for_dict_filter,
     _parse_response_for_dict_prefix,
     _update_request_uri_query_local_storage,
-    _ETreeXmlToObject,
 )
 from .._http import HTTPRequest
 from ._chunking import _download_blob_chunks
@@ -42,7 +41,6 @@ from ..models import (
 )
 from .models import (
     Container,
-    ContainerEnumResults,
     LeaseActions,
 )
 from ..auth import (
@@ -66,9 +64,13 @@ from .._deserialization import (
     _convert_xml_to_signed_identifiers,
 )
 from ._serialization import (
-    _create_blob_result,
-    _parse_blob_enum_results_list,
     _update_storage_blob_header,
+)
+from ._deserialization import (
+    _convert_xml_to_containers,
+    _parse_blob,
+    _parse_blob_properties,
+    _convert_xml_to_blob_list,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -311,8 +313,7 @@ class _BaseBlobService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _ETreeXmlToObject.parse_enum_results_list(
-            response, ContainerEnumResults, "Containers", Container)
+        return _convert_xml_to_containers(response)
 
     def create_container(self, container_name, metadata=None,
                          blob_public_access=None, fail_on_exist=False):
@@ -845,7 +846,7 @@ class _BaseBlobService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _parse_blob_enum_results_list(response)
+        return _convert_xml_to_blob_list(response)
 
     def set_blob_service_properties(
         self, logging=None, hour_metrics=None, minute_metrics=None,
@@ -913,8 +914,8 @@ class _BaseBlobService(_StorageClient):
         if_modified_since=None, if_unmodified_since=None, if_match=None,
         if_none_match=None):
         '''
-        Returns all user-defined metadata, standard HTTP properties, and
-        system properties for the blob.
+        Returns a BlobProperties along with a metadata dict. BlobProperties contains
+        standard HTTP properties and system properties for the blob.
 
         container_name:
             Name of existing container.
@@ -955,14 +956,12 @@ class _BaseBlobService(_StorageClient):
 
         response = self._perform_request(request)
 
-        return _parse_response_for_dict(response)
+        return _parse_blob_properties(response)
 
     def set_blob_properties(
-        self, container_name, blob_name, cache_control=None,
-        content_type=None, content_md5=None, content_encoding=None,
-        content_language=None, lease_id=None, content_disposition=None,
+        self, container_name, blob_name, settings=None, lease_id=None,
         if_modified_since=None, if_unmodified_since=None, if_match=None,
-        if_none_match=None):
+        if_none_match=None, blob_properties=None):
         '''
         Sets system properties on the blob.
 
@@ -970,26 +969,10 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        cache_control:
-            Modifies the cache control string for the blob.
-        content_type:
-            Sets the blob's content type.
-        content_md5:
-            Sets the blob's MD5 hash.
-        content_encoding:
-            Sets the blob's content encoding.
-        content_language:
-            Sets the blob's content language.
+        settings:
+            Settings object used to set blob properties.
         lease_id:
             Required if the blob has an active lease.
-        content_disposition:
-            Sets the blob's Content-Disposition header.
-            The Content-Disposition response header field conveys additional
-            information about how to process the response payload, and also can
-            be used to attach additional metadata. For example, if set to
-            attachment, it indicates that the user-agent should not display the
-            response, but instead show a Save As dialog with a filename other
-            than the blob name specified.
         if_modified_since:
             Datetime string.
         if_unmodified_since:
@@ -1006,22 +989,17 @@ class _BaseBlobService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + \
             _str(container_name) + '/' + _str(blob_name) + '?comp=properties'
-        request.headers = [
-            ('x-ms-blob-cache-control', _str_or_none(cache_control)),
-            ('x-ms-blob-content-type', _str_or_none(content_type)),
-            ('x-ms-blob-content-disposition',
-             _str_or_none(content_disposition)),
-            ('x-ms-blob-content-md5', _str_or_none(content_md5)),
-            ('x-ms-blob-content-encoding',
-             _str_or_none(content_encoding)),
-            ('x-ms-blob-content-language',
-             _str_or_none(content_language)),
+
+        request.headers += [
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
             ('x-ms-lease-id', _str_or_none(lease_id))
         ]
+        if settings is not None:
+            request.headers += settings.to_headers()
+
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
@@ -1086,7 +1064,7 @@ class _BaseBlobService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request, None)
 
-        return _create_blob_result(response)
+        return _parse_blob(response)
 
     def get_blob_to_path(
         self, container_name, blob_name, file_path, open_mode='wb',
@@ -1202,8 +1180,8 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
 
-        props = self.get_blob_properties(container_name, blob_name)
-        blob_size = int(props['content-length'])
+        props, _ = self.get_blob_properties(container_name, blob_name)
+        blob_size = int(props.content_length)
 
         if blob_size < self._BLOB_MAX_DATA_SIZE:
             if progress_callback:

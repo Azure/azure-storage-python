@@ -78,8 +78,8 @@ def _convert_xml_to_shares(response):
 
         # Properties
         properties_element = share_element.find('Properties')
-        share.properties.etag = parser.parse(properties_element.findtext('Last-Modified'))
-        share.properties.last_modified = properties_element.findtext('Etag')
+        share.properties.last_modified = parser.parse(properties_element.findtext('Last-Modified'))
+        share.properties.etag = properties_element.findtext('Etag')
         share.properties.quota = int(properties_element.findtext('Quota'))
         
         # Add share to list

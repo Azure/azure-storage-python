@@ -25,8 +25,8 @@ import unittest
 from azure.common import AzureHttpError
 from azure.storage.blob import (
     PageBlobService,
-    PageList,
     PageRange,
+    Settings,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -113,23 +113,23 @@ class StoragePageBlobTest(StorageTestCase):
 
     def _wait_for_async_copy(self, container_name, blob_name):
         count = 0
-        props = self.bs.get_blob_properties(container_name, blob_name)
-        while props['x-ms-copy-status'] != 'success':
+        props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        while props.copy.status != 'success':
             count = count + 1
             if count > 5:
                 self.assertTrue(
                     False, 'Timed out waiting for async copy to complete.')
             self.sleep(5)
-            props = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(props['x-ms-copy-status'], 'success')
+            props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(props.copy.status, 'success')
 
     def assertBlobEqual(self, container_name, blob_name, expected_data):
         actual_data = self.bs.get_blob(container_name, blob_name)
         self.assertEqual(actual_data, expected_data)
 
     def assertBlobLengthEqual(self, container_name, blob_name, expected_length):
-        props = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(int(props['content-length']), expected_length)
+        props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(int(props.content_length), expected_length)
 
     def _get_oversized_binary_data(self):
         '''Returns random binary data exceeding the size threshold for
@@ -273,7 +273,7 @@ class StoragePageBlobTest(StorageTestCase):
         data = b'ab' * 256
         start_sequence = 10
         self.bs.create_blob(self.container_name, 'blob1', 512,
-                         sequence_number=start_sequence)
+                            sequence_number=start_sequence)
 
         # Act
         self.bs.put_page(self.container_name, 'blob1', data, 'bytes=0-511',
@@ -290,7 +290,7 @@ class StoragePageBlobTest(StorageTestCase):
         data = b'ab' * 256
         start_sequence = 10
         self.bs.create_blob(self.container_name, 'blob1', 512,
-                         sequence_number=start_sequence)
+                            sequence_number=start_sequence)
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -340,7 +340,7 @@ class StoragePageBlobTest(StorageTestCase):
         data = b'ab' * 256
         start_sequence = 10
         self.bs.create_blob(self.container_name, 'blob1', 512,
-                         sequence_number=start_sequence)
+                            sequence_number=start_sequence)
 
         # Act
         self.bs.put_page(self.container_name, 'blob1', data, 'bytes=0-511',
@@ -390,8 +390,8 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(ranges)
-        self.assertIsInstance(ranges, PageList)
-        self.assertEqual(len(ranges.page_ranges), 0)
+        self.assertIsInstance(ranges, list)
+        self.assertEqual(len(ranges), 0)
 
     @record
     def test_get_page_ranges_2_pages(self):
@@ -409,12 +409,12 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(ranges)
-        self.assertIsInstance(ranges, PageList)
-        self.assertEqual(len(ranges.page_ranges), 2)
-        self.assertEqual(ranges.page_ranges[0].start, 0)
-        self.assertEqual(ranges.page_ranges[0].end, 511)
-        self.assertEqual(ranges.page_ranges[1].start, 1024)
-        self.assertEqual(ranges.page_ranges[1].end, 1535)
+        self.assertIsInstance(ranges, list)
+        self.assertEqual(len(ranges), 2)
+        self.assertEqual(ranges[0].start, 0)
+        self.assertEqual(ranges[0].end, 511)
+        self.assertEqual(ranges[1].start, 1024)
+        self.assertEqual(ranges[1].end, 1535)
 
     @record
     def test_get_page_ranges_iter(self):
@@ -879,6 +879,37 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
         self.assertEqual(progress, self._get_expected_progress(blob_size))
+
+    @record
+    def test_resize_blob(self):
+        # Arrange
+        blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name, 1024)
+        
+        # Act
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(props.content_length, 1024)
+
+        self.bs.resize(self.container_name, blob_name, 512)
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        #Assert
+        self.assertIsNotNone(props)
+        self.assertEqual(props.content_length, 512)
+
+    @record
+    def test_set_sequence_number_blob(self):
+        # Arrange
+        blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name, 512)
+        
+        # Act
+        self.bs.set_sequence_number(self.container_name, blob_name, 6, 'update')
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        #Assert
+        self.assertIsNotNone(props)
+        self.assertEqual(props.page_blob_sequence_number, 6)
 
 
 #------------------------------------------------------------------------------

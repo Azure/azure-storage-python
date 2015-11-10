@@ -301,7 +301,7 @@ class StorageFileTest(StorageTestCase):
         # Act
         created = self.fs.create_share(self.share_name)
         with self.assertRaises(AzureConflictHttpError):
-            self.fs.create_share(self.share_name, None, True)
+            self.fs.create_share(self.share_name, fail_on_exist=True)
 
         # Assert
         self.assertTrue(created)
@@ -770,7 +770,7 @@ class StorageFileTest(StorageTestCase):
         self.assertNamedItemInContainer(result1.files, 'filea2')
         self.assertNamedItemInContainer(result2.files, 'filea3')
         self.assertNamedItemInContainer(result2.files, 'fileb1')
-        self.assertEqual(result2.next_marker, '')
+        self.assertEqual(result2.next_marker, None)
 
     #--Test cases for files ----------------------------------------------
     @record
@@ -1316,7 +1316,7 @@ class StorageFileTest(StorageTestCase):
             return response
 
         bc = self.fs.with_filter(my_filter)
-        bc.create_share(self.share_name + '0', None, False)
+        bc.create_share(self.share_name + '0', fail_on_exist=False)
 
         self.assertTrue(called)
 
@@ -1337,7 +1337,7 @@ class StorageFileTest(StorageTestCase):
             return next(request)
 
         bc = self.fs.with_filter(filter_a).with_filter(filter_b)
-        bc.create_share(self.share_name + '1', None, False)
+        bc.create_share(self.share_name + '1', fail_on_exist=False)
 
         self.assertEqual(called, ['b', 'a'])
 

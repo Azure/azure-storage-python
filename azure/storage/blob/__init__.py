@@ -18,21 +18,17 @@ from ..constants import (
 )
 
 from .models import (
-    ContainerEnumResults,
     Container,
-    Properties,
-    BlobEnumResults,
-    BlobResult,
+    ContainerProperties,
     Blob,
     BlobProperties,
-    BlobPrefix,
     BlobBlock,
     BlobBlockList,
     PageRange,
-    PageList,
     ContainerSharedAccessPermissions,
     BlobSharedAccessPermissions,
     LeaseActions,
+    Settings,
 )
 
 from .blockblobservice import BlockBlobService
