@@ -22,6 +22,9 @@ from azure.common import (
     AzureHttpError,
 )
 
+from .models import BlobBlock
+
+
 class _BlobChunkDownloader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
                  chunk_size, stream, parallel, max_retries, retry_wait,
@@ -184,15 +187,15 @@ class _BlobChunkUploader(object):
 
 class _BlockBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_offset, chunk_data):
-        range_id = url_quote(_encode_base64('{0:032d}'.format(chunk_offset)))
+        block_id=url_quote(_encode_base64('{0:032d}'.format(chunk_offset)))
         self.blob_service.put_block(
             self.container_name,
             self.blob_name,
             chunk_data,
-            range_id,
+            block_id,
             lease_id=self.lease_id,
         )
-        return range_id
+        return BlobBlock(block_id)
 
 
 class _PageBlobChunkUploader(_BlobChunkUploader):

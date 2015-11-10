@@ -91,9 +91,7 @@ class AppendBlobService(_BaseBlobService):
             account_name, account_key, protocol, host_base, dev_host,
             timeout, sas_token, connection_string, request_session)
 
-    def create_blob(self, container_name, blob_name, content_encoding=None,
-                 content_language=None, cache_control=None,
-                 content_type=None, content_md5=None,
+    def create_blob(self, container_name, blob_name, settings=None,
                  metadata=None, lease_id=None,
                  if_modified_since=None, if_unmodified_since=None,
                  if_match=None, if_none_match=None):
@@ -109,20 +107,8 @@ class AppendBlobService(_BaseBlobService):
             Name of existing container.
         blob_name:
             Name of blob to create or update.
-        content_encoding:
-            Specifies which content encodings have been applied to
-            the blob. This value is returned to the client when the Get Blob
-            (REST API) operation is performed on the blob resource. The client
-            can use this value when returned to decode the blob content.
-        content_language:
-            Specifies the natural languages used by this resource.
-        cache_control:
-            The Blob service stores this value but does not use or
-            modify it.
-        content_type:
-            Set the blob's content type.
-        content_md5:
-            Set the blob's MD5 hash.
+        settings:
+            Settings object used to set blob properties.
         metadata:
             A dict containing name, value for metadata.
         lease_id:
@@ -144,12 +130,6 @@ class AppendBlobService(_BaseBlobService):
         request.path = '/' + _str(container_name) + '/' + _str(blob_name)
         request.headers = [
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
-            ('Content-Encoding', _str_or_none(content_encoding)),
-            ('x-ms-blob-content-type', _str_or_none(content_type)),
-            ('x-ms-blob-content-language',
-                _str_or_none(content_language)),
-            ('x-ms-blob-content-md5', _str_or_none(content_md5)),
-            ('x-ms-blob-cache-control', _str_or_none(cache_control)),
             ('x-ms-meta-name-values', metadata),
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
@@ -157,6 +137,8 @@ class AppendBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
+        if settings is not None:
+            request.headers += settings.to_headers()
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
@@ -184,8 +166,6 @@ class AppendBlobService(_BaseBlobService):
             verify the integrity of the blob during transport. When this
             header is specified, the storage service checks the hash that has
             arrived with the one that was sent.
-        lease_id:
-            Required if the blob has an active lease.
         maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -199,6 +179,8 @@ class AppendBlobService(_BaseBlobService):
             is not, the request will fail with the
             AppendPositionConditionNotMet error
             (HTTP status code 412 – Precondition Failed).
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string.
         if_unmodified_since:
@@ -218,9 +200,9 @@ class AppendBlobService(_BaseBlobService):
             _str(container_name) + '/' + _str(blob_name) + '?comp=appendblock'
         request.headers = [
             ('Content-MD5', _str_or_none(content_md5)),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-blob-condition-maxsize', _str_or_none(maxsize_condition)),
             ('x-ms-blob-condition-appendpos', _str_or_none(appendpos_condition)),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
@@ -239,12 +221,10 @@ class AppendBlobService(_BaseBlobService):
 
     def append_blob_from_path(
         self, container_name, blob_name, file_path,
-        content_encoding=None, content_language=None,
-        cache_control=None, content_type=None, content_md5=None,
-        metadata=None, maxsize_condition=None, lease_id=None,
+        settings=None, metadata=None, maxsize_condition=None,
         progress_callback=None, max_retries=5, retry_wait=1.0,
-        if_modified_since=None, if_unmodified_since=None, if_match=None,
-        if_none_match=None, create_if_not_exist=True):
+        lease_id=None, if_modified_since=None, if_unmodified_since=None,
+        if_match=None, if_none_match=None, create_if_not_exist=True):
         '''
         Appends to the content of an existing blob from a file path, with automatic
         chunking and progress notifications. If blob doesn't exist, a new blob will
@@ -256,22 +236,8 @@ class AppendBlobService(_BaseBlobService):
             Name of blob to create or update.
         file_path:
             Path of the file to upload as the blob content.
-        content_encoding:
-            Specifies which content encodings have been applied to
-            the blob. This value is returned to the client when the Get Blob
-            (REST API) operation is performed on the blob resource. The client
-            can use this value when returned to decode the blob content.
-        content_language:
-            Specifies the natural languages used by this resource.
-        cache_control:
-            The blob service stores this value but does not use or
-            modify it.
-        content_type:
-            Set the blob's content type, if blob doesn't exist and
-            create_if_not_exists is true.
-        content_md5:
-            Set the blob's MD5 hash, if blob doesn't exist and
-            create_if_not_exists is true.
+        settings:
+            Settings object used to set blob properties.
         metadata:
             A dict containing name, value pairs for setting blob metadata, if blob
             doesn't exist and create_if_not_exists is true.
@@ -281,8 +247,6 @@ class AppendBlobService(_BaseBlobService):
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        lease_id:
-            Required if the blob has an active lease.
         progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -291,6 +255,8 @@ class AppendBlobService(_BaseBlobService):
             Number of times to retry upload of blob chunk if an error occurs.
         retry_wait:
             Sleep time in secs between retries.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string, if blob doesn't exist and
             create_if_not_exists is true.
@@ -318,17 +284,13 @@ class AppendBlobService(_BaseBlobService):
                 blob_name,
                 stream,
                 count=count,
-                content_encoding=content_encoding,
-                content_language=content_language,
-                cache_control=cache_control,
-                content_type=content_type,
-                content_md5=content_md5,
+                settings=settings,
                 metadata=metadata,
                 maxsize_condition=maxsize_condition,
-                lease_id=lease_id,
                 progress_callback=progress_callback,
                 max_retries=max_retries,
                 retry_wait=retry_wait,
+                lease_id=lease_id,
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
@@ -337,12 +299,9 @@ class AppendBlobService(_BaseBlobService):
 
     def append_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        content_encoding=None, content_language=None,
-        cache_control=None, content_type=None, 
-        content_md5=None, metadata=None,
-        maxsize_condition=None, lease_id=None,
+        settings=None, metadata=None, maxsize_condition=None, 
         progress_callback=None, max_retries=5, retry_wait=1.0,
-        if_modified_since=None, if_unmodified_since=None,
+        lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, create_if_not_exist=True):
         '''
         Appends to the content of an existing blob from an array of bytes, with
@@ -360,22 +319,8 @@ class AppendBlobService(_BaseBlobService):
         count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        content_encoding:
-            Specifies which content encodings have been applied to
-            the blob. This value is returned to the client when the Get Blob
-            (REST API) operation is performed on the blob resource. The client
-            can use this value when returned to decode the blob content.
-        content_language:
-            Specifies the natural languages used by this resource.
-        cache_control:
-            The Blob service stores this value but does not use or
-            modify it.
-        content_type:
-            Set the blob's content type, if blob doesn't exist and
-            create_if_not_exists is true.
-        content_md5:
-            Set the blob's MD5 hash, if blob doesn't exist and
-            create_if_not_exists is true.
+        settings:
+            Setting object used to set blob properties.
         metadata:
             A dict containing name, value pairs for setting blob metadata, if blob
             doesn't exist and create_if_not_exists is true.
@@ -385,8 +330,6 @@ class AppendBlobService(_BaseBlobService):
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        lease_id:
-            Required if the blob has an active lease.
         progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -395,6 +338,8 @@ class AppendBlobService(_BaseBlobService):
             Number of times to retry upload of blob chunk if an error occurs.
         retry_wait:
             Sleep time in secs between retries.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string, if blob doesn't exist and
             create_if_not_exists is true.
@@ -431,11 +376,7 @@ class AppendBlobService(_BaseBlobService):
             blob_name,
             stream,
             count=count,
-            content_encoding=content_encoding,
-            content_language=content_language,
-            cache_control=cache_control,
-            content_type=content_type,
-            content_md5=content_md5,
+            settings=settings,
             metadata=metadata,
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
@@ -450,12 +391,9 @@ class AppendBlobService(_BaseBlobService):
 
     def append_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
-        content_encoding=None, content_language=None,
-        cache_control=None, content_type=None,
-        content_md5=None, metadata=None,
-        maxsize_condition=None, lease_id=None,
+        settings=None, metadata=None, maxsize_condition=None, 
         progress_callback=None, max_retries=5, retry_wait=1.0,
-        if_modified_since=None, if_unmodified_since=None,
+        lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, create_if_not_exist=True):
         '''
         Appends to the content of an existing blob from str/unicode, with
@@ -470,22 +408,8 @@ class AppendBlobService(_BaseBlobService):
             Text to upload to the blob.
         encoding:
             Python encoding to use to convert the text to bytes.
-        content_encoding:
-            Specifies which content encodings have been applied to
-            the blob. This value is returned to the client when the Get Blob
-            (REST API) operation is performed on the blob resource. The client
-            can use this value when returned to decode the blob content.
-        content_language:
-            Specifies the natural languages used by this resource.
-        cache_control:
-            The Blob service stores this value but does not use or
-            modify it.
-        content_type:
-            Set the blob's content type, if blob doesn't exist and
-            create_if_not_exists is true.
-        content_md5:
-            Set the blob's MD5 hash, if blob doesn't exist and
-            create_if_not_exists is true.
+        settings:
+            Settings object used to set blob properties.
         metadata:
             A dict containing name, value pairs for setting blob metadata, if blob
             doesn't exist and create_if_not_exists is true.
@@ -495,8 +419,6 @@ class AppendBlobService(_BaseBlobService):
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        lease_id:
-            Required if the blob has an active lease.
         progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -505,6 +427,8 @@ class AppendBlobService(_BaseBlobService):
             Number of times to retry upload of blob chunk if an error occurs.
         retry_wait:
             Sleep time in secs between retries.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string, if blob doesn't exist and
             create_if_not_exists is true.
@@ -535,11 +459,7 @@ class AppendBlobService(_BaseBlobService):
             text,
             index=0,
             count=len(text),
-            content_encoding=content_encoding,
-            content_language=content_language,
-            cache_control=cache_control,
-            content_type=content_type,
-            content_md5=content_md5,
+            settings=settings,
             metadata=metadata,
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
@@ -554,13 +474,10 @@ class AppendBlobService(_BaseBlobService):
 
     def append_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
-        content_encoding=None, content_language=None,
-        cache_control=None, content_type=None,
-        content_md5=None, metadata=None,
-        maxsize_condition=None, lease_id=None, progress_callback=None, 
-        max_retries=5, retry_wait=1.0, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None,
-        create_if_not_exist=True):
+        settings=None, metadata=None, maxsize_condition=None, 
+        progress_callback=None,  max_retries=5, retry_wait=1.0,
+        lease_id=None, if_modified_since=None, if_unmodified_since=None,
+        if_match=None, if_none_match=None, create_if_not_exist=True):
         '''
         Appends to the content of an existing blob from a file/stream, with
         automatic chunking and progress notifications. If blob doesn't exist, a new
@@ -575,22 +492,8 @@ class AppendBlobService(_BaseBlobService):
         count:
             Number of bytes to read from the stream. This is optional, but
             should be supplied for optimal performance.
-        content_encoding:
-            Specifies which content encodings have been applied to
-            the blob. This value is returned to the client when the Get Blob
-            (REST API) operation is performed on the blob resource. The client
-            can use this value when returned to decode the blob content.
-        content_language:
-            Specifies the natural languages used by this resource.
-        cache_control:
-            The blob service stores this value but does not use or
-            modify it.
-        content_type:
-            Set the blob's content type, if blob doesn't exist and
-            create_if_not_exists is true.
-        content_md5:
-            Set the blob's MD5 hash, if blob doesn't exist and
-            create_if_not_exists is true.
+        settings:
+            Settings object used to set blob properties.
         metadata:
             A dict containing name, value pairs for setting blob metadata,
             if blob doesn't exist and create_if_not_exists is true.
@@ -600,8 +503,6 @@ class AppendBlobService(_BaseBlobService):
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        lease_id:
-            Required if the blob has an active lease.
         progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -610,6 +511,8 @@ class AppendBlobService(_BaseBlobService):
             Number of times to retry upload of blob chunk if an error occurs.
         retry_wait:
             Sleep time in secs between retries.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string. Used if blob doesn't exist and
             create_if_not_exists is true.
@@ -638,11 +541,7 @@ class AppendBlobService(_BaseBlobService):
                 self.create_blob(
                     container_name=container_name,
                     blob_name=blob_name,
-                    content_encoding=content_encoding,
-                    content_language=content_language,
-                    cache_control=cache_control,
-                    content_type=content_type,
-                    content_md5=content_md5,
+                    settings=settings,
                     metadata=metadata,
                     lease_id=lease_id,
                     if_modified_since=if_modified_since,

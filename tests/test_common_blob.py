@@ -36,10 +36,12 @@ from azure.storage import (
 )
 from azure.storage.blob import (
     BLOB_SERVICE_HOST_BASE,
-    BlobResult,
+    Blob,
+    BlobBlock,
     BlockBlobService,
     BlobSharedAccessPermissions,
     ContainerSharedAccessPermissions,
+    Settings,
 )
 from azure.storage.storageclient import (
     AZURE_STORAGE_ACCESS_KEY,
@@ -125,7 +127,7 @@ class StorageCommonBlobTest(StorageTestCase):
     def _create_container_and_block_blob(self, container_name, blob_name,
                                          blob_data):
         self._create_container(container_name)
-        resp = self.bs.create_blob_from_bytes (container_name, blob_name, blob_data)
+        resp = self.bs.create_blob_from_bytes(container_name, blob_name, blob_data)
         self.assertIsNone(resp)
 
     def _create_container_and_block_blob_with_random_data(
@@ -161,23 +163,23 @@ class StorageCommonBlobTest(StorageTestCase):
 
     def _wait_for_async_copy(self, container_name, blob_name):
         count = 0
-        props = self.bs.get_blob_properties(container_name, blob_name)
-        while props['x-ms-copy-status'] != 'success':
+        props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        while props.copy.status != 'success':
             count = count + 1
             if count > 5:
                 self.assertTrue(
                     False, 'Timed out waiting for async copy to complete.')
             self.sleep(5)
-            props = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(props['x-ms-copy-status'], 'success')
+            props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(props.copy.status, 'success')
 
     def assertBlobEqual(self, container_name, blob_name, expected_data):
         actual_data = self.bs.get_blob(container_name, blob_name)
         self.assertEqual(actual_data, expected_data)
 
     def assertBlobLengthEqual(self, container_name, blob_name, expected_length):
-        props = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(int(props['content-length']), expected_length)
+        props, _ = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(int(props.content_length), expected_length)
 
     def _get_oversized_binary_data(self):
         '''Returns random binary data exceeding the size threshold for
@@ -673,11 +675,12 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(props)
+        self.assertIsNotNone(props)
         self.assertEqual(props['x-ms-meta-hello'], 'world')
         self.assertEqual(props['x-ms-meta-number'], '42')
         self.assertEqual(props['x-ms-lease-duration'], 'infinite')
-        self.assertEqual(props['x-ms-lease-status'], 'locked')
         self.assertEqual(props['x-ms-lease-state'], 'leased')
+        self.assertEqual(props['x-ms-lease-status'], 'locked')
 
     @record
     def test_get_container_properties_with_non_matching_lease_id(self):
@@ -1198,55 +1201,8 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(len(resp), 2)
         self.assertEqual(len(resp.blobs), 2)
         self.assertEqual(len(resp.prefixes), 0)
-        self.assertEqual(resp.prefix, 'bloba')
         self.assertNamedItemInContainer(resp, 'bloba1')
         self.assertNamedItemInContainer(resp, 'bloba2')
-
-    @record
-    def test_list_blobs_with_prefix_and_delimiter(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'hello world'
-        self.bs.create_blob_from_bytes (self.container_name,
-                         'documents/music/pop/thriller.mp3', data, )
-        self.bs.create_blob_from_bytes (self.container_name,
-                         'documents/music/rock/stairwaytoheaven.mp3', data,
-                         )
-        self.bs.create_blob_from_bytes (self.container_name,
-                         'documents/music/rock/hurt.mp3', data, )
-        self.bs.create_blob_from_bytes (self.container_name,
-                         'documents/music/rock/metallica/one.mp3', data,
-                         )
-        self.bs.create_blob_from_bytes (self.container_name,
-                         'documents/music/unsorted1.mp3', data, )
-        self.bs.create_blob_from_bytes (self.container_name,
-                         'documents/music/unsorted2.mp3', data, )
-        self.bs.create_blob_from_bytes (self.container_name,
-                         'documents/pictures/birthday/kid.jpg', data,
-                         )
-        self.bs.create_blob_from_bytes (self.container_name,
-                         'documents/pictures/birthday/cake.jpg', data,
-                         )
-
-        # Act
-        resp = self.bs.list_blobs(
-            self.container_name, 'documents/music/', delimiter='/')
-
-        # Assert
-        self.assertIsNotNone(resp)
-        self.assertEqual(len(resp), 2)
-        self.assertEqual(len(resp.blobs), 2)
-        self.assertEqual(len(resp.prefixes), 2)
-        self.assertEqual(resp.prefix, 'documents/music/')
-        self.assertEqual(resp.delimiter, '/')
-        self.assertNamedItemInContainer(resp, 'documents/music/unsorted1.mp3')
-        self.assertNamedItemInContainer(resp, 'documents/music/unsorted2.mp3')
-        self.assertNamedItemInContainer(
-            resp.blobs, 'documents/music/unsorted1.mp3')
-        self.assertNamedItemInContainer(
-            resp.blobs, 'documents/music/unsorted2.mp3')
-        self.assertNamedItemInContainer(resp.prefixes, 'documents/music/pop/')
-        self.assertNamedItemInContainer(resp.prefixes, 'documents/music/rock/')
 
     @record
     def test_list_blobs_with_max_results(self):
@@ -1305,11 +1261,11 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(len(blobs), 3)
         self.assertEqual(blobs[0].name, 'blob1')
-        self.assertNotEqual(blobs[0].snapshot, '')
+        self.assertIsNotNone(blobs[0].snapshot)
         self.assertEqual(blobs[1].name, 'blob1')
-        self.assertEqual(blobs[1].snapshot, '')
+        self.assertIsNone(blobs[1].snapshot)
         self.assertEqual(blobs[2].name, 'blob2')
-        self.assertEqual(blobs[2].snapshot, '')
+        self.assertIsNone(blobs[2].snapshot)
 
     @record
     def test_list_blobs_with_include_metadata(self):
@@ -1378,17 +1334,17 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blobs[1].properties.content_length, 11)
         self.assertEqual(blobs[1].properties.content_type,
                          'application/octet-stream Charset=UTF-8')
-        self.assertEqual(blobs[1].properties.content_encoding, '')
-        self.assertEqual(blobs[1].properties.content_language, '')
-        self.assertNotEqual(blobs[1].properties.content_md5, '')
+        self.assertEqual(blobs[1].properties.content_encoding, None)
+        self.assertEqual(blobs[1].properties.content_language, None)
+        self.assertNotEqual(blobs[1].properties.content_md5, None)
         self.assertEqual(blobs[1].properties.blob_type, self.bs.blob_type)
         self.assertEqual(blobs[1].properties.lease_status, 'unlocked')
         self.assertEqual(blobs[1].properties.lease_state, 'available')
-        self.assertNotEqual(blobs[1].properties.copy_id, '')
+        self.assertNotEqual(blobs[1].properties.copy_id, None)
         self.assertEqual(blobs[1].properties.copy_source, sourceblob)
         self.assertEqual(blobs[1].properties.copy_status, 'success')
         self.assertEqual(blobs[1].properties.copy_progress, '11/11')
-        self.assertNotEqual(blobs[1].properties.copy_completion_time, '')
+        self.assertNotEqual(blobs[1].properties.copy_completion_time, None)
 
     @record
     def test_list_blobs_with_include_multiple(self):
@@ -1408,15 +1364,15 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(len(blobs), 3)
         self.assertEqual(blobs[0].name, 'blob1')
-        self.assertNotEqual(blobs[0].snapshot, '')
+        self.assertIsNotNone(blobs[0].snapshot)
         self.assertEqual(blobs[0].metadata['number'], '1')
         self.assertEqual(blobs[0].metadata['name'], 'bob')
         self.assertEqual(blobs[1].name, 'blob1')
-        self.assertEqual(blobs[1].snapshot, '')
+        self.assertIsNone(blobs[1].snapshot)
         self.assertEqual(blobs[1].metadata['number'], '1')
         self.assertEqual(blobs[1].metadata['name'], 'bob')
         self.assertEqual(blobs[2].name, 'blob2')
-        self.assertEqual(blobs[2].snapshot, '')
+        self.assertIsNone(blobs[2].snapshot)
         self.assertEqual(blobs[2].metadata['number'], '2')
         self.assertEqual(blobs[2].metadata['name'], 'car')
 
@@ -1467,7 +1423,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob = self.bs.get_blob(self.container_name, 'blob1')
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -1482,7 +1438,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', snapshot['x-ms-snapshot'])
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -1500,8 +1456,8 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_latest = self.bs.get_blob(self.container_name, 'blob1')
 
         # Assert
-        self.assertIsInstance(blob_previous, BlobResult)
-        self.assertIsInstance(blob_latest, BlobResult)
+        self.assertIsInstance(blob_previous, Blob)
+        self.assertIsInstance(blob_latest, Blob)
         self.assertEqual(blob_previous, b'hello world')
         self.assertEqual(blob_latest, b'hello world again')
 
@@ -1516,7 +1472,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', byte_range='bytes=0-5')
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello ')
 
     @record
@@ -1531,10 +1487,10 @@ class StorageCommonBlobTest(StorageTestCase):
                                 range_get_content_md5='true')
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello ')
         self.assertEqual(
-            blob.properties['content-md5'], '+BSJN3e8wilf/wXwDlCNpg==')
+            blob.properties.settings.content_md5, '+BSJN3e8wilf/wXwDlCNpg==')
 
     @record
     def test_get_blob_with_lease(self):
@@ -1550,7 +1506,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.release_blob_lease(self.container_name, 'blob1', lease_id)
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -1565,7 +1521,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob = self.bs.get_blob(self.container_name, 'blob1')
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -1599,15 +1555,38 @@ class StorageCommonBlobTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            content_language='spanish',
-            content_disposition='inline',
+            settings=Settings(
+                content_language='spanish',
+                content_disposition='inline'),
         )
 
         # Assert
         self.assertIsNone(resp)
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props['content-language'], 'spanish')
-        self.assertEqual(props['content-disposition'], 'inline')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.settings.content_disposition, 'inline')
+
+    @record
+    def test_set_blob_properties_with_blob_settings_param(self):
+        # Arrange
+        self._create_container_and_block_blob(
+            self.container_name, 'blob1', b'hello world')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+
+        # Act
+        props.settings.content_language = 'spanish'
+        props.settings.content_disposition = 'inline'
+        resp = self.bs.set_blob_properties(
+            self.container_name,
+            'blob1',
+            settings=props.settings,
+        )
+
+        # Assert
+        self.assertIsNone(resp)
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_non_existing_container(self):
@@ -1617,7 +1596,7 @@ class StorageCommonBlobTest(StorageTestCase):
         with self.assertRaises(AzureHttpError):
             self.bs.set_blob_properties(
                 self.container_name, 'blob1',
-                content_language='spanish')
+                settings=Settings(content_language='spanish'))
 
         # Assert
 
@@ -1630,7 +1609,7 @@ class StorageCommonBlobTest(StorageTestCase):
         with self.assertRaises(AzureHttpError):
             self.bs.set_blob_properties(
                 self.container_name, 'blob1',
-                content_language='spanish')
+                settings=Settings(content_language='spanish'))
 
         # Assert
 
@@ -1641,13 +1620,13 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], self.bs.blob_type)
-        self.assertEqual(props['content-length'], '11')
-        self.assertEqual(props['x-ms-lease-status'], 'unlocked')
+        self.assertEqual(props.blob_type, self.bs.blob_type)
+        self.assertEqual(props.content_length, 11)
+        self.assertEqual(props.lease.status, 'unlocked')
 
     @record
     def test_get_blob_properties_with_snapshot(self):
@@ -1662,12 +1641,12 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(len(blobs), 2)
 
         # Act
-        props = self.bs.get_blob_properties(self.container_name, blob_name, snapshot=snapshot)
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name, snapshot=snapshot)
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], self.bs.blob_type)
-        self.assertEqual(props['content-length'], '11')
+        self.assertEqual(props.blob_type, self.bs.blob_type)
+        self.assertEqual(props.content_length, 11)
 
     @record
     def test_get_blob_properties_with_leased_blob(self):
@@ -1677,15 +1656,15 @@ class StorageCommonBlobTest(StorageTestCase):
         lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
-        props = self.bs.get_blob_properties(self.container_name, 'blob1')
+        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-blob-type'], self.bs.blob_type)
-        self.assertEqual(props['content-length'], '11')
-        self.assertEqual(props['x-ms-lease-status'], 'locked')
-        self.assertEqual(props['x-ms-lease-state'], 'leased')
-        self.assertEqual(props['x-ms-lease-duration'], 'infinite')
+        self.assertEqual(props.blob_type, self.bs.blob_type)
+        self.assertEqual(props.content_length, 11)
+        self.assertEqual(props.lease.status, 'locked')
+        self.assertEqual(props.lease.state, 'leased')
+        self.assertEqual(props.lease.duration, 'infinite')
 
     @record
     def test_get_blob_properties_with_non_existing_container(self):
@@ -1782,7 +1761,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
         self.assertEqual(len(blobs), 1)
         self.assertEqual(blobs[0].name, blob_name)
-        self.assertEqual(blobs[0].snapshot, '')
+        self.assertIsNone(blobs[0].snapshot)
 
     @record
     def test_delete_blob_snapshots(self):
@@ -1802,7 +1781,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         blobs = self.bs.list_blobs(self.container_name, include='snapshots')
         self.assertEqual(len(blobs), 1)
-        self.assertEqual(blobs[0].snapshot, '')
+        self.assertIsNone(blobs[0].snapshot)
 
     @record
     def test_delete_blob_with_snapshots(self):
@@ -2215,7 +2194,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob = self.bs.get_blob(self.container_name, '啊齄丂狛狜')
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello world')
 
     @record
@@ -2242,7 +2221,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob = self.bs.get_blob(self.container_name, 'blob1')
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, blob_data)
 
     @record
@@ -2258,7 +2237,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob = self.bs.get_blob(self.container_name, 'blob1')
 
         # Assert
-        self.assertIsInstance(blob, BlobResult)
+        self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, binary_data)
 
     @record

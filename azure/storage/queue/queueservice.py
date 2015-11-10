@@ -35,7 +35,6 @@ from .._common_serialization import (
     _parse_response_for_dict_filter,
     _parse_response_for_dict_prefix,
     _update_request_uri_query_local_storage,
-    _ETreeXmlToObject,
 )
 from .._common_conversion import (
     _int_or_none,

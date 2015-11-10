@@ -16,10 +16,6 @@ from azure.common import (
     AzureException,
     AzureHttpError,
 )
-from ._common_models import (
-    WindowsAzureData,
-    _list_of,
-)
 from ._common_error import (
     _validate_not_none,
 )

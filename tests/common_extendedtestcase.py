@@ -22,12 +22,21 @@ class ExtendedTestCase(unittest.TestCase):
 
     def assertNamedItemInContainer(self, container, item_name, msg=None):
         for item in container:
-            if item.name == item_name:
+            if self._is_string(item):
+                if item == item_name:
+                    return
+            elif item.name == item_name:
                 return
 
         standardMsg = '{0} not found in {1}'.format(
             repr(item_name), repr(container))
         self.fail(self._formatMessage(msg, standardMsg))
+
+    def _is_string(self, obj):
+        if sys.version_info >= (3,):
+            return isinstance(obj, str)
+        else:
+            return isinstance(obj, basestring)
 
     def assertNamedItemNotInContainer(self, container, item_name, msg=None):
         for item in container:
