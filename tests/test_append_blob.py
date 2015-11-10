@@ -76,9 +76,9 @@ class StorageAppendBlobTest(StorageTestCase):
     def _create_container(self, container_name):
         self.bs.create_container(container_name, None, None, True)
 
-    def _create_container_and_blob(self, container_name, blob_name):
+    def _create_container_and_blob(self, container_name, blob_name, blob_settings=None):
         self._create_container(container_name)
-        resp = self.bs.create_blob(container_name, blob_name)
+        resp = self.bs.create_blob(container_name, blob_name, settings=blob_settings)
         self.assertIsNone(resp)
 
     def _blob_exists(self, container_name, blob_name):
@@ -165,10 +165,11 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_put_blob(self):
         # Arrange
+        blob_name = 'blob1'
         self._create_container(self.container_name)
 
         # Act
-        resp = self.bs.create_blob(self.container_name, 'blob1')
+        resp = self.bs.create_blob(self.container_name, blob_name)
 
         # Assert
         self.assertIsNone(resp)
@@ -176,14 +177,15 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_put_blob_with_lease_id(self):
         # Arrange
+        blob_name = 'blob1'
         self._create_container_and_blob(
-            self.container_name, 'blob1')
-        lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
+            self.container_name, blob_name)
+        lease = self.bs.acquire_blob_lease(self.container_name, blob_name)
         lease_id = lease['x-ms-lease-id']
 
         # Act
         resp = self.bs.create_blob(
-            self.container_name, 'blob1', lease_id=lease_id)
+            self.container_name, blob_name, lease_id=lease_id)
 
         # Assert
         self.assertIsNone(resp)
@@ -191,28 +193,30 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_put_blob_with_metadata(self):
         # Arrange
+        blob_name = 'blob1'
         self._create_container(self.container_name)
 
         # Act
         resp = self.bs.create_blob(
-            self.container_name, 'blob1',
+            self.container_name, blob_name,
             metadata={'hello': 'world', 'number': '42'})
 
         # Assert
         self.assertIsNone(resp)
-        md = self.bs.get_blob_metadata(self.container_name, 'blob1')
+        md = self.bs.get_blob_metadata(self.container_name, blob_name)
         self.assertEqual(md['x-ms-meta-hello'], 'world')
         self.assertEqual(md['x-ms-meta-number'], '42')
 
     @record
     def test_append_block(self):
         # Arrange
-        self._create_container_and_blob(self.container_name, 'blob1')
+        blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
 
         # Act
         for i in range(5):
             resp = self.bs.append_block(self.container_name,
-                                        'blob1',
+                                        blob_name,
                                         u'block {0}'.format(i).encode('utf-8'))
             keys = (
                 'x-ms-blob-append-offset',
@@ -222,7 +226,7 @@ class StorageAppendBlobTest(StorageTestCase):
             self.assertDictContainsKeys(keys, resp)
 
         # Assert
-        blob = self.bs.get_blob(self.container_name, 'blob1')
+        blob = self.bs.get_blob(self.container_name, blob_name)
         self.assertEqual(b'block 0block 1block 2block 3block 4', blob)
 
     def assertDictContainsKeys(self, keys, dictionary, msg=None):
@@ -238,33 +242,36 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_block_unicode(self):
         # Arrange
-        self._create_container_and_blob(self.container_name, 'blob1')
+        blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
 
         # Act
         with self.assertRaises(TypeError):
-            resp = self.bs.append_block(self.container_name, 'blob1', u'啊齄丂狛狜')
+            resp = self.bs.append_block(self.container_name, blob_name, u'啊齄丂狛狜')
 
         # Assert
 
     @record
     def test_append_blob_from_bytes(self):
         # Arrange
-        self._create_container(self.container_name)
+        blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
 
         # Act
         data = b'abcdefghijklmnopqrstuvwxyz'
         resp = self.bs.append_blob_from_bytes(
-            self.container_name, 'blob1', data,
+            self.container_name, blob_name, data,
             maxsize_condition=len(data))
 
         # Assert
         self.assertIsNone(resp)
-        self.assertEqual(data, self.bs.get_blob(self.container_name, 'blob1'))
+        self.assertEqual(data, self.bs.get_blob(self.container_name, blob_name))
 
     @record
     def test_append_blob_from_bytes_with_progress(self):
         # Arrange
-        self._create_container(self.container_name)
+        blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = b'abcdefghijklmnopqrstuvwxyz'
 
         # Act
@@ -274,69 +281,73 @@ class StorageAppendBlobTest(StorageTestCase):
             progress.append((current, total))
 
         resp = self.bs.append_blob_from_bytes(
-            self.container_name, 'blob1', data, progress_callback=callback)
+            self.container_name, blob_name, data, progress_callback=callback)
 
         # Assert
         self.assertIsNone(resp)
-        self.assertEqual(data, self.bs.get_blob(self.container_name, 'blob1'))
+        self.assertEqual(data, self.bs.get_blob(self.container_name, blob_name))
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
     def test_append_blob_from_bytes_with_index(self):
         # Arrange
-        self._create_container(self.container_name)
+        blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
 
         # Act
         data = b'abcdefghijklmnopqrstuvwxyz'
         resp = self.bs.append_blob_from_bytes(
-            self.container_name, 'blob1', data, 3)
+            self.container_name, blob_name, data, 3)
 
         # Assert
         self.assertIsNone(resp)
         self.assertEqual(b'defghijklmnopqrstuvwxyz',
-                         self.bs.get_blob(self.container_name, 'blob1'))
+                         self.bs.get_blob(self.container_name, blob_name))
 
     @record
     def test_append_blob_from_bytes_with_index_and_count(self):
         # Arrange
-        self._create_container(self.container_name)
+        blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
 
         # Act
         data = b'abcdefghijklmnopqrstuvwxyz'
         resp = self.bs.append_blob_from_bytes(
-            self.container_name, 'blob1', data, 3, 5)
+            self.container_name, blob_name, data, 3, 5)
 
         # Assert
         self.assertIsNone(resp)
         self.assertEqual(
-            b'defgh', self.bs.get_blob(self.container_name, 'blob1'))
+            b'defgh', self.bs.get_blob(self.container_name, blob_name))
 
     @record
     def test_append_blob_from_bytes_with_index_and_count_and_properties(self):
         # Arrange
-        self._create_container(self.container_name)
-
+        blob_name = 'blob1'
+        self._create_container_and_blob(
+            self.container_name,
+            blob_name,
+            blob_settings=Settings(
+                content_type='image/png',
+                content_language='spanish'))
         # Act
         data = b'abcdefghijklmnopqrstuvwxyz'
         resp = self.bs.append_blob_from_bytes(
-            self.container_name, 'blob1', data, 3, 5,
-            settings=Settings(
-                content_type='image/png',
-                content_language='spanish'))
+            self.container_name, blob_name, data, 3, 5)
 
         # Assert
         self.assertIsNone(resp)
         self.assertEqual(
-            b'defgh', self.bs.get_blob(self.container_name, 'blob1'))
-        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+            b'defgh', self.bs.get_blob(self.container_name, blob_name))
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
         self.assertEqual(props.settings.content_type, 'image/png')
         self.assertEqual(props.settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_bytes_chunked_upload(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
 
         # Act
@@ -351,30 +362,32 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_bytes_chunked_upload_with_properties(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(
+            self.container_name,
+            blob_name,
+            blob_settings=Settings(
+                content_type='image/png',
+                content_language='spanish'))
         data = self._get_oversized_binary_data()
 
         # Act
         resp = self.bs.append_blob_from_bytes(
-            self.container_name, blob_name, data,
-            settings=Settings(
-                content_type='image/png',
-                content_language='spanish'))
+            self.container_name, blob_name, data)
 
         # Assert
         self.assertIsNone(resp)
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
-        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
         self.assertEqual(props.settings.content_type, 'image/png')
         self.assertEqual(props.settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_bytes_with_progress_chunked_upload(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
 
         # Act
@@ -395,8 +408,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_bytes_chunked_upload_with_index_and_count(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         index = 33
         blob_size = len(data) - 66
@@ -414,8 +427,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_path_chunked_upload(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -433,8 +446,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_path_with_progress_chunked_upload(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -459,8 +472,13 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_path_chunked_upload_with_properties(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(
+            self.container_name,
+            blob_name,
+            blob_settings=Settings(
+                content_type='image/png',
+                content_language='spanish'))
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -468,10 +486,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Act
         resp = self.bs.append_blob_from_path(
-            self.container_name, blob_name, file_path,
-            settings=Settings(            
-                content_type='image/png',
-                content_language='spanish'))
+            self.container_name, blob_name, file_path)
 
         # Assert
         self.assertIsNone(resp)
@@ -484,8 +499,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_stream_chunked_upload(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -504,8 +519,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_stream_non_seekable_chunked_upload_known_size(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -527,8 +542,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_stream_non_seekable_chunked_upload_unknown_size(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -548,8 +563,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_stream_with_multiple_appends(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         file_path1 = 'blob_input1.temp.dat'
         file_path2 = 'blob_input2.temp.dat'
@@ -573,29 +588,10 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertBlobEqual(self.container_name, blob_name, data)
 
     @record
-    def test_append_blob_from_stream_fail(self):
-        # Arrange
-        self._create_container(self.container_name)
-        blob_name = 'blob1'
-        data = self._get_oversized_binary_data()
-        file_path = 'blob_input.temp.dat'
-        with open(file_path, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        with self.assertRaises(AzureMissingResourceHttpError):
-            with open(file_path, 'rb') as stream:
-                self.bs.append_blob_from_stream(
-                    self.container_name, blob_name, stream,
-                    create_if_not_exist=False)
-
-        # Assert
-
-    @record
     def test_append_blob_from_stream_chunked_upload_with_count(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -618,8 +614,8 @@ class StorageAppendBlobTest(StorageTestCase):
             return
 
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -639,8 +635,14 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_stream_chunked_upload_with_properties(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(
+            self.container_name,
+            blob_name,
+            blob_settings=Settings(
+                content_type='image/png',
+                content_language='spanish'))
+        
         data = self._get_oversized_binary_data()
         file_path = 'blob_input.temp.dat'
         with open(file_path, 'wb') as stream:
@@ -649,10 +651,7 @@ class StorageAppendBlobTest(StorageTestCase):
         # Act
         with open(file_path, 'rb') as stream:
             resp = self.bs.append_blob_from_stream(
-                self.container_name, blob_name, stream,
-                settings=Settings(
-                    content_type='image/png',
-                    content_language='spanish'))
+                self.container_name, blob_name, stream)
 
         # Assert
         self.assertIsNone(resp)
@@ -665,8 +664,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_text(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         text = u'hello 啊齄丂狛狜 world'
         data = text.encode('utf-8')
 
@@ -682,8 +681,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_text_with_encoding(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         text = u'hello 啊齄丂狛狜 world'
         data = text.encode('utf-16')
 
@@ -699,8 +698,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_text_with_encoding_and_progress(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         text = u'hello 啊齄丂狛狜 world'
         data = text.encode('utf-16')
 
@@ -723,8 +722,8 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_append_blob_from_text_chunked_upload(self):
         # Arrange
-        self._create_container(self.container_name)
         blob_name = 'blob1'
+        self._create_container_and_blob(self.container_name, blob_name)
         data = self._get_oversized_text_data()
         encoded_data = data.encode('utf-8')
 
