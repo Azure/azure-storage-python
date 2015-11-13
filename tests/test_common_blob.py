@@ -2940,7 +2940,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         resp = self.bs.get_blob_to_path(
             self.container_name, blob_name, file_path,
-            progress_callback=callback)
+            progress_callback=callback, max_connections=2)
 
         # Assert
         self.assertIsNone(resp)

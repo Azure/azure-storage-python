@@ -27,19 +27,18 @@ from .models import BlobBlock
 
 class _BlobChunkDownloader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
-                 chunk_size, stream, parallel, max_retries, retry_wait,
-                 progress_callback):
+                 chunk_size, stream, max_retries, retry_wait, progress_callback):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
         self.blob_size = blob_size
         self.chunk_size = chunk_size
         self.stream = stream
-        self.stream_start = stream.tell() if parallel else None
-        self.stream_lock = threading.Lock() if parallel else None
+        self.stream_start = stream.tell()
+        self.stream_lock = threading.Lock()
         self.progress_callback = progress_callback
         self.progress_total = 0
-        self.progress_lock = threading.Lock() if parallel else None
+        self.progress_lock = threading.Lock()
         self.max_retries = max_retries
         self.retry_wait = retry_wait
 
@@ -58,21 +57,14 @@ class _BlobChunkDownloader(object):
 
     def _update_progress(self, length):
         if self.progress_callback is not None:
-            if self.progress_lock is not None:
-                with self.progress_lock:
-                    self.progress_total += length
-                    total = self.progress_total
-            else:
+            with self.progress_lock:
                 self.progress_total += length
                 total = self.progress_total
-            self.progress_callback(total, self.blob_size)
+                self.progress_callback(total, self.blob_size)
 
     def _write_to_stream(self, chunk_data, chunk_offset):
-        if self.stream_lock is not None:
-            with self.stream_lock:
-                self.stream.seek(self.stream_start + chunk_offset)
-                self.stream.write(chunk_data)
-        else:
+        with self.stream_lock:
+            self.stream.seek(self.stream_start + chunk_offset)
             self.stream.write(chunk_data)
 
     def _download_chunk_with_retries(self, chunk_offset):
@@ -237,6 +229,12 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
 def _download_blob_chunks(blob_service, container_name, blob_name,
                           blob_size, block_size, stream, max_connections,
                           max_retries, retry_wait, progress_callback):
+    if max_connections <= 1:
+        raise ValueError(
+            'To use blob chunk downloader more than 1 thread must be ' +
+            'used since get_blob should be called for single threaded ' +
+            'blob downloads.')
+
     downloader = _BlobChunkDownloader(
         blob_service,
         container_name,
@@ -244,7 +242,6 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
         blob_size,
         block_size,
         stream,
-        max_connections > 1,
         max_retries,
         retry_wait,
         progress_callback,
@@ -253,13 +250,9 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
     if progress_callback is not None:
         progress_callback(0, blob_size)
 
-    if max_connections > 1:
-        import concurrent.futures
-        executor = concurrent.futures.ThreadPoolExecutor(max_connections)
-        result = list(executor.map(downloader.process_chunk, downloader.get_chunk_offsets()))
-    else:
-        for range_start in downloader.get_chunk_offsets():
-            downloader.process_chunk(range_start)
+    import concurrent.futures
+    executor = concurrent.futures.ThreadPoolExecutor(max_connections)
+    result = list(executor.map(downloader.process_chunk, downloader.get_chunk_offsets()))
 
 
 def _upload_blob_chunks(blob_service, container_name, blob_name,

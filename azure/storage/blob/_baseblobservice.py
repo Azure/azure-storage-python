@@ -1094,11 +1094,9 @@ class _BaseBlobService(_StorageClient):
             current is the number of bytes transfered so far, and total is the
             size of the blob.
         max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to download the blob chunks sequentially.
-            Set to 2 or more to download the blob chunks in parallel. This uses
-            more system resources but will download faster.
+            Set to 1 to download the blob sequentially.
+            Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
+            If the blob size does not exceed 64MB it will be downloaded in one chunk.
         max_retries:
             Number of times to retry download of blob chunk if an error occurs.
         retry_wait:
@@ -1157,12 +1155,9 @@ class _BaseBlobService(_StorageClient):
             current is the number of bytes transfered so far, and total is the
             size of the blob.
         max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to download the blob chunks sequentially.
-            Set to 2 or more to download the blob chunks in parallel. This uses
-            more system resources but will download faster.
-            Note that parallel download requires the stream to be seekable.
+            Set to 1 to download the blob sequentially.
+            Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
+            If the blob size does not exceed 64MB it will be downloaded in one chunk.
         max_retries:
             Number of times to retry download of blob chunk if an error occurs.
         retry_wait:
@@ -1183,7 +1178,7 @@ class _BaseBlobService(_StorageClient):
         props, _ = self.get_blob_properties(container_name, blob_name)
         blob_size = int(props.content_length)
 
-        if blob_size < self._BLOB_MAX_DATA_SIZE:
+        if blob_size < self._BLOB_MAX_DATA_SIZE or max_connections <= 1:
             if progress_callback:
                 progress_callback(0, blob_size)
 
@@ -1237,11 +1232,9 @@ class _BaseBlobService(_StorageClient):
             current is the number of bytes transfered so far, and total is the
             size of the blob.
         max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to download the blob chunks sequentially.
-            Set to 2 or more to download the blob chunks in parallel. This uses
-            more system resources but will download faster.
+            Set to 1 to download the blob sequentially.
+            Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
+            If the blob size does not exceed 64MB it will be downloaded in one chunk.
         max_retries:
             Number of times to retry download of blob chunk if an error occurs.
         retry_wait:
@@ -1300,11 +1293,9 @@ class _BaseBlobService(_StorageClient):
             current is the number of bytes transfered so far, and total is the
             size of the blob.
         max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to download the blob chunks sequentially.
-            Set to 2 or more to download the blob chunks in parallel. This uses
-            more system resources but will download faster.
+            Set to 1 to download the blob sequentially.
+            Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
+            If the blob size does not exceed 64MB it will be downloaded in one chunk.
         max_retries:
             Number of times to retry download of blob chunk if an error occurs.
         retry_wait:

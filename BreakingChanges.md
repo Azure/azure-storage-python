@@ -27,6 +27,7 @@
 - Changed models for better usability. Blob & BlobResult classes have been joined. ContainerEnumResults => list of Container objects. Properties => ContainerProperties. BlobEnumResults => list of Blob objects. BlobBlock objects are used for specifying information for blocks passed to put_block_list. PageList => list of PageRange objects. get_blob_properties double returns BlobProperties object and a metadata dict.
 - Settings objects have replaced all content_*, cache_control, and sequence_number params for applicable APIs. Create a Settings object passing in those params and pass it APIs instead of each individual param.
 - list_blobs no longer exposes prefix, marker, max_results, or delimiter.
+- Single-threaded blob download APIs will now download the blob without chunking to improve perf.
 
 ### Queue:
 - The list_queues operation returns a sequence of Queue objects. The sequence returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
