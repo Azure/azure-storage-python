@@ -33,6 +33,7 @@
 - Settings objects have replaced all content_*, cache_control, and sequence_number params for applicable APIs. Create a Settings object passing in those params and pass it APIs instead of each individual param.
 - list_blobs no longer exposes prefix, marker, max_results, or delimiter.
 - resize and set_sequence_number APIs have been added for Page Blob. It is not possible to make these changes with set_blob_properties.
+- Single-threaded blob download APIs will now download the blob without chunking to improve perf.
 
 ### Queue:
 - The list_queues operation returns a list of Queue objects. The list returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.

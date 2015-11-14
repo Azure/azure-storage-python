@@ -92,9 +92,9 @@ class AppendBlobService(_BaseBlobService):
             timeout, sas_token, connection_string, request_session)
 
     def create_blob(self, container_name, blob_name, settings=None,
-                 metadata=None, lease_id=None,
-                 if_modified_since=None, if_unmodified_since=None,
-                 if_match=None, if_none_match=None):
+                    metadata=None, lease_id=None,
+                    if_modified_since=None, if_unmodified_since=None,
+                    if_match=None, if_none_match=None):
         '''
         Creates a blob or overrides an existing blob. Use if_match=* to
         prevent overriding an existing blob. 
@@ -221,14 +221,11 @@ class AppendBlobService(_BaseBlobService):
 
     def append_blob_from_path(
         self, container_name, blob_name, file_path,
-        settings=None, metadata=None, maxsize_condition=None,
-        progress_callback=None, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, create_if_not_exist=True):
+        maxsize_condition=None, progress_callback=None,
+        max_retries=5, retry_wait=1.0, lease_id=None):
         '''
         Appends to the content of an existing blob from a file path, with automatic
-        chunking and progress notifications. If blob doesn't exist, a new blob will
-        be created if create_if_not_exist, otherwise operation will fail.
+        chunking and progress notifications.
 
         container_name:
             Name of existing container.
@@ -236,11 +233,6 @@ class AppendBlobService(_BaseBlobService):
             Name of blob to create or update.
         file_path:
             Path of the file to upload as the blob content.
-        settings:
-            Settings object used to set blob properties.
-        metadata:
-            A dict containing name, value pairs for setting blob metadata, if blob
-            doesn't exist and create_if_not_exists is true.
         maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -257,21 +249,6 @@ class AppendBlobService(_BaseBlobService):
             Sleep time in secs between retries.
         lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
-            Datetime string, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_unmodified_since:
-            DateTime string, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_match:
-            An ETag value, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_none_match:
-            An ETag value, if blob doesn't exist and
-            create_if_not_exists is true.
-        create_if_not_exist:
-            Indicates if a blob should be created for the append block operation if
-            the blob doesn't already exist.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -284,29 +261,19 @@ class AppendBlobService(_BaseBlobService):
                 blob_name,
                 stream,
                 count=count,
-                settings=settings,
-                metadata=metadata,
                 maxsize_condition=maxsize_condition,
                 progress_callback=progress_callback,
                 max_retries=max_retries,
                 retry_wait=retry_wait,
-                lease_id=lease_id,
-                if_modified_since=if_modified_since,
-                if_unmodified_since=if_unmodified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                create_if_not_exist=create_if_not_exist)
+                lease_id=lease_id)
 
     def append_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        settings=None, metadata=None, maxsize_condition=None, 
-        progress_callback=None, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, create_if_not_exist=True):
+        maxsize_condition=None, progress_callback=None,
+        max_retries=5, retry_wait=1.0, lease_id=None):
         '''
         Appends to the content of an existing blob from an array of bytes, with
-        automatic chunking and progress notifications. If blob doesn't exist, a new
-        blob will be created if create_if_not_exist, otherwise operation will fail.
+        automatic chunking and progress notifications.
 
         container_name:
             Name of existing container.
@@ -319,11 +286,6 @@ class AppendBlobService(_BaseBlobService):
         count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        settings:
-            Setting object used to set blob properties.
-        metadata:
-            A dict containing name, value pairs for setting blob metadata, if blob
-            doesn't exist and create_if_not_exists is true.
         maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -340,21 +302,6 @@ class AppendBlobService(_BaseBlobService):
             Sleep time in secs between retries.
         lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
-            Datetime string, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_unmodified_since:
-            DateTime string, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_match:
-            An ETag value, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_none_match:
-            An ETag value, if blob doesn't exist and
-            create_if_not_exists is true.
-        create_if_not_exist:
-            Indicates if a blob should be created for the append block operation if
-            the blob doesn't already exist.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -376,29 +323,19 @@ class AppendBlobService(_BaseBlobService):
             blob_name,
             stream,
             count=count,
-            settings=settings,
-            metadata=metadata,
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_retries=max_retries,
-            retry_wait=retry_wait,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            create_if_not_exist=create_if_not_exist)
+            retry_wait=retry_wait)
 
     def append_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
-        settings=None, metadata=None, maxsize_condition=None, 
-        progress_callback=None, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, create_if_not_exist=True):
+        maxsize_condition=None, progress_callback=None,
+        max_retries=5, retry_wait=1.0, lease_id=None):
         '''
         Appends to the content of an existing blob from str/unicode, with
-        automatic chunking and progress notifications. If blob doesn't exist, a new
-        blob will be created if create_if_not_exist, otherwise operation will fail.
+        automatic chunking and progress notifications.
 
         container_name:
             Name of existing container.
@@ -408,11 +345,6 @@ class AppendBlobService(_BaseBlobService):
             Text to upload to the blob.
         encoding:
             Python encoding to use to convert the text to bytes.
-        settings:
-            Settings object used to set blob properties.
-        metadata:
-            A dict containing name, value pairs for setting blob metadata, if blob
-            doesn't exist and create_if_not_exists is true.
         maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -429,21 +361,6 @@ class AppendBlobService(_BaseBlobService):
             Sleep time in secs between retries.
         lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
-            Datetime string, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_unmodified_since:
-            DateTime string, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_match:
-            An ETag value, if blob doesn't exist and
-            create_if_not_exists is true.
-        if_none_match:
-            An ETag value, if blob doesn't exist and
-            create_if_not_exists is true.
-        create_if_not_exist:
-            Indicates if a blob should be created for the append block operation if
-            the blob doesn't already exist.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -459,29 +376,19 @@ class AppendBlobService(_BaseBlobService):
             text,
             index=0,
             count=len(text),
-            settings=settings,
-            metadata=metadata,
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_retries=max_retries,
-            retry_wait=retry_wait,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            create_if_not_exist=create_if_not_exist)
+            retry_wait=retry_wait)
 
     def append_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
-        settings=None, metadata=None, maxsize_condition=None, 
-        progress_callback=None,  max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, create_if_not_exist=True):
+        maxsize_condition=None, progress_callback=None, 
+        max_retries=5, retry_wait=1.0, lease_id=None):
         '''
         Appends to the content of an existing blob from a file/stream, with
-        automatic chunking and progress notifications. If blob doesn't exist, a new
-        blob will be created if create_if_not_exist, otherwise operation will fail.
+        automatic chunking and progress notifications.
 
         container_name:
             Name of existing container.
@@ -492,11 +399,6 @@ class AppendBlobService(_BaseBlobService):
         count:
             Number of bytes to read from the stream. This is optional, but
             should be supplied for optimal performance.
-        settings:
-            Settings object used to set blob properties.
-        metadata:
-            A dict containing name, value pairs for setting blob metadata,
-            if blob doesn't exist and create_if_not_exists is true.
         maxsize_condition:
             Conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -513,43 +415,11 @@ class AppendBlobService(_BaseBlobService):
             Sleep time in secs between retries.
         lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
-            Datetime string. Used if blob doesn't exist and
-            create_if_not_exists is true.
-        if_unmodified_since:
-            DateTime string. Used if blob doesn't exist and
-            create_if_not_exists is true.
-        if_match:
-            An ETag value. Used if blob doesn't exist and
-            create_if_not_exists is true.
-        if_none_match:
-            An ETag value. Used if blob doesn't exist and
-            create_if_not_exists is true.
-        create_if_not_exist:
-            Indicates if a blob should be created for the append block operation if
-            the blob doesn't already exist.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
-        _validate_not_none('create_if_not_exist', create_if_not_exist)
         
-        if create_if_not_exist:
-            try:
-                self.get_blob_properties(container_name, blob_name)
-            except AzureMissingResourceHttpError:
-                self.create_blob(
-                    container_name=container_name,
-                    blob_name=blob_name,
-                    settings=settings,
-                    metadata=metadata,
-                    lease_id=lease_id,
-                    if_modified_since=if_modified_since,
-                    if_unmodified_since=if_unmodified_since,
-                    if_match=if_match,
-                    if_none_match=if_none_match,
-                )
-
         _upload_blob_chunks(
             blob_service=self,
             container_name=container_name,
