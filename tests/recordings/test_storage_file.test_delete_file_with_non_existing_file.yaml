@@ -46,4 +46,51 @@ interactions:
       x-ms-request-id: [cb5fc8a8-001a-000b-1bf1-c3e77e000000]
       x-ms-version: ['2014-02-14']
     status: {code: 404, message: The specified resource does not exist.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:32:41 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharea5ed1761?restype=share
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:32:41 GMT']
+      ETag: ['"0x8D2EEBCB233AF0E"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:32:42 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [61349bc5-001a-0023-32a5-2090c1000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:32:42 GMT']
+      x-ms-version: ['2014-02-14']
+    method: DELETE
+    uri: https://storagename.file.core.windows.net/utsharea5ed1761/file1
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
+        \ specified resource does not exist.\nRequestId:61349bc6-001a-0023-33a5-2090c1000000\n\
+        Time:2015-11-16T19:32:43.5976820Z</Message></Error>"}
+    headers:
+      Content-Length: ['223']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:32:43 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [61349bc6-001a-0023-33a5-2090c1000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 404, message: The specified resource does not exist.}
 version: 1

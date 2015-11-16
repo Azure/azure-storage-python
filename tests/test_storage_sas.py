@@ -25,14 +25,12 @@ from azure.storage.sharedaccesssignature import (
     QueryStringConstants,
     ResourceType,
 )
-from testutils.common_extendedtestcase import (
-    ExtendedTestCase,
-)
+from tests.storage_testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 
 
-class StorageSASTest(ExtendedTestCase):
+class StorageSASTest(StorageTestCase):
 
     def setUp(self):
         self.sas = SharedAccessSignature(DEV_ACCOUNT_NAME, DEV_ACCOUNT_KEY)

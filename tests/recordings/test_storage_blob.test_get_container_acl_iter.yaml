@@ -49,4 +49,51 @@ interactions:
       x-ms-request-id: [5213d4c7-0001-0060-5c4e-adef99000000]
       x-ms-version: ['2014-02-14']
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:24:30 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainera8aa1264?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:24:29 GMT']
+      ETag: ['"0x8D2EEBB8CF4A83F"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:24:30 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a19eb8b-0001-0089-7aa4-20462e000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:24:30 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainera8aa1264?restype=container&comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers\
+        \ />"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:24:29 GMT']
+      ETag: ['"0x8D2EEBB8CF4A83F"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:24:30 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a19eba3-0001-0089-0fa4-20462e000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
 version: 1

@@ -105,4 +105,106 @@ interactions:
       x-ms-version: ['2014-02-14']
     status: {code: 412, message: 'A lease ID was specified, but the lease for the
         container has expired.'}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:25:54 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer1f1a14d2?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:25:53 GMT']
+      ETag: ['"0x8D2EEBBBF08A65C"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:25:54 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [039cf46d-0001-000e-67a4-201301000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:25:54 GMT']
+      x-ms-lease-action: [acquire]
+      x-ms-lease-duration: ['15']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer1f1a14d2?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:25:53 GMT']
+      ETag: ['"0x8D2EEBBBF08A65C"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:25:54 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [c595c71a-9576-4db0-a1d1-369372970700]
+      x-ms-request-id: [039cf49d-0001-000e-15a4-201301000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:25:54 GMT']
+      x-ms-lease-action: [break]
+      x-ms-lease-break-period: ['5']
+      x-ms-lease-id: [c595c71a-9576-4db0-a1d1-369372970700]
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer1f1a14d2?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:25:53 GMT']
+      ETag: ['"0x8D2EEBBBF08A65C"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:25:54 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-time: ['5']
+      x-ms-request-id: [039cf4bb-0001-000e-31a4-201301000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:25:59 GMT']
+      x-ms-lease-id: [c595c71a-9576-4db0-a1d1-369372970700]
+      x-ms-version: ['2014-02-14']
+    method: DELETE
+    uri: https://storagename.blob.core.windows.net/utcontainer1f1a14d2?restype=container
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>LeaseLost</Code><Message>A\
+        \ lease ID was specified, but the lease for the container has expired.\nRequestId:039d0213-0001-000e-4aa4-201301000000\n\
+        Time:2015-11-16T19:25:59.8258714Z</Message></Error>"}
+    headers:
+      Content-Length: ['248']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:25:59 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [039d0213-0001-000e-4aa4-201301000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 412, message: 'A lease ID was specified, but the lease for the
+        container has expired.'}
 version: 1

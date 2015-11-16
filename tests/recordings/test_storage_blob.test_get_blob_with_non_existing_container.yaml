@@ -24,4 +24,27 @@ interactions:
       x-ms-request-id: [e90fddd2-0001-0040-554e-ad8355000000]
       x-ms-version: ['2014-02-14']
     status: {code: 404, message: The specified container does not exist.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:25:06 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainerd750184f/blob1
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
+        \ specified container does not exist.\nRequestId:b5585e58-0001-001c-33a4-20271d000000\n\
+        Time:2015-11-16T19:25:07.2938034Z</Message></Error>"}
+    headers:
+      Content-Length: ['225']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:25:06 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [b5585e58-0001-001c-33a4-20271d000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 404, message: The specified container does not exist.}
 version: 1

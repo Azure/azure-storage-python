@@ -81,4 +81,82 @@ interactions:
       x-ms-request-id: [76eabd7a-0001-0072-704e-addb85000000]
       x-ms-version: ['2014-02-14']
     status: {code: 206, message: Partial Content}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:47 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer729d1125?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:22:46 GMT']
+      ETag: ['"0x8D2EEBB4F9F7AFE"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:47 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [c6169418-0001-0080-06a4-205ca0000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      aGVsbG8gd29ybGQ=
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['11']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:47 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer729d1125/blob1
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Date: ['Mon, 16 Nov 2015 19:22:46 GMT']
+      ETag: ['"0x8D2EEBB4FB6274B"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:47 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [c6169432-0001-0080-1ca4-205ca0000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:47 GMT']
+      x-ms-range: [bytes=0-5]
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer729d1125/blob1
+  response:
+    body: {string: 'hello '}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['6']
+      Content-Range: [bytes 0-5/11]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      Date: ['Mon, 16 Nov 2015 19:22:46 GMT']
+      ETag: ['"0x8D2EEBB4FB6274B"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:47 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-request-id: [c6169455-0001-0080-3ca4-205ca0000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 206, message: Partial Content}
 version: 1

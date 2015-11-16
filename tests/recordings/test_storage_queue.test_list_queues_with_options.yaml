@@ -141,4 +141,54 @@ interactions:
       x-ms-request-id: [a704512b-0003-0078-5948-adc20c000000]
       x-ms-version: ['2014-02-14']
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:35:53 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.queue.core.windows.net/?prefix=mytestqueue&maxresults=3&comp=list
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
+        \ ServiceEndpoint=\"https://storagename.queue.core.windows.net/\"><Prefix>mytestqueue</Prefix><MaxResults>3</MaxResults><Queues><Queue><Name>mytestqueue0eafa141f</Name></Queue><Queue><Name>mytestqueue1eafa141f</Name></Queue><Queue><Name>mytestqueue2eafa141f</Name></Queue></Queues><NextMarker>/storagename/mytestqueue323fb0f42</NextMarker></EnumerationResults>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:35:52 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [6129f228-0003-004c-06a6-203815000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:35:53 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.queue.core.windows.net/?prefix=mytestqueue&marker=/storagename/mytestqueue323fb0f42&include=metadata&comp=list
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
+        \ ServiceEndpoint=\"https://storagename.queue.core.windows.net/\"><Prefix>mytestqueue</Prefix><Marker>/storagename/mytestqueue323fb0f42</Marker><Queues><Queue><Name>mytestqueue3eafa141f</Name><Metadata\
+        \ /></Queue><Queue><Name>mytestqueue4eafa141f</Name><Metadata /></Queue><Queue><Name>mytestqueue5eafa141f</Name><Metadata\
+        \ /></Queue><Queue><Name>mytestqueue6eafa141f</Name><Metadata /></Queue><Queue><Name>mytestqueue7eafa141f</Name><Metadata\
+        \ /></Queue><Queue><Name>mytestqueue8eafa141f</Name><Metadata /></Queue><Queue><Name>mytestqueue9eafa141f</Name><Metadata\
+        \ /></Queue></Queues><NextMarker /></EnumerationResults>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:35:52 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [6129f230-0003-004c-0da6-203815000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
 version: 1

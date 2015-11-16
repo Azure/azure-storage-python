@@ -24,4 +24,28 @@ interactions:
       x-ms-request-id: [b33ba07b-0003-004f-5f48-ad6ea3000000]
       x-ms-version: ['2014-02-14']
     status: {code: 404, message: The specified queue does not exist.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:36:02 GMT']
+      x-ms-version: ['2014-02-14']
+    method: DELETE
+    uri: https://storagename.queue.core.windows.net/mycreatablequeue0c02d1319
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>QueueNotFound</Code><Message>The\
+        \ specified queue does not exist.\nRequestId:efe9faaf-0003-007a-55a6-209547000000\n\
+        Time:2015-11-16T19:36:03.1772112Z</Message></Error>"}
+    headers:
+      Content-Length: ['217']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:36:02 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [efe9faaf-0003-007a-55a6-209547000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 404, message: The specified queue does not exist.}
 version: 1

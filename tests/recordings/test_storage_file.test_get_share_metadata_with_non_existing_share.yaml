@@ -23,4 +23,27 @@ interactions:
       x-ms-request-id: [98e78658-001a-0013-28f1-c3caeb000000]
       x-ms-version: ['2014-02-14']
     status: {code: 404, message: The specified share does not exist.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:32:15 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utshare6fcd1ab4?restype=share&comp=metadata
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ShareNotFound</Code><Message>The\
+        \ specified share does not exist.\nRequestId:ac4f5c0b-001a-0083-52a5-205fa7000000\n\
+        Time:2015-11-16T19:32:15.9076570Z</Message></Error>"}
+    headers:
+      Content-Length: ['217']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:32:15 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [ac4f5c0b-001a-0083-52a5-205fa7000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 404, message: The specified share does not exist.}
 version: 1

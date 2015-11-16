@@ -101,4 +101,101 @@ interactions:
       x-ms-request-id: [58abb694-0001-007d-124e-ad3673000000]
       x-ms-version: ['2014-02-14']
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:24 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer620a160d?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:22:24 GMT']
+      ETag: ['"0x8D2EEBB42447E19"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:25 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [dd7392f2-0001-003d-67a4-204a2c000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:25 GMT']
+      x-ms-lease-action: [acquire]
+      x-ms-lease-duration: ['60']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer620a160d?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:22:24 GMT']
+      ETag: ['"0x8D2EEBB42447E19"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:25 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [6de57661-02cb-429f-a7dd-cfd5346407f3]
+      x-ms-request-id: [dd739311-0001-003d-03a4-204a2c000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:25 GMT']
+      x-ms-lease-id: [6de57661-02cb-429f-a7dd-cfd5346407f3]
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer620a160d?restype=container&comp=acl
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:22:24 GMT']
+      ETag: ['"0x8D2EEBB42447E1A"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:25 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [dd739333-0001-003d-23a4-204a2c000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:25 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer620a160d?restype=container&comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers\
+        \ />"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:22:24 GMT']
+      ETag: ['"0x8D2EEBB42447E1A"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:25 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [dd739347-0001-003d-36a4-204a2c000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
 version: 1

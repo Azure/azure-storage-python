@@ -48,4 +48,51 @@ interactions:
       x-ms-request-id: [9c82f235-0001-0071-5d4f-add882000000]
       x-ms-version: ['2014-02-14']
     status: {code: 404, message: The specified blob does not exist.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:31:08 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainera5a2175e?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:31:09 GMT']
+      ETag: ['"0x8D2EEBC7AF01C83"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:31:09 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [fcdd905d-0001-0075-0ea5-2078b1000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:31:09 GMT']
+      x-ms-version: ['2014-02-14']
+    method: DELETE
+    uri: https://storagename.blob.core.windows.net/utcontainera5a2175e/blob1
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>BlobNotFound</Code><Message>The\
+        \ specified blob does not exist.\nRequestId:fcdd9075-0001-0075-25a5-2078b1000000\n\
+        Time:2015-11-16T19:31:09.6869991Z</Message></Error>"}
+    headers:
+      Content-Length: ['215']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:31:09 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [fcdd9075-0001-0075-25a5-2078b1000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 404, message: The specified blob does not exist.}
 version: 1

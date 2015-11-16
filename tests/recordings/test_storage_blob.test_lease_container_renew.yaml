@@ -125,4 +125,125 @@ interactions:
       x-ms-request-id: [c16c4078-0001-006f-374d-ad026f000000]
       x-ms-version: ['2014-02-14']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:18:02 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer964f120c?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:18:03 GMT']
+      ETag: ['"0x8D2EEBAA67B686B"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:18:03 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [2643c5a8-0001-0058-38a3-20fb71000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:18:03 GMT']
+      x-ms-lease-action: [acquire]
+      x-ms-lease-duration: ['15']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer964f120c?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:18:03 GMT']
+      ETag: ['"0x8D2EEBAA67B686B"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:18:03 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [85837c3a-643e-4de5-981a-d49908ba5342]
+      x-ms-request-id: [2643c5d6-0001-0058-64a3-20fb71000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:18:13 GMT']
+      x-ms-lease-action: [renew]
+      x-ms-lease-id: [85837c3a-643e-4de5-981a-d49908ba5342]
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer964f120c?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:18:13 GMT']
+      ETag: ['"0x8D2EEBAA67B686B"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:18:03 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [85837c3a-643e-4de5-981a-d49908ba5342]
+      x-ms-request-id: [2643dd2c-0001-0058-57a3-20fb71000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:18:18 GMT']
+      x-ms-version: ['2014-02-14']
+    method: DELETE
+    uri: https://storagename.blob.core.windows.net/utcontainer964f120c?restype=container
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>LeaseIdMissing</Code><Message>There\
+        \ is currently a lease on the container and no lease ID was specified in the\
+        \ request.\nRequestId:2643e900-0001-0058-6ca3-20fb71000000\nTime:2015-11-16T19:18:18.8291802Z</Message></Error>"}
+    headers:
+      Content-Length: ['272']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:18:18 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [2643e900-0001-0058-6ca3-20fb71000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 412, message: There is currently a lease on the container and no
+        lease ID was specified in the request.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:18:28 GMT']
+      x-ms-version: ['2014-02-14']
+    method: DELETE
+    uri: https://storagename.blob.core.windows.net/utcontainer964f120c?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:18:28 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [264400c1-0001-0058-34a3-20fb71000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 202, message: Accepted}
 version: 1
