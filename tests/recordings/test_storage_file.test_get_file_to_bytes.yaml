@@ -125,4 +125,128 @@ interactions:
       x-ms-type: [File]
       x-ms-version: ['2014-02-14']
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:33:41 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utshare50d11068?restype=share
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:33:41 GMT']
+      ETag: ['"0x8D2EEBCD5A045AC"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:33:41 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [309c1b73-001a-0080-43a5-205ca0000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-content-length: ['26']
+      x-ms-date: ['Mon, 16 Nov 2015 19:33:42 GMT']
+      x-ms-type: [file]
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utshare50d11068/file1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:33:41 GMT']
+      ETag: ['"0x8D2EEBCD609F339"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:33:42 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [309c1b75-001a-0080-44a5-205ca0000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['26']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:33:42 GMT']
+      x-ms-range: [bytes=0-25]
+      x-ms-version: ['2014-02-14']
+      x-ms-write: [update]
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utshare50d11068/file1?comp=range
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [w/zT12GS5AB9+0lsymfhOw==]
+      Date: ['Mon, 16 Nov 2015 19:33:41 GMT']
+      ETag: ['"0x8D2EEBCD60F4AB7"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:33:42 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [309c1b76-001a-0080-45a5-205ca0000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:33:42 GMT']
+      x-ms-version: ['2014-02-14']
+    method: HEAD
+    uri: https://storagename.file.core.windows.net/utshare50d11068/file1
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['26']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      Date: ['Mon, 16 Nov 2015 19:33:41 GMT']
+      ETag: ['"0x8D2EEBCD60F4AB7"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:33:42 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [309c1b77-001a-0080-46a5-205ca0000000]
+      x-ms-type: [File]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:33:42 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utshare50d11068/file1
+  response:
+    body: {string: abcdefghijklmnopqrstuvwxyz}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['26']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      Date: ['Mon, 16 Nov 2015 19:33:41 GMT']
+      ETag: ['"0x8D2EEBCD60F4AB7"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:33:42 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [309c1b78-001a-0080-47a5-205ca0000000]
+      x-ms-type: [File]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
 version: 1

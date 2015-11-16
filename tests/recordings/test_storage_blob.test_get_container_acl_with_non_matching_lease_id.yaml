@@ -77,4 +77,78 @@ interactions:
       x-ms-version: ['2014-02-14']
     status: {code: 412, message: The lease ID specified did not match the lease ID
         for the container.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:21:42 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainera54c1b55?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:21:43 GMT']
+      ETag: ['"0x8D2EEBB294F2A6A"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:21:43 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [7fe177da-0001-006a-1aa4-20a3a1000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:21:42 GMT']
+      x-ms-lease-action: [acquire]
+      x-ms-lease-duration: ['60']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainera54c1b55?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:21:43 GMT']
+      ETag: ['"0x8D2EEBB294F2A6A"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:21:43 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [a943a58e-6d5b-4c2b-93d2-308b7cd9c2db]
+      x-ms-request-id: [7fe177f5-0001-006a-34a4-20a3a1000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:21:42 GMT']
+      x-ms-lease-id: [00000000-1111-2222-3333-444444444444]
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainera54c1b55?restype=container&comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>LeaseIdMismatchWithContainerOperation</Code><Message>The\
+        \ lease ID specified did not match the lease ID for the container.\nRequestId:7fe17821-0001-006a-5ca4-20a3a1000000\n\
+        Time:2015-11-16T19:21:43.2750394Z</Message></Error>"}
+    headers:
+      Content-Length: ['274']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:21:43 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [7fe17821-0001-006a-5ca4-20a3a1000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 412, message: The lease ID specified did not match the lease ID
+        for the container.}
 version: 1

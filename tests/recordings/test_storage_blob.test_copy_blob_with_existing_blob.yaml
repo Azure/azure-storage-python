@@ -112,4 +112,112 @@ interactions:
       x-ms-request-id: [437548a1-0001-0020-334f-adc677000000]
       x-ms-version: ['2014-02-14']
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:31:18 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer224914fc?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:31:18 GMT']
+      ETag: ['"0x8D2EEBC80BE12FE"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:31:19 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [4ddab823-0001-0079-4ca5-209640000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      aGVsbG8gd29ybGQ=
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['11']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-date: ['Mon, 16 Nov 2015 19:31:19 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer224914fc/blob1
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Date: ['Mon, 16 Nov 2015 19:31:18 GMT']
+      ETag: ['"0x8D2EEBC80A3CBBC"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:31:19 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [4ddab840-0001-0079-66a5-209640000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-copy-source: ['https://xclientdev.blob.core.windows.net/utcontainer224914fc/blob1']
+      x-ms-date: ['Mon, 16 Nov 2015 19:31:19 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer224914fc/blob1copy
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:31:18 GMT']
+      ETag: ['"0x8D2EEBC80AAD0D8"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:31:19 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-copy-id: [8a6acd86-066c-46d2-9d12-be351911df52]
+      x-ms-copy-status: [success]
+      x-ms-request-id: [4ddab866-0001-0079-09a5-209640000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:31:19 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer224914fc/blob1copy
+  response:
+    body: {string: hello world}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['11']
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      Date: ['Mon, 16 Nov 2015 19:31:18 GMT']
+      ETag: ['"0x8D2EEBC80AAD0D8"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:31:19 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-copy-completion-time: ['Mon, 16 Nov 2015 19:31:19 GMT']
+      x-ms-copy-id: [8a6acd86-066c-46d2-9d12-be351911df52]
+      x-ms-copy-progress: [11/11]
+      x-ms-copy-source: ['https://storagename.blob.core.windows.net/utcontainer224914fc/blob1']
+      x-ms-copy-status: [success]
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-request-id: [4ddab886-0001-0079-27a5-209640000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
 version: 1

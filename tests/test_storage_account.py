@@ -18,12 +18,12 @@ from azure.storage import CloudStorageAccount
 from azure.storage.blob import BlobService
 from azure.storage.queue import QueueService
 from azure.storage.table import TableService
-from testutils.common_extendedtestcase import ExtendedTestCase
+from tests.storage_testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 
 
-class StorageAccountTest(ExtendedTestCase):
+class StorageAccountTest(StorageTestCase):
 
     def setUp(self):
         self.account_name = 'storagename'

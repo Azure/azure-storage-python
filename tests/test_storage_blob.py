@@ -472,9 +472,13 @@ class StorageBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        containers = self.bs.list_containers()
-        for container in containers:
-            name = container.name
+        resp = self.bs.list_containers()
+        containers = resp.containers
+        next_marker = resp.next_marker
+        while next_marker:
+            resp = self.bs.list_containers(marker=next_marker)
+            containers += resp.containers
+            next_marker = resp.next_marker
 
         # Assert
         self.assertIsNotNone(containers)

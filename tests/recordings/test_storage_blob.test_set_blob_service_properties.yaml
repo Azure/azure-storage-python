@@ -54,4 +54,57 @@ interactions:
       x-ms-request-id: [2267812a-0001-000d-0b4e-ad45b7000000]
       x-ms-version: ['2014-02-14']
     status: {code: 200, message: OK}
+- request:
+    body: !!binary |
+      PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48U3RvcmFnZVNlcnZpY2VQcm9w
+      ZXJ0aWVzPjxNaW51dGVNZXRyaWNzPjxWZXJzaW9uPjEuMDwvVmVyc2lvbj48UmV0ZW50aW9uUG9s
+      aWN5PjxFbmFibGVkPkZhbHNlPC9FbmFibGVkPjwvUmV0ZW50aW9uUG9saWN5PjxFbmFibGVkPkZh
+      bHNlPC9FbmFibGVkPjwvTWludXRlTWV0cmljcz48SG91ck1ldHJpY3M+PFZlcnNpb24+MS4wPC9W
+      ZXJzaW9uPjxSZXRlbnRpb25Qb2xpY3k+PEVuYWJsZWQ+RmFsc2U8L0VuYWJsZWQ+PC9SZXRlbnRp
+      b25Qb2xpY3k+PEVuYWJsZWQ+RmFsc2U8L0VuYWJsZWQ+PC9Ib3VyTWV0cmljcz48TG9nZ2luZz48
+      RGVsZXRlPkZhbHNlPC9EZWxldGU+PFJlYWQ+RmFsc2U8L1JlYWQ+PFJldGVudGlvblBvbGljeT48
+      RW5hYmxlZD5GYWxzZTwvRW5hYmxlZD48L1JldGVudGlvblBvbGljeT48V3JpdGU+RmFsc2U8L1dy
+      aXRlPjxWZXJzaW9uPjEuMDwvVmVyc2lvbj48L0xvZ2dpbmc+PC9TdG9yYWdlU2VydmljZVByb3Bl
+      cnRpZXM+
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['519']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:24:21 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:24:24 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [7cb46907-0001-004c-7aa4-203815000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:24:24 GMT']
+      x-ms-version: ['2014-02-14']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /><DefaultServiceVersion>2014-02-14</DefaultServiceVersion></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:24:24 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [7cb46f87-0001-004c-78a4-203815000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 200, message: OK}
 version: 1

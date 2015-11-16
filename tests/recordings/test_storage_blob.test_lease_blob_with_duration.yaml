@@ -134,4 +134,134 @@ interactions:
       x-ms-version: ['2014-02-14']
     status: {code: 412, message: 'A lease ID was specified, but the lease for the
         blob has expired.'}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:53 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerce4e1348?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:22:53 GMT']
+      ETag: ['"0x8D2EEBB53C897F2"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:54 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3118ebea-0001-0088-01a4-2047d3000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      aGVsbG8gd29ybGQ=
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['11']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:54 GMT']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerce4e1348/blob1
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Date: ['Mon, 16 Nov 2015 19:22:53 GMT']
+      ETag: ['"0x8D2EEBB537A77A2"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:53 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3118ec03-0001-0088-1aa4-2047d3000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:54 GMT']
+      x-ms-lease-action: [acquire]
+      x-ms-lease-duration: ['15']
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerce4e1348/blob1?comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Nov 2015 19:22:53 GMT']
+      ETag: ['"0x8D2EEBB537A77A2"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:53 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [06889322-fa89-4563-a539-d5fbc4f0e4af]
+      x-ms-request-id: [3118ec27-0001-0088-3ba4-2047d3000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      aGVsbG8gMg==
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['7']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-date: ['Mon, 16 Nov 2015 19:22:54 GMT']
+      x-ms-lease-id: [06889322-fa89-4563-a539-d5fbc4f0e4af]
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerce4e1348/blob1
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [uyHsg5S3V5ViL2FhOnd6iw==]
+      Date: ['Mon, 16 Nov 2015 19:22:54 GMT']
+      ETag: ['"0x8D2EEBB5386ACF9"']
+      Last-Modified: ['Mon, 16 Nov 2015 19:22:54 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3118ec42-0001-0088-56a4-2047d3000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      aGVsbG8gMw==
+    headers:
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['7']
+      Content-Type: [application/octet-stream Charset=UTF-8]
+      User-Agent: [pyazure/0.20.3]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-date: ['Mon, 16 Nov 2015 19:23:09 GMT']
+      x-ms-lease-id: [06889322-fa89-4563-a539-d5fbc4f0e4af]
+      x-ms-version: ['2014-02-14']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerce4e1348/blob1
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>LeaseLost</Code><Message>A\
+        \ lease ID was specified, but the lease for the blob has expired.\nRequestId:311910a6-0001-0088-66a4-2047d3000000\n\
+        Time:2015-11-16T19:23:09.6213727Z</Message></Error>"}
+    headers:
+      Content-Length: ['243']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Nov 2015 19:23:09 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [311910a6-0001-0088-66a4-2047d3000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 412, message: 'A lease ID was specified, but the lease for the
+        blob has expired.'}
 version: 1
