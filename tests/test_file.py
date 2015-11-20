@@ -229,6 +229,14 @@ class StorageFileTest(StorageTestCase):
 
     #--Test cases for file service --------------------------------------------
     @record
+    def test_create_file_service_empty_key(self):
+        try:
+            file_service = FileService('testaccount', '')
+            self.fail('Passing an empty key to create account should fail.')
+        except ValueError as e:
+            self.assertTrue(str(e) == 'You need to provide an account name and account key when creating a storage service')
+
+    @record
     def test_create_file_service_missing_arguments(self):
         # Arrange
         if AZURE_STORAGE_ACCOUNT in os.environ:
