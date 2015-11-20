@@ -37,9 +37,10 @@ from azure.storage import (
 from azure.storage.file import (
     FILE_SERVICE_HOST_BASE,
     FileService,
-    FileResult,
+    File,
     FileService,
     Range,
+    ContentSettings,
     FileSharedAccessPermissions,
     ShareSharedAccessPermissions,
 )
@@ -143,15 +144,15 @@ class StorageFileTest(StorageTestCase):
 
     def _wait_for_async_copy(self, share_name, file_name):
         count = 0
-        props = self.fs.get_file_properties(share_name, None, file_name)
-        while props['x-ms-copy-status'] != 'success':
+        props, _ = self.fs.get_file_properties(share_name, None, file_name)
+        while props.copy.status != 'success':
             count = count + 1
             if count > 5:
                 self.assertTrue(
                     False, 'Timed out waiting for async copy to complete.')
             self.sleep(5)
-            props = self.fs.get_file_properties(share_name, None, file_name)
-        self.assertEqual(props['x-ms-copy-status'], 'success')
+            props, _ = self.fs.get_file_properties(share_name, None, file_name)
+        self.assertEqual(props.copy.status, 'success')
 
     def _file_exists(self, share_name, file_name):
         resp = self.fs.list_directories_and_files(share_name)
@@ -165,8 +166,8 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(actual_data, expected_data)
 
     def assertFileLengthEqual(self, share_name, file_name, expected_length):
-        props = self.fs.get_file_properties(share_name, None, file_name)
-        self.assertEqual(int(props['content-length']), expected_length)
+        props, _ = self.fs.get_file_properties(share_name, None, file_name)
+        self.assertEqual(int(props.content_length), expected_length)
 
     def _get_oversized_binary_data(self):
         '''Returns random binary data exceeding the size threshold for
@@ -878,7 +879,7 @@ class StorageFileTest(StorageTestCase):
         file = self.fs.get_file(self.share_name, None, 'file1')
 
         # Assert
-        self.assertIsInstance(file, FileResult)
+        self.assertIsInstance(file, File)
         self.assertEqual(file, b'hello world')
 
     @record
@@ -892,7 +893,7 @@ class StorageFileTest(StorageTestCase):
             self.share_name, None, 'file1', byte_range='bytes=0-5')
 
         # Assert
-        self.assertIsInstance(file, FileResult)
+        self.assertIsInstance(file, File)
         self.assertEqual(file, b'hello ')
 
     @record
@@ -907,10 +908,11 @@ class StorageFileTest(StorageTestCase):
                                 range_get_content_md5='true')
 
         # Assert
-        self.assertIsInstance(file, FileResult)
+        self.assertIsInstance(file, File)
         self.assertEqual(file, b'hello ')
         self.assertEqual(
-            file.properties['content-md5'], '+BSJN3e8wilf/wXwDlCNpg==')
+            file.properties.content_settings.content_md5,
+            '+BSJN3e8wilf/wXwDlCNpg==')
 
     @record
     def test_get_file_with_non_existing_share(self):
@@ -945,8 +947,8 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertIsNone(resp)
-        props = self.fs.get_file_properties(self.share_name, None, 'file1')
-        self.assertEqual(props['content-length'], '5')
+        props, _ = self.fs.get_file_properties(self.share_name, None, 'file1')
+        self.assertEqual(props.content_length, 5)
 
     @record
     def test_set_file_properties(self):
@@ -959,15 +961,16 @@ class StorageFileTest(StorageTestCase):
             self.share_name,
             None, 
             'file1',
-            content_language='spanish',
-            content_disposition='inline',
+            content_settings=ContentSettings(
+                content_language='spanish',
+                content_disposition='inline')
         )
 
         # Assert
         self.assertIsNone(resp)
-        props = self.fs.get_file_properties(self.share_name, None, 'file1')
-        self.assertEqual(props['content-language'], 'spanish')
-        self.assertEqual(props['content-disposition'], 'inline')
+        props, _ = self.fs.get_file_properties(self.share_name, None, 'file1')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_file_properties_with_non_existing_share(self):
@@ -977,7 +980,7 @@ class StorageFileTest(StorageTestCase):
         with self.assertRaises(AzureMissingResourceHttpError):
             self.fs.set_file_properties(
                 self.share_name, None, 'file1',
-                content_language='spanish')
+                content_settings=ContentSettings(content_language='spanish'))
 
         # Assert
 
@@ -991,7 +994,7 @@ class StorageFileTest(StorageTestCase):
         with self.assertRaises(AzureMissingResourceHttpError):
             self.fs.set_file_properties(
                 self.share_name, 'dir1', 'file1',
-                content_language='spanish')
+                content_settings=ContentSettings(content_language='spanish'))
 
         # Assert
 
@@ -1002,12 +1005,12 @@ class StorageFileTest(StorageTestCase):
             self.share_name, 'file1', b'hello world')
 
         # Act
-        props = self.fs.get_file_properties(self.share_name, None, 
-                                            'file1')
+        props, _ = self.fs.get_file_properties(
+            self.share_name, None, 'file1')
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['content-length'], '11')
+        self.assertEqual(props.content_length, 11)
 
     @record
     def test_get_file_properties_with_non_existing_share(self):
@@ -1367,7 +1370,7 @@ class StorageFileTest(StorageTestCase):
         file = self.fs.get_file(self.share_name, None, '啊齄丂狛狜')
 
         # Assert
-        self.assertIsInstance(file, FileResult)
+        self.assertIsInstance(file, File)
         self.assertEqual(file, b'hello world')
 
     @record
@@ -1394,7 +1397,7 @@ class StorageFileTest(StorageTestCase):
         file = self.fs.get_file(self.share_name, None, 'file1')
 
         # Assert
-        self.assertIsInstance(file, FileResult)
+        self.assertIsInstance(file, File)
         self.assertEqual(file, file_data)
 
     @record
@@ -1410,7 +1413,7 @@ class StorageFileTest(StorageTestCase):
         file = self.fs.get_file(self.share_name, None, 'file1')
 
         # Assert
-        self.assertIsInstance(file, FileResult)
+        self.assertIsInstance(file, File)
         self.assertEqual(file, binary_data)
 
     @record
@@ -1495,7 +1498,8 @@ class StorageFileTest(StorageTestCase):
             progress.append((current, total))
 
         resp = self.fs.get_file_to_bytes(
-            self.share_name, None, file_name, progress_callback=callback)
+            self.share_name, None, file_name, progress_callback=callback,
+            max_connections=2)
 
         # Assert
         self.assertEqual(data, resp)
@@ -1638,33 +1642,6 @@ class StorageFileTest(StorageTestCase):
             self.assertEqual(data, actual)
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
-    @record
-    def test_get_file_to_stream_with_progress_chunked_download(self):
-        # Arrange
-        file_name = 'file1'
-        data = self._get_oversized_binary_data()
-        file_path = 'file_output.temp.dat'
-        self._create_share_and_file_with_text(
-            self.share_name, file_name, data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        with open(file_path, 'wb') as stream:
-            resp = self.fs.get_file_to_stream(
-                self.share_name, None, file_name, stream,
-                progress_callback=callback)
-
-        # Assert
-        self.assertIsNone(resp)
-        with open(file_path, 'rb') as stream:
-            actual = stream.read()
-            self.assertEqual(data, actual)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
-
     def test_get_file_to_stream_with_progress_chunked_download_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
@@ -1785,7 +1762,7 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
-    def test_get_file_to_path_with_progress_chunked_downlad(self):
+    def test_get_file_to_path_with_progress_chunked_download(self):
         # Arrange
         file_name = 'file1'
         data = self._get_oversized_binary_data()
@@ -1801,7 +1778,7 @@ class StorageFileTest(StorageTestCase):
 
         resp = self.fs.get_file_to_path(
             self.share_name, None, file_name, file_path,
-            progress_callback=callback)
+            progress_callback=callback, max_connections=2)
 
         # Assert
         self.assertIsNone(resp)

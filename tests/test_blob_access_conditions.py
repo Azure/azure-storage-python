@@ -30,7 +30,7 @@ from azure.storage.blob import (
     PageBlobService,
     AppendBlobService,
     PageRange,
-    Settings,
+    ContentSettings,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -590,7 +590,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            settings=Settings(
+            content_settings=ContentSettings(
                 content_language='spanish',
                 content_disposition='inline'),
             if_modified_since=test_datetime,
@@ -599,8 +599,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.settings.content_language, 'spanish')
-        self.assertEqual(props.settings.content_disposition, 'inline')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_if_modified_fail(self):
@@ -615,7 +615,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                settings=Settings(
+                content_settings=ContentSettings(
                     content_language='spanish',
                     content_disposition='inline'),
                 if_modified_since=test_datetime,
@@ -635,7 +635,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            settings=Settings(
+            content_settings=ContentSettings(
                 content_language='spanish',
                 content_disposition='inline'),
             if_unmodified_since=test_datetime,
@@ -644,8 +644,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.settings.content_language, 'spanish')
-        self.assertEqual(props.settings.content_disposition, 'inline')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_if_unmodified_fail(self):
@@ -660,7 +660,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                settings=Settings(
+                content_settings=ContentSettings(
                     content_language='spanish',
                     content_disposition='inline'),
                 if_unmodified_since=test_datetime,
@@ -679,7 +679,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            settings=Settings(
+            content_settings=ContentSettings(
                 content_language='spanish',
                 content_disposition='inline'),
             if_match=etag,
@@ -688,8 +688,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.settings.content_language, 'spanish')
-        self.assertEqual(props.settings.content_disposition, 'inline')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_if_match_fail(self):
@@ -702,7 +702,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                settings=Settings(
+                content_settings=ContentSettings(
                     content_language='spanish',
                     content_disposition='inline'),
                 if_match='0x111111111111111',
@@ -720,7 +720,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            settings=Settings(
+            content_settings=ContentSettings(
                 content_language='spanish',
                 content_disposition='inline'),
             if_none_match='0x111111111111111',
@@ -729,8 +729,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.settings.content_language, 'spanish')
-        self.assertEqual(props.settings.content_disposition, 'inline')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_if_none_match_fail(self):
@@ -744,7 +744,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             resp = self.bs.set_blob_properties(
                 self.container_name,
                 'blob1',
-                settings=Settings(
+                content_settings=ContentSettings(
                     content_language='spanish',
                     content_disposition='inline'),
                 if_none_match=etag,

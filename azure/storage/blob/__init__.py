@@ -25,10 +25,11 @@ from .models import (
     BlobBlock,
     BlobBlockList,
     PageRange,
+    ContentSettings,
+    CopyProperties,
     ContainerSharedAccessPermissions,
     BlobSharedAccessPermissions,
     LeaseActions,
-    Settings,
 )
 
 from .blockblobservice import BlockBlobService

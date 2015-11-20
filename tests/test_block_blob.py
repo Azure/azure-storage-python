@@ -29,7 +29,7 @@ from azure.storage.blob import (
     BlobBlock,
     BlobBlockList,
     BlockBlobService,
-    Settings,
+    ContentSettings,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -496,7 +496,7 @@ class StorageBlockBlobTest(StorageTestCase):
         data = b'abcdefghijklmnopqrstuvwxyz'
         resp = self.bs.create_blob_from_bytes(
             self.container_name, 'blob1', data, 3, 5,
-            settings=Settings(
+            content_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish'))
 
@@ -505,8 +505,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(
             b'defgh', self.bs.get_blob(self.container_name, 'blob1'))
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_bytes_chunked_upload(self):
@@ -554,7 +554,7 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         resp = self.bs.create_blob_from_bytes(
             self.container_name, blob_name, data,
-            settings=Settings(
+            content_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish'))
 
@@ -563,8 +563,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_bytes_with_progress_chunked_upload(self):
@@ -688,7 +688,7 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         resp = self.bs.create_blob_from_path(
             self.container_name, blob_name, file_path,
-            settings=Settings(
+            content_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish'))
 
@@ -697,8 +697,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
         props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_stream_chunked_upload(self):
@@ -936,7 +936,7 @@ class StorageBlockBlobTest(StorageTestCase):
         with open(file_path, 'rb') as stream:
             resp = self.bs.create_blob_from_stream(
                 self.container_name, blob_name, stream, blob_size,
-                settings=Settings(
+                content_settings=ContentSettings(
                     content_type='image/png',
                     content_language='spanish'))
 
@@ -945,8 +945,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, blob_size)
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
         props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_stream_chunked_upload_with_properties(self):
@@ -962,7 +962,7 @@ class StorageBlockBlobTest(StorageTestCase):
         with open(file_path, 'rb') as stream:
             resp = self.bs.create_blob_from_stream(
                 self.container_name, blob_name, stream,
-                settings=Settings(
+                content_settings=ContentSettings(
                     content_type='image/png',
                     content_language='spanish'))
 
@@ -971,8 +971,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
         props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_create_blob_from_text(self):

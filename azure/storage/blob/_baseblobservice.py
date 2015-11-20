@@ -40,6 +40,7 @@ from ..models import (
     AccessPolicy,
 )
 from .models import (
+    BlobProperties,
     Container,
     LeaseActions,
 )
@@ -69,9 +70,9 @@ from ._serialization import (
 from ._deserialization import (
     _convert_xml_to_containers,
     _parse_blob,
-    _parse_blob_properties,
     _convert_xml_to_blob_list,
 )
+from .._common_deserialization import _parse_properties
 from ..sharedaccesssignature import (
     SharedAccessSignature,
     ResourceType,
@@ -956,10 +957,10 @@ class _BaseBlobService(_StorageClient):
 
         response = self._perform_request(request)
 
-        return _parse_blob_properties(response)
+        return _parse_properties(response, BlobProperties)
 
     def set_blob_properties(
-        self, container_name, blob_name, settings=None, lease_id=None,
+        self, container_name, blob_name, content_settings=None, lease_id=None,
         if_modified_since=None, if_unmodified_since=None, if_match=None,
         if_none_match=None, blob_properties=None):
         '''
@@ -969,8 +970,8 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        settings:
-            Settings object used to set blob properties.
+        content_settings:
+            ContentSettings object used to set blob properties.
         lease_id:
             Required if the blob has an active lease.
         if_modified_since:
@@ -997,8 +998,8 @@ class _BaseBlobService(_StorageClient):
             ('If-None-Match', _str_or_none(if_none_match)),
             ('x-ms-lease-id', _str_or_none(lease_id))
         ]
-        if settings is not None:
-            request.headers += settings.to_headers()
+        if content_settings is not None:
+            request.headers += content_settings.to_headers()
 
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)

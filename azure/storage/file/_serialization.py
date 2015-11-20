@@ -16,10 +16,6 @@ from time import time
 from wsgiref.handlers import format_date_time
 from .._common_serialization import _parse_response_for_dict
 from .._serialization import _update_storage_header
-from .models import (
-    FileResult,
-)
-
 
 def _update_storage_file_header(request, authentication):
     request = _update_storage_header(request)
@@ -30,8 +26,3 @@ def _update_storage_file_header(request, authentication):
     authentication.sign_request(request)
 
     return request.headers
-
-
-def _create_file_result(response):
-    file_properties = _parse_response_for_dict(response)
-    return FileResult(response.body, file_properties)

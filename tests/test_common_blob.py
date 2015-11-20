@@ -41,7 +41,7 @@ from azure.storage.blob import (
     BlockBlobService,
     BlobSharedAccessPermissions,
     ContainerSharedAccessPermissions,
-    Settings,
+    ContentSettings,
 )
 from azure.storage.storageclient import (
     AZURE_STORAGE_ACCESS_KEY,
@@ -1490,7 +1490,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsInstance(blob, Blob)
         self.assertEqual(blob, b'hello ')
         self.assertEqual(
-            blob.properties.settings.content_md5, '+BSJN3e8wilf/wXwDlCNpg==')
+            blob.properties.content_settings.content_md5, '+BSJN3e8wilf/wXwDlCNpg==')
 
     @record
     def test_get_blob_with_lease(self):
@@ -1555,7 +1555,7 @@ class StorageCommonBlobTest(StorageTestCase):
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            settings=Settings(
+            content_settings=ContentSettings(
                 content_language='spanish',
                 content_disposition='inline'),
         )
@@ -1563,8 +1563,8 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.settings.content_language, 'spanish')
-        self.assertEqual(props.settings.content_disposition, 'inline')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_blob_settings_param(self):
@@ -1574,19 +1574,19 @@ class StorageCommonBlobTest(StorageTestCase):
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
 
         # Act
-        props.settings.content_language = 'spanish'
-        props.settings.content_disposition = 'inline'
+        props.content_settings.content_language = 'spanish'
+        props.content_settings.content_disposition = 'inline'
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            settings=props.settings,
+            content_settings=props.content_settings,
         )
 
         # Assert
         self.assertIsNone(resp)
         props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.settings.content_language, 'spanish')
-        self.assertEqual(props.settings.content_disposition, 'inline')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_non_existing_container(self):
@@ -1596,7 +1596,7 @@ class StorageCommonBlobTest(StorageTestCase):
         with self.assertRaises(AzureHttpError):
             self.bs.set_blob_properties(
                 self.container_name, 'blob1',
-                settings=Settings(content_language='spanish'))
+                content_settings=ContentSettings(content_language='spanish'))
 
         # Assert
 
@@ -1609,7 +1609,7 @@ class StorageCommonBlobTest(StorageTestCase):
         with self.assertRaises(AzureHttpError):
             self.bs.set_blob_properties(
                 self.container_name, 'blob1',
-                settings=Settings(content_language='spanish'))
+                content_settings=ContentSettings(content_language='spanish'))
 
         # Assert
 

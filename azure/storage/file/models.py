@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-
+from .._common_conversion import _str_or_none
 class Share(object):
 
     ''' File share class. '''
@@ -44,24 +44,17 @@ class FileAndDirectoryResults(object):
         self.files = list()
         self.directories = list()
 
-
-class FileResult(bytes):
-
-    def __new__(cls, file, properties):
-        return bytes.__new__(cls, file if file else b'')
-
-    def __init__(self, file, properties):
-        self.properties = properties
-
-
-class File(object):
+class File(bytes):
 
     ''' File class. '''
 
-    def __init__(self):
+    def __new__(cls, file=None, properties=None, metadata=None):
+        return bytes.__new__(cls, file if file else b'')
+
+    def __init__(self, file=None, properties=None, metadata=None):
         self.name = None
-        self.properties = FileProperties()
-        self.metadata = None
+        self.properties = properties or FileProperties()
+        self.metadata = metadata
 
 
 class FileProperties(object):
@@ -72,12 +65,50 @@ class FileProperties(object):
         self.last_modified = None
         self.etag = None
         self.content_length = None
-        self.content_type = None
-        self.content_encoding = None
-        self.content_language = None
-        self.content_md5 = None
-        self.content_disposition = None
-        self.cache_control = None
+        self.content_settings = ContentSettings()
+        self.copy = CopyProperties()
+
+
+class ContentSettings(object):
+
+    '''ContentSettings object used for File services.'''
+
+    def __init__(
+        self, content_type=None, content_encoding=None,
+        content_language=None, content_disposition=None,
+        cache_control=None, content_md5=None):
+        
+        self.content_type = content_type
+        self.content_encoding = content_encoding
+        self.content_language = content_language
+        self.content_disposition = content_disposition
+        self.cache_control = cache_control
+        self.content_md5 = content_md5
+
+    def to_headers(self):
+        return [
+            ('x-ms-cache-control', _str_or_none(self.cache_control)),
+            ('x-ms-content-type', _str_or_none(self.content_type)),
+            ('x-ms-content-disposition',
+                _str_or_none(self.content_disposition)),
+            ('x-ms-content-md5', _str_or_none(self.content_md5)),
+            ('x-ms-content-encoding',
+                _str_or_none(self.content_encoding)),
+            ('x-ms-content-language',
+                _str_or_none(self.content_language)),
+        ]
+
+
+class CopyProperties(object):
+    '''File Copy Properties'''
+
+    def __init__(self):
+        self.id = None
+        self.source = None
+        self.status = None
+        self.progress = None
+        self.completion_time = None
+        self.status_description = None
 
 
 class Directory(object):

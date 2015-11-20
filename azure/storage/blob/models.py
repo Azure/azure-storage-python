@@ -44,7 +44,7 @@ class Blob(bytes):
     def __init__(self, blob=None, props=None, metadata=None):
         self.name = None
         self.snapshot = None
-        self.properties = props if props else BlobProperties()
+        self.properties = props or BlobProperties()
         self.metadata = metadata
 
 
@@ -52,48 +52,21 @@ class BlobProperties(object):
 
     ''' Blob Properties '''
 
-    def __init__(
-        self, blob_type=None, last_modified=None, etag=None, content_length=None,
-        append_blob_committed_block_count=None, page_blob_sequence_number=None,
-        copy_id=None, copy_source=None, copy_status=None, copy_state=None,
-        copy_progress=None, copy_completion_time=None, copy_status_description=None,
-        content_type=None, content_encoding=None, content_language=None,
-        content_disposition=None, cache_control=None, content_md5=None,
-        lease_status=None, lease_state=None, lease_duration=None):
-        
-        self.blob_type = blob_type
-        self.last_modified = last_modified
-        self.etag = etag
-        self.content_length = content_length
-        self.append_blob_committed_block_count = append_blob_committed_block_count
-        self.page_blob_sequence_number = page_blob_sequence_number
-        self.copy = CopyProperties(
-            copy_id, copy_source, copy_status, copy_progress,
-            copy_completion_time, copy_status_description)
-        self.settings = Settings(
-            content_type, content_encoding, content_language, content_disposition,
-            cache_control, content_md5)
-        self.lease = LeaseProperties(lease_status, lease_state, lease_duration)
+    def __init__(self):
+        self.blob_type = None
+        self.last_modified = None
+        self.etag = None
+        self.content_length = None
+        self.append_blob_committed_block_count = None
+        self.page_blob_sequence_number = None
+        self.copy = CopyProperties()
+        self.content_settings = ContentSettings()
+        self.lease = LeaseProperties()
 
 
-class CopyProperties(object):
-    '''Blob Copy Properties'''
+class ContentSettings(object):
 
-    def __init__(
-        self, id=None, source=None, status=None, progress=None,
-        completion_time=None, status_description=None):
-        
-        self.id = id
-        self.source = source
-        self.status = status
-        self.progress = progress
-        self.completion_time = completion_time
-        self.status_description = status_description
-
-
-class Settings(object):
-
-    '''Blob Settings'''
+    '''ContentSettings object used for Blob services.'''
 
     def __init__(
         self, content_type=None, content_encoding=None,
@@ -121,14 +94,26 @@ class Settings(object):
         ]
 
 
+class CopyProperties(object):
+    '''Blob Copy Properties'''
+
+    def __init__(self):
+        self.id = None
+        self.source = None
+        self.status = None
+        self.progress = None
+        self.completion_time = None
+        self.status_description = None
+
+
 class LeaseProperties(object):
 
     '''Blob Lease Properties'''
 
-    def __init__(self, status=None, state=None, duration=None):
-        self.status = status
-        self.state = state
-        self.duration = duration
+    def __init__(self):
+        self.status = None
+        self.state = None
+        self.duration = None
 
 
 class BlobBlockState(object):
