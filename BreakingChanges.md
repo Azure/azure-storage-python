@@ -25,7 +25,7 @@
 - Refactored the blob service into a block blob and page blob service.
 - Renamed APIs and params: All x_ms(_blob) prefexes and duplicates headers removed. x_ms_range => byte_range for applicable APIs. maxresults => max_results for applicable APIs. For append blobs and page blobs: put_blob => create_blob. For block blobs put_blob => _put_blob. x_ms_blob_condition_maxsize => maxsize_condition for append blob APIs. x_ms_blob_condition_appendpos => appendpos_condition for append blob APIs. text_encoding => encoding for applicable APIs. put_blob_from* => create_blob_from* for page and block blobs. x_ms_blob_content_md5 => transactional_content_md5 for put_block_list. blocklisttype => block_list_type for get_block_list. blockid => block_id for put_block.
 - Changed models for better usability. Blob & BlobResult classes have been joined. ContainerEnumResults => list of Container objects. Properties => ContainerProperties. BlobEnumResults => list of Blob objects. BlobBlock objects are used for specifying information for blocks passed to put_block_list. PageList => list of PageRange objects. get_blob_properties double returns BlobProperties object and a metadata dict.
-- Settings objects have replaced all content_*, cache_control, and sequence_number params for applicable APIs. Create a Settings object passing in those params and pass it APIs instead of each individual param.
+- ContentSettings objects have replaced all content_* and cache_control params for applicable APIs. Create a ContentSettings object passing with those params and pass it to APIs instead.
 - list_blobs no longer exposes prefix, marker, max_results, or delimiter.
 - Single-threaded blob download APIs will now download the blob without chunking to improve perf.
 
@@ -38,3 +38,7 @@
 - Renamed APIs and params: All x_ms prefexes have been removed. x_ms_range => byte_range for applicable APIs. maxresults => max_results for applicable APIs. x_ms_meta_name_values => metadata for applicable APIs. text_encoding => encoding for applicable APIs. list_ranges no longer uses range param.
 - Added sas_token parameter to FileService constructor before the connection_string param. Added quota parameter to create_share before the fail_on_exist param.
 - Changed list_ranges to return the list of file ranges directly rather than nested within a RangeList object.
+- ContentSettings objects have replaced all content_* and cache_control params for applicable APIs. Create a ContentSettings object passing with those params and pass it to APIs instead.
+- Single-threaded file download APIs will now download the file without chunking to improve perf.
+- Combined models for File & FileResult for better usability. get_file_properties double returns FileProperties object and a metadata dict.
+- list_directories_and_files no longer exposes marker or max_results.

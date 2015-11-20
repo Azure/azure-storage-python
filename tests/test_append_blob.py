@@ -25,7 +25,7 @@ import unittest
 from azure.common import AzureMissingResourceHttpError
 from azure.storage.blob import (
     AppendBlobService,
-    Settings,
+    ContentSettings,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -78,7 +78,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
     def _create_container_and_blob(self, container_name, blob_name, blob_settings=None):
         self._create_container(container_name)
-        resp = self.bs.create_blob(container_name, blob_name, settings=blob_settings)
+        resp = self.bs.create_blob(container_name, blob_name, content_settings=blob_settings)
         self.assertIsNone(resp)
 
     def _blob_exists(self, container_name, blob_name):
@@ -327,7 +327,7 @@ class StorageAppendBlobTest(StorageTestCase):
         self._create_container_and_blob(
             self.container_name,
             blob_name,
-            blob_settings=Settings(
+            blob_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish'))
         # Act
@@ -340,8 +340,8 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertEqual(
             b'defgh', self.bs.get_blob(self.container_name, blob_name))
         props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_bytes_chunked_upload(self):
@@ -366,7 +366,7 @@ class StorageAppendBlobTest(StorageTestCase):
         self._create_container_and_blob(
             self.container_name,
             blob_name,
-            blob_settings=Settings(
+            blob_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish'))
         data = self._get_oversized_binary_data()
@@ -380,8 +380,8 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
         props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_bytes_with_progress_chunked_upload(self):
@@ -476,7 +476,7 @@ class StorageAppendBlobTest(StorageTestCase):
         self._create_container_and_blob(
             self.container_name,
             blob_name,
-            blob_settings=Settings(
+            blob_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish'))
         data = self._get_oversized_binary_data()
@@ -493,8 +493,8 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
         props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_stream_chunked_upload(self):
@@ -639,7 +639,7 @@ class StorageAppendBlobTest(StorageTestCase):
         self._create_container_and_blob(
             self.container_name,
             blob_name,
-            blob_settings=Settings(
+            blob_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish'))
         
@@ -658,8 +658,8 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
         props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.settings.content_type, 'image/png')
-        self.assertEqual(props.settings.content_language, 'spanish')
+        self.assertEqual(props.content_settings.content_type, 'image/png')
+        self.assertEqual(props.content_settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_text(self):

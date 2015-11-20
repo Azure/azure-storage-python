@@ -26,7 +26,6 @@ from azure.common import AzureHttpError
 from azure.storage.blob import (
     PageBlobService,
     PageRange,
-    Settings,
 )
 from tests.common_recordingtestcase import (
     TestMode,

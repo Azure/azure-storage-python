@@ -91,7 +91,7 @@ class AppendBlobService(_BaseBlobService):
             account_name, account_key, protocol, host_base, dev_host,
             timeout, sas_token, connection_string, request_session)
 
-    def create_blob(self, container_name, blob_name, settings=None,
+    def create_blob(self, container_name, blob_name, content_settings=None,
                     metadata=None, lease_id=None,
                     if_modified_since=None, if_unmodified_since=None,
                     if_match=None, if_none_match=None):
@@ -107,8 +107,8 @@ class AppendBlobService(_BaseBlobService):
             Name of existing container.
         blob_name:
             Name of blob to create or update.
-        settings:
-            Settings object used to set blob properties.
+        content_settings:
+            ContentSettings object used to set blob properties.
         metadata:
             A dict containing name, value for metadata.
         lease_id:
@@ -137,8 +137,8 @@ class AppendBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
-        if settings is not None:
-            request.headers += settings.to_headers()
+        if content_settings is not None:
+            request.headers += content_settings.to_headers()
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(

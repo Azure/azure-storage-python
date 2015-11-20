@@ -30,7 +30,7 @@
 - Added Append Blob support.
 - Renamed some APIs and parameters for better readablity and less redundancy.
 - Changed models for better usability.
-- Settings objects have replaced all content_*, cache_control, and sequence_number params for applicable APIs. Create a Settings object passing in those params and pass it APIs instead of each individual param.
+- ContentSettings objects have replaced all content_* and cache_control params for applicable APIs. Create a ContentSettings object passing with those params and pass it to APIs instead.
 - list_blobs no longer exposes prefix, marker, max_results, or delimiter.
 - resize and set_sequence_number APIs have been added for Page Blob. It is not possible to make these changes with set_blob_properties.
 - Single-threaded blob download APIs will now download the blob without chunking to improve perf.
@@ -42,3 +42,7 @@
 ### File:
 - Renamed some APIs and parameters for better readablity and less redundancy.
 - Added new file features including support for SAS and ACL, share usage stats, directory metadata, async server side file copy, and share quota.
+- ContentSettings objects have replaced all content_* and cache_control params for applicable APIs. Create a ContentSettings object passing with those params and pass it to APIs instead.
+- Single-threaded file download APIs will now download the file without chunking to improve perf.
+- Combined models for File & FileResult for better usability. get_file_properties double returns FileProperties object and a metadata dict.
+- list_directories_and_files no longer exposes marker or max_results.

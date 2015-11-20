@@ -47,6 +47,7 @@ from ..models import (
     CorsRule,
     AccessPolicy,
 )
+from .models import FileProperties
 from .._http import HTTPRequest
 from ._chunking import (
     _download_file_chunks,
@@ -64,7 +65,6 @@ from ..constants import (
     X_MS_VERSION,
 )
 from ._serialization import (
-    _create_file_result,
     _update_storage_file_header,
 )
 from ._deserialization import (
@@ -72,7 +72,9 @@ from ._deserialization import (
     _convert_xml_to_directories_and_files,
     _convert_xml_to_ranges,
     _convert_xml_to_share_stats,
+    _parse_file,
 )
+from .._common_deserialization import _parse_properties
 from ..sharedaccesssignature import (
     SharedAccessSignature,
     ResourceType,
@@ -398,7 +400,7 @@ class FileService(_StorageClient):
         return _convert_xml_to_shares(response)
 
     def create_share(self, share_name, metadata=None, quota=None,
-                         fail_on_exist=False):
+                     fail_on_exist=False):
         '''
         Creates a new share under the specified account. If the share
         with the same name already exists, the operation fails on the
@@ -866,7 +868,7 @@ class FileService(_StorageClient):
 
         response = self._perform_request(request)
 
-        return _parse_response_for_dict(response)
+        return _parse_properties(response, FileProperties)
 
     def resize_file(self, share_name, directory_name, 
                     file_name, content_length):
@@ -904,10 +906,7 @@ class FileService(_StorageClient):
         self._perform_request(request)
 
     def set_file_properties(self, share_name, directory_name, 
-                            file_name, cache_control=None,
-                            content_type=None, content_md5=None,
-                            content_encoding=None, content_language=None,
-                            content_disposition=None):
+                            file_name, content_settings=None):
         '''
         Sets system properties on the file.
 
@@ -917,24 +916,8 @@ class FileService(_StorageClient):
             The path to the directory.
         file_name:
             Name of existing file.
-        cache_control:
-            Modifies the cache control string for the file.
-        content_type:
-            Sets the file's content type.
-        content_md5:
-            Sets the file's MD5 hash.
-        content_encoding:
-            Sets the file's content encoding.
-        content_language:
-            Sets the file's content language.
-        content_disposition:
-            Sets the file's Content-Disposition header.
-            The Content-Disposition response header field conveys additional
-            information about how to process the response payload, and also can
-            be used to attach additional metadata. For example, if set to
-            attachment, it indicates that the user-agent should not display the
-            response, but instead show a Save As dialog with a filename other
-            than the file name specified.
+        content_settings:
+            ContentSettings object used to set the file properties.
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -945,16 +928,9 @@ class FileService(_StorageClient):
         if directory_name is not None:
             request.path += '/' + _str(directory_name)
         request.path += '/' + _str(file_name) + '?comp=properties'
-        request.headers = [
-            ('x-ms-cache-control', _str_or_none(cache_control)),
-            ('x-ms-content-type', _str_or_none(content_type)),
-            ('x-ms-content-disposition',
-             _str_or_none(content_disposition)),
-            ('x-ms-content-md5', _str_or_none(content_md5)),
-            ('x-ms-content-encoding',
-             _str_or_none(content_encoding)),
-            ('x-ms-content-language',
-             _str_or_none(content_language))]
+        request.headers = None
+        if content_settings is not None:
+            request.headers = content_settings.to_headers()
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
@@ -1126,9 +1102,7 @@ class FileService(_StorageClient):
         self._perform_request(request)
 
     def create_file(self, share_name, directory_name, file_name,
-                    content_length, content_encoding=None, 
-                    content_language=None, content_md5=None, cache_control=None,
-                    content_type=None, metadata=None):
+                    content_length, content_settings=None, metadata=None):
         '''
         Creates a new block file or range file, or updates the content of an
         existing block file.
@@ -1143,19 +1117,8 @@ class FileService(_StorageClient):
             The path to the directory.
         file_name:
             Name of file to create or update.
-        content_length:
-            Required. This header specifies the maximum size
-            for the file, up to 1 TB.
-        content_encoding:
-            Set the file's content encoding.
-        content_language:
-            Set the file's content language.
-        content_md5:
-            Set the file's MD5 hash.
-        cache_control:
-            Sets the file's cache control.
-        content_type:
-            Set the file's content type.
+        content_settings:
+            ContentSettings object used to set file properties.
         metadata:
             A dict containing name, value for metadata.
         '''
@@ -1170,15 +1133,13 @@ class FileService(_StorageClient):
             request.path += '/' + _str(directory_name)
         request.path += '/' + _str(file_name) + ''
         request.headers = [
-            ('x-ms-content-type', _str_or_none(content_type)),
-            ('x-ms-content-encoding', _str_or_none(content_encoding)),
-            ('x-ms-content-language', _str_or_none(content_language)),
-            ('x-ms-content-md5', _str_or_none(content_md5)),
-            ('x-ms-cache-control', _str_or_none(cache_control)),
             ('x-ms-meta-name-values', metadata),
             ('x-ms-content-length', _str_or_none(content_length)),
             ('x-ms-type', 'file')
         ]
+        if content_settings is not None:
+            request.headers += content_settings.to_headers()
+
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
@@ -1186,9 +1147,7 @@ class FileService(_StorageClient):
         self._perform_request(request)
 
     def create_file_from_path(self, share_name, directory_name, file_name, 
-                           local_file_path, content_type=None,
-                           content_encoding=None, content_language=None,
-                           content_md5=None, cache_control=None,
+                           local_file_path, content_settings=None,
                            metadata=None, progress_callback=None,
                            max_connections=1, max_retries=5, retry_wait=1.0):
         '''
@@ -1203,16 +1162,8 @@ class FileService(_StorageClient):
             Name of file to create or update.
         local_file_path:
             Path of the local file to upload as the file content.
-        content_type:
-            Set the file's content type.
-        content_encoding:
-            Set the file's content encoding.
-        content_language:
-            Set the file's content language.
-        content_md5:
-            Set the file's MD5 hash.
-        cache_control:
-            Sets the file's cache control.
+        content_settings:
+            ContentSettings object used for setting file properties.
         metadata:
             A dict containing name, value for metadata.
         progress_callback:
@@ -1238,15 +1189,11 @@ class FileService(_StorageClient):
         with open(local_file_path, 'rb') as stream:
             self.create_file_from_stream(
                 share_name, directory_name, file_name, stream,
-                count, content_type, content_encoding,
-                content_language, content_md5, cache_control,
-                metadata, progress_callback,
+                count, content_settings, metadata, progress_callback,
                 max_connections, max_retries, retry_wait)
 
     def create_file_from_text(self, share_name, directory_name, file_name, 
-                           text, encoding='utf-8', content_type=None,
-                           content_encoding=None, content_language=None,
-                           content_md5=None, cache_control=None,
+                           text, encoding='utf-8', content_settings=None,
                            metadata=None):
         '''
         Creates a new file from str/unicode, or updates the content of an
@@ -1259,19 +1206,11 @@ class FileService(_StorageClient):
         file_name:
             Name of file to create or update.
         text:
-            Text to upload to the blob.
+            Text to upload to the file.
         encoding:
             Encoding to use to convert the text to bytes.
-        content_type:
-            Set the blob's content type.
-        content_encoding:
-            Set the blob's content encoding.
-        content_language:
-            Set the blob's content language.
-        content_md5:
-            Set the blob's MD5 hash.
-        cache_control:
-            Sets the blob's cache control.
+        content_settings:
+            ContentSettings object used to set file properties.
         metadata:
             A dict containing name, value for metadata.
         '''
@@ -1285,15 +1224,11 @@ class FileService(_StorageClient):
 
         self.create_file_from_bytes(
             share_name, directory_name, file_name, text, 0,
-            len(text), content_type, content_encoding,
-            content_language, content_md5, cache_control,
-            metadata)
+            len(text), content_settings, metadata)
 
     def create_file_from_bytes(
         self, share_name, directory_name, file_name, file,
-        index=0, count=None, content_type=None,
-        content_encoding=None, content_language=None,
-        content_md5=None, cache_control=None, metadata=None,
+        index=0, count=None, content_settings=None, metadata=None,
         progress_callback=None, max_connections=1, max_retries=5,
         retry_wait=1.0):
         '''
@@ -1314,16 +1249,8 @@ class FileService(_StorageClient):
         count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        content_type:
-            Set the file's content type.
-        content_encoding:
-            Set the file's content encoding.
-        content_language:
-            Set the file's content language.
-        content_md5:
-            Set the file's MD5 hash.
-        cache_control:
-            Sets the file's cache control.
+        content_settings:
+            ContentSettings object used to set file properties.
         metadata:
             A dict containing name, value for metadata.
         progress_callback:
@@ -1357,17 +1284,13 @@ class FileService(_StorageClient):
 
         self.create_file_from_stream(
             share_name, directory_name, file_name, stream, count,
-            content_type, content_encoding, content_language,
-            content_md5, cache_control, metadata,
-            progress_callback, max_connections, max_retries,
-            retry_wait)
+            content_settings, metadata, progress_callback,
+            max_connections, max_retries, retry_wait)
 
     def create_file_from_stream(
         self, share_name, directory_name, file_name, stream, count,
-        content_type=None, content_encoding=None, content_language=None,
-        content_md5=None, cache_control=None, metadata=None,
-        progress_callback=None, max_connections=1, max_retries=5,
-        retry_wait=1.0):
+        content_settings=None, metadata=None, progress_callback=None,
+        max_connections=1, max_retries=5, retry_wait=1.0):
         '''
         Creates a new page file from a file/stream, or updates the content of an
         existing page file, with automatic chunking and progress notifications.
@@ -1383,16 +1306,8 @@ class FileService(_StorageClient):
         count:
             Number of bytes to read from the stream. This is required, a page
             file cannot be created if the count is unknown.
-        content_type:
-            Set the file's content type.
-        content_encoding:
-            Set the file's content encoding.
-        content_language:
-            Set the file's content language.
-        content_md5:
-            Set the file's MD5 hash.
-        cache_control:
-            Sets the file's cache control.
+        content_settings:
+            ContentSettings object used to set file properties.
         metadata:
             A dict containing name, value for metadata.
         progress_callback:
@@ -1424,11 +1339,7 @@ class FileService(_StorageClient):
             directory_name,
             file_name,
             count,
-            content_type,
-            content_encoding,
-            content_language,
-            content_md5,
-            cache_control,
+            content_settings,
             metadata
         )
 
@@ -1488,7 +1399,7 @@ class FileService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request, None)
 
-        return _create_file_result(response)
+        return _parse_file(response)
 
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
                          open_mode='wb', progress_callback=None,
@@ -1512,11 +1423,9 @@ class FileService(_StorageClient):
             current is the number of bytes transfered so far, and total is the
             size of the file.
         max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to download the file chunks sequentially.
-            Set to 2 or more to download the file chunks in parallel. This uses
-            more system resources but will download faster.
+            Set to 1 to download the file sequentially.
+            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
+            If the file size does not exceed 64MB it will be downloaded in one chunk.
         max_retries:
             Number of times to retry download of file chunk if an error occurs.
         retry_wait:
@@ -1554,12 +1463,9 @@ class FileService(_StorageClient):
             current is the number of bytes transfered so far, and total is the
             size of the file.
         max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to download the file chunks sequentially.
-            Set to 2 or more to download the file chunks in parallel. This uses
-            more system resources but will download faster.
-            Note that parallel download requires the stream to be seekable.
+            Set to 1 to download the file sequentially.
+            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
+            If the file size does not exceed 64MB it will be downloaded in one chunk.
         max_retries:
             Number of times to retry download of file chunk if an error occurs.
         retry_wait:
@@ -1569,10 +1475,10 @@ class FileService(_StorageClient):
         _validate_not_none('file_name', file_name)
         _validate_not_none('stream', stream)
 
-        props = self.get_file_properties(share_name, directory_name, file_name)
-        file_size = int(props['content-length'])
+        props, _ = self.get_file_properties(share_name, directory_name, file_name)
+        file_size = props.content_length
 
-        if file_size < self._FILE_MAX_DATA_SIZE:
+        if file_size < self._FILE_MAX_DATA_SIZE or max_connections <= 1:
             if progress_callback:
                 progress_callback(0, file_size)
 
@@ -1615,11 +1521,9 @@ class FileService(_StorageClient):
             current is the number of bytes transfered so far, and total is the
             size of the file.
         max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to download the file chunks sequentially.
-            Set to 2 or more to download the file chunks in parallel. This uses
-            more system resources but will download faster.
+            Set to 1 to download the file sequentially.
+            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
+            If the file size does not exceed 64MB it will be downloaded in one chunk.
         max_retries:
             Number of times to retry download of file chunk if an error occurs.
         retry_wait:
@@ -1661,11 +1565,9 @@ class FileService(_StorageClient):
             current is the number of bytes transfered so far, and total is the
             size of the file.
         max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to download the file chunks sequentially.
-            Set to 2 or more to download the file chunks in parallel. This uses
-            more system resources but will download faster.
+            Set to 1 to download the file sequentially.
+            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
+            If the file size does not exceed 64MB it will be downloaded in one chunk.
         max_retries:
             Number of times to retry download of file chunk if an error occurs.
         retry_wait:

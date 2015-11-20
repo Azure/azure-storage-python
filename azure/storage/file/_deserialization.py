@@ -21,6 +21,7 @@ from .models import (
     Share,
     Directory,
     File,
+    FileProperties,
     FileAndDirectoryResults,
     Range,
     ShareStats,
@@ -28,7 +29,7 @@ from .models import (
 from ..models import (
     _list,
 )
-
+from .._common_deserialization import _parse_properties
 def _convert_xml_to_shares(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
@@ -140,6 +141,10 @@ def _convert_xml_to_directories_and_files(response):
         entries.directories.append(directory)
 
     return entries
+
+def _parse_file(response):
+    properties, metadata = _parse_properties(response, FileProperties)
+    return File(response.body, properties, metadata)
 
 def _convert_xml_to_ranges(response):
     '''

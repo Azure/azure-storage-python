@@ -21,7 +21,10 @@ from .._common_conversion import (
     _decode_base64_to_text,
     _str_or_none,
 )
-from .._common_serialization import _parse_response_for_dict
+from .._common_deserialization import (
+    _parse_properties,
+    _int_or_none,
+)
 from .models import (
     Container,
     Blob,
@@ -94,9 +97,6 @@ def _convert_xml_to_containers(response):
         containers.append(container)
 
     return containers
-
-def _int_or_none(value):
-    return value if value is None else int(value)
 
 LIST_BLOBS_ATTRIBUTE_MAP = {
     'Last-Modified': ('last_modified', parser.parse),
@@ -204,7 +204,7 @@ def _convert_xml_to_blob_list(response):
     return blob_list
 
 def _parse_blob(response):
-    props, metadata = _parse_blob_properties(response)
+    props, metadata = _parse_properties(response, BlobProperties)
     return Blob(response.body, props, metadata)
 
 def _convert_xml_to_block_list(response):
@@ -283,49 +283,3 @@ def _convert_xml_to_page_ranges(response):
         )
 
     return page_list
-
-GET_BLOB_ATTRIBUTE_MAP = {
-    'last-modified': (None, 'last_modified', parser.parse),
-    'etag': (None, 'etag', _str_or_none),
-    'x-ms-blob-type': (None, 'blob_type', _str_or_none),
-    'content-length': (None, 'content_length', _int_or_none),
-    'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_or_none),
-    'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_or_none),
-    'content-type': ('settings', 'content_type', _str_or_none),
-    'cache-control': ('settings', 'cache_control', _str_or_none),
-    'content-encoding': ('settings', 'content_encoding', _str_or_none),
-    'content-disposition': ('settings', 'content_disposition', _str_or_none),
-    'content-language': ('settings', 'content_language', _str_or_none),
-    'content-md5': ('settings', 'content_md5', _str_or_none),
-    'x-ms-lease-status': ('lease', 'status', _str_or_none),
-    'x-ms-lease-state': ('lease', 'state', _str_or_none),
-    'x-ms-lease-duration': ('lease', 'duration', _str_or_none),
-    'x-ms-copy-id': ('copy', 'id', _str_or_none),
-    'x-ms-copy-source': ('copy', 'source', _str_or_none),
-    'x-ms-copy-status': ('copy', 'status', _str_or_none),
-    'x-ms-copy-progress': ('copy', 'progress', _str_or_none),
-    'x-ms-copy-completion-time': ('copy', 'completion_time', _str_or_none),
-    'x-ms-copy-status-description': ('copy', 'status_description', _str_or_none),
-}
-
-def _parse_blob_properties(response):
-    ''' Extracts name-values from response header. Filter out the standard
-    http headers.'''
-
-    if response is None and response.headers is not None:
-        return None, None
-
-    props = BlobProperties()
-    metadata = {}
-    for key, value in response.headers:
-        info = GET_BLOB_ATTRIBUTE_MAP.get(key)
-        if info:
-            if info[0] is None:
-                setattr(props, info[1], info[2](value))
-            else:
-                attr = getattr(props, info[0])
-                setattr(attr, info[1], info[2](value))
-        elif key.startswith('x-ms-meta-'):
-            metadata[key] = _str_or_none(value)
-
-    return props, metadata

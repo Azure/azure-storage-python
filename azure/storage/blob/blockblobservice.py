@@ -97,7 +97,7 @@ class BlockBlobService(_BaseBlobService):
             account_name, account_key, protocol, host_base, dev_host,
             timeout, sas_token, connection_string, request_session)
 
-    def _put_blob(self, container_name, blob_name, blob, settings=None,
+    def _put_blob(self, container_name, blob_name, blob, content_settings=None,
                   metadata=None, lease_id=None, if_modified_since=None,
                   if_unmodified_since=None, if_match=None,
                   if_none_match=None):
@@ -115,8 +115,8 @@ class BlockBlobService(_BaseBlobService):
         blob:
             Content of blob as bytes (size < 64MB). For larger size, you
             must call put_block and put_block_list to set content of blob.
-        settings:
-            Settings object used to set properties on the blob.
+        content_settings:
+            ContentSettings object used to set properties on the blob.
         metadata:
             A dict containing name, value for metadata.
         lease_id:
@@ -145,8 +145,8 @@ class BlockBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
-        if settings is not None:
-            request.headers += settings.to_headers()
+        if content_settings is not None:
+            request.headers += content_settings.to_headers()
         request.body = _get_request_body_bytes_only('blob', blob)
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -199,7 +199,7 @@ class BlockBlobService(_BaseBlobService):
 
     def put_block_list(
         self, container_name, blob_name, block_list,
-        transactional_content_md5=None, settings=None,
+        transactional_content_md5=None, content_settings=None,
         metadata=None, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None):
         '''
@@ -219,8 +219,8 @@ class BlockBlobService(_BaseBlobService):
             verify the integrity of the blob during transport. When this header
             is specified, the storage service checks the hash that has arrived
             with the one that was sent.
-        settings:
-            Settings object used to set properties on the blob.
+        content_settings:
+            ContentSettings object used to set properties on the blob.
         metadata:
             Dict containing name and value pairs.
         lease_id:
@@ -251,8 +251,8 @@ class BlockBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        if settings is not None:
-            request.headers += settings.to_headers()
+        if content_settings is not None:
+            request.headers += content_settings.to_headers()
         request.body = _get_request_body(
             _convert_block_list_to_xml(block_list))
         request.path, request.query = _update_request_uri_query_local_storage(
@@ -303,7 +303,7 @@ class BlockBlobService(_BaseBlobService):
     #----Convenience APIs-----------------------------------------------------
 
     def create_blob_from_path(
-        self, container_name, blob_name, file_path, settings=None,
+        self, container_name, blob_name, file_path, content_settings=None,
         metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
@@ -318,8 +318,8 @@ class BlockBlobService(_BaseBlobService):
             Name of blob to create or update.
         file_path:
             Path of the file to upload as the blob content.
-        settings:
-            Settings object used to set blob properties.
+        content_settings:
+            ContentSettings object used to set blob properties.
         metadata:
             A dict containing name, value for metadata.
         progress_callback:
@@ -358,7 +358,7 @@ class BlockBlobService(_BaseBlobService):
                 blob_name=blob_name,
                 stream=stream,
                 count=count,
-                settings=settings,
+                content_settings=content_settings,
                 metadata=metadata,
                 lease_id=lease_id,
                 progress_callback=progress_callback,
@@ -372,7 +372,7 @@ class BlockBlobService(_BaseBlobService):
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
-        settings=None, metadata=None, progress_callback=None,
+        content_settings=None, metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None):
@@ -390,8 +390,8 @@ class BlockBlobService(_BaseBlobService):
         count:
             Number of bytes to read from the stream. This is optional, but
             should be supplied for optimal performance.
-        settings:
-            Settings object used to set blob properties.
+        content_settings:
+            ContentSettings object used to set blob properties.
         metadata:
             A dict containing name, value for metadata.
         progress_callback:
@@ -433,7 +433,7 @@ class BlockBlobService(_BaseBlobService):
                 container_name=container_name,
                 blob_name=blob_name,
                 blob=data,
-                settings=settings,
+                content_settings=content_settings,
                 metadata=metadata,
                 lease_id=lease_id,
                 if_modified_since=if_modified_since,
@@ -448,7 +448,7 @@ class BlockBlobService(_BaseBlobService):
                 container_name=container_name,
                 blob_name=blob_name,
                 blob=None,
-                settings=settings,
+                content_settings=content_settings,
                 metadata=metadata,
                 lease_id=lease_id,
                 if_modified_since=if_modified_since,
@@ -476,7 +476,7 @@ class BlockBlobService(_BaseBlobService):
                 container_name=container_name,
                 blob_name=blob_name,
                 block_list=block_ids,
-                settings=settings,
+                content_settings=content_settings,
                 metadata=metadata,
                 lease_id=lease_id,
                 if_modified_since=if_modified_since,
@@ -487,7 +487,7 @@ class BlockBlobService(_BaseBlobService):
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        settings=None, metadata=None, progress_callback=None,
+        content_settings=None, metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None):
@@ -507,8 +507,8 @@ class BlockBlobService(_BaseBlobService):
         count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        settings:
-            Settings object used to set blob properties.
+        content_settings:
+            ContentSettings object used to set blob properties.
         metadata:
             A dict containing name, value for metadata.
         progress_callback:
@@ -557,7 +557,7 @@ class BlockBlobService(_BaseBlobService):
                 container_name=container_name,
                 blob_name=blob_name,
                 blob=data,
-                settings=settings,
+                content_settings=content_settings,
                 metadata=metadata,
                 lease_id=lease_id,
                 if_modified_since=if_modified_since,
@@ -576,7 +576,7 @@ class BlockBlobService(_BaseBlobService):
                 blob_name=blob_name,
                 stream=stream,
                 count=count,
-                settings=settings,
+                content_settings=content_settings,
                 metadata=metadata,
                 progress_callback=progress_callback,
                 max_connections=max_connections,
@@ -590,7 +590,7 @@ class BlockBlobService(_BaseBlobService):
 
     def create_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
-        settings=None, metadata=None, progress_callback=None,
+        content_settings=None, metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None):
@@ -606,8 +606,8 @@ class BlockBlobService(_BaseBlobService):
             Text to upload to the blob.
         encoding:
             Python encoding to use to convert the text to bytes.
-        settings:
-            Settings object used to set blob properties.
+        content_settings:
+            ContentSettings object used to set blob properties.
         metadata:
             A dict containing name, value for metadata.
         progress_callback:
@@ -649,7 +649,7 @@ class BlockBlobService(_BaseBlobService):
             blob=text,
             index=0,
             count=len(text),
-            settings=settings,
+            content_settings=content_settings,
             metadata=metadata,
             lease_id=lease_id,
             progress_callback=progress_callback,
