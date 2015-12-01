@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+from xml.sax.saxutils import escape as xml_escape
+from xml.sax.saxutils import unescape as xml_unescape
+from base64 import (
+    b64encode,
+    b64decode,
+)
+from ._error import (
+    _validate_message_type_bytes,
+    _validate_message_type_text,
+    _ERROR_MESSAGE_NOT_BASE64,
+)
 
 class Queue(object):
 
@@ -39,12 +50,12 @@ class QueueMessage(object):
     ''' 
     Queue message class. 
 
-    :ivar message_id: 
+    :ivar id: 
         A GUID value assigned to the message by the Queue service that 
         identifies the message in the queue. This value may be used together 
         with the value of pop_receipt to delete a message from the queue after 
         it has been retrieved with the get messages operation. 
-    :vartype message_id: str
+    :vartype id: str
     :ivar insertion_time: 
         A UTC date value representing the time the messages was inserted.
     :vartype insertion_time: date
@@ -55,9 +66,10 @@ class QueueMessage(object):
         Begins with a value of 1 the first time the message is dequeued. This 
         value is incremented each time the message is subsequently dequeued.
     :vartype dequeue_count: int
-    :ivar message_text: 
-        A UTC date value representing the time the messages was inserted.
-    :vartype message_text: date
+    :ivar content: 
+        The message content. Type is determined by the decode_function set on 
+        the service. Default is str.
+    :vartype message: obj
     :ivar pop_receipt: 
         A receipt str which can be used together with the message_id element to 
         delete a message from the queue after it has been retrieved with the get 
@@ -71,13 +83,65 @@ class QueueMessage(object):
     '''
 
     def __init__(self):
-        self.message_id = None
+        self.id = None
         self.insertion_time = None
         self.expiration_time = None
         self.dequeue_count = None
-        self.message_text = None
+        self.content = None
         self.pop_receipt = None
         self.time_next_visible = None
+
+
+class QueueMessageFormat:
+    ''' 
+    Encoding and decoding methods which can be used to modify how the queue service 
+    encodes and decodes queue messages. Set these to queueservice.encode_function 
+    and queueservice.decode_function to modify the behavior. The defaults are 
+    text_xmlencode and text_xmldecode, respectively.
+    '''
+
+    @staticmethod
+    def text_base64encode(data):
+        _validate_message_type_text(data)
+        return b64encode(data.encode('utf-8')).decode('utf-8')
+     
+    @staticmethod
+    def text_base64decode(data):    
+        try:
+            return b64decode(data.encode('utf-8')).decode('utf-8')
+        except (ValueError, TypeError):
+            # ValueError for Python 3, TypeError for Python 2
+            raise ValueError(_ERROR_MESSAGE_NOT_BASE64)
+
+    @staticmethod
+    def binary_base64encode(data):
+        _validate_message_type_bytes(data)
+        return b64encode(data).decode('utf-8')
+     
+    @staticmethod
+    def binary_base64decode(data):
+        try:
+            return b64decode(data.encode('utf-8'))
+        except (ValueError, TypeError):
+            # ValueError for Python 3, TypeError for Python 2
+            raise ValueError(_ERROR_MESSAGE_NOT_BASE64)
+
+    @staticmethod
+    def text_xmlencode(data):
+        _validate_message_type_text(data)
+        return xml_escape(data)
+       
+    @staticmethod 
+    def text_xmldecode(data):
+        return xml_unescape(data)
+
+    @staticmethod
+    def noencode(data):
+        return data
+        
+    @staticmethod
+    def nodecode(data):
+        return data
 
 
 class QueueSharedAccessPermissions(object):

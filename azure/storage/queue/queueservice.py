@@ -17,7 +17,6 @@ from azure.common import (
     AzureHttpError,
 )
 from ..constants import (
-    DEFAULT_HTTP_TIMEOUT,
     DEV_QUEUE_HOST,
     QUEUE_SERVICE_HOST_BASE,
 )
@@ -41,6 +40,9 @@ from .._common_conversion import (
 )
 from .._http import (
     HTTPRequest,
+)
+from .models import (
+    QueueMessageFormat,
 )
 from ..auth import (
     StorageSASAuthentication,
@@ -77,38 +79,55 @@ class QueueService(_StorageClient):
 
     '''
     This is the main class managing queue resources.
+
+    :ivar encode_function: A function used to encode queue messages. Takes as 
+    a parameter the data passed to the put_message API and returns the encoded 
+    message. Defaults to take text and xml encode, but bytes and other 
+    encodings can be used. For example, base64 may be preferable for developing 
+    across multiple Azure Storage libraries in different languages. See the 
+    `.QueueMessageFormat` class for xml, base64 and no encoding methods as well 
+    as binary equivalents.
+    :vartype encode_function: function(data)
+    :ivar decode_function: A function used to encode decode messages. Takes as 
+    a parameter the data returned by the get_messages and peek_messages APIs and 
+    returns the decoded message. Defaults to return text and xml decode, but 
+    bytes and other decodings can be used. For example, base64 may be preferable 
+    for developing across multiple Azure Storage libraries in different languages. 
+    See the `.QueueMessageFormat` class for xml, base64 and no decoding methods 
+    as well as binary equivalents.
+    :vartype decode_function: function(data)
     '''
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=QUEUE_SERVICE_HOST_BASE, dev_host=DEV_QUEUE_HOST,
-                 timeout=DEFAULT_HTTP_TIMEOUT, sas_token=None, connection_string=None,
+                 timeout=None, sas_token=None, connection_string=None,
                  request_session=None):
         '''
-        account_name:
+        :param str account_name:
             your storage account name, required for all operations.
-        account_key:
+        :param str account_key:
             your storage account key, required for all operations.
-        protocol:
-            Optional. Protocol. Defaults to http.
-        host_base:
-            Optional. Live host base url. Defaults to Azure url. Override this
+        :param str protocol:
+            Protocol. Defaults to http.
+        :param str host_base:
+            Live host base url. Defaults to Azure url. Override this
             for on-premise.
-        dev_host:
-            Optional. Dev host url. Defaults to localhost.
-        timeout:
-            Optional. Timeout for the http request, in seconds.
-        sas_token:
-            Optional. Token to use to authenticate with shared access signature.
-        connection_string:
-            Optional. If specified, the first four parameters (account_name,
+        :param str dev_host:
+            Dev host url. Defaults to localhost.
+        :param int timeout:
+            Timeout for the http request, in seconds.
+        :param str sas_token:
+            Token to use to authenticate with shared access signature.
+        :param str connection_string:
+            If specified, the first four parameters (account_name,
             account_key, protocol, host_base) may be overridden
             by values specified in the connection_string. The next three parameters
             (dev_host, timeout, sas_token) cannot be specified with a
             connection_string. See 
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
-        request_session:
-            Optional. Session object to use for http requests.
+        :param request_session:
+            Session object to use for http requests.
         '''
         if connection_string is not None:
             connection_params = StorageConnectionParameters(connection_string)
@@ -129,6 +148,9 @@ class QueueService(_StorageClient):
             self.authentication = StorageSASAuthentication(self.sas_token)
         else:
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
+
+        self.encode_function = QueueMessageFormat.text_xmlencode
+        self.decode_function = QueueMessageFormat.text_xmldecode
 
     def generate_shared_access_signature(self, queue_name,
                                          permission=None, 
@@ -202,8 +224,8 @@ class QueueService(_StorageClient):
         Gets the properties of a storage account's Queue Service, including
         Azure Storage Analytics.
 
-        timeout:
-            Optional. The timeout parameter is expressed in seconds.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -219,26 +241,28 @@ class QueueService(_StorageClient):
         return _convert_xml_to_service_properties(response.body)
 
     def list_queues(self, prefix=None, marker=None, max_results=None,
-                    include=None):
+                    include=None, timeout=None):
         '''
         Lists all of the queues in a given storage account.
 
-        prefix:
+        :param str prefix:
             Filters the results to return only queues with names that begin
             with the specified prefix.
-        marker:
+        :param str marker:
             A string value that identifies the portion of the list to be
             returned with the next list operation. The operation returns a
             NextMarker element within the response body if the list returned
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
             queues. The marker value is opaque to the client.
-        max_results:
-            Specifies the maximum number of queues to return. If max_results is
+        :param int max_results:
+            Specifies the maximum number of queues to return. If maxresults is
             not specified, the server will return up to 5,000 items.
-        include:
-            Optional. Include this parameter to specify that the container's
+        :param str include:
+            Include this parameter to specify that the container's
             metadata be returned as part of the response body.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -248,7 +272,8 @@ class QueueService(_StorageClient):
             ('prefix', _str_or_none(prefix)),
             ('marker', _str_or_none(marker)),
             ('maxresults', _int_or_none(max_results)),
-            ('include', _str_or_none(include))
+            ('include', _str_or_none(include)),
+            ('timeout', _int_or_none(timeout))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -258,25 +283,28 @@ class QueueService(_StorageClient):
 
         return _convert_xml_to_queues(response)
 
-    def create_queue(self, queue_name, x_ms_meta_name_values=None,
-                     fail_on_exist=False):
+    def create_queue(self, queue_name, metadata=None,
+                     fail_on_exist=False, timeout=None):
         '''
         Creates a queue under the given account.
 
-        queue_name:
+        :param str queue_name:
             name of the queue.
-        x_ms_meta_name_values:
-            Optional. A dict containing name-value pairs to associate with the
+        :param dict metadata:
+            A dict containing name-value pairs to associate with the
             queue as metadata.
-        fail_on_exist:
+        :param bool fail_on_exist:
             Specify whether throw exception when queue exists.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + ''
-        request.headers = [('x-ms-meta-name-values', x_ms_meta_name_values)]
+        request.query = [('timeout', _int_or_none(timeout))]
+        request.headers = [('x-ms-meta-name-values', metadata)]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
@@ -297,20 +325,23 @@ class QueueService(_StorageClient):
                     _ERROR_CONFLICT.format(response.message), response.status)
             return True
 
-    def delete_queue(self, queue_name, fail_not_exist=False):
+    def delete_queue(self, queue_name, fail_not_exist=False, timeout=None):
         '''
         Permanently deletes the specified queue.
 
-        queue_name:
+        :param str queue_name:
             Name of the queue.
-        fail_not_exist:
+        :param bool fail_not_exist:
             Specify whether throw exception when queue doesn't exist.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + ''
+        request.query = [('timeout', _int_or_none(timeout))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
@@ -326,19 +357,22 @@ class QueueService(_StorageClient):
             self._perform_request(request)
             return True
 
-    def get_queue_metadata(self, queue_name):
+    def get_queue_metadata(self, queue_name, timeout=None):
         '''
         Retrieves user-defined metadata and queue properties on the specified
         queue. Metadata is associated with the queue as name-values pairs.
 
-        queue_name:
+        :param str queue_name:
             Name of the queue.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + '?comp=metadata'
+        request.query = [('timeout', _int_or_none(timeout))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
@@ -349,36 +383,41 @@ class QueueService(_StorageClient):
             response,
             prefixes=['x-ms-meta', 'x-ms-approximate-messages-count'])
 
-    def set_queue_metadata(self, queue_name, x_ms_meta_name_values=None):
+    def set_queue_metadata(self, queue_name, metadata=None, timeout=None):
         '''
         Sets user-defined metadata on the specified queue. Metadata is
         associated with the queue as name-value pairs.
 
-        queue_name:
+        :param str queue_name:
             Name of the queue.
-        x_ms_meta_name_values:
-            Optional. A dict containing name-value pairs to associate with the
+        :param dict metadata:
+            A dict containing name-value pairs to associate with the
             queue as metadata.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + '?comp=metadata'
-        request.headers = [('x-ms-meta-name-values', x_ms_meta_name_values)]
+        request.query = [('timeout', _int_or_none(timeout))]
+        request.headers = [('x-ms-meta-name-values', metadata)]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
             request, self.authentication)
         self._perform_request(request)
 
-    def get_queue_acl(self, queue_name):
+    def get_queue_acl(self, queue_name, timeout=None):
         '''
         Returns details about any stored access policies specified on the
         queue that may be used with Shared Access Signatures.
 
         :param str queue_name:
             Name of existing queue.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         :return: A dictionary of access policies associated with the queue.
         :rtype: dict of str to :class:`.AccessPolicy`:
         '''
@@ -387,6 +426,7 @@ class QueueService(_StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + '?comp=acl'
+        request.query = [('timeout', _int_or_none(timeout))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
@@ -395,7 +435,7 @@ class QueueService(_StorageClient):
 
         return _convert_xml_to_signed_identifiers(response.body)
 
-    def set_queue_acl(self, queue_name, signed_identifiers=None):
+    def set_queue_acl(self, queue_name, signed_identifiers=None, timeout=None):
         '''
         Sets stored access policies for the queue that may be used with
         Shared Access Signatures.
@@ -407,6 +447,8 @@ class QueueService(_StorageClient):
             dictionary may contain up to 5 elements. An empty dictionary  
             will clear the access policies set on the service. 
         :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -414,6 +456,7 @@ class QueueService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + \
             _str(queue_name) + '?comp=acl'
+        request.query = [('timeout', _int_or_none(timeout))]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
         request.path, request.query = _update_request_uri_query_local_storage(
@@ -422,68 +465,75 @@ class QueueService(_StorageClient):
             request, self.authentication)
         self._perform_request(request)
 
-    def put_message(self, queue_name, message_text, visibilitytimeout=None,
-                    messagettl=None):
+    def put_message(self, queue_name, content, visibility_timeout=None,
+                    time_to_live=None, timeout=None):
         '''
         Adds a new message to the back of the message queue. A visibility
         timeout can also be specified to make the message invisible until the
         visibility timeout expires. A message must be in a format that can be
         included in an XML request with UTF-8 encoding. The encoded message can
-        be up to 64KB in size for versions 2011-08-18 and newer, or 8KB in size
-        for previous versions.
+        be up to 64KB in size.
 
-        queue_name:
+        :param str queue_name:
             Name of the queue.
-        message_text:
-            Message content.
-        visibilitytimeout:
-            Optional. If not specified, the default value is 0. Specifies the
+        :param obj content:
+            Message content. Allowed type is determined by the encode_function 
+            set on the service. Default is str.
+        :param int visibility_timeout:
+            If not specified, the default value is 0. Specifies the
             new visibility timeout value, in seconds, relative to server time.
             The new value must be larger than or equal to 0, and cannot be
             larger than 7 days. The visibility timeout of a message cannot be
-            set to a value later than the expiry time. visibilitytimeout
+            set to a value later than the expiry time. visibility_timeout
             should be set to a value smaller than the time-to-live value.
-        messagettl:
-            Optional. Specifies the time-to-live interval for the message, in
+        :param int time_to_live:
+            Specifies the time-to-live interval for the message, in
             seconds. The maximum time-to-live allowed is 7 days. If this
             parameter is omitted, the default time-to-live is 7 days.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
-        _validate_not_none('message_text', message_text)
+        _validate_not_none('content', content)
         request = HTTPRequest()
         request.method = 'POST'
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + '/messages'
         request.query = [
-            ('visibilitytimeout', _str_or_none(visibilitytimeout)),
-            ('messagettl', _str_or_none(messagettl))
+            ('visibilitytimeout', _str_or_none(visibility_timeout)),
+            ('messagettl', _str_or_none(time_to_live)),
+            ('timeout', _int_or_none(timeout))
         ]
-        request.body = _get_request_body(_convert_queue_message_xml(message_text))
+        request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
             request, self.authentication)
         self._perform_request(request)
 
-    def get_messages(self, queue_name, numofmessages=None,
-                     visibilitytimeout=None):
+    def get_messages(self, queue_name, num_messages=None,
+                     visibility_timeout=None, timeout=None):
         '''
         Retrieves one or more messages from the front of the queue.
 
-        queue_name:
+        :param str :param str queue_name:
             Name of the queue.
-        numofmessages:
-            Optional. A nonzero integer value that specifies the number of
+        :param int num_messages:
+            A nonzero integer value that specifies the number of
             messages to retrieve from the queue, up to a maximum of 32. If
             fewer are visible, the visible messages are returned. By default,
             a single message is retrieved from the queue with this operation.
-        visibilitytimeout:
+        :param int visibility_timeout:
             Specifies the new visibility timeout value, in seconds, relative
             to server time. The new value must be larger than or equal to 1
             second, and cannot be larger than 7 days, or larger than 2 hours
             on REST protocol versions prior to version 2011-08-18. The
             visibility timeout of a message can be set to a value later than
             the expiry time.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: A list of QueueMessage objects.
+        :rtype: list of `.QueueMessage`s
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -491,8 +541,9 @@ class QueueService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + '/messages'
         request.query = [
-            ('numofmessages', _str_or_none(numofmessages)),
-            ('visibilitytimeout', _str_or_none(visibilitytimeout))
+            ('numofmessages', _str_or_none(num_messages)),
+            ('visibilitytimeout', _str_or_none(visibility_timeout)),
+            ('timeout', _int_or_none(timeout))
         ]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
@@ -500,116 +551,135 @@ class QueueService(_StorageClient):
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _convert_xml_to_queue_messages(response)
+        return _convert_xml_to_queue_messages(response, self.decode_function)
 
-    def peek_messages(self, queue_name, numofmessages=None):
+    def peek_messages(self, queue_name, num_messages=None, timeout=None):
         '''
         Retrieves one or more messages from the front of the queue, but does
         not alter the visibility of the message.
 
-        queue_name:
+        :param str :param str queue_name:
             Name of the queue.
-        numofmessages:
-            Optional. A nonzero integer value that specifies the number of
+        :param int num_messages:
+            A nonzero integer value that specifies the number of
             messages to peek from the queue, up to a maximum of 32. By default,
             a single message is peeked from the queue with this operation.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: A list of QueueMessage objects.
+        :rtype: list of `.QueueMessage`s
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + '/messages?peekonly=true'
-        request.query = [('numofmessages', _str_or_none(numofmessages))]
+        request.query = [
+            ('numofmessages', _str_or_none(num_messages)),
+            ('timeout', _int_or_none(timeout))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
             request, self.authentication)
         response = self._perform_request(request)
 
-        return _convert_xml_to_queue_messages(response)
+        return _convert_xml_to_queue_messages(response, self.decode_function)
 
-    def delete_message(self, queue_name, message_id, popreceipt):
+    def delete_message(self, queue_name, message_id, pop_receipt, timeout=None):
         '''
         Deletes the specified message.
 
-        queue_name:
+        :param str :param str queue_name:
             Name of the queue.
-        message_id:
+        :param str message_id:
             Message to delete.
-        popreceipt:
-            Required. A valid pop receipt value returned from an earlier call
+        :param str pop_receipt:
+            A valid pop receipt value returned from an earlier call
             to the Get Messages or Update Message operation.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         _validate_not_none('message_id', message_id)
-        _validate_not_none('popreceipt', popreceipt)
+        _validate_not_none('pop_receipt', pop_receipt)
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = '/' + \
             _str(queue_name) + '/messages/' + _str(message_id) + ''
-        request.query = [('popreceipt', _str_or_none(popreceipt))]
+        request.query = [
+            ('popreceipt', _str_or_none(pop_receipt)),
+            ('timeout', _int_or_none(timeout))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
             request, self.authentication)
         self._perform_request(request)
 
-    def clear_messages(self, queue_name):
+    def clear_messages(self, queue_name, timeout=None):
         '''
         Deletes all messages from the specified queue.
 
-        queue_name:
+        :param str :param str queue_name:
             Name of the queue.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = '/' + _str(queue_name) + '/messages'
+        request.query = [('timeout', _int_or_none(timeout))]
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
             request, self.authentication)
         self._perform_request(request)
 
-    def update_message(self, queue_name, message_id, message_text, popreceipt,
-                       visibilitytimeout):
+    def update_message(self, queue_name, id, pop_receipt, visibility_timeout, 
+                       content=None, timeout=None):
         '''
         Updates the visibility timeout of a message. You can also use this
         operation to update the contents of a message.
 
-        queue_name:
+        :param str queue_name:
             Name of the queue.
-        message_id:
+        :param str id:
             Message to update.
-        message_text:
-            Content of message.
-        popreceipt:
-            Required. A valid pop receipt value returned from an earlier call
+        :param str pop_receipt:
+            A valid pop receipt value returned from an earlier call
             to the Get Messages or Update Message operation.
-        visibilitytimeout:
-            Required. Specifies the new visibility timeout value, in seconds,
+        :param int visibility_timeout:
+            Specifies the new visibility timeout value, in seconds,
             relative to server time. The new value must be larger than or equal
             to 0, and cannot be larger than 7 days. The visibility timeout of a
             message cannot be set to a value later than the expiry time. A
             message can be updated until it has been deleted or has expired.
+        :param obj content:
+            Message content. Allowed type is determined by the encode_function 
+            set on the service. Default is str.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
-        _validate_not_none('message_id', message_id)
-        _validate_not_none('message_text', message_text)
-        _validate_not_none('popreceipt', popreceipt)
-        _validate_not_none('visibilitytimeout', visibilitytimeout)
+        _validate_not_none('id', id)
+        _validate_not_none('pop_receipt', pop_receipt)
+        _validate_not_none('visibility_timeout', visibility_timeout)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + \
-            _str(queue_name) + '/messages/' + _str(message_id) + ''
+            _str(queue_name) + '/messages/' + _str(id) + ''
         request.query = [
-            ('popreceipt', _str_or_none(popreceipt)),
-            ('visibilitytimeout', _str_or_none(visibilitytimeout))
+            ('popreceipt', _str_or_none(pop_receipt)),
+            ('visibilitytimeout', _int_or_none(visibility_timeout)),
+            ('timeout', _int_or_none(timeout))
         ]
-        request.body = _get_request_body(_convert_queue_message_xml(message_text))
+
+        if content is not None:
+            request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
+
         request.path, request.query = _update_request_uri_query_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_queue_header(
@@ -618,7 +688,7 @@ class QueueService(_StorageClient):
 
         return _parse_response_for_dict_filter(
             response,
-            filter=['x-ms-popreceipt', 'x-ms-time-next-visible'])
+            filter=['x-ms-pop_receipt', 'x-ms-time-next-visible'])
 
     def set_queue_service_properties(self, logging=None, hour_metrics=None, 
                                     minute_metrics=None, cors=None, timeout=None):
