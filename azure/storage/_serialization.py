@@ -14,25 +14,169 @@
 #--------------------------------------------------------------------------
 import sys
 from datetime import date
+from dateutil.tz import tzutc
+
 if sys.version_info >= (3,):
     from io import BytesIO
+    from urllib.parse import quote as url_quote
 else:
     from cStringIO import StringIO as BytesIO
+    from urllib2 import quote as url_quote   
 
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
     from xml.etree import ElementTree as ETree
 
-from ._common_error import (
+from ._error import (
     _general_error_handler,
+    _ERROR_VALUE_SHOULD_BE_BYTES,
 )
 from .constants import (
     X_MS_VERSION,
 )
-from ._common_serialization import (
-    _to_utc_datetime,
+from .models import (
+    _unicode_type,
+    HeaderDict,
 )
+
+def _to_utc_datetime(value):
+    # Azure expects the date value passed in to be UTC.
+    # Azure will always return values as UTC.
+    # If a date is passed in without timezone info, it is assumed to be UTC.
+    if value.tzinfo:
+        value = value.astimezone(tzutc())
+    return value.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+def _get_request_body_bytes_only(param_name, param_value):
+    '''Validates the request body passed in and converts it to bytes
+    if our policy allows it.'''
+    if param_value is None:
+        return b''
+
+    if isinstance(param_value, bytes):
+        return param_value
+
+    raise TypeError(_ERROR_VALUE_SHOULD_BE_BYTES.format(param_name))
+
+
+def _get_request_body(request_body):
+    '''Converts an object into a request body.  If it's None
+    we'll return an empty string, if it's one of our objects it'll
+    convert it to XML and return it.  Otherwise we just use the object
+    directly'''
+    if request_body is None:
+        return b''
+
+    if isinstance(request_body, bytes):
+        return request_body
+
+    if isinstance(request_body, _unicode_type):
+        return request_body.encode('utf-8')
+
+    request_body = str(request_body)
+    if isinstance(request_body, _unicode_type):
+        return request_body.encode('utf-8')
+
+    return request_body
+
+
+def _update_request_uri_query_local_storage(request, use_local_storage):
+    ''' create correct uri and query for the request '''
+
+    def _update_request_uri_query(request):
+        '''pulls the query string out of the URI and moves it into
+        the query portion of the request object.  If there are already
+        query parameters on the request the parameters in the URI will
+        appear after the existing parameters'''
+
+        if '?' in request.path:
+            request.path, _, query_string = request.path.partition('?')
+            if query_string:
+                query_params = query_string.split('&')
+                for query in query_params:
+                    if '=' in query:
+                        name, _, value = query.partition('=')
+                        request.query.append((name, value))
+
+        request.path = url_quote(request.path, '/()$=\',')
+
+        # add encoded queries to request.path.
+        if request.query:
+            request.path += '?'
+            for name, value in request.query:
+                if value is not None:
+                    request.path += name + '=' + url_quote(value, '/()$=\',') + '&'
+            request.path = request.path[:-1]
+
+        return request.path, request.query
+
+    uri, query = _update_request_uri_query(request)
+    if use_local_storage:
+        return '/' + DEV_ACCOUNT_NAME + uri, query
+    return uri, query
+
+
+def _parse_response_for_dict(response):
+    ''' Extracts name-values from response header. Filter out the standard
+    http headers.'''
+
+    if response is None:
+        return None
+    http_headers = ['server', 'date', 'location', 'host',
+                    'via', 'proxy-connection', 'connection']
+    return_dict = HeaderDict()
+    if response.headers:
+        for name, value in response.headers:
+            if not name.lower() in http_headers:
+                return_dict[name] = value
+
+    return return_dict
+
+
+def _parse_response_for_dict_prefix(response, prefixes):
+    ''' Extracts name-values for names starting with prefix from response
+    header. Filter out the standard http headers.'''
+
+    if response is None:
+        return None
+    return_dict = {}
+    orig_dict = _parse_response_for_dict(response)
+    if orig_dict:
+        for name, value in orig_dict.items():
+            for prefix_value in prefixes:
+                if name.lower().startswith(prefix_value.lower()):
+                    return_dict[name] = value
+                    break
+        return return_dict
+    else:
+        return None
+
+
+def _parse_response_for_dict_filter(response, filter):
+    ''' Extracts name-values for names in filter from response header. Filter
+    out the standard http headers.'''
+    if response is None:
+        return None
+    return_dict = {}
+    orig_dict = _parse_response_for_dict(response)
+    if orig_dict:
+        for name, value in orig_dict.items():
+            if name.lower() in filter:
+                return_dict[name] = value
+        return return_dict
+    else:
+        return None
+
+    
+def _extract_etag(response):
+    ''' Extracts the etag from the response headers. '''
+    if response and response.headers:
+        for name, value in response.headers:
+            if name.lower() == 'etag':
+                return value
+
+    return None
 
 def _storage_error_handler(http_error):
     ''' Simple error handler for storage service. '''

@@ -12,9 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
+from azure.common import (
+    AzureException,
+    AzureHttpError,
+)
 from ._error import (
     _ERROR_ATTRIBUTE_MISSING,
 )
+
+class AzureBatchValidationError(AzureException):
+
+    '''Indicates that a batch operation cannot proceed due to invalid input'''
+
+
+class AzureBatchOperationError(AzureHttpError):
+
+    '''Indicates that a batch operation failed'''
+
+    def __init__(self, message, status_code, batch_code):
+        super(AzureBatchOperationError, self).__init__(message, status_code)
+        self.code = batch_code
 
 class Entity(dict):
     ''' Entity class. The attributes of entity will be created dynamically. '''

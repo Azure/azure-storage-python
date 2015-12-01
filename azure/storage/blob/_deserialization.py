@@ -21,7 +21,7 @@ from .._common_conversion import (
     _decode_base64_to_text,
     _str_or_none,
 )
-from .._common_deserialization import (
+from .._deserialization import (
     _parse_properties,
     _int_or_none,
 )

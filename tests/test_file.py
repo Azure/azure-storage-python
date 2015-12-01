@@ -27,12 +27,7 @@ from azure.common import (
     AzureMissingResourceHttpError,
 )
 from azure.storage import (
-    DEV_ACCOUNT_NAME,
-    DEV_ACCOUNT_KEY,
     AccessPolicy,
-    Logging,
-    Metrics,
-    ServiceProperties,
 )
 from azure.storage.file import (
     FILE_SERVICE_HOST_BASE,

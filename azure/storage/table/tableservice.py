@@ -21,27 +21,20 @@ from .._common_conversion import (
     _str,
     _str_or_none,
 )
-from .._common_error import (
+from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
     _ERROR_STORAGE_MISSING_INFO,
 )
-from .._common_serialization import (
+from .._serialization import (
     _get_request_body,
     _update_request_uri_query_local_storage,
     _extract_etag,
 )
 from .._http import HTTPRequest
-from ..models import (
-    Logging,
-    Metrics,
-    CorsRule,
-    AccessPolicy,
-)
+
 from .models import (
-    TableSharedAccessPermissions,
-    Entity,
     TablePayloadFormat,
 )
 from ..auth import (
@@ -73,16 +66,11 @@ from ._deserialization import (
     _convert_json_response_to_tables,
     _convert_json_response_to_entities,
     _parse_batch_response,
-    _parse_batch_error,
 )
 from ..constants import (
     TABLE_SERVICE_HOST_BASE,
     DEFAULT_HTTP_TIMEOUT,
     DEV_TABLE_HOST,
-    X_MS_VERSION,
-)
-from ._error import (
-    _validate_object_has_param,
 )
 from ._request import (
     _get_entity,

@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-import base64
 import unittest
 import sys
 import locale
@@ -22,7 +21,6 @@ import os
 
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc, tzoffset
-from requests import Session
 from math import isnan
 from azure.common import (
     AzureHttpError,

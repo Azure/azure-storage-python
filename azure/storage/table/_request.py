@@ -17,11 +17,10 @@ from .._common_conversion import (
     _str,
     _str_or_none,
 )
-from .._common_error import (
+from .._error import (
     _validate_not_none,
 )
-from .._common_serialization import (
-    _update_request_uri_query_local_storage,
+from .._serialization import (
     _get_request_body,
 )
 from ._error import (
@@ -29,7 +28,6 @@ from ._error import (
 )
 from ._serialization import (
     _convert_entity_to_json,
-    _update_storage_table_header,
     _DEFAULT_ACCEPT_HEADER,
     _DEFAULT_CONTENT_TYPE_HEADER,
     _DEFAULT_PREFER_HEADER,

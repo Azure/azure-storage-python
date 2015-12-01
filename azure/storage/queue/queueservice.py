@@ -20,17 +20,15 @@ from ..constants import (
     DEFAULT_HTTP_TIMEOUT,
     DEV_QUEUE_HOST,
     QUEUE_SERVICE_HOST_BASE,
-    X_MS_VERSION,
 )
-from .._common_error import (
+from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
     _ERROR_CONFLICT,
     _ERROR_STORAGE_MISSING_INFO,
 )
-from .._common_serialization import (
-    xml_escape,
+from .._serialization import (
     _get_request_body,
     _parse_response_for_dict_filter,
     _parse_response_for_dict_prefix,
@@ -43,15 +41,6 @@ from .._common_conversion import (
 )
 from .._http import (
     HTTPRequest,
-)
-from ..models import (
-    Logging,
-    Metrics,
-    CorsRule,
-    AccessPolicy,
-)
-from .models import (
-    Queue,
 )
 from ..auth import (
     StorageSASAuthentication,

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-import types
 import sys
 if sys.version_info >= (3,):
     from io import BytesIO
@@ -26,10 +25,8 @@ except ImportError:
 
 from time import time
 from wsgiref.handlers import format_date_time
+from xml.sax.saxutils import escape as xml_escape
 from .._serialization import _update_storage_header
-from .._common_serialization import (
-    xml_escape,
-)
 from .._common_conversion import (
     _str,
 )

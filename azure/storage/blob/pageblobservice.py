@@ -12,36 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from azure.common import AzureHttpError
-from .._common_error import (
+from .._error import (
     _validate_not_none,
     _validate_type_bytes,
     _ERROR_VALUE_NEGATIVE,
-    _ERROR_PAGE_BLOB_SIZE_ALIGNMENT,
 )
 from .._common_conversion import (
     _int_or_none,
     _str,
     _str_or_none,
 )
-from .._common_serialization import (
+from .._serialization import (
     _get_request_body_bytes_only,
     _update_request_uri_query_local_storage,
 )
 from .._http import HTTPRequest
+from ._error import (
+    _ERROR_PAGE_BLOB_SIZE_ALIGNMENT,
+)
 from ._chunking import (
     _PageBlobChunkUploader,
     _upload_blob_chunks,
 )
 from .models import (
-    PageRange,
     _BlobTypes,
 )
 from ..constants import (
     BLOB_SERVICE_HOST_BASE,
     DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
-    X_MS_VERSION,
 )
 from ._serialization import _update_storage_blob_header
 from ._deserialization import _convert_xml_to_page_ranges

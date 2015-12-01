@@ -12,32 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from azure.common import (
-    AzureException,
-    AzureHttpError,
-)
-from ._common_error import (
+import sys
+if sys.version_info < (3,):
+    _unicode_type = unicode
+else:
+    _unicode_type = str
+
+from ._error import (
     _validate_not_none,
 )
 
+class HeaderDict(dict):
+
+    def __getitem__(self, index):
+        return super(HeaderDict, self).__getitem__(index.lower())
 
 class _list(list):
     '''Used so that a continuation token can be set on the return object'''
     pass
-
-
-class AzureBatchValidationError(AzureException):
-
-    '''Indicates that a batch operation cannot proceed due to invalid input'''
-
-
-class AzureBatchOperationError(AzureHttpError):
-
-    '''Indicates that a batch operation failed'''
-
-    def __init__(self, message, status_code, batch_code):
-        super(AzureBatchOperationError, self).__init__(message, status_code)
-        self.code = batch_code
 
 
 class EnumResultsBase(object):

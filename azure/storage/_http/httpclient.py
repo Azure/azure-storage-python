@@ -13,7 +13,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import base64
-import os
 import sys
 
 if sys.version_info < (3,):

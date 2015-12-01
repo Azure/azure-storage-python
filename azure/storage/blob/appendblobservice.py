@@ -12,11 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-import requests
-from azure.common import (
-    AzureHttpError,
-)
-from .._common_error import (
+from .._error import (
     _validate_not_none,
     _validate_type_bytes,
     _ERROR_VALUE_NEGATIVE,
@@ -25,7 +21,7 @@ from .._common_conversion import (
     _str,
     _str_or_none,
 )
-from .._common_serialization import (
+from .._serialization import (
     _get_request_body_bytes_only,
     _update_request_uri_query_local_storage,
     _parse_response_for_dict,
@@ -40,9 +36,7 @@ from ..constants import (
     BLOB_SERVICE_HOST_BASE,
     DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
-    X_MS_VERSION,
 )
-from azure.common import AzureMissingResourceHttpError
 from ._serialization import _update_storage_blob_header
 from ._baseblobservice import _BaseBlobService
 from os import path

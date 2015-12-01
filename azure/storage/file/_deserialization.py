@@ -29,7 +29,8 @@ from .models import (
 from ..models import (
     _list,
 )
-from .._common_deserialization import _parse_properties
+from .._deserialization import _parse_properties
+
 def _convert_xml_to_shares(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>

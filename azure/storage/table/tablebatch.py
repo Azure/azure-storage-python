@@ -12,22 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from ..models import (
-    AzureBatchValidationError,
-)
-from .._common_error import (
-    _validate_not_none,
-)
 from ._error import (
     _ERROR_INCORRECT_PARTITION_KEY_IN_BATCH,
     _ERROR_DUPLICATE_ROW_KEY_IN_BATCH,
     _ERROR_TOO_MANY_ENTITIES_IN_BATCH,
 )
 from .models import (
-    TablePayloadFormat,
+    AzureBatchValidationError,
 )
 from ._request import (
-    _get_entity,
     _insert_entity,
     _update_entity,
     _merge_entity,

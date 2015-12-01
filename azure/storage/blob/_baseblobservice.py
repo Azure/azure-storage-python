@@ -13,7 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 from azure.common import AzureHttpError
-from .._common_error import (
+from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
@@ -24,7 +24,7 @@ from .._common_conversion import (
     _str_or_none,
 )
 from abc import ABCMeta
-from .._common_serialization import (
+from .._serialization import (
     _get_request_body,
     _parse_response_for_dict,
     _parse_response_for_dict_filter,
@@ -33,15 +33,9 @@ from .._common_serialization import (
 )
 from .._http import HTTPRequest
 from ._chunking import _download_blob_chunks
-from ..models import (
-    Logging,
-    Metrics,
-    CorsRule,
-    AccessPolicy,
-)
+
 from .models import (
     BlobProperties,
-    Container,
     LeaseActions,
 )
 from ..auth import (
@@ -54,7 +48,6 @@ from ..constants import (
     BLOB_SERVICE_HOST_BASE,
     DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
-    X_MS_VERSION,
 )
 from .._serialization import (
     _convert_signed_identifiers_to_xml,
@@ -72,13 +65,12 @@ from ._deserialization import (
     _parse_blob,
     _convert_xml_to_blob_list,
 )
-from .._common_deserialization import _parse_properties
+from .._deserialization import _parse_properties
 from ..sharedaccesssignature import (
     SharedAccessSignature,
     ResourceType,
 )
 from ..storageclient import _StorageClient
-from os import path
 import sys
 if sys.version_info >= (3,):
     from io import BytesIO

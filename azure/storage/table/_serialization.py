@@ -17,7 +17,6 @@ import types
 import uuid
 
 from datetime import datetime
-from dateutil.tz import tzutc
 from time import time
 from wsgiref.handlers import format_date_time
 from json import (
@@ -25,15 +24,12 @@ from json import (
 )
 from math import(
     isnan,
-    isinf,
 )
 from .._common_conversion import (
     _encode_base64,
     _str,
-    _str_or_none,
 )
-from .._common_serialization import (
-    _update_request_uri_query_local_storage,
+from .._serialization import (
     _to_utc_datetime,
 )
 from .._serialization import _update_storage_header
@@ -43,7 +39,6 @@ from ._error import (
     _ERROR_VALUE_TOO_LARGE,
 )
 from .models import (
-    Entity,
     EntityProperty,
     TablePayloadFormat,
     EdmType,

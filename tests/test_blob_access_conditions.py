@@ -14,12 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-import base64
 import datetime
 import os
-import random
-import requests
-import sys
 import unittest
 
 from azure.common import AzureHttpError
@@ -33,7 +29,6 @@ from azure.storage.blob import (
     ContentSettings,
 )
 from tests.common_recordingtestcase import (
-    TestMode,
     record,
 )
 from tests.testcase import StorageTestCase
@@ -199,7 +194,6 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
     @record
     def test_lease_container_acquire_with_if_modified(self):
-        import random
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -

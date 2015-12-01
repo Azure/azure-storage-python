@@ -18,7 +18,7 @@ import hashlib
 import hmac
 import sys
 
-from ._common_models import (
+from .models import (
     _unicode_type,
 )
 

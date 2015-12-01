@@ -13,7 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 from azure.common import AzureHttpError
-from .._common_error import (
+from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
@@ -22,12 +22,11 @@ from .._common_error import (
     _ERROR_STORAGE_MISSING_INFO,
 )
 from .._common_conversion import (
-    _encode_base64,
     _int_or_none,
     _str,
     _str_or_none,
 )
-from .._common_serialization import (
+from .._serialization import (
     _get_request_body,
     _get_request_body_bytes_only,
     _parse_response_for_dict,
@@ -41,11 +40,6 @@ from .._serialization import (
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
-)
-from ..models import (
-    Metrics,
-    CorsRule,
-    AccessPolicy,
 )
 from .models import FileProperties
 from .._http import HTTPRequest
@@ -62,7 +56,6 @@ from ..constants import (
     FILE_SERVICE_HOST_BASE,
     DEFAULT_HTTP_TIMEOUT,
     DEV_FILE_HOST,
-    X_MS_VERSION,
 )
 from ._serialization import (
     _update_storage_file_header,
@@ -74,7 +67,7 @@ from ._deserialization import (
     _convert_xml_to_share_stats,
     _parse_file,
 )
-from .._common_deserialization import _parse_properties
+from .._deserialization import _parse_properties
 from ..sharedaccesssignature import (
     SharedAccessSignature,
     ResourceType,

@@ -14,15 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-import base64
-import datetime
 import os
 import random
-import requests
-import sys
 import unittest
 
-from azure.common import AzureMissingResourceHttpError
 from azure.storage.blob import (
     AppendBlobService,
     ContentSettings,
