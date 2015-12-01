@@ -41,7 +41,7 @@ class _StorageClient(object):
     '''
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
-                 host_base='', dev_host='', timeout=DEFAULT_HTTP_TIMEOUT,
+                 host_base='', dev_host='', timeout=None,
                  sas_token=None, request_session=None):
         '''
         account_name:

@@ -17,6 +17,7 @@ try:
     from xml.etree import cElementTree as ETree
 except ImportError:
     from xml.etree import ElementTree as ETree
+
 from .models import (
     Queue,
     QueueMessage,
@@ -71,7 +72,7 @@ def _convert_xml_to_queues(response):
 
     return queues
 
-def _convert_xml_to_queue_messages(response):
+def _convert_xml_to_queue_messages(response, decode_function):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <QueueMessagesList>
@@ -95,9 +96,10 @@ def _convert_xml_to_queue_messages(response):
     for message_element in list_element.findall('QueueMessage'):
         message = QueueMessage()
 
-        message.message_id = message_element.findtext('MessageId')
+        message.id = message_element.findtext('MessageId')
         message.dequeue_count = message_element.findtext('DequeueCount')
-        message.message_text = message_element.findtext('MessageText')
+
+        message.content = decode_function(message_element.findtext('MessageText'))
 
         message.insertion_time = parser.parse(message_element.findtext('InsertionTime'))
         message.expiration_time = parser.parse(message_element.findtext('ExpirationTime'))

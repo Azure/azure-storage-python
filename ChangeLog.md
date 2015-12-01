@@ -38,6 +38,10 @@
 ### Queue:
 - The list_queues operation returns a list of Queue objects. The list returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
 - The peek_messages and get_messages operations return a list of QueueMessage objects. QueueMessage objects contain the same fields as previously, but insertion_time, expiration_time, and time_next_visible are returned as UTC dates rather than strings.
+- update_message takes message_text as an optional parameter. This changes the parameter ordering.
+- create_queue and set_queue_metadata apis take metadata rather than x_ms_meta_name_values.
+- Added encode_function and decode_function properties to the queue service to allow users to specify custom encoding and decoding of queue messages.
+- Encoding and decoding functions default to xml encoding and decoding. Previously messages were only xml encoded but not decoded.
 
 ### File:
 - Renamed some APIs and parameters for better readablity and less redundancy.

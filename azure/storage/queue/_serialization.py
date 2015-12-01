@@ -16,7 +16,10 @@ import sys
 if sys.version_info >= (3,):
     from io import BytesIO
 else:
-    from cStringIO import StringIO as BytesIO
+    try:
+        from cStringIO import StringIO as BytesIO
+    except:
+        from StringIO import StringIO as BytesIO
 
 try:
     from xml.etree import cElementTree as ETree
@@ -41,7 +44,7 @@ def _update_storage_queue_header(request, authentication):
 
     return request.headers
 
-def _convert_queue_message_xml(message_text):
+def _convert_queue_message_xml(message_text, encode_function):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <QueueMessage>
@@ -51,12 +54,15 @@ def _convert_queue_message_xml(message_text):
     queue_message_element = ETree.Element('QueueMessage');
 
     # Enabled
-    message_text = xml_escape(_str(message_text))
+    message_text = _str(encode_function(message_text))
     ETree.SubElement(queue_message_element, 'MessageText').text = message_text
 
     # Add xml declaration and serialize
-    with BytesIO() as stream:
+    try:
+        stream = BytesIO()
         ETree.ElementTree(queue_message_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
         output = stream.getvalue()
+    finally:
+        stream.close()
 
     return output

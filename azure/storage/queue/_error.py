@@ -12,16 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from ..constants import (
-    QUEUE_SERVICE_HOST_BASE,
-    DEV_QUEUE_HOST,
+import sys
+from .._error import (
+    _validate_type_bytes,
 )
 
-from .models import (
-    Queue,
-    QueueMessage,
-    QueueSharedAccessPermissions,
-    QueueMessageFormat,
-)
+_ERROR_MESSAGE_SHOULD_BE_UNICODE = 'message should be of type unicode.'
+_ERROR_MESSAGE_SHOULD_BE_STR = 'message should be of type str.'
+_ERROR_MESSAGE_NOT_BASE64 = 'message is not a valid base64 value.'
 
-from .queueservice import QueueService
+def _validate_message_type_text(param):
+    if sys.version_info < (3,):
+        if not isinstance(param, unicode):
+            raise TypeError(_ERROR_MESSAGE_SHOULD_BE_UNICODE)
+    else:
+        if not isinstance(param, str):
+            raise TypeError(_ERROR_MESSAGE_SHOULD_BE_STR)
+
+def _validate_message_type_bytes(param):
+    _validate_type_bytes('message', param)

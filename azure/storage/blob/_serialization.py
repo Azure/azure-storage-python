@@ -13,8 +13,8 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 from time import time
-from wsgiref.handlers import format_date_time
 from xml.sax.saxutils import escape as xml_escape
+from wsgiref.handlers import format_date_time
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
