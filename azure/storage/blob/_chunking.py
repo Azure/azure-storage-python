@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-import sys
 import threading
 
 from time import sleep
 from .._common_conversion import _encode_base64
-from .._common_serialization import url_quote
+from .._serialization import url_quote
 from azure.common import (
     AzureHttpError,
 )

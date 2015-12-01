@@ -12,35 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-import base64
 import unittest
-import sys
-import locale
-import os
 
-from datetime import datetime, timedelta
-from dateutil.tz import tzutc, tzoffset
-from requests import Session
-from math import isnan
-from azure.common import (
-    AzureHttpError,
-    AzureConflictHttpError,
-    AzureMissingResourceHttpError,
-    AzureException,
-)
-from azure.storage import (
-    AzureBatchOperationError,
-    AzureBatchValidationError,
-)
+
+from datetime import datetime
+from dateutil.tz import tzutc
 from azure.storage.table import (
     Entity,
     EntityProperty,
     TableService,
     TableBatch,
     EdmType,
+    AzureBatchOperationError,
+    AzureBatchValidationError,
 )
 from tests.common_recordingtestcase import (
-    TestMode,
     record,
 )
 from tests.testcase import StorageTestCase

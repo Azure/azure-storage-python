@@ -13,7 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 
-from .._common_error import (
+from .._error import (
     _validate_not_none,
     _ERROR_VALUE_NONE_OR_EMPTY,
 )

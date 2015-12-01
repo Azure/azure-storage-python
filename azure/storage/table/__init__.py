@@ -24,6 +24,8 @@ from .models import (
     TableSharedAccessPermissions,
     TablePayloadFormat,
     EdmType,
+    AzureBatchOperationError,
+    AzureBatchValidationError,
 )
 from .tablebatch import TableBatch
 from .tableservice import TableService

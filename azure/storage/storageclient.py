@@ -29,7 +29,7 @@ from .constants import (
 from ._http import HTTPError
 from ._http.httpclient import _HTTPClient
 from ._serialization import _storage_error_handler
-from ._common_error import (
+from ._error import (
     _ERROR_STORAGE_MISSING_INFO,
 )
 

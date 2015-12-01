@@ -14,10 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-import sys
 import unittest
 from datetime import datetime, timedelta
-from requests import Session
 from azure.storage import AccessPolicy
 from azure.storage.queue import (
     QueueService,

@@ -15,7 +15,7 @@
 from datetime import date
 
 from ._common_conversion import _sign_string
-from ._common_serialization import (
+from ._serialization import (
     url_quote,
     _to_utc_datetime,
 )

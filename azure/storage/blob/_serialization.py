@@ -14,22 +14,16 @@
 #--------------------------------------------------------------------------
 from time import time
 from wsgiref.handlers import format_date_time
+from xml.sax.saxutils import escape as xml_escape
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
     from xml.etree import ElementTree as ETree
 from .._common_conversion import (
-    _decode_base64_to_text,
     _encode_base64,
     _str,
 )
 from .._serialization import _update_storage_header
-from .._common_serialization import xml_escape
-from .models import (
-    Blob,
-    BlobBlock,
-    BlobBlockList,
-)
 import sys
 if sys.version_info >= (3,):
     from io import BytesIO

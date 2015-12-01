@@ -13,10 +13,8 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import sys
-import types
 
 from dateutil import parser
-from dateutil.tz import tzutc
 if sys.version_info < (3,):
     from urllib2 import quote as url_quote
 else:
@@ -28,13 +26,7 @@ from .._http import HTTPResponse
 from azure.common import (
     AzureException,
 )
-from .._common_models import (
-    HeaderDict,
-)
-from ..models import (
-    AzureBatchOperationError,
-)
-from .._common_serialization import (
+from .._serialization import (
     _extract_etag,
 )
 from .._common_conversion import (
@@ -49,9 +41,11 @@ from .models import (
     EntityProperty,
     Table,
     EdmType,
+    AzureBatchOperationError,
 )
 from ..models import (
     _list,
+    HeaderDict,
 )
 
 def _set_continuation_from_response_headers(feeds, response):

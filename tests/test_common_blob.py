@@ -30,14 +30,10 @@ from azure.storage import (
     DEV_ACCOUNT_NAME,
     DEV_ACCOUNT_KEY,
     AccessPolicy,
-    Logging,
-    Metrics,
-    ServiceProperties,
 )
 from azure.storage.blob import (
     BLOB_SERVICE_HOST_BASE,
     Blob,
-    BlobBlock,
     BlockBlobService,
     BlobSharedAccessPermissions,
     ContainerSharedAccessPermissions,

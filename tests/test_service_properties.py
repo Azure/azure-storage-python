@@ -28,7 +28,6 @@ from azure.storage.queue import QueueService
 from azure.storage.table import TableService
 from azure.storage.file import FileService
 from tests.common_recordingtestcase import (
-    TestMode,
     record,
 )
 from tests.testcase import StorageTestCase
