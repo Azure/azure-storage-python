@@ -221,3 +221,229 @@ class AccessPolicy(object):
         self.start = start
         self.expiry = expiry
         self.permission = permission
+
+
+class ResourceTypes(object):
+
+    '''
+    Specifies the resource types that are accessible with the account SAS.
+
+    :param bool service:
+        Access to service-level APIs (e.g., Get/Set Service Properties, 
+        Get Service Stats, List Containers/Queues/Tables/Shares) 
+    :param bool container:
+        Access to container-level APIs (e.g., Create/Delete Container, 
+        Create/Delete Queue, Create/Delete Table, Create/Delete Share, 
+        List Blobs/Files and Directories) 
+    :param bool object:
+        Access to object-level APIs for blobs, queue messages, table entities, and 
+        files(e.g. Put Blob, Query Entity, Get Messages, Create File, etc.) 
+    :param str _str: 
+        A string representing the resource types.
+    '''
+    def __init__(self, service=False, container=False, object=False, _str=None):
+
+        if not _str:
+            _str = ''
+        self.service = service or ('s' in _str)
+        self.container = container or ('c' in _str)
+        self.object = object or ('o' in _str)
+    
+    def __or__(self, other):
+        return ResourceTypes(_str=str(self) + str(other))
+
+    def __add__(self, other):
+        return ResourceTypes(_str=str(self) + str(other))
+    
+    def __str__(self):
+        return (('s' if self.service else '') +
+                ('c' if self.container else '') +
+                ('o' if self.object else ''))
+
+''' 
+Access to service-level APIs (e.g., Get/Set Service Properties, 
+Get Service Stats, List Containers/Queues/Tables/Shares) 
+'''
+ResourceTypes.SERVICE = ResourceTypes(service=True)
+
+''' 
+Access to container-level APIs (e.g., Create/Delete Container, 
+Create/Delete Queue, Create/Delete Table, Create/Delete Share, 
+List Blobs/Files and Directories) 
+'''
+ResourceTypes.CONTAINER = ResourceTypes(container=True)
+
+''' 
+Access to object-level APIs for blobs, queue messages, table entities, and 
+files(e.g. Put Blob, Query Entity, Get Messages, Create File, etc.) 
+'''
+ResourceTypes.OBJECT = ResourceTypes(object=True)
+
+
+class Services(object):
+
+    '''
+    Specifies the services accessible with the account SAS. Possible values include:
+
+    :param bool blob:
+        Access to any blob service, for example, the `.BlockBlobService`
+    :param bool queue:
+        Access to the `.QueueService`
+    :param bool table:
+        Access to the `.TableService`
+    :param bool file:
+        Access to the `.FileService`
+    :param str _str: 
+        A string representing the services.
+    '''
+    def __init__(self, blob=False, queue=False, table=False, file=False, _str=None):
+
+        if not _str:
+            _str = ''
+        self.blob = blob or ('b' in _str)
+        self.queue = queue or ('q' in _str)
+        self.table = table or ('t' in _str)
+        self.file = file or ('f' in _str)
+    
+    def __or__(self, other):
+        return Services(_str=str(self) + str(other))
+
+    def __add__(self, other):
+        return Services(_str=str(self) + str(other))
+    
+    def __str__(self):
+        return (('b' if self.blob else '') +
+                ('q' if self.queue else '') +
+                ('t' if self.table else '') +
+                ('f' if self.file else ''))
+
+''' 
+The blob service.
+'''
+Services.BLOB = Services(blob=True)
+
+''' 
+The queue service.
+'''
+Services.QUEUE = Services(queue=True)
+
+''' 
+The table service
+'''
+Services.TABLE = Services(table=True)
+
+''' 
+The file service.
+'''
+Services.FILE = Services(file=True)
+
+
+class AccountPermissions(object):
+
+    '''
+    TablePermissions class to be used with TableService generate_shared_access_signature 
+    method and for the AccessPolicies used with set_table_acl. 
+    There are two types of SAS which may be used to grant table access. One is to grant 
+    access to a specific table (table-specific) to do operations on its entities. 
+    Another is to grant access to the entire table service for a specific account 
+    and allow certain operations based on perms found here.
+
+    :param bool read:
+        Valid for all signed resources types (Service, Container, and Object). 
+        Permits read permissions to the specified resource type.
+    :param bool write:
+        Valid for all signed resources types (Service, Container, and Object). 
+        Permits write permissions to the specified resource type.
+    :param bool delete: 
+        Valid for Container and Object resource types, except for queue messages.
+    :param bool list:
+        Valid for Service and Container resource types only.
+    :param bool add:
+        Valid for the following Object resource types only: queue messages, 
+        table entities, and append blobs.
+    :param bool create:
+        Valid for the following Object resource types only: blobs and files. 
+        Users can create new blobs or files, but may not overwrite existing 
+        blobs or files.
+    :param bool update:
+        Valid for the following Object resource types only: queue messages and 
+        table entities.
+    :param bool process:
+        Valid for the following Object resource type only: queue messages.
+    :param str _str: 
+        A string representing the permissions.
+    '''
+    def __init__(self, read=False, write=False, delete=False, list=False, 
+                 add=False, create=False, update=False, process=False, _str=None):
+
+        if not _str:
+            _str = ''
+        self.read = read or ('r' in _str)
+        self.write = write or ('w' in _str)
+        self.delete = delete or ('d' in _str)
+        self.list = list or ('l' in _str)
+        self.add = add or ('a' in _str)
+        self.create = create or ('c' in _str)
+        self.update = update or ('u' in _str)
+        self.process = process or ('p' in _str)
+    
+    def __or__(self, other):
+        return TablePermissions(_str=str(self) + str(other))
+
+    def __add__(self, other):
+        return TablePermissions(_str=str(self) + str(other))
+    
+    def __str__(self):
+        return (('r' if self.read else '') +
+                ('w' if self.write else '') +
+                ('d' if self.delete else '') +
+                ('l' if self.list else '') +
+                ('a' if self.add else '') +
+                ('c' if self.create else '') +
+                ('u' if self.update else '') +
+                ('p' if self.process else ''))
+
+''' 
+Valid for all signed resources types (Service, Container, and Object). 
+Permits read permissions to the specified resource type. 
+'''
+AccountPermissions.READ = AccountPermissions(read=True)
+
+''' 
+Valid for all signed resources types (Service, Container, and Object). 
+Permits write permissions to the specified resource type. 
+'''
+AccountPermissions.WRITE = AccountPermissions(write=True)
+
+''' 
+Valid for Container and Object resource types, except for queue messages. 
+'''
+AccountPermissions.DELETE = AccountPermissions(delete=True)
+
+''' 
+Valid for Service and Container resource types only. 
+'''
+AccountPermissions.LIST = AccountPermissions(list=True)
+
+''' 
+Valid for the following Object resource types only: queue messages, table 
+entities, and append blobs. 
+'''
+AccountPermissions.ADD = AccountPermissions(add=True)
+
+''' 
+Valid for the following Object resource types only: blobs and files. Users 
+can create new blobs or files, but may not overwrite existing blobs or files. 
+'''
+AccountPermissions.CREATE = AccountPermissions(create=True)
+
+''' 
+Valid for the following Object resource types only: queue messages and table 
+entities. 
+'''
+AccountPermissions.UPDATE = AccountPermissions(update=True)
+
+''' 
+Valid for the following Object resource type only: queue messages. 
+'''
+AccountPermissions.PROCESS = AccountPermissions(process=True)

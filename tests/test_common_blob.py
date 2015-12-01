@@ -30,13 +30,15 @@ from azure.storage import (
     DEV_ACCOUNT_NAME,
     DEV_ACCOUNT_KEY,
     AccessPolicy,
+    ResourceTypes,
+    AccountPermissions,
 )
 from azure.storage.blob import (
     BLOB_SERVICE_HOST_BASE,
     Blob,
     BlockBlobService,
-    BlobSharedAccessPermissions,
-    ContainerSharedAccessPermissions,
+    BlobPermissions,
+    ContainerPermissions,
     ContentSettings,
 )
 from azure.storage.storageclient import (
@@ -851,7 +853,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Act
         identifiers = dict()
         identifiers['testid'] = AccessPolicy(
-            permission=ContainerSharedAccessPermissions.READ,
+            permission=ContainerPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),  
             start=datetime.utcnow() - timedelta(minutes=1),  
             )
@@ -1862,10 +1864,10 @@ class StorageCommonBlobTest(StorageTestCase):
         self._create_remote_container_and_block_blob(
             source_blob_name, data, None)
 
-        sas_token = self.bs2.generate_shared_access_signature(
+        sas_token = self.bs2.generate_blob_shared_access_signature(
             self.remote_container_name,
             source_blob_name,
-            permission=BlobSharedAccessPermissions.READ,
+            permission=BlobPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),          
         )
 
@@ -2305,10 +2307,10 @@ class StorageCommonBlobTest(StorageTestCase):
             data,
         )
         
-        token = self.bs.generate_shared_access_signature(
+        token = self.bs.generate_blob_shared_access_signature(
             self.container_name,
             blob_name,
-            permission=BlobSharedAccessPermissions.READ,
+            permission=BlobPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -2342,12 +2344,12 @@ class StorageCommonBlobTest(StorageTestCase):
         access_policy = AccessPolicy()
         access_policy.start = '2011-10-11'
         access_policy.expiry = '2018-10-12'
-        access_policy.permission = BlobSharedAccessPermissions.READ
+        access_policy.permission = BlobPermissions.READ
         identifiers = {'testid': access_policy}
 
         resp = self.bs.set_container_acl(self.container_name, identifiers)
 
-        token = self.bs.generate_shared_access_signature(
+        token = self.bs.generate_blob_shared_access_signature(
             self.container_name,
             blob_name,
             id='testid'
@@ -2366,6 +2368,39 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(data, result)
 
     @record
+    def test_account_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with read permission on blob'
+        blob_name = 'blob1.txt'
+        self._create_container_and_block_blob(
+            self.container_name,
+            blob_name,
+            data,
+        )
+
+        token = self.bs.generate_account_shared_access_signature(
+            ResourceTypes.OBJECT,
+            AccountPermissions.READ,
+            datetime.utcnow() + timedelta(hours=1),
+        )
+
+        # Act
+        url = self.bs.make_blob_url(
+            self.container_name,
+            blob_name,
+            sas_token=token,
+        )
+        response = requests.get(url)
+
+        # Assert
+        self.assertTrue(response.ok)
+        self.assertEqual(data, response.content)
+
+    @record
     def test_shared_read_access_blob(self):
         # SAS URL is calculated from storage key, so this test runs live only
         if TestMode.need_recordingfile(self.test_mode):
@@ -2380,10 +2415,10 @@ class StorageCommonBlobTest(StorageTestCase):
             data,
         )
 
-        token = self.bs.generate_shared_access_signature(
+        token = self.bs.generate_blob_shared_access_signature(
             self.container_name,
             blob_name,
-            permission=BlobSharedAccessPermissions.READ,
+            permission=BlobPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -2414,10 +2449,10 @@ class StorageCommonBlobTest(StorageTestCase):
             data,
         )
 
-        token = self.bs.generate_shared_access_signature(
+        token = self.bs.generate_blob_shared_access_signature(
             self.container_name,
             blob_name,
-            permission=BlobSharedAccessPermissions.READ,
+            permission=BlobPermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
             cache_control='no-cache',
             content_disposition='inline',
@@ -2458,10 +2493,10 @@ class StorageCommonBlobTest(StorageTestCase):
             data,
         )
 
-        token = self.bs.generate_shared_access_signature(
+        token = self.bs.generate_blob_shared_access_signature(
             self.container_name,
             blob_name,
-            permission=BlobSharedAccessPermissions.WRITE,
+            permission=BlobPermissions.WRITE,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
         url = self.bs.make_blob_url(
@@ -2494,10 +2529,10 @@ class StorageCommonBlobTest(StorageTestCase):
             data,
         )
 
-        token = self.bs.generate_shared_access_signature(
+        token = self.bs.generate_blob_shared_access_signature(
             self.container_name,
             blob_name,
-            permission=BlobSharedAccessPermissions.DELETE,
+            permission=BlobPermissions.DELETE,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
         url = self.bs.make_blob_url(
@@ -2529,11 +2564,10 @@ class StorageCommonBlobTest(StorageTestCase):
             data,
         )
 
-        token = self.bs.generate_shared_access_signature(
+        token = self.bs.generate_container_shared_access_signature(
             self.container_name,
-            None,
             expiry=datetime.utcnow() + timedelta(hours=1),
-            permission=ContainerSharedAccessPermissions.READ,
+            permission=ContainerPermissions.READ,
         )
         url = self.bs.make_blob_url(
             self.container_name,

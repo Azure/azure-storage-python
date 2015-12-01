@@ -39,6 +39,9 @@ from .models import (
     _unicode_type,
     HeaderDict,
 )
+from ._common_conversion import (
+    _str,
+)
 
 def _to_utc_datetime(value):
     # Azure expects the date value passed in to be UTC.
@@ -211,7 +214,7 @@ def _convert_signed_identifiers_to_xml(signed_identifiers):
             ETree.SubElement(policy, 'Expiry').text = expiry
         
         if access_policy.permission:
-            ETree.SubElement(policy, 'Permission').text = access_policy.permission
+            ETree.SubElement(policy, 'Permission').text = _str(access_policy.permission)
 
     # Add xml declaration and serialize
     with BytesIO() as stream:

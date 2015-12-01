@@ -68,22 +68,6 @@ class Table(object):
     pass
 
 
-class TableSharedAccessPermissions(object):
-    '''Permissions for a table.'''
-
-    '''Get entities and query entities.'''
-    QUERY = 'r'
-
-    '''Add entities.'''
-    ADD = 'a'
-
-    '''Update entities.'''
-    UPDATE = 'u'
-
-    '''Delete entities.'''
-    DELETE = 'd'
-
-
 class TablePayloadFormat(object):
     '''
     Specifies the accepted content type of the response payload. More information
@@ -109,3 +93,53 @@ class EdmType(object):
     INT32 = 'Edm.Int32'
     DOUBLE = 'Edm.Double'
     BOOLEAN = 'Edm.Boolean'
+
+
+class TablePermissions(object):
+
+    '''
+    TablePermissions class to be used with `.TableService.generate_table_shared_access_signature`
+    method and for the AccessPolicies used with `.TableService.set_table_acl`. 
+
+    :param bool query:
+        Get entities and query entities.
+    :param bool add:
+        Add entities. Add and Update permissions are required for upsert operations.
+    :param bool update:
+        Update entities. Add and Update permissions are required for upsert operations.
+    :param bool delete: 
+        Delete entities.
+    :param str _str: 
+        A string representing the permissions.
+    '''
+    def __init__(self, query=False, add=False, update=False, delete=False, _str=None):
+        if not _str:
+            _str = ''
+        self.query = query or ('r' in _str)
+        self.add = add or ('a' in _str)
+        self.update = update or ('u' in _str)
+        self.delete = delete or ('d' in _str)
+    
+    def __or__(self, other):
+        return TablePermissions(_str=str(self) + str(other))
+
+    def __add__(self, other):
+        return TablePermissions(_str=str(self) + str(other))
+    
+    def __str__(self):
+        return (('r' if self.query else '') +
+                ('a' if self.add else '') +
+                ('u' if self.update else '') +
+                ('d' if self.delete else ''))
+
+''' Get entities and query entities. '''
+TablePermissions.QUERY = TablePermissions(query=True)
+
+''' Add entities. '''
+TablePermissions.ADD = TablePermissions(add=True)
+
+''' Update entities. '''
+TablePermissions.UPDATE = TablePermissions(update=True)
+
+''' Delete entities. '''
+TablePermissions.DELETE = TablePermissions(delete=True)

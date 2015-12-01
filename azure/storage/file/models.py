@@ -134,54 +134,134 @@ class ShareStats(object):
     def __init__(self):
         self.share_usage = None
 
-class ShareSharedAccessPermissions(object):
-    '''Permissions for a share.'''
+
+class FilePermissions(object):
 
     '''
-    Read the content, properties or metadata of any file in the share. Use any 
-    file in the share as the source of a copy operation.
+    FilePermissions class to be used with 
+    `._FileService.generate_file_shared_access_signature` method.
+
+    :param bool read:
+        Read the content, properties, metadata. Use the file as the source of a copy 
+        operation.
+    :param bool create:
+        Create a new file or copy a file to a new file.
+    :param bool write: 
+        Create or write content, properties, metadata. Resize the file. Use the file 
+        as the destination of a copy operation within the same account.
+    :param bool delete: 
+        Delete the file.
+    :param str _str: 
+        A string representing the permissions.
     '''
-    READ = 'r'
+    def __init__(self, read=False, create=False, write=False, delete=False, 
+                 _str=None):
+        if not _str:
+            _str = ''
+        self.read = read or ('r' in _str)
+        self.create = create or ('c' in _str)
+        self.write = write or ('w' in _str)
+        self.delete = delete or ('d' in _str)
+    
+    def __or__(self, other):
+        return FilePermissions(_str=str(self) + str(other))
+
+    def __add__(self, other):
+        return FilePermissions(_str=str(self) + str(other))
+    
+    def __str__(self):
+        return (('r' if self.read else '') +
+                ('c' if self.create else '') +
+                ('w' if self.write else '') +
+                ('d' if self.delete else ''))
+
+'''
+Read the content, properties, metadata. Use the file as the source of a copy 
+operation.
+'''
+FilePermissions.READ = FilePermissions(read=True)
+
+'''
+Create a new file or copy a file to a new file.
+'''
+FilePermissions.CREATE = FilePermissions(create=True)
+
+'''
+Create or write content, properties, metadata. Resize the file. Use the file 
+as the destination of a copy operation within the same account.
+'''
+FilePermissions.WRITE = FilePermissions(write=True)
+
+'''Delete the file.'''
+FilePermissions.DELETE = FilePermissions(delete=True)
+
+
+class SharePermissions(object):
 
     '''
-    For any file in the share, create or write content, properties or metadata. 
-    Resize the file. Use the file as the destination of a copy operation within 
-    the same account.
-    Note: You cannot grant permissions to read or write share properties or 
-    metadata with a service SAS. Use an account SAS instead.
-    '''
-    WRITE = 'w'
+    SharePermissions class to be used with `._FileService.generate_share_shared_access_signature`
+    method and for the AccessPolicies used with `._FileService.set_share_acl`. 
 
+    :param bool read:
+        Read the content, properties or metadata of any file in the share. Use any 
+        file in the share as the source of a copy operation.
+    :param bool write: 
+        For any file in the share, create or write content, properties or metadata. 
+        Resize the file. Use the file as the destination of a copy operation within 
+        the same account.
+        Note: You cannot grant permissions to read or write share properties or 
+        metadata with a service SAS. Use an account SAS instead.
+    :param bool delete: 
+        Delete any file in the share.
+        Note: You cannot grant permissions to delete a share with a service SAS. Use 
+        an account SAS instead.
+    :param bool list: 
+        List files and directories in the share.
+    :param str _str: 
+        A string representing the permissions.
     '''
-    Delete any file in the share.
-    Note: You cannot grant permissions to delete a share with a service SAS. Use 
-    an account SAS instead.
-    '''
-    DELETE = 'd'
+    def __init__(self, read=False, write=False, delete=False, list=False, 
+                 _str=None):
+        if not _str:
+            _str = ''
+        self.read = read or ('r' in _str)
+        self.write = write or ('w' in _str)
+        self.delete = delete or ('d' in _str)
+        self.list = list or ('l' in _str)
+    
+    def __or__(self, other):
+        return SharePermissions(_str=str(self) + str(other))
 
-    '''List files and directories in the share.'''
-    LIST = 'l'
+    def __add__(self, other):
+        return SharePermissions(_str=str(self) + str(other))
+    
+    def __str__(self):
+        return (('r' if self.read else '') +
+                ('w' if self.write else '') +
+                ('d' if self.delete else '') + 
+                ('l' if self.list else ''))
 
+'''
+Read the content, properties or metadata of any file in the share. Use any 
+file in the share as the source of a copy operation.
+'''
+SharePermissions.READ = SharePermissions(read=True)
 
-class FileSharedAccessPermissions(object):
-    '''Permissions for a file.'''
+'''
+For any file in the share, create or write content, properties or metadata. 
+Resize the file. Use the file as the destination of a copy operation within 
+the same account.
+Note: You cannot grant permissions to read or write share properties or 
+metadata with a service SAS. Use an account SAS instead.
+'''
+SharePermissions.WRITE = SharePermissions(write=True)
 
-    '''
-    Read the content, properties, metadata. Use the file as the source of a copy 
-    operation.
-    '''
-    READ = 'r'
+'''
+Delete any file in the share.
+Note: You cannot grant permissions to delete a share with a service SAS. Use 
+an account SAS instead.
+'''
+SharePermissions.DELETE = SharePermissions(delete=True)
 
-    '''
-    Create a new file or copy a file to a new file.
-    '''
-    CREATE = 'c'
-
-    '''
-    Create or write content, properties, metadata. Resize the file. Use the file 
-    as the destination of a copy operation within the same account.
-    '''
-    WRITE = 'w'
-
-    '''Delete the file.'''
-    DELETE = 'd'
+'''List files and directories in the share.'''
+SharePermissions.LIST = SharePermissions(list=True)

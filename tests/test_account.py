@@ -13,21 +13,28 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import unittest
-
-from azure.storage import CloudStorageAccount
+from datetime import datetime, timedelta
+import requests
+from azure.storage import (
+    CloudStorageAccount,
+    ResourceTypes,
+    AccountPermissions,
+    Services,
+)
 from azure.storage.blob import BlockBlobService
 from azure.storage.queue import QueueService
 from azure.storage.table import TableService
-from tests.common_extendedtestcase import ExtendedTestCase
+from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 
 
-class StorageAccountTest(ExtendedTestCase):
+class StorageAccountTest(StorageTestCase):
 
     def setUp(self):
-        self.account_name = 'storagename'
-        self.account_key = 'NzhL3hKZbJBuJ2484dPTR+xF30kYaWSSCbs2BzLgVVI1woqeST/1IgqaLm6QAOTxtGvxctSNbIR/1hW8yH+bJg=='
+        super(StorageAccountTest, self).setUp()
+        self.account_name = self.settings.STORAGE_ACCOUNT_NAME
+        self.account_key = self.settings.STORAGE_ACCOUNT_KEY
         self.account = CloudStorageAccount(self.account_name, self.account_key)
 
     #--Test cases --------------------------------------------------------
@@ -76,6 +83,38 @@ class StorageAccountTest(ExtendedTestCase):
         self.assertIsInstance(service, QueueService)
         self.assertEqual(service.account_name, self.account_name)
         self.assertEqual(service.account_key, self.account_key)
+
+    def test_generate_account_sas(self):
+        # Arrange
+        token = self.account.generate_shared_access_signature(
+            Services.BLOB,
+            ResourceTypes.OBJECT,
+            AccountPermissions.READ,
+            datetime.utcnow() + timedelta(hours=1),
+        )
+
+        service = self.account.create_block_blob_service()
+        data = b'shared access signature with read permission on blob'
+        container_name='container1'
+        blob_name = 'blob1.txt'
+
+        try:
+            service.create_container(container_name)
+            service.create_blob_from_bytes(container_name, blob_name, data)
+
+            # Act
+            url = service.make_blob_url(
+                container_name,
+                blob_name,
+                sas_token=token,
+            )
+            response = requests.get(url)
+
+            # Assert
+            self.assertTrue(response.ok)
+            self.assertEqual(data, response.content)
+        finally:
+            service.delete_container(container_name)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

@@ -28,8 +28,8 @@ from .models import (
     ShareStats,
     ContentSettings,
     CopyProperties,
-    ShareSharedAccessPermissions,
-    FileSharedAccessPermissions,
+    SharePermissions,
+    FilePermissions,
 )
 
 from .fileservice import FileService

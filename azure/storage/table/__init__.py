@@ -21,7 +21,7 @@ from .models import (
     Entity,
     EntityProperty,
     Table,
-    TableSharedAccessPermissions,
+    TablePermissions,
     TablePayloadFormat,
     EdmType,
     AzureBatchOperationError,

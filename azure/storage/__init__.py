@@ -28,6 +28,9 @@ from .models import (
     CorsRule,
     ServiceProperties,
     AccessPolicy,
+    ResourceTypes,
+    Services,
+    AccountPermissions,
 )
 
 from .cloudstorageaccount import CloudStorageAccount

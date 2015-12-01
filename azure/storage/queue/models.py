@@ -144,20 +144,55 @@ class QueueMessageFormat:
         return data
 
 
-class QueueSharedAccessPermissions(object):
-    '''Permissions for a queue.'''
+class QueuePermissions(object):
 
     '''
-    Read metadata and properties, including message count.
-    Peek at messages.
+    QueuePermissions class to be used with `.QueueService.generate_queue_shared_access_signature`
+    method and for the AccessPolicies used with `.QueueService.set_queue_acl`. 
+
+    :param bool read:
+        Read metadata and properties, including message count. Peek at messages.
+    :param bool add:
+        Add messages to the queue.
+    :param bool update:
+        Update messages in the queue. Note: Use the Process permission with 
+        Update so you can first get the message you want to update.
+    :param bool process: 
+        Get and delete messages from the queue.
+    :param str _str: 
+        A string representing the permissions.
     '''
-    READ = 'r'
+    def __init__(self, read=False, add=False, update=False, process=False, _str=None):
+        if not _str:
+            _str = ''
+        self.read = read or ('r' in _str)
+        self.add = add or ('a' in _str)
+        self.update = update or ('u' in _str)
+        self.process = process or ('p' in _str)
+    
+    def __or__(self, other):
+        return QueuePermissions(_str=str(self) + str(other))
 
-    '''Add messages to the queue.'''
-    ADD = 'a'
+    def __add__(self, other):
+        return QueuePermissions(_str=str(self) + str(other))
+    
+    def __str__(self):
+        return (('r' if self.read else '') +
+                ('a' if self.add else '') +
+                ('u' if self.update else '') +
+                ('p' if self.process else ''))
 
-    '''Update messages in the queue.'''
-    UPDATE = 'u'
+''' Read metadata and properties, including message count. Peek at messages. '''
+QueuePermissions.READ = QueuePermissions(read=True)
 
-    '''Get and delete messages from the queue.'''
-    PROCESS = 'p'
+''' Add messages to the queue. '''
+QueuePermissions.ADD = QueuePermissions(add=True)
+
+''' 
+Update messages in the queue. Note: Use the Process permission with 
+Update so you can first get the message you want to update.
+'''
+QueuePermissions.UPDATE = QueuePermissions(update=True)
+
+''' Get and delete messages from the queue. '''
+QueuePermissions.PROCESS = QueuePermissions(process=True)

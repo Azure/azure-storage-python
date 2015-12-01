@@ -5,11 +5,16 @@
 ## Version X.X.X:
 
 ### All:
+- UserAgent string has changed to conform to the Azure Storage standard.
+
+### Shared Access Signatures (SAS) and ACL
+- Added support for Account SAS. See CloudStorageAccount.generateSharedAccessSignature and the generate_account_shared_access_signature methods on each service.
+- Added support for protocol (HTTP/HTTPS) and IP restrictions on the SAS token.
+- Created instantiable objects for the shared access Permissions classes to simplify specifying more than one permission.
 - set and get acl methods take and return dictionaries mapping an id to an AccessPolicy object rather than a SignedIdentifiers object.
 - generate_shared_access_signature methods take permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
 - generate_signed_query_string on SharedAccessSignature takes permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
 - expiry and start, whether as part of AccessPolicy or params in generateSharedAccessSignature, may be given as UTC date objects or as strings.
-- UserAgent string has changed to conform to the Azure Storage standard.
 
 ### Table:
 - Simplified tableservice *_entity functions by removing partition_key, row_key, and content_type parameters where possible.
