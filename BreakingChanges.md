@@ -5,10 +5,14 @@
 ## Version X.X.X
 
 ### All:
-- set and get acl methods take and return dictionaries mapping an id to an AccessPolicy object rather than a SignedIdentifiers object.
-- generate_shared_access_signature methods take permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
-- generate_signed_query_string on SharedAccessSignature takes permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
 - UserAgent string has changed to conform to the Azure Storage standard.
+
+### Shared Access Signatures (SAS) and ACL
+- set and get acl methods take and return dictionaries mapping an id to an AccessPolicy object rather than a SignedIdentifiers object.
+- generate_shared_access_signature methods were renamed to indicate the object for which they were creating the sas. For example, generate_shared_access_signature for containers became generate_container_shared_access_signature.
+- generate_*_shared_access_signature methods take permission, expiry, start and id directly rather than as part of a SharedAccessPolicy object.
+- *SharedAccessPermissions objects were renamed to *Permissions. For example, TableSharedAccessPermissions became TablePermissions.
+- SharedAccessSignature was completely redone and contains methods for individual services rather than one method for all. For example, generate_file to create a file shared access token.
 
 ### Table:
 - Entity insert, update, merge, delete, insert_or_replace and insert_or_merge operations do not take a content_type parameter.

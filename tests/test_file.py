@@ -28,6 +28,8 @@ from azure.common import (
 )
 from azure.storage import (
     AccessPolicy,
+    ResourceTypes,
+    AccountPermissions,
 )
 from azure.storage.file import (
     FILE_SERVICE_HOST_BASE,
@@ -36,8 +38,8 @@ from azure.storage.file import (
     FileService,
     Range,
     ContentSettings,
-    FileSharedAccessPermissions,
-    ShareSharedAccessPermissions,
+    FilePermissions,
+    SharePermissions,
 )
 from azure.storage.storageclient import (
     AZURE_STORAGE_ACCESS_KEY,
@@ -129,10 +131,10 @@ class StorageFileTest(StorageTestCase):
 
         sas_token = None
         if sas:
-            sas_token = self.fs2.generate_shared_access_signature(self.remote_share_name, 
+            sas_token = self.fs2.generate_file_shared_access_signature(self.remote_share_name, 
                                                                  None, 
                                                                  source_file_name, 
-                                                                 permission=FileSharedAccessPermissions.READ, 
+                                                                 permission=FilePermissions.READ, 
                                                                  expiry=datetime.utcnow() + timedelta(hours=1))
         source_file_url = self.fs2.make_file_url(self.remote_share_name, None, source_file_name, sas_token=sas_token)
         return source_file_url
@@ -2400,11 +2402,11 @@ class StorageFileTest(StorageTestCase):
         self._create_share_and_file_with_text(
             self.share_name, file_name, data)
         
-        token = self.fs.generate_shared_access_signature(
+        token = self.fs.generate_file_shared_access_signature(
             self.share_name,
             None,
             file_name,
-            permission=FileSharedAccessPermissions.READ,
+            permission=FilePermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -2435,12 +2437,12 @@ class StorageFileTest(StorageTestCase):
         access_policy = AccessPolicy()
         access_policy.start = '2011-10-11'
         access_policy.expiry = '2018-10-12'
-        access_policy.permission = FileSharedAccessPermissions.READ
+        access_policy.permission = FilePermissions.READ
         identifiers = {'testid': access_policy}
 
         resp = self.fs.set_share_acl(self.share_name, identifiers)
 
-        token = self.fs.generate_shared_access_signature(
+        token = self.fs.generate_file_shared_access_signature(
             self.share_name,
             None,
             file_name,
@@ -2459,6 +2461,38 @@ class StorageFileTest(StorageTestCase):
         # Assert
         self.assertEqual(data, result)
 
+
+    @record
+    def test_account_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        data = b'shared access signature with read permission on file'
+        file_name = 'file1.txt'
+        self._create_share_and_file_with_text(
+            self.share_name, file_name, data)
+
+        token = self.bs.generate_account_shared_access_signature(
+            ResourceTypes.OBJECT,
+            AccountPermissions.READ,
+            datetime.utcnow() + timedelta(hours=1),
+        )
+
+        # Act
+        url = self.fs.make_file_url(
+            self.share_name,
+            None,
+            file_name,
+            sas_token=token,
+        )
+        response = requests.get(url)
+
+        # Assert
+        self.assertTrue(response.ok)
+        self.assertEqual(data, response.content)
+
     @record
     def test_shared_read_access_file(self):
         # SAS URL is calculated from storage key, so this test runs live only
@@ -2471,11 +2505,11 @@ class StorageFileTest(StorageTestCase):
         self._create_share_and_file_with_text(
             self.share_name, file_name, data)
 
-        token = self.fs.generate_shared_access_signature(
+        token = self.fs.generate_file_shared_access_signature(
             self.share_name,
             None,
             file_name,
-            permission=FileSharedAccessPermissions.READ,
+            permission=FilePermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -2504,11 +2538,11 @@ class StorageFileTest(StorageTestCase):
         self._create_share_and_file_with_text(
             self.share_name, file_name, data)
 
-        token = self.fs.generate_shared_access_signature(
+        token = self.fs.generate_file_shared_access_signature(
             self.share_name,
             None,
             file_name,
-            permission=FileSharedAccessPermissions.READ,
+            permission=FilePermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),
             cache_control='no-cache',
             content_disposition='inline',
@@ -2547,11 +2581,11 @@ class StorageFileTest(StorageTestCase):
         self._create_share_and_file_with_text(
             self.share_name, file_name, data)
 
-        token = self.fs.generate_shared_access_signature(
+        token = self.fs.generate_file_shared_access_signature(
             self.share_name,
             None,
             file_name,
-            permission=FileSharedAccessPermissions.WRITE,
+            permission=FilePermissions.WRITE,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
         url = self.fs.make_file_url(
@@ -2582,11 +2616,11 @@ class StorageFileTest(StorageTestCase):
         self._create_share_and_file_with_text(
             self.share_name, file_name, data)
 
-        token = self.fs.generate_shared_access_signature(
+        token = self.fs.generate_file_shared_access_signature(
             self.share_name,
             None,
             file_name,
-            permission=FileSharedAccessPermissions.DELETE,
+            permission=FilePermissions.DELETE,
             expiry=datetime.utcnow() + timedelta(hours=1),
         )
         url = self.fs.make_file_url(
@@ -2616,10 +2650,10 @@ class StorageFileTest(StorageTestCase):
         self._create_share_and_file_with_text(
             self.share_name, file_name, data)
 
-        token = self.fs.generate_shared_access_signature(
+        token = self.fs.generate_share_shared_access_signature(
             self.share_name,
             expiry=datetime.utcnow() + timedelta(hours=1),
-            permission=ShareSharedAccessPermissions.READ,
+            permission=SharePermissions.READ,
         )
         url = self.fs.make_file_url(
             self.share_name,
@@ -2657,7 +2691,7 @@ class StorageFileTest(StorageTestCase):
         # Act
         identifiers = dict()
         identifiers['testid'] = AccessPolicy(
-            permission=ShareSharedAccessPermissions.READ,
+            permission=SharePermissions.READ,
             expiry=datetime.utcnow() + timedelta(hours=1),  
             start=datetime.utcnow() - timedelta(minutes=1),  
             )

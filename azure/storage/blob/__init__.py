@@ -27,8 +27,8 @@ from .models import (
     PageRange,
     ContentSettings,
     CopyProperties,
-    ContainerSharedAccessPermissions,
-    BlobSharedAccessPermissions,
+    ContainerPermissions,
+    BlobPermissions,
     LeaseActions,
 )
 

@@ -28,12 +28,16 @@ from azure.common import (
     AzureMissingResourceHttpError,
     AzureException,
 )
-from azure.storage import AccessPolicy
+from azure.storage import (
+    AccessPolicy,
+    ResourceTypes,
+    AccountPermissions,
+)
 from azure.storage.table import (
     Entity,
     EntityProperty,
     TableService,
-    TableSharedAccessPermissions,
+    TablePermissions,
     EdmType,
     TableBatch,
 )
@@ -1282,6 +1286,37 @@ class StorageTableTest(StorageTestCase):
         self.assertIsNone(e)
 
     @record
+    def test_account_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        self._create_table_with_default_entities(self.table_name, 2)
+        token = self.ts.generate_account_shared_access_signature(
+            ResourceTypes.OBJECT,
+            AccountPermissions.READ,
+            datetime.utcnow() + timedelta(hours=1),
+            datetime.utcnow() - timedelta(minutes=1),
+        )
+
+        # Act
+        service = TableService(
+            account_name=self.settings.STORAGE_ACCOUNT_NAME,
+            sas_token=token,
+        )
+        self._set_service_options(service, self.settings)
+        resp = self.ts.query_entities(self.table_name, None, 'age,sex')
+
+        # Assert
+        self.assertEqual(len(resp), 2)
+        self.assertEqual(resp[0].age, 39)
+        self.assertEqual(resp[0].sex, 'male')
+        self.assertFalse(hasattr(resp[0], "birthday"))
+        self.assertFalse(hasattr(resp[0], "married"))
+        self.assertFalse(hasattr(resp[0], "deceased"))
+
+    @record
     def test_sas_query(self):
         # SAS URL is calculated from storage key, so this test runs live only
         if TestMode.need_recordingfile(self.test_mode):
@@ -1289,9 +1324,9 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table_with_default_entities(self.table_name, 2)
-        token = self.ts.generate_shared_access_signature(
+        token = self.ts.generate_table_shared_access_signature(
             self.table_name,
-            TableSharedAccessPermissions.QUERY,
+            TablePermissions.QUERY,
             datetime.utcnow() + timedelta(hours=1),
             datetime.utcnow() - timedelta(minutes=1),
         )
@@ -1320,9 +1355,9 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table(self.table_name)
-        token = self.ts.generate_shared_access_signature(
+        token = self.ts.generate_table_shared_access_signature(
             self.table_name,
-            TableSharedAccessPermissions.ADD,
+            TablePermissions.ADD,
             datetime.utcnow() + timedelta(hours=1),
             datetime.utcnow() - timedelta(minutes=1),
         )
@@ -1354,9 +1389,9 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table(self.table_name)
-        token = self.ts.generate_shared_access_signature(
+        token = self.ts.generate_table_shared_access_signature(
             self.table_name,
-            TableSharedAccessPermissions.ADD,
+            TablePermissions.ADD,
             datetime.utcnow() + timedelta(hours=1),
             start_pk='test', start_rk='test1',
             end_pk='test', end_rk='test1',
@@ -1389,9 +1424,9 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table(self.table_name)
-        token = self.ts.generate_shared_access_signature(
+        token = self.ts.generate_table_shared_access_signature(
             self.table_name,
-            TableSharedAccessPermissions.ADD,
+            TablePermissions.ADD,
             datetime.utcnow() + timedelta(hours=1),
             start_pk='test', start_rk='test1',
             end_pk='test', end_rk='test1',
@@ -1422,9 +1457,9 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table_with_default_entities(self.table_name, 1)
-        token = self.ts.generate_shared_access_signature(
+        token = self.ts.generate_table_shared_access_signature(
             self.table_name,
-            TableSharedAccessPermissions.UPDATE,
+            TablePermissions.UPDATE,
             datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -1449,9 +1484,9 @@ class StorageTableTest(StorageTestCase):
 
         # Arrange
         self._create_table_with_default_entities(self.table_name, 1)
-        token = self.ts.generate_shared_access_signature(
+        token = self.ts.generate_table_shared_access_signature(
             self.table_name,
-            TableSharedAccessPermissions.DELETE,
+            TablePermissions.DELETE,
             datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -1479,12 +1514,12 @@ class StorageTableTest(StorageTestCase):
         access_policy = AccessPolicy()
         access_policy.start = '2011-10-11'
         access_policy.expiry = '2018-10-12'
-        access_policy.permission = TableSharedAccessPermissions.QUERY
+        access_policy.permission = TablePermissions.QUERY
         identifiers = {'testid': access_policy}
 
         resp = self.ts.set_table_acl(self.table_name, identifiers)
 
-        token = self.ts.generate_shared_access_signature(
+        token = self.ts.generate_table_shared_access_signature(
             self.table_name,
             id='testid',
         )
@@ -1577,7 +1612,7 @@ class StorageTableTest(StorageTestCase):
         identifiers = dict()
         identifiers['testid'] = AccessPolicy(start='2011-10-11', 
                                              expiry='2011-10-12', 
-                                             permission=TableSharedAccessPermissions.QUERY)
+                                             permission=TablePermissions.QUERY)
 
         resp = self.ts.set_table_acl(self.table_name, identifiers)
 

@@ -41,6 +41,7 @@ from .._common_conversion import (
 from .._http import (
     HTTPRequest,
 )
+from ..models import Services
 from .models import (
     QueueMessageFormat,
 )
@@ -152,7 +153,54 @@ class QueueService(_StorageClient):
         self.encode_function = QueueMessageFormat.text_xmlencode
         self.decode_function = QueueMessageFormat.text_xmldecode
 
-    def generate_shared_access_signature(self, queue_name,
+    def generate_account_shared_access_signature(self, resource_types, permission, 
+                                        expiry, start=None, ip=None, protocol=None):
+        '''
+        Generates a shared access signature for the queue service.
+        Use the returned signature with the sas_token parameter of QueueService.
+
+        :param ResourceTypes resource_types:
+            Specifies the resource types that are accessible with the account SAS.
+        :param AccountPermissions permission:
+            The permissions associated with the shared access signature. The 
+            user is restricted to operations allowed by the permissions. 
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has been 
+            specified in an associated stored access policy.
+        :param expiry:
+            The time at which the shared access signature becomes invalid. 
+            Required unless an id is given referencing a stored access policy 
+            which contains this field. This field must be omitted if it has 
+            been specified in an associated stored access policy. Azure will always 
+            convert values to UTC. If a date is passed in without timezone info, it 
+            is assumed to be UTC.
+        :type expiry: date or str
+        :param start:
+            The time at which the shared access signature becomes valid. If 
+            omitted, start time for this call is assumed to be the time when the 
+            storage service receives the request. Azure will always convert values 
+            to UTC. If a date is passed in without timezone info, it is assumed to 
+            be UTC.
+        :type start: date or str
+        :param str ip:
+            Specifies an IP address or a range of IP addresses from which to accept requests.
+            If the IP address from which the request originates does not match the IP address
+            or address range specified on the SAS token, the request is not authenticated.
+            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
+            restricts the request to those IP addresses.
+        :param str protocol:
+            Specifies the protocol permitted for a request made. Possible values are
+            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
+            is https,http. Note that HTTP only is not a permitted value.
+        '''
+        _validate_not_none('self.account_name', self.account_name)
+        _validate_not_none('self.account_key', self.account_key)
+
+        sas = SharedAccessSignature(self.account_name, self.account_key)
+        return sas.generate_account(Services.QUEUE, resource_types, permission, 
+                                    expiry, start=start, ip=ip, protocol=protocol)
+
+    def generate_queue_shared_access_signature(self, queue_name,
                                          permission=None, 
                                          expiry=None,                                       
                                          start=None,
@@ -207,16 +255,14 @@ class QueueService(_StorageClient):
         _validate_not_none('self.account_key', self.account_key)
 
         sas = SharedAccessSignature(self.account_name, self.account_key)
-        return sas.generate_signed_query_string(
-            'queue',
+        return sas.generate_queue(
             queue_name,
-            None,
-            permission, 
-            expiry,
-            start, 
-            id,
-            ip,
-            protocol,
+            permission=permission, 
+            expiry=expiry,
+            start=start, 
+            id=id,
+            ip=ip,
+            protocol=protocol,
         )
 
     def get_queue_service_properties(self, timeout=None):

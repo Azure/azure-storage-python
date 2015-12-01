@@ -20,7 +20,7 @@ from ..constants import (
 from .models import (
     Queue,
     QueueMessage,
-    QueueSharedAccessPermissions,
+    QueuePermissions,
     QueueMessageFormat,
 )
 

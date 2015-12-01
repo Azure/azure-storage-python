@@ -16,10 +16,14 @@
 #--------------------------------------------------------------------------
 import unittest
 from datetime import datetime, timedelta
-from azure.storage import AccessPolicy
+from azure.storage import (
+    AccessPolicy,
+    ResourceTypes,
+    AccountPermissions,
+)
 from azure.storage.queue import (
     QueueService,
-    QueueSharedAccessPermissions,
+    QueuePermissions,
     QueueMessageFormat,
 )
 from azure.common import (
@@ -407,6 +411,37 @@ class StorageQueueTest(StorageTestCase):
         self.assertIsNotNone(message.expiration_time)
         self.assertIsNotNone(message.time_next_visible)
 
+    def test_account_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        queue_name = self._create_queue()
+        self.qs.put_message(queue_name, 'message1')
+        token = self.qs.generate_account_shared_access_signature(
+            ResourceTypes.OBJECT,
+            AccountPermissions.READ,
+            datetime.utcnow() + timedelta(hours=1),
+            datetime.utcnow() - timedelta(minutes=5)
+        )
+
+        # Act
+        service = QueueService(
+            account_name=self.settings.STORAGE_ACCOUNT_NAME,
+            sas_token=token,
+        )
+        self._set_service_options(service, self.settings)
+        result = service.peek_messages(queue_name)
+
+        # Assert
+        self.assertIsNotNone(result)
+        self.assertEqual(1, len(result))
+        message = result[0]
+        self.assertIsNotNone(message)
+        self.assertNotEqual('', message.id)
+        self.assertEqual('message1', message.content)
+
     def test_sas_read(self):
         # SAS URL is calculated from storage key, so this test runs live only
         if TestMode.need_recordingfile(self.test_mode):
@@ -415,9 +450,9 @@ class StorageQueueTest(StorageTestCase):
         # Arrange
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, 'message1')
-        token = self.qs.generate_shared_access_signature(
+        token = self.qs.generate_queue_shared_access_signature(
             queue_name,
-            QueueSharedAccessPermissions.READ,
+            QueuePermissions.READ,
             datetime.utcnow() + timedelta(hours=1),
             datetime.utcnow() - timedelta(minutes=5)
         )
@@ -445,9 +480,9 @@ class StorageQueueTest(StorageTestCase):
 
         # Arrange
         queue_name = self._create_queue()
-        token = self.qs.generate_shared_access_signature(
+        token = self.qs.generate_queue_shared_access_signature(
             queue_name,
-            QueueSharedAccessPermissions.ADD,
+            QueuePermissions.ADD,
             datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -471,9 +506,9 @@ class StorageQueueTest(StorageTestCase):
         # Arrange
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, 'message1')
-        token = self.qs.generate_shared_access_signature(
+        token = self.qs.generate_queue_shared_access_signature(
             queue_name,
-            QueueSharedAccessPermissions.UPDATE,
+            QueuePermissions.UPDATE,
             datetime.utcnow() + timedelta(hours=1),
         )
         result = self.qs.get_messages(queue_name)
@@ -504,9 +539,9 @@ class StorageQueueTest(StorageTestCase):
         # Arrange
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, 'message1')
-        token = self.qs.generate_shared_access_signature(
+        token = self.qs.generate_queue_shared_access_signature(
             queue_name,
-            QueueSharedAccessPermissions.PROCESS,
+            QueuePermissions.PROCESS,
             datetime.utcnow() + timedelta(hours=1),
         )
 
@@ -535,7 +570,7 @@ class StorageQueueTest(StorageTestCase):
         access_policy = AccessPolicy()
         access_policy.start = '2011-10-11'
         access_policy.expiry = '2018-10-12'
-        access_policy.permission = QueueSharedAccessPermissions.READ
+        access_policy.permission = QueuePermissions.READ
 
         identifiers = {'testid': access_policy}
 
@@ -544,7 +579,7 @@ class StorageQueueTest(StorageTestCase):
 
         self.qs.put_message(queue_name, 'message1')
 
-        token = self.qs.generate_shared_access_signature(
+        token = self.qs.generate_queue_shared_access_signature(
             queue_name,
             id='testid'
         )
@@ -635,7 +670,7 @@ class StorageQueueTest(StorageTestCase):
         queue_name = self._create_queue()
 
         # Act
-        access_policy = AccessPolicy(permission=QueueSharedAccessPermissions.READ,
+        access_policy = AccessPolicy(permission=QueuePermissions.READ,
                                      expiry='2011-10-12',
                                      start='2011-10-11')
         identifiers = {'testid': access_policy}
