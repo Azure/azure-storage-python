@@ -165,12 +165,15 @@ Alternatively, you can define a named access policy on the server:
     from azure.storage.blob import BlobService, BlobSharedAccessPermissions
     blob_service = BlobService(account_name, account_key)
 
-    policy_name = 'readonlyvaliduntilnextyear'
+    policy_name = 'readAndListValidUntilNextYear'
 
     si = SignedIdentifier()
     si.id = policy_name
     si.access_policy.expiry = '2016-01-01'
-    si.access_policy.permission = BlobSharedAccessPermissions.READ
+    si.access_policy.permission = (
+        ContainerSharedAccessPermissions.READ +
+        ContainerSharedAccessPermissions.LIST
+    )
     identifiers = SignedIdentifiers()
     identifiers.signed_identifiers.append(si)
 
