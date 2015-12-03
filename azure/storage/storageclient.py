@@ -20,7 +20,6 @@ import requests
 from .constants import (
     AZURE_STORAGE_ACCOUNT,
     AZURE_STORAGE_ACCESS_KEY,
-    DEFAULT_HTTP_TIMEOUT,
     DEV_ACCOUNT_NAME,
     DEV_ACCOUNT_KEY,
     EMULATED,
@@ -41,8 +40,7 @@ class _StorageClient(object):
     '''
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
-                 host_base='', dev_host='', timeout=None,
-                 sas_token=None, request_session=None):
+                 host_base='', dev_host='', sas_token=None, request_session=None):
         '''
         account_name:
             your storage account name, required for all operations.
@@ -55,8 +53,6 @@ class _StorageClient(object):
             for on-premise.
         dev_host:
             Optional. Dev host url. Defaults to localhost.
-        timeout:
-            Optional. Timeout for the http request, in seconds.
         sas_token:
             Optional. Token to use to authenticate with shared access signature.
         request_session:
@@ -100,7 +96,6 @@ class _StorageClient(object):
         self._httpclient = _HTTPClient(
             service_instance=self,
             protocol=self.protocol,
-            timeout=timeout,
             request_session=request_session or requests.Session(),
             user_agent=_USER_AGENT_STRING,
         )
@@ -116,8 +111,7 @@ class _StorageClient(object):
         post-processing on the response.
         '''
         res = type(self)(self.account_name, self.account_key, self.protocol,
-                         self.host_base, self.dev_host,
-                         self._httpclient.timeout)
+                         self.host_base, self.dev_host)
         old_filter = self._filter
 
         def new_filter(request):
@@ -140,14 +134,6 @@ class _StorageClient(object):
             Password for proxy authorization.
         '''
         self._httpclient.set_proxy(host, port, user, password)
-
-    @property
-    def timeout(self):
-        return self._httpclient.timeout
-
-    @timeout.setter
-    def timeout(self, value):
-        self._httpclient.timeout = value
 
     def _get_host(self):
         if self.use_local_storage:

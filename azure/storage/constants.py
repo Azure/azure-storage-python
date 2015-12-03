@@ -39,9 +39,6 @@ DEV_FILE_HOST = '127.0.0.1:10003'
 DEV_ACCOUNT_NAME = 'devstoreaccount1'
 DEV_ACCOUNT_KEY = 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=='
 
-# Default timeout for http requests (in secs)
-DEFAULT_HTTP_TIMEOUT = 65
-
 #--------------------------------------------------------------------------
 # constants for azure app setting environment variables
 AZURE_STORAGE_ACCOUNT = 'AZURE_STORAGE_ACCOUNT'

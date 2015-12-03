@@ -102,8 +102,7 @@ class QueueService(_StorageClient):
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=QUEUE_SERVICE_HOST_BASE, dev_host=DEV_QUEUE_HOST,
-                 timeout=None, sas_token=None, connection_string=None,
-                 request_session=None):
+                 sas_token=None, connection_string=None, request_session=None):
         '''
         :param str account_name:
             your storage account name, required for all operations.
@@ -116,8 +115,6 @@ class QueueService(_StorageClient):
             for on-premise.
         :param str dev_host:
             Dev host url. Defaults to localhost.
-        :param int timeout:
-            Timeout for the http request, in seconds.
         :param str sas_token:
             Token to use to authenticate with shared access signature.
         :param str connection_string:
@@ -139,7 +136,7 @@ class QueueService(_StorageClient):
             host_base = connection_params.host_base_queue
             
         super(QueueService, self).__init__(
-            account_name, account_key, protocol, host_base, dev_host, timeout, sas_token, request_session)
+            account_name, account_key, protocol, host_base, dev_host, sas_token, request_session)
 
         if self.account_key:
             self.authentication = StorageSharedKeyAuthentication(

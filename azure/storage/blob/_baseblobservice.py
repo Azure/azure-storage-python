@@ -48,7 +48,6 @@ from ..auth import (
 from ..connection import StorageConnectionParameters
 from ..constants import (
     BLOB_SERVICE_HOST_BASE,
-    DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
 )
 from .._serialization import (
@@ -91,8 +90,7 @@ class _BaseBlobService(_StorageClient):
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=BLOB_SERVICE_HOST_BASE, dev_host=DEV_BLOB_HOST,
-                 timeout=DEFAULT_HTTP_TIMEOUT, sas_token=None, connection_string=None,
-                 request_session=None):
+                 sas_token=None, connection_string=None, request_session=None):
         '''
         account_name:
             your storage account name, required for all operations.
@@ -105,16 +103,12 @@ class _BaseBlobService(_StorageClient):
             for on-premise.
         dev_host:
             Dev host url. Defaults to localhost.
-        timeout:
-            Timeout for the http request, in seconds.
         sas_token:
             Token to use to authenticate with shared access signature.
         connection_string:
             If specified, the first four parameters (account_name,
             account_key, protocol, host_base) may be overridden
-            by values specified in the connection_string. The next three parameters
-            (dev_host, timeout, sas_token) cannot be specified with a
-            connection_string. See 
+            by values specified in the connection_string. See 
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
         request_session:
@@ -128,7 +122,7 @@ class _BaseBlobService(_StorageClient):
             host_base = connection_params.host_base_blob
             
         super(_BaseBlobService, self).__init__(
-            account_name, account_key, protocol, host_base, dev_host, timeout, sas_token, request_session)
+            account_name, account_key, protocol, host_base, dev_host, sas_token, request_session)
 
         if self.account_key:
             self.authentication = StorageSharedKeyAuthentication(
@@ -396,7 +390,7 @@ class _BaseBlobService(_StorageClient):
         )
 
     def list_containers(self, prefix=None, marker=None, max_results=None,
-                        include=None):
+                        include=None, timeout=None):
         '''
         The List Containers operation returns a list of the containers under
         the specified account.
@@ -413,6 +407,8 @@ class _BaseBlobService(_StorageClient):
             Include this parameter to specify that the container's
             metadata be returned as part of the response body. set this
             parameter to string 'metadata' to get container's metadata.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -423,7 +419,8 @@ class _BaseBlobService(_StorageClient):
             ('prefix', _str_or_none(prefix)),
             ('marker', _str_or_none(marker)),
             ('maxresults', _int_or_none(max_results)),
-            ('include', _str_or_none(include))
+            ('include', _str_or_none(include)),
+            ('timeout', _int_or_none(timeout))
         ]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -434,7 +431,7 @@ class _BaseBlobService(_StorageClient):
         return _convert_xml_to_containers(response)
 
     def create_container(self, container_name, metadata=None,
-                         blob_public_access=None, fail_on_exist=False):
+                         blob_public_access=None, fail_on_exist=False, timeout=None):
         '''
         Creates a new container under the specified account. If the container
         with the same name already exists, the operation fails.
@@ -448,13 +445,17 @@ class _BaseBlobService(_StorageClient):
             Possible values include: container, blob
         fail_on_exist:
             specify whether to throw an exception when the container exists.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [('restype', 'container')]
+        request.query = [
+            ('restype', 'container'),
+            ('timeout', _int_or_none(timeout)),]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
             ('x-ms-blob-public-access', _str_or_none(blob_public_access))
@@ -474,7 +475,7 @@ class _BaseBlobService(_StorageClient):
             self._perform_request(request)
             return True
 
-    def get_container_properties(self, container_name, lease_id=None):
+    def get_container_properties(self, container_name, lease_id=None, timeout=None):
         '''
         Returns all user-defined metadata and system properties for the
         specified container.
@@ -484,13 +485,18 @@ class _BaseBlobService(_StorageClient):
         lease_id:
             If specified, get_container_properties only succeeds if the
             container's lease is active and matches this ID.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [('restype', 'container')]
+        request.query = [
+            ('restype', 'container'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -500,7 +506,7 @@ class _BaseBlobService(_StorageClient):
 
         return _parse_response_for_dict(response)
 
-    def get_container_metadata(self, container_name, lease_id=None):
+    def get_container_metadata(self, container_name, lease_id=None, timeout=None):
         '''
         Returns all user-defined metadata for the specified container. The
         metadata will be in returned dictionary['x-ms-meta-(name)'].
@@ -510,6 +516,8 @@ class _BaseBlobService(_StorageClient):
         lease_id:
             If specified, get_container_metadata only succeeds if the
             container's lease is active and matches this ID.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -519,6 +527,7 @@ class _BaseBlobService(_StorageClient):
         request.query = [
             ('restype', 'container'),
             ('comp', 'metadata'),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
         request.path = _update_request_uri_local_storage(
@@ -530,7 +539,7 @@ class _BaseBlobService(_StorageClient):
         return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
 
     def set_container_metadata(self, container_name, metadata=None,
-                               lease_id=None, if_modified_since=None):
+                               lease_id=None, if_modified_since=None, timeout=None):
         '''
         Sets one or more user-defined name-value pairs for the specified
         container.
@@ -545,6 +554,8 @@ class _BaseBlobService(_StorageClient):
             container's lease is active and matches this ID.
         if_modified_since:
             Datetime string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -554,6 +565,7 @@ class _BaseBlobService(_StorageClient):
         request.query = [
             ('restype', 'container'),
             ('comp', 'metadata'),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
@@ -566,7 +578,7 @@ class _BaseBlobService(_StorageClient):
             request, self.authentication)
         self._perform_request(request)
 
-    def get_container_acl(self, container_name, lease_id=None):
+    def get_container_acl(self, container_name, lease_id=None, timeout=None):
         '''
         Gets the permissions for the specified container.
 
@@ -577,6 +589,8 @@ class _BaseBlobService(_StorageClient):
             container's lease is active and matches this ID.
         :return: A dictionary of access policies associated with the container.
         :rtype: dict of str to :class:`.AccessPolicy`:
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -586,6 +600,7 @@ class _BaseBlobService(_StorageClient):
         request.query = [
             ('restype', 'container'),
             ('comp', 'acl'),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
         request.path = _update_request_uri_local_storage(
@@ -598,7 +613,7 @@ class _BaseBlobService(_StorageClient):
 
     def set_container_acl(self, container_name, signed_identifiers=None,
                           blob_public_access=None, lease_id=None,
-                          if_modified_since=None, if_unmodified_since=None):
+                          if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
         Sets the permissions for the specified container or stored access 
         policies that may be used with Shared Access Signatures.
@@ -619,6 +634,8 @@ class _BaseBlobService(_StorageClient):
             Datetime string.
         :param str if_unmodified_since:
             DateTime string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -628,6 +645,7 @@ class _BaseBlobService(_StorageClient):
         request.query = [
             ('restype', 'container'),
             ('comp', 'acl'),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
             ('x-ms-blob-public-access', _str_or_none(blob_public_access)),
@@ -645,7 +663,7 @@ class _BaseBlobService(_StorageClient):
 
     def delete_container(self, container_name, fail_not_exist=False,
                          lease_id=None, if_modified_since=None,
-                         if_unmodified_since=None):
+                         if_unmodified_since=None, timeout=None):
         '''
         Marks the specified container for deletion.
 
@@ -660,13 +678,18 @@ class _BaseBlobService(_StorageClient):
             Datetime string.
         if_unmodified_since:
             DateTime string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [('restype', 'container')]
+        request.query = [
+            ('restype', 'container'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
@@ -690,7 +713,7 @@ class _BaseBlobService(_StorageClient):
     def _lease_container_impl(
         self, container_name, lease_action, lease_id, lease_duration,
         lease_break_period, proposed_lease_id, if_modified_since,
-        if_unmodified_since):
+        if_unmodified_since, timeout):
         '''
         Establishes and manages a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
@@ -724,6 +747,8 @@ class _BaseBlobService(_StorageClient):
             Datetime string.
         if_unmodified_since:
             DateTime string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('lease_action', lease_action)
@@ -734,6 +759,7 @@ class _BaseBlobService(_StorageClient):
         request.query = [
             ('restype', 'container'),
             ('comp', 'lease'),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -756,7 +782,7 @@ class _BaseBlobService(_StorageClient):
 
     def acquire_container_lease(
         self, container_name, lease_duration=-1, proposed_lease_id=None,
-        if_modified_since=None, if_unmodified_since=None):
+        if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
         Acquires a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds or infinite.
@@ -774,6 +800,8 @@ class _BaseBlobService(_StorageClient):
             Datetime string.
         if_unmodified_since:
             DateTime string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_duration', lease_duration)
         if lease_duration is not -1 and\
@@ -787,11 +815,12 @@ class _BaseBlobService(_StorageClient):
                                           None, # lease_break_period
                                           proposed_lease_id,
                                           if_modified_since,
-                                          if_unmodified_since)
+                                          if_unmodified_since,
+                                          timeout)
 
     def renew_container_lease(
         self, container_name, lease_id, if_modified_since=None,
-        if_unmodified_since=None):
+        if_unmodified_since=None, timeout=None):
         '''
         Renews a lock on a container for delete operations.
 
@@ -803,6 +832,8 @@ class _BaseBlobService(_StorageClient):
             Datetime string.
         if_unmodified_since:
             DateTime string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_id', lease_id)
 
@@ -813,11 +844,12 @@ class _BaseBlobService(_StorageClient):
                                           None, # lease_break_period
                                           None, # proposed_lease_id
                                           if_modified_since,
-                                          if_unmodified_since)
+                                          if_unmodified_since,
+                                          timeout)
 
     def release_container_lease(
         self, container_name, lease_id, if_modified_since=None,
-        if_unmodified_since=None):
+        if_unmodified_since=None, timeout=None):
         '''
         Releases a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
@@ -834,6 +866,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_id', lease_id)
 
@@ -844,11 +878,12 @@ class _BaseBlobService(_StorageClient):
                                           None, # lease_break_period
                                           None, # proposed_lease_id
                                           if_modified_since,
-                                          if_unmodified_since)
+                                          if_unmodified_since,
+                                          timeout)
 
     def break_container_lease(
         self, container_name, lease_id, lease_break_period=None,
-        if_modified_since=None, if_unmodified_since=None):
+        if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
         Breaks a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
@@ -871,6 +906,8 @@ class _BaseBlobService(_StorageClient):
             Datetime string.
         if_unmodified_since:
             DateTime string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_id', lease_id)
         if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
@@ -883,11 +920,12 @@ class _BaseBlobService(_StorageClient):
                                           lease_break_period,
                                           None, # proposed_lease_id
                                           if_modified_since,
-                                          if_unmodified_since)
+                                          if_unmodified_since,
+                                          timeout)
 
     def change_container_lease(
         self, container_name, lease_id, proposed_lease_id,
-        if_modified_since=None, if_unmodified_since=None):
+        if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
         Changes a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
@@ -903,6 +941,8 @@ class _BaseBlobService(_StorageClient):
             Datetime string.
         if_unmodified_since:
             DateTime string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_id', lease_id)
 
@@ -913,10 +953,11 @@ class _BaseBlobService(_StorageClient):
                                           None, # lease_break_period
                                           proposed_lease_id,
                                           if_modified_since,
-                                          if_unmodified_since)
+                                          if_unmodified_since,
+                                          timeout)
 
     def list_blobs(self, container_name, prefix=None, marker=None,
-                   max_results=None, include=None, delimiter=None):
+                   max_results=None, include=None, delimiter=None, timeout=None):
         '''
         Returns the list of blobs under the specified container.
 
@@ -962,6 +1003,8 @@ class _BaseBlobService(_StorageClient):
             placeholder for all blobs whose names begin with the same
             substring up to the appearance of the delimiter character. The
             delimiter may be a single character or a string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -975,7 +1018,8 @@ class _BaseBlobService(_StorageClient):
             ('delimiter', _str_or_none(delimiter)),
             ('marker', _str_or_none(marker)),
             ('maxresults', _int_or_none(max_results)),
-            ('include', _str_or_none(include))
+            ('include', _str_or_none(include)),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -1057,7 +1101,7 @@ class _BaseBlobService(_StorageClient):
     def get_blob_properties(
         self, container_name, blob_name, snapshot=None, lease_id=None,
         if_modified_since=None, if_unmodified_since=None, if_match=None,
-        if_none_match=None):
+        if_none_match=None, timeout=None):
         '''
         Returns a BlobProperties along with a metadata dict. BlobProperties contains
         standard HTTP properties and system properties for the blob.
@@ -1079,6 +1123,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1086,6 +1132,10 @@ class _BaseBlobService(_StorageClient):
         request.method = 'HEAD'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
+        request.query = [
+            ('snapshot', _str_or_none(snapshot)),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
@@ -1093,7 +1143,6 @@ class _BaseBlobService(_StorageClient):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.query = [('snapshot', _str_or_none(snapshot))]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
@@ -1106,7 +1155,7 @@ class _BaseBlobService(_StorageClient):
     def set_blob_properties(
         self, container_name, blob_name, content_settings=None, lease_id=None,
         if_modified_since=None, if_unmodified_since=None, if_match=None,
-        if_none_match=None, blob_properties=None):
+        if_none_match=None, blob_properties=None, timeout=None):
         '''
         Sets system properties on the blob.
 
@@ -1126,6 +1175,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1133,7 +1184,10 @@ class _BaseBlobService(_StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('comp', 'properties')]
+        request.query = [
+            ('comp', 'properties'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers += [
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
@@ -1153,7 +1207,7 @@ class _BaseBlobService(_StorageClient):
     def get_blob(
         self, container_name, blob_name, snapshot=None, byte_range=None,
         lease_id=None, range_get_content_md5=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Reads or downloads a blob from the system, including its metadata and
         properties.
@@ -1184,6 +1238,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1191,6 +1247,10 @@ class _BaseBlobService(_StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
+        request.query = [
+            ('snapshot', _str_or_none(snapshot)),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-range', _str_or_none(byte_range)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -1201,7 +1261,6 @@ class _BaseBlobService(_StorageClient):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.query = [('snapshot', _str_or_none(snapshot))]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
@@ -1215,7 +1274,7 @@ class _BaseBlobService(_StorageClient):
         snapshot=None, lease_id=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Downloads a blob to a file path, with automatic chunking and progress
         notifications.
@@ -1253,6 +1312,10 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1272,13 +1335,14 @@ class _BaseBlobService(_StorageClient):
                                   if_modified_since,
                                   if_unmodified_since,
                                   if_match,
-                                  if_none_match)
+                                  if_none_match,
+                                  timeout)
 
     def get_blob_to_file(
         self, container_name, blob_name, stream, snapshot=None,
         lease_id=None, progress_callback=None, max_connections=1,
         max_retries=5, retry_wait=1.0, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Downloads a blob to a file/stream, with automatic chunking and progress
         notifications.
@@ -1314,12 +1378,16 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
 
-        props, _ = self.get_blob_properties(container_name, blob_name)
+        props, _ = self.get_blob_properties(container_name, blob_name, timeout)
         blob_size = int(props.content_length)
 
         if blob_size < self._BLOB_MAX_DATA_SIZE or max_connections <= 1:
@@ -1333,7 +1401,8 @@ class _BaseBlobService(_StorageClient):
                                  if_modified_since=if_modified_since,
                                  if_unmodified_since=if_unmodified_since,
                                  if_match=if_match,
-                                 if_none_match=if_none_match)
+                                 if_none_match=if_none_match,
+                                 timeout=timeout)
 
             stream.write(data)
 
@@ -1350,14 +1419,15 @@ class _BaseBlobService(_StorageClient):
                 max_connections,
                 max_retries,
                 retry_wait,
-                progress_callback
+                progress_callback,
+                timeout
             )
 
     def get_blob_to_bytes(
         self, container_name, blob_name, snapshot=None, lease_id=None,
         progress_callback=None, max_connections=1, max_retries=5,
         retry_wait=1.0, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Downloads a blob as an array of bytes, with automatic chunking and
         progress notifications.
@@ -1391,6 +1461,10 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1408,7 +1482,8 @@ class _BaseBlobService(_StorageClient):
                               if_modified_since,
                               if_unmodified_since,
                               if_match,
-                              if_none_match)
+                              if_none_match,
+                              timeout)
 
         return stream.getvalue()
 
@@ -1416,7 +1491,7 @@ class _BaseBlobService(_StorageClient):
         self, container_name, blob_name, encoding='utf-8', snapshot=None,
         lease_id=None, progress_callback=None, max_connections=1, max_retries=5,
         retry_wait=1.0, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Downloads a blob as unicode text, with automatic chunking and progress
         notifications.
@@ -1452,6 +1527,10 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1468,14 +1547,15 @@ class _BaseBlobService(_StorageClient):
                                         if_modified_since,
                                         if_unmodified_since,
                                         if_match,
-                                        if_none_match)
+                                        if_none_match,
+                                        timeout)
 
         return result.decode(encoding)
 
     def get_blob_metadata(
         self, container_name, blob_name, snapshot=None, lease_id=None,
         if_modified_since=None, if_unmodified_since=None, if_match=None,
-        if_none_match=None):
+        if_none_match=None, timeout=None):
         '''
         Returns all user-defined metadata for the specified blob or snapshot.
 
@@ -1496,6 +1576,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1506,6 +1588,7 @@ class _BaseBlobService(_StorageClient):
         request.query = [
             ('snapshot', _str_or_none(snapshot)),
             ('comp', 'metadata'),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -1525,7 +1608,7 @@ class _BaseBlobService(_StorageClient):
     def set_blob_metadata(self, container_name, blob_name,
                           metadata=None, lease_id=None,
                           if_modified_since=None, if_unmodified_since=None,
-                          if_match=None, if_none_match=None):
+                          if_match=None, if_none_match=None, timeout=None):
         '''
         Sets user-defined metadata for the specified blob as one or more
         name-value pairs.
@@ -1546,6 +1629,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1553,14 +1638,17 @@ class _BaseBlobService(_StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('comp', 'metadata')]
+        request.query = [
+            ('comp', 'metadata'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
-            ('x-ms-lease-id', _str_or_none(lease_id))
+            ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -1572,7 +1660,7 @@ class _BaseBlobService(_StorageClient):
                          lease_action, lease_id,
                          lease_duration, lease_break_period,
                          proposed_lease_id, if_modified_since,
-                         if_unmodified_since, if_match, if_none_match):
+                         if_unmodified_since, if_match, if_none_match, timeout=None):
         '''
         Establishes and manages a lock on a blob for write and delete
         operations.
@@ -1612,6 +1700,8 @@ class _BaseBlobService(_StorageClient):
             value specified.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1620,7 +1710,10 @@ class _BaseBlobService(_StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('comp', 'lease')]
+        request.query = [
+            ('comp', 'lease'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-lease-action', _str_or_none(lease_action)),
@@ -1648,7 +1741,7 @@ class _BaseBlobService(_StorageClient):
                            if_modified_since=None,
                            if_unmodified_since=None,
                            if_match=None,
-                           if_none_match=None):
+                           if_none_match=None, timeout=None):
         '''
         Acquires a lock on a blob for write and delete operations.
 
@@ -1671,6 +1764,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_duration', lease_duration)
 
@@ -1687,12 +1782,13 @@ class _BaseBlobService(_StorageClient):
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
-                                     if_none_match)
+                                     if_none_match,
+                                     timeout)
 
     def renew_blob_lease(self, container_name, blob_name,
                          lease_id, if_modified_since=None,
                          if_unmodified_since=None, if_match=None,
-                         if_none_match=None):
+                         if_none_match=None, timeout=None):
         '''
         Renews a lock on a blob for write and delete operations.
 
@@ -1710,6 +1806,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_id', lease_id)
 
@@ -1723,12 +1821,13 @@ class _BaseBlobService(_StorageClient):
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
-                                     if_none_match)
+                                     if_none_match,
+                                     timeout)
 
     def release_blob_lease(self, container_name, blob_name,
                            lease_id, if_modified_since=None,
                            if_unmodified_since=None, if_match=None,
-                           if_none_match=None):
+                           if_none_match=None, timeout=None):
         '''
         Releases a lock on a blob for write and delete operations.
 
@@ -1746,6 +1845,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_id', lease_id)
 
@@ -1759,7 +1860,8 @@ class _BaseBlobService(_StorageClient):
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
-                                     if_none_match)
+                                     if_none_match,
+                                     timeout)
 
     def break_blob_lease(self, container_name, blob_name,
                          lease_id,
@@ -1767,7 +1869,7 @@ class _BaseBlobService(_StorageClient):
                          if_modified_since=None,
                          if_unmodified_since=None,
                          if_match=None,
-                         if_none_match=None):
+                         if_none_match=None, timeout=None):
         '''
         Breaks a lock on a blob for write and delete operations.
 
@@ -1795,6 +1897,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('lease_id', lease_id)
         if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
@@ -1810,7 +1914,8 @@ class _BaseBlobService(_StorageClient):
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
-                                     if_none_match)
+                                     if_none_match,
+                                     timeout)
 
     def change_blob_lease(self, container_name, blob_name,
                          lease_id,
@@ -1818,7 +1923,7 @@ class _BaseBlobService(_StorageClient):
                          if_modified_since=None,
                          if_unmodified_since=None,
                          if_match=None,
-                         if_none_match=None):
+                         if_none_match=None, timeout=None):
         '''
         Changes a lock on a blob for write and delete operations.
 
@@ -1838,6 +1943,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         return self._lease_blob_impl(container_name,
                                      blob_name,
@@ -1849,12 +1956,13 @@ class _BaseBlobService(_StorageClient):
                                      if_modified_since,
                                      if_unmodified_since,
                                      if_match,
-                                     if_none_match)
+                                     if_none_match,
+                                     timeout)
 
     def snapshot_blob(self, container_name, blob_name,
                       metadata=None, if_modified_since=None,
                       if_unmodified_since=None, if_match=None,
-                      if_none_match=None, lease_id=None):
+                      if_none_match=None, lease_id=None, timeout=None):
         '''
         Creates a read-only snapshot of a blob.
 
@@ -1874,6 +1982,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value
         lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1881,7 +1991,10 @@ class _BaseBlobService(_StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('comp', 'snapshot')]
+        request.query = [
+            ('comp', 'snapshot'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
@@ -1907,7 +2020,7 @@ class _BaseBlobService(_StorageClient):
                   source_if_match=None, source_if_none_match=None,
                   if_modified_since=None, if_unmodified_since=None,
                   if_match=None, if_none_match=None, lease_id=None,
-                  source_lease_id=None):
+                  source_lease_id=None, timeout=None):
         '''
         Copies a blob to a destination within the storage account.
 
@@ -1950,12 +2063,14 @@ class _BaseBlobService(_StorageClient):
         source_lease_id:
             Specify this to perform the Copy Blob operation only if
             the lease ID given matches the active lease ID of the source blob.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('copy_source', copy_source)
 
-        if copy_source.startswith('/'):
+        if copy_source.startswith('/', timeout=None):
             # Backwards compatibility for earlier versions of the SDK where
             # the copy source can be in the following formats:
             # - Blob in named container:
@@ -1975,6 +2090,7 @@ class _BaseBlobService(_StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
+        request.query = [('timeout', _int_or_none(timeout))]
         request.headers = [
             ('x-ms-copy-source', _str_or_none(copy_source)),
             ('x-ms-meta-name-values', metadata),
@@ -2002,7 +2118,7 @@ class _BaseBlobService(_StorageClient):
         return _parse_response_for_dict(response)
 
     def abort_copy_blob(self, container_name, blob_name, copy_id,
-                        lease_id=None):
+                        lease_id=None, timeout=None):
         '''
          Aborts a pending copy_blob operation, and leaves a destination blob
          with zero length and full metadata.
@@ -2016,6 +2132,8 @@ class _BaseBlobService(_StorageClient):
             copy_blob operation.
          lease_id:
             Required if the destination blob has an active infinite lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -2027,6 +2145,7 @@ class _BaseBlobService(_StorageClient):
         request.query = [
             ('comp', 'copy'),
             ('copyid', _str(copy_id)),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -2039,9 +2158,9 @@ class _BaseBlobService(_StorageClient):
         self._perform_request(request)
 
     def delete_blob(self, container_name, blob_name, snapshot=None,
-                    timeout=None, lease_id=None, delete_snapshots=None,
+                    lease_id=None, delete_snapshots=None,
                     if_modified_since=None, if_unmodified_since=None,
-                    if_match=None, if_none_match=None):
+                    if_match=None, if_none_match=None, timeout=None):
         '''
         Marks the specified blob or snapshot for deletion. The blob is later
         deleted during garbage collection.
@@ -2056,10 +2175,6 @@ class _BaseBlobService(_StorageClient):
         snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to delete.
-        timeout:
-            The timeout parameter is expressed in seconds.
-            The Blob service returns an error when the timeout interval elapses
-            while processing the request.
         lease_id:
             Required if the blob has an active lease.
         delete_snapshots:
@@ -2083,6 +2198,8 @@ class _BaseBlobService(_StorageClient):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)

@@ -20,7 +20,7 @@ from time import sleep
 class _FileChunkDownloader(object):
     def __init__(self, file_service, share_name, directory_name, file_name, 
                  file_size, chunk_size, stream, max_retries, retry_wait,
-                 progress_callback):
+                 progress_callback, timeout):
         self.file_service = file_service
         self.share_name = share_name
         self.directory_name = directory_name
@@ -35,6 +35,7 @@ class _FileChunkDownloader(object):
         self.progress_lock = threading.Lock()
         self.max_retries = max_retries
         self.retry_wait = retry_wait
+        self.timeout = timeout
 
     def get_chunk_offsets(self):
         index = 0
@@ -70,7 +71,8 @@ class _FileChunkDownloader(object):
                     self.share_name,
                     self.directory_name,
                     self.file_name,
-                    byte_range=range_id
+                    byte_range=range_id,
+                    timeout=self.timeout
                 )
             except Exception:
                 if retries > 0:
@@ -83,7 +85,7 @@ class _FileChunkDownloader(object):
 class _FileChunkUploader(object):
     def __init__(self, file_service, share_name, directory_name, file_name, 
                  file_size, chunk_size, stream, parallel, max_retries, retry_wait,
-                 progress_callback):
+                 progress_callback, timeout):
         self.file_service = file_service
         self.share_name = share_name
         self.directory_name = directory_name
@@ -98,6 +100,7 @@ class _FileChunkUploader(object):
         self.progress_lock = threading.Lock() if parallel else None
         self.max_retries = max_retries
         self.retry_wait = retry_wait
+        self.timeout = timeout
 
     def get_chunk_offsets(self):
         index = 0
@@ -179,13 +182,14 @@ class _FileChunkUploader(object):
             self.file_name,
             chunk_data,
             range_id,
+            timeout=self.timeout
         )
         return range_id
 
 
 def _download_file_chunks(file_service, share_name, directory_name, file_name,
                           file_size, block_size, stream, max_connections,
-                          max_retries, retry_wait, progress_callback):
+                          max_retries, retry_wait, progress_callback, timeout):
     if max_connections <= 1:
         raise ValueError(
             'To use file chunk downloader more than 1 thread must be ' +
@@ -203,6 +207,7 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
         max_retries,
         retry_wait,
         progress_callback,
+        timeout
     )
 
     if progress_callback is not None:
@@ -214,7 +219,7 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
 
 def _upload_file_chunks(file_service, share_name, directory_name, file_name,
                         file_size, block_size, stream, max_connections,
-                        max_retries, retry_wait, progress_callback):
+                        max_retries, retry_wait, progress_callback, timeout):
     uploader = _FileChunkUploader(
         file_service,
         share_name,
@@ -227,6 +232,7 @@ def _upload_file_chunks(file_service, share_name, directory_name, file_name,
         max_retries,
         retry_wait,
         progress_callback,
+        timeout
     )
 
     if progress_callback is not None:

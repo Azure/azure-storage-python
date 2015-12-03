@@ -39,7 +39,6 @@ from .models import (
 )
 from ..constants import (
     BLOB_SERVICE_HOST_BASE,
-    DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
 )
 from ._serialization import (
@@ -63,8 +62,7 @@ class PageBlobService(_BaseBlobService):
     
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=BLOB_SERVICE_HOST_BASE, dev_host=DEV_BLOB_HOST,
-                 timeout=DEFAULT_HTTP_TIMEOUT, sas_token=None, connection_string=None,
-                 request_session=None):
+                 sas_token=None, connection_string=None, request_session=None):
         '''
         account_name:
             your storage account name, required for all operations.
@@ -77,16 +75,12 @@ class PageBlobService(_BaseBlobService):
             for on-premise.
         dev_host:
             Dev host url. Defaults to localhost.
-        timeout:
-            Timeout for the http request, in seconds.
         sas_token:
             Token to use to authenticate with shared access signature.
         connection_string:
             If specified, the first four parameters (account_name,
             account_key, protocol, host_base) may be overridden
-            by values specified in the connection_string. The next three parameters
-            (dev_host, timeout, sas_token) cannot be specified with a
-            connection_string. See 
+            by values specified in the connection_string. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
         request_session:
@@ -95,12 +89,12 @@ class PageBlobService(_BaseBlobService):
         self.blob_type = _BlobTypes.PageBlob
         super(PageBlobService, self).__init__(
             account_name, account_key, protocol, host_base, dev_host,
-            timeout, sas_token, connection_string, request_session)
+            sas_token, connection_string, request_session)
 
     def create_blob(
         self, container_name, blob_name, content_length, content_settings=None,
         sequence_number=None, metadata=None, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new page blob.
 
@@ -134,6 +128,8 @@ class PageBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -142,6 +138,7 @@ class PageBlobService(_BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
+        request.query = [('timeout', _int_or_none(timeout))]
         request.headers = [
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
@@ -164,11 +161,11 @@ class PageBlobService(_BaseBlobService):
 
     def put_page(
         self, container_name, blob_name, page, byte_range,
-        page_write, timeout=None, content_md5=None,
+        page_write, content_md5=None,
         lease_id=None, if_sequence_number_lte=None,
         if_sequence_number_lt=None, if_sequence_number_eq=None,
         if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Writes a range of pages to a page blob.
 
@@ -198,8 +195,6 @@ class PageBlobService(_BaseBlobService):
                     Content-Length header to zero, and the Range header to a
                     value that indicates the range to clear, up to maximum
                     blob size.
-        timeout:
-            The timeout parameter is expressed in seconds.
         content_md5:
             An MD5 hash of the page content. This hash is used to
             verify the integrity of the page during transport. When this header
@@ -237,6 +232,8 @@ class PageBlobService(_BaseBlobService):
             header to write the page only if the blob's ETag value does not
             match the value specified. If the values are identical, the Blob
             service fails.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -277,7 +274,7 @@ class PageBlobService(_BaseBlobService):
     def get_page_ranges(
         self, container_name, blob_name, snapshot=None, range=None,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Retrieves the page ranges for a blob.
 
@@ -307,6 +304,8 @@ class PageBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -317,6 +316,7 @@ class PageBlobService(_BaseBlobService):
         request.query = [
             ('comp', 'pagelist'),
             ('snapshot', _str_or_none(snapshot)),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
             ('x-ms-range', _str_or_none(range)),
@@ -337,7 +337,7 @@ class PageBlobService(_BaseBlobService):
     def set_sequence_number(
         self, container_name, blob_name, sequence_number, sequence_number_action,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         
         '''
         Sets the blob sequence number.
@@ -361,6 +361,8 @@ class PageBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -370,7 +372,10 @@ class PageBlobService(_BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('comp', 'properties')]
+        request.query = [
+            ('comp', 'properties'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
             ('x-ms-sequence-number-action', _str_or_none(sequence_number_action)),
@@ -389,7 +394,7 @@ class PageBlobService(_BaseBlobService):
     def resize(
         self, container_name, blob_name, content_length,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         
         '''
         Resizes the blob to a new length.
@@ -410,6 +415,8 @@ class PageBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -418,7 +425,10 @@ class PageBlobService(_BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('comp', 'properties')]
+        request.query = [
+            ('comp', 'properties'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-blob-content-length', _str_or_none(content_length)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -439,7 +449,7 @@ class PageBlobService(_BaseBlobService):
         self, container_name, blob_name, file_path, content_settings=None,
         metadata=None, progress_callback=None, max_connections=1,
         max_retries=5, retry_wait=1.0, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -478,6 +488,10 @@ class PageBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -500,14 +514,15 @@ class PageBlobService(_BaseBlobService):
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
-                if_none_match=if_none_match)
+                if_none_match=if_none_match
+                timeout=timeout)
 
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count, content_settings=None,
         metadata=None, progress_callback=None, max_connections=1,
         max_retries=5, retry_wait=1.0, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file/stream, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -550,6 +565,10 @@ class PageBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -572,7 +591,8 @@ class PageBlobService(_BaseBlobService):
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
-            if_none_match=if_none_match
+            if_none_match=if_none_match,
+            timeout=timeout
         )
 
         _upload_blob_chunks(
@@ -588,6 +608,7 @@ class PageBlobService(_BaseBlobService):
             progress_callback=progress_callback,
             lease_id=lease_id,
             uploader_class=_PageBlobChunkUploader,
+            timeout=timeout
         )
 
     def create_blob_from_bytes(
@@ -595,7 +616,7 @@ class PageBlobService(_BaseBlobService):
         content_settings=None, metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -640,6 +661,10 @@ class PageBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -670,4 +695,5 @@ class PageBlobService(_BaseBlobService):
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
-            if_none_match=if_none_match)
+            if_none_match=if_none_match,
+            timeout=timeout)
