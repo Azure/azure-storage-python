@@ -87,14 +87,14 @@ def _get_request_body(request_body):
 def _update_request_uri_local_storage(request, use_local_storage):
     ''' URL encodes the path and adds the query params to it. '''
 
-    path = url_quote(request.path, '/()$=\',')
+    path = url_quote(request.path, '/()$=\',~')
 
     # add encoded queries to request.path.
     if request.query:
         path += '?'
         for name, value in request.query:
             if value is not None:
-                path += name + '=' + url_quote(value, '/()$=\',') + '&'
+                path += name + '=' + url_quote(value, '~') + '&'
         path = path[:-1]
 
     if use_local_storage:
