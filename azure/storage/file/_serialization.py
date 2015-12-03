@@ -12,17 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from time import time
-from wsgiref.handlers import format_date_time
 from .._serialization import _update_storage_header
 from .._common_conversion import _str
 
 def _update_storage_file_header(request, authentication):
     request = _update_storage_header(request)
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
-    request.headers.append(
-        ('Content-Type', 'application/octet-stream Charset=UTF-8'))
     authentication.sign_request(request)
 
     return request.headers

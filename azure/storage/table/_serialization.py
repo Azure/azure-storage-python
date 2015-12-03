@@ -17,8 +17,6 @@ import types
 import uuid
 
 from datetime import datetime
-from time import time
-from wsgiref.handlers import format_date_time
 from json import (
     dumps,
 )
@@ -72,9 +70,6 @@ def _update_storage_table_header(request):
     request.headers.append(('MaxDataServiceVersion', '3.0'))
 
     # set date
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
-    request.headers.append(('Date', current_time))
     return request.headers
 
 def _to_entity_binary(value):

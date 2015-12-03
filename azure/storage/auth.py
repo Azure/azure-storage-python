@@ -88,7 +88,7 @@ class StorageTableSharedKeyAuthentication(_StorageSharedKeyAuthentication):
             self._get_verb(request) + \
             self._get_headers(
                 request,
-                ['content-md5', 'content-type', 'date'],
+                ['content-md5', 'content-type', 'x-ms-date'],
             ) + \
             self._get_canonicalized_resource(request) + \
             self._get_canonicalized_resource_query(request)

@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from time import time
 from xml.sax.saxutils import escape as xml_escape
-from wsgiref.handlers import format_date_time
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -32,10 +30,6 @@ else:
 
 def _update_storage_blob_header(request, authentication):
     request = _update_storage_header(request)
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
-    request.headers.append(
-        ('Content-Type', 'application/octet-stream Charset=UTF-8'))
     authentication.sign_request(request)
 
     return request.headers
