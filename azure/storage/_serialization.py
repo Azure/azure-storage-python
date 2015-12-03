@@ -84,40 +84,22 @@ def _get_request_body(request_body):
     return request_body
 
 
-def _update_request_uri_query_local_storage(request, use_local_storage):
-    ''' create correct uri and query for the request '''
+def _update_request_uri_local_storage(request, use_local_storage):
+    ''' URL encodes the path and adds the query params to it. '''
 
-    def _update_request_uri_query(request):
-        '''pulls the query string out of the URI and moves it into
-        the query portion of the request object.  If there are already
-        query parameters on the request the parameters in the URI will
-        appear after the existing parameters'''
+    path = url_quote(request.path, '/()$=\',')
 
-        if '?' in request.path:
-            request.path, _, query_string = request.path.partition('?')
-            if query_string:
-                query_params = query_string.split('&')
-                for query in query_params:
-                    if '=' in query:
-                        name, _, value = query.partition('=')
-                        request.query.append((name, value))
+    # add encoded queries to request.path.
+    if request.query:
+        path += '?'
+        for name, value in request.query:
+            if value is not None:
+                path += name + '=' + url_quote(value, '/()$=\',') + '&'
+        path = path[:-1]
 
-        request.path = url_quote(request.path, '/()$=\',')
-
-        # add encoded queries to request.path.
-        if request.query:
-            request.path += '?'
-            for name, value in request.query:
-                if value is not None:
-                    request.path += name + '=' + url_quote(value, '/()$=\',') + '&'
-            request.path = request.path[:-1]
-
-        return request.path, request.query
-
-    uri, query = _update_request_uri_query(request)
     if use_local_storage:
-        return '/' + DEV_ACCOUNT_NAME + uri, query
-    return uri, query
+        return '/' + DEV_ACCOUNT_NAME + path
+    return path
 
 
 def _parse_response_for_dict(response):

@@ -31,7 +31,7 @@ from .._serialization import (
     _get_request_body_bytes_only,
     _parse_response_for_dict,
     _parse_response_for_dict_prefix,
-    _update_request_uri_query_local_storage,
+    _update_request_uri_local_storage,
 )
 from .._serialization import (
     _convert_signed_identifiers_to_xml,
@@ -60,6 +60,7 @@ from ..constants import (
 )
 from ._serialization import (
     _update_storage_file_header,
+    _get_path,
 )
 from ._deserialization import (
     _convert_xml_to_shares,
@@ -450,11 +451,15 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/?restype=service&comp=properties'
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.path = _get_path()
+        request.query = [
+            ('restype', 'service'),
+            ('comp', 'properties'),
+            ('timeout', _int_or_none(timeout)),         
+        ]
         request.body = _get_request_body(
             _convert_service_properties_to_xml(None, hour_metrics, minute_metrics, cors))
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -471,9 +476,13 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/?restype=service&comp=properties'
-        request.query = [('timeout', _int_or_none(timeout))]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path()
+        request.query = [
+            ('restype', 'service'),
+            ('comp', 'properties'),
+            ('timeout', _int_or_none(timeout)),         
+        ]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -503,14 +512,15 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/?comp=list'
+        request.path = _get_path()
         request.query = [
+            ('comp', 'list'),
             ('prefix', _str_or_none(prefix)),
             ('marker', _str_or_none(marker)),
             ('maxresults', _int_or_none(max_results)),
             ('include', _str_or_none(include))
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -542,11 +552,12 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name) + '?restype=share'
+        request.path = _get_path(share_name)
+        request.query = [('restype', 'share')]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
             ('x-ms-share-quota', _int_or_none(quota))]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -573,8 +584,9 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name) + '?restype=share'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name)
+        request.query = [('restype', 'share')]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -597,10 +609,13 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(share_name) + '?restype=share&comp=properties'
+        request.path = _get_path(share_name)
+        request.query = [
+            ('restype', 'share'),
+            ('comp', 'properties'),
+        ]
         request.headers = [('x-ms-share-quota', _int_or_none(quota))]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -618,9 +633,12 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(share_name) + '?restype=share&comp=metadata'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name)
+        request.query = [
+            ('restype', 'share'),
+            ('comp', 'metadata'),
+        ]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -643,10 +661,13 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(share_name) + '?restype=share&comp=metadata'
+        request.path = _get_path(share_name)
+        request.query = [
+            ('restype', 'share'),
+            ('comp', 'metadata'),
+        ]
         request.headers = [('x-ms-meta-name-values', metadata)]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -665,9 +686,12 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(share_name) + '?restype=share&comp=acl'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name)
+        request.query = [
+            ('restype', 'share'),
+            ('comp', 'acl'),
+        ]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -692,11 +716,14 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(share_name) + '?restype=share&comp=acl'
+        request.path = _get_path(share_name)
+        request.query = [
+            ('restype', 'share'),
+            ('comp', 'acl'),
+        ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -715,9 +742,12 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(share_name) + '?restype=share&comp=stats'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name)
+        request.query = [
+            ('restype', 'share'),
+            ('comp', 'stats'),
+        ]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -742,8 +772,9 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name) + '?restype=share'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name)
+        request.query = [('restype', 'share')]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -780,9 +811,9 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name) + \
-            '/' + _str(directory_name) + '?restype=directory'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name, directory_name)
+        request.query = [('restype', 'directory')]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -822,9 +853,9 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name) + \
-            '/' + _str(directory_name) + '?restype=directory'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name, directory_name)
+        request.query = [('restype', 'directory')]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -854,9 +885,9 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name) + \
-            '/' + _str(directory_name) + '?restype=directory'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name, directory_name)
+        request.query = [('restype', 'directory')]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -878,9 +909,12 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name) + \
-            '/' + _str(directory_name) + '?restype=directory&comp=metadata'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name, directory_name)
+        request.query = [
+            ('restype', 'directory'),
+            ('comp', 'metadata'),
+        ]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -905,10 +939,13 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name) + \
-            '/' + _str(directory_name) + '?restype=directory&comp=metadata'
+        request.path = _get_path(share_name, directory_name)
+        request.query = [
+            ('restype', 'directory'),
+            ('comp', 'metadata'),
+        ]
         request.headers = [('x-ms-meta-name-values', metadata)]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -943,15 +980,14 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '?restype=directory&comp=list'
+        request.path = _get_path(share_name, directory_name)
         request.query = [
+            ('restype', 'directory'),
+            ('comp', 'list'),
             ('marker', _str_or_none(marker)),
             ('maxresults', _int_or_none(max_results)),
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -976,11 +1012,8 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'HEAD'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + ''
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1012,13 +1045,11 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + '?comp=properties'
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = [('comp', 'properties')]
         request.headers = [
             ('x-ms-content-length', _str_or_none(content_length))]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1043,14 +1074,12 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + '?comp=properties'
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = [('comp', 'properties')]
         request.headers = None
         if content_settings is not None:
             request.headers = content_settings.to_headers()
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1072,11 +1101,9 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + '?comp=metadata'
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = [('comp', 'metadata')]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1104,12 +1131,10 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + '?comp=metadata'
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = [('comp', 'metadata')]
         request.headers = [('x-ms-meta-name-values', metadata)]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1141,16 +1166,13 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name)
+        request.path = _get_path(share_name, directory_name, file_name)
         request.headers = [
             ('x-ms-copy-source', _str_or_none(copy_source)),
             ('x-ms-meta-name-values', metadata),
         ]
 
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1179,15 +1201,15 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + '?comp=copy&copyid=' + \
-            _str(copy_id)
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = [
+            ('comp', 'copy'),
+            ('copyid', _str(copy_id)),
+        ]
         request.headers = [
             ('x-ms-copy-action', 'abort'),
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1210,11 +1232,8 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + ''
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1247,10 +1266,7 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + ''
+        request.path = _get_path(share_name, directory_name, file_name)
         request.headers = [
             ('x-ms-meta-name-values', metadata),
             ('x-ms-content-length', _str_or_none(content_length)),
@@ -1259,7 +1275,7 @@ class FileService(_StorageClient):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
 
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1503,16 +1519,13 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + ''
+        request.path = _get_path(share_name, directory_name, file_name)
         request.headers = [
             ('x-ms-range', _str_or_none(byte_range)),
             ('x-ms-range-get-content-md5',
              _str_or_none(range_get_content_md5))
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1739,17 +1752,15 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + '?comp=range'
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = [('comp', 'range')]
         request.headers = [
             ('x-ms-range', _str_or_none(byte_range)),
             ('Content-MD5', _str_or_none(content_md5)),
             ('x-ms-write', 'update'),
         ]
         request.body = _get_request_body_bytes_only('data', data)
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1778,16 +1789,14 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + '?comp=range'
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = [('comp', 'range')]
         request.headers = [
             ('x-ms-range', _str_or_none(byte_range)),
             ('Content-Length', '0'),
             ('x-ms-write', 'clear'),
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)
@@ -1824,14 +1833,12 @@ class FileService(_StorageClient):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + _str(share_name)
-        if directory_name is not None:
-            request.path += '/' + _str(directory_name)
-        request.path += '/' + _str(file_name) + '?comp=rangelist'
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = [('comp', 'rangelist')]
         request.headers = [
             ('x-ms-range', _str_or_none(byte_range))
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_file_header(
             request, self.authentication)

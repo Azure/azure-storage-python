@@ -40,6 +40,24 @@ def _update_storage_blob_header(request, authentication):
 
     return request.headers
 
+def _get_path(container_name=None, blob_name=None):
+    '''
+    Creates the path to access a blob resource.
+
+    container_name:
+        Name of container.
+    blob_name:
+        The path to the blob.
+    '''
+    if container_name and blob_name:
+        return '/{0}/{1}'.format(
+            _str(container_name),
+            _str(blob_name))
+    elif container_name:
+        return '/{0}'.format(_str(container_name))
+    else:
+        return '/'
+
 def _convert_block_list_to_xml(block_id_list):
     '''
     <?xml version="1.0" encoding="utf-8"?>

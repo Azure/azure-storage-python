@@ -44,6 +44,27 @@ def _update_storage_queue_header(request, authentication):
 
     return request.headers
 
+def _get_path(queue_name=None, include_messages=None, message_id=None):
+    '''
+    Creates the path to access a queue resource.
+
+    queue_name:
+        Name of queue.
+    include_messages:
+        Whether or not to include messages.
+    message_id:
+        Message id.
+    '''
+    if queue_name and include_messages and message_id:
+        return '/{0}/messages/{1}'.format(_str(queue_name), message_id)
+    if queue_name and include_messages:
+        return '/{0}/messages'.format(_str(queue_name))
+    elif queue_name:
+        return '/{0}'.format(_str(queue_name))
+    else:
+        return '/'
+
+
 def _convert_queue_message_xml(message_text, encode_function):
     '''
     <?xml version="1.0" encoding="utf-8"?>

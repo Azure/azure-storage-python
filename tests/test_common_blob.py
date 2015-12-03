@@ -1375,6 +1375,20 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blobs[2].metadata['name'], 'car')
 
     @record
+    def test_create_blob_with_question_mark(self):
+        # Arrange
+        self._create_container(self.container_name)
+        blob_name = '?ques?tion?'
+        blob_data = u'???'
+
+        # Act
+        self.bs.create_blob_from_text(self.container_name, blob_name, blob_data)
+
+        # Assert
+        blob = self.bs.get_blob_to_text(self.container_name, blob_name)
+        self.assertEqual(blob, blob_data)
+
+    @record
     def test_create_blob_with_lease_id(self):
         # Arrange
         self._create_container_and_block_blob(
@@ -1907,7 +1921,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         target_blob = self.bs.get_blob(self.container_name, target_blob_name)
         self.assertEqual(target_blob, b'')
-        self.assertEqual(target_blob.properties['x-ms-copy-status'], 'aborted')
+        self.assertEqual(target_blob.properties.copy.status, 'aborted')
 
     @record
     def test_abort_copy_blob_with_synchronous_copy_fails(self):
