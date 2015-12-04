@@ -1265,7 +1265,7 @@ class StorageFileTest(StorageTestCase):
         # Assert
         target_file = self.fs.get_file(self.share_name, None, target_file_name)
         self.assertEqual(target_file, b'')
-        self.assertEqual(target_file.properties['x-ms-copy-status'], 'aborted')
+        self.assertEqual(target_file.properties.copy.status, 'aborted')
 
     @record
     def test_abort_copy_file_with_synchronous_copy_fails(self):
@@ -2474,7 +2474,7 @@ class StorageFileTest(StorageTestCase):
         self._create_share_and_file_with_text(
             self.share_name, file_name, data)
 
-        token = self.bs.generate_account_shared_access_signature(
+        token = self.fs.generate_account_shared_access_signature(
             ResourceTypes.OBJECT,
             AccountPermissions.READ,
             datetime.utcnow() + timedelta(hours=1),

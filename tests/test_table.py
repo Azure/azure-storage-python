@@ -1306,7 +1306,7 @@ class StorageTableTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        resp = self.ts.query_entities(self.table_name, None, 'age,sex')
+        resp = service.query_entities(self.table_name, None, 'age,sex')
 
         # Assert
         self.assertEqual(len(resp), 2)

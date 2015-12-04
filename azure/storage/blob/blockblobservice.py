@@ -25,7 +25,7 @@ from .._common_conversion import (
 from .._serialization import (
     _get_request_body,
     _get_request_body_bytes_only,
-    _update_request_uri_query_local_storage,
+    _update_request_uri_local_storage,
 )
 from .._http import HTTPRequest
 from ._chunking import (
@@ -43,6 +43,7 @@ from ..constants import (
 from ._serialization import (
     _convert_block_list_to_xml,
     _update_storage_blob_header,
+    _get_path,
 )
 from ._deserialization import (
     _convert_xml_to_block_list,
@@ -132,7 +133,7 @@ class BlockBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(container_name) + '/' + _str(blob_name)
+        request.path = _get_path(container_name, blob_name)
         request.headers = [
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
@@ -145,7 +146,7 @@ class BlockBlobService(_BaseBlobService):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
         request.body = _get_request_body_bytes_only('blob', blob)
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
@@ -180,15 +181,17 @@ class BlockBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(container_name) + '/' + _str(blob_name) + '?comp=block'
+        request.path = _get_path(container_name, blob_name)
+        request.query = [
+            ('comp', 'block'),
+            ('blockid', _encode_base64(_str_or_none(block_id))),
+        ]
         request.headers = [
             ('Content-MD5', _str_or_none(content_md5)),
             ('x-ms-lease-id', _str_or_none(lease_id))
         ]
-        request.query = [('blockid', _encode_base64(_str_or_none(block_id)))]
         request.body = _get_request_body_bytes_only('block', block)
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
@@ -237,8 +240,8 @@ class BlockBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(container_name) + '/' + _str(blob_name) + '?comp=blocklist'
+        request.path = _get_path(container_name, blob_name)
+        request.query = [('comp', 'blocklist')]
         request.headers = [
             ('Content-MD5', _str_or_none(transactional_content_md5)),
             ('x-ms-meta-name-values', metadata),
@@ -252,7 +255,7 @@ class BlockBlobService(_BaseBlobService):
             request.headers += content_settings.to_headers()
         request.body = _get_request_body(
             _convert_block_list_to_xml(block_list))
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
@@ -282,14 +285,14 @@ class BlockBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(container_name) + '/' + _str(blob_name) + '?comp=blocklist'
-        request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
+        request.path = _get_path(container_name, blob_name)
         request.query = [
+            ('comp', 'blocklist'),
             ('snapshot', _str_or_none(snapshot)),
             ('blocklisttype', _str_or_none(block_list_type))
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)

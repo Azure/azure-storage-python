@@ -23,7 +23,7 @@ from .._common_conversion import (
 )
 from .._serialization import (
     _get_request_body_bytes_only,
-    _update_request_uri_query_local_storage,
+    _update_request_uri_local_storage,
     _parse_response_for_dict,
 )
 from .._http import HTTPRequest
@@ -37,7 +37,10 @@ from ..constants import (
     DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
 )
-from ._serialization import _update_storage_blob_header
+from ._serialization import (
+    _update_storage_blob_header,
+    _get_path,
+)
 from ._baseblobservice import _BaseBlobService
 from os import path
 import sys
@@ -121,7 +124,7 @@ class AppendBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(container_name) + '/' + _str(blob_name)
+        request.path = _get_path(container_name, blob_name)
         request.headers = [
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
@@ -133,7 +136,7 @@ class AppendBlobService(_BaseBlobService):
         ]
         if content_settings is not None:
             request.headers += content_settings.to_headers()
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
@@ -190,8 +193,8 @@ class AppendBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(container_name) + '/' + _str(blob_name) + '?comp=appendblock'
+        request.path = _get_path(container_name, blob_name)
+        request.query = [('comp', 'appendblock')]
         request.headers = [
             ('Content-MD5', _str_or_none(content_md5)),
             ('x-ms-blob-condition-maxsize', _str_or_none(maxsize_condition)),
@@ -203,7 +206,7 @@ class AppendBlobService(_BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match))
         ]
         request.body = _get_request_body_bytes_only('block', block)
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)

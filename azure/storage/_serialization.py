@@ -15,6 +15,8 @@
 import sys
 from datetime import date
 from dateutil.tz import tzutc
+from time import time
+from wsgiref.handlers import format_date_time
 
 if sys.version_info >= (3,):
     from io import BytesIO
@@ -51,6 +53,30 @@ def _to_utc_datetime(value):
         value = value.astimezone(tzutc())
     return value.strftime('%Y-%m-%dT%H:%M:%SZ')
 
+def _update_storage_header(request):
+    ''' add additional headers for storage request. '''
+    if request.body:
+        assert isinstance(request.body, bytes)
+
+    # if it is PUT, POST, MERGE, DELETE, need to add content-length to header.
+    if request.method in ['PUT', 'POST', 'MERGE', 'DELETE']:
+        request.headers.append(('Content-Length', str(len(request.body))))
+
+    # append addtional headers based on the service
+    current_time = format_date_time(time())
+    request.headers.append(('x-ms-date', current_time))
+    request.headers.append(('x-ms-version', X_MS_VERSION))
+    request.headers.append(('Accept-Encoding', 'identity'))
+
+    # append x-ms-meta name, values to header
+    for name, value in request.headers:
+        if 'x-ms-meta-name-values' in name and value:
+            for meta_name, meta_value in value.items():
+                request.headers.append(('x-ms-meta-' + meta_name, meta_value))
+            request.headers.remove((name, value))
+            break
+    return request
+
 def _get_request_body_bytes_only(param_name, param_value):
     '''Validates the request body passed in and converts it to bytes
     if our policy allows it.'''
@@ -84,40 +110,22 @@ def _get_request_body(request_body):
     return request_body
 
 
-def _update_request_uri_query_local_storage(request, use_local_storage):
-    ''' create correct uri and query for the request '''
+def _update_request_uri_local_storage(request, use_local_storage):
+    ''' URL encodes the path and adds the query params to it. '''
 
-    def _update_request_uri_query(request):
-        '''pulls the query string out of the URI and moves it into
-        the query portion of the request object.  If there are already
-        query parameters on the request the parameters in the URI will
-        appear after the existing parameters'''
+    path = url_quote(request.path, '/()$=\',~')
 
-        if '?' in request.path:
-            request.path, _, query_string = request.path.partition('?')
-            if query_string:
-                query_params = query_string.split('&')
-                for query in query_params:
-                    if '=' in query:
-                        name, _, value = query.partition('=')
-                        request.query.append((name, value))
+    # add encoded queries to request.path.
+    if request.query:
+        path += '?'
+        for name, value in request.query:
+            if value is not None:
+                path += name + '=' + url_quote(value, '~') + '&'
+        path = path[:-1]
 
-        request.path = url_quote(request.path, '/()$=\',')
-
-        # add encoded queries to request.path.
-        if request.query:
-            request.path += '?'
-            for name, value in request.query:
-                if value is not None:
-                    request.path += name + '=' + url_quote(value, '/()$=\',') + '&'
-            request.path = request.path[:-1]
-
-        return request.path, request.query
-
-    uri, query = _update_request_uri_query(request)
     if use_local_storage:
-        return '/' + DEV_ACCOUNT_NAME + uri, query
-    return uri, query
+        return '/' + DEV_ACCOUNT_NAME + path
+    return path
 
 
 def _parse_response_for_dict(response):
@@ -348,27 +356,3 @@ def _convert_retention_policy_to_xml(retention_policy, root):
     # Days
     if retention_policy.enabled and retention_policy.days:
         ETree.SubElement(root, 'Days').text = str(retention_policy.days)
-
-
-def _update_storage_header(request):
-    ''' add additional headers for storage request. '''
-    if request.body:
-        assert isinstance(request.body, bytes)
-
-    # if it is PUT, POST, MERGE, DELETE, need to add content-length to header.
-    if request.method in ['PUT', 'POST', 'MERGE', 'DELETE']:
-        request.headers.append(('Content-Length', str(len(request.body))))
-
-    # append addtional headers based on the service
-    request.headers.append(('x-ms-version', X_MS_VERSION))
-    request.headers.append(('Accept-Charset', 'UTF-8'))
-    request.headers.append(('Accept-Encoding', 'identity'))
-
-    # append x-ms-meta name, values to header
-    for name, value in request.headers:
-        if 'x-ms-meta-name-values' in name and value:
-            for meta_name, meta_value in value.items():
-                request.headers.append(('x-ms-meta-' + meta_name, meta_value))
-            request.headers.remove((name, value))
-            break
-    return request

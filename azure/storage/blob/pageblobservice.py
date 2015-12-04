@@ -24,7 +24,7 @@ from .._common_conversion import (
 )
 from .._serialization import (
     _get_request_body_bytes_only,
-    _update_request_uri_query_local_storage,
+    _update_request_uri_local_storage,
 )
 from .._http import HTTPRequest
 from ._error import (
@@ -42,7 +42,10 @@ from ..constants import (
     DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
 )
-from ._serialization import _update_storage_blob_header
+from ._serialization import (
+    _update_storage_blob_header,
+    _get_path,
+)
 from ._deserialization import _convert_xml_to_page_ranges
 from ._baseblobservice import _BaseBlobService
 from os import path
@@ -138,12 +141,11 @@ class PageBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + _str(container_name) + '/' + _str(blob_name)
+        request.path = _get_path(container_name, blob_name)
         request.headers = [
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
-            ('x-ms-blob-content-length',
-                _str_or_none(content_length)),
+            ('x-ms-blob-content-length', _str_or_none(content_length)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
@@ -154,7 +156,7 @@ class PageBlobService(_BaseBlobService):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
 
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
@@ -244,8 +246,11 @@ class PageBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(container_name) + '/' + _str(blob_name) + '?comp=page'
+        request.path = _get_path(container_name, blob_name)
+        request.query = [
+            ('comp', 'page'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('x-ms-range', _str_or_none(byte_range)),
             ('Content-MD5', _str_or_none(content_md5)),
@@ -262,9 +267,8 @@ class PageBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
-        request.query = [('timeout', _int_or_none(timeout))]
         request.body = _get_request_body_bytes_only('page', page)
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
@@ -309,8 +313,11 @@ class PageBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(container_name) + '/' + _str(blob_name) + '?comp=pagelist'
+        request.path = _get_path(container_name, blob_name)
+        request.query = [
+            ('comp', 'pagelist'),
+            ('snapshot', _str_or_none(snapshot)),
+        ]
         request.headers = [
             ('x-ms-range', _str_or_none(range)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -319,8 +326,7 @@ class PageBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.query = [('snapshot', _str_or_none(snapshot))]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
@@ -363,8 +369,8 @@ class PageBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(container_name) + '/' + _str(blob_name) + '?comp=properties'
+        request.path = _get_path(container_name, blob_name)
+        request.query = [('comp', 'properties')]
         request.headers = [
             ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
             ('x-ms-sequence-number-action', _str_or_none(sequence_number_action)),
@@ -374,7 +380,7 @@ class PageBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)
@@ -411,8 +417,8 @@ class PageBlobService(_BaseBlobService):
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
-        request.path = '/' + \
-            _str(container_name) + '/' + _str(blob_name) + '?comp=properties'
+        request.path = _get_path(container_name, blob_name)
+        request.query = [('comp', 'properties')]
         request.headers = [
             ('x-ms-blob-content-length', _str_or_none(content_length)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -421,7 +427,7 @@ class PageBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.path, request.query = _update_request_uri_query_local_storage(
+        request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_blob_header(
             request, self.authentication)

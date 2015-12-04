@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from time import time
 from xml.sax.saxutils import escape as xml_escape
-from wsgiref.handlers import format_date_time
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -32,13 +30,27 @@ else:
 
 def _update_storage_blob_header(request, authentication):
     request = _update_storage_header(request)
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
-    request.headers.append(
-        ('Content-Type', 'application/octet-stream Charset=UTF-8'))
     authentication.sign_request(request)
 
     return request.headers
+
+def _get_path(container_name=None, blob_name=None):
+    '''
+    Creates the path to access a blob resource.
+
+    container_name:
+        Name of container.
+    blob_name:
+        The path to the blob.
+    '''
+    if container_name and blob_name:
+        return '/{0}/{1}'.format(
+            _str(container_name),
+            _str(blob_name))
+    elif container_name:
+        return '/{0}'.format(_str(container_name))
+    else:
+        return '/'
 
 def _convert_block_list_to_xml(block_id_list):
     '''

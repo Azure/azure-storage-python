@@ -26,8 +26,6 @@ try:
 except ImportError:
     from xml.etree import ElementTree as ETree
 
-from time import time
-from wsgiref.handlers import format_date_time
 from xml.sax.saxutils import escape as xml_escape
 from .._serialization import _update_storage_header
 from .._common_conversion import (
@@ -36,13 +34,30 @@ from .._common_conversion import (
 
 def _update_storage_queue_header(request, authentication):
     request = _update_storage_header(request)
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
-    request.headers.append(
-        ('Content-Type', 'application/octet-stream Charset=UTF-8'))
     authentication.sign_request(request)
 
     return request.headers
+
+def _get_path(queue_name=None, include_messages=None, message_id=None):
+    '''
+    Creates the path to access a queue resource.
+
+    queue_name:
+        Name of queue.
+    include_messages:
+        Whether or not to include messages.
+    message_id:
+        Message id.
+    '''
+    if queue_name and include_messages and message_id:
+        return '/{0}/messages/{1}'.format(_str(queue_name), message_id)
+    if queue_name and include_messages:
+        return '/{0}/messages'.format(_str(queue_name))
+    elif queue_name:
+        return '/{0}'.format(_str(queue_name))
+    else:
+        return '/'
+
 
 def _convert_queue_message_xml(message_text, encode_function):
     '''

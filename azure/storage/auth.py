@@ -72,18 +72,12 @@ class StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
         self._add_authorization_header(request, string_to_sign)
 
     def _get_canonicalized_resource_query(self, request):
-        query_to_sign = request.query
-        query_to_sign.sort()
+        request.query.sort()
 
         string_to_sign = ''
-        current_name = ''
-        for name, value in query_to_sign:
+        for name, value in request.query:
             if value:
-                if current_name != name:
-                    string_to_sign += '\n' + name + ':' + value
-                    current_name = name
-                else:
-                    string_to_sign += '\n' + ',' + value
+                string_to_sign += '\n' + name.lower() + ':' + value
 
         return string_to_sign
 
@@ -94,7 +88,7 @@ class StorageTableSharedKeyAuthentication(_StorageSharedKeyAuthentication):
             self._get_verb(request) + \
             self._get_headers(
                 request,
-                ['content-md5', 'content-type', 'date'],
+                ['content-md5', 'content-type', 'x-ms-date'],
             ) + \
             self._get_canonicalized_resource(request) + \
             self._get_canonicalized_resource_query(request)

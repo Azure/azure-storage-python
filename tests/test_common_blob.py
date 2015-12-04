@@ -1157,7 +1157,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertNamedItemInContainer(resp, 'blob2')
         self.assertEqual(resp[0].properties.content_length, 11)
         self.assertEqual(resp[1].properties.content_type,
-                         'application/octet-stream Charset=UTF-8')
+                         'application/octet-stream')
 
     @record
     def test_list_blobs_leased_blob(self):
@@ -1331,7 +1331,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blobs[1].name, 'blob1copy')
         self.assertEqual(blobs[1].properties.content_length, 11)
         self.assertEqual(blobs[1].properties.content_type,
-                         'application/octet-stream Charset=UTF-8')
+                         'application/octet-stream')
         self.assertEqual(blobs[1].properties.content_encoding, None)
         self.assertEqual(blobs[1].properties.content_language, None)
         self.assertNotEqual(blobs[1].properties.content_md5, None)
@@ -1373,6 +1373,35 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNone(blobs[2].snapshot)
         self.assertEqual(blobs[2].metadata['number'], '2')
         self.assertEqual(blobs[2].metadata['name'], 'car')
+
+    @record
+    def test_create_blob_with_question_mark(self):
+        # Arrange
+        self._create_container(self.container_name)
+        blob_name = '?ques?tion?'
+        blob_data = u'???'
+
+        # Act
+        self.bs.create_blob_from_text(self.container_name, blob_name, blob_data)
+
+        # Assert
+        blob = self.bs.get_blob_to_text(self.container_name, blob_name)
+        self.assertEqual(blob, blob_data)
+
+    @record
+    def test_create_blob_with_special_chars(self):
+        # Arrange
+        self._create_container(self.container_name)
+
+        # Act
+        for c in '-._ /()$=\',~':
+            blob_name = '{0}a{0}a{0}'.format(c)
+            blob_data = c
+            self.bs.create_blob_from_text(self.container_name, blob_name, blob_data)
+            blob = self.bs.get_blob_to_text(self.container_name, blob_name)
+            self.assertEqual(blob, blob_data)
+
+        # Assert
 
     @record
     def test_create_blob_with_lease_id(self):
@@ -1907,7 +1936,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         target_blob = self.bs.get_blob(self.container_name, target_blob_name)
         self.assertEqual(target_blob, b'')
-        self.assertEqual(target_blob.properties['x-ms-copy-status'], 'aborted')
+        self.assertEqual(target_blob.properties.copy.status, 'aborted')
 
     @record
     def test_abort_copy_blob_with_synchronous_copy_fails(self):

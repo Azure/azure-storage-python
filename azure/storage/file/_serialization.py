@@ -12,16 +12,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from time import time
-from wsgiref.handlers import format_date_time
 from .._serialization import _update_storage_header
+from .._common_conversion import _str
 
 def _update_storage_file_header(request, authentication):
     request = _update_storage_header(request)
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
-    request.headers.append(
-        ('Content-Type', 'application/octet-stream Charset=UTF-8'))
     authentication.sign_request(request)
 
     return request.headers
+
+def _get_path(share_name=None, directory_name=None, file_name=None):
+    '''
+    Creates the path to access a file resource.
+
+    share_name:
+        Name of share.
+    directory_name:
+        The path to the directory.
+    file_name:
+        Name of file.
+    '''
+    if share_name and directory_name and file_name:
+        return '/{0}/{1}/{2}'.format(
+            _str(share_name),
+            _str(directory_name),
+            _str(file_name))
+    elif share_name and directory_name:
+        return '/{0}/{1}'.format(
+            _str(share_name),
+            _str(directory_name))
+    elif share_name and file_name:
+        return '/{0}/{1}'.format(
+            _str(share_name),
+            _str(file_name))
+    elif share_name:
+        return '/{0}'.format(_str(share_name))
+    else:
+        return '/'
