@@ -6,6 +6,7 @@
 
 ### All:
 - UserAgent string has changed to conform to the Azure Storage standard.
+- Added optional timeout parameter to all APIs.
 
 ### Shared Access Signatures (SAS) and ACL
 - Added support for Account SAS. See CloudStorageAccount.generateSharedAccessSignature and the generate_account_shared_access_signature methods on each service.

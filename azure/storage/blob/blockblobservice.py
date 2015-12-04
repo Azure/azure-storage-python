@@ -37,7 +37,6 @@ from .models import (
 )
 from ..constants import (
     BLOB_SERVICE_HOST_BASE,
-    DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
 )
 from ._serialization import (
@@ -61,8 +60,7 @@ class BlockBlobService(_BaseBlobService):
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=BLOB_SERVICE_HOST_BASE, dev_host=DEV_BLOB_HOST,
-                 timeout=DEFAULT_HTTP_TIMEOUT, sas_token=None, connection_string=None,
-                 request_session=None):
+                 sas_token=None, connection_string=None, request_session=None):
         '''
         account_name:
             your storage account name, required for all operations.
@@ -75,16 +73,12 @@ class BlockBlobService(_BaseBlobService):
             for on-premise.
         dev_host:
             Dev host url. Defaults to localhost.
-        timeout:
-            Timeout for the http request, in seconds.
         sas_token:
             Token to use to authenticate with shared access signature.
         connection_string:
             If specified, the first four parameters (account_name,
             account_key, protocol, host_base) may be overridden
-            by values specified in the connection_string. The next three parameters
-            (dev_host, timeout, sas_token) cannot be specified with a
-            connection_string. See 
+            by values specified in the connection_string. See 
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
         request_session:
@@ -93,12 +87,12 @@ class BlockBlobService(_BaseBlobService):
         self.blob_type = _BlobTypes.BlockBlob
         super(BlockBlobService, self).__init__(
             account_name, account_key, protocol, host_base, dev_host,
-            timeout, sas_token, connection_string, request_session)
+            sas_token, connection_string, request_session)
 
     def _put_blob(self, container_name, blob_name, blob, content_settings=None,
                   metadata=None, lease_id=None, if_modified_since=None,
                   if_unmodified_since=None, if_match=None,
-                  if_none_match=None):
+                  if_none_match=None, timeout=None):
         '''
         Creates a blob or updates an existing blob.
 
@@ -127,6 +121,8 @@ class BlockBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -134,6 +130,7 @@ class BlockBlobService(_BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
+        request.query = [('timeout', _int_or_none(timeout))]
         request.headers = [
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
@@ -153,7 +150,7 @@ class BlockBlobService(_BaseBlobService):
         self._perform_request(request)
 
     def put_block(self, container_name, blob_name, block, block_id,
-                  content_md5=None, lease_id=None):
+                  content_md5=None, lease_id=None, timeout=None):
         '''
         Creates a new block to be committed as part of a blob.
 
@@ -173,6 +170,8 @@ class BlockBlobService(_BaseBlobService):
             arrived with the one that was sent.
         lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -185,6 +184,7 @@ class BlockBlobService(_BaseBlobService):
         request.query = [
             ('comp', 'block'),
             ('blockid', _encode_base64(_str_or_none(block_id))),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
             ('Content-MD5', _str_or_none(content_md5)),
@@ -201,7 +201,8 @@ class BlockBlobService(_BaseBlobService):
         self, container_name, blob_name, block_list,
         transactional_content_md5=None, content_settings=None,
         metadata=None, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, 
+        timeout=None):
         '''
         Writes a blob by specifying the list of block IDs that make up the
         blob. In order to be written as part of a blob, a block must have been
@@ -233,6 +234,8 @@ class BlockBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -241,7 +244,10 @@ class BlockBlobService(_BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('comp', 'blocklist')]
+        request.query = [
+            ('comp', 'blocklist'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.headers = [
             ('Content-MD5', _str_or_none(transactional_content_md5)),
             ('x-ms-meta-name-values', metadata),
@@ -262,7 +268,7 @@ class BlockBlobService(_BaseBlobService):
         self._perform_request(request)
 
     def get_block_list(self, container_name, blob_name, snapshot=None,
-                       block_list_type=None, lease_id=None):
+                       block_list_type=None, lease_id=None, timeout=None):
         '''
         Retrieves the list of blocks that have been uploaded as part of a
         block blob.
@@ -279,6 +285,8 @@ class BlockBlobService(_BaseBlobService):
             committed, uncommitted, or all.
         lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -289,7 +297,8 @@ class BlockBlobService(_BaseBlobService):
         request.query = [
             ('comp', 'blocklist'),
             ('snapshot', _str_or_none(snapshot)),
-            ('blocklisttype', _str_or_none(block_list_type))
+            ('blocklisttype', _str_or_none(block_list_type)),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
         request.path = _update_request_uri_local_storage(
@@ -307,7 +316,7 @@ class BlockBlobService(_BaseBlobService):
         metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -346,6 +355,10 @@ class BlockBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -368,14 +381,15 @@ class BlockBlobService(_BaseBlobService):
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
-                if_none_match=if_none_match)
+                if_none_match=if_none_match,
+                timeout=timeout)
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
         content_settings=None, metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file/stream, or updates the content of
         an existing blob, with automatic chunking and progress
@@ -419,6 +433,10 @@ class BlockBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -439,7 +457,8 @@ class BlockBlobService(_BaseBlobService):
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
-                if_none_match=if_none_match)
+                if_none_match=if_none_match,
+                timeout=timeout)
 
             if progress_callback:
                 progress_callback(count, count)
@@ -455,6 +474,7 @@ class BlockBlobService(_BaseBlobService):
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
                 if_none_match=if_none_match,
+                timeout=timeout
             )
 
             block_ids = _upload_blob_chunks(
@@ -470,6 +490,7 @@ class BlockBlobService(_BaseBlobService):
                 progress_callback=progress_callback,
                 lease_id=lease_id,
                 uploader_class=_BlockBlobChunkUploader,
+                timeout=timeout
             )
 
             self.put_block_list(
@@ -483,6 +504,7 @@ class BlockBlobService(_BaseBlobService):
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
                 if_none_match=if_none_match,
+                timeout=timeout
             )
 
     def create_blob_from_bytes(
@@ -490,7 +512,7 @@ class BlockBlobService(_BaseBlobService):
         content_settings=None, metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -535,6 +557,10 @@ class BlockBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -563,7 +589,8 @@ class BlockBlobService(_BaseBlobService):
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
-                if_none_match=if_none_match)
+                if_none_match=if_none_match,
+                timeout=timeout)
 
             if progress_callback:
                 progress_callback(count, count)
@@ -586,14 +613,15 @@ class BlockBlobService(_BaseBlobService):
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
-                if_none_match=if_none_match)
+                if_none_match=if_none_match,
+                timeout=timeout)
 
     def create_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
         content_settings=None, metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None):
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from str/unicode, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -634,6 +662,10 @@ class BlockBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -659,4 +691,5 @@ class BlockBlobService(_BaseBlobService):
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
-            if_none_match=if_none_match)
+            if_none_match=if_none_match,
+            timeout=timeout)

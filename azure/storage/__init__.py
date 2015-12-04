@@ -18,7 +18,6 @@ from .constants import (
     X_MS_VERSION,
     DEV_ACCOUNT_NAME,
     DEV_ACCOUNT_KEY,
-    DEFAULT_HTTP_TIMEOUT,
 )
 
 from .models import (

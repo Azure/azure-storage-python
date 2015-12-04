@@ -26,7 +26,8 @@ from .models import BlobBlock
 
 class _BlobChunkDownloader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
-                 chunk_size, stream, max_retries, retry_wait, progress_callback):
+                 chunk_size, stream, max_retries, retry_wait, progress_callback,
+                 timeout):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
@@ -40,6 +41,7 @@ class _BlobChunkDownloader(object):
         self.progress_lock = threading.Lock()
         self.max_retries = max_retries
         self.retry_wait = retry_wait
+        self.timeout = timeout
 
     def get_chunk_offsets(self):
         index = 0
@@ -74,7 +76,8 @@ class _BlobChunkDownloader(object):
                 return self.blob_service.get_blob(
                     self.container_name,
                     self.blob_name,
-                    byte_range=range_id
+                    byte_range=range_id,
+                    timeout=self.timeout
                 )
             except AzureHttpError:
                 if retries > 0:
@@ -87,7 +90,7 @@ class _BlobChunkDownloader(object):
 class _BlobChunkUploader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
                  chunk_size, stream, parallel, max_retries, retry_wait,
-                 progress_callback, lease_id):
+                 progress_callback, lease_id, timeout):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
@@ -102,6 +105,7 @@ class _BlobChunkUploader(object):
         self.max_retries = max_retries
         self.retry_wait = retry_wait
         self.lease_id = lease_id
+        self.timeout = timeout
 
     def get_chunk_offsets(self):
         index = 0
@@ -185,6 +189,7 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
             chunk_data,
             block_id,
             lease_id=self.lease_id,
+            timeout=self.timeout,
         )
         return BlobBlock(block_id)
 
@@ -199,6 +204,7 @@ class _PageBlobChunkUploader(_BlobChunkUploader):
             range_id,
             'update',
             lease_id=self.lease_id,
+            timeout=self.timeout,
         )
         return range_id
 
@@ -211,6 +217,7 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 chunk_data,
                 lease_id=self.lease_id,
                 maxsize_condition=self.maxsize_condition,
+                timeout=self.timeout,
             )
 
             self.current_length = int(resp['x-ms-blob-append-offset'])
@@ -222,12 +229,13 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 lease_id=self.lease_id,
                 maxsize_condition=self.maxsize_condition,
                 appendpos_condition=self.current_length + chunk_offset,
+                timeout=self.timeout,
             )
 
 
 def _download_blob_chunks(blob_service, container_name, blob_name,
                           blob_size, block_size, stream, max_connections,
-                          max_retries, retry_wait, progress_callback):
+                          max_retries, retry_wait, progress_callback, timeout):
     if max_connections <= 1:
         raise ValueError(
             'To use blob chunk downloader more than 1 thread must be ' +
@@ -244,6 +252,7 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
         max_retries,
         retry_wait,
         progress_callback,
+        timeout
     )
 
     if progress_callback is not None:
@@ -257,7 +266,7 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
 def _upload_blob_chunks(blob_service, container_name, blob_name,
                         blob_size, block_size, stream, max_connections,
                         max_retries, retry_wait, progress_callback,
-                        lease_id, uploader_class, maxsize_condition=None):
+                        lease_id, uploader_class, maxsize_condition=None, timeout=None):
     uploader = uploader_class(
         blob_service,
         container_name,
@@ -270,6 +279,7 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
         retry_wait,
         progress_callback,
         lease_id,
+        timeout
     )
 
     uploader.maxsize_condition = maxsize_condition

@@ -67,7 +67,6 @@ from ._deserialization import (
 )
 from ..constants import (
     TABLE_SERVICE_HOST_BASE,
-    DEFAULT_HTTP_TIMEOUT,
     DEV_TABLE_HOST,
 )
 from ._request import (
@@ -93,8 +92,7 @@ class TableService(_StorageClient):
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=TABLE_SERVICE_HOST_BASE, dev_host=DEV_TABLE_HOST,
-                 timeout=DEFAULT_HTTP_TIMEOUT, sas_token=None, connection_string=None,
-                 request_session=None):
+                 sas_token=None, connection_string=None, request_session=None):
         '''
         account_name:
             your storage account name, required for all operations.
@@ -107,8 +105,6 @@ class TableService(_StorageClient):
             for on-premise.
         dev_host:
             Optional. Dev host url. Defaults to localhost.
-        timeout:
-            Optional. Timeout for the http request, in seconds.
         sas_token:
             Optional. Token to use to authenticate with shared access signature.
         connection_string:
@@ -130,7 +126,7 @@ class TableService(_StorageClient):
             host_base = connection_params.host_base_table
             
         super(TableService, self).__init__(
-            account_name, account_key, protocol, host_base, dev_host, timeout, sas_token, request_session)
+            account_name, account_key, protocol, host_base, dev_host, sas_token, request_session)
 
         if self.account_key:
             self.authentication = StorageTableSharedKeyAuthentication(
@@ -278,10 +274,13 @@ class TableService(_StorageClient):
             end_rk=end_rk,
         )
 
-    def get_table_service_properties(self):
+    def get_table_service_properties(self, timeout=None):
         '''
         Gets the properties of a storage account's Table service, including
         Azure Storage Analytics.
+
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -290,6 +289,7 @@ class TableService(_StorageClient):
         request.query = [
             ('restype', 'service'),
             ('comp', 'properties'),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -299,7 +299,7 @@ class TableService(_StorageClient):
         return _convert_xml_to_service_properties(response.body)
 
     def set_table_service_properties(self, logging=None, hour_metrics=None, 
-                                    minute_metrics=None, cors=None):
+                                    minute_metrics=None, cors=None, timeout=None):
         '''
         Sets the properties of a storage account's Table service, including
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
@@ -328,6 +328,7 @@ class TableService(_StorageClient):
         request.query = [
             ('restype', 'service'),
             ('comp', 'properties'),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
@@ -336,7 +337,7 @@ class TableService(_StorageClient):
         request.headers = _update_storage_table_header(request)
         self._perform_request(request)
 
-    def query_tables(self, table_name=None, top=None, next_table_name=None):
+    def query_tables(self, table_name=None, top=None, next_table_name=None, timeout=None):
         '''
         Returns a list of tables under the specified account.
 
@@ -347,6 +348,8 @@ class TableService(_StorageClient):
         next_table_name:
             Optional. When top is used, the next table name is stored in
             result.x_ms_continuation['NextTableName']
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -359,7 +362,8 @@ class TableService(_StorageClient):
         request.headers = [('Accept', TablePayloadFormat.JSON_NO_METADATA)]
         request.query = [
             ('$top', _int_or_none(top)),
-            ('NextTableName', _str_or_none(next_table_name))
+            ('NextTableName', _str_or_none(next_table_name)),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -368,7 +372,7 @@ class TableService(_StorageClient):
 
         return _convert_json_response_to_tables(response)
 
-    def create_table(self, table, fail_on_exist=False):
+    def create_table(self, table, fail_on_exist=False, timeout=None):
         '''
         Creates a new table in the storage account.
 
@@ -378,12 +382,15 @@ class TableService(_StorageClient):
             It is case-insensitive and must be from 3 to 63 characters long.
         fail_on_exist:
             Specify whether throw exception when table exists.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table', table)
         request = HTTPRequest()
         request.method = 'POST'
         request.host = self._get_host()
         request.path = '/Tables'
+        request.query = [('timeout', _int_or_none(timeout))]
         request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
                            _DEFAULT_PREFER_HEADER,
                            _DEFAULT_ACCEPT_HEADER]
@@ -402,18 +409,21 @@ class TableService(_StorageClient):
             self._perform_request(request)
             return True
 
-    def delete_table(self, table_name, fail_not_exist=False):
+    def delete_table(self, table_name, fail_not_exist=False, timeout=None):
         '''
         table_name:
             Name of the table to delete.
         fail_not_exist:
             Specify whether throw exception when table doesn't exist.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = '/Tables(\'' + _str(table_name) + '\')'
+        request.query = [('timeout', _int_or_none(timeout))]
         request.headers = [_DEFAULT_ACCEPT_HEADER]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -429,7 +439,7 @@ class TableService(_StorageClient):
             self._perform_request(request)
             return True
 
-    def get_table_acl(self, table_name):
+    def get_table_acl(self, table_name, timeout=None):
         '''
         Returns details about any stored access policies specified on the
         table that may be used with Shared Access Signatures.
@@ -438,13 +448,18 @@ class TableService(_StorageClient):
             Name of existing table.
         :return: A dictionary of access policies associated with the table.
         :rtype: dict of str to :class:`.AccessPolicy`:
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/' + _str(table_name)
-        request.query = [('comp', 'acl')]
+        request.query = [
+            ('comp', 'acl'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
@@ -452,7 +467,7 @@ class TableService(_StorageClient):
 
         return _convert_xml_to_signed_identifiers(response.body)
 
-    def set_table_acl(self, table_name, signed_identifiers=None):
+    def set_table_acl(self, table_name, signed_identifiers=None, timeout=None):
         '''
         Sets stored access policies for the table that may be used with
         Shared Access Signatures.
@@ -464,13 +479,18 @@ class TableService(_StorageClient):
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
         :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + _str(table_name)
-        request.query = [('comp', 'acl')]
+        request.query = [
+            ('comp', 'acl'),
+            ('timeout', _int_or_none(timeout)),
+        ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
         request.path = _update_request_uri_local_storage(
@@ -481,7 +501,7 @@ class TableService(_StorageClient):
     def query_entities(self, table_name, filter=None, select=None, top=None,
                        next_partition_key=None, next_row_key=None,
                        accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
-                       property_resolver=None):
+                       property_resolver=None, timeout=None):
         '''
         Get entities in a table; includes the $filter and $select options.
 
@@ -507,6 +527,8 @@ class TableService(_StorageClient):
             Optional. A function which given the partition key, row key, 
             property name, property value, and the property EdmType if 
             returned by the service, returns the EdmType of the property.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('accept', accept)
@@ -520,7 +542,8 @@ class TableService(_StorageClient):
             ('$select', _str_or_none(select)),
             ('$top', _int_or_none(top)),
             ('NextPartitionKey', _str_or_none(next_partition_key)),
-            ('NextRowKey', _str_or_none(next_row_key))
+            ('NextRowKey', _str_or_none(next_row_key)),
+            ('timeout', _int_or_none(timeout)),
         ]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -529,7 +552,7 @@ class TableService(_StorageClient):
 
         return _convert_json_response_to_entities(response, property_resolver)
 
-    def commit_batch(self, table_name, batch):
+    def commit_batch(self, table_name, batch, timeout=None):
         '''
         Commits a batch request.
 
@@ -537,6 +560,8 @@ class TableService(_StorageClient):
             Table name.
         batch:
             a Batch object
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
 
@@ -545,6 +570,7 @@ class TableService(_StorageClient):
         request.method = 'POST'
         request.host = self._get_host()
         request.path = '/' + '$batch'
+        request.query = [('timeout', _int_or_none(timeout))]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
 
@@ -571,21 +597,23 @@ class TableService(_StorageClient):
         return responses
 
     @contextmanager
-    def batch(self, table_name):
+    def batch(self, table_name, timeout=None):
         '''
         Creates a batch object which can be used as a context manager.
         Commits the batch on exit.
 
         table_name:
             Table name.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         batch = TableBatch()
         yield batch
-        self.commit_batch(table_name, batch)
+        self.commit_batch(table_name, batch, timeout=timeout)
 
     def get_entity(self, table_name, partition_key, row_key, select=None,
                    accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
-                   property_resolver=None):
+                   property_resolver=None, timeout=None):
         '''
         Get an entity in a table; includes the $select options.
 
@@ -604,11 +632,14 @@ class TableService(_StorageClient):
             Optional. A function which given the partition key, row key, 
             property name, property value, and the property EdmType if 
             returned by the service, returns the EdmType of the property.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = _get_entity(partition_key, row_key, select, accept)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, partition_key, row_key)
+        request.query += [('timeout', _int_or_none(timeout))]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
@@ -616,7 +647,7 @@ class TableService(_StorageClient):
         response = self._perform_request(request)
         return _convert_json_response_to_entity(response, property_resolver)
 
-    def insert_entity(self, table_name, entity):
+    def insert_entity(self, table_name, entity, timeout=None):
         '''
         Inserts a new entity into a table.
 
@@ -625,11 +656,14 @@ class TableService(_StorageClient):
         entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_entity(entity)
         request.host = self._get_host()
         request.path = '/' + _str(table_name)
+        request.query += [('timeout', _int_or_none(timeout))]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
@@ -637,7 +671,7 @@ class TableService(_StorageClient):
         response = self._perform_request(request)
         return _extract_etag(response)
 
-    def update_entity(self, table_name, entity, if_match='*'):
+    def update_entity(self, table_name, entity, if_match='*', timeout=None):
         '''
         Updates an existing entity in a table. The Update Entity operation
         replaces the entire entity and can be used to remove properties.
@@ -655,11 +689,14 @@ class TableService(_StorageClient):
             value maintained by the server, indicating that the entity has 
             not been modified since it was retrieved by the client. To force 
             an unconditional update, set If-Match to the wildcard character (*).
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = _update_entity(entity, if_match)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
+        request.query += [('timeout', _int_or_none(timeout))]
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
         request.headers = _update_storage_table_header(request)
@@ -667,7 +704,7 @@ class TableService(_StorageClient):
         response = self._perform_request(request)
         return _extract_etag(response)
 
-    def merge_entity(self, table_name, entity, if_match='*'):
+    def merge_entity(self, table_name, entity, if_match='*', timeout=None):
         '''
         Updates an existing entity by updating the entity's properties. This
         operation does not replace the existing entity as the Update Entity
@@ -686,10 +723,13 @@ class TableService(_StorageClient):
             value maintained by the server, indicating that the entity has 
             not been modified since it was retrieved by the client. To force 
             an unconditional merge, set If-Match to the wildcard character (*).
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = _merge_entity(entity, if_match)
         request.host = self._get_host()
+        request.query += [('timeout', _int_or_none(timeout))]
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -699,7 +739,7 @@ class TableService(_StorageClient):
         return _extract_etag(response)
 
     def delete_entity(self, table_name, partition_key, row_key,
-                      if_match='*'):
+                      if_match='*', timeout=None):
         '''
         Deletes an existing entity in a table.
 
@@ -717,10 +757,13 @@ class TableService(_StorageClient):
             value maintained by the server, indicating that the entity has 
             not been modified since it was retrieved by the client. To force 
             an unconditional delete, set If-Match to the wildcard character (*).
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = _delete_entity(partition_key, row_key, if_match)
         request.host = self._get_host()
+        request.query += [('timeout', _int_or_none(timeout))]
         request.path = _get_entity_path(table_name, partition_key, row_key)
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -728,7 +771,7 @@ class TableService(_StorageClient):
 
         self._perform_request(request)
 
-    def insert_or_replace_entity(self, table_name, entity):
+    def insert_or_replace_entity(self, table_name, entity, timeout=None):
         '''
         Replaces an existing entity or inserts a new entity if it does not
         exist in the table. Because this operation can insert or update an
@@ -739,10 +782,13 @@ class TableService(_StorageClient):
         entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_or_replace_entity(entity)
         request.host = self._get_host()
+        request.query += [('timeout', _int_or_none(timeout))]
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)
@@ -751,7 +797,7 @@ class TableService(_StorageClient):
         response = self._perform_request(request)
         return _extract_etag(response)
 
-    def insert_or_merge_entity(self, table_name, entity):
+    def insert_or_merge_entity(self, table_name, entity, timeout=None):
         '''
         Merges an existing entity or inserts a new entity if it does not exist
         in the table. Because this operation can insert or update an entity,
@@ -762,10 +808,13 @@ class TableService(_StorageClient):
         entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_or_merge_entity(entity)
         request.host = self._get_host()
+        request.query += [('timeout', _int_or_none(timeout))]
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
         request.path = _update_request_uri_local_storage(
             request, self.use_local_storage)

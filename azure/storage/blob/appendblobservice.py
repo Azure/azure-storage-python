@@ -34,7 +34,6 @@ from ._chunking import (
 from .models import _BlobTypes
 from ..constants import (
     BLOB_SERVICE_HOST_BASE,
-    DEFAULT_HTTP_TIMEOUT,
     DEV_BLOB_HOST,
 )
 from ._serialization import (
@@ -54,8 +53,7 @@ class AppendBlobService(_BaseBlobService):
 
     def __init__(self, account_name=None, account_key=None, protocol='https',
                  host_base=BLOB_SERVICE_HOST_BASE, dev_host=DEV_BLOB_HOST,
-                 timeout=DEFAULT_HTTP_TIMEOUT, sas_token=None, connection_string=None,
-                 request_session=None):
+                 sas_token=None, connection_string=None, request_session=None):
         '''
         account_name:
             your storage account name, required for all operations.
@@ -68,16 +66,12 @@ class AppendBlobService(_BaseBlobService):
             for on-premise.
         dev_host:
             Dev host url. Defaults to localhost.
-        timeout:
-            Timeout for the http request, in seconds.
         sas_token:
             Token to use to authenticate with shared access signature.
         connection_string:
             If specified, the first four parameters (account_name,
             account_key, protocol, host_base) may be overridden
-            by values specified in the connection_string. The next three parameters
-            (dev_host, timeout, sas_token) cannot be specified with a
-            connection_string. See 
+            by values specified in the connection_string. See 
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
         request_session:
@@ -86,12 +80,12 @@ class AppendBlobService(_BaseBlobService):
         self.blob_type = _BlobTypes.AppendBlob
         super(AppendBlobService, self).__init__(
             account_name, account_key, protocol, host_base, dev_host,
-            timeout, sas_token, connection_string, request_session)
+            sas_token, connection_string, request_session)
 
     def create_blob(self, container_name, blob_name, content_settings=None,
                     metadata=None, lease_id=None,
                     if_modified_since=None, if_unmodified_since=None,
-                    if_match=None, if_none_match=None):
+                    if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a blob or overrides an existing blob. Use if_match=* to
         prevent overriding an existing blob. 
@@ -118,6 +112,8 @@ class AppendBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -125,6 +121,7 @@ class AppendBlobService(_BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
+        request.query = [('timeout', _int_or_none(timeout))]
         request.headers = [
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
@@ -147,7 +144,7 @@ class AppendBlobService(_BaseBlobService):
                      appendpos_condition=None,
                      lease_id=None, if_modified_since=None,
                      if_unmodified_since=None, if_match=None,
-                     if_none_match=None):
+                     if_none_match=None, timeout=None):
         '''
         The Append Block operation commits a new block of data
         to the end of an existing append blob.
@@ -186,6 +183,8 @@ class AppendBlobService(_BaseBlobService):
             An ETag value.
         if_none_match:
             An ETag value.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -194,7 +193,10 @@ class AppendBlobService(_BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('comp', 'appendblock')]
+        request.query = [
+            ('comp', 'appendblock'),
+            ('timeout', _int_or_none(timeout)),
+         ]
         request.headers = [
             ('Content-MD5', _str_or_none(content_md5)),
             ('x-ms-blob-condition-maxsize', _str_or_none(maxsize_condition)),
@@ -219,7 +221,7 @@ class AppendBlobService(_BaseBlobService):
     def append_blob_from_path(
         self, container_name, blob_name, file_path,
         maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None):
+        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from a file path, with automatic
         chunking and progress notifications.
@@ -246,6 +248,10 @@ class AppendBlobService(_BaseBlobService):
             Sleep time in secs between retries.
         lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -262,12 +268,13 @@ class AppendBlobService(_BaseBlobService):
                 progress_callback=progress_callback,
                 max_retries=max_retries,
                 retry_wait=retry_wait,
-                lease_id=lease_id)
+                lease_id=lease_id,
+                timeout=timeout)
 
     def append_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
         maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None):
+        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from an array of bytes, with
         automatic chunking and progress notifications.
@@ -299,6 +306,10 @@ class AppendBlobService(_BaseBlobService):
             Sleep time in secs between retries.
         lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -324,12 +335,13 @@ class AppendBlobService(_BaseBlobService):
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_retries=max_retries,
-            retry_wait=retry_wait)
+            retry_wait=retry_wait,
+            timeout=timeout)
 
     def append_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
         maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None):
+        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from str/unicode, with
         automatic chunking and progress notifications.
@@ -358,6 +370,10 @@ class AppendBlobService(_BaseBlobService):
             Sleep time in secs between retries.
         lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -377,12 +393,13 @@ class AppendBlobService(_BaseBlobService):
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_retries=max_retries,
-            retry_wait=retry_wait)
+            retry_wait=retry_wait,
+            timeout=timeout)
 
     def append_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
         maxsize_condition=None, progress_callback=None, 
-        max_retries=5, retry_wait=1.0, lease_id=None):
+        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from a file/stream, with
         automatic chunking and progress notifications.
@@ -412,6 +429,10 @@ class AppendBlobService(_BaseBlobService):
             Sleep time in secs between retries.
         lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make 
+            multiple calls to the Azure service and the timeout will apply to 
+            each call individually.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -430,5 +451,6 @@ class AppendBlobService(_BaseBlobService):
             progress_callback=progress_callback,
             lease_id=lease_id,
             uploader_class=_AppendBlobChunkUploader,
-            maxsize_condition=maxsize_condition
+            maxsize_condition=maxsize_condition,
+            timeout=timeout
         )
