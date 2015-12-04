@@ -24,6 +24,7 @@ from .constants import (
     DEV_ACCOUNT_KEY,
     EMULATED,
     _USER_AGENT_STRING,
+    _SOCKET_TIMEOUT
 )
 from ._http import HTTPError
 from ._http.httpclient import _HTTPClient
@@ -98,6 +99,7 @@ class _StorageClient(object):
             protocol=self.protocol,
             request_session=request_session or requests.Session(),
             user_agent=_USER_AGENT_STRING,
+            timeout=_SOCKET_TIMEOUT,
         )
         self._filter = self._perform_request_worker
 
