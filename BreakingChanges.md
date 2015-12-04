@@ -32,6 +32,7 @@
 - ContentSettings objects have replaced all content_* and cache_control params for applicable APIs. Create a ContentSettings object passing with those params and pass it to APIs instead.
 - list_blobs no longer exposes prefix, marker, max_results, or delimiter.
 - Single-threaded blob download APIs will now download the blob without chunking to improve perf.
+- get_blob_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
 
 ### Queue:
 - The list_queues operation returns a sequence of Queue objects. The sequence returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
@@ -48,3 +49,4 @@
 - Single-threaded file download APIs will now download the file without chunking to improve perf.
 - Combined models for File & FileResult for better usability. get_file_properties double returns FileProperties object and a metadata dict.
 - list_directories_and_files no longer exposes marker or max_results.
+- get_file_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.

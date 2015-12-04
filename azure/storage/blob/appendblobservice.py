@@ -20,6 +20,7 @@ from .._error import (
 from .._common_conversion import (
     _str,
     _str_or_none,
+    _int_or_none,
 )
 from .._serialization import (
     _get_request_body_bytes_only,

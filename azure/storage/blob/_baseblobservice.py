@@ -1293,9 +1293,9 @@ class _BaseBlobService(_StorageClient):
         lease_id:
             Required if the blob has an active lease.
         progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the blob.
+            Callback for progress with signature function(current, total) 
+            where current is the number of bytes transfered so far, and total is 
+            the size of the blob if known.
         max_connections:
             Set to 1 to download the blob sequentially.
             Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
@@ -1359,9 +1359,9 @@ class _BaseBlobService(_StorageClient):
         lease_id:
             Required if the blob has an active lease.
         progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the blob.
+            Callback for progress with signature function(current, total) 
+            where current is the number of bytes transfered so far, and total is 
+            the size of the blob if known.
         max_connections:
             Set to 1 to download the blob sequentially.
             Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
@@ -1387,41 +1387,48 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
 
-        props, _ = self.get_blob_properties(container_name, blob_name, timeout)
-        blob_size = int(props.content_length)
+        # Only get properties if parallelism will actually be used
+        blob_size = None
+        if max_connections > 1:
+            props, _ = self.get_blob_properties(container_name, blob_name, timeout=timeout)
+            blob_size = int(props.content_length)
 
-        if blob_size < self._BLOB_MAX_DATA_SIZE or max_connections <= 1:
-            if progress_callback:
-                progress_callback(0, blob_size)
+            # If blob size is large, use parallel download
+            if blob_size >= self._BLOB_MAX_DATA_SIZE:
+                _download_blob_chunks(
+                    self,
+                    container_name,
+                    blob_name,
+                    blob_size,
+                    self._BLOB_MAX_CHUNK_DATA_SIZE,
+                    stream,
+                    max_connections,
+                    max_retries,
+                    retry_wait,
+                    progress_callback,
+                    timeout,
+                )
+                return
 
-            data = self.get_blob(container_name,
-                                 blob_name,
-                                 snapshot,
-                                 lease_id=lease_id,
-                                 if_modified_since=if_modified_since,
-                                 if_unmodified_since=if_unmodified_since,
-                                 if_match=if_match,
-                                 if_none_match=if_none_match,
-                                 timeout=timeout)
+        # If parallelism is off or the blob is small, do a single download
+        if progress_callback:
+            progress_callback(0, blob_size)
 
-            stream.write(data)
+        data = self.get_blob(container_name,
+                                blob_name,
+                                snapshot,
+                                lease_id=lease_id,
+                                if_modified_since=if_modified_since,
+                                if_unmodified_since=if_unmodified_since,
+                                if_match=if_match,
+                                if_none_match=if_none_match,
+                                timeout=timeout)
 
-            if progress_callback:
-                progress_callback(blob_size, blob_size)
-        else:
-            _download_blob_chunks(
-                self,
-                container_name,
-                blob_name,
-                blob_size,
-                self._BLOB_MAX_CHUNK_DATA_SIZE,
-                stream,
-                max_connections,
-                max_retries,
-                retry_wait,
-                progress_callback,
-                timeout
-            )
+        stream.write(data)
+
+        if progress_callback:
+            blob_size = data.properties.content_length
+            progress_callback(blob_size, blob_size)
 
     def get_blob_to_bytes(
         self, container_name, blob_name, snapshot=None, lease_id=None,
@@ -1442,9 +1449,9 @@ class _BaseBlobService(_StorageClient):
         lease_id:
             Required if the blob has an active lease.
         progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the blob.
+            Callback for progress with signature function(current, total) 
+            where current is the number of bytes transfered so far, and total is 
+            the size of the blob if known.
         max_connections:
             Set to 1 to download the blob sequentially.
             Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
@@ -1508,9 +1515,9 @@ class _BaseBlobService(_StorageClient):
         lease_id:
             Required if the blob has an active lease.
         progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the blob.
+            Callback for progress with signature function(current, total) 
+            where current is the number of bytes transfered so far, and total is 
+            the size of the blob if known.
         max_connections:
             Set to 1 to download the blob sequentially.
             Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
@@ -2070,7 +2077,7 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('copy_source', copy_source)
 
-        if copy_source.startswith('/', timeout=None):
+        if copy_source.startswith('/'):
             # Backwards compatibility for earlier versions of the SDK where
             # the copy source can be in the following formats:
             # - Blob in named container:

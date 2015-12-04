@@ -41,6 +41,7 @@
 - resize and set_sequence_number APIs have been added for Page Blob. It is not possible to make these changes with set_blob_properties.
 - Single-threaded blob download APIs will now download the blob without chunking to improve perf.
 - Allow '?' as part of blob names.
+- get_blob_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
 
 ### Queue:
 - The list_queues operation returns a list of Queue objects. The list returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
@@ -57,3 +58,4 @@
 - Single-threaded file download APIs will now download the file without chunking to improve perf.
 - Combined models for File & FileResult for better usability. get_file_properties double returns FileProperties object and a metadata dict.
 - list_directories_and_files no longer exposes marker or max_results.
+- get_file_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
