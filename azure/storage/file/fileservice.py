@@ -1393,7 +1393,7 @@ class FileService(_StorageClient):
             A dict containing name, value for metadata.
         progress_callback:
             Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
+            current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
         max_connections:
             Maximum number of parallel connections to use when the file size
@@ -1488,7 +1488,7 @@ class FileService(_StorageClient):
             A dict containing name, value for metadata.
         progress_callback:
             Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
+            current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
         max_connections:
             Maximum number of parallel connections to use when the file size
@@ -1549,7 +1549,7 @@ class FileService(_StorageClient):
             A dict containing name, value for metadata.
         progress_callback:
             Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
+            current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
         max_connections:
             Maximum number of parallel connections to use when the file size
@@ -1662,9 +1662,9 @@ class FileService(_StorageClient):
         open_mode:
             Mode to use when opening the file.
         progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the file.
+            Callback for progress with signature function(current, total) 
+            where current is the number of bytes transfered so far, and total is 
+            the size of the file if known.
         max_connections:
             Set to 1 to download the file sequentially.
             Set to 2 or greater if you want to download a file larger than 64MB in chunks.
@@ -1706,9 +1706,9 @@ class FileService(_StorageClient):
         stream:
             Opened file/stream to write to.
         progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the file.
+            Callback for progress with signature function(current, total) 
+            where current is the number of bytes transfered so far, and total is 
+            the size of the file if known.
         max_connections:
             Set to 1 to download the file sequentially.
             Set to 2 or greater if you want to download a file larger than 64MB in chunks.
@@ -1726,35 +1726,43 @@ class FileService(_StorageClient):
         _validate_not_none('file_name', file_name)
         _validate_not_none('stream', stream)
 
-        props, _ = self.get_file_properties(share_name, directory_name, file_name, timeout)
-        file_size = props.content_length
+        # Only get properties if parallelism will actually be used
+        file_size = None
+        if max_connections > 1:
+            props, _ = self.get_file_properties(share_name, directory_name, 
+                                                file_name, timeout=timeout)
+            file_size = props.content_length
 
-        if file_size < self._FILE_MAX_DATA_SIZE or max_connections <= 1:
-            if progress_callback:
-                progress_callback(0, file_size)
+            # If file size is large, use parallel download
+            if file_size >= self._FILE_MAX_DATA_SIZE:
+                _download_file_chunks(
+                    self,
+                    share_name,
+                    directory_name,
+                    file_name,
+                    file_size,
+                    self._FILE_MAX_CHUNK_DATA_SIZE,
+                    stream,
+                    max_connections,
+                    max_retries,
+                    retry_wait,
+                    progress_callback, 
+                    timeout
+                )
+                return
 
-            data = self.get_file(share_name, directory_name,
-                                 file_name, timeout)
+        # If parallelism is off or the file is small, do a single download
+        if progress_callback:
+            progress_callback(0, file_size)
 
-            stream.write(data)
+        data = self.get_file(share_name, directory_name,
+                                file_name, timeout=timeout)
 
-            if progress_callback:
-                progress_callback(file_size, file_size)
-        else:
-            _download_file_chunks(
-                self,
-                share_name,
-                directory_name,
-                file_name,
-                file_size,
-                self._FILE_MAX_CHUNK_DATA_SIZE,
-                stream,
-                max_connections,
-                max_retries,
-                retry_wait,
-                progress_callback,
-                timeout
-            )
+        stream.write(data)
+
+        if progress_callback:
+            file_size = data.properties.content_length
+            progress_callback(file_size, file_size)
 
     def get_file_to_bytes(self, share_name, directory_name, file_name, progress_callback=None,
                           max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
@@ -1769,9 +1777,9 @@ class FileService(_StorageClient):
         file_name:
             Name of existing file.
         progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the file.
+            Callback for progress with signature function(current, total) 
+            where current is the number of bytes transfered so far, and total is 
+            the size of the file if known.
         max_connections:
             Set to 1 to download the file sequentially.
             Set to 2 or greater if you want to download a file larger than 64MB in chunks.
@@ -1818,9 +1826,9 @@ class FileService(_StorageClient):
         encoding:
             Python encoding to use when decoding the file data.
         progress_callback:
-            Callback for progress with signature function(current, total) where
-            current is the number of bytes transfered so far, and total is the
-            size of the file.
+            Callback for progress with signature function(current, total) 
+            where current is the number of bytes transfered so far, and total is 
+            the size of the file if known.
         max_connections:
             Set to 1 to download the file sequentially.
             Set to 2 or greater if you want to download a file larger than 64MB in chunks.
