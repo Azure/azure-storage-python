@@ -185,14 +185,16 @@ class StorageCommonBlobTest(StorageTestCase):
         size = self.bs._BLOB_MAX_DATA_SIZE + 12345
         return self._get_random_bytes(size)
 
-    def _get_expected_progress(self, blob_size, unknown_size=False):
+    def _get_expected_progress(self, blob_size, unknown_size=True):
         result = []
         index = 0
-        total = None if unknown_size else blob_size
-        while (index < blob_size):
-            result.append((index, total))
-            index += self.bs._BLOB_MAX_CHUNK_DATA_SIZE
-        result.append((blob_size, total))
+        if unknown_size:
+            result.append((0, None))
+        else:
+            while (index < blob_size):
+                result.append((index, blob_size))
+                index += self.bs._BLOB_MAX_CHUNK_DATA_SIZE
+        result.append((blob_size, blob_size))
         return result
 
     def _get_random_bytes(self, size):
@@ -436,9 +438,11 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        containers = self.bs.list_containers()
-        for container in containers:
-            name = container.name
+        result = self.bs.list_containers()
+        containers = result
+        while result.next_marker:
+            result = self.bs.list_containers(marker=result.next_marker)
+            containers += result
 
         # Assert
         self.assertIsNotNone(containers)
@@ -3006,7 +3010,7 @@ class StorageCommonBlobTest(StorageTestCase):
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assertEqual(progress, self._get_expected_progress(len(data), False))
 
     @record
     def test_get_blob_to_path_with_mode(self):

@@ -21,6 +21,7 @@ from .._common_conversion import (
     _encode_base64,
     _str,
     _str_or_none,
+    _int_or_none,
 )
 from .._serialization import (
     _get_request_body,

@@ -2077,7 +2077,7 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('copy_source', copy_source)
 
-        if copy_source.startswith('/', timeout=None):
+        if copy_source.startswith('/'):
             # Backwards compatibility for earlier versions of the SDK where
             # the copy source can be in the following formats:
             # - Blob in named container:
