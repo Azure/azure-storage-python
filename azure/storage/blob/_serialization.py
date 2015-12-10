@@ -21,18 +21,11 @@ from .._common_conversion import (
     _encode_base64,
     _str,
 )
-from .._serialization import _update_storage_header
 import sys
 if sys.version_info >= (3,):
     from io import BytesIO
 else:
     from cStringIO import StringIO as BytesIO
-
-def _update_storage_blob_header(request, authentication):
-    request = _update_storage_header(request)
-    authentication.sign_request(request)
-
-    return request.headers
 
 def _get_path(container_name=None, blob_name=None):
     '''

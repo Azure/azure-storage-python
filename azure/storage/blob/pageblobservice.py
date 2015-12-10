@@ -24,7 +24,6 @@ from .._common_conversion import (
 )
 from .._serialization import (
     _get_request_body_bytes_only,
-    _update_request_uri_local_storage,
 )
 from .._http import HTTPRequest
 from ._error import (
@@ -42,7 +41,6 @@ from ..constants import (
     DEV_BLOB_HOST,
 )
 from ._serialization import (
-    _update_storage_blob_header,
     _get_path,
 )
 from ._deserialization import _convert_xml_to_page_ranges
@@ -153,10 +151,6 @@ class PageBlobService(_BaseBlobService):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
 
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
         self._perform_request(request)
 
     def put_page(
@@ -265,10 +259,7 @@ class PageBlobService(_BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match))
         ]
         request.body = _get_request_body_bytes_only('page', page)
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_page_ranges(
@@ -326,12 +317,8 @@ class PageBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_page_ranges(response)
 
     def set_sequence_number(
@@ -385,10 +372,7 @@ class PageBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def resize(
@@ -437,10 +421,7 @@ class PageBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     #----Convenience APIs-----------------------------------------------------

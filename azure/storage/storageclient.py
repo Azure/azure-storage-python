@@ -28,7 +28,10 @@ from .constants import (
 )
 from ._http import HTTPError
 from ._http.httpclient import _HTTPClient
-from ._serialization import _storage_error_handler
+from ._serialization import (
+    _storage_error_handler,
+    _update_request,
+)
 from ._error import (
     _ERROR_STORAGE_MISSING_INFO,
 )
@@ -144,6 +147,8 @@ class _StorageClient(object):
             return self.account_name + self.host_base
 
     def _perform_request_worker(self, request):
+        _update_request(request, self.use_local_storage)
+        self.authentication.sign_request(request)
         return self._httpclient.perform_request(request)
 
     def _perform_request(self, request, encoding='utf-8'):

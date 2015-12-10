@@ -31,9 +31,6 @@ from .._serialization import (
     _get_request_body_bytes_only,
     _parse_response_for_dict,
     _parse_response_for_dict_prefix,
-    _update_request_uri_local_storage,
-)
-from .._serialization import (
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
 )
@@ -58,7 +55,6 @@ from ..constants import (
     DEV_FILE_HOST,
 )
 from ._serialization import (
-    _update_storage_file_header,
     _get_path,
 )
 from ._deserialization import (
@@ -453,10 +449,7 @@ class FileService(_StorageClient):
         ]
         request.body = _get_request_body(
             _convert_service_properties_to_xml(None, hour_metrics, minute_metrics, cors))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_file_service_properties(self, timeout=None):
@@ -476,12 +469,8 @@ class FileService(_StorageClient):
             ('comp', 'properties'),
             ('timeout', _int_or_none(timeout)),         
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_service_properties(response.body)
 
     def list_shares(self, prefix=None, marker=None, max_results=None, 
@@ -517,12 +506,8 @@ class FileService(_StorageClient):
             ('include', _str_or_none(include)),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_shares(response)
 
     def create_share(self, share_name, metadata=None, quota=None,
@@ -559,10 +544,7 @@ class FileService(_StorageClient):
         request.headers = [
             ('x-ms-meta-name-values', metadata),
             ('x-ms-share-quota', _int_or_none(quota))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         if not fail_on_exist:
             try:
                 self._perform_request(request)
@@ -593,12 +575,8 @@ class FileService(_StorageClient):
             ('restype', 'share'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict(response)
 
     def set_share_properties(self, share_name, quota, timeout=None):
@@ -625,10 +603,7 @@ class FileService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-share-quota', _int_or_none(quota))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_share_metadata(self, share_name, timeout=None):
@@ -651,12 +626,8 @@ class FileService(_StorageClient):
             ('comp', 'metadata'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
 
     def set_share_metadata(self, share_name, metadata=None, timeout=None):
@@ -683,10 +654,7 @@ class FileService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_share_acl(self, share_name, timeout=None):
@@ -710,12 +678,8 @@ class FileService(_StorageClient):
             ('comp', 'acl'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_signed_identifiers(response.body)
 
     def set_share_acl(self, share_name, signed_identifiers=None, timeout=None):
@@ -745,10 +709,7 @@ class FileService(_StorageClient):
         ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_share_stats(self, share_name, timeout=None):
@@ -772,12 +733,8 @@ class FileService(_StorageClient):
             ('comp', 'stats'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_share_stats(response)
 
     def delete_share(self, share_name, fail_not_exist=False, timeout=None):
@@ -804,10 +761,7 @@ class FileService(_StorageClient):
             ('restype', 'share'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         if not fail_not_exist:
             try:
                 self._perform_request(request)
@@ -848,10 +802,7 @@ class FileService(_StorageClient):
             ('restype', 'directory'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         if not fail_on_exist:
             try:
                 self._perform_request(request)
@@ -895,10 +846,7 @@ class FileService(_StorageClient):
             ('restype', 'directory'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         if not fail_not_exist:
             try:
                 self._perform_request(request)
@@ -932,12 +880,8 @@ class FileService(_StorageClient):
             ('restype', 'directory'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict(response)
 
     def get_directory_metadata(self, share_name, directory_name, timeout=None):
@@ -962,12 +906,8 @@ class FileService(_StorageClient):
             ('comp', 'metadata'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
 
     def set_directory_metadata(self, share_name, directory_name, metadata=None, timeout=None):
@@ -996,10 +936,7 @@ class FileService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def list_directories_and_files(self, share_name, directory_name=None, 
@@ -1041,12 +978,8 @@ class FileService(_StorageClient):
             ('maxresults', _int_or_none(max_results)),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_directories_and_files(response)
 
     def get_file_properties(self, share_name, directory_name, file_name, timeout=None):
@@ -1070,13 +1003,8 @@ class FileService(_StorageClient):
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
 
         response = self._perform_request(request)
-
         return _parse_properties(response, FileProperties)
 
     def resize_file(self, share_name, directory_name, 
@@ -1111,10 +1039,7 @@ class FileService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-content-length', _str_or_none(content_length))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def set_file_properties(self, share_name, directory_name, 
@@ -1146,10 +1071,7 @@ class FileService(_StorageClient):
         request.headers = None
         if content_settings is not None:
             request.headers = content_settings.to_headers()
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_file_metadata(self, share_name, directory_name, file_name, timeout=None):
@@ -1175,12 +1097,8 @@ class FileService(_StorageClient):
             ('comp', 'metadata'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
 
     def set_file_metadata(self, share_name, directory_name, 
@@ -1211,10 +1129,7 @@ class FileService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def copy_file(self, share_name, directory_name, file_name, copy_source,
@@ -1252,12 +1167,7 @@ class FileService(_StorageClient):
             ('x-ms-meta-name-values', metadata),
         ]
 
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
         response = self._perform_request(request)
-
         return _parse_response_for_dict(response)
 
     def abort_copy_file(self, share_name, directory_name, file_name, copy_id, timeout=None):
@@ -1292,10 +1202,7 @@ class FileService(_StorageClient):
         request.headers = [
             ('x-ms-copy-action', 'abort'),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def delete_file(self, share_name, directory_name, file_name, timeout=None):
@@ -1319,10 +1226,7 @@ class FileService(_StorageClient):
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def create_file(self, share_name, directory_name, file_name,
@@ -1365,10 +1269,6 @@ class FileService(_StorageClient):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
 
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
         self._perform_request(request)
 
     def create_file_from_path(self, share_name, directory_name, file_name, 
@@ -1636,12 +1536,8 @@ class FileService(_StorageClient):
             ('x-ms-range-get-content-md5',
              _str_or_none(range_get_content_md5))
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request, None)
 
+        response = self._perform_request(request, None)
         return _parse_file(response)
 
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
@@ -1903,10 +1799,7 @@ class FileService(_StorageClient):
             ('x-ms-write', 'update'),
         ]
         request.body = _get_request_body_bytes_only('data', data)
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def clear_range(self, share_name, directory_name, file_name, byte_range, timeout=None):
@@ -1944,10 +1837,7 @@ class FileService(_StorageClient):
             ('Content-Length', '0'),
             ('x-ms-write', 'clear'),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def list_ranges(self, share_name, directory_name, file_name, byte_range=None, timeout=None):
@@ -1991,10 +1881,6 @@ class FileService(_StorageClient):
         request.headers = [
             ('x-ms-range', _str_or_none(byte_range))
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_file_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_ranges(response)

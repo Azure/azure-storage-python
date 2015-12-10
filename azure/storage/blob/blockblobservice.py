@@ -26,7 +26,6 @@ from .._common_conversion import (
 from .._serialization import (
     _get_request_body,
     _get_request_body_bytes_only,
-    _update_request_uri_local_storage,
 )
 from .._http import HTTPRequest
 from ._chunking import (
@@ -42,7 +41,6 @@ from ..constants import (
 )
 from ._serialization import (
     _convert_block_list_to_xml,
-    _update_storage_blob_header,
     _get_path,
 )
 from ._deserialization import (
@@ -144,10 +142,7 @@ class BlockBlobService(_BaseBlobService):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
         request.body = _get_request_body_bytes_only('blob', blob)
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def put_block(self, container_name, blob_name, block, block_id,
@@ -192,10 +187,7 @@ class BlockBlobService(_BaseBlobService):
             ('x-ms-lease-id', _str_or_none(lease_id))
         ]
         request.body = _get_request_body_bytes_only('block', block)
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def put_block_list(
@@ -262,10 +254,7 @@ class BlockBlobService(_BaseBlobService):
             request.headers += content_settings.to_headers()
         request.body = _get_request_body(
             _convert_block_list_to_xml(block_list))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_block_list(self, container_name, blob_name, snapshot=None,
@@ -302,12 +291,8 @@ class BlockBlobService(_BaseBlobService):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_block_list(response)
 
     #----Convenience APIs-----------------------------------------------------

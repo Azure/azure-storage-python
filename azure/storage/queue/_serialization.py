@@ -27,16 +27,9 @@ except ImportError:
     from xml.etree import ElementTree as ETree
 
 from xml.sax.saxutils import escape as xml_escape
-from .._serialization import _update_storage_header
 from .._common_conversion import (
     _str,
 )
-
-def _update_storage_queue_header(request, authentication):
-    request = _update_storage_header(request)
-    authentication.sign_request(request)
-
-    return request.headers
 
 def _get_path(queue_name=None, include_messages=None, message_id=None):
     '''

@@ -29,8 +29,10 @@ from .._error import (
 )
 from .._serialization import (
     _get_request_body,
-    _update_request_uri_local_storage,
+    _update_request,
     _extract_etag,
+    _convert_signed_identifiers_to_xml,
+    _convert_service_properties_to_xml,
 )
 from .._http import HTTPRequest
 from ..models import Services
@@ -41,10 +43,6 @@ from ..auth import (
 )
 from ..connection import (
     StorageConnectionParameters,
-)
-from .._serialization import (
-    _convert_signed_identifiers_to_xml,
-    _convert_service_properties_to_xml,
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
@@ -291,11 +289,8 @@ class TableService(_StorageClient):
             ('comp', 'properties'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_service_properties(response.body)
 
     def set_table_service_properties(self, logging=None, hour_metrics=None, 
@@ -332,9 +327,7 @@ class TableService(_StorageClient):
         ]
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
+
         self._perform_request(request)
 
     def query_tables(self, table_name=None, top=None, next_table_name=None, timeout=None):
@@ -365,11 +358,8 @@ class TableService(_StorageClient):
             ('NextTableName', _str_or_none(next_table_name)),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_json_response_to_tables(response)
 
     def create_table(self, table, fail_on_exist=False, timeout=None):
@@ -395,9 +385,8 @@ class TableService(_StorageClient):
                            _DEFAULT_PREFER_HEADER,
                            _DEFAULT_ACCEPT_HEADER]
         request.body = _get_request_body(_convert_table_to_json(table))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
+
+
         if not fail_on_exist:
             try:
                 self._perform_request(request)
@@ -425,9 +414,7 @@ class TableService(_StorageClient):
         request.path = '/Tables(\'' + _str(table_name) + '\')'
         request.query = [('timeout', _int_or_none(timeout))]
         request.headers = [_DEFAULT_ACCEPT_HEADER]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
+
         if not fail_not_exist:
             try:
                 self._perform_request(request)
@@ -460,11 +447,8 @@ class TableService(_StorageClient):
             ('comp', 'acl'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_signed_identifiers(response.body)
 
     def set_table_acl(self, table_name, signed_identifiers=None, timeout=None):
@@ -493,9 +477,7 @@ class TableService(_StorageClient):
         ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
+
         self._perform_request(request)
 
     def query_entities(self, table_name, filter=None, select=None, top=None,
@@ -545,11 +527,8 @@ class TableService(_StorageClient):
             ('NextRowKey', _str_or_none(next_row_key)),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_json_response_to_entities(response, property_resolver)
 
     def commit_batch(self, table_name, batch, timeout=None):
@@ -571,8 +550,6 @@ class TableService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + '$batch'
         request.query = [('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
 
         # Update the batch operation requests with table and client specific info
         for row_key, batch_request in batch._requests:
@@ -581,15 +558,11 @@ class TableService(_StorageClient):
                 batch_request.path = '/' + _str(table_name)
             else:
                 batch_request.path = _get_entity_path(table_name, batch._partition_key, row_key)
-            batch_request.path = _update_request_uri_local_storage(
-                batch_request, self.use_local_storage)
+            _update_request(batch_request, self.use_local_storage)
 
         # Construct the batch body
         request.body, boundary = _convert_batch_to_json(batch._requests)
         request.headers = [('Content-Type', boundary)]
-
-        # Add the table and storage specific headers, including content length
-        request.headers = _update_storage_table_header(request)
 
         # Perform the batch request and return the response
         response = self._perform_request(request)
@@ -640,9 +613,6 @@ class TableService(_StorageClient):
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, partition_key, row_key)
         request.query += [('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
 
         response = self._perform_request(request)
         return _convert_json_response_to_entity(response, property_resolver)
@@ -664,9 +634,6 @@ class TableService(_StorageClient):
         request.host = self._get_host()
         request.path = '/' + _str(table_name)
         request.query += [('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
 
         response = self._perform_request(request)
         return _extract_etag(response)
@@ -697,9 +664,6 @@ class TableService(_StorageClient):
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
         request.query += [('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
 
         response = self._perform_request(request)
         return _extract_etag(response)
@@ -731,9 +695,6 @@ class TableService(_StorageClient):
         request.host = self._get_host()
         request.query += [('timeout', _int_or_none(timeout))]
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
 
         response = self._perform_request(request)
         return _extract_etag(response)
@@ -765,9 +726,6 @@ class TableService(_StorageClient):
         request.host = self._get_host()
         request.query += [('timeout', _int_or_none(timeout))]
         request.path = _get_entity_path(table_name, partition_key, row_key)
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
 
         self._perform_request(request)
 
@@ -790,9 +748,6 @@ class TableService(_StorageClient):
         request.host = self._get_host()
         request.query += [('timeout', _int_or_none(timeout))]
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
 
         response = self._perform_request(request)
         return _extract_etag(response)
@@ -816,13 +771,10 @@ class TableService(_StorageClient):
         request.host = self._get_host()
         request.query += [('timeout', _int_or_none(timeout))]
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_table_header(request)
 
         response = self._perform_request(request)
         return _extract_etag(response)
 
     def _perform_request_worker(self, request):
-        self.authentication.sign_request(request)
-        return self._httpclient.perform_request(request)
+        _update_storage_table_header(request)
+        return super(TableService, self)._perform_request_worker(request)

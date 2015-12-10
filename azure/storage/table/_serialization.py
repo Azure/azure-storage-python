@@ -30,7 +30,6 @@ from .._common_conversion import (
 from .._serialization import (
     _to_utc_datetime,
 )
-from .._serialization import _update_storage_header
 from ._error import (
     _ERROR_CANNOT_SERIALIZE_VALUE_TO_ENTITY,
     _ERROR_TYPE_NOT_SUPPORTED,
@@ -63,14 +62,9 @@ def _get_entity_path(table_name, partition_key, row_key):
 def _update_storage_table_header(request):
     ''' add additional headers for storage table request. '''
 
-    request = _update_storage_header(request)
-
     # set service version
     request.headers.append(('DataServiceVersion', '3.0;NetFx'))
     request.headers.append(('MaxDataServiceVersion', '3.0'))
-
-    # set date
-    return request.headers
 
 def _to_entity_binary(value):
    return EdmType.BINARY, _encode_base64(value)

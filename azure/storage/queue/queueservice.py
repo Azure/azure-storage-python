@@ -31,7 +31,6 @@ from .._serialization import (
     _get_request_body,
     _parse_response_for_dict_filter,
     _parse_response_for_dict_prefix,
-    _update_request_uri_local_storage,
 )
 from .._common_conversion import (
     _int_or_none,
@@ -61,7 +60,6 @@ from .._deserialization import (
     _convert_xml_to_signed_identifiers,
 )
 from ._serialization import (
-    _update_storage_queue_header,
     _convert_queue_message_xml,
     _get_path,
 )
@@ -280,10 +278,6 @@ class QueueService(_StorageClient):
             ('comp', 'properties'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         response = self._perform_request(request)
 
         return _convert_xml_to_service_properties(response.body)
@@ -324,10 +318,6 @@ class QueueService(_StorageClient):
             ('include', _str_or_none(include)),
             ('timeout', _int_or_none(timeout))
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         response = self._perform_request(request)
 
         return _convert_xml_to_queues(response)
@@ -354,10 +344,6 @@ class QueueService(_StorageClient):
         request.path = _get_path(queue_name)
         request.query = [('timeout', _int_or_none(timeout))]
         request.headers = [('x-ms-meta-name-values', metadata)]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         if not fail_on_exist:
             try:
                 response = self._perform_request(request)
@@ -391,10 +377,6 @@ class QueueService(_StorageClient):
         request.host = self._get_host()
         request.path = _get_path(queue_name)
         request.query = [('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         if not fail_not_exist:
             try:
                 self._perform_request(request)
@@ -425,10 +407,6 @@ class QueueService(_StorageClient):
             ('comp', 'metadata'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         response = self._perform_request(request)
 
         return _parse_response_for_dict_prefix(
@@ -458,10 +436,6 @@ class QueueService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         self._perform_request(request)
 
     def get_queue_acl(self, queue_name, timeout=None):
@@ -485,10 +459,6 @@ class QueueService(_StorageClient):
             ('comp', 'acl'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         response = self._perform_request(request)
 
         return _convert_xml_to_signed_identifiers(response.body)
@@ -519,10 +489,6 @@ class QueueService(_StorageClient):
         ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         self._perform_request(request)
 
     def put_message(self, queue_name, content, visibility_timeout=None,
@@ -565,10 +531,6 @@ class QueueService(_StorageClient):
             ('timeout', _int_or_none(timeout))
         ]
         request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         self._perform_request(request)
 
     def get_messages(self, queue_name, num_messages=None,
@@ -605,10 +567,6 @@ class QueueService(_StorageClient):
             ('visibilitytimeout', _str_or_none(visibility_timeout)),
             ('timeout', _int_or_none(timeout))
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         response = self._perform_request(request)
 
         return _convert_xml_to_queue_messages(response, self.decode_function)
@@ -638,10 +596,6 @@ class QueueService(_StorageClient):
             ('peekonly', 'true'),
             ('numofmessages', _str_or_none(num_messages)),
             ('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         response = self._perform_request(request)
 
         return _convert_xml_to_queue_messages(response, self.decode_function)
@@ -670,10 +624,6 @@ class QueueService(_StorageClient):
         request.query = [
             ('popreceipt', _str_or_none(pop_receipt)),
             ('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         self._perform_request(request)
 
     def clear_messages(self, queue_name, timeout=None):
@@ -691,10 +641,6 @@ class QueueService(_StorageClient):
         request.host = self._get_host()
         request.path = _get_path(queue_name, True)
         request.query = [('timeout', _int_or_none(timeout))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         self._perform_request(request)
 
     def update_message(self, queue_name, message_id, pop_receipt, visibility_timeout, 
@@ -739,10 +685,6 @@ class QueueService(_StorageClient):
         if content is not None:
             request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
 
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         response = self._perform_request(request)
 
         return _parse_response_for_dict_filter(
@@ -783,8 +725,4 @@ class QueueService(_StorageClient):
         ]
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_queue_header(
-            request, self.authentication)
         self._perform_request(request)
