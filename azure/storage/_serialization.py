@@ -53,8 +53,8 @@ def _to_utc_datetime(value):
         value = value.astimezone(tzutc())
     return value.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-def _update_storage_header(request):
-    ''' add additional headers for storage request. '''
+def _update_request(request, use_local_storage):
+    # Verify body
     if request.body:
         assert isinstance(request.body, bytes)
 
@@ -75,7 +75,20 @@ def _update_storage_header(request):
                 request.headers.append(('x-ms-meta-' + meta_name, meta_value))
             request.headers.remove((name, value))
             break
-    return request
+
+    # Encode and optionally add local storage prefix to path
+    if use_local_storage:
+        request.path = '/' + DEV_ACCOUNT_NAME + request.path
+    request.path = url_quote(request.path, '/()$=\',~')
+
+    # Add query params to path
+    if request.query:
+        request.path += '?'
+        for name, value in request.query:
+            if value is not None:
+                request.path += name + '=' + url_quote(value, '~') + '&'
+        request.path = request.path[:-1]
+
 
 def _get_request_body_bytes_only(param_name, param_value):
     '''Validates the request body passed in and converts it to bytes
@@ -108,24 +121,6 @@ def _get_request_body(request_body):
         return request_body.encode('utf-8')
 
     return request_body
-
-
-def _update_request_uri_local_storage(request, use_local_storage):
-    ''' URL encodes the path and adds the query params to it. '''
-
-    path = url_quote(request.path, '/()$=\',~')
-
-    # add encoded queries to request.path.
-    if request.query:
-        path += '?'
-        for name, value in request.query:
-            if value is not None:
-                path += name + '=' + url_quote(value, '~') + '&'
-        path = path[:-1]
-
-    if use_local_storage:
-        return '/' + DEV_ACCOUNT_NAME + path
-    return path
 
 
 def _parse_response_for_dict(response):

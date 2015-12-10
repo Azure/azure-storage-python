@@ -24,7 +24,6 @@ from .._common_conversion import (
 )
 from .._serialization import (
     _get_request_body_bytes_only,
-    _update_request_uri_local_storage,
     _parse_response_for_dict,
 )
 from .._http import HTTPRequest
@@ -38,7 +37,6 @@ from ..constants import (
     DEV_BLOB_HOST,
 )
 from ._serialization import (
-    _update_storage_blob_header,
     _get_path,
 )
 from ._baseblobservice import _BaseBlobService
@@ -134,10 +132,7 @@ class AppendBlobService(_BaseBlobService):
         ]
         if content_settings is not None:
             request.headers += content_settings.to_headers()
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def append_block(self, container_name, blob_name, block,
@@ -209,12 +204,8 @@ class AppendBlobService(_BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match))
         ]
         request.body = _get_request_body_bytes_only('block', block)
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict(response)
 
     #----Convenience APIs----------------------------------------------

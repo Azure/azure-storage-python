@@ -12,14 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from .._serialization import _update_storage_header
 from .._common_conversion import _str
-
-def _update_storage_file_header(request, authentication):
-    request = _update_storage_header(request)
-    authentication.sign_request(request)
-
-    return request.headers
 
 def _get_path(share_name=None, directory_name=None, file_name=None):
     '''

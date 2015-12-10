@@ -29,7 +29,8 @@ from .._serialization import (
     _parse_response_for_dict,
     _parse_response_for_dict_filter,
     _parse_response_for_dict_prefix,
-    _update_request_uri_local_storage,
+    _convert_signed_identifiers_to_xml,
+    _convert_service_properties_to_xml,
 )
 from .._http import HTTPRequest
 from ._chunking import _download_blob_chunks
@@ -50,16 +51,11 @@ from ..constants import (
     BLOB_SERVICE_HOST_BASE,
     DEV_BLOB_HOST,
 )
-from .._serialization import (
-    _convert_signed_identifiers_to_xml,
-    _convert_service_properties_to_xml,
-)
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
 )
 from ._serialization import (
-    _update_storage_blob_header,
     _get_path,
 )
 from ._deserialization import (
@@ -422,12 +418,8 @@ class _BaseBlobService(_StorageClient):
             ('include', _str_or_none(include)),
             ('timeout', _int_or_none(timeout))
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_containers(response)
 
     def create_container(self, container_name, metadata=None,
@@ -460,10 +452,7 @@ class _BaseBlobService(_StorageClient):
             ('x-ms-meta-name-values', metadata),
             ('x-ms-blob-public-access', _str_or_none(blob_public_access))
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         if not fail_on_exist:
             try:
                 self._perform_request(request)
@@ -498,12 +487,8 @@ class _BaseBlobService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict(response)
 
     def get_container_metadata(self, container_name, lease_id=None, timeout=None):
@@ -530,12 +515,8 @@ class _BaseBlobService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
 
     def set_container_metadata(self, container_name, metadata=None,
@@ -572,10 +553,7 @@ class _BaseBlobService(_StorageClient):
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_container_acl(self, container_name, lease_id=None, timeout=None):
@@ -603,12 +581,8 @@ class _BaseBlobService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_signed_identifiers(response.body)
 
     def set_container_acl(self, container_name, signed_identifiers=None,
@@ -655,10 +629,7 @@ class _BaseBlobService(_StorageClient):
         ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def delete_container(self, container_name, fail_not_exist=False,
@@ -695,10 +666,7 @@ class _BaseBlobService(_StorageClient):
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),          
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         if not fail_not_exist:
             try:
                 self._perform_request(request)
@@ -770,12 +738,8 @@ class _BaseBlobService(_StorageClient):
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict_filter(
             response,
             filter=['x-ms-lease-id', 'x-ms-lease-time'])
@@ -1021,12 +985,8 @@ class _BaseBlobService(_StorageClient):
             ('include', _str_or_none(include)),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_blob_list(response)
 
     def set_blob_service_properties(
@@ -1067,10 +1027,7 @@ class _BaseBlobService(_StorageClient):
         ]
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors, target_version))
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def get_blob_service_properties(self, timeout=None):
@@ -1090,12 +1047,8 @@ class _BaseBlobService(_StorageClient):
             ('comp', 'properties'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _convert_xml_to_service_properties(response.body)
 
     def get_blob_properties(
@@ -1143,13 +1096,8 @@ class _BaseBlobService(_StorageClient):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
 
         response = self._perform_request(request)
-
         return _parse_properties(response, BlobProperties)
 
     def set_blob_properties(
@@ -1198,10 +1146,6 @@ class _BaseBlobService(_StorageClient):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
 
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
         self._perform_request(request)
 
     def get_blob(
@@ -1261,12 +1205,8 @@ class _BaseBlobService(_StorageClient):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request, None)
 
+        response = self._perform_request(request, None)
         return _parse_blob(response)
 
     def get_blob_to_path(
@@ -1604,12 +1544,8 @@ class _BaseBlobService(_StorageClient):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]     
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
 
     def set_blob_metadata(self, container_name, blob_name,
@@ -1657,10 +1593,7 @@ class _BaseBlobService(_StorageClient):
             ('If-None-Match', _str_or_none(if_none_match)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def _lease_blob_impl(self, container_name, blob_name,
@@ -1732,12 +1665,8 @@ class _BaseBlobService(_StorageClient):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict_filter(
             response,
             filter=['x-ms-lease-id', 'x-ms-lease-time'])
@@ -2010,12 +1939,8 @@ class _BaseBlobService(_StorageClient):
             ('If-None-Match', _str_or_none(if_none_match)),
             ('x-ms-lease-id', _str_or_none(lease_id))
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
-        response = self._perform_request(request)
 
+        response = self._perform_request(request)
         return _parse_response_for_dict_filter(
             response,
             filter=['x-ms-snapshot', 'etag', 'last-modified'])
@@ -2116,12 +2041,7 @@ class _BaseBlobService(_StorageClient):
             ('x-ms-source-lease-id', _str_or_none(source_lease_id))
         ]
 
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
         response = self._perform_request(request)
-
         return _parse_response_for_dict(response)
 
     def abort_copy_blob(self, container_name, blob_name, copy_id,
@@ -2158,10 +2078,7 @@ class _BaseBlobService(_StorageClient):
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-copy-action', 'abort'),
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
 
     def delete_blob(self, container_name, blob_name, snapshot=None,
@@ -2226,8 +2143,5 @@ class _BaseBlobService(_StorageClient):
             ('snapshot', _str_or_none(snapshot)),
             ('timeout', _int_or_none(timeout))
         ]
-        request.path = _update_request_uri_local_storage(
-            request, self.use_local_storage)
-        request.headers = _update_storage_blob_header(
-            request, self.authentication)
+
         self._perform_request(request)
