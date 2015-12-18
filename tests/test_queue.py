@@ -227,6 +227,27 @@ class StorageQueueTest(StorageTestCase):
         self.assertEqual('blah', result['x-ms-meta-val2'])
 
     @record
+    def test_queue_exists(self):
+        # Arrange
+        queue_name = self._create_queue()
+
+        # Act
+        exists = self.qs.exists(queue_name)
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_queue_not_exists(self):
+        # Arrange
+
+        # Act
+        exists = self.qs.exists(self.get_resource_name('missing'))
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
     def test_put_message(self):
         # Action.  No exception means pass. No asserts needed.
         queue_name = self._create_queue()

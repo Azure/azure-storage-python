@@ -151,13 +151,6 @@ class StorageFileTest(StorageTestCase):
             props, _ = self.fs.get_file_properties(share_name, None, file_name)
         self.assertEqual(props.copy.status, 'success')
 
-    def _file_exists(self, share_name, file_name):
-        resp = self.fs.list_directories_and_files(share_name)
-        for file in resp:
-            if file.name == file_name:
-                return True
-        return False
-
     def assertFileEqual(self, share_name, file_name, expected_data):
         actual_data = self.fs.get_file(share_name, None, file_name)
         self.assertEqual(actual_data, expected_data)
@@ -352,6 +345,28 @@ class StorageFileTest(StorageTestCase):
         props = self.fs.get_share_properties(self.share_name)
         self.assertIsNotNone(props)
         self.assertEqual(props['x-ms-share-quota'], '1')
+
+    @record
+    def test_share_exists(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+
+        # Act
+        exists = self.fs.exists(self.share_name)
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_share_not_exists(self):
+        # Arrange
+
+        # Act
+        exists = self.fs.exists(self.get_resource_name('missing'))
+
+        # Assert
+        self.assertFalse(exists)
+
 
     @record
     def test_list_shares_no_options(self):
@@ -646,6 +661,28 @@ class StorageFileTest(StorageTestCase):
         # Assert
 
     @record
+    def test_directory_exists(self):
+        # Arrange
+        self.fs.create_share(self.share_name)
+        self.fs.create_directory(self.share_name, 'dir1')
+
+        # Act
+        exists = self.fs.exists(self.share_name, 'dir1')
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_directory_not_exists(self):
+        # Arrange
+
+        # Act
+        exists = self.fs.exists(self.share_name, 'missing')
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
     def test_get_set_directory_metadata(self):
         # Arrange
         self.fs.create_share(self.share_name)
@@ -875,6 +912,28 @@ class StorageFileTest(StorageTestCase):
         md = self.fs.get_file_metadata(self.share_name, None, 'file1')
         self.assertEqual(md['x-ms-meta-hello'], 'world')
         self.assertEqual(md['x-ms-meta-number'], '42')
+
+    @record
+    def test_file_exists(self):
+        # Arrange
+        self._create_share_and_file_with_text(
+            self.share_name, 'file1', b'hello world')
+
+        # Act
+        exists = self.fs.exists(self.share_name, None, 'file1')
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_file_not_exists(self):
+        # Arrange
+
+        # Act
+        exists = self.fs.exists(self.get_resource_name('missing'), 'missingdir', 'file1')
+
+        # Assert
+        self.assertFalse(exists)
 
     @record
     def test_get_file_with_existing_file(self):

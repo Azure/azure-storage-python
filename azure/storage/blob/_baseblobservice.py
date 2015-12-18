@@ -1148,6 +1148,32 @@ class _BaseBlobService(_StorageClient):
 
         self._perform_request(request)
 
+    def exists(self, container_name, blob_name=None, snapshot=None, timeout=None):
+        '''
+        Returns a boolean indicating whether the container exists (if blob_name 
+        is None), or otherwise a boolean indicating whether the blob exists.
+
+        container_name:
+            Name of a container.
+        blob_name:
+            Name of a blob.
+        snapshot:
+            The snapshot parameter is an opaque DateTime value that,
+            when present, specifies the snapshot.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        _validate_not_none('container_name', container_name)
+        try:
+            if blob_name is None:
+                self.get_container_properties(container_name, timeout=timeout)
+            else:
+                self.get_blob_properties(container_name, blob_name, snapshot=snapshot, timeout=timeout)
+            return True
+        except AzureHttpError as ex:
+            _dont_fail_not_exist(ex)
+            return False
+
     def get_blob(
         self, container_name, blob_name, snapshot=None, byte_range=None,
         lease_id=None, range_get_content_md5=None, if_modified_since=None,

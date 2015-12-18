@@ -1007,6 +1007,33 @@ class FileService(_StorageClient):
         response = self._perform_request(request)
         return _parse_properties(response, FileProperties)
 
+    def exists(self, share_name, directory_name=None, file_name=None, timeout=None):
+        '''
+        Returns a boolean indicating whether the share exists, the directory 
+        exists, or the file exists.
+
+        share_name:
+            Name of a share.
+        directory_name:
+            The path to a directory.
+        file_name:
+            Name of a file.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        _validate_not_none('share_name', share_name)
+        try:
+            if file_name is not None:
+                self.get_file_properties(share_name, directory_name, file_name, timeout=timeout)
+            elif directory_name is not None:
+                self.get_directory_properties(share_name, directory_name, timeout=timeout)
+            else:
+                self.get_share_properties(share_name, timeout=timeout)
+            return True
+        except AzureHttpError as ex:
+            _dont_fail_not_exist(ex)
+            return False
+
     def resize_file(self, share_name, directory_name, 
                     file_name, content_length, timeout=None):
         '''

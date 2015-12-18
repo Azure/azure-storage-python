@@ -386,7 +386,6 @@ class TableService(_StorageClient):
                            _DEFAULT_ACCEPT_HEADER]
         request.body = _get_request_body(_convert_table_to_json(table))
 
-
         if not fail_on_exist:
             try:
                 self._perform_request(request)
@@ -397,6 +396,30 @@ class TableService(_StorageClient):
         else:
             self._perform_request(request)
             return True
+
+    def exists(self, table_name, timeout=None):
+        '''
+        Returns a boolean indicating whether the table exists.
+
+        table_name:
+            Name of table to check for existence.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        _validate_not_none('table_name', table_name)
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self._get_host()
+        request.path = '/Tables' + "('" + table_name + "')"
+        request.headers = [('Accept', TablePayloadFormat.JSON_NO_METADATA)]
+        request.query = [('timeout', _int_or_none(timeout))]
+
+        try:
+            self._perform_request(request)
+            return True
+        except AzureHttpError as ex:
+            _dont_fail_not_exist(ex)
+            return False
 
     def delete_table(self, table_name, fail_not_exist=False, timeout=None):
         '''

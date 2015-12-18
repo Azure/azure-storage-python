@@ -322,6 +322,27 @@ class StorageTableTest(StorageTestCase):
         self.assertTrue(created)
 
     @record
+    def test_table_exists(self):
+        # Arrange
+        self.ts.create_table(self.table_name)
+
+        # Act
+        exists = self.ts.exists(self.table_name)
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_table_not_exists(self):
+        # Arrange
+
+        # Act
+        exists = self.ts.exists(self.get_resource_name('missing'))
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
     def test_query_tables(self):
         # Arrange
         self._create_table(self.table_name)

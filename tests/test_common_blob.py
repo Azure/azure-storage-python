@@ -140,13 +140,6 @@ class StorageCommonBlobTest(StorageTestCase):
             block_list.append(block_id)
         self.bs.put_block_list(container_name, blob_name, block_list)
 
-    def _blob_exists(self, container_name, blob_name):
-        resp = self.bs.list_blobs(container_name)
-        for blob in resp:
-            if blob.name == blob_name:
-                return True
-        return False
-
     def _create_remote_container_and_block_blob(self, source_blob_name, data,
                                                 blob_public_access):
         self.remote_container_name = self.get_resource_name('remotectnr')
@@ -431,6 +424,39 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNotNone(md)
         self.assertEqual(md['x-ms-meta-hello'], 'world')
         self.assertEqual(md['x-ms-meta-number'], '42')
+
+    @record
+    def test_container_exists(self):
+        # Arrange
+        self.bs.create_container(self.container_name)
+
+        # Act
+        exists = self.bs.exists(self.container_name)
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_container_not_exists(self):
+        # Arrange
+
+        # Act
+        exists = self.bs.exists(self.get_resource_name('missing'))
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
+    def test_container_exists_with_lease(self):
+        # Arrange
+        self.bs.create_container(self.container_name)
+        self.bs.acquire_container_lease(self.container_name)
+
+        # Act
+        exists = self.bs.exists(self.container_name)
+
+        # Assert
+        self.assertTrue(exists)
 
     @record
     def test_list_containers_no_options(self):
@@ -1083,6 +1109,28 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
 
     #-- Common test cases for blobs ----------------------------------------------
+    @record
+    def test_blob_exists(self):
+        # Arrange
+        self._create_container(self.container_name)
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1', b'hello world')
+
+        # Act
+        exists = self.bs.exists(self.container_name, 'blob1')
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_blob_not_exists(self):
+        # Arrange
+
+        # Act
+        exists = self.bs.exists(self.get_resource_name('missing'), 'blob1')
+
+        # Assert
+        self.assertFalse(exists)
+
     @record
     def test_make_blob_url(self):
         # Arrange

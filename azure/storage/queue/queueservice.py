@@ -438,6 +438,22 @@ class QueueService(_StorageClient):
         request.headers = [('x-ms-meta-name-values', metadata)]
         self._perform_request(request)
 
+    def exists(self, queue_name, timeout=None):
+        '''
+        Returns a boolean indicating whether the queue exists.
+
+        queue_name:
+            Name of queue to check for existence.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        try:
+            self.get_queue_metadata(queue_name, timeout=timeout)
+            return True
+        except AzureHttpError as ex:
+            _dont_fail_not_exist(ex)
+            return False
+
     def get_queue_acl(self, queue_name, timeout=None):
         '''
         Returns details about any stored access policies specified on the

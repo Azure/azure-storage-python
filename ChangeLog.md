@@ -27,6 +27,7 @@
 - Table Entity class extends dict but also allows property access as if it were an object to allow more flexible usage.
 - Table batches are constructed using the Batch class rather than turning batching on and off via the TableService. The TableService can then execute these batches using commit_batch(table_name, batch).
 - Table sas generation requires start/end pk/rk to be specified as direct parameters to the method rather than as part of an AccessPolicy.
+- Added exists method to check table existence.
 
 ### Blob:
 - Added snapshot support for the get_blob_properties API.
@@ -42,6 +43,7 @@
 - Single-threaded blob download APIs will now download the blob without chunking to improve perf.
 - Allow '?' as part of blob names.
 - get_blob_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
+- Added exists method to check container or blob existence.
 
 ### Queue:
 - The list_queues operation returns a list of Queue objects. The list returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
@@ -50,6 +52,7 @@
 - create_queue and set_queue_metadata apis take metadata rather than x_ms_meta_name_values.
 - Added encode_function and decode_function properties to the queue service to allow users to specify custom encoding and decoding of queue messages.
 - Encoding and decoding functions default to xml encoding and decoding. Previously messages were only xml encoded but not decoded.
+- Added exists method to check queue existence.
 
 ### File:
 - Renamed some APIs and parameters for better readablity and less redundancy.
@@ -59,3 +62,4 @@
 - Combined models for File & FileResult for better usability. get_file_properties double returns FileProperties object and a metadata dict.
 - list_directories_and_files no longer exposes marker or max_results.
 - get_file_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
+- Added exists method to check share, directory, or file existence.
