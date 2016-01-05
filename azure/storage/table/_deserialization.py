@@ -48,13 +48,12 @@ from ..models import (
     HeaderDict,
 )
 
-def _set_continuation_from_response_headers(feeds, response):
-    x_ms_continuation = HeaderDict()
+def _get_continuation_from_response_headers(response):
+    marker = {}
     for name, value in response.headers:
         if name.startswith('x-ms-continuation'):
-            x_ms_continuation[name[len('x-ms-continuation') + 1:]] = value
-    if x_ms_continuation:
-        setattr(feeds, 'x_ms_continuation', x_ms_continuation)
+            marker[name[len('x-ms-continuation') + 1:]] = value
+    return marker
 
 # Tables of conversions to and from entity types.  We support specific
 # datatypes, and beyond that the user can use an EntityProperty to get
@@ -197,7 +196,8 @@ def _convert_json_response_to_tables(response):
 
     tables = _list()
 
-    _set_continuation_from_response_headers(tables, response)
+    continuation = _get_continuation_from_response_headers(response)
+    tables.next_marker = continuation.get('NextTableName')
 
     root = loads(response.body.decode('utf-8'))
 
@@ -222,7 +222,10 @@ def _convert_json_response_to_entities(response, property_resolver):
 
     entities = _list()
 
-    _set_continuation_from_response_headers(entities, response)
+    continuation = _get_continuation_from_response_headers(response)
+    tables.next_marker = object()
+    tables.next_marker.next_partition_key = continuation.get('NextPartitionKey')
+    tables.next_marker.next_row_key = continuation.get('NextRowKey')
 
     root = loads(response.body.decode('utf-8'))
 

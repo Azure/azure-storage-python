@@ -340,11 +340,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        result = self.bs.list_containers()
-        containers = result
-        while result.next_marker:
-            result = self.bs.list_containers(marker=result.next_marker)
-            containers += result
+        containers = list(self.bs.list_containers())
 
         # Assert
         self.assertIsNotNone(containers)
@@ -358,7 +354,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.create_container(self.container_name)
 
         # Act
-        containers = self.bs.list_containers(self.container_name)
+        containers = list(self.bs.list_containers(self.container_name))
 
         # Assert
         self.assertIsNotNone(containers)
@@ -375,8 +371,8 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, {'hello': 'world', 'number': '43'})
 
         # Act
-        containers = self.bs.list_containers(
-            self.container_name, None, None, 'metadata')
+        containers = list(self.bs.list_containers(
+            self.container_name, None, None, 'metadata'))
 
         # Assert
         self.assertIsNotNone(containers)
@@ -397,9 +393,11 @@ class StorageCommonBlobTest(StorageTestCase):
             self.bs.create_container(name)
 
         # Act
-        containers1 = self.bs.list_containers(self.container_name, None, 2)
-        containers2 = self.bs.list_containers(
-            self.container_name, containers1.next_marker, 2)
+        generator1 = self.bs.list_containers(self.container_name, None, 2)
+        generator2 = self.bs.list_containers(self.container_name, generator1.next_marker, 2)
+
+        containers1 = generator1.items
+        containers2 = generator2.items
 
         # Assert
         self.assertIsNotNone(containers1)
@@ -867,8 +865,8 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        containers = self.bs.list_containers()
-        self.assertNamedItemNotInContainer(containers, self.container_name)
+        exists = self.bs.exists(container_name)
+        self.assertFalse(exists)
 
     @record
     def test_delete_container_with_existing_container_fail_not_exist(self):
@@ -880,8 +878,8 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        containers = self.bs.list_containers()
-        self.assertNamedItemNotInContainer(containers, self.container_name)
+        exists = self.bs.exists(container_name)
+        self.assertFalse(exists)
 
     @record
     def test_delete_container_with_non_existing_container(self):
@@ -914,8 +912,8 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        containers = self.bs.list_containers()
-        self.assertNamedItemNotInContainer(containers, self.container_name)
+        exists = self.bs.exists(container_name)
+        self.assertFalse(exists)
 
     @record
     def test_delete_container_without_lease_id(self):
@@ -994,18 +992,16 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.create_blob_from_bytes (self.container_name, 'blob2', data, )
 
         # Act
-        resp = self.bs.list_blobs(self.container_name)
-        for blob in resp:
-            name = blob.name
+        blobs = list(self.bs.list_blobs(self.container_name))
 
         # Assert
-        self.assertIsNotNone(resp)
-        self.assertGreaterEqual(len(resp), 2)
-        self.assertIsNotNone(resp[0])
-        self.assertNamedItemInContainer(resp, 'blob1')
-        self.assertNamedItemInContainer(resp, 'blob2')
-        self.assertEqual(resp[0].properties.content_length, 11)
-        self.assertEqual(resp[1].properties.content_type,
+        self.assertIsNotNone(blobs)
+        self.assertGreaterEqual(len(blobs), 2)
+        self.assertIsNotNone(blobs[0])
+        self.assertNamedItemInContainer(blobs, 'blob1')
+        self.assertNamedItemInContainer(blobs, 'blob2')
+        self.assertEqual(blobs[0].properties.content_length, 11)
+        self.assertEqual(blobs[1].properties.content_type,
                          'application/octet-stream')
 
     @record
@@ -1017,9 +1013,7 @@ class StorageCommonBlobTest(StorageTestCase):
         lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
-        resp = self.bs.list_blobs(self.container_name)
-        for blob in resp:
-            name = blob.name
+        resp = list(self.bs.list_blobs(self.container_name))
 
         # Assert
         self.assertIsNotNone(resp)
@@ -1041,13 +1035,11 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.create_blob_from_bytes (self.container_name, 'blobb1', data, )
 
         # Act
-        resp = self.bs.list_blobs(self.container_name, 'bloba')
+        resp = list(self.bs.list_blobs(self.container_name, 'bloba'))
 
         # Assert
         self.assertIsNotNone(resp)
         self.assertEqual(len(resp), 2)
-        self.assertEqual(len(resp.blobs), 2)
-        self.assertEqual(len(resp.prefixes), 0)
         self.assertNamedItemInContainer(resp, 'bloba1')
         self.assertNamedItemInContainer(resp, 'bloba2')
 
@@ -1062,36 +1054,13 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.create_blob_from_bytes (self.container_name, 'blobb1', data, )
 
         # Act
-        blobs = self.bs.list_blobs(self.container_name, None, None, 2)
+        blobs = list(self.bs.list_blobs(self.container_name, None, None, 2))
 
         # Assert
         self.assertIsNotNone(blobs)
         self.assertEqual(len(blobs), 2)
         self.assertNamedItemInContainer(blobs, 'bloba1')
         self.assertNamedItemInContainer(blobs, 'bloba2')
-
-    @record
-    def test_list_blobs_with_max_results_and_marker(self):
-        # Arrange
-        self._create_container(self.container_name)
-        data = b'hello world'
-        self.bs.create_blob_from_bytes (self.container_name, 'bloba1', data, )
-        self.bs.create_blob_from_bytes (self.container_name, 'bloba2', data, )
-        self.bs.create_blob_from_bytes (self.container_name, 'bloba3', data, )
-        self.bs.create_blob_from_bytes (self.container_name, 'blobb1', data, )
-
-        # Act
-        blobs1 = self.bs.list_blobs(self.container_name, None, None, 2)
-        blobs2 = self.bs.list_blobs(
-            self.container_name, None, blobs1.next_marker, 2)
-
-        # Assert
-        self.assertEqual(len(blobs1), 2)
-        self.assertEqual(len(blobs2), 2)
-        self.assertNamedItemInContainer(blobs1, 'bloba1')
-        self.assertNamedItemInContainer(blobs1, 'bloba2')
-        self.assertNamedItemInContainer(blobs2, 'bloba3')
-        self.assertNamedItemInContainer(blobs2, 'blobb1')
 
     @record
     def test_list_blobs_with_include_snapshots(self):
@@ -1103,7 +1072,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
         # Act
-        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
 
         # Assert
         self.assertEqual(len(blobs), 3)
@@ -1126,7 +1095,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
         # Act
-        blobs = self.bs.list_blobs(self.container_name, include='metadata')
+        blobs =list(self.bs.list_blobs(self.container_name, include='metadata'))
 
         # Assert
         self.assertEqual(len(blobs), 2)
@@ -1149,8 +1118,7 @@ class StorageCommonBlobTest(StorageTestCase):
                          metadata={'number': '2', 'name': 'car'})
 
         # Act
-        blobs = self.bs.list_blobs(
-            self.container_name, include='uncommittedblobs')
+        blobs = list(self.bs.list_blobs(self.container_name, include='uncommittedblobs'))
 
         # Assert
         self.assertEqual(len(blobs), 2)
@@ -1172,7 +1140,7 @@ class StorageCommonBlobTest(StorageTestCase):
                           sourceblob, {'status': 'copy'})
 
         # Act
-        blobs = self.bs.list_blobs(self.container_name, include='copy')
+        blobs = list(self.bs.list_blobs(self.container_name, include='copy'))
 
         # Assert
         self.assertEqual(len(blobs), 2)
@@ -1194,6 +1162,26 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertNotEqual(blobs[1].properties.copy_completion_time, None)
 
     @record
+    def test_list_blobs_with_delimiter(self):
+        # Arrange
+        self._create_container(self.container_name)
+        data = b'hello world'
+        self.bs.create_blob_from_bytes (self.container_name, 'a/blob1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'a/blob2', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'b/blob1', data, )
+        self.bs.create_blob_from_bytes (self.container_name, 'blob1', data, )
+
+        # Act
+        resp = list(self.bs.list_blobs(self.container_name, delimiter='/'))
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEqual(len(resp), 3)
+        self.assertNamedItemInContainer(resp, 'a/')
+        self.assertNamedItemInContainer(resp, 'b/')
+        self.assertNamedItemInContainer(resp, 'blob1')
+
+    @record
     def test_list_blobs_with_include_multiple(self):
         # Arrange
         self._create_container(self.container_name)
@@ -1205,8 +1193,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.snapshot_blob(self.container_name, 'blob1')
 
         # Act
-        blobs = self.bs.list_blobs(
-            self.container_name, include='snapshots,metadata')
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots,metadata'))
 
         # Assert
         self.assertEqual(len(blobs), 3)
@@ -1509,7 +1496,7 @@ class StorageCommonBlobTest(StorageTestCase):
         data = b'hello world'
         self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
         res = self.bs.snapshot_blob(self.container_name, blob_name)
-        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
         self.assertEqual(len(blobs), 2)
 
         # Act
@@ -1620,14 +1607,12 @@ class StorageCommonBlobTest(StorageTestCase):
         data = b'hello world'
         self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
         res = self.bs.snapshot_blob(self.container_name, blob_name)
-        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
-        self.assertEqual(len(blobs), 2)
 
         # Act
         self.bs.delete_blob(self.container_name, blob_name, snapshot=res.snapshot)
 
         # Assert
-        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
         self.assertEqual(len(blobs), 1)
         self.assertEqual(blobs[0].name, blob_name)
         self.assertIsNone(blobs[0].snapshot)
@@ -1640,15 +1625,13 @@ class StorageCommonBlobTest(StorageTestCase):
         data = b'hello world'
         self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
         self.bs.snapshot_blob(self.container_name, blob_name)
-        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
-        self.assertEqual(len(blobs), 2)
 
         # Act
         self.bs.delete_blob(self.container_name, blob_name,
                             delete_snapshots='only')
 
         # Assert
-        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
         self.assertEqual(len(blobs), 1)
         self.assertIsNone(blobs[0].snapshot)
 
@@ -1660,15 +1643,13 @@ class StorageCommonBlobTest(StorageTestCase):
         data = b'hello world'
         self.bs.create_blob_from_bytes (self.container_name, blob_name, data, )
         self.bs.snapshot_blob(self.container_name, blob_name)
-        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
-        self.assertEqual(len(blobs), 2)
 
         # Act
         self.bs.delete_blob(self.container_name, blob_name,
                             delete_snapshots='include')
 
         # Assert
-        blobs = self.bs.list_blobs(self.container_name, include='snapshots')
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
         self.assertEqual(len(blobs), 0)
 
     @record

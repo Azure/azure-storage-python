@@ -272,8 +272,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        containers = self.bs.list_containers()
-        self.assertNamedItemNotInContainer(containers, self.container_name)
+        exists = self.bs.exists(self.container_name)
+        self.assertFalse(exists)
 
     @record
     def test_delete_container_with_if_modified_fail(self):
@@ -302,8 +302,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        containers = self.bs.list_containers()
-        self.assertNamedItemNotInContainer(containers, self.container_name)
+        exists = self.bs.exists(self.container_name)
+        self.assertFalse(exists)
 
     @record
     def test_delete_container_with_if_unmodified_fail(self):

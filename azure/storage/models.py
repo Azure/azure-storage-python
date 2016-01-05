@@ -31,17 +31,48 @@ class _list(list):
     '''Used so that a continuation token can be set on the return object'''
     pass
 
+class ListGenerator(object):
+    def __init__(self, resources, list_method, list_args, list_kwargs):
+        self.items = resources
+        self.next_marker = resources.next_marker
 
-class EnumResultsBase(object):
+        self._list_method = list_method
+        self._list_args = list_args
+        self._list_kwargs = list_kwargs
 
-    ''' base class for EnumResults. '''
+    def __iter__(self):
+        # return results
+        for i in self.items:
+            yield i
 
-    def __init__(self):
-        self.prefix = u''
-        self.marker = u''
-        self.max_results = 0
-        self.next_marker = u''
+        while True:
+            # if no more results on the service, return
+            if not self.next_marker:
+                break
 
+            # update the marker args
+            self._list_kwargs['marker'] = self.next_marker
+
+            # handle max results, if present
+            max_results = self._list_kwargs.get('max_results')
+            if max_results is not None:
+                max_results = max_results - len(self.items)
+
+                # if we've reached max_results, return
+                # else, update the max_results arg
+                if max_results <= 0:
+                    break
+                else:
+                    self._list_kwargs['max_results'] = max_results
+
+            # get the next segment
+            resources = self._list_method(*self._list_args, **self._list_kwargs)
+            self.items = resources
+            self.next_marker = resources.next_marker
+
+            # return results
+            for i in self.items:
+                yield i
 
 class RetentionPolicy(object):
 

@@ -31,7 +31,10 @@ from .._serialization import (
 )
 from .._http import HTTPRequest
 from ._chunking import _download_blob_chunks
-from ..models import Services
+from ..models import (
+    Services,
+    ListGenerator,
+)
 from .models import (
     Blob,
     BlobProperties,
@@ -411,8 +414,44 @@ class _BaseBlobService(_StorageClient):
             Filters the results to return only containers whose names
             begin with the specified prefix.
         marker:
-            A string value that identifies the portion of the list to
-            be returned with the next list operation.
+            A string value that identifies the portion of the list
+            to be returned with the next list operation. The operation returns
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of list items. The marker value is
+            opaque to the client.
+        max_results:
+            Specifies the maximum number of containers to return.
+        include:
+            Include this parameter to specify that the container's
+            metadata be returned as part of the response body. set this
+            parameter to string 'metadata' to get container's metadata.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
+                'include': include, 'timeout': timeout}
+        resp = self._list_containers(**kwargs)
+
+        return ListGenerator(resp, self._list_containers, (), kwargs)
+
+
+    def _list_containers(self, prefix=None, marker=None, max_results=None,
+                        include=None, timeout=None):
+        '''
+        The List Containers operation returns a list of the containers under
+        the specified account.
+
+        prefix:
+            Filters the results to return only containers whose names
+            begin with the specified prefix.
+        marker:
+            A string value that identifies the portion of the list
+            to be returned with the next list operation. The operation returns
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of list items. The marker value is
+            opaque to the client.
         max_results:
             Specifies the maximum number of containers to return.
         include:
@@ -946,7 +985,64 @@ class _BaseBlobService(_StorageClient):
         marker:
             A string value that identifies the portion of the list
             to be returned with the next list operation. The operation returns
-            a marker value within the response body if the list returned was
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of list items. The marker value is
+            opaque to the client.
+        max_results:
+            Specifies the maximum number of blobs to return,
+            including all BlobPrefix elements. If the request does not specify
+            max_results or specifies a value greater than 5,000, the server will
+            return up to 5,000 items. Setting max_results to a value less than
+            or equal to zero results in error response code 400 (Bad Request).
+        include:
+            Specifies one or more datasets to include in the
+            response. To specify more than one of these options on the URI,
+            you must separate each option with a comma. Valid values are:
+                snapshots:
+                    Specifies that snapshots should be included in the
+                    enumeration. Snapshots are listed from oldest to newest in
+                    the response.
+                metadata:
+                    Specifies that blob metadata be returned in the response.
+                uncommittedblobs:
+                    Specifies that blobs for which blocks have been uploaded,
+                    but which have not been committed using Put Block List
+                    (REST API), be included in the response.
+                copy:
+                    Version 2012-02-12 and newer. Specifies that metadata
+                    related to any current or previous Copy Blob operation
+                    should be included in the response.
+        delimiter:
+            When the request includes this parameter, the operation
+            returns a BlobPrefix element in the response body that acts as a
+            placeholder for all blobs whose names begin with the same
+            substring up to the appearance of the delimiter character. The
+            delimiter may be a single character or a string.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        args = (container_name,)
+        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
+                'include': include, 'delimiter': delimiter, 'timeout': timeout}
+        resp = self._list_blobs(*args, **kwargs)
+
+        return ListGenerator(resp, self._list_blobs, args, kwargs)
+
+    def _list_blobs(self, container_name, prefix=None, marker=None,
+                   max_results=None, include=None, delimiter=None, timeout=None):
+        '''
+        Returns the list of blobs under the specified container.
+
+        container_name:
+            Name of existing container.
+        prefix:
+            Filters the results to return only blobs whose names
+            begin with the specified prefix.
+        marker:
+            A string value that identifies the portion of the list
+            to be returned with the next list operation. The operation returns
+            a next_marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of list items. The marker value is
             opaque to the client.

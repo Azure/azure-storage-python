@@ -22,7 +22,6 @@ from .models import (
     Directory,
     File,
     FileProperties,
-    FileAndDirectoryResults,
     Range,
     ShareStats,
     ShareProperties,
@@ -141,7 +140,7 @@ def _convert_xml_to_directories_and_files(response):
     if response is None or response.body is None:
         return response
 
-    entries = FileAndDirectoryResults()
+    entries = _list()
     list_element = ETree.fromstring(response.body)
     
     # Set next marker
@@ -160,7 +159,7 @@ def _convert_xml_to_directories_and_files(response):
         file.properties.content_length = int(properties_element.findtext('Content-Length'))
         
         # Add file to list
-        entries.files.append(file)
+        entries.append(file)
 
     for directory_element in entries_element.findall('Directory'):
         # Name element
@@ -168,7 +167,7 @@ def _convert_xml_to_directories_and_files(response):
         directory.name = directory_element.findtext('Name')
         
         # Add directory to list
-        entries.directories.append(directory)
+        entries.append(directory)
 
     return entries
 

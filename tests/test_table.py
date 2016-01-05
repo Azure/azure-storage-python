@@ -335,23 +335,12 @@ class StorageTableTest(StorageTestCase):
         self.assertFalse(exists)
 
     @record
-    def test_query_tables(self):
+    def test_list_tables(self):
         # Arrange
         self._create_table(self.table_name)
 
         # Act
-        tables = []
-        next=None
-        while True:
-            segment = self.ts.query_tables(next_table_name=next)
-            for table in segment:
-                tables.append(table)
-
-            next = None
-            if hasattr(segment, 'x_ms_continuation'):
-                next = segment.x_ms_continuation.get('nexttablename')
-            if not next:
-                break
+        tables = list(self.ts.list_tables())
 
         # Assert
         tableNames = [x.name for x in tables]
@@ -360,31 +349,7 @@ class StorageTableTest(StorageTestCase):
         self.assertIn(self.table_name, tableNames)
 
     @record
-    def test_query_tables_with_table_name(self):
-        # Arrange
-        self._create_table(self.table_name)
-
-        # Act
-        tables = self.ts.query_tables(self.table_name)
-        for table in tables:
-            pass
-
-        # Assert
-        self.assertEqual(len(tables), 1)
-        self.assertEqual(tables[0].name, self.table_name)
-
-    @record
-    def test_query_tables_with_table_name_no_tables(self):
-        # Arrange
-
-        # Act
-        with self.assertRaises(AzureHttpError):
-            self.ts.query_tables(self.table_name)
-
-        # Assert
-
-    @record
-    def test_query_tables_with_top(self):
+    def test_list_tables_with_max_results(self):
         # Arrange
         self.additional_table_names = [
             self.table_name + suffix for suffix in 'abcd']
@@ -392,15 +357,13 @@ class StorageTableTest(StorageTestCase):
             self.ts.create_table(name)
 
         # Act
-        tables = self.ts.query_tables(None, 3)
-        for table in tables:
-            pass
+        tables = list(self.ts.list_tables(3))
 
         # Assert
         self.assertEqual(len(tables), 3)
 
     @record
-    def test_query_tables_with_top_and_next_table_name(self):
+    def test_list_tables_with_max_results_and_next_table_name(self):
         # Arrange
         self.additional_table_names = [
             self.table_name + suffix for suffix in 'abcd']
@@ -408,14 +371,16 @@ class StorageTableTest(StorageTestCase):
             self.ts.create_table(name)
 
         # Act
-        tables_set1 = self.ts.query_tables(None, 3)
-        tables_set2 = self.ts.query_tables(
-            None, 3, tables_set1.x_ms_continuation['NextTableName'])
+        generator1 = self.ts.list_tables(3)
+        generator2 = self.ts.list_tables(3, generator1.next_marker)
+
+        tables1 = generator1.items
+        tables2 = generator2.items
 
         # Assert
-        self.assertEqual(len(tables_set1), 3)
-        self.assertGreaterEqual(len(tables_set2), 1)
-        self.assertLessEqual(len(tables_set2), 3)
+        self.assertEqual(len(tables1), 3)
+        self.assertGreaterEqual(len(tables2), 1)
+        self.assertLessEqual(len(tables2), 3)
 
     @record
     def test_delete_table_with_existing_table(self):
@@ -427,8 +392,8 @@ class StorageTableTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        tables = self.ts.query_tables()
-        self.assertNamedItemNotInContainer(tables, self.table_name)
+        exists = self.ts.exists(self.table_name)
+        self.assertFalse(self.table_name)
 
     @record
     def test_delete_table_with_existing_table_fail_not_exist(self):
@@ -440,8 +405,8 @@ class StorageTableTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        tables = self.ts.query_tables()
-        self.assertNamedItemNotInContainer(tables, self.table_name)
+        exists = self.ts.exists(self.table_name)
+        self.assertFalse(self.table_name)
 
     @record
     def test_delete_table_with_non_existing_table(self):
@@ -730,15 +695,15 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 2)
 
         # Act
-        resp = self.ts.query_entities(self.table_name)
+        entities = list(self.ts.query_entities(self.table_name))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        for entity in resp:
+        self.assertEqual(len(entities), 2)
+        for entity in entities:
             self.assertEqual(entity.PartitionKey, 'MyPartition')
             self._assert_default_entity(entity)
-        self.assertEqual(resp[0].RowKey, '1')
-        self.assertEqual(resp[1].RowKey, '2')
+        self.assertEqual(entities[0].RowKey, '1')
+        self.assertEqual(entities[1].RowKey, '2')
 
     @record
     def test_query_entities_full_metadata(self):
@@ -746,17 +711,17 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 2)
 
         # Act
-        resp = self.ts.query_entities(self.table_name, 
-                                      accept='application/json;odata=fullmetadata')
+        entities = list(self.ts.query_entities(self.table_name, 
+                                      accept='application/json;odata=fullmetadata'))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        for entity in resp:
+        self.assertEqual(len(entities), 2)
+        for entity in entities:
             self.assertEqual(entity.PartitionKey, 'MyPartition')
             self._assert_default_entity(entity)
             self.assertIsNotNone(entity.etag)
-        self.assertEqual(resp[0].RowKey, '1')
-        self.assertEqual(resp[1].RowKey, '2')
+        self.assertEqual(entities[0].RowKey, '1')
+        self.assertEqual(entities[1].RowKey, '2')
 
     @record
     def test_query_entities_no_metadata(self):
@@ -764,16 +729,16 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 2)
 
         # Act
-        resp = self.ts.query_entities(self.table_name, 
-                                      accept='application/json;odata=nometadata')
+        entities = list(self.ts.query_entities(self.table_name, 
+                                      accept='application/json;odata=nometadata'))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        for entity in resp:
+        self.assertEqual(len(entities), 2)
+        for entity in entities:
             self.assertEqual(entity.PartitionKey, 'MyPartition')
             self._assert_default_entity_json_no_metadata(entity)
-        self.assertEqual(resp[0].RowKey, '1')
-        self.assertEqual(resp[1].RowKey, '2')
+        self.assertEqual(entities[0].RowKey, '1')
+        self.assertEqual(entities[1].RowKey, '2')
 
     @record
     def test_query_entities_with_property_resolver(self):
@@ -781,17 +746,17 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 2)
 
         # Act
-        resp = self.ts.query_entities(self.table_name, 
+        entities = list(self.ts.query_entities(self.table_name, 
                                       accept='application/json;odata=nometadata',
-                                      property_resolver=self._resolver_with_assert)
+                                      property_resolver=self._resolver_with_assert))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        for entity in resp:
+        self.assertEqual(len(entities), 2)
+        for entity in entities:
             self.assertEqual(entity.PartitionKey, 'MyPartition')
             self._assert_default_entity(entity)
-        self.assertEqual(resp[0].RowKey, '1')
-        self.assertEqual(resp[1].RowKey, '2')
+        self.assertEqual(entities[0].RowKey, '1')
+        self.assertEqual(entities[1].RowKey, '2')
 
     @record
     def test_query_entities_large(self):
@@ -816,14 +781,14 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         start_time = datetime.now()
-        resp = self.ts.query_entities(self.table_name)
+        entities = list(self.ts.query_entities(self.table_name))
         elapsed_time = datetime.now() - start_time
 
         # Assert
         print('query_entities took {0} secs.'.format(elapsed_time.total_seconds()))
         # azure allocates 5 seconds to execute a query
         # if it runs slowly, it will return fewer results and make the test fail
-        self.assertEqual(len(resp), total_entities_count)
+        self.assertEqual(len(entities), total_entities_count)
 
     @record
     def test_query_entities_with_filter(self):
@@ -834,12 +799,11 @@ class StorageTableTest(StorageTestCase):
             self._create_default_entity_dict('MyOtherPartition', '3'))
 
         # Act
-        resp = self.ts.query_entities(
-            self.table_name, "PartitionKey eq 'MyPartition'")
+        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq 'MyPartition'"))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        for entity in resp:
+        self.assertEqual(len(entities), 2)
+        for entity in entities:
             self.assertEqual(entity.PartitionKey, 'MyPartition')
             self._assert_default_entity(entity)
 
@@ -849,15 +813,15 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 2)
 
         # Act
-        resp = self.ts.query_entities(self.table_name, None, 'age,sex')
+        entities = list(self.ts.query_entities(self.table_name, None, 'age,sex'))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        self.assertEqual(resp[0].age, 39)
-        self.assertEqual(resp[0].sex, 'male')
-        self.assertFalse(hasattr(resp[0], "birthday"))
-        self.assertFalse(hasattr(resp[0], "married"))
-        self.assertFalse(hasattr(resp[0], "deceased"))
+        self.assertEqual(len(entities), 2)
+        self.assertEqual(entities[0].age, 39)
+        self.assertEqual(entities[0].sex, 'male')
+        self.assertFalse(hasattr(entities[0], "birthday"))
+        self.assertFalse(hasattr(entities[0], "married"))
+        self.assertFalse(hasattr(entities[0], "deceased"))
 
     @record
     def test_query_entities_with_top(self):
@@ -865,10 +829,10 @@ class StorageTableTest(StorageTestCase):
         self._create_table_with_default_entities(self.table_name, 3)
 
         # Act
-        resp = self.ts.query_entities(self.table_name, None, None, 2)
+        entities = list(self.ts.query_entities(self.table_name, None, None, 2))
 
         # Assert
-        self.assertEqual(len(resp), 2)
+        self.assertEqual(len(entities), 2)
 
     @record
     def test_query_entities_with_top_and_next(self):
@@ -878,23 +842,23 @@ class StorageTableTest(StorageTestCase):
         # Act
         resp1 = self.ts.query_entities(self.table_name, None, None, 2)
         resp2 = self.ts.query_entities(
-            self.table_name, None, None, 2,
-            resp1.x_ms_continuation['NextPartitionKey'],
-            resp1.x_ms_continuation['NextRowKey'])
+            self.table_name, None, None, 2, resp1.next_marker)
         resp3 = self.ts.query_entities(
-            self.table_name, None, None, 2,
-            resp2.x_ms_continuation['NextPartitionKey'],
-            resp2.x_ms_continuation['NextRowKey'])
+            self.table_name, None, None, 2, resp2.next_marker)
+
+        entities1 = resp1.items
+        entities2 = resp2.items
+        entities3 = resp3.items
 
         # Assert
-        self.assertEqual(len(resp1), 2)
-        self.assertEqual(len(resp2), 2)
-        self.assertEqual(len(resp3), 1)
-        self.assertEqual(resp1[0].RowKey, '1')
-        self.assertEqual(resp1[1].RowKey, '2')
-        self.assertEqual(resp2[0].RowKey, '3')
-        self.assertEqual(resp2[1].RowKey, '4')
-        self.assertEqual(resp3[0].RowKey, '5')
+        self.assertEqual(len(entities1), 2)
+        self.assertEqual(len(entities2), 2)
+        self.assertEqual(len(entities3), 1)
+        self.assertEqual(entities1[0].RowKey, '1')
+        self.assertEqual(entities1[1].RowKey, '2')
+        self.assertEqual(entities2[0].RowKey, '3')
+        self.assertEqual(entities2[1].RowKey, '4')
+        self.assertEqual(entities3[0].RowKey, '5')
 
     @record
     def test_update_entity(self):
@@ -1155,12 +1119,11 @@ class StorageTableTest(StorageTestCase):
         self.ts.insert_entity(
             self.table_name,
             {'PartitionKey': 'test', 'RowKey': 'test2', 'Description': 'ꀕ'})
-        resp = self.ts.query_entities(
-            self.table_name, "PartitionKey eq 'test'")
+        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq 'test'"))
         # Assert
-        self.assertEqual(len(resp), 2)
-        self.assertEqual(resp[0].Description, u'ꀕ')
-        self.assertEqual(resp[1].Description, u'ꀕ')
+        self.assertEqual(len(entities), 2)
+        self.assertEqual(entities[0].Description, u'ꀕ')
+        self.assertEqual(entities[1].Description, u'ꀕ')
 
     @record
     def test_unicode_property_name(self):
@@ -1172,12 +1135,12 @@ class StorageTableTest(StorageTestCase):
         self.ts.insert_entity(
             self.table_name,
             {'PartitionKey': 'test', 'RowKey': 'test2', u'啊齄丂狛狜': 'hello'})
-        resp = self.ts.query_entities(
-            self.table_name, "PartitionKey eq 'test'")
+        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq 'test'"))
+
         # Assert
-        self.assertEqual(len(resp), 2)
-        self.assertEqual(resp[0][u'啊齄丂狛狜'], u'ꀕ')
-        self.assertEqual(resp[1][u'啊齄丂狛狜'], u'hello')
+        self.assertEqual(len(entities), 2)
+        self.assertEqual(entities[0][u'啊齄丂狛狜'], u'ꀕ')
+        self.assertEqual(entities[1][u'啊齄丂狛狜'], u'hello')
 
     @record
     def test_unicode_create_table_unicode_name(self):
@@ -1291,7 +1254,7 @@ class StorageTableTest(StorageTestCase):
 
         # Act
         try:
-            resp = self.ts.query_tables()
+            resp = self.ts.list_tables()
         except:
             e = sys.exc_info()[0]
 
@@ -1319,15 +1282,15 @@ class StorageTableTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        resp = service.query_entities(self.table_name, None, 'age,sex')
+        entities = list(service.query_entities(self.table_name, None, 'age,sex'))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        self.assertEqual(resp[0].age, 39)
-        self.assertEqual(resp[0].sex, 'male')
-        self.assertFalse(hasattr(resp[0], "birthday"))
-        self.assertFalse(hasattr(resp[0], "married"))
-        self.assertFalse(hasattr(resp[0], "deceased"))
+        self.assertEqual(len(entities), 2)
+        self.assertEqual(entities[0].age, 39)
+        self.assertEqual(entities[0].sex, 'male')
+        self.assertFalse(hasattr(entities[0], "birthday"))
+        self.assertFalse(hasattr(entities[0], "married"))
+        self.assertFalse(hasattr(entities[0], "deceased"))
 
     @record
     def test_sas_query(self):
@@ -1350,15 +1313,15 @@ class StorageTableTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        resp = self.ts.query_entities(self.table_name, None, 'age,sex')
+        entities = list(self.ts.query_entities(self.table_name, None, 'age,sex'))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        self.assertEqual(resp[0].age, 39)
-        self.assertEqual(resp[0].sex, 'male')
-        self.assertFalse(hasattr(resp[0], "birthday"))
-        self.assertFalse(hasattr(resp[0], "married"))
-        self.assertFalse(hasattr(resp[0], "deceased"))
+        self.assertEqual(len(entities), 2)
+        self.assertEqual(entities[0].age, 39)
+        self.assertEqual(entities[0].sex, 'male')
+        self.assertFalse(hasattr(entities[0], "birthday"))
+        self.assertFalse(hasattr(entities[0], "married"))
+        self.assertFalse(hasattr(entities[0], "deceased"))
 
     @record
     def test_sas_add(self):
@@ -1530,7 +1493,7 @@ class StorageTableTest(StorageTestCase):
         access_policy.permission = TablePermissions.QUERY
         identifiers = {'testid': access_policy}
 
-        resp = self.ts.set_table_acl(self.table_name, identifiers)
+        entities = self.ts.set_table_acl(self.table_name, identifiers)
 
         token = self.ts.generate_table_shared_access_signature(
             self.table_name,
@@ -1543,15 +1506,15 @@ class StorageTableTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        resp = self.ts.query_entities(self.table_name, None, 'age,sex')
+        entities = list(self.ts.query_entities(self.table_name, None, 'age,sex'))
 
         # Assert
-        self.assertEqual(len(resp), 2)
-        self.assertEqual(resp[0].age, 39)
-        self.assertEqual(resp[0].sex, 'male')
-        self.assertFalse(hasattr(resp[0], "birthday"))
-        self.assertFalse(hasattr(resp[0], "married"))
-        self.assertFalse(hasattr(resp[0], "deceased"))
+        self.assertEqual(len(entities), 2)
+        self.assertEqual(entities[0].age, 39)
+        self.assertEqual(entities[0].sex, 'male')
+        self.assertFalse(hasattr(entities[0], "birthday"))
+        self.assertFalse(hasattr(entities[0], "married"))
+        self.assertFalse(hasattr(entities[0], "deceased"))
 
     @record
     def test_get_table_acl(self):
