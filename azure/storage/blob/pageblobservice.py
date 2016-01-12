@@ -42,6 +42,7 @@ from ..constants import (
 )
 from ._serialization import (
     _get_path,
+    _validate_and_format_range_headers,
 )
 from ._deserialization import _convert_xml_to_page_ranges
 from ._baseblobservice import _BaseBlobService
@@ -154,7 +155,7 @@ class PageBlobService(_BaseBlobService):
         self._perform_request(request)
 
     def put_page(
-        self, container_name, blob_name, page, byte_range,
+        self, container_name, blob_name, page, start_range, end_range,
         page_write, content_md5=None,
         lease_id=None, if_sequence_number_lte=None,
         if_sequence_number_lt=None, if_sequence_number_eq=None,
@@ -169,14 +170,16 @@ class PageBlobService(_BaseBlobService):
             Name of existing blob.
         page:
             Content of the page.
-        byte_range:
-            Specifies the range of bytes to be written as a page.
-            Both the start and end of the range must be specified. Must be in
-            format:
-                bytes=startByte-endByte. Given that pages must be aligned
-            with 512-byte boundaries, the start offset must be a modulus of
-            512 and the end offset must be a modulus of 512-1. Examples of
-            valid byte ranges are 0-511, 512-1023, etc.
+        start_range:
+            Start of byte range to use for writing to a section of the blob.
+            Pages must be aligned with 512-byte boundaries, the start offset
+            must be a modulus of 512 and the end offset must be a modulus of
+            512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
+        end_range:
+            End of byte range to use for writing to a section of the blob.
+            Pages must be aligned with 512-byte boundaries, the start offset
+            must be a modulus of 512 and the end offset must be a modulus of
+            512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
         page_write:
             You may specify one of the following options:
                 update (lower case):
@@ -232,7 +235,6 @@ class PageBlobService(_BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('page', page)
-        _validate_not_none('range', byte_range)
         _validate_not_none('page_write', page_write)
         request = HTTPRequest()
         request.method = 'PUT'
@@ -243,7 +245,6 @@ class PageBlobService(_BaseBlobService):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
-            ('x-ms-range', _str_or_none(byte_range)),
             ('Content-MD5', _str_or_none(content_md5)),
             ('x-ms-page-write', _str_or_none(page_write)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -258,16 +259,22 @@ class PageBlobService(_BaseBlobService):
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
+        _validate_and_format_range_headers(
+            request,
+            start_range,
+            end_range,
+            align_to_page=True)
         request.body = _get_request_body_bytes_only('page', page)
 
         self._perform_request(request)
 
     def get_page_ranges(
-        self, container_name, blob_name, snapshot=None, range=None,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        self, container_name, blob_name, snapshot=None, start_range=None,
+        end_range=None, lease_id=None, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
-        Retrieves the page ranges for a blob.
+        Returns the list of valid page ranges for a page blob or snapshot
+        of a page blob.
 
         container_name:
             Name of existing container.
@@ -277,14 +284,20 @@ class PageBlobService(_BaseBlobService):
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve information
             from.
-        range:
-            Specifies the range of bytes to be written as a page.
-            Both the start and end of the range must be specified. Must be in
-            format:
-                bytes=startByte-endByte. Given that pages must be aligned
-            with 512-byte boundaries, the start offset must be a modulus of
-            512 and the end offset must be a modulus of 512-1. Examples of
-            valid byte ranges are 0-511, 512-1023, etc.
+        start_range:
+            Start of byte range to use for getting valid page ranges.
+            If no end_range is given, all bytes after the start_range will be searched.
+            Pages must be aligned with 512-byte boundaries, the start offset
+            must be a modulus of 512 and the end offset must be a modulus of
+            512-1. Examples of valid byte ranges are 0-511, 512-, etc.
+        end_range:
+            End of byte range to use for getting valid page ranges.
+            If end_range is given, start_range must be provided.
+            This range will return valid page ranges for from the offset start up to
+            offset end.
+            Pages must be aligned with 512-byte boundaries, the start offset
+            must be a modulus of 512 and the end offset must be a modulus of
+            512-1. Examples of valid byte ranges are 0-511, 512-, etc.
         lease_id:
             Required if the blob has an active lease.
         if_modified_since:
@@ -310,13 +323,20 @@ class PageBlobService(_BaseBlobService):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
-            ('x-ms-range', _str_or_none(range)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
+        if start_range is not None:
+            _validate_and_format_range_headers(
+                request,
+                start_range,
+                end_range,
+                start_range_required=False,
+                end_range_required=False,
+                align_to_page=True)
 
         response = self._perform_request(request)
         return _convert_xml_to_page_ranges(response)

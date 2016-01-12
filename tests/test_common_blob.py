@@ -154,23 +154,23 @@ class StorageCommonBlobTest(StorageTestCase):
 
     def _wait_for_async_copy(self, container_name, blob_name):
         count = 0
-        props, _ = self.bs.get_blob_properties(container_name, blob_name)
-        while props.copy.status != 'success':
+        blob = self.bs.get_blob_properties(container_name, blob_name)
+        while blob.properties.copy.status != 'success':
             count = count + 1
             if count > 5:
                 self.assertTrue(
                     False, 'Timed out waiting for async copy to complete.')
             self.sleep(5)
-            props, _ = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(props.copy.status, 'success')
+            blob = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(blob.properties.copy.status, 'success')
 
     def assertBlobEqual(self, container_name, blob_name, expected_data):
-        actual_data = self.bs.get_blob(container_name, blob_name)
-        self.assertEqual(actual_data, expected_data)
+        actual_data = self.bs.get_blob_to_bytes(container_name, blob_name)
+        self.assertEqual(actual_data.content, expected_data)
 
     def assertBlobLengthEqual(self, container_name, blob_name, expected_length):
-        props, _ = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(int(props.content_length), expected_length)
+        blob = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(int(blob.properties.content_length), expected_length)
 
     def _get_oversized_binary_data(self):
         '''Returns random binary data exceeding the size threshold for
@@ -1438,7 +1438,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         blob = self.bs.get_blob_to_text(self.container_name, blob_name)
-        self.assertEqual(blob, blob_data)
+        self.assertEqual(blob.content, blob_data)
 
     @record
     def test_create_blob_with_special_chars(self):
@@ -1451,7 +1451,7 @@ class StorageCommonBlobTest(StorageTestCase):
             blob_data = c
             self.bs.create_blob_from_text(self.container_name, blob_name, blob_data)
             blob = self.bs.get_blob_to_text(self.container_name, blob_name)
-            self.assertEqual(blob, blob_data)
+            self.assertEqual(blob.content, blob_data)
 
         # Assert
 
@@ -1471,9 +1471,9 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNone(resp)
-        blob = self.bs.get_blob(
+        blob = self.bs.get_blob_to_bytes(
             self.container_name, 'blob1', lease_id=lease_id)
-        self.assertEqual(blob, b'hello world again')
+        self.assertEqual(blob.content, b'hello world again')
 
     @record
     def test_create_blob_with_metadata(self):
@@ -1499,11 +1499,11 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        blob = self.bs.get_blob(self.container_name, 'blob1')
+        blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, b'hello world')
+        self.assertEqual(blob.content, b'hello world')
 
     @record
     def test_get_blob_with_snapshot(self):
@@ -1513,12 +1513,12 @@ class StorageCommonBlobTest(StorageTestCase):
         snapshot = self.bs.snapshot_blob(self.container_name, 'blob1')
 
         # Act
-        blob = self.bs.get_blob(
+        blob = self.bs.get_blob_to_bytes(
             self.container_name, 'blob1', snapshot['x-ms-snapshot'])
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, b'hello world')
+        self.assertEqual(blob.content, b'hello world')
 
     @record
     def test_get_blob_with_snapshot_previous(self):
@@ -1530,15 +1530,15 @@ class StorageCommonBlobTest(StorageTestCase):
                          b'hello world again', )
 
         # Act
-        blob_previous = self.bs.get_blob(
+        blob_previous = self.bs.get_blob_to_bytes(
             self.container_name, 'blob1', snapshot['x-ms-snapshot'])
-        blob_latest = self.bs.get_blob(self.container_name, 'blob1')
+        blob_latest = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
 
         # Assert
         self.assertIsInstance(blob_previous, Blob)
         self.assertIsInstance(blob_latest, Blob)
-        self.assertEqual(blob_previous, b'hello world')
-        self.assertEqual(blob_latest, b'hello world again')
+        self.assertEqual(blob_previous.content, b'hello world')
+        self.assertEqual(blob_latest.content, b'hello world again')
 
     @record
     def test_get_blob_with_range(self):
@@ -1547,12 +1547,12 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        blob = self.bs.get_blob(
-            self.container_name, 'blob1', byte_range='bytes=0-5')
+        blob = self.bs.get_blob_to_bytes(
+            self.container_name, 'blob1', start_range=0, end_range=5)
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, b'hello ')
+        self.assertEqual(blob.content, b'hello ')
 
     @record
     def test_get_blob_with_range_and_get_content_md5(self):
@@ -1561,13 +1561,13 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        blob = self.bs.get_blob(self.container_name, 'blob1',
-                                byte_range='bytes=0-5',
-                                range_get_content_md5='true')
+        blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1',
+                                start_range=0, end_range=5,
+                                range_get_content_md5=True)
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, b'hello ')
+        self.assertEqual(blob.content, b'hello ')
         self.assertEqual(
             blob.properties.content_settings.content_md5, '+BSJN3e8wilf/wXwDlCNpg==')
 
@@ -1580,13 +1580,13 @@ class StorageCommonBlobTest(StorageTestCase):
         lease_id = lease['x-ms-lease-id']
 
         # Act
-        blob = self.bs.get_blob(
+        blob = self.bs.get_blob_to_bytes(
             self.container_name, 'blob1', lease_id=lease_id)
         self.bs.release_blob_lease(self.container_name, 'blob1', lease_id)
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, b'hello world')
+        self.assertEqual(blob.content, b'hello world')
 
     @record
     def test_get_blob_on_leased_blob_without_lease_id(self):
@@ -1596,12 +1596,12 @@ class StorageCommonBlobTest(StorageTestCase):
         self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
-        # get_blob is allowed without lease id
-        blob = self.bs.get_blob(self.container_name, 'blob1')
+        # get_blob_to_bytes is allowed without lease id
+        blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, b'hello world')
+        self.assertEqual(blob.content, b'hello world')
 
     @record
     def test_get_blob_with_non_existing_container(self):
@@ -1609,7 +1609,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.get_blob(self.container_name, 'blob1')
+            self.bs.get_blob_to_bytes(self.container_name, 'blob1')
 
         # Assert
 
@@ -1620,7 +1620,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.get_blob(self.container_name, 'blob1')
+            self.bs.get_blob_to_bytes(self.container_name, 'blob1')
 
         # Assert
 
@@ -1641,31 +1641,31 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNone(resp)
-        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.content_settings.content_language, 'spanish')
-        self.assertEqual(props.content_settings.content_disposition, 'inline')
+        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
+        self.assertEqual(blob.properties.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_blob_settings_param(self):
         # Arrange
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
-        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
 
         # Act
-        props.content_settings.content_language = 'spanish'
-        props.content_settings.content_disposition = 'inline'
+        blob.properties.content_settings.content_language = 'spanish'
+        blob.properties.content_settings.content_disposition = 'inline'
         resp = self.bs.set_blob_properties(
             self.container_name,
             'blob1',
-            content_settings=props.content_settings,
+            content_settings=blob.properties.content_settings,
         )
 
         # Assert
         self.assertIsNone(resp)
-        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(props.content_settings.content_language, 'spanish')
-        self.assertEqual(props.content_settings.content_disposition, 'inline')
+        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
+        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
+        self.assertEqual(blob.properties.content_settings.content_disposition, 'inline')
 
     @record
     def test_set_blob_properties_with_non_existing_container(self):
@@ -1699,13 +1699,13 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
 
         # Assert
-        self.assertIsNotNone(props)
-        self.assertEqual(props.blob_type, self.bs.blob_type)
-        self.assertEqual(props.content_length, 11)
-        self.assertEqual(props.lease.status, 'unlocked')
+        self.assertIsInstance(blob, Blob)
+        self.assertEqual(blob.properties.blob_type, self.bs.blob_type)
+        self.assertEqual(blob.properties.content_length, 11)
+        self.assertEqual(blob.properties.lease.status, 'unlocked')
 
     @record
     def test_get_blob_properties_with_snapshot(self):
@@ -1720,12 +1720,12 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(len(blobs), 2)
 
         # Act
-        props, _ = self.bs.get_blob_properties(self.container_name, blob_name, snapshot=snapshot)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name, snapshot=snapshot)
 
         # Assert
-        self.assertIsNotNone(props)
-        self.assertEqual(props.blob_type, self.bs.blob_type)
-        self.assertEqual(props.content_length, 11)
+        self.assertIsNotNone(blob)
+        self.assertEqual(blob.properties.blob_type, self.bs.blob_type)
+        self.assertEqual(blob.properties.content_length, 11)
 
     @record
     def test_get_blob_properties_with_leased_blob(self):
@@ -1735,15 +1735,15 @@ class StorageCommonBlobTest(StorageTestCase):
         lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act
-        props, _ = self.bs.get_blob_properties(self.container_name, 'blob1')
+        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
 
         # Assert
-        self.assertIsNotNone(props)
-        self.assertEqual(props.blob_type, self.bs.blob_type)
-        self.assertEqual(props.content_length, 11)
-        self.assertEqual(props.lease.status, 'locked')
-        self.assertEqual(props.lease.state, 'leased')
-        self.assertEqual(props.lease.duration, 'infinite')
+        self.assertIsInstance(blob, Blob)
+        self.assertEqual(blob.properties.blob_type, self.bs.blob_type)
+        self.assertEqual(blob.properties.content_length, 11)
+        self.assertEqual(blob.properties.lease.status, 'locked')
+        self.assertEqual(blob.properties.lease.state, 'leased')
+        self.assertEqual(blob.properties.lease.duration, 'infinite')
 
     @record
     def test_get_blob_properties_with_non_existing_container(self):
@@ -1897,8 +1897,8 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNotNone(resp)
         self.assertEqual(resp['x-ms-copy-status'], 'success')
         self.assertIsNotNone(resp['x-ms-copy-id'])
-        copy = self.bs.get_blob(self.container_name, 'blob1copy')
-        self.assertEqual(copy, b'hello world')
+        copy = self.bs.get_blob_to_bytes(self.container_name, 'blob1copy')
+        self.assertEqual(copy.content, b'hello world')
 
     @record
     def test_copy_blob_async_public_blob(self):
@@ -1986,8 +1986,8 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'targetblob', copy_resp['x-ms-copy-id'])
 
         # Assert
-        target_blob = self.bs.get_blob(self.container_name, target_blob_name)
-        self.assertEqual(target_blob, b'')
+        target_blob = self.bs.get_blob_to_bytes(self.container_name, target_blob_name)
+        self.assertEqual(target_blob.content, b'')
         self.assertEqual(target_blob.properties.copy.status, 'aborted')
 
     @record
@@ -2270,11 +2270,11 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, '啊齄丂狛狜', b'hello world')
 
         # Act
-        blob = self.bs.get_blob(self.container_name, '啊齄丂狛狜')
+        blob = self.bs.get_blob_to_bytes(self.container_name, '啊齄丂狛狜')
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, b'hello world')
+        self.assertEqual(blob.content, b'hello world')
 
     @record
     def test_create_blob_blob_unicode_data(self):
@@ -2297,11 +2297,11 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', blob_data)
 
         # Act
-        blob = self.bs.get_blob(self.container_name, 'blob1')
+        blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, blob_data)
+        self.assertEqual(blob.content, blob_data)
 
     @record
     def test_unicode_get_blob_binary_data(self):
@@ -2313,11 +2313,11 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, 'blob1', binary_data)
 
         # Act
-        blob = self.bs.get_blob(self.container_name, 'blob1')
+        blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
 
         # Assert
         self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob, binary_data)
+        self.assertEqual(blob.content, binary_data)
 
     @record
     def test_no_sas_private_blob(self):
@@ -2371,7 +2371,7 @@ class StorageCommonBlobTest(StorageTestCase):
         result = service.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert
-        self.assertEqual(data, result)
+        self.assertEqual(data, result.content)
 
     @record
     def test_sas_access_blob(self):
@@ -2405,7 +2405,7 @@ class StorageCommonBlobTest(StorageTestCase):
         result = service.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert
-        self.assertEqual(data, result)
+        self.assertEqual(data, result.content)
 
     @record
     def test_sas_signed_identifier(self):
@@ -2446,7 +2446,7 @@ class StorageCommonBlobTest(StorageTestCase):
         result = service.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert
-        self.assertEqual(data, result)
+        self.assertEqual(data, result.content)
 
     @record
     def test_account_sas(self):
@@ -2592,8 +2592,8 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertTrue(response.ok)
-        blob = self.bs.get_blob(self.container_name, 'blob1.txt')
-        self.assertEqual(updated_data, blob)
+        blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1.txt')
+        self.assertEqual(updated_data, blob.content)
 
     @record
     def test_shared_delete_access_blob(self):
@@ -2628,7 +2628,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertTrue(response.ok)
         with self.assertRaises(AzureMissingResourceHttpError):
-            blob = self.bs.get_blob(self.container_name, blob_name)
+            blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
 
     @record
     def test_shared_access_container(self):
@@ -2672,10 +2672,10 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, data)
 
         # Act
-        resp = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert
-        self.assertEqual(data, resp)
+        self.assertEqual(data, blob.content)
 
     @record
     def test_get_blob_to_bytes_chunked_download(self):
@@ -2689,7 +2689,7 @@ class StorageCommonBlobTest(StorageTestCase):
         resp = self.bs.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert
-        self.assertEqual(data, resp)
+        self.assertEqual(data, resp.content)
 
     def test_get_blob_to_bytes_chunked_download_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -2707,7 +2707,7 @@ class StorageCommonBlobTest(StorageTestCase):
                                          max_connections=10)
 
         # Assert
-        self.assertEqual(data, resp)
+        self.assertEqual(data, resp.content)
 
     @record
     def test_get_blob_to_bytes_with_progress(self):
@@ -2727,7 +2727,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, progress_callback=callback)
 
         # Assert
-        self.assertEqual(data, resp)
+        self.assertEqual(data, resp.content)
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
@@ -2745,14 +2745,15 @@ class StorageCommonBlobTest(StorageTestCase):
             progress.append((current, total))
 
         resp = self.bs.get_blob_to_bytes(
-            self.container_name, blob_name, progress_callback=callback)
+            self.container_name, blob_name, progress_callback=callback,
+            max_connections=2)
 
         # Assert
-        self.assertEqual(data, resp)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assertEqual(data, resp.content)
+        self.assertEqual(progress, self._get_expected_progress(len(data), False))
 
     @record
-    def test_get_blob_to_file(self):
+    def test_get_blob_to_stream(self):
         # Arrange
         blob_name = 'blob1'
         data = b'abcdefghijklmnopqrstuvwxyz'
@@ -2762,17 +2763,17 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         with open(file_path, 'wb') as stream:
-            resp = self.bs.get_blob_to_file(
+            resp = self.bs.get_blob_to_stream(
                 self.container_name, blob_name, stream)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
 
     @record
-    def test_get_blob_to_file_chunked_download(self):
+    def test_get_blob_to_stream_chunked_download(self):
         # Arrange
         blob_name = 'blob1'
         data = self._get_oversized_binary_data()
@@ -2782,16 +2783,16 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         with open(file_path, 'wb') as stream:
-            resp = self.bs.get_blob_to_file(
+            resp = self.bs.get_blob_to_stream(
                 self.container_name, blob_name, stream)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
 
-    def test_get_blob_to_file_chunked_download_parallel(self):
+    def test_get_blob_to_stream_chunked_download_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -2805,18 +2806,18 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         with open(file_path, 'wb') as stream:
-            resp = self.bs.get_blob_to_file(
+            resp = self.bs.get_blob_to_stream(
                 self.container_name, blob_name, stream,
                 max_connections=10)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
 
     @record
-    def test_get_blob_to_file_non_seekable_chunked_download(self):
+    def test_get_blob_to_stream_non_seekable_chunked_download(self):
         # Arrange
         blob_name = 'blob1'
         data = self._get_oversized_binary_data()
@@ -2827,17 +2828,17 @@ class StorageCommonBlobTest(StorageTestCase):
         # Act
         with open(file_path, 'wb') as stream:
             non_seekable_stream = StorageCommonBlobTest.NonSeekableFile(stream)
-            resp = self.bs.get_blob_to_file(
+            resp = self.bs.get_blob_to_stream(
                 self.container_name, blob_name, non_seekable_stream,
                 max_connections=1)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
 
-    def test_get_blob_to_file_non_seekable_chunked_download_parallel(self):
+    def test_get_blob_to_stream_non_seekable_chunked_download_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -2855,14 +2856,14 @@ class StorageCommonBlobTest(StorageTestCase):
 
             # Parallel downloads require that the file be seekable
             with self.assertRaises(AttributeError):
-                resp = self.bs.get_blob_to_file(
+                resp = self.bs.get_blob_to_stream(
                     self.container_name, blob_name, non_seekable_stream,
                     max_connections=10)
 
         # Assert
 
     @record
-    def test_get_blob_to_file_with_progress(self):
+    def test_get_blob_to_stream_with_progress(self):
         # Arrange
         blob_name = 'blob1'
         data = b'abcdefghijklmnopqrstuvwxyz'
@@ -2877,19 +2878,19 @@ class StorageCommonBlobTest(StorageTestCase):
             progress.append((current, total))
 
         with open(file_path, 'wb') as stream:
-            resp = self.bs.get_blob_to_file(
+            resp = self.bs.get_blob_to_stream(
                 self.container_name, blob_name, stream,
                 progress_callback=callback)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
-    def test_get_blob_to_file_with_progress_chunked_download(self):
+    def test_get_blob_to_stream_with_progress_chunked_download(self):
         # Arrange
         blob_name = 'blob1'
         data = self._get_oversized_binary_data()
@@ -2904,18 +2905,18 @@ class StorageCommonBlobTest(StorageTestCase):
             progress.append((current, total))
 
         with open(file_path, 'wb') as stream:
-            resp = self.bs.get_blob_to_file(
+            resp = self.bs.get_blob_to_stream(
                 self.container_name, blob_name, stream,
-                progress_callback=callback)
+                progress_callback=callback, max_connections=2)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assertEqual(progress, self._get_expected_progress(len(data), False))
 
-    def test_get_blob_to_file_with_progress_chunked_download_parallel(self):
+    def test_get_blob_to_stream_with_progress_chunked_download_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recordingfile(self.test_mode):
             return
@@ -2934,13 +2935,13 @@ class StorageCommonBlobTest(StorageTestCase):
             progress.append((current, total))
 
         with open(file_path, 'wb') as stream:
-            resp = self.bs.get_blob_to_file(
+            resp = self.bs.get_blob_to_stream(
                 self.container_name, blob_name, stream,
                 progress_callback=callback,
                 max_connections=5)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
@@ -2961,7 +2962,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, file_path)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
@@ -2980,7 +2981,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, file_path)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
@@ -3003,10 +3004,76 @@ class StorageCommonBlobTest(StorageTestCase):
             max_connections=10)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
+
+    def test_ranged_get_blob_to_path_chunked_download_parallel(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = 'blob1'
+        data = self._get_oversized_binary_data()
+        file_path = 'blob_output.temp.dat'
+        self._create_container_and_block_blob(
+            self.container_name, blob_name, data)
+
+        # Act
+        resp = self.bs.get_blob_to_path(
+            self.container_name, blob_name, file_path, start_range=0,
+            max_connections=10)
+
+        # Assert
+        self.assertIsInstance(resp, Blob)
+        with open(file_path, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(data, actual)
+
+    def test_ranged_get_blob_to_path(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = 'blob1'
+        data = b'foo'
+        file_path = 'blob_output.temp.dat'
+        self._create_container_and_block_blob(
+            self.container_name, blob_name, data)
+
+        # Act
+        resp = self.bs.get_blob_to_path(
+            self.container_name, blob_name, file_path, start_range=1, end_range=3,
+            range_get_content_md5=True, max_connections=10)
+
+        # Assert
+        self.assertIsInstance(resp, Blob)
+        with open(file_path, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(b"oo", actual)
+
+    def test_ranged_get_blob_to_path_md5_without_end_range_fail(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = 'blob1'
+        data = b'foo'
+        file_path = 'blob_output.temp.dat'
+        self._create_container_and_block_blob(
+            self.container_name, blob_name, data)
+
+        # Act
+        with self.assertRaises(ValueError):
+            resp = self.bs.get_blob_to_path(
+                self.container_name, blob_name, file_path, start_range=1,
+                range_get_content_md5=True, max_connections=10)
+
+        # Assert
 
     @record
     def test_get_blob_to_path_with_progress(self):
@@ -3028,7 +3095,7 @@ class StorageCommonBlobTest(StorageTestCase):
             progress_callback=callback)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
@@ -3054,7 +3121,7 @@ class StorageCommonBlobTest(StorageTestCase):
             progress_callback=callback, max_connections=2)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
@@ -3076,7 +3143,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, file_path, 'a+b')
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(b'abcdef' + data, actual)
@@ -3097,7 +3164,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, file_path, 'a+b')
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsInstance(resp, Blob)
         with open(file_path, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(b'abcdef' + data, actual)
@@ -3115,7 +3182,7 @@ class StorageCommonBlobTest(StorageTestCase):
         resp = self.bs.get_blob_to_text(self.container_name, blob_name)
 
         # Assert
-        self.assertEqual(text, resp)
+        self.assertEqual(text, resp.content)
 
     @record
     def test_get_blob_to_text_with_encoding(self):
@@ -3131,7 +3198,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, 'utf-16')
 
         # Assert
-        self.assertEqual(text, resp)
+        self.assertEqual(text, resp.content)
 
     @record
     def test_get_blob_to_text_chunked_download(self):
@@ -3146,7 +3213,7 @@ class StorageCommonBlobTest(StorageTestCase):
         resp = self.bs.get_blob_to_text(self.container_name, blob_name)
 
         # Assert
-        self.assertEqual(text, resp)
+        self.assertEqual(text, resp.content)
 
     def test_get_blob_to_text_chunked_download_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -3165,7 +3232,7 @@ class StorageCommonBlobTest(StorageTestCase):
                                         max_connections=10)
 
         # Assert
-        self.assertEqual(text, resp)
+        self.assertEqual(text, resp.content)
 
     @record
     def test_get_blob_to_text_with_progress(self):
@@ -3186,7 +3253,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, progress_callback=callback)
 
         # Assert
-        self.assertEqual(text, resp)
+        self.assertEqual(text, resp.content)
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
@@ -3209,7 +3276,7 @@ class StorageCommonBlobTest(StorageTestCase):
             progress_callback=callback)
 
         # Assert
-        self.assertEqual(text, resp)
+        self.assertEqual(text, resp.content)
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
 #------------------------------------------------------------------------------

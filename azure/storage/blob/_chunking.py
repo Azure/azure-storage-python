@@ -26,13 +26,22 @@ from .models import BlobBlock
 
 class _BlobChunkDownloader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
-                 chunk_size, stream, max_retries, retry_wait, progress_callback,
-                 timeout):
+                 chunk_size, start_range, end_range, stream, max_retries,
+                 retry_wait, progress_callback, timeout):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
-        self.blob_size = blob_size
         self.chunk_size = chunk_size
+        if start_range is not None:
+            end_range = end_range or blob_size
+            self.blob_size = end_range - start_range
+            self.blob_end = end_range
+            self.start_index = start_range
+        else:
+            self.blob_size = blob_size
+            self.blob_end = blob_size
+            self.start_index = 0
+
         self.stream = stream
         self.stream_start = stream.tell()
         self.stream_lock = threading.Lock()
@@ -44,16 +53,21 @@ class _BlobChunkDownloader(object):
         self.timeout = timeout
 
     def get_chunk_offsets(self):
-        index = 0
-        while index < self.blob_size:
+        index = self.start_index
+        while index < self.blob_end:
             yield index
             index += self.chunk_size
 
-    def process_chunk(self, chunk_offset):
-        chunk_data = self._download_chunk_with_retries(chunk_offset)
-        length = len(chunk_data)
+    def process_chunk(self, chunk_start):
+        if chunk_start + self.chunk_size > self.blob_end:
+            chunk_end = self.blob_end
+        else:
+            chunk_end = chunk_start + self.chunk_size
+
+        chunk_data = self._download_chunk_with_retries(chunk_start, chunk_end).content
+        length = chunk_end - chunk_start
         if length > 0:
-            self._write_to_stream(chunk_data, chunk_offset)
+            self._write_to_stream(chunk_data, chunk_start)
             self._update_progress(length)
 
     def _update_progress(self, length):
@@ -63,20 +77,20 @@ class _BlobChunkDownloader(object):
                 total = self.progress_total
                 self.progress_callback(total, self.blob_size)
 
-    def _write_to_stream(self, chunk_data, chunk_offset):
+    def _write_to_stream(self, chunk_data, chunk_start):
         with self.stream_lock:
-            self.stream.seek(self.stream_start + chunk_offset)
+            self.stream.seek(self.stream_start + chunk_start)
             self.stream.write(chunk_data)
 
-    def _download_chunk_with_retries(self, chunk_offset):
-        range_id = 'bytes={0}-{1}'.format(chunk_offset, chunk_offset + self.chunk_size - 1)
+    def _download_chunk_with_retries(self, chunk_start, chunk_end):
         retries = self.max_retries
         while True:
             try:
-                return self.blob_service.get_blob(
+                return self.blob_service._get_blob(
                     self.container_name,
                     self.blob_name,
-                    byte_range=range_id,
+                    start_range=chunk_start,
+                    end_range=chunk_end - 1,
                     timeout=self.timeout
                 )
             except AzureHttpError:
@@ -195,18 +209,19 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
 
 
 class _PageBlobChunkUploader(_BlobChunkUploader):
-    def _upload_chunk(self, chunk_offset, chunk_data):
-        range_id = 'bytes={0}-{1}'.format(chunk_offset, chunk_offset + len(chunk_data) - 1)
+    def _upload_chunk(self, chunk_start, chunk_data):
+        chunk_end = chunk_start + len(chunk_data) - 1
         self.blob_service.put_page(
             self.container_name,
             self.blob_name,
             chunk_data,
-            range_id,
+            chunk_start,
+            chunk_end,
             'update',
             lease_id=self.lease_id,
             timeout=self.timeout,
         )
-        return range_id
+        return 'bytes={0}-{1}'.format(chunk_start, chunk_end)
 
 class _AppendBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_offset, chunk_data):
@@ -234,12 +249,13 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
 
 
 def _download_blob_chunks(blob_service, container_name, blob_name,
-                          blob_size, block_size, stream, max_connections,
-                          max_retries, retry_wait, progress_callback, timeout):
+                          blob_size, block_size, start_range, end_range, stream,
+                          max_connections, max_retries, retry_wait, progress_callback,
+                          timeout):
     if max_connections <= 1:
         raise ValueError(
             'To use blob chunk downloader more than 1 thread must be ' +
-            'used since get_blob should be called for single threaded ' +
+            'used since get_blob_to_bytes should be called for single threaded ' +
             'blob downloads.')
 
     downloader = _BlobChunkDownloader(
@@ -248,6 +264,8 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
         blob_name,
         blob_size,
         block_size,
+        start_range,
+        end_range,
         stream,
         max_retries,
         retry_wait,

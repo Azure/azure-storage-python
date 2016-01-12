@@ -30,6 +30,16 @@ from .models import (
 def _int_or_none(value):
     return value if value is None else int(value)
 
+def _get_download_size(start_range, end_range, resource_size):
+    if start_range is not None:
+        end_range = end_range if end_range else (resource_size if resource_size else None)
+        if end_range is not None:
+            return end_range - start_range
+        else:
+            return None
+    else:
+        return resource_size
+
 GET_PROPERTIES_ATTRIBUTE_MAP = {
     'last-modified': (None, 'last_modified', parser.parse),
     'etag': (None, 'etag', _str_or_none),
@@ -54,15 +64,14 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-copy-status-description': ('copy', 'status_description', _str_or_none),
 }
 
-def _parse_properties(response, properties_class):
+def _parse_properties(response, result_class, properties_class):
     '''
     Extracts out resource properties and metadata informaiton.
     Ignores the standard http headers.
     '''
 
     if response is None and response.headers is not None:
-        return None, None
-
+        return None
     props = properties_class()
     metadata = {}
     for key, value in response.headers:
@@ -76,7 +85,7 @@ def _parse_properties(response, properties_class):
         elif key.startswith('x-ms-meta-'):
             metadata[key] = _str_or_none(value)
 
-    return props, metadata
+    return result_class(response.body, props, metadata)
 
 def _convert_xml_to_signed_identifiers(xml):
     list_element = ETree.fromstring(xml)

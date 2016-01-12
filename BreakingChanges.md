@@ -27,8 +27,9 @@
 ### Blob:
 - Separated lease_container and lease_blob into unique methods for each lease action.
 - Refactored the blob service into a block blob and page blob service.
-- Renamed APIs and params: All x_ms(_blob) prefexes and duplicates headers removed. x_ms_range => byte_range for applicable APIs. maxresults => max_results for applicable APIs. For append blobs and page blobs: put_blob => create_blob. For block blobs put_blob => _put_blob. x_ms_blob_condition_maxsize => maxsize_condition for append blob APIs. x_ms_blob_condition_appendpos => appendpos_condition for append blob APIs. text_encoding => encoding for applicable APIs. put_blob_from* => create_blob_from* for page and block blobs. x_ms_blob_content_md5 => transactional_content_md5 for put_block_list. blocklisttype => block_list_type for get_block_list. blockid => block_id for put_block.
-- Changed models for better usability. Blob & BlobResult classes have been joined. ContainerEnumResults => list of Container objects. Properties => ContainerProperties. BlobEnumResults => list of Blob objects. BlobBlock objects are used for specifying information for blocks passed to put_block_list. PageList => list of PageRange objects. get_blob_properties double returns BlobProperties object and a metadata dict.
+- Renamed APIs and params: All x_ms(_blob) prefixes and duplicates headers removed. x_ms_range => byte_range for applicable APIs. maxresults => max_results for applicable APIs. For append blobs and page blobs: put_blob => create_blob. For block blobs put_blob => _put_blob. x_ms_blob_condition_maxsize => maxsize_condition for append blob APIs. x_ms_blob_condition_appendpos => appendpos_condition for append blob APIs. text_encoding => encoding for applicable APIs. put_blob_from* => create_blob_from* for page and block blobs. x_ms_blob_content_md5 => transactional_content_md5 for put_block_list. blocklisttype => block_list_type for get_block_list. blockid => block_id for put_block. get_blob_to_file => get_blob_to_stream. get_blob => _get_blob (use get_blob_to_bytes instead). All get_blob* APIs use boolean value for range_get_content_md5 parameter. All get_blob* APIs take in a start_range and end_range param instead of byte_range.
+- Client-side validation added for ranges used in APIs.
+- Changed models for better usability. Blob & BlobResult classes have been joined. ContainerEnumResults => list of Container objects. Properties => ContainerProperties. BlobEnumResults => list of Blob objects. BlobBlock objects are used for specifying information for blocks passed to put_block_list. PageList => list of PageRange objects. get_blob_properties returns a Blob object with the metadata and properties variables filled in. All get_blob_to_* APIs now return a Blob object.
 - ContentSettings objects have replaced all content_* and cache_control params for applicable APIs. Create a ContentSettings object passing with those params and pass it to APIs instead.
 - list_blobs no longer exposes prefix, marker, max_results, or delimiter.
 - Single-threaded blob download APIs will now download the blob without chunking to improve perf.
@@ -42,11 +43,12 @@
 - Encoding and decoding functions default to xml encoding and decoding. Previously messages were only xml encoded but not decoded.
 
 ### File:
-- Renamed APIs and params: All x_ms prefexes have been removed. x_ms_range => byte_range for applicable APIs. maxresults => max_results for applicable APIs. x_ms_meta_name_values => metadata for applicable APIs. text_encoding => encoding for applicable APIs. list_ranges no longer uses range param.
+- Renamed APIs and params: All x_ms prefixes have been removed. x_ms_range => byte_range for applicable APIs. get_file => _get_file (use get_file_to_bytes instead). maxresults => max_results for applicable APIs. x_ms_meta_name_values => metadata for applicable APIs. text_encoding => encoding for applicable APIs. get_file is now internal (_get_file) since the get_file_to_* APIs make get_file somewhat redundant. All get_file* APIs use boolean value for range_get_content_md5 parameter. All APIs that took byte_range now take start_range and end_range params.
+- Client-side validation added for ranges used in APIs.
 - Added sas_token parameter to FileService constructor before the connection_string param. Added quota parameter to create_share before the fail_on_exist param.
 - Changed list_ranges to return the list of file ranges directly rather than nested within a RangeList object.
 - ContentSettings objects have replaced all content_* and cache_control params for applicable APIs. Create a ContentSettings object passing with those params and pass it to APIs instead.
 - Single-threaded file download APIs will now download the file without chunking to improve perf.
-- Combined models for File & FileResult for better usability. get_file_properties double returns FileProperties object and a metadata dict.
+- Combined models for File & FileResult for better usability. get_file_properties returns a File object with the metadata and properties variables filled in. All get_file_to_* APIs now return a File object.
 - list_directories_and_files no longer exposes marker or max_results.
 - get_file_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.

@@ -37,9 +37,13 @@ from .._serialization import (
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
+    _get_download_size,
 )
 from ..models import Services
-from .models import FileProperties
+from .models import (
+    File,
+    FileProperties,
+)
 from .._http import HTTPRequest
 from ._chunking import (
     _download_file_chunks,
@@ -56,6 +60,7 @@ from ..constants import (
 )
 from ._serialization import (
     _get_path,
+    _validate_and_format_range_headers,
 )
 from ._deserialization import (
     _convert_xml_to_shares,
@@ -985,7 +990,7 @@ class FileService(_StorageClient):
     def get_file_properties(self, share_name, directory_name, file_name, timeout=None):
         '''
         Returns all user-defined metadata, standard HTTP properties, and
-        system properties for the file.
+        system properties for the file. Returns an instance of File with properties and metadata.
 
         share_name:
             Name of existing share.
@@ -1005,7 +1010,7 @@ class FileService(_StorageClient):
         request.query = [('timeout', _int_or_none(timeout))]
 
         response = self._perform_request(request)
-        return _parse_properties(response, FileProperties)
+        return _parse_properties(response, File, FileProperties)
 
     def exists(self, share_name, directory_name=None, file_name=None, timeout=None):
         '''
@@ -1527,11 +1532,13 @@ class FileService(_StorageClient):
             timeout
         )
 
-    def get_file(self, share_name, directory_name, file_name, byte_range=None, 
+    def _get_file(self, share_name, directory_name, file_name,
+                 start_range=None, end_range=None,
                  range_get_content_md5=None, timeout=None):
         '''
-        Reads or downloads a file from the system, including its metadata and
-        properties.
+        Downloads a file's content, metadata, and properties. You can specify a
+        range if you don't need to download the file in its entirety. If no range
+        is specified, the full file will be downloaded.
 
         See get_file_to_* for high level functions that handle the download
         of large files with automatic chunking and progress notifications.
@@ -1542,10 +1549,15 @@ class FileService(_StorageClient):
             The path to the directory.
         file_name:
             Name of existing file.
-        byte_range:
-            Return only the bytes of the file in the specified range.
+        start_range:
+            Start of byte range to use for downloading a section of the file.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the file.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end. 
         range_get_content_md5:
-            When this header is set to true and specified together
+            When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
         :param int timeout:
@@ -1558,21 +1570,24 @@ class FileService(_StorageClient):
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [('timeout', _int_or_none(timeout))]
-        request.headers = [
-            ('x-ms-range', _str_or_none(byte_range)),
-            ('x-ms-range-get-content-md5',
-             _str_or_none(range_get_content_md5))
-        ]
+        _validate_and_format_range_headers(
+            request,
+            start_range,
+            end_range,
+            start_range_required=False,
+            end_range_required=False,
+            check_content_md5=range_get_content_md5)
 
         response = self._perform_request(request, None)
         return _parse_file(response)
 
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
-                         open_mode='wb', progress_callback=None,
+                         open_mode='wb', start_range=None, end_range=None,
+                         range_get_content_md5=None, progress_callback=None,
                          max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Downloads a file to a file path, with automatic chunking and progress
-        notifications.
+        notifications. Returns an instance of File with properties and metadata.
 
         share_name:
             Name of existing share.
@@ -1584,6 +1599,17 @@ class FileService(_StorageClient):
             Path of file to write to.
         open_mode:
             Mode to use when opening the file.
+        start_range:
+            Start of byte range to use for downloading a section of the file.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the file.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end. 
+        range_get_content_md5:
+            When this header is set to True and specified together
+            with the Range header, the service returns the MD5 hash for the
+            range, as long as the range is less than or equal to 4 MB in size.
         progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1607,18 +1633,22 @@ class FileService(_StorageClient):
         _validate_not_none('open_mode', open_mode)
 
         with open(file_path, open_mode) as stream:
-            self.get_file_to_stream(
+            file = self.get_file_to_stream(
                 share_name, directory_name, file_name, stream,
+                start_range, end_range, range_get_content_md5,
                 progress_callback, max_connections, max_retries,
                 retry_wait, timeout)
 
+        return file
+
     def get_file_to_stream(
         self, share_name, directory_name, file_name, stream,
+        start_range=None, end_range=None, range_get_content_md5=None,
         progress_callback=None, max_connections=1, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
-        Downloads a file to a file/stream, with automatic chunking and progress
-        notifications.
+        Downloads a file to a stream, with automatic chunking and progress
+        notifications. Returns an instance of File with properties and metadata.
 
         share_name:
             Name of existing share.
@@ -1628,6 +1658,17 @@ class FileService(_StorageClient):
             Name of existing file.
         stream:
             Opened file/stream to write to.
+        start_range:
+            Start of byte range to use for downloading a section of the file.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the file.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end. 
+        range_get_content_md5:
+            When this header is set to True and specified together
+            with the Range header, the service returns the MD5 hash for the
+            range, as long as the range is less than or equal to 4 MB in size.
         progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1651,10 +1692,10 @@ class FileService(_StorageClient):
 
         # Only get properties if parallelism will actually be used
         file_size = None
-        if max_connections > 1:
-            props, _ = self.get_file_properties(share_name, directory_name, 
-                                                file_name, timeout=timeout)
-            file_size = props.content_length
+        if max_connections > 1 and range_get_content_md5 is None:
+            file = self.get_file_properties(share_name, directory_name, 
+                                            file_name, timeout=timeout)
+            file_size = file.properties.content_length
 
             # If file size is large, use parallel download
             if file_size >= self._FILE_MAX_DATA_SIZE:
@@ -1665,6 +1706,8 @@ class FileService(_StorageClient):
                     file_name,
                     file_size,
                     self._FILE_MAX_CHUNK_DATA_SIZE,
+                    start_range,
+                    end_range,
                     stream,
                     max_connections,
                     max_retries,
@@ -1672,26 +1715,39 @@ class FileService(_StorageClient):
                     progress_callback, 
                     timeout
                 )
-                return
+                return file
 
         # If parallelism is off or the file is small, do a single download
+        download_size = _get_download_size(start_range, end_range, file_size)
         if progress_callback:
-            progress_callback(0, file_size)
+            progress_callback(0, download_size)
 
-        data = self.get_file(share_name, directory_name,
-                                file_name, timeout=timeout)
+        file = self._get_file(
+            share_name,
+            directory_name,
+            file_name,
+            start_range=start_range,
+            end_range=end_range,
+            range_get_content_md5=range_get_content_md5,
+            timeout=timeout)
 
-        stream.write(data)
+        if file.content is not None:
+            stream.write(file.content)
 
         if progress_callback:
-            file_size = data.properties.content_length
-            progress_callback(file_size, file_size)
+            download_size = len(file.content)
+            progress_callback(download_size, download_size)
 
-    def get_file_to_bytes(self, share_name, directory_name, file_name, progress_callback=None,
-                          max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
+        file.content = None # Clear file content since output has been written to user stream
+        return file
+
+    def get_file_to_bytes(self, share_name, directory_name, file_name, 
+                          start_range=None, end_range=None, range_get_content_md5=None,
+                          progress_callback=None, max_connections=1, max_retries=5,
+                          retry_wait=1.0, timeout=None):
         '''
         Downloads a file as an array of bytes, with automatic chunking and
-        progress notifications.
+        progress notifications. Returns an instance of File with properties, metadata, and content.
 
         share_name:
             Name of existing share.
@@ -1699,6 +1755,17 @@ class FileService(_StorageClient):
             The path to the directory.
         file_name:
             Name of existing file.
+        start_range:
+            Start of byte range to use for downloading a section of the file.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the file.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end. 
+        range_get_content_md5:
+            When this header is set to True and specified together
+            with the Range header, the service returns the MD5 hash for the
+            range, as long as the range is less than or equal to 4 MB in size.
         progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1720,25 +1787,31 @@ class FileService(_StorageClient):
         _validate_not_none('file_name', file_name)
 
         stream = BytesIO()
-        self.get_file_to_stream(share_name,
-                              directory_name,
-                              file_name,
-                              stream,
-                              progress_callback,
-                              max_connections,
-                              max_retries,
-                              retry_wait,
-                              timeout)
+        file = self.get_file_to_stream(
+            share_name,
+            directory_name,
+            file_name,
+            stream,
+            start_range,
+            end_range,
+            range_get_content_md5,
+            progress_callback,
+            max_connections,
+            max_retries,
+            retry_wait,
+            timeout)
 
-        return stream.getvalue()
+        file.content = stream.getvalue()
+        return file
 
     def get_file_to_text(
         self, share_name, directory_name, file_name, encoding='utf-8',
+        start_range=None, end_range=None, range_get_content_md5=None,
         progress_callback=None, max_connections=1, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
         Downloads a file as unicode text, with automatic chunking and progress
-        notifications.
+        notifications. Returns an instance of File with properties, metadata, and content.
 
         share_name:
             Name of existing share.
@@ -1748,6 +1821,17 @@ class FileService(_StorageClient):
             Name of existing file.
         encoding:
             Python encoding to use when decoding the file data.
+        start_range:
+            Start of byte range to use for downloading a section of the file.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the file.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end.
+        range_get_content_md5:
+            When this header is set to True and specified together
+            with the Range header, the service returns the MD5 hash for the
+            range, as long as the range is less than or equal to 4 MB in size.
         progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1769,19 +1853,24 @@ class FileService(_StorageClient):
         _validate_not_none('file_name', file_name)
         _validate_not_none('encoding', encoding)
 
-        result = self.get_file_to_bytes(share_name,
-                                        directory_name,
-                                        file_name,
-                                        progress_callback,
-                                        max_connections,
-                                        max_retries,
-                                        retry_wait,
-                                        timeout)
+        file = self.get_file_to_bytes(
+            share_name,
+            directory_name,
+            file_name,
+            start_range,
+            end_range,
+            range_get_content_md5,
+            progress_callback,
+            max_connections,
+            max_retries,
+            retry_wait,
+            timeout)
 
-        return result.decode(encoding)
+        file.content = file.content.decode(encoding)
+        return file
 
     def update_range(self, share_name, directory_name, file_name, data, 
-                     byte_range, content_md5=None, timeout=None):
+                     start_range, end_range, content_md5=None, timeout=None):
         '''
         Writes the bytes specified by the request body into the specified range.
          
@@ -1793,11 +1882,12 @@ class FileService(_StorageClient):
             Name of existing file.
         data:
             Content of the range.
-        byte_range:
-            Specifies the range of bytes to be written. Both the start and end 
-            of the range must be specified. The range can be up to 4 MB in size.
-            The byte range must be specified in the following format: 
-            bytes=startByte-endByte (e.g. "bytes=0-1024"). 
+        start_range:
+            Start of byte range to use for updating a section of the file.
+            The range can be up to 4 MB in size.
+        end_range:
+            End of byte range to use for updating a section of the file.
+            The range can be up to 4 MB in size.
         content_md5:
             An MD5 hash of the range content. This hash is used to
             verify the integrity of the range during transport. When this header
@@ -1811,7 +1901,6 @@ class FileService(_StorageClient):
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
         _validate_not_none('data', data)
-        _validate_not_none('x_ms_range', byte_range)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
@@ -1821,15 +1910,16 @@ class FileService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
-            ('x-ms-range', _str_or_none(byte_range)),
             ('Content-MD5', _str_or_none(content_md5)),
             ('x-ms-write', 'update'),
         ]
+        _validate_and_format_range_headers(
+            request, start_range, end_range)
         request.body = _get_request_body_bytes_only('data', data)
 
         self._perform_request(request)
 
-    def clear_range(self, share_name, directory_name, file_name, byte_range, timeout=None):
+    def clear_range(self, share_name, directory_name, file_name, start_range, end_range, timeout=None):
         '''
         Clears the specified range and releases the space used in storage for 
         that range.
@@ -1840,17 +1930,17 @@ class FileService(_StorageClient):
             The path to the directory.
         file_name:
             Name of existing file.
-        byte_range:
-            Specifies the range of bytes to be cleared. Both the start
-            and end of the range must be specified. The range can be up to the 
-            value of the file's full size. The byte range must be specified in 
-            the following format: bytes=startByte-endByte (e.g. "bytes=0-1024"). 
+        start_range:
+            Start of byte range to use for clearing a section of the file.
+            The range can be up to 4 MB in size.
+        end_range:
+            End of byte range to use for clearing a section of the file.
+            The range can be up to 4 MB in size.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
-        _validate_not_none('x_ms_range', byte_range)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
@@ -1860,14 +1950,16 @@ class FileService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
-            ('x-ms-range', _str_or_none(byte_range)),
             ('Content-Length', '0'),
             ('x-ms-write', 'clear'),
         ]
+        _validate_and_format_range_headers(
+            request, start_range, end_range)
 
         self._perform_request(request)
 
-    def list_ranges(self, share_name, directory_name, file_name, byte_range=None, timeout=None):
+    def list_ranges(self, share_name, directory_name, file_name,
+                    start_range=None, end_range=None, timeout=None):
         '''
         Retrieves the ranges for a file. If the x-ms-range header is specified 
         on a request, then the service uses the range specified by x-ms-range; 
@@ -1892,6 +1984,10 @@ class FileService(_StorageClient):
             inclusively. Must be in one of these formats:
                 bytes=startByte
                 bytes=startByte-endByte
+        start_range:
+            Specifies the start offset of bytes over which to list ranges.
+        end_range:
+            Specifies the end offset of bytes over which to list ranges.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -1905,9 +2001,13 @@ class FileService(_StorageClient):
             ('comp', 'rangelist'),
             ('timeout', _int_or_none(timeout)),
         ]
-        request.headers = [
-            ('x-ms-range', _str_or_none(byte_range))
-        ]
+        if start_range is not None:
+            _validate_and_format_range_headers(
+                request,
+                start_range,
+                end_range,
+                start_range_required=False,
+                end_range_required=False)
 
         response = self._perform_request(request)
         return _convert_xml_to_ranges(response)
