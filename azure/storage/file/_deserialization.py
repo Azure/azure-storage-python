@@ -144,8 +144,7 @@ def _convert_xml_to_directories_and_files(response):
     return entries
 
 def _parse_file(response):
-    properties, metadata = _parse_properties(response, FileProperties)
-    return File(response.body, properties, metadata)
+    return _parse_properties(response, File, FileProperties)
 
 def _convert_xml_to_ranges(response):
     '''

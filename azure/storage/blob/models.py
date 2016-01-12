@@ -35,14 +35,12 @@ class ContainerProperties(object):
         self.lease_duration = None
 
 
-class Blob(bytes):
+class Blob(object):
 
     ''' Blob class'''
-    def __new__(cls, blob=None, props=None, metadata=None):
-        return bytes.__new__(cls, blob if blob else b'')
-
-    def __init__(self, blob=None, props=None, metadata=None):
+    def __init__(self, content=None, props=None, metadata=None):
         self.name = None
+        self.content = content
         self.snapshot = None
         self.properties = props or BlobProperties()
         self.metadata = metadata

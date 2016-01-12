@@ -36,6 +36,7 @@ from .._http import HTTPRequest
 from ._chunking import _download_blob_chunks
 from ..models import Services
 from .models import (
+    Blob,
     BlobProperties,
     LeaseActions,
     ContainerPermissions,
@@ -54,9 +55,11 @@ from ..constants import (
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
+    _get_download_size,
 )
 from ._serialization import (
     _get_path,
+    _validate_and_format_range_headers,
 )
 from ._deserialization import (
     _convert_xml_to_containers,
@@ -1098,7 +1101,7 @@ class _BaseBlobService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_properties(response, BlobProperties)
+        return _parse_properties(response, Blob, BlobProperties)
 
     def set_blob_properties(
         self, container_name, blob_name, content_settings=None, lease_id=None,
@@ -1174,13 +1177,15 @@ class _BaseBlobService(_StorageClient):
             _dont_fail_not_exist(ex)
             return False
 
-    def get_blob(
-        self, container_name, blob_name, snapshot=None, byte_range=None,
-        lease_id=None, range_get_content_md5=None, if_modified_since=None,
+    def _get_blob(
+        self, container_name, blob_name, snapshot=None, start_range=None,
+        end_range=None, range_get_content_md5=None, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
-        Reads or downloads a blob from the system, including its metadata and
-        properties.
+        Downloads a blob's content, metadata, and properties. You can also
+        call this API to read a snapshot. You can specify a range if you don't
+        need to download the blob in its entirety. If no range is specified,
+        the full blob will be downloaded.
 
         See get_blob_to_* for high level functions that handle the download
         of large blobs with automatic chunking and progress notifications.
@@ -1192,14 +1197,19 @@ class _BaseBlobService(_StorageClient):
         snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        byte_range:
-            Return only the bytes of the blob in the specified range.
-        lease_id:
-            Required if the blob has an active lease.
+        start_range:
+            Start of byte range to use for downloading a section of the blob.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the blob.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end. 
         range_get_content_md5:
-            When this header is set to true and specified together
+            When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string.
         if_unmodified_since:
@@ -1222,28 +1232,33 @@ class _BaseBlobService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = [
-            ('x-ms-range', _str_or_none(byte_range)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('x-ms-range-get-content-md5',
-             _str_or_none(range_get_content_md5)),
             ('If-Modified-Since', _str_or_none(if_modified_since)),
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
+        _validate_and_format_range_headers(
+            request,
+            start_range,
+            end_range,
+            start_range_required=False,
+            end_range_required=False,
+            check_content_md5=range_get_content_md5)
 
         response = self._perform_request(request, None)
         return _parse_blob(response)
 
     def get_blob_to_path(
         self, container_name, blob_name, file_path, open_mode='wb',
-        snapshot=None, lease_id=None, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0,
+        snapshot=None, start_range=None, end_range=None,
+        range_get_content_md5=None, progress_callback=None,
+        max_connections=1, max_retries=5, retry_wait=1.0, lease_id=None,
         if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
         Downloads a blob to a file path, with automatic chunking and progress
-        notifications.
+        notifications. Returns an instance of Blob with properties and metadata.
 
         container_name:
             Name of existing container.
@@ -1256,8 +1271,17 @@ class _BaseBlobService(_StorageClient):
         snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        lease_id:
-            Required if the blob has an active lease.
+        start_range:
+            Start of byte range to use for downloading a section of the blob.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the blob.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end. 
+        range_get_content_md5:
+            When this header is set to True and specified together
+            with the Range header, the service returns the MD5 hash for the
+            range, as long as the range is less than or equal to 4 MB in size.
         progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1270,6 +1294,8 @@ class _BaseBlobService(_StorageClient):
             Number of times to retry download of blob chunk if an error occurs.
         retry_wait:
             Sleep time in secs between retries.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string.
         if_unmodified_since:
@@ -1289,29 +1315,37 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('open_mode', open_mode)
 
         with open(file_path, open_mode) as stream:
-            self.get_blob_to_file(container_name,
-                                  blob_name,
-                                  stream,
-                                  snapshot,
-                                  lease_id,
-                                  progress_callback,
-                                  max_connections,
-                                  max_retries,
-                                  retry_wait,
-                                  if_modified_since,
-                                  if_unmodified_since,
-                                  if_match,
-                                  if_none_match,
-                                  timeout)
+            blob = self.get_blob_to_stream(
+                container_name,
+                blob_name,
+                stream,
+                snapshot,
+                start_range,
+                end_range,
+                range_get_content_md5,
+                progress_callback,
+                max_connections,
+                max_retries,
+                retry_wait,
+                lease_id,
+                if_modified_since,
+                if_unmodified_since,
+                if_match,
+                if_none_match,
+                timeout)
 
-    def get_blob_to_file(
+        return blob
+
+    def get_blob_to_stream(
         self, container_name, blob_name, stream, snapshot=None,
-        lease_id=None, progress_callback=None, max_connections=1,
-        max_retries=5, retry_wait=1.0, if_modified_since=None,
+        start_range=None, end_range=None, range_get_content_md5=None,
+        progress_callback=None, max_connections=1, max_retries=5,
+        retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+
         '''
-        Downloads a blob to a file/stream, with automatic chunking and progress
-        notifications.
+        Downloads a blob to a stream, with automatic chunking and progress
+        notifications. Returns an instance of Blob with properties and metadata.
 
         container_name:
             Name of existing container.
@@ -1322,8 +1356,17 @@ class _BaseBlobService(_StorageClient):
         snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        lease_id:
-            Required if the blob has an active lease.
+        start_range:
+            Start of byte range to use for downloading a section of the blob.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the blob.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end. 
+        range_get_content_md5:
+            When this header is set to True and specified together
+            with the Range header, the service returns the MD5 hash for the
+            range, as long as the range is less than or equal to 4 MB in size.
         progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1336,6 +1379,8 @@ class _BaseBlobService(_StorageClient):
             Number of times to retry download of blob chunk if an error occurs.
         retry_wait:
             Sleep time in secs between retries.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string.
         if_unmodified_since:
@@ -1355,9 +1400,9 @@ class _BaseBlobService(_StorageClient):
 
         # Only get properties if parallelism will actually be used
         blob_size = None
-        if max_connections > 1:
-            props, _ = self.get_blob_properties(container_name, blob_name, timeout=timeout)
-            blob_size = int(props.content_length)
+        if max_connections > 1 and range_get_content_md5 is None:
+            blob = self.get_blob_properties(container_name, blob_name, timeout=timeout)
+            blob_size = blob.properties.content_length
 
             # If blob size is large, use parallel download
             if blob_size >= self._BLOB_MAX_DATA_SIZE:
@@ -1367,6 +1412,8 @@ class _BaseBlobService(_StorageClient):
                     blob_name,
                     blob_size,
                     self._BLOB_MAX_CHUNK_DATA_SIZE,
+                    start_range,
+                    end_range,
                     stream,
                     max_connections,
                     max_retries,
@@ -1374,36 +1421,46 @@ class _BaseBlobService(_StorageClient):
                     progress_callback,
                     timeout,
                 )
-                return
+                return blob
 
         # If parallelism is off or the blob is small, do a single download
+        download_size = _get_download_size(start_range, end_range, blob_size)
         if progress_callback:
-            progress_callback(0, blob_size)
+            progress_callback(0, download_size)
 
-        data = self.get_blob(container_name,
-                                blob_name,
-                                snapshot,
-                                lease_id=lease_id,
-                                if_modified_since=if_modified_since,
-                                if_unmodified_since=if_unmodified_since,
-                                if_match=if_match,
-                                if_none_match=if_none_match,
-                                timeout=timeout)
+        blob = self._get_blob(container_name,
+                              blob_name,
+                              snapshot,
+                              start_range=start_range,
+                              end_range=end_range,
+                              range_get_content_md5=range_get_content_md5,
+                              lease_id=lease_id,
+                              if_modified_since=if_modified_since,
+                              if_unmodified_since=if_unmodified_since,
+                              if_match=if_match,
+                              if_none_match=if_none_match,
+                              timeout=timeout)
 
-        stream.write(data)
-
+        if blob.content is not None:
+            stream.write(blob.content)
+    
         if progress_callback:
-            blob_size = data.properties.content_length
-            progress_callback(blob_size, blob_size)
+            download_size = len(blob.content)
+            progress_callback(download_size, download_size)
 
+        blob.content = None # Clear blob content since output has been written to user stream
+        return blob
+        
     def get_blob_to_bytes(
-        self, container_name, blob_name, snapshot=None, lease_id=None,
+        self, container_name, blob_name, snapshot=None,
+        start_range=None, end_range=None, range_get_content_md5=None,
         progress_callback=None, max_connections=1, max_retries=5,
-        retry_wait=1.0, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        retry_wait=1.0, lease_id=None, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None,
+        timeout=None):
         '''
         Downloads a blob as an array of bytes, with automatic chunking and
-        progress notifications.
+        progress notifications. Returns an instance of Blob with properties, metadata, and content.
 
         container_name:
             Name of existing container.
@@ -1412,8 +1469,17 @@ class _BaseBlobService(_StorageClient):
         snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        lease_id:
-            Required if the blob has an active lease.
+        start_range:
+            Start of byte range to use for downloading a section of the blob.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the blob.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end. 
+        range_get_content_md5:
+            When this header is set to True and specified together
+            with the Range header, the service returns the MD5 hash for the
+            range, as long as the range is less than or equal to 4 MB in size.
         progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1426,6 +1492,8 @@ class _BaseBlobService(_StorageClient):
             Number of times to retry download of blob chunk if an error occurs.
         retry_wait:
             Sleep time in secs between retries.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string.
         if_unmodified_since:
@@ -1443,31 +1511,38 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('blob_name', blob_name)
 
         stream = BytesIO()
-        self.get_blob_to_file(container_name,
-                              blob_name,
-                              stream,
-                              snapshot,
-                              lease_id,
-                              progress_callback,
-                              max_connections,
-                              max_retries,
-                              retry_wait,
-                              if_modified_since,
-                              if_unmodified_since,
-                              if_match,
-                              if_none_match,
-                              timeout)
+        blob = self.get_blob_to_stream(
+            container_name,
+            blob_name,
+            stream,
+            snapshot,
+            start_range,
+            end_range,
+            range_get_content_md5,
+            progress_callback,
+            max_connections,
+            max_retries,
+            retry_wait,
+            lease_id,
+            if_modified_since,
+            if_unmodified_since,
+            if_match,
+            if_none_match,
+            timeout)
 
-        return stream.getvalue()
+        blob.content = stream.getvalue()
+        return blob
 
     def get_blob_to_text(
         self, container_name, blob_name, encoding='utf-8', snapshot=None,
-        lease_id=None, progress_callback=None, max_connections=1, max_retries=5,
-        retry_wait=1.0, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        start_range=None, end_range=None, range_get_content_md5=None,
+        progress_callback=None, max_connections=1, max_retries=5,
+        retry_wait=1.0, lease_id=None, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None,
+        timeout=None):
         '''
         Downloads a blob as unicode text, with automatic chunking and progress
-        notifications.
+        notifications. Returns an instance of Blob with properties, metadata, and content.
 
         container_name:
             Name of existing container.
@@ -1478,8 +1553,17 @@ class _BaseBlobService(_StorageClient):
         snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        lease_id:
-            Required if the blob has an active lease.
+        start_range:
+            Start of byte range to use for downloading a section of the blob.
+            If no end_range is given, all bytes after the start_range will be downloaded.
+        end_range:
+            End of byte range to use for downloading a section of the blob.
+            If end_range is given, start_range must be provided.
+            This range will return bytes from the offset start up to offset end.
+        range_get_content_md5:
+            When this header is set to True and specified together
+            with the Range header, the service returns the MD5 hash for the
+            range, as long as the range is less than or equal to 4 MB in size.
         progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1492,6 +1576,8 @@ class _BaseBlobService(_StorageClient):
             Number of times to retry download of blob chunk if an error occurs.
         retry_wait:
             Sleep time in secs between retries.
+        lease_id:
+            Required if the blob has an active lease.
         if_modified_since:
             Datetime string.
         if_unmodified_since:
@@ -1509,21 +1595,24 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('encoding', encoding)
 
-        result = self.get_blob_to_bytes(container_name,
+        blob = self.get_blob_to_bytes(container_name,
                                         blob_name,
                                         snapshot,
-                                        lease_id,
+                                        start_range,
+                                        end_range,
+                                        range_get_content_md5,
                                         progress_callback,
                                         max_connections,
                                         max_retries,
                                         retry_wait,
+                                        lease_id,
                                         if_modified_since,
                                         if_unmodified_since,
                                         if_match,
                                         if_none_match,
                                         timeout)
-
-        return result.decode(encoding)
+        blob.content = blob.content.decode(encoding)
+        return blob
 
     def get_blob_metadata(
         self, container_name, blob_name, snapshot=None, lease_id=None,

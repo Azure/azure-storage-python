@@ -21,6 +21,9 @@ from .._common_conversion import (
     _encode_base64,
     _str,
 )
+from .._error import (
+    _validate_not_none,
+)
 import sys
 if sys.version_info >= (3,):
     from io import BytesIO
@@ -44,6 +47,33 @@ def _get_path(container_name=None, blob_name=None):
         return '/{0}'.format(_str(container_name))
     else:
         return '/'
+
+def _validate_and_format_range_headers(request, start_range, end_range, start_range_required=True, end_range_required=True, check_content_md5=False, align_to_page=False):
+    request.headers = request.headers or []
+    if start_range_required == True:
+        _validate_not_none('start_range', start_range)
+    if end_range_required == True:
+        _validate_not_none('end_range', end_range)
+    _validate_page_ranges(start_range, end_range, align_to_page)
+    if end_range is not None:
+        request.headers.append(('x-ms-range', "bytes={0}-{1}".format(start_range, end_range)))
+    else:
+        request.headers.append(('x-ms-range', "bytes={0}-".format(start_range)))
+
+    if check_content_md5 == True:
+        if start_range is None or end_range is None:
+            raise ValueError('Both end_range and start_range need to be specified for getting content MD5.')
+        if end_range - start_range > 4 * 1024 * 1024:
+            raise ValueError('Getting content MD5 for a range greater than 4MB is not supported.')
+
+        request.headers.append(('x-ms-range-get-content-md5', 'true'))
+
+def _validate_page_ranges(start_range, end_range, align_to_page):
+    if align_to_page == True:
+        if start_range is not None and start_range % 512 != 0:
+            raise ValueError('start_range must align with 512 page size')
+        if end_range is not None and end_range % 512 != 511:
+            raise ValueError('end_range must align with 512 page size')
 
 def _convert_block_list_to_xml(block_id_list):
     '''

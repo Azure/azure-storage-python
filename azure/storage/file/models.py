@@ -44,16 +44,13 @@ class FileAndDirectoryResults(object):
         self.files = list()
         self.directories = list()
 
-class File(bytes):
+class File(object):
 
     ''' File class. '''
-
-    def __new__(cls, file=None, properties=None, metadata=None):
-        return bytes.__new__(cls, file if file else b'')
-
-    def __init__(self, file=None, properties=None, metadata=None):
+    def __init__(self, content=None, props=None, metadata=None):
         self.name = None
-        self.properties = properties or FileProperties()
+        self.content = content
+        self.properties = props or FileProperties()
         self.metadata = metadata
 
 

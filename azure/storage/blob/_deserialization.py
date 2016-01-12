@@ -204,8 +204,7 @@ def _convert_xml_to_blob_list(response):
     return blob_list
 
 def _parse_blob(response):
-    props, metadata = _parse_properties(response, BlobProperties)
-    return Blob(response.body, props, metadata)
+    return _parse_properties(response, Blob, BlobProperties)
 
 def _convert_xml_to_block_list(response):
     '''

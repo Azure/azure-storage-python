@@ -40,7 +40,7 @@ myblob
 
 How to: Download Blobs
 ----------------------
->>> blob = blob_service.get_blob('mycontainer', 'myblob')
+>>> blob = blob_service.get_blob_to_bytes('mycontainer', 'myblob')
 >>> blob
 b'hello blob'
 

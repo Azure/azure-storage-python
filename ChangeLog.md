@@ -44,6 +44,7 @@
 - Allow '?' as part of blob names.
 - get_blob_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
 - Added exists method to check container or blob existence.
+- Client-side validation added for ranges used in APIs.
 
 ### Queue:
 - The list_queues operation returns a list of Queue objects. The list returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
@@ -63,3 +64,4 @@
 - list_directories_and_files no longer exposes marker or max_results.
 - get_file_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
 - Added exists method to check share, directory, or file existence.
+- Client-side validation added for ranges used in APIs.

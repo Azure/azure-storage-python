@@ -85,23 +85,23 @@ class StorageAppendBlobTest(StorageTestCase):
 
     def _wait_for_async_copy(self, container_name, blob_name):
         count = 0
-        props, _ = self.bs.get_blob_properties(container_name, blob_name)
-        while props.copy.status != 'success':
+        blob = self.bs.get_blob_properties(container_name, blob_name)
+        while blob.properties.copy.status != 'success':
             count = count + 1
             if count > 5:
                 self.assertTrue(
                     False, 'Timed out waiting for async copy to complete.')
             self.sleep(5)
-            props, _ = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(props.copy.status, 'success')
+            blob = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(blob.properties.copy.status, 'success')
 
     def assertBlobEqual(self, container_name, blob_name, expected_data):
-        actual_data = self.bs.get_blob(container_name, blob_name)
-        self.assertEqual(actual_data, expected_data)
+        actual_data = self.bs.get_blob_to_bytes(container_name, blob_name)
+        self.assertEqual(actual_data.content, expected_data)
 
     def assertBlobLengthEqual(self, container_name, blob_name, expected_length):
-        props, _ = self.bs.get_blob_properties(container_name, blob_name)
-        self.assertEqual(props.content_length, expected_length)
+        blob = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(blob.properties.content_length, expected_length)
 
     def _get_oversized_binary_data(self):
         '''Returns random binary data exceeding the size threshold for
@@ -221,8 +221,8 @@ class StorageAppendBlobTest(StorageTestCase):
             self.assertDictContainsKeys(keys, resp)
 
         # Assert
-        blob = self.bs.get_blob(self.container_name, blob_name)
-        self.assertEqual(b'block 0block 1block 2block 3block 4', blob)
+        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+        self.assertEqual(b'block 0block 1block 2block 3block 4', blob.content)
 
     def assertDictContainsKeys(self, keys, dictionary, msg=None):
         if all (k in dictionary for k in keys):
@@ -260,7 +260,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNone(resp)
-        self.assertEqual(data, self.bs.get_blob(self.container_name, blob_name))
+        self.assertEqual(data, self.bs.get_blob_to_bytes(self.container_name, blob_name).content)
 
     @record
     def test_append_blob_from_bytes_with_progress(self):
@@ -280,7 +280,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Assert
         self.assertIsNone(resp)
-        self.assertEqual(data, self.bs.get_blob(self.container_name, blob_name))
+        self.assertEqual(data, self.bs.get_blob_to_bytes(self.container_name, blob_name).content)
         self.assertEqual(progress, self._get_expected_progress(len(data)))
 
     @record
@@ -297,7 +297,7 @@ class StorageAppendBlobTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         self.assertEqual(b'defghijklmnopqrstuvwxyz',
-                         self.bs.get_blob(self.container_name, blob_name))
+                         self.bs.get_blob_to_bytes(self.container_name, blob_name).content)
 
     @record
     def test_append_blob_from_bytes_with_index_and_count(self):
@@ -313,7 +313,7 @@ class StorageAppendBlobTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         self.assertEqual(
-            b'defgh', self.bs.get_blob(self.container_name, blob_name))
+            b'defgh', self.bs.get_blob_to_bytes(self.container_name, blob_name).content)
 
     @record
     def test_append_blob_from_bytes_with_index_and_count_and_properties(self):
@@ -333,10 +333,10 @@ class StorageAppendBlobTest(StorageTestCase):
         # Assert
         self.assertIsNone(resp)
         self.assertEqual(
-            b'defgh', self.bs.get_blob(self.container_name, blob_name))
-        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.content_settings.content_type, 'image/png')
-        self.assertEqual(props.content_settings.content_language, 'spanish')
+            b'defgh', self.bs.get_blob_to_bytes(self.container_name, blob_name).content)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(blob.properties.content_settings.content_type, 'image/png')
+        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_bytes_chunked_upload(self):
@@ -374,9 +374,9 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertIsNone(resp)
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
-        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.content_settings.content_type, 'image/png')
-        self.assertEqual(props.content_settings.content_language, 'spanish')
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(blob.properties.content_settings.content_type, 'image/png')
+        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_bytes_with_progress_chunked_upload(self):
@@ -487,9 +487,9 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertIsNone(resp)
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
-        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.content_settings.content_type, 'image/png')
-        self.assertEqual(props.content_settings.content_language, 'spanish')
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(blob.properties.content_settings.content_type, 'image/png')
+        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_stream_chunked_upload(self):
@@ -652,9 +652,9 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertIsNone(resp)
         self.assertBlobLengthEqual(self.container_name, blob_name, len(data))
         self.assertBlobEqual(self.container_name, blob_name, data)
-        props, _ = self.bs.get_blob_properties(self.container_name, blob_name)
-        self.assertEqual(props.content_settings.content_type, 'image/png')
-        self.assertEqual(props.content_settings.content_language, 'spanish')
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(blob.properties.content_settings.content_type, 'image/png')
+        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
 
     @record
     def test_append_blob_from_text(self):
