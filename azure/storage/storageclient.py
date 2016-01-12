@@ -75,10 +75,15 @@ class _StorageClient(object):
         self.use_local_storage = False
 
         # check whether it is run in emulator.
+        self.is_emulated = False
         if EMULATED in os.environ:
             self.is_emulated = os.environ[EMULATED].lower() != 'false'
-        else:
-            self.is_emulated = False
+        # switch to emulator mode when dev credentials are passed, which is a much simpler
+        # way to trigger this behaviour than needing an environment variable. 
+        elif self.account_name == DEV_ACCOUNT_NAME and self.account_key == DEV_ACCOUNT_KEY:
+            self.is_emulated = True
+            self.account_name = None
+            self.account_key = None
 
         # get account_name and account key. If they are not set when
         # constructing, get the account and key from environment variables if
