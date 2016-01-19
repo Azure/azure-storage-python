@@ -40,7 +40,10 @@ from .._deserialization import (
     _parse_metadata,
     _parse_properties,
 )
-from ..models import Services
+from ..models import (
+    Services,
+    ListGenerator,
+)
 from .models import (
     File,
     FileProperties,
@@ -489,8 +492,43 @@ class FileService(_StorageClient):
             Filters the results to return only shares whose names
             begin with the specified prefix.
         marker:
-            A string value that identifies the portion of the list to
-            be returned with the next list operation.
+            A string value that identifies the portion of the list
+            to be returned with the next list operation. The operation returns
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of list items. The marker value is
+            opaque to the client.
+        max_results:
+            Specifies the maximum number of shares to return.
+        include:
+            Include this parameter to specify that the share's
+            metadata be returned as part of the response body. set this
+            parameter to string 'metadata' to get share's metadata.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
+                'include': include, 'timeout': timeout}
+        resp = self._list_shares(**kwargs)
+
+        return ListGenerator(resp, self._list_shares, (), kwargs)
+
+    def _list_shares(self, prefix=None, marker=None, max_results=None, 
+                    include=None, timeout=None):
+        '''
+        The List Shares operation returns a list of the shares under
+        the specified account.
+
+        prefix:
+            Filters the results to return only shares whose names
+            begin with the specified prefix.
+        marker:
+            A string value that identifies the portion of the list
+            to be returned with the next list operation. The operation returns
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of list items. The marker value is
+            opaque to the client.
         max_results:
             Specifies the maximum number of shares to return.
         include:
@@ -959,7 +997,40 @@ class FileService(_StorageClient):
         marker:
             A string value that identifies the portion of the list
             to be returned with the next list operation. The operation returns
-            a marker value within the response body if the list returned was
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of list items. The marker value is
+            opaque to the client.
+        max_results:
+            Specifies the maximum number of files to return,
+            including all directory elements. If the request does not specify
+            max_results or specifies a value greater than 5,000, the server will
+            return up to 5,000 items. Setting max_results to a value less than
+            or equal to zero results in error response code 400 (Bad Request).
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        args = (share_name, directory_name)
+        kwargs = {'marker': marker, 'max_results': max_results, 'timeout': timeout}
+        resp = self._list_directories_and_files(*args, **kwargs)
+
+        return ListGenerator(resp, self._list_directories_and_files, args, kwargs)
+
+    def _list_directories_and_files(self, share_name, directory_name=None, 
+                                   marker=None, max_results=None, timeout=None):
+        '''
+        Returns a list of files or directories under the specified share or 
+        directory. It lists the contents only for a single level of the directory 
+        hierarchy.
+
+        share_name:
+            Name of existing share.
+        directory_name:
+            The path to the directory.
+        marker:
+            A string value that identifies the portion of the list
+            to be returned with the next list operation. The operation returns
+            a next_marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of list items. The marker value is
             opaque to the client.

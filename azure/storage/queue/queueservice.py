@@ -38,7 +38,10 @@ from .._common_conversion import (
 from .._http import (
     HTTPRequest,
 )
-from ..models import Services
+from ..models import (
+    Services,
+    ListGenerator,
+)
 from .models import (
     QueueMessageFormat,
 )
@@ -291,6 +294,36 @@ class QueueService(_StorageClient):
         return _convert_xml_to_service_properties(response.body)
 
     def list_queues(self, prefix=None, marker=None, max_results=None,
+                    include=None, timeout=None):
+        '''
+        Lists all of the queues in a given storage account.
+
+        :param str prefix:
+            Filters the results to return only queues with names that begin
+            with the specified prefix.
+        :param str marker:
+            A string value that identifies the portion of the list
+            to be returned with the next list operation. The operation returns
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of list items. The marker value is
+            opaque to the client.
+        :param int max_results:
+            Specifies the maximum number of queues to return. If maxresults is
+            not specified, the server will return up to 5,000 items.
+        :param str include:
+            Include this parameter to specify that the container's
+            metadata be returned as part of the response body.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
+                'include': include, 'timeout': timeout}
+        resp = self._list_queues(**kwargs)
+
+        return ListGenerator(resp, self._list_queues, (), kwargs)
+
+    def _list_queues(self, prefix=None, marker=None, max_results=None,
                     include=None, timeout=None):
         '''
         Lists all of the queues in a given storage account.

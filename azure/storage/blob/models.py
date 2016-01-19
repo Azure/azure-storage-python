@@ -145,23 +145,6 @@ class BlobBlockList(object):
         self.committed_blocks = list()
         self.uncommitted_blocks = list()
 
-class BlobList(object):
-    '''BlobList class'''
-
-    def __init__(self):
-        self.next_marker = None
-        self.blobs = list()
-        self.prefixes = list()
-
-    def __iter__(self):
-        return iter(self.blobs)
-
-    def __len__(self):
-        return len(self.blobs)
-
-    def __getitem__(self, index):
-        return self.blobs[index]
-
 class PageRange(object):
 
     ''' Page Range for page blob. '''

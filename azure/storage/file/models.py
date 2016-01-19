@@ -49,17 +49,6 @@ class DirectoryProperties(object):
         self.last_modified = None
         self.etag = None
 
-class FileAndDirectoryResults(object):
-
-    ''' 
-    Enum result class holding a list of files
-    and a list of directories. 
-    '''
-
-    def __init__(self):
-        self.files = list()
-        self.directories = list()
-
 class File(object):
 
     ''' File class. '''

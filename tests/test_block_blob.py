@@ -121,7 +121,7 @@ class StorageBlockBlobTest(StorageTestCase):
         self.bs.put_block_list(container_name, blob_name, block_list)
 
     def _blob_exists(self, container_name, blob_name):
-        resp = self.bs.list_blobs(container_name)
+        resp = list(self.bs.list_blobs(container_name))
         for blob in resp:
             if blob.name == blob_name:
                 return True

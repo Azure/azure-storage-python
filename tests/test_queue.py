@@ -150,7 +150,7 @@ class StorageQueueTest(StorageTestCase):
     @record
     def test_list_queues(self):
         # Action
-        queues = self.qs.list_queues()
+        queues = list(self.qs.list_queues())
 
         # Asserts
         self.assertIsNotNone(queues)
@@ -163,24 +163,27 @@ class StorageQueueTest(StorageTestCase):
             self._create_queue()
 
         # Action
-        queues_1 = self.qs.list_queues(prefix=TEST_QUEUE_PREFIX, max_results=3)
-        queues_2 = self.qs.list_queues(
+        generator1 = self.qs.list_queues(prefix=TEST_QUEUE_PREFIX, max_results=3)
+        queues1 = list(generator1)
+
+        generator2 = self.qs.list_queues(
             prefix=TEST_QUEUE_PREFIX,
-            marker=queues_1.next_marker,
+            marker=generator1.next_marker,
             include='metadata')
+        queues2 = list(generator2)
 
         # Asserts
-        self.assertIsNotNone(queues_1)
-        self.assertEqual(3, len(queues_1))
-        self.assertIsNotNone(queues_1[0])
-        self.assertIsNone(queues_1[0].metadata)
-        self.assertNotEqual('', queues_1[0].name)
+        self.assertIsNotNone(queues1)
+        self.assertEqual(3, len(queues1))
+        self.assertIsNotNone(queues1[0])
+        self.assertIsNone(queues1[0].metadata)
+        self.assertNotEqual('', queues1[0].name)
         # Asserts
-        self.assertIsNotNone(queues_2)
-        self.assertTrue(len(self.test_queues) - 3 <= len(queues_2))
-        self.assertIsNotNone(queues_2[0])
-        self.assertIsNotNone(queues_2[0].metadata)
-        self.assertNotEqual('', queues_2[0].name)
+        self.assertIsNotNone(queues2)
+        self.assertTrue(len(self.test_queues) - 3 <= len(queues2))
+        self.assertIsNotNone(queues2[0])
+        self.assertIsNotNone(queues2[0].metadata)
+        self.assertNotEqual('', queues2[0].name)
 
     @record
     def test_list_queues_with_metadata(self):
@@ -190,7 +193,7 @@ class StorageQueueTest(StorageTestCase):
             queue_name,
             metadata={'val1': 'test', 'val2': 'blah'})
 
-        queue = self.qs.list_queues(queue_name, max_results=1, include='metadata')[0]
+        queue = list(self.qs.list_queues(queue_name, max_results=1, include='metadata'))[0]
 
         # Asserts
         self.assertIsNotNone(queue)

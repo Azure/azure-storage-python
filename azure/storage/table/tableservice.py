@@ -34,7 +34,10 @@ from .._serialization import (
     _convert_service_properties_to_xml,
 )
 from .._http import HTTPRequest
-from ..models import Services
+from ..models import (
+    Services,
+    ListGenerator,
+)
 from .models import TablePayloadFormat
 from ..auth import (
     _StorageSASAuthentication,
@@ -337,32 +340,51 @@ class TableService(_StorageClient):
 
         self._perform_request(request)
 
-    def query_tables(self, table_name=None, top=None, next_table_name=None, timeout=None):
+    def list_tables(self, max_results=None, marker=None, timeout=None):
         '''
         Returns a list of tables under the specified account.
 
-        table_name:
-            Optional.  The specific table to query.
-        top:
+        max_results:
             Optional. Maximum number of tables to return.
-        next_table_name:
-            Optional. When top is used, the next table name is stored in
-            result.x_ms_continuation['NextTableName']
+        marker:
+            A string value that identifies the portion of the query to be
+            returned with the next query operation. The operation returns a
+            next_marker element within the response body if the list returned
+            was not complete. This value may then be used as a query parameter
+            in a subsequent call to request the next portion of the list of
+            queues. The marker value is opaque to the client.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        kwargs = {'max_results': max_results, 'marker': marker, 'timeout': timeout}
+        resp = self._list_tables(**kwargs)
+
+        return ListGenerator(resp, self._list_tables, (), kwargs)
+
+    def _list_tables(self, max_results=None, marker=None, timeout=None):
+        '''
+        Returns a list of tables under the specified account.
+
+        max_results:
+            Optional. Maximum number of tables to return.
+        marker:
+            A string value that identifies the portion of the query to be
+            returned with the next query operation. The operation returns a
+            next_marker element within the response body if the list returned
+            was not complete. This value may then be used as a query parameter
+            in a subsequent call to request the next portion of the list of
+            queues. The marker value is opaque to the client.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
-        if table_name is not None:
-            uri_part_table_name = "('" + table_name + "')"
-        else:
-            uri_part_table_name = ""
-        request.path = '/Tables' + uri_part_table_name
+        request.path = '/Tables'
         request.headers = [('Accept', TablePayloadFormat.JSON_NO_METADATA)]
         request.query = [
-            ('$top', _int_or_none(top)),
-            ('NextTableName', _str_or_none(next_table_name)),
+            ('$top', _int_or_none(max_results)),
+            ('NextTableName', _str_or_none(marker)),
             ('timeout', _int_or_none(timeout)),
         ]
 
@@ -511,8 +533,7 @@ class TableService(_StorageClient):
         self._perform_request(request)
 
     def query_entities(self, table_name, filter=None, select=None, top=None,
-                       next_partition_key=None, next_row_key=None,
-                       accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
+                       marker=None, accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
                        property_resolver=None, timeout=None):
         '''
         Get entities in a table; includes the $filter and $select options.
@@ -526,12 +547,52 @@ class TableService(_StorageClient):
             Optional. Property names to select from the entities.
         top:
             Optional. Maximum number of entities to return.
-        next_partition_key:
-            Optional. When top is used, the next partition key is stored in
-            result.x_ms_continuation['NextPartitionKey']
-        next_row_key:
-            Optional. When top is used, the next partition key is stored in
-            result.x_ms_continuation['NextRowKey']
+        marker:
+            A value that identifies the portion of the list
+            to be returned with the next list operation. The operation returns
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of list items. The marker value is
+            opaque to the client.
+        accept:
+            Required. Specifies the accepted content type of the response 
+            payload. See TablePayloadFormat for possible values.
+        property_resolver:
+            Optional. A function which given the partition key, row key, 
+            property name, property value, and the property EdmType if 
+            returned by the service, returns the EdmType of the property.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        args = (table_name,)
+        kwargs = {'filter': filter, 'select': select, 'top': top, 'marker': marker, 
+                  'accept': accept, 'property_resolver': property_resolver, 'timeout': timeout}
+        resp = self._query_entities(*args, **kwargs)
+
+        return ListGenerator(resp, self._query_entities, args, kwargs)
+
+    def _query_entities(self, table_name, filter=None, select=None, top=None,
+                       marker=None, accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
+                       property_resolver=None, timeout=None):
+        '''
+        Get entities in a table; includes the $filter and $select options.
+
+        table_name:
+            Table to query.
+        filter:
+            Optional. Filter as described at
+            http://msdn.microsoft.com/en-us/library/windowsazure/dd894031.aspx
+        select:
+            Optional. Property names to select from the entities.
+        top:
+            Optional. Maximum number of entities to return.
+        marker:
+            A value that identifies the portion of the query
+            to be returned with the next query operation. The operation returns
+            a next_marker value within the response body if the list returned was
+            not complete. The marker value may then be used in a subsequent
+            call to request the next set of query items. The marker value is
+            opaque to the client.
         accept:
             Required. Specifies the accepted content type of the response 
             payload. See TablePayloadFormat for possible values.
@@ -553,8 +614,8 @@ class TableService(_StorageClient):
             ('$filter', _str_or_none(filter)),
             ('$select', _str_or_none(select)),
             ('$top', _int_or_none(top)),
-            ('NextPartitionKey', _str_or_none(next_partition_key)),
-            ('NextRowKey', _str_or_none(next_row_key)),
+            ('NextPartitionKey', _str_or_none(marker.next_partition_key)),
+            ('NextRowKey', _str_or_none(marker.next_row_key)),
             ('timeout', _int_or_none(timeout)),
         ]
 

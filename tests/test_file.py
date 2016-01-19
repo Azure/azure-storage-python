@@ -301,9 +301,7 @@ class StorageFileTest(StorageTestCase):
         self.fs.create_share(self.share_name)
 
         # Act
-        shares = self.fs.list_shares()
-        for share in shares:
-            name = share.name
+        shares = list(self.fs.list_shares())
 
         # Assert
         self.assertIsNotNone(shares)
@@ -321,7 +319,7 @@ class StorageFileTest(StorageTestCase):
         self.fs.create_share(self.share_name)
 
         # Act
-        shares = self.fs.list_shares(self.share_name)
+        shares = list(self.fs.list_shares(self.share_name))
 
         # Assert
         self.assertIsNotNone(shares)
@@ -338,8 +336,7 @@ class StorageFileTest(StorageTestCase):
         resp = self.fs.set_share_metadata(self.share_name, metadata)
 
         # Act
-        shares = self.fs.list_shares(
-            self.share_name, None, None, 'metadata')
+        shares = list(self.fs.list_shares(self.share_name, None, None, 'metadata'))
 
         # Assert
         self.assertIsNotNone(shares)
@@ -359,9 +356,11 @@ class StorageFileTest(StorageTestCase):
             self.fs.create_share(name)
 
         # Act
-        shares1 = self.fs.list_shares(self.share_name, None, 2)
-        shares2 = self.fs.list_shares(
-            self.share_name, shares1.next_marker, 2)
+        generator1 = self.fs.list_shares(self.share_name, None, 2)
+        generator2 = self.fs.list_shares(self.share_name, generator1.next_marker, 2)
+
+        shares1 = generator1.items
+        shares2 = generator2.items
 
         # Assert
         self.assertIsNotNone(shares1)
@@ -469,8 +468,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        shares = self.fs.list_shares()
-        self.assertNamedItemNotInContainer(shares, self.share_name)
+        self.assertFalse(self.fs.exists(self.share_name))
 
     @record
     def test_delete_share_with_existing_share_fail_not_exist(self):
@@ -482,8 +480,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertTrue(deleted)
-        shares = self.fs.list_shares()
-        self.assertNamedItemNotInContainer(shares, self.share_name)
+        self.assertFalse(self.fs.exists(self.share_name))
 
     @record
     def test_delete_share_with_non_existing_share(self):
@@ -675,19 +672,15 @@ class StorageFileTest(StorageTestCase):
         self.fs.create_file(self.share_name, 'dir1', 'file2', 1025)
 
         # Act
-        resp = self.fs.list_directories_and_files(self.share_name)
-        for file in resp.files:
-            name = file.name
+        resp = list(self.fs.list_directories_and_files(self.share_name))
 
         # Assert
         self.assertIsNotNone(resp)
-        self.assertEqual(len(resp.files), 1)
-        self.assertEqual(len(resp.directories), 2)
-        self.assertIsNotNone(resp.files[0])
-        self.assertNamedItemInContainer(resp.directories, 'dir1')
-        self.assertNamedItemInContainer(resp.directories, 'dir2')
-        self.assertNamedItemInContainer(resp.files, 'file1')
-        self.assertEqual(resp.files[0].properties.content_length, 1024)
+        self.assertEqual(len(resp), 3)
+        self.assertIsNotNone(resp[0])
+        self.assertNamedItemInContainer(resp, 'dir1')
+        self.assertNamedItemInContainer(resp, 'dir2')
+        self.assertNamedItemInContainer(resp, 'file1')
 
     @record
     def test_list_directories_and_files_with_maxresults(self):
@@ -700,15 +693,13 @@ class StorageFileTest(StorageTestCase):
         self.fs.create_file(self.share_name, None, 'fileb1', 1024)
 
         # Act
-        result = self.fs.list_directories_and_files(self.share_name, None, None, 2)
+        result = list(self.fs.list_directories_and_files(self.share_name, None, None, 2))
 
         # Assert
         self.assertIsNotNone(result)
-        self.assertEqual(len(result.files), 1)
-        self.assertEqual(len(result.directories), 1)
-        self.assertNamedItemInContainer(result.directories, 'dir1')
-        self.assertNamedItemInContainer(result.files, 'filea1')
-        self.assertIsNotNone(result.next_marker)
+        self.assertEqual(len(result), 2)
+        self.assertNamedItemInContainer(result, 'dir1')
+        self.assertNamedItemInContainer(result, 'filea1')
 
     @record
     def test_list_directories_and_files_with_maxresults_and_marker(self):
@@ -721,17 +712,19 @@ class StorageFileTest(StorageTestCase):
         self.fs.create_file(self.share_name, 'dir1', 'fileb1', 1024)
 
         # Act
-        result1 = self.fs.list_directories_and_files(self.share_name, 'dir1', None, 2)
-        result2 = self.fs.list_directories_and_files(
-            self.share_name, 'dir1', result1.next_marker, 2)
+        generator1 = self.fs.list_directories_and_files(self.share_name, 'dir1', None, 2)
+        generator2 = self.fs.list_directories_and_files(self.share_name, 'dir1', generator1.next_marker, 2)
+
+        result1 = generator1.items
+        result2 = generator2.items
 
         # Assert
-        self.assertEqual(len(result1.files), 2)
-        self.assertEqual(len(result2.files), 2)
-        self.assertNamedItemInContainer(result1.files, 'filea1')
-        self.assertNamedItemInContainer(result1.files, 'filea2')
-        self.assertNamedItemInContainer(result2.files, 'filea3')
-        self.assertNamedItemInContainer(result2.files, 'fileb1')
+        self.assertEqual(len(result1), 2)
+        self.assertEqual(len(result2), 2)
+        self.assertNamedItemInContainer(result1, 'filea1')
+        self.assertNamedItemInContainer(result1, 'filea2')
+        self.assertNamedItemInContainer(result2, 'filea3')
+        self.assertNamedItemInContainer(result2, 'fileb1')
         self.assertEqual(result2.next_marker, None)
 
     #--Test cases for files ----------------------------------------------

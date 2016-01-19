@@ -30,7 +30,6 @@ from .._deserialization import (
 from .models import (
     Container,
     Blob,
-    BlobList,
     BlobBlock,
     BlobBlockList,
     BlobBlockState,
@@ -229,7 +228,7 @@ def _convert_xml_to_blob_list(response):
     if response is None or response.body is None:
         return response
 
-    blob_list = BlobList()    
+    blob_list = _list()    
     list_element = ETree.fromstring(response.body)
 
     setattr(blob_list, 'next_marker', list_element.findtext('NextMarker'))
@@ -238,7 +237,7 @@ def _convert_xml_to_blob_list(response):
     blob_prefix_elements = blobs_element.findall('BlobPrefix')
     if blob_prefix_elements is not None:
         for blob_prefix_element in blob_prefix_elements:
-            blob_list.prefixes.append(blob_prefix_element.findtext('Name'))
+            blob_list.append(blob_prefix_element.findtext('Name'))
 
     for blob_element in blobs_element.findall('Blob'):
         blob = Blob()
@@ -262,7 +261,7 @@ def _convert_xml_to_blob_list(response):
                 blob.metadata[metadata_element.tag] = metadata_element.text
         
         # Add blob to list
-        blob_list.blobs.append(blob)
+        blob_list.append(blob)
 
     return blob_list
 
