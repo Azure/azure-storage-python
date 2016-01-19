@@ -236,6 +236,15 @@ def _convert_json_response_to_entities(response, property_resolver):
 
     return entities
 
+def _extract_etag(response):
+    ''' Extracts the etag from the response headers. '''
+    if response and response.headers:
+        for name, value in response.headers:
+            if name.lower() == 'etag':
+                return value
+
+    return None
+
 def _parse_batch_response(body):
     parts = body.split(b'--changesetresponse_')
 

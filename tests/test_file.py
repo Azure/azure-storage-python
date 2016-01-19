@@ -251,17 +251,15 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_create_share_with_metadata(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
 
         # Act
-        created = self.fs.create_share(
-            self.share_name, {'hello': 'world', 'number': '42'})
+        created = self.fs.create_share(self.share_name, metadata)
 
         # Assert
         self.assertTrue(created)
         md = self.fs.get_share_metadata(self.share_name)
-        self.assertIsNotNone(md)
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
+        self.assertDictEqual(md, metadata)
 
     @record
     def test_create_share_with_quota(self):
@@ -271,9 +269,9 @@ class StorageFileTest(StorageTestCase):
         self.fs.create_share(self.share_name, quota=1)
 
         # Assert
-        props = self.fs.get_share_properties(self.share_name)
-        self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-share-quota'], '1')
+        share = self.fs.get_share_properties(self.share_name)
+        self.assertIsNotNone(share)
+        self.assertEqual(share.properties.quota, 1)
 
     @record
     def test_share_exists(self):
@@ -335,9 +333,9 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_list_shares_with_include_metadata(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
         self.fs.create_share(self.share_name)
-        resp = self.fs.set_share_metadata(
-            self.share_name, {'hello': 'world', 'number': '43'})
+        resp = self.fs.set_share_metadata(self.share_name, metadata)
 
         # Act
         shares = self.fs.list_shares(
@@ -348,8 +346,7 @@ class StorageFileTest(StorageTestCase):
         self.assertGreaterEqual(len(shares), 1)
         self.assertIsNotNone(shares[0])
         self.assertNamedItemInContainer(shares, self.share_name)
-        self.assertEqual(shares[0].metadata['hello'], 'world')
-        self.assertEqual(shares[0].metadata['number'], '43')
+        self.assertDictEqual(shares[0].metadata, metadata)
 
     @record
     def test_list_shares_with_maxresults_and_marker(self):
@@ -379,18 +376,16 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_set_share_metadata(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
         self.fs.create_share(self.share_name)
 
         # Act
-        resp = self.fs.set_share_metadata(
-            self.share_name, {'hello': 'world', 'number': '43'})
+        resp = self.fs.set_share_metadata(self.share_name, metadata)
 
         # Assert
         self.assertIsNone(resp)
         md = self.fs.get_share_metadata(self.share_name)
-        self.assertIsNotNone(md)
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '43')
+        self.assertDictEqual(md, metadata)
 
     @record
     def test_set_share_metadata_with_non_existing_share(self):
@@ -406,18 +401,15 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_get_share_metadata(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
         self.fs.create_share(self.share_name)
-        self.fs.set_share_metadata(
-            self.share_name, {'hello': 'world', 'number': '42'})
+        self.fs.set_share_metadata(self.share_name, metadata)
 
         # Act
         md = self.fs.get_share_metadata(self.share_name)
 
         # Assert
-        self.assertIsNotNone(md)
-        self.assertEqual(2, len(md))
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
+        self.assertDictEqual(md, metadata)
 
     @record
     def test_get_share_metadata_with_non_existing_share(self):
@@ -432,17 +424,17 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_get_share_properties(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
         self.fs.create_share(self.share_name)
-        self.fs.set_share_metadata(
-            self.share_name, {'hello': 'world', 'number': '42'})
+        self.fs.set_share_metadata(self.share_name, metadata)
 
         # Act
         props = self.fs.get_share_properties(self.share_name)
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-meta-hello'], 'world')
-        self.assertEqual(props['x-ms-meta-number'], '42')
+        self.assertDictEqual(props.metadata, metadata)
+        self.assertIsNotNone(props.properties.etag)
 
     @record
     def test_get_share_properties_with_non_existing_share(self):
@@ -465,7 +457,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertEqual(props['x-ms-share-quota'], '1')
+        self.assertEqual(props.properties.quota, 1)
 
     @record
     def test_delete_share_with_existing_share(self):
@@ -576,8 +568,8 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(props)
-        self.assertIsNotNone(props['ETag'])
-        self.assertIsNotNone(props['Last-Modified'])
+        self.assertIsNotNone(props.properties.etag)
+        self.assertIsNotNone(props.properties.last_modified)
 
     @record
     def test_get_directory_properties_with_non_existing_directory(self):
@@ -614,20 +606,16 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_get_set_directory_metadata(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '43'}
         self.fs.create_share(self.share_name)
         self.fs.create_directory(self.share_name, 'dir1')
 
         # Act
-        resp = self.fs.set_directory_metadata(
-            self.share_name, 'dir1', {'hello': 'world', 'number': '43'})
+        self.fs.set_directory_metadata(self.share_name, 'dir1', metadata)
         md = self.fs.get_directory_metadata(self.share_name, 'dir1')
 
         # Assert
-        self.assertIsNone(resp)
-        self.assertIsNotNone(md)
-        self.assertEqual(2, len(md))
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '43')
+        self.assertDictEqual(md, metadata)
 
     @record
     def test_delete_directory_with_existing_share(self):
@@ -806,18 +794,16 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_create_file_with_metadata(self):
         # Arrange
+        metadata={'hello': 'world', 'number': '42'}
         self.fs.create_share(self.share_name)
 
         # Act
-        resp = self.fs.create_file(
-            self.share_name, None, 'file1', 1024,
-            metadata={'hello': 'world', 'number': '42'})
+        resp = self.fs.create_file(self.share_name, None, 'file1', 1024, metadata=metadata)
 
         # Assert
         self.assertIsNone(resp)
         md = self.fs.get_file_metadata(self.share_name, None, 'file1')
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
+        self.assertDictEqual(md, metadata)
 
     @record
     def test_file_exists(self):
@@ -1018,8 +1004,9 @@ class StorageFileTest(StorageTestCase):
         self.assertIsNotNone(md)
 
     @record
-    def test_set_file_metadata_with_existing_file(self):
+    def test_set_file_metadata_with_upper_case(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '42', 'UP': 'UPval'}
         self._create_share_and_file_with_text(
             self.share_name, 'file1', b'hello world')
 
@@ -1028,15 +1015,15 @@ class StorageFileTest(StorageTestCase):
             self.share_name,
             None, 
             'file1',
-            {'hello': 'world', 'number': '42', 'UP': 'UPval'})
+            metadata)
 
         # Assert
         self.assertIsNone(resp)
         md = self.fs.get_file_metadata(self.share_name, None, 'file1')
         self.assertEqual(3, len(md))
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
-        self.assertEqual(md['x-ms-meta-up'], 'UPval')
+        self.assertEqual(md['hello'], 'world')
+        self.assertEqual(md['number'], '42')
+        self.assertEqual(md['up'], 'UPval')
 
     @record
     def test_delete_file_with_existing_file(self):
@@ -1174,8 +1161,8 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(resp)
-        self.assertEqual(resp['x-ms-copy-status'], 'success')
-        self.assertIsNotNone(resp['x-ms-copy-id'])
+        self.assertEqual(resp.status, 'success')
+        self.assertIsNotNone(resp.id)
         copy = self.fs.get_file_to_bytes(self.share_name, None, 'file1copy')
         self.assertEqual(copy.content, data)
 
@@ -1210,7 +1197,7 @@ class StorageFileTest(StorageTestCase):
             self.share_name, None, target_file_name, source_file_url)
 
         # Assert
-        self.assertEqual(copy_resp['x-ms-copy-status'], 'pending')
+        self.assertEqual(copy_resp.status, 'pending')
         self._wait_for_async_copy(self.share_name, target_file_name)
         self.assertFileEqual(self.share_name, target_file_name, data)
 
@@ -1226,9 +1213,8 @@ class StorageFileTest(StorageTestCase):
         target_file_name = 'targetfile'
         copy_resp = self.fs.copy_file(
             self.share_name, None, target_file_name, source_file_url)
-        self.assertEqual(copy_resp['x-ms-copy-status'], 'pending')
-        self.fs.abort_copy_file(
-            self.share_name, None, 'targetfile', copy_resp['x-ms-copy-id'])
+        self.assertEqual(copy_resp.status, 'pending')
+        self.fs.abort_copy_file(self.share_name, None, 'targetfile', copy_resp.id)
 
         # Assert
         target_file = self.fs.get_file_to_bytes(self.share_name, None, target_file_name)
@@ -1252,10 +1238,10 @@ class StorageFileTest(StorageTestCase):
                 self.share_name,
                 None,
                 target_file_name,
-                copy_resp['x-ms-copy-id'])
+                copy_resp.id)
 
         # Assert
-        self.assertEqual(copy_resp['x-ms-copy-status'], 'success')
+        self.assertEqual(copy_resp.status, 'success')
 
     @record
     def test_with_filter(self):

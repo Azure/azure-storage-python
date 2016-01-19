@@ -30,8 +30,6 @@ from .._common_conversion import (
 from .._serialization import (
     _get_request_body,
     _get_request_body_bytes_only,
-    _parse_response_for_dict,
-    _parse_response_for_dict_prefix,
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
 )
@@ -39,6 +37,8 @@ from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
     _get_download_size,
+    _parse_metadata,
+    _parse_properties,
 )
 from ..models import Services
 from .models import (
@@ -70,8 +70,9 @@ from ._deserialization import (
     _convert_xml_to_ranges,
     _convert_xml_to_share_stats,
     _parse_file,
+    _parse_share,
+    _parse_directory,
 )
-from .._deserialization import _parse_properties
 from ..sharedaccesssignature import (
     SharedAccessSignature,
 )
@@ -582,7 +583,7 @@ class FileService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict(response)
+        return _parse_share(share_name, response)
 
     def set_share_properties(self, share_name, quota, timeout=None):
         '''
@@ -633,7 +634,7 @@ class FileService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
+        return _parse_metadata(response)
 
     def set_share_metadata(self, share_name, metadata=None, timeout=None):
         '''
@@ -887,7 +888,7 @@ class FileService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict(response)
+        return _parse_directory(directory_name, response)
 
     def get_directory_metadata(self, share_name, directory_name, timeout=None):
         '''
@@ -913,7 +914,7 @@ class FileService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
+        return _parse_metadata(response)
 
     def set_directory_metadata(self, share_name, directory_name, metadata=None, timeout=None):
         '''
@@ -1010,7 +1011,7 @@ class FileService(_StorageClient):
         request.query = [('timeout', _int_or_none(timeout))]
 
         response = self._perform_request(request)
-        return _parse_properties(response, File, FileProperties)
+        return _parse_file(file_name, response)
 
     def exists(self, share_name, directory_name=None, file_name=None, timeout=None):
         '''
@@ -1131,7 +1132,7 @@ class FileService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
+        return _parse_metadata(response)
 
     def set_file_metadata(self, share_name, directory_name, 
                           file_name, metadata=None, timeout=None):
@@ -1200,7 +1201,8 @@ class FileService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict(response)
+        props = _parse_properties(response, FileProperties)
+        return props.copy
 
     def abort_copy_file(self, share_name, directory_name, file_name, copy_id, timeout=None):
         '''
@@ -1579,7 +1581,7 @@ class FileService(_StorageClient):
             check_content_md5=range_get_content_md5)
 
         response = self._perform_request(request, None)
-        return _parse_file(response)
+        return _parse_file(file_name, response)
 
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
                          open_mode='wb', start_range=None, end_range=None,

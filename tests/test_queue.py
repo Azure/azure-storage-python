@@ -75,12 +75,11 @@ class StorageQueueTest(StorageTestCase):
         # Action
         queue_name = self._get_queue_reference()
         self.qs.create_queue(queue_name)
-        result = self.qs.get_queue_metadata(queue_name)
-        self.qs.delete_queue(queue_name)
+        metadata, count = self.qs.get_queue_metadata(queue_name)
 
         # Asserts
-        self.assertIsNotNone(result)
-        self.assertEqual(result['x-ms-approximate-messages-count'], '0')
+        self.assertEqual(0, len(metadata))
+        self.assertEqual(0, count)
 
     @record
     def test_create_queue_already_exist(self):
@@ -111,14 +110,13 @@ class StorageQueueTest(StorageTestCase):
         self.qs.create_queue(
             queue_name,
             metadata={'val1': 'test', 'val2': 'blah'})
-        result = self.qs.get_queue_metadata(queue_name)
+        metadata, count = self.qs.get_queue_metadata(queue_name)
 
         # Asserts
-        self.assertIsNotNone(result)
-        self.assertEqual(3, len(result))
-        self.assertEqual(result['x-ms-approximate-messages-count'], '0')
-        self.assertEqual('test', result['x-ms-meta-val1'])
-        self.assertEqual('blah', result['x-ms-meta-val2'])
+        self.assertEqual(0, count)
+        self.assertEqual(2, len(metadata))
+        self.assertEqual('test', metadata['val1'])
+        self.assertEqual('blah', metadata['val2'])
 
     @record
     def test_delete_queue_not_exist(self):
@@ -208,15 +206,24 @@ class StorageQueueTest(StorageTestCase):
         self.qs.set_queue_metadata(
             queue_name,
             metadata={'val1': 'test', 'val2': 'blah'})
-        result = self.qs.get_queue_metadata(queue_name)
-        self.qs.delete_queue(queue_name)
+        metadata, count = self.qs.get_queue_metadata(queue_name)
 
         # Asserts
-        self.assertIsNotNone(result)
-        self.assertEqual(3, len(result))
-        self.assertEqual('0', result['x-ms-approximate-messages-count'])
-        self.assertEqual('test', result['x-ms-meta-val1'])
-        self.assertEqual('blah', result['x-ms-meta-val2'])
+        self.assertEqual(0, count)
+        self.assertEqual(2, len(metadata))
+        self.assertEqual('test', metadata['val1'])
+        self.assertEqual('blah', metadata['val2'])
+
+    @record
+    def test_get_queue_metadata_message_count(self):
+        # Action
+        queue_name = self._create_queue()
+        self.qs.put_message(queue_name, 'message1')
+        metadata, count = self.qs.get_queue_metadata(queue_name)
+
+        # Asserts
+        self.assertTrue(count >= 1)
+        self.assertEqual(0, len(metadata))
 
     @record
     def test_queue_exists(self):
@@ -381,13 +388,20 @@ class StorageQueueTest(StorageTestCase):
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, 'message1')
         list_result1 = self.qs.get_messages(queue_name)
-        self.qs.update_message(queue_name,
+        message = self.qs.update_message(queue_name,
                                list_result1[0].id,
                                list_result1[0].pop_receipt,
                                0)
         list_result2 = self.qs.get_messages(queue_name)
 
         # Asserts
+        # Update response
+        self.assertIsNotNone(message)
+        self.assertIsNotNone(message.pop_receipt)
+        self.assertIsNotNone(message.time_next_visible)
+        self.assertIsInstance(message.time_next_visible, datetime)
+
+        # Get response
         self.assertIsNotNone(list_result2)
         message = list_result2[0]
         self.assertIsNotNone(message)
@@ -405,7 +419,7 @@ class StorageQueueTest(StorageTestCase):
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, 'message1')
         list_result1 = self.qs.get_messages(queue_name)
-        self.qs.update_message(queue_name,
+        message = self.qs.update_message(queue_name,
                                list_result1[0].id,
                                list_result1[0].pop_receipt,
                                0,
@@ -413,6 +427,13 @@ class StorageQueueTest(StorageTestCase):
         list_result2 = self.qs.get_messages(queue_name)
 
         # Asserts
+        # Update response
+        self.assertIsNotNone(message)
+        self.assertIsNotNone(message.pop_receipt)
+        self.assertIsNotNone(message.time_next_visible)
+        self.assertIsInstance(message.time_next_visible, datetime)
+
+        # Get response
         self.assertIsNotNone(list_result2)
         message = list_result2[0]
         self.assertIsNotNone(message)

@@ -204,8 +204,7 @@ class StoragePageBlobTest(StorageTestCase):
         # Arrange
         self._create_container_and_blob(
             self.container_name, 'blob1', 512)
-        lease = self.bs.acquire_blob_lease(self.container_name, 'blob1')
-        lease_id = lease['x-ms-lease-id']
+        lease_id = self.bs.acquire_blob_lease(self.container_name, 'blob1')
 
         # Act        
         data = b'abcdefghijklmnop' * 32
@@ -221,19 +220,19 @@ class StoragePageBlobTest(StorageTestCase):
     @record
     def test_put_blob_with_metadata(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
         self._create_container(self.container_name)
 
         # Act
         data = b'hello world'
         resp = self.bs.create_blob(
             self.container_name, 'blob1', 512,
-            metadata={'hello': 'world', 'number': '42'})
+            metadata=metadata)
 
         # Assert
         self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
+        self.assertDictEqual(md, metadata)
 
     @record
     def test_put_page_update(self):

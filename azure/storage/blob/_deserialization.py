@@ -24,6 +24,8 @@ from .._common_conversion import (
 from .._deserialization import (
     _parse_properties,
     _int_or_none,
+    _parse_metadata,
+    _parse_response_for_dict,
 )
 from .models import (
     Container,
@@ -34,8 +36,69 @@ from .models import (
     BlobBlockState,
     BlobProperties,
     PageRange,
+    ContainerProperties,
+    AppendBlockProperties,
 )
 from ..models import _list
+
+def _parse_snapshot_blob(name, response):
+    '''
+    Extracts append block return headers.
+    '''   
+    raw_headers = _parse_response_for_dict(response)
+    snapshot = raw_headers.get('x-ms-snapshot')
+
+    return _parse_blob(name, snapshot, response)
+
+def _parse_append_block(response):
+    '''
+    Extracts append block return headers.
+    '''   
+    raw_headers = _parse_response_for_dict(response)
+
+    append_block = AppendBlockProperties()
+    append_block.last_modified = parser.parse(raw_headers.get('last-modified'))
+    append_block.etag = raw_headers.get('etag')
+    append_block.append_offset = _int_or_none(raw_headers.get('x-ms-blob-append-offset'))
+    append_block.committed_block_count = _int_or_none(raw_headers.get('x-ms-blob-committed-block-count'))
+
+    return append_block
+
+def _parse_lease_time(response):
+    '''
+    Extracts append block return headers.
+    '''   
+    raw_headers = _parse_response_for_dict(response)
+    lease_time = raw_headers.get('x-ms-lease-time')
+    if lease_time:
+        lease_time = _int_or_none(lease_time)
+
+    return lease_time
+
+def _parse_lease_id(response):
+    '''
+    Extracts append block return headers.
+    '''   
+    raw_headers = _parse_response_for_dict(response)
+    lease_id = raw_headers.get('x-ms-lease-id')
+
+    return lease_id
+
+def _parse_blob(name, snapshot, response):
+    if response is None:
+        return None
+
+    metadata = _parse_metadata(response)
+    props = _parse_properties(response, BlobProperties)
+    return Blob(name, snapshot, response.body, props, metadata)
+
+def _parse_container(name, response):
+    if response is None:
+        return None
+
+    metadata = _parse_metadata(response)
+    props = _parse_properties(response, ContainerProperties)
+    return Container(name, props, metadata)
 
 def _convert_xml_to_containers(response):
     '''
@@ -202,9 +265,6 @@ def _convert_xml_to_blob_list(response):
         blob_list.blobs.append(blob)
 
     return blob_list
-
-def _parse_blob(response):
-    return _parse_properties(response, Blob, BlobProperties)
 
 def _convert_xml_to_block_list(response):
     '''

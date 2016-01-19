@@ -30,7 +30,6 @@ from .._error import (
 from .._serialization import (
     _get_request_body,
     _update_request,
-    _extract_etag,
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
 )
@@ -62,6 +61,7 @@ from ._deserialization import (
     _convert_json_response_to_tables,
     _convert_json_response_to_entities,
     _parse_batch_response,
+    _extract_etag,
 )
 from ..constants import (
     SERVICE_HOST_BASE,

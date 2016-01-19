@@ -45,6 +45,11 @@
 - get_blob_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
 - Added exists method to check container or blob existence.
 - Client-side validation added for ranges used in APIs.
+- Metadata returned for blobs and containers will be returned without the 'x-ms-meta' prefix on the keys. Namely, metadata will be returned as it is received.
+- get_container_properties and get_blob_properties return parsed Container and Blob objects, respectively, instead of string header dictionaries.
+- copy_blob returns a parsed CopyProperties object instead of a string header dictionary.
+- acquire and renew lease calls return the lease id, break lease returns the remaining lease time, and change and release lease return nothing instead of string header dictionaries.
+- snapshot_blob returns a Blob object with the name, snapshot, etag and LMT properties populated instead of a string header dictionary.
 
 ### Queue:
 - The list_queues operation returns a list of Queue objects. The list returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
@@ -54,6 +59,9 @@
 - Added encode_function and decode_function properties to the queue service to allow users to specify custom encoding and decoding of queue messages.
 - Encoding and decoding functions default to xml encoding and decoding. Previously messages were only xml encoded but not decoded.
 - Added exists method to check queue existence.
+- Metadata returned for queues will be returned without the 'x-ms-meta' prefix on the keys. Namely, metadata will be returned as it is received.
+- get_queue_metadata returns two values, first the metadata dictionary and second the approximate message count as an int.
+- update_message returns a QueueMessage object with pop receipt and time next visible (parsed as a date) populated rather than a header dictionary.
 
 ### File:
 - Renamed some APIs and parameters for better readablity and less redundancy.
@@ -65,3 +73,6 @@
 - get_file_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
 - Added exists method to check share, directory, or file existence.
 - Client-side validation added for ranges used in APIs.
+- Metadata returned for shares, directories, and files will be returned without the 'x-ms-meta' prefix on the keys. Namely, metadata will be returned as it is received.
+- get_share_properties, get_directory_properties, and get_file_properties return parsed Share, Directory, and File objects, respectively, instead of string header dictionaries.
+- copy_file returns a parsed CopyProperties object instead of a string header dictionary.

@@ -34,6 +34,11 @@
 - list_blobs no longer exposes prefix, marker, max_results, or delimiter.
 - Single-threaded blob download APIs will now download the blob without chunking to improve perf.
 - get_blob_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
+- Metadata returned for blobs and containers will be returned without the 'x-ms-meta' prefix on the keys. Namely, metadata will be returned as it is received.
+- get_container_properties and get_blob_properties return parsed Container and Blob objects, respectively, instead of string header dictionaries.
+- copy_blob returns a parsed CopyProperties object instead of a string header dictionary.
+- acquire and renew lease calls return the lease id, break lease returns the remaining lease time, and change and release lease return nothing instead of string header dictionaries.
+- snapshot_blob returns a Blob object with the name, snapshot, etag and LMT properties populated instead of a string header dictionary.
 
 ### Queue:
 - The list_queues operation returns a sequence of Queue objects. The sequence returned has a single attribute, next_marker. Queue objects contain a name and metadata element. The metadata is returned as a dictionary rather than an object.
@@ -41,6 +46,9 @@
 - Renamed params: maxresults => max_results for list_queues.
 - update_message takes message_text as an optional parameter. This changes the parameter ordering.
 - Encoding and decoding functions default to xml encoding and decoding. Previously messages were only xml encoded but not decoded.
+- Metadata returned for queues will be returned without the 'x-ms-meta' prefix on the keys. Namely, metadata will be returned as it is received.
+- get_queue_metadata returns two values, first the metadata dictionary and second the approximate message count as an int.
+- update_message returns a QueueMessage object with pop receipt and time next visible (parsed as a date) populated rather than a header dictionary.
 
 ### File:
 - Renamed APIs and params: All x_ms prefixes have been removed. x_ms_range => byte_range for applicable APIs. get_file => _get_file (use get_file_to_bytes instead). maxresults => max_results for applicable APIs. x_ms_meta_name_values => metadata for applicable APIs. text_encoding => encoding for applicable APIs. get_file is now internal (_get_file) since the get_file_to_* APIs make get_file somewhat redundant. All get_file* APIs use boolean value for range_get_content_md5 parameter. All APIs that took byte_range now take start_range and end_range params.
@@ -52,3 +60,6 @@
 - Combined models for File & FileResult for better usability. get_file_properties returns a File object with the metadata and properties variables filled in. All get_file_to_* APIs now return a File object.
 - list_directories_and_files no longer exposes marker or max_results.
 - get_file_to_* progress_callback may receive None for its total parameter when parallelism is off to allow a perf optimization.
+- Metadata returned for shares, directories, and files will be returned without the 'x-ms-meta' prefix on the keys. Namely, metadata will be returned as it is received.
+- get_share_properties, get_directory_properties, and get_file_properties return parsed Share, Directory, and File objects, respectively, instead of string header dictionaries.
+- copy_file returns a parsed CopyProperties object instead of a string header dictionary.

@@ -24,7 +24,6 @@ from .._common_conversion import (
 )
 from .._serialization import (
     _get_request_body_bytes_only,
-    _parse_response_for_dict,
 )
 from .._http import HTTPRequest
 from ._chunking import (
@@ -38,6 +37,9 @@ from ..constants import (
 )
 from ._serialization import (
     _get_path,
+)
+from ._deserialization import (
+    _parse_append_block,
 )
 from ._baseblobservice import _BaseBlobService
 from os import path
@@ -219,7 +221,7 @@ class AppendBlobService(_BaseBlobService):
         request.body = _get_request_body_bytes_only('block', block)
 
         response = self._perform_request(request)
-        return _parse_response_for_dict(response)
+        return _parse_append_block(response)
 
     #----Convenience APIs----------------------------------------------
 

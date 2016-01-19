@@ -235,7 +235,7 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 timeout=self.timeout,
             )
 
-            self.current_length = int(resp['x-ms-blob-append-offset'])
+            self.current_length = resp.append_offset
         else:
             resp = self.blob_service.append_block(
                 self.container_name,

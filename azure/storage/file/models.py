@@ -17,10 +17,10 @@ class Share(object):
 
     ''' File share class. '''
 
-    def __init__(self):
-        self.name = None
-        self.properties = ShareProperties()
-        self.metadata = None
+    def __init__(self, name=None, props=None, metadata=None):
+        self.name = name
+        self.properties = props or ShareProperties()
+        self.metadata = metadata
 
 
 class ShareProperties(object):
@@ -32,6 +32,22 @@ class ShareProperties(object):
         self.etag = None
         self.quota = None
 
+class Directory(object):
+
+    ''' Directory class. '''
+
+    def __init__(self, name=None, props=None, metadata=None):
+        self.name = name
+        self.properties = props or DirectoryProperties()
+        self.metadata = metadata
+
+class DirectoryProperties(object):
+
+    ''' File share's properties class. '''
+
+    def __init__(self):
+        self.last_modified = None
+        self.etag = None
 
 class FileAndDirectoryResults(object):
 
@@ -47,8 +63,8 @@ class FileAndDirectoryResults(object):
 class File(object):
 
     ''' File class. '''
-    def __init__(self, content=None, props=None, metadata=None):
-        self.name = None
+    def __init__(self, name=None, content=None, props=None, metadata=None):
+        self.name = name
         self.content = content
         self.properties = props or FileProperties()
         self.metadata = metadata
@@ -106,14 +122,6 @@ class CopyProperties(object):
         self.progress = None
         self.completion_time = None
         self.status_description = None
-
-
-class Directory(object):
-
-    ''' Directory class. '''
-
-    def __init__(self):
-        self.name = None
 
 
 class Range(object):

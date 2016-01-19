@@ -25,6 +25,29 @@ from .models import (
 from ..models import (
     _list,
 )
+from .._deserialization import (
+    _int_or_none,
+    _parse_response_for_dict,
+)
+
+def _parse_approximate_message_count(response):
+    '''
+    Extracts approximate messages count header.
+    '''
+    headers = _parse_response_for_dict(response)
+    return _int_or_none(headers.get('x-ms-approximate-messages-count'))
+
+def _parse_queue_message_from_headers(response):
+    '''
+    Extracts pop receipt and time next visible from headers.
+    '''
+    headers = _parse_response_for_dict(response)
+
+    message = QueueMessage()
+    message.pop_receipt = headers.get('x-ms-popreceipt')
+    message.time_next_visible = parser.parse(headers.get('x-ms-time-next-visible'))
+    
+    return message
 
 def _convert_xml_to_queues(response):
     '''
