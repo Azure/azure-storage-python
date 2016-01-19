@@ -27,24 +27,16 @@ from azure.common import (
     AzureMissingResourceHttpError,
 )
 from azure.storage import (
-    DEV_ACCOUNT_NAME,
-    DEV_ACCOUNT_KEY,
     AccessPolicy,
     ResourceTypes,
     AccountPermissions,
 )
 from azure.storage.blob import (
-    BLOB_SERVICE_HOST_BASE,
     Blob,
     BlockBlobService,
     BlobPermissions,
     ContainerPermissions,
     ContentSettings,
-)
-from azure.storage.storageclient import (
-    AZURE_STORAGE_ACCESS_KEY,
-    AZURE_STORAGE_ACCOUNT,
-    EMULATED,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -225,119 +217,6 @@ class StorageCommonBlobTest(StorageTestCase):
 
         def read(self, count):
             return self.wrapped_file.read(count)
-
-    #--Test cases for blob service --------------------------------------------
-    @record
-    def test_create_blob_service_missing_arguments(self):
-        # Arrange
-        if AZURE_STORAGE_ACCOUNT in os.environ:
-            del os.environ[AZURE_STORAGE_ACCOUNT]
-        if AZURE_STORAGE_ACCESS_KEY in os.environ:
-            del os.environ[AZURE_STORAGE_ACCESS_KEY]
-        if EMULATED in os.environ:
-            del os.environ[EMULATED]
-
-        # Act
-        with self.assertRaises(ValueError):
-            bs = BlockBlobService()
-
-        # Assert
-
-    @record
-    def test_create_blob_service_env_variables(self):
-        # Arrange
-        os.environ[
-            AZURE_STORAGE_ACCOUNT] = self.settings.STORAGE_ACCOUNT_NAME
-        os.environ[
-            AZURE_STORAGE_ACCESS_KEY] = self.settings.STORAGE_ACCOUNT_KEY
-
-        # Act
-        bs = BlockBlobService()
-
-        if AZURE_STORAGE_ACCOUNT in os.environ:
-            del os.environ[AZURE_STORAGE_ACCOUNT]
-        if AZURE_STORAGE_ACCESS_KEY in os.environ:
-            del os.environ[AZURE_STORAGE_ACCESS_KEY]
-
-        # Assert
-        self.assertIsNotNone(bs)
-        self.assertEqual(bs.account_name, self.settings.STORAGE_ACCOUNT_NAME)
-        self.assertEqual(bs.account_key, self.settings.STORAGE_ACCOUNT_KEY)
-        self.assertEqual(bs.is_emulated, False)
-
-    @record
-    def test_create_blob_service_emulated_true(self):
-        # Arrange
-        os.environ[EMULATED] = 'true'
-
-        # Act
-        bs = BlockBlobService()
-
-        if EMULATED in os.environ:
-            del os.environ[EMULATED]
-
-        # Assert
-        self.assertIsNotNone(bs)
-        self.assertEqual(bs.account_name, DEV_ACCOUNT_NAME)
-        self.assertEqual(bs.account_key, DEV_ACCOUNT_KEY)
-        self.assertEqual(bs.is_emulated, True)
-
-    @record
-    def test_create_blob_service_emulated_false(self):
-        # Arrange
-        os.environ[EMULATED] = 'false'
-
-        # Act
-        with self.assertRaises(ValueError):
-            bs = BlockBlobService()
-
-        if EMULATED in os.environ:
-            del os.environ[EMULATED]
-
-        # Assert
-
-    @record
-    def test_create_blob_service_emulated_false_env_variables(self):
-        # Arrange
-        os.environ[EMULATED] = 'false'
-        os.environ[
-            AZURE_STORAGE_ACCOUNT] = self.settings.STORAGE_ACCOUNT_NAME
-        os.environ[
-            AZURE_STORAGE_ACCESS_KEY] = self.settings.STORAGE_ACCOUNT_KEY
-
-        # Act
-        bs = BlockBlobService()
-
-        if EMULATED in os.environ:
-            del os.environ[EMULATED]
-        if AZURE_STORAGE_ACCOUNT in os.environ:
-            del os.environ[AZURE_STORAGE_ACCOUNT]
-        if AZURE_STORAGE_ACCESS_KEY in os.environ:
-            del os.environ[AZURE_STORAGE_ACCESS_KEY]
-
-        # Assert
-        self.assertIsNotNone(bs)
-        self.assertEqual(bs.account_name, self.settings.STORAGE_ACCOUNT_NAME)
-        self.assertEqual(bs.account_key, self.settings.STORAGE_ACCOUNT_KEY)
-        self.assertEqual(bs.is_emulated, False)
-
-    @record
-    def test_create_blob_service_connection_string(self):
-        # Arrange
-        connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
-                            'http', self.settings.STORAGE_ACCOUNT_NAME,
-                            self.settings.STORAGE_ACCOUNT_KEY)
-        
-        # Act
-        bs = BlockBlobService(connection_string = connection_string)
-        
-        # Assert
-        self.assertIsNotNone(bs)
-        self.assertEqual(bs.account_name, self.settings.STORAGE_ACCOUNT_NAME)
-        self.assertEqual(bs.account_key, self.settings.STORAGE_ACCOUNT_KEY)
-        self.assertEqual(bs.protocol, 'http')
-        self.assertEqual(bs.host_base, BLOB_SERVICE_HOST_BASE)
-        self.assertFalse(bs.is_emulated)
         
     #--Test cases for containers -----------------------------------------
     @record
@@ -1143,17 +1022,6 @@ class StorageCommonBlobTest(StorageTestCase):
                          + '.blob.core.windows.net/vhds/my.vhd')
 
     @record
-    def test_make_blob_url_with_account_name(self):
-        # Arrange
-
-        # Act
-        res = self.bs.make_blob_url('vhds', 'my.vhd', account_name='myaccount')
-
-        # Assert
-        self.assertEqual(
-            res, 'https://myaccount.blob.core.windows.net/vhds/my.vhd')
-
-    @record
     def test_make_blob_url_with_protocol(self):
         # Arrange
 
@@ -1165,28 +1033,15 @@ class StorageCommonBlobTest(StorageTestCase):
                          + '.blob.core.windows.net/vhds/my.vhd')
 
     @record
-    def test_make_blob_url_with_host_base(self):
+    def test_make_blob_url_with_sas(self):
         # Arrange
 
         # Act
-        res = self.bs.make_blob_url(
-            'vhds', 'my.vhd', host_base='.blob.internal.net')
+        res = self.bs.make_blob_url('vhds', 'my.vhd', sas_token='sas')
 
         # Assert
         self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
-                         + '.blob.internal.net/vhds/my.vhd')
-
-    @record
-    def test_make_blob_url_with_all(self):
-        # Arrange
-
-        # Act
-        res = self.bs.make_blob_url(
-            'vhds', 'my.vhd', account_name='myaccount', protocol='http',
-            host_base='.blob.internal.net')
-
-        # Assert
-        self.assertEqual(res, 'http://myaccount.blob.internal.net/vhds/my.vhd')
+                         + '.blob.core.windows.net/vhds/my.vhd?sas')
 
     @record
     def test_list_blobs(self):

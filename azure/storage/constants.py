@@ -24,16 +24,13 @@ X_MS_VERSION = '2015-04-05'
 _USER_AGENT_STRING = 'Azure-Storage/{} (Python {} {}; {} {})'.format(__version__, platform.python_implementation(), platform.python_version(), platform.system(), platform.release())
 
 # Live ServiceClient URLs
-BLOB_SERVICE_HOST_BASE = '.blob.core.windows.net'
-QUEUE_SERVICE_HOST_BASE = '.queue.core.windows.net'
-TABLE_SERVICE_HOST_BASE = '.table.core.windows.net'
-FILE_SERVICE_HOST_BASE = '.file.core.windows.net'
+SERVICE_HOST_BASE = 'core.windows.net'
+DEFAULT_PROTOCOL = 'https'
 
 # Development ServiceClient URLs
 DEV_BLOB_HOST = '127.0.0.1:10000'
 DEV_QUEUE_HOST = '127.0.0.1:10001'
 DEV_TABLE_HOST = '127.0.0.1:10002'
-DEV_FILE_HOST = '127.0.0.1:10003'
 
 # Default credentials for Development Storage Service
 DEV_ACCOUNT_NAME = 'devstoreaccount1'
@@ -41,9 +38,3 @@ DEV_ACCOUNT_KEY = 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6t
 
 # Socket timeout in seconds is 5 min * 60 seconds
 _SOCKET_TIMEOUT = 5 * 60
-
-#--------------------------------------------------------------------------
-# constants for azure app setting environment variables
-AZURE_STORAGE_ACCOUNT = 'AZURE_STORAGE_ACCOUNT'
-AZURE_STORAGE_ACCESS_KEY = 'AZURE_STORAGE_ACCESS_KEY'
-EMULATED = 'EMULATED'

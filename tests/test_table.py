@@ -270,14 +270,6 @@ class StorageTableTest(StorageTestCase):
 
     #--Test cases for tables --------------------------------------------------
     @record
-    def test_create_table_service_empty_key(self):
-        try:
-            table_service = TableService('testaccount', '')
-            self.fail('Passing an empty key to create account should fail.')
-        except ValueError as e:
-            self.assertTrue(str(e) == 'You need to provide an account name and account key when creating a storage service')
-
-    @record
     def test_create_table(self):
         # Arrange
 

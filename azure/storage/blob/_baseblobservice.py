@@ -43,14 +43,14 @@ from .models import (
     BlobPermissions,
 )
 from ..auth import (
-    StorageSASAuthentication,
-    StorageSharedKeyAuthentication,
-    StorageNoAuthentication,
+    _StorageSASAuthentication,
+    _StorageSharedKeyAuthentication,
+    _StorageNoAuthentication,
 )
-from ..connection import StorageConnectionParameters
+from ..connection import _ServiceParameters
 from ..constants import (
-    BLOB_SERVICE_HOST_BASE,
-    DEV_BLOB_HOST,
+    SERVICE_HOST_BASE,
+    DEFAULT_PROTOCOL,
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
@@ -87,54 +87,70 @@ class _BaseBlobService(_StorageClient):
     _BLOB_MAX_DATA_SIZE = 64 * 1024 * 1024
     _BLOB_MAX_CHUNK_DATA_SIZE = 4 * 1024 * 1024
 
-    def __init__(self, account_name=None, account_key=None, protocol='https',
-                 host_base=BLOB_SERVICE_HOST_BASE, dev_host=DEV_BLOB_HOST,
-                 sas_token=None, connection_string=None, request_session=None):
+    def __init__(self, account_name=None, account_key=None, sas_token=None, 
+                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
+                 custom_domain=None, request_session=None, connection_string=None):
         '''
-        account_name:
-            your storage account name, required for all operations.
-        account_key:
-            your storage account key, required for all operations.
-        protocol:
-            Protocol. Defaults to https.
-        host_base:
-            Live host base url. Defaults to Azure url. Override this
-            for on-premise.
-        dev_host:
-            Dev host url. Defaults to localhost.
-        sas_token:
-            Token to use to authenticate with shared access signature.
-        connection_string:
-            If specified, the first four parameters (account_name,
-            account_key, protocol, host_base) may be overridden
-            by values specified in the connection_string. See 
+        :param str account_name:
+            The storage account name. This is used to authenticate requests 
+            signed with an account key and to construct the storage endpoint. It 
+            is required unless a connection string is given, or if a custom 
+            domain is used with anonymous authentication.
+        :param str account_key:
+            The storage account key. This is used for shared key authentication. 
+            If neither account key or sas token is specified, anonymous access 
+            will be used.
+        :param str sas_token:
+             A shared access signature token to use to authenticate requests 
+             instead of the account key. If account key and sas token are both 
+             specified, account key will be used to sign. If neither are 
+             specified, anonymous access will be used.
+        :param bool is_emulated:
+            Whether to use the emulator. Defaults to False. If specified, will 
+            override all other parameters besides connection string and request 
+            session.
+        :param str protocol:
+            The protocol to use for requests. Defaults to https.
+        :param str endpoint_suffix:
+            The host base component of the url, minus the account name. Defaults 
+            to Azure (core.windows.net). Override this to use the China cloud 
+            (core.chinacloudapi.cn).
+        :param str custom_domain:
+            The custom domain to use. This can be set in the Azure Portal. For 
+            example, 'www.mydomain.com'.
+        :param requests.Session request_session:
+            The session object to use for http requests.
+        :param str connection_string:
+            If specified, this will override all other parameters besides 
+            request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
-        request_session:
-            Session object to use for http requests.
         '''
-        if connection_string is not None:
-            connection_params = StorageConnectionParameters(connection_string)
-            account_name = connection_params.account_name
-            account_key = connection_params.account_key
-            protocol = connection_params.protocol.lower()
-            host_base = connection_params.host_base_blob
-            
-        super(_BaseBlobService, self).__init__(
-            account_name, account_key, protocol, host_base, dev_host, sas_token, request_session)
+        service_params = _ServiceParameters.get_service_parameters(
+            'blob',
+            account_name=account_name, 
+            account_key=account_key,
+            sas_token=sas_token, 
+            is_emulated=is_emulated,
+            protocol=protocol, 
+            endpoint_suffix=endpoint_suffix,
+            custom_domain=custom_domain,
+            request_session=request_session,
+            connection_string=connection_string)
+
+        super(_BaseBlobService, self).__init__(service_params)
 
         if self.account_key:
-            self.authentication = StorageSharedKeyAuthentication(
+            self.authentication = _StorageSharedKeyAuthentication(
                 self.account_name,
                 self.account_key,
             )
         elif self.sas_token:
-            self.authentication = StorageSASAuthentication(self.sas_token)
+            self.authentication = _StorageSASAuthentication(self.sas_token)
         else:
-            self.authentication = StorageNoAuthentication()
+            self.authentication = _StorageNoAuthentication()
 
-    def make_blob_url(self, container_name, blob_name, account_name=None,
-                      protocol=None, host_base=None, sas_token=None):
+    def make_blob_url(self, container_name, blob_name, protocol=None, sas_token=None):
         '''
         Creates the url to access a blob.
 
@@ -142,24 +158,17 @@ class _BaseBlobService(_StorageClient):
             Name of container.
         blob_name:
             Name of blob.
-        account_name:
-            Name of the storage account. If not specified, uses the account
-            specified when _BaseBlobService was initialized.
         protocol:
             Protocol to use: 'http' or 'https'. If not specified, uses the
             protocol specified when _BaseBlobService was initialized.
-        host_base:
-            Live host base url.  If not specified, uses the host base specified
-            when _BaseBlobService was initialized.
         sas_token:
             Shared access signature token created with
             generate_shared_access_signature.
         '''
 
-        url = '{0}://{1}{2}/{3}/{4}'.format(
+        url = '{}://{}/{}/{}'.format(
             protocol or self.protocol,
-            account_name or self.account_name,
-            host_base or self.host_base,
+            self.primary_endpoint,
             container_name,
             blob_name,
         )
@@ -2131,7 +2140,7 @@ class _BaseBlobService(_StorageClient):
             account, _, source =\
                 copy_source.partition('/')[2].partition('/')
             copy_source = self.protocol + '://' + \
-                account + self.host_base + '/' + source
+                self.primary_endpoint + '/' + source
 
         request = HTTPRequest()
         request.method = 'PUT'

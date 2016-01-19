@@ -53,7 +53,7 @@ class _StorageSharedKeyAuthentication(object):
         request.headers.append(('Authorization', auth_string))
 
 
-class StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
+class _StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
     def sign_request(self, request):
         string_to_sign = \
             self._get_verb(request) + \
@@ -82,7 +82,7 @@ class StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
         return string_to_sign
 
 
-class StorageTableSharedKeyAuthentication(_StorageSharedKeyAuthentication):
+class _StorageTableSharedKeyAuthentication(_StorageSharedKeyAuthentication):
     def sign_request(self, request):
         string_to_sign = \
             self._get_verb(request) + \
@@ -102,12 +102,12 @@ class StorageTableSharedKeyAuthentication(_StorageSharedKeyAuthentication):
         return ''
 
 
-class StorageNoAuthentication(object):
+class _StorageNoAuthentication(object):
     def sign_request(self, request):
         pass
 
 
-class StorageSASAuthentication(object):
+class _StorageSASAuthentication(object):
     def __init__(self, sas_token):
         self.sas_token = sas_token
 

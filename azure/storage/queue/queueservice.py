@@ -17,8 +17,8 @@ from azure.common import (
     AzureHttpError,
 )
 from ..constants import (
-    DEV_QUEUE_HOST,
-    QUEUE_SERVICE_HOST_BASE,
+    SERVICE_HOST_BASE,
+    DEFAULT_PROTOCOL,
 )
 from .._error import (
     _dont_fail_not_exist,
@@ -45,11 +45,11 @@ from .models import (
     QueueMessageFormat,
 )
 from ..auth import (
-    StorageSASAuthentication,
-    StorageSharedKeyAuthentication,
+    _StorageSASAuthentication,
+    _StorageSharedKeyAuthentication,
 )
 from ..connection import (
-    StorageConnectionParameters,
+    _ServiceParameters,
 )
 from .._serialization import (
     _convert_signed_identifiers_to_xml,
@@ -98,51 +98,58 @@ class QueueService(_StorageClient):
     :vartype decode_function: function(data)
     '''
 
-    def __init__(self, account_name=None, account_key=None, protocol='https',
-                 host_base=QUEUE_SERVICE_HOST_BASE, dev_host=DEV_QUEUE_HOST,
-                 sas_token=None, connection_string=None, request_session=None):
+    def __init__(self, account_name=None, account_key=None, sas_token=None, 
+                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
+                 request_session=None, connection_string=None):
         '''
         :param str account_name:
-            your storage account name, required for all operations.
+            The storage account name. This is used to authenticate requests 
+            signed with an account key and to construct the storage endpoint. It 
+            is required unless a connection string is given.
         :param str account_key:
-            your storage account key, required for all operations.
-        :param str protocol:
-            Protocol. Defaults to http.
-        :param str host_base:
-            Live host base url. Defaults to Azure url. Override this
-            for on-premise.
-        :param str dev_host:
-            Dev host url. Defaults to localhost.
+            The storage account key. This is used for shared key authentication. 
         :param str sas_token:
-            Token to use to authenticate with shared access signature.
+             A shared access signature token to use to authenticate requests 
+             instead of the account key. If account key and sas token are both 
+             specified, account key will be used to sign.
+        :param bool is_emulated:
+            Whether to use the emulator. Defaults to False. If specified, will 
+            override all other parameters besides connection string and request 
+            session.
+        :param str protocol:
+            The protocol to use for requests. Defaults to https.
+        :param str endpoint_suffix:
+            The host base component of the url, minus the account name. Defaults 
+            to Azure (core.windows.net). Override this to use the China cloud 
+            (core.chinacloudapi.cn).
+        :param requests.Session request_session:
+            The session object to use for http requests.
         :param str connection_string:
-            If specified, the first four parameters (account_name,
-            account_key, protocol, host_base) may be overridden
-            by values specified in the connection_string. The next three parameters
-            (dev_host, timeout, sas_token) cannot be specified with a
-            connection_string. See 
+            If specified, this will override all other parameters besides 
+            request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
-        :param request_session:
-            Session object to use for http requests.
         '''
-        if connection_string is not None:
-            connection_params = StorageConnectionParameters(connection_string)
-            account_name = connection_params.account_name
-            account_key = connection_params.account_key
-            protocol = connection_params.protocol.lower()
-            host_base = connection_params.host_base_queue
+        service_params = _ServiceParameters.get_service_parameters(
+            'queue',
+            account_name=account_name, 
+            account_key=account_key, 
+            sas_token=sas_token, 
+            is_emulated=is_emulated, 
+            protocol=protocol, 
+            endpoint_suffix=endpoint_suffix,
+            request_session=request_session,
+            connection_string=connection_string)
             
-        super(QueueService, self).__init__(
-            account_name, account_key, protocol, host_base, dev_host, sas_token, request_session)
+        super(QueueService, self).__init__(service_params)
 
         if self.account_key:
-            self.authentication = StorageSharedKeyAuthentication(
+            self.authentication = _StorageSharedKeyAuthentication(
                 self.account_name,
                 self.account_key,
             )
         elif self.sas_token:
-            self.authentication = StorageSASAuthentication(self.sas_token)
+            self.authentication = _StorageSASAuthentication(self.sas_token)
         else:
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
 

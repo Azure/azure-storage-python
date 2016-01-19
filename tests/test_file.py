@@ -32,7 +32,6 @@ from azure.storage import (
     AccountPermissions,
 )
 from azure.storage.file import (
-    FILE_SERVICE_HOST_BASE,
     FileService,
     File,
     FileService,
@@ -40,11 +39,6 @@ from azure.storage.file import (
     ContentSettings,
     FilePermissions,
     SharePermissions,
-)
-from azure.storage.storageclient import (
-    AZURE_STORAGE_ACCESS_KEY,
-    AZURE_STORAGE_ACCOUNT,
-    EMULATED,
 )
 from tests.common_recordingtestcase import (
     TestMode,
@@ -218,71 +212,6 @@ class StorageFileTest(StorageTestCase):
 
         def read(self, count):
             return self.wrapped_file.read(count)
-
-    #--Test cases for file service --------------------------------------------
-    @record
-    def test_create_file_service_empty_key(self):
-        try:
-            file_service = FileService('testaccount', '')
-            self.fail('Passing an empty key to create account should fail.')
-        except ValueError as e:
-            self.assertTrue(str(e) == 'You need to provide an account name and account key when creating a storage service')
-
-    @record
-    def test_create_file_service_missing_arguments(self):
-        # Arrange
-        if AZURE_STORAGE_ACCOUNT in os.environ:
-            del os.environ[AZURE_STORAGE_ACCOUNT]
-        if AZURE_STORAGE_ACCESS_KEY in os.environ:
-            del os.environ[AZURE_STORAGE_ACCESS_KEY]
-        if EMULATED in os.environ:
-            del os.environ[EMULATED]
-
-        # Act
-        with self.assertRaises(ValueError):
-            fs = FileService()
-
-        # Assert
-
-    @record
-    def test_create_file_service_env_variables(self):
-        # Arrange
-        os.environ[
-            AZURE_STORAGE_ACCOUNT] = self.settings.STORAGE_ACCOUNT_NAME
-        os.environ[
-            AZURE_STORAGE_ACCESS_KEY] = self.settings.STORAGE_ACCOUNT_KEY
-
-        # Act
-        fs = FileService()
-
-        if AZURE_STORAGE_ACCOUNT in os.environ:
-            del os.environ[AZURE_STORAGE_ACCOUNT]
-        if AZURE_STORAGE_ACCESS_KEY in os.environ:
-            del os.environ[AZURE_STORAGE_ACCESS_KEY]
-
-        # Assert
-        self.assertIsNotNone(fs)
-        self.assertEqual(fs.account_name, self.settings.STORAGE_ACCOUNT_NAME)
-        self.assertEqual(fs.account_key, self.settings.STORAGE_ACCOUNT_KEY)
-        self.assertEqual(fs.is_emulated, False)
-
-    @record
-    def test_create_file_service_connection_string(self):
-        # Arrange
-        connection_string = 'DefaultEndpointsProtocol={};AccountName={};AccountKey={}'.format(
-                            'http', self.settings.STORAGE_ACCOUNT_NAME,
-                            self.settings.STORAGE_ACCOUNT_KEY)
-        
-        # Act
-        fs = FileService(connection_string = connection_string)
-        
-        # Assert
-        self.assertIsNotNone(fs)
-        self.assertEqual(fs.account_name, self.settings.STORAGE_ACCOUNT_NAME)
-        self.assertEqual(fs.account_key, self.settings.STORAGE_ACCOUNT_KEY)
-        self.assertEqual(fs.protocol, 'http')
-        self.assertEqual(fs.host_base, FILE_SERVICE_HOST_BASE)
-        self.assertFalse(fs.is_emulated)
         
     #--Test cases for shares -----------------------------------------
     @record
@@ -841,17 +770,6 @@ class StorageFileTest(StorageTestCase):
                          + '.file.core.windows.net/vhds/my.vhd')
 
     @record
-    def test_make_file_url_with_account_name(self):
-        # Arrange
-
-        # Act
-        res = self.fs.make_file_url('vhds', 'vhd_dir', 'my.vhd', account_name='myaccount')
-
-        # Assert
-        self.assertEqual(
-            res, 'https://myaccount.file.core.windows.net/vhds/vhd_dir/my.vhd')
-
-    @record
     def test_make_file_url_with_protocol(self):
         # Arrange
 
@@ -863,28 +781,16 @@ class StorageFileTest(StorageTestCase):
                          + '.file.core.windows.net/vhds/vhd_dir/my.vhd')
 
     @record
-    def test_make_file_url_with_host_base(self):
+    def test_make_file_url_with_sas(self):
         # Arrange
 
         # Act
         res = self.fs.make_file_url(
-            'vhds', None, 'my.vhd', host_base='.file.internal.net')
+            'vhds', 'vhd_dir', 'my.vhd', sas_token='sas')
 
         # Assert
-        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
-                         + '.file.internal.net/vhds/my.vhd')
-
-    @record
-    def test_make_file_url_with_all(self):
-        # Arrange
-
-        # Act
-        res = self.fs.make_file_url(
-            'vhds', 'vhd_dir', 'my.vhd', account_name='myaccount', protocol='http',
-            host_base='.file.internal.net')
-
-        # Assert
-        self.assertEqual(res, 'http://myaccount.file.internal.net/vhds/vhd_dir/my.vhd')
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME + 
+                         '.file.core.windows.net/vhds/vhd_dir/my.vhd?sas')
 
     @record
     def test_create_file(self):

@@ -38,11 +38,11 @@ from .._http import HTTPRequest
 from ..models import Services
 from .models import TablePayloadFormat
 from ..auth import (
-    StorageSASAuthentication,
-    StorageTableSharedKeyAuthentication,
+    _StorageSASAuthentication,
+    _StorageTableSharedKeyAuthentication,
 )
 from ..connection import (
-    StorageConnectionParameters,
+    _ServiceParameters,
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
@@ -64,8 +64,8 @@ from ._deserialization import (
     _parse_batch_response,
 )
 from ..constants import (
-    TABLE_SERVICE_HOST_BASE,
-    DEV_TABLE_HOST,
+    SERVICE_HOST_BASE,
+    DEFAULT_PROTOCOL,
 )
 from ._request import (
     _get_entity,
@@ -88,51 +88,58 @@ class TableService(_StorageClient):
     This is the main class managing Table resources.
     '''
 
-    def __init__(self, account_name=None, account_key=None, protocol='https',
-                 host_base=TABLE_SERVICE_HOST_BASE, dev_host=DEV_TABLE_HOST,
-                 sas_token=None, connection_string=None, request_session=None):
+    def __init__(self, account_name=None, account_key=None, sas_token=None, 
+                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
+                 request_session=None, connection_string=None):
         '''
-        account_name:
-            your storage account name, required for all operations.
-        account_key:
-            your storage account key, required for all operations.
-        protocol:
-            Optional. Protocol. Defaults to http.
-        host_base:
-            Optional. Live host base url. Defaults to Azure url. Override this
-            for on-premise.
-        dev_host:
-            Optional. Dev host url. Defaults to localhost.
-        sas_token:
-            Optional. Token to use to authenticate with shared access signature.
-        connection_string:
-            Optional. If specified, the first four parameters (account_name,
-            account_key, protocol, host_base) may be overridden
-            by values specified in the connection_string. The next three parameters
-            (dev_host, timeout, sas_token) cannot be specified with a
-            connection_string. See
+        :param str account_name:
+            The storage account name. This is used to authenticate requests 
+            signed with an account key and to construct the storage endpoint. It 
+            is required unless a connection string is given.
+        :param str account_key:
+            The storage account key. This is used for shared key authentication. 
+        :param str sas_token:
+             A shared access signature token to use to authenticate requests 
+             instead of the account key. If account key and sas token are both 
+             specified, account key will be used to sign.
+        :param bool is_emulated:
+            Whether to use the emulator. Defaults to False. If specified, will 
+            override all other parameters besides connection string and request 
+            session.
+        :param str protocol:
+            The protocol to use for requests. Defaults to https.
+        :param str endpoint_suffix:
+            The host base component of the url, minus the account name. Defaults 
+            to Azure (core.windows.net). Override this to use the China cloud 
+            (core.chinacloudapi.cn).
+        :param requests.Session request_session:
+            The session object to use for http requests.
+        :param str connection_string:
+            If specified, this will override all other parameters besides 
+            request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
-        request_session:
-            Optional. Session object to use for http requests.
         '''
-        if connection_string is not None:
-            connection_params = StorageConnectionParameters(connection_string)
-            account_name = connection_params.account_name
-            account_key = connection_params.account_key
-            protocol = connection_params.protocol.lower()
-            host_base = connection_params.host_base_table
+        service_params = _ServiceParameters.get_service_parameters(
+            'table',
+            account_name=account_name, 
+            account_key=account_key, 
+            sas_token=sas_token, 
+            is_emulated=is_emulated, 
+            protocol=protocol, 
+            endpoint_suffix=endpoint_suffix,
+            request_session=request_session,
+            connection_string=connection_string)
             
-        super(TableService, self).__init__(
-            account_name, account_key, protocol, host_base, dev_host, sas_token, request_session)
+        super(TableService, self).__init__(service_params)
 
         if self.account_key:
-            self.authentication = StorageTableSharedKeyAuthentication(
+            self.authentication = _StorageTableSharedKeyAuthentication(
                 self.account_name,
                 self.account_key,
             )
         elif self.sas_token:
-            self.authentication = StorageSASAuthentication(self.sas_token)
+            self.authentication = _StorageSASAuthentication(self.sas_token)
         else:
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
 
@@ -581,7 +588,7 @@ class TableService(_StorageClient):
                 batch_request.path = '/' + _str(table_name)
             else:
                 batch_request.path = _get_entity_path(table_name, batch._partition_key, row_key)
-            _update_request(batch_request, self.use_local_storage)
+            _update_request(batch_request)
 
         # Construct the batch body
         request.body, boundary = _convert_batch_to_json(batch._requests)

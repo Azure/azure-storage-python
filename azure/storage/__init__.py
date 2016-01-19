@@ -16,8 +16,6 @@ from .constants import (
     __author__,
     __version__,
     X_MS_VERSION,
-    DEV_ACCOUNT_NAME,
-    DEV_ACCOUNT_KEY,
 )
 
 from .models import (
@@ -35,14 +33,4 @@ from .models import (
 from .cloudstorageaccount import CloudStorageAccount
 from .sharedaccesssignature import (
     SharedAccessSignature,
-)
-from .auth import (
-    _StorageSharedKeyAuthentication,
-    StorageNoAuthentication,
-    StorageSASAuthentication,
-    StorageSharedKeyAuthentication,
-    StorageTableSharedKeyAuthentication,
-)
-from .connection import (
-    StorageConnectionParameters,
 )
