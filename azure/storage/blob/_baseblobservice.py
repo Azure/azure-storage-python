@@ -26,9 +26,6 @@ from .._common_conversion import (
 from abc import ABCMeta
 from .._serialization import (
     _get_request_body,
-    _parse_response_for_dict,
-    _parse_response_for_dict_filter,
-    _parse_response_for_dict_prefix,
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
 )
@@ -41,6 +38,8 @@ from .models import (
     LeaseActions,
     ContainerPermissions,
     BlobPermissions,
+    Container,
+    ContainerProperties,
 )
 from ..auth import (
     _StorageSASAuthentication,
@@ -56,6 +55,8 @@ from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
     _get_download_size,
+    _parse_metadata,
+    _parse_properties,
 )
 from ._serialization import (
     _get_path,
@@ -65,8 +66,11 @@ from ._deserialization import (
     _convert_xml_to_containers,
     _parse_blob,
     _convert_xml_to_blob_list,
+    _parse_container,
+    _parse_snapshot_blob,
+    _parse_lease_time,
+    _parse_lease_id,
 )
-from .._deserialization import _parse_properties
 from ..sharedaccesssignature import (
     SharedAccessSignature,
 )
@@ -501,7 +505,7 @@ class _BaseBlobService(_StorageClient):
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict(response)
+        return _parse_container(container_name, response)
 
     def get_container_metadata(self, container_name, lease_id=None, timeout=None):
         '''
@@ -529,7 +533,7 @@ class _BaseBlobService(_StorageClient):
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
+        return _parse_metadata(response)
 
     def set_container_metadata(self, container_name, metadata=None,
                                lease_id=None, if_modified_since=None, timeout=None):
@@ -751,10 +755,7 @@ class _BaseBlobService(_StorageClient):
             ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
         ]
 
-        response = self._perform_request(request)
-        return _parse_response_for_dict_filter(
-            response,
-            filter=['x-ms-lease-id', 'x-ms-lease-time'])
+        return self._perform_request(request)
 
     def acquire_container_lease(
         self, container_name, lease_duration=-1, proposed_lease_id=None,
@@ -784,7 +785,7 @@ class _BaseBlobService(_StorageClient):
            (lease_duration < 15 or lease_duration > 60):
             raise ValueError("lease_duration param needs to be between 15 and 60 or -1.")
 
-        return self._lease_container_impl(container_name, 
+        response = self._lease_container_impl(container_name, 
                                           LeaseActions.Acquire,
                                           None, # lease_id
                                           lease_duration,
@@ -793,6 +794,7 @@ class _BaseBlobService(_StorageClient):
                                           if_modified_since,
                                           if_unmodified_since,
                                           timeout)
+        return _parse_lease_id(response)
 
     def renew_container_lease(
         self, container_name, lease_id, if_modified_since=None,
@@ -813,7 +815,7 @@ class _BaseBlobService(_StorageClient):
         '''
         _validate_not_none('lease_id', lease_id)
 
-        return self._lease_container_impl(container_name, 
+        response =  self._lease_container_impl(container_name, 
                                           LeaseActions.Renew,
                                           lease_id,
                                           None, # lease_duration
@@ -822,6 +824,7 @@ class _BaseBlobService(_StorageClient):
                                           if_modified_since,
                                           if_unmodified_since,
                                           timeout)
+        return _parse_lease_id(response)
 
     def release_container_lease(
         self, container_name, lease_id, if_modified_since=None,
@@ -847,18 +850,18 @@ class _BaseBlobService(_StorageClient):
         '''
         _validate_not_none('lease_id', lease_id)
 
-        return self._lease_container_impl(container_name, 
-                                          LeaseActions.Release,
-                                          lease_id,
-                                          None, # lease_duration
-                                          None, # lease_break_period
-                                          None, # proposed_lease_id
-                                          if_modified_since,
-                                          if_unmodified_since,
-                                          timeout)
+        self._lease_container_impl(container_name, 
+                                    LeaseActions.Release,
+                                    lease_id,
+                                    None, # lease_duration
+                                    None, # lease_break_period
+                                    None, # proposed_lease_id
+                                    if_modified_since,
+                                    if_unmodified_since,
+                                    timeout)
 
     def break_container_lease(
-        self, container_name, lease_id, lease_break_period=None,
+        self, container_name, lease_break_period=None,
         if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
         Breaks a lock on a container for delete operations.
@@ -866,8 +869,6 @@ class _BaseBlobService(_StorageClient):
 
         container_name:
             Name of existing container.
-        lease_id:
-            Lease ID for active lease.
         lease_break_period:
             This is the proposed duration of seconds that the lease
             should continue before it is broken, between 0 and 60 seconds. This
@@ -885,19 +886,19 @@ class _BaseBlobService(_StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
-        _validate_not_none('lease_id', lease_id)
         if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
             raise ValueError("lease_break_period param needs to be between 0 and 60.")
         
-        return self._lease_container_impl(container_name, 
+        response = self._lease_container_impl(container_name, 
                                           LeaseActions.Break,
-                                          lease_id,
+                                          None, # lease_id
                                           None, # lease_duration
                                           lease_break_period,
                                           None, # proposed_lease_id
                                           if_modified_since,
                                           if_unmodified_since,
                                           timeout)
+        return _parse_lease_time(response)
 
     def change_container_lease(
         self, container_name, lease_id, proposed_lease_id,
@@ -922,15 +923,15 @@ class _BaseBlobService(_StorageClient):
         '''
         _validate_not_none('lease_id', lease_id)
 
-        return self._lease_container_impl(container_name, 
-                                          LeaseActions.Change,
-                                          lease_id,
-                                          None, # lease_duration
-                                          None, # lease_break_period
-                                          proposed_lease_id,
-                                          if_modified_since,
-                                          if_unmodified_since,
-                                          timeout)
+        self._lease_container_impl(container_name, 
+                                    LeaseActions.Change,
+                                    lease_id,
+                                    None, # lease_duration
+                                    None, # lease_break_period
+                                    proposed_lease_id,
+                                    if_modified_since,
+                                    if_unmodified_since,
+                                    timeout)
 
     def list_blobs(self, container_name, prefix=None, marker=None,
                    max_results=None, include=None, delimiter=None, timeout=None):
@@ -1110,7 +1111,7 @@ class _BaseBlobService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_properties(response, Blob, BlobProperties)
+        return _parse_blob(blob_name, snapshot, response)
 
     def set_blob_properties(
         self, container_name, blob_name, content_settings=None, lease_id=None,
@@ -1256,7 +1257,7 @@ class _BaseBlobService(_StorageClient):
             check_content_md5=range_get_content_md5)
 
         response = self._perform_request(request, None)
-        return _parse_blob(response)
+        return _parse_blob(blob_name, snapshot, response)
 
     def get_blob_to_path(
         self, container_name, blob_name, file_path, open_mode='wb',
@@ -1670,7 +1671,7 @@ class _BaseBlobService(_StorageClient):
         ]     
 
         response = self._perform_request(request)
-        return _parse_response_for_dict_prefix(response, prefixes=['x-ms-meta'])
+        return _parse_metadata(response)
 
     def set_blob_metadata(self, container_name, blob_name,
                           metadata=None, lease_id=None,
@@ -1790,10 +1791,7 @@ class _BaseBlobService(_StorageClient):
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
 
-        response = self._perform_request(request)
-        return _parse_response_for_dict_filter(
-            response,
-            filter=['x-ms-lease-id', 'x-ms-lease-time'])
+        return self._perform_request(request)
 
     def acquire_blob_lease(self, container_name, blob_name,
                            lease_duration=-1,
@@ -1832,7 +1830,7 @@ class _BaseBlobService(_StorageClient):
         if lease_duration is not -1 and\
            (lease_duration < 15 or lease_duration > 60):
             raise ValueError("lease_duration param needs to be between 15 and 60 or -1.")
-        return self._lease_blob_impl(container_name,
+        response = self._lease_blob_impl(container_name,
                                      blob_name,
                                      LeaseActions.Acquire,
                                      None, # lease_id
@@ -1844,6 +1842,7 @@ class _BaseBlobService(_StorageClient):
                                      if_match,
                                      if_none_match,
                                      timeout)
+        return _parse_lease_id(response)
 
     def renew_blob_lease(self, container_name, blob_name,
                          lease_id, if_modified_since=None,
@@ -1871,18 +1870,19 @@ class _BaseBlobService(_StorageClient):
         '''
         _validate_not_none('lease_id', lease_id)
 
-        return self._lease_blob_impl(container_name,
-                                     blob_name,
-                                     LeaseActions.Renew,
-                                     lease_id,
-                                     None, # lease_duration
-                                     None, # lease_break_period
-                                     None, # proposed_lease_id
-                                     if_modified_since,
-                                     if_unmodified_since,
-                                     if_match,
-                                     if_none_match,
-                                     timeout)
+        response = self._lease_blob_impl(container_name,
+                                            blob_name,
+                                            LeaseActions.Renew,
+                                            lease_id,
+                                            None, # lease_duration
+                                            None, # lease_break_period
+                                            None, # proposed_lease_id
+                                            if_modified_since,
+                                            if_unmodified_since,
+                                            if_match,
+                                            if_none_match,
+                                            timeout)
+        return _parse_lease_id(response)
 
     def release_blob_lease(self, container_name, blob_name,
                            lease_id, if_modified_since=None,
@@ -1910,21 +1910,20 @@ class _BaseBlobService(_StorageClient):
         '''
         _validate_not_none('lease_id', lease_id)
 
-        return self._lease_blob_impl(container_name,
-                                     blob_name,
-                                     LeaseActions.Release,
-                                     lease_id,
-                                     None, # lease_duration
-                                     None, # lease_break_period
-                                     None, # proposed_lease_id
-                                     if_modified_since,
-                                     if_unmodified_since,
-                                     if_match,
-                                     if_none_match,
-                                     timeout)
+        self._lease_blob_impl(container_name,
+                                blob_name,
+                                LeaseActions.Release,
+                                lease_id,
+                                None, # lease_duration
+                                None, # lease_break_period
+                                None, # proposed_lease_id
+                                if_modified_since,
+                                if_unmodified_since,
+                                if_match,
+                                if_none_match,
+                                timeout)
 
     def break_blob_lease(self, container_name, blob_name,
-                         lease_id,
                          lease_break_period=None,
                          if_modified_since=None,
                          if_unmodified_since=None,
@@ -1937,8 +1936,6 @@ class _BaseBlobService(_StorageClient):
             Name of existing container.
         blob_name:
             Name of existing blob.
-        lease_id:
-            Lease ID for active lease.
         lease_break_period:
             For a break operation, this is the proposed duration of
             seconds that the lease should continue before it is broken, between
@@ -1960,14 +1957,13 @@ class _BaseBlobService(_StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
-        _validate_not_none('lease_id', lease_id)
         if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
             raise ValueError("lease_break_period param needs to be between 0 and 60.")
 
-        return self._lease_blob_impl(container_name,
+        response = self._lease_blob_impl(container_name,
                                      blob_name,
                                      LeaseActions.Break,
-                                     lease_id,
+                                     None, # lease_id
                                      None, # lease_duration
                                      lease_break_period,
                                      None, # proposed_lease_id
@@ -1976,6 +1972,7 @@ class _BaseBlobService(_StorageClient):
                                      if_match,
                                      if_none_match,
                                      timeout)
+        return _parse_lease_time(response)
 
     def change_blob_lease(self, container_name, blob_name,
                          lease_id,
@@ -2006,18 +2003,18 @@ class _BaseBlobService(_StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
-        return self._lease_blob_impl(container_name,
-                                     blob_name,
-                                     LeaseActions.Change,
-                                     lease_id,
-                                     None, # lease_duration
-                                     None, # lease_break_period
-                                     proposed_lease_id,
-                                     if_modified_since,
-                                     if_unmodified_since,
-                                     if_match,
-                                     if_none_match,
-                                     timeout)
+        self._lease_blob_impl(container_name,
+                                blob_name,
+                                LeaseActions.Change,
+                                lease_id,
+                                None, # lease_duration
+                                None, # lease_break_period
+                                proposed_lease_id,
+                                if_modified_since,
+                                if_unmodified_since,
+                                if_match,
+                                if_none_match,
+                                timeout)
 
     def snapshot_blob(self, container_name, blob_name,
                       metadata=None, if_modified_since=None,
@@ -2065,9 +2062,7 @@ class _BaseBlobService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict_filter(
-            response,
-            filter=['x-ms-snapshot', 'etag', 'last-modified'])
+        return _parse_snapshot_blob(blob_name, response)
 
     def copy_blob(self, container_name, blob_name, copy_source,
                   metadata=None,
@@ -2166,7 +2161,8 @@ class _BaseBlobService(_StorageClient):
         ]
 
         response = self._perform_request(request)
-        return _parse_response_for_dict(response)
+        props = _parse_properties(response, BlobProperties)
+        return props.copy
 
     def abort_copy_blob(self, container_name, blob_name, copy_id,
                         lease_id=None, timeout=None):

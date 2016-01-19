@@ -25,6 +25,7 @@ from .models import (
     Metrics,
     CorsRule,
     AccessPolicy,
+    HeaderDict,
 )
 
 def _int_or_none(value):
@@ -47,6 +48,7 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'content-length': (None, 'content_length', _int_or_none),
     'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_or_none),
     'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_or_none),
+    'x-ms-share-quota': (None, 'quota', _int_or_none),
     'content-type': ('content_settings', 'content_type', _str_or_none),
     'cache-control': ('content_settings', 'cache_control', _str_or_none),
     'content-encoding': ('content_settings', 'content_encoding', _str_or_none),
@@ -64,16 +66,31 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-copy-status-description': ('copy', 'status_description', _str_or_none),
 }
 
-def _parse_properties(response, result_class, properties_class):
+def _parse_metadata(response):
     '''
-    Extracts out resource properties and metadata informaiton.
+    Extracts out resource metadata information.
+    '''
+
+    if response is None or response.headers is None:
+        return None
+
+    metadata = {}
+    for key, value in response.headers:
+        if key.startswith('x-ms-meta-'):
+            metadata[key[10:]] = _str_or_none(value)
+
+    return metadata
+
+def _parse_properties(response, result_class):
+    '''
+    Extracts out resource properties and metadata information.
     Ignores the standard http headers.
     '''
 
-    if response is None and response.headers is not None:
+    if response is None or response.headers is None:
         return None
-    props = properties_class()
-    metadata = {}
+
+    props = result_class()
     for key, value in response.headers:
         info = GET_PROPERTIES_ATTRIBUTE_MAP.get(key)
         if info:
@@ -82,10 +99,24 @@ def _parse_properties(response, result_class, properties_class):
             else:
                 attr = getattr(props, info[0])
                 setattr(attr, info[1], info[2](value))
-        elif key.startswith('x-ms-meta-'):
-            metadata[key] = _str_or_none(value)
 
-    return result_class(response.body, props, metadata)
+    return props
+
+def _parse_response_for_dict(response):
+    ''' Extracts name-values from response header. Filter out the standard
+    http headers.'''
+
+    if response is None:
+        return None
+    http_headers = ['server', 'date', 'location', 'host',
+                    'via', 'proxy-connection', 'connection']
+    return_dict = HeaderDict()
+    if response.headers:
+        for name, value in response.headers:
+            if not name.lower() in http_headers:
+                return_dict[name] = value
+
+    return return_dict
 
 def _convert_xml_to_signed_identifiers(xml):
     list_element = ETree.fromstring(xml)

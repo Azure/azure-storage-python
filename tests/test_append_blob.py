@@ -175,8 +175,7 @@ class StorageAppendBlobTest(StorageTestCase):
         blob_name = 'blob1'
         self._create_container_and_blob(
             self.container_name, blob_name)
-        lease = self.bs.acquire_blob_lease(self.container_name, blob_name)
-        lease_id = lease['x-ms-lease-id']
+        lease_id = self.bs.acquire_blob_lease(self.container_name, blob_name)
 
         # Act
         resp = self.bs.create_blob(
@@ -188,19 +187,19 @@ class StorageAppendBlobTest(StorageTestCase):
     @record
     def test_put_blob_with_metadata(self):
         # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
         blob_name = 'blob1'
         self._create_container(self.container_name)
 
         # Act
         resp = self.bs.create_blob(
             self.container_name, blob_name,
-            metadata={'hello': 'world', 'number': '42'})
+            metadata=metadata)
 
         # Assert
         self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, blob_name)
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
+        self.assertDictEqual(md, metadata)
 
     @record
     def test_append_block(self):
@@ -213,26 +212,13 @@ class StorageAppendBlobTest(StorageTestCase):
             resp = self.bs.append_block(self.container_name,
                                         blob_name,
                                         u'block {0}'.format(i).encode('utf-8'))
-            keys = (
-                'x-ms-blob-append-offset',
-                'x-ms-blob-committed-block-count',
-            )
             
-            self.assertDictContainsKeys(keys, resp)
+            self.assertEqual(resp.append_offset, 7 * i)
+            self.assertEqual(resp.committed_block_count, i + 1)
 
         # Assert
         blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
         self.assertEqual(b'block 0block 1block 2block 3block 4', blob.content)
-
-    def assertDictContainsKeys(self, keys, dictionary, msg=None):
-        if all (k in dictionary for k in keys):
-            return
-        
-        standardMsg = ''
-        if missing:
-            standardMsg = 'Missing: some keys were not found in dictionary.'
-
-        self.fail(self._formatMessage(msg, standardMsg))
 
     @record
     def test_append_block_unicode(self):

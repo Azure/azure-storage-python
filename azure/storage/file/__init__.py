@@ -18,6 +18,7 @@ from .models import (
     File,
     FileProperties,
     Directory,
+    DirectoryProperties,
     Range,
     ShareStats,
     ContentSettings,

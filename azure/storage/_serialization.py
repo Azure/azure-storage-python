@@ -39,7 +39,6 @@ from .constants import (
 )
 from .models import (
     _unicode_type,
-    HeaderDict,
 )
 from ._common_conversion import (
     _str,
@@ -125,68 +124,6 @@ def _get_request_body(request_body):
         return request_body.encode('utf-8')
 
     return request_body
-
-
-def _parse_response_for_dict(response):
-    ''' Extracts name-values from response header. Filter out the standard
-    http headers.'''
-
-    if response is None:
-        return None
-    http_headers = ['server', 'date', 'location', 'host',
-                    'via', 'proxy-connection', 'connection']
-    return_dict = HeaderDict()
-    if response.headers:
-        for name, value in response.headers:
-            if not name.lower() in http_headers:
-                return_dict[name] = value
-
-    return return_dict
-
-
-def _parse_response_for_dict_prefix(response, prefixes):
-    ''' Extracts name-values for names starting with prefix from response
-    header. Filter out the standard http headers.'''
-
-    if response is None:
-        return None
-    return_dict = {}
-    orig_dict = _parse_response_for_dict(response)
-    if orig_dict:
-        for name, value in orig_dict.items():
-            for prefix_value in prefixes:
-                if name.lower().startswith(prefix_value.lower()):
-                    return_dict[name] = value
-                    break
-        return return_dict
-    else:
-        return None
-
-
-def _parse_response_for_dict_filter(response, filter):
-    ''' Extracts name-values for names in filter from response header. Filter
-    out the standard http headers.'''
-    if response is None:
-        return None
-    return_dict = {}
-    orig_dict = _parse_response_for_dict(response)
-    if orig_dict:
-        for name, value in orig_dict.items():
-            if name.lower() in filter:
-                return_dict[name] = value
-        return return_dict
-    else:
-        return None
-
-    
-def _extract_etag(response):
-    ''' Extracts the etag from the response headers. '''
-    if response and response.headers:
-        for name, value in response.headers:
-            if name.lower() == 'etag':
-                return value
-
-    return None
 
 def _storage_error_handler(http_error):
     ''' Simple error handler for storage service. '''

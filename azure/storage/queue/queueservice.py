@@ -29,8 +29,6 @@ from .._error import (
 )
 from .._serialization import (
     _get_request_body,
-    _parse_response_for_dict_filter,
-    _parse_response_for_dict_prefix,
 )
 from .._common_conversion import (
     _int_or_none,
@@ -58,6 +56,7 @@ from .._serialization import (
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
+    _parse_metadata,
 )
 from ._serialization import (
     _convert_queue_message_xml,
@@ -66,6 +65,8 @@ from ._serialization import (
 from ._deserialization import (
     _convert_xml_to_queues,
     _convert_xml_to_queue_messages,
+    _parse_approximate_message_count,
+    _parse_queue_message_from_headers,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -416,9 +417,7 @@ class QueueService(_StorageClient):
         ]
         response = self._perform_request(request)
 
-        return _parse_response_for_dict_prefix(
-            response,
-            prefixes=['x-ms-meta', 'x-ms-approximate-messages-count'])
+        return _parse_metadata(response), _parse_approximate_message_count(response)
 
     def set_queue_metadata(self, queue_name, metadata=None, timeout=None):
         '''
@@ -709,10 +708,7 @@ class QueueService(_StorageClient):
             request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
 
         response = self._perform_request(request)
-
-        return _parse_response_for_dict_filter(
-            response,
-            filter=['x-ms-pop_receipt', 'x-ms-time-next-visible'])
+        return _parse_queue_message_from_headers(response)
 
     def set_queue_service_properties(self, logging=None, hour_metrics=None, 
                                     minute_metrics=None, cors=None, timeout=None):

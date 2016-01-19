@@ -17,10 +17,10 @@ class Container(object):
 
     ''' Blob container class. '''
 
-    def __init__(self):
-        self.name = None
-        self.properties = ContainerProperties()
-        self.metadata = None
+    def __init__(self, name=None, props=None, metadata=None):
+        self.name = name
+        self.properties = props or ContainerProperties()
+        self.metadata = metadata
 
 
 class ContainerProperties(object):
@@ -30,18 +30,16 @@ class ContainerProperties(object):
     def __init__(self):
         self.last_modified = None
         self.etag = None
-        self.lease_status = None
-        self.lease_state = None
-        self.lease_duration = None
+        self.lease = LeaseProperties()
 
 
 class Blob(object):
 
     ''' Blob class'''
-    def __init__(self, content=None, props=None, metadata=None):
-        self.name = None
+    def __init__(self, name=None, snapshot=None, content=None, props=None, metadata=None):
+        self.name = name
         self.content = content
-        self.snapshot = None
+        self.snapshot = snapshot
         self.properties = props or BlobProperties()
         self.metadata = metadata
 
@@ -171,6 +169,16 @@ class PageRange(object):
     def __init__(self, start=None, end=None):
         self.start = start
         self.end = end
+
+class AppendBlockProperties(object):
+
+    ''' Response for an append block request. '''
+
+    def __init__(self):
+        self.last_modified = None
+        self.etag = None
+        self.append_offset = None
+        self.committed_block_count = None
 
 class LeaseActions(object):
     '''Actions for a lease'''

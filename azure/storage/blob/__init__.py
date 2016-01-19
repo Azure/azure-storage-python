@@ -25,6 +25,7 @@ from .models import (
     ContainerPermissions,
     BlobPermissions,
     LeaseActions,
+    AppendBlockProperties,
 )
 
 from .blockblobservice import BlockBlobService

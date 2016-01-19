@@ -25,11 +25,40 @@ from .models import (
     FileAndDirectoryResults,
     Range,
     ShareStats,
+    ShareProperties,
+    DirectoryProperties,
 )
 from ..models import (
     _list,
 )
-from .._deserialization import _parse_properties
+from .._deserialization import (
+    _parse_properties,
+    _parse_metadata,
+)
+
+def _parse_share(name, response):
+    if response is None:
+        return None
+
+    metadata = _parse_metadata(response)
+    props = _parse_properties(response, ShareProperties)
+    return Share(name, props, metadata)
+
+def _parse_directory(name, response):
+    if response is None:
+        return None
+
+    metadata = _parse_metadata(response)
+    props = _parse_properties(response, DirectoryProperties)
+    return Directory(name, props, metadata)
+
+def _parse_file(name, response):
+    if response is None:
+        return None
+
+    metadata = _parse_metadata(response)
+    props = _parse_properties(response, FileProperties)
+    return File(name, response.body, props, metadata)
 
 def _convert_xml_to_shares(response):
     '''
@@ -142,9 +171,6 @@ def _convert_xml_to_directories_and_files(response):
         entries.directories.append(directory)
 
     return entries
-
-def _parse_file(response):
-    return _parse_properties(response, File, FileProperties)
 
 def _convert_xml_to_ranges(response):
     '''
