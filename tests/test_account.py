@@ -21,9 +21,14 @@ from azure.storage import (
     AccountPermissions,
     Services,
 )
-from azure.storage.blob import BlockBlobService
+from azure.storage.blob import (
+    BlockBlobService,
+    PageBlobService,
+    AppendBlobService,
+)
 from azure.storage.queue import QueueService
 from azure.storage.table import TableService
+from azure.storage.file import FileService
 from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
@@ -35,22 +40,72 @@ class StorageAccountTest(StorageTestCase):
         super(StorageAccountTest, self).setUp()
         self.account_name = self.settings.STORAGE_ACCOUNT_NAME
         self.account_key = self.settings.STORAGE_ACCOUNT_KEY
+        self.sas_token = '?sv=2015-04-05&st=2015-04-29T22%3A18%3A26Z&se=2015-04-30T02%3A23%3A26Z&sr=b&sp=rw&sip=168.1.5.60-168.1.5.70&spr=https&sig=Z%2FRHIX5Xcg0Mq2rqI3OlWTjEg2tYkboXr1P9ZUXDtkk%3D'
         self.account = CloudStorageAccount(self.account_name, self.account_key)
 
+    #--Helpers-----------------------------------------------------------------
+    def validate_service(self, service, type):
+        self.assertIsNotNone(service)
+        self.assertIsInstance(service, type)
+        self.assertEqual(service.account_name, self.account_name)
+        self.assertEqual(service.account_key, self.account_key)
+
     #--Test cases --------------------------------------------------------
-    def test_create_blob_service(self):
+    def test_create_block_blob_service(self):
         # Arrange
 
         # Act
         service = self.account.create_block_blob_service()
 
         # Assert
-        self.assertIsNotNone(service)
-        self.assertIsInstance(service, BlockBlobService)
-        self.assertEqual(service.account_name, self.account_name)
-        self.assertEqual(service.account_key, self.account_key)
+        self.validate_service(service, BlockBlobService)
 
-    def test_create_blob_service_empty_credentials(self):
+    def test_create_page_blob_service(self):
+        # Arrange
+
+        # Act
+        service = self.account.create_page_blob_service()
+
+        # Assert
+        self.validate_service(service, PageBlobService)
+
+    def test_create_append_blob_service(self):
+        # Arrange
+
+        # Act
+        service = self.account.create_append_blob_service()
+
+        # Assert
+        self.validate_service(service, AppendBlobService)
+
+    def test_create_table_service(self):
+        # Arrange
+
+        # Act
+        service = self.account.create_table_service()
+
+        # Assert
+        self.validate_service(service, TableService)
+
+    def test_create_queue_service(self):
+        # Arrange
+
+        # Act
+        service = self.account.create_queue_service()
+
+        # Assert
+        self.validate_service(service, QueueService)
+
+    def test_create_file_service(self):
+        # Arrange
+
+        # Act
+        service = self.account.create_file_service()
+
+        # Assert
+        self.validate_service(service, FileService)
+
+    def test_create_service_no_key(self):
         # Arrange
 
         # Act
@@ -60,29 +115,40 @@ class StorageAccountTest(StorageTestCase):
 
         # Assert
 
-    def test_create_table_service(self):
+    def test_create_account_sas(self):
         # Arrange
-
+      
         # Act
-        service = self.account.create_table_service()
+        sas_account = CloudStorageAccount(self.account_name, sas_token=self.sas_token)
+        service = sas_account.create_block_blob_service()
 
         # Assert
         self.assertIsNotNone(service)
-        self.assertIsInstance(service, TableService)
         self.assertEqual(service.account_name, self.account_name)
-        self.assertEqual(service.account_key, self.account_key)
+        self.assertIsNone(service.account_key)
+        self.assertEqual(service.sas_token, self.sas_token)
 
-    def test_create_queue_service(self):
+    def test_create_account_sas_and_key(self):
         # Arrange
-
+        
         # Act
-        service = self.account.create_queue_service()
+        account = CloudStorageAccount(self.account_name, self.account_key, self.sas_token)
+        service = account.create_block_blob_service()
+
+        # Assert
+        self.validate_service(service, BlockBlobService)
+
+    def test_create_account_emulated(self):
+        # Arrange
+      
+        # Act
+        account = CloudStorageAccount(is_emulated=True)
+        service = account.create_block_blob_service()
 
         # Assert
         self.assertIsNotNone(service)
-        self.assertIsInstance(service, QueueService)
-        self.assertEqual(service.account_name, self.account_name)
-        self.assertEqual(service.account_key, self.account_key)
+        self.assertEqual(service.account_name, 'devstoreaccount1')
+        self.assertIsNotNone(service.account_key)
 
     def test_generate_account_sas(self):
         # Arrange

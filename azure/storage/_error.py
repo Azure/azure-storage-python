@@ -23,8 +23,9 @@ _ERROR_CONFLICT = 'Conflict ({0})'
 _ERROR_NOT_FOUND = 'Not found ({0})'
 _ERROR_UNKNOWN = 'Unknown error ({0})'
 _ERROR_STORAGE_MISSING_INFO = \
-    'You need to provide an account name and account key when creating a ' + \
-    'storage service'
+    'You need to provide an account name and either an account_key or sas_token when creating a storage service.'
+_ERROR_EMULATOR_DOES_NOT_SUPPORT_FILES = \
+    'The emulator does not support the file service.'
 _ERROR_ACCESS_POLICY = \
     'share_access_policy must be either SignedIdentifier or AccessPolicy ' + \
     'instance'

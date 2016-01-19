@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from ..constants import (
-    QUEUE_SERVICE_HOST_BASE,
-    DEV_QUEUE_HOST,
-)
-
 from .models import (
     Queue,
     QueueMessage,

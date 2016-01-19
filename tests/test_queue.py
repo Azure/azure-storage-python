@@ -71,14 +71,6 @@ class StorageQueueTest(StorageTestCase):
         return queue_name
 
     @record
-    def test_create_queue_service_empty_key(self):
-        try:
-            queue_service = QueueService('testaccount', '')
-            self.fail('Passing an empty key to create account should fail.')
-        except ValueError as e:
-            self.assertTrue(str(e) == 'You need to provide an account name and account key when creating a storage service')
-
-    @record
     def test_create_queue(self):
         # Action
         queue_name = self._get_queue_reference()

@@ -33,8 +33,8 @@ from ._chunking import (
 )
 from .models import _BlobTypes
 from ..constants import (
-    BLOB_SERVICE_HOST_BASE,
-    DEV_BLOB_HOST,
+    SERVICE_HOST_BASE,
+    DEFAULT_PROTOCOL,
 )
 from ._serialization import (
     _get_path,
@@ -50,36 +50,49 @@ else:
 
 class AppendBlobService(_BaseBlobService):
 
-    def __init__(self, account_name=None, account_key=None, protocol='https',
-                 host_base=BLOB_SERVICE_HOST_BASE, dev_host=DEV_BLOB_HOST,
-                 sas_token=None, connection_string=None, request_session=None):
+    def __init__(self, account_name=None, account_key=None, sas_token=None, 
+                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
+                 custom_domain=None, request_session=None, connection_string=None):
         '''
-        account_name:
-            your storage account name, required for all operations.
-        account_key:
-            your storage account key, required for all operations.
-        protocol:
-            Protocol. Defaults to https.
-        host_base:
-            Live host base url. Defaults to Azure url. Override this
-            for on-premise.
-        dev_host:
-            Dev host url. Defaults to localhost.
-        sas_token:
-            Token to use to authenticate with shared access signature.
-        connection_string:
-            If specified, the first four parameters (account_name,
-            account_key, protocol, host_base) may be overridden
-            by values specified in the connection_string. See 
+        :param str account_name:
+            The storage account name. This is used to authenticate requests 
+            signed with an account key and to construct the storage endpoint. It 
+            is required unless a connection string is given, or if a custom 
+            domain is used with anonymous authentication.
+        :param str account_key:
+            The storage account key. This is used for shared key authentication. 
+            If neither account key or sas token is specified, anonymous access 
+            will be used.
+        :param str sas_token:
+             A shared access signature token to use to authenticate requests 
+             instead of the account key. If account key and sas token are both 
+             specified, account key will be used to sign. If neither are 
+             specified, anonymous access will be used.
+        :param bool is_emulated:
+            Whether to use the emulator. Defaults to False. If specified, will 
+            override all other parameters besides connection string and request 
+            session.
+        :param str protocol:
+            The protocol to use for requests. Defaults to https.
+        :param str endpoint_suffix:
+            The host base component of the url, minus the account name. Defaults 
+            to Azure (core.windows.net). Override this to use the China cloud 
+            (core.chinacloudapi.cn).
+        :param str custom_domain:
+            The custom domain to use. This can be set in the Azure Portal. For 
+            example, 'www.mydomain.com'.
+        :param requests.Session request_session:
+            The session object to use for http requests.
+        :param str connection_string:
+            If specified, this will override all other parameters besides 
+            request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
-        request_session:
-            Session object to use for http requests.
         '''
         self.blob_type = _BlobTypes.AppendBlob
         super(AppendBlobService, self).__init__(
-            account_name, account_key, protocol, host_base, dev_host,
-            sas_token, connection_string, request_session)
+            account_name, account_key, sas_token, is_emulated, protocol, endpoint_suffix, 
+            custom_domain, request_session, connection_string)
 
     def create_blob(self, container_name, blob_name, content_settings=None,
                     metadata=None, lease_id=None,

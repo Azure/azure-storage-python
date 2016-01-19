@@ -36,35 +36,41 @@ class CloudStorageAccount(object):
     use the factory or can construct the appropriate service directly.
     """
 
-    def __init__(self, account_name=None, account_key=None, sas_token=None):
+    def __init__(self, account_name=None, account_key=None, sas_token=None, is_emulated=None):
         self.account_name = account_name
         self.account_key = account_key
         self.sas_token = sas_token
+        self.is_emulated = is_emulated
 
     def create_block_blob_service(self):
         from .blob.blockblobservice import BlockBlobService
         return BlockBlobService(self.account_name, self.account_key, 
-                                sas_token=self.sas_token)
+                                sas_token=self.sas_token,
+                                is_emulated=self.is_emulated)
 
     def create_page_blob_service(self):
         from .blob.pageblobservice import PageBlobService
         return PageBlobService(self.account_name, self.account_key,
-                               sas_token=self.sas_token)
+                               sas_token=self.sas_token,
+                               is_emulated=self.is_emulated)
 
     def create_append_blob_service(self):
         from .blob.appendblobservice import AppendBlobService
         return AppendBlobService(self.account_name, self.account_key,
-                                 sas_token=self.sas_token)
+                                 sas_token=self.sas_token,
+                                 is_emulated=self.is_emulated)
 
     def create_table_service(self):
         from .table.tableservice import TableService
         return TableService(self.account_name, self.account_key,
-                            sas_token=self.sas_token)
+                            sas_token=self.sas_token,
+                            is_emulated=self.is_emulated)
 
     def create_queue_service(self):
         from .queue.queueservice import QueueService
         return QueueService(self.account_name, self.account_key,
-                            sas_token=self.sas_token)
+                            sas_token=self.sas_token,
+                            is_emulated=self.is_emulated)
 
     def create_file_service(self):
         from .file.fileservice import FileService

@@ -47,14 +47,19 @@ class StorageTestCase(RecordingTestCase):
         return val
 
     def _create_storage_service(self, service_class, settings, account_name=None, account_key=None):
-        account_name = account_name or settings.STORAGE_ACCOUNT_NAME
-        account_key = account_key or settings.STORAGE_ACCOUNT_KEY
-        protocol = settings.PROTOCOL or 'https'
-        service = service_class(
-            account_name,
-            account_key,
-            protocol=protocol,
-        )
+        if settings.IS_EMULATED:
+            service = service_class(
+                is_emulated=True
+            )
+        else:
+            account_name = account_name or settings.STORAGE_ACCOUNT_NAME
+            account_key = account_key or settings.STORAGE_ACCOUNT_KEY
+            protocol = settings.PROTOCOL or 'https'
+            service = service_class(
+                account_name,
+                account_key,
+                protocol=protocol,
+            )
         self._set_service_options(service, settings)
         return service
 

@@ -53,7 +53,7 @@ def _to_utc_datetime(value):
         value = value.astimezone(tzutc())
     return value.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-def _update_request(request, use_local_storage):
+def _update_request(request):
     # Verify body
     if request.body:
         assert isinstance(request.body, bytes)
@@ -76,9 +76,13 @@ def _update_request(request, use_local_storage):
             request.headers.remove((name, value))
             break
 
+    # If the host has a path component (ex local storage), move it
+    path = request.host.split('/', 1)
+    if len(path) == 2:
+        request.host = path[0]
+        request.path = '/{}{}'.format(path[1], request.path)
+
     # Encode and optionally add local storage prefix to path
-    if use_local_storage:
-        request.path = '/' + DEV_ACCOUNT_NAME + request.path
     request.path = url_quote(request.path, '/()$=\',~')
 
     # Add query params to path
