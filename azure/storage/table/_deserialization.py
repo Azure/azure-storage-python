@@ -26,9 +26,6 @@ from .._http import HTTPResponse
 from azure.common import (
     AzureException,
 )
-from .._serialization import (
-    _extract_etag,
-)
 from .._common_conversion import (
     _decode_base64_to_bytes,
 )
