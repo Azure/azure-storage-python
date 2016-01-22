@@ -565,13 +565,13 @@ class TableService(_StorageClient):
             The timeout parameter is expressed in seconds.
         '''
         args = (table_name,)
-        kwargs = {'filter': filter, 'select': select, 'top': top, 'marker': marker, 
+        kwargs = {'filter': filter, 'select': select, 'max_results': top, 'marker': marker, 
                   'accept': accept, 'property_resolver': property_resolver, 'timeout': timeout}
         resp = self._query_entities(*args, **kwargs)
 
         return ListGenerator(resp, self._query_entities, args, kwargs)
 
-    def _query_entities(self, table_name, filter=None, select=None, top=None,
+    def _query_entities(self, table_name, filter=None, select=None, max_results=None,
                        marker=None, accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
                        property_resolver=None, timeout=None):
         '''
@@ -605,6 +605,9 @@ class TableService(_StorageClient):
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('accept', accept)
+        next_partition_key = None if marker is None else marker.get('nextpartitionkey')
+        next_row_key = None if marker is None else marker.get('nextrowkey')
+
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
@@ -613,9 +616,9 @@ class TableService(_StorageClient):
         request.query = [
             ('$filter', _str_or_none(filter)),
             ('$select', _str_or_none(select)),
-            ('$top', _int_or_none(top)),
-            ('NextPartitionKey', _str_or_none(marker.next_partition_key)),
-            ('NextRowKey', _str_or_none(marker.next_row_key)),
+            ('$top', _int_or_none(max_results)),
+            ('NextPartitionKey', _str_or_none(next_partition_key)),
+            ('NextRowKey', _str_or_none(next_row_key)),
             ('timeout', _int_or_none(timeout)),
         ]
 
