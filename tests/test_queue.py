@@ -24,21 +24,20 @@ from azure.storage import (
 from azure.storage.queue import (
     QueueService,
     QueuePermissions,
-    QueueMessageFormat,
 )
 from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
     AzureMissingResourceHttpError,
 )
-from tests.common_recordingtestcase import (
+from tests.testcase import (
+    StorageTestCase,
     TestMode,
     record,
 )
-from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
-TEST_QUEUE_PREFIX = 'mytestqueue'
+TEST_QUEUE_PREFIX = 'queue'
 #------------------------------------------------------------------------------
 
 
@@ -60,16 +59,18 @@ class StorageQueueTest(StorageTestCase):
                     pass
         return super(StorageQueueTest, self).tearDown()
 
-    def _get_queue_reference(self):
-        queue_name = self.get_resource_name(TEST_QUEUE_PREFIX + str(len(self.test_queues)))
+    #--Helpers-----------------------------------------------------------------
+    def _get_queue_reference(self, prefix=TEST_QUEUE_PREFIX):
+        queue_name = self.get_resource_name(prefix)
         self.test_queues.append(queue_name)
         return queue_name
 
-    def _create_queue(self):
-        queue_name = self._get_queue_reference()
+    def _create_queue(self, prefix=TEST_QUEUE_PREFIX):
+        queue_name = self._get_queue_reference(prefix)
         self.qs.create_queue(queue_name)
         return queue_name
 
+    #--Test cases for containers ----------------------------------------------
     @record
     def test_create_queue(self):
         # Action
@@ -159,11 +160,12 @@ class StorageQueueTest(StorageTestCase):
     @record
     def test_list_queues_with_options(self):
         # Arrange
+        prefix = 'listqueue'
         for i in range(0, 4):
-            self._create_queue()
+            self._create_queue(prefix + str(i))
 
         # Action
-        generator1 = self.qs.list_queues(prefix=TEST_QUEUE_PREFIX, max_results=3)
+        generator1 = self.qs.list_queues(prefix=prefix, max_results=3)
         queues1 = list(generator1)
 
         generator2 = self.qs.list_queues(

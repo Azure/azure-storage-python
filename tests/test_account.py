@@ -29,7 +29,11 @@ from azure.storage.blob import (
 from azure.storage.queue import QueueService
 from azure.storage.table import TableService
 from azure.storage.file import FileService
-from tests.testcase import StorageTestCase
+from tests.testcase import (
+    StorageTestCase,
+    TestMode,
+    record,
+)
 
 #------------------------------------------------------------------------------
 
@@ -150,7 +154,12 @@ class StorageAccountTest(StorageTestCase):
         self.assertEqual(service.account_name, 'devstoreaccount1')
         self.assertIsNotNone(service.account_key)
 
+    @record
     def test_generate_account_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
         # Arrange
         token = self.account.generate_shared_access_signature(
             Services.BLOB,

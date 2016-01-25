@@ -14,7 +14,6 @@
 #--------------------------------------------------------------------------
 import unittest
 
-
 from datetime import datetime
 from dateutil.tz import tzutc
 from azure.storage.table import (
@@ -26,16 +25,14 @@ from azure.storage.table import (
     AzureBatchOperationError,
     AzureBatchValidationError,
 )
-from tests.common_recordingtestcase import (
+from tests.testcase import (
+    StorageTestCase,
     record,
 )
-from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
-
-MAX_RETRY = 60
+TEST_TABLE_PREFIX = 'table'
 #------------------------------------------------------------------------------
-
 
 class StorageTableBatchTest(StorageTestCase):
 
@@ -44,51 +41,35 @@ class StorageTableBatchTest(StorageTestCase):
 
         self.ts = self._create_storage_service(TableService, self.settings)
 
-        self.table_name = self.get_resource_name('uttable')
+        self.test_tables = []
+        self.table_name = self._get_table_reference()
 
-        self.additional_table_names = []
+        if not self.is_playback():
+            self.ts.create_table(self.table_name)
 
     def tearDown(self):
         if not self.is_playback():
-            try:
-                self.ts.delete_table(self.table_name)
-            except:
-                pass
-
-            for name in self.additional_table_names:
+            for table_name in self.test_tables:
                 try:
-                    self.ts.delete_table(name)
+                    self.ts.delete_table(table_name)
                 except:
                     pass
-
         return super(StorageTableBatchTest, self).tearDown()
 
     #--Helpers-----------------------------------------------------------------
-    def _create_table(self, table_name):
-        '''
-        Creates a table with the specified name.
-        '''
-        self.ts.create_table(table_name, True)
 
-    def _create_table_with_default_entities(self, table_name, entity_count):
-        '''
-        Creates a table with the specified name and adds entities with the
-        default set of values. PartitionKey is set to 'MyPartition' and RowKey
-        is set to a unique counter value starting at 1 (as a string).
-        '''
-        entities = []
-        self._create_table(table_name)
-        for i in range(1, entity_count + 1):
-            entities.append(self.ts.insert_entity(
-                table_name,
-                self._create_default_entity_dict('MyPartition', str(i))))
-        return entities
+    def _get_table_reference(self, prefix=TEST_TABLE_PREFIX):
+        table_name = self.get_resource_name(prefix)
+        self.test_tables.append(table_name)
+        return table_name
 
-    def _create_default_entity_dict(self, partition, row):
+    def _create_default_entity_dict(self, partition=None, row=None):
         '''
         Creates a dictionary-based entity with fixed values, using all
         of the supported data types.
         '''
+        partition = partition if partition is not None else self.get_resource_name('pk')
+        row = row if row is not None else self.get_resource_name('rk')
         return {'PartitionKey': partition,
                 'RowKey': row,
                 'age': 39,
@@ -171,7 +152,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_insert(self):
         # Arrange
-        self._create_table(self.table_name)
 
         # Act
         entity = Entity()
@@ -195,7 +175,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_update(self):
         # Arrange
-        self._create_table(self.table_name)
 
         # Act
         entity = Entity()
@@ -225,7 +204,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_merge(self):
         # Arrange
-        self._create_table(self.table_name)
 
         # Act
         entity = Entity()
@@ -259,55 +237,49 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_update_if_match(self):
         # Arrange
-        etags = self._create_table_with_default_entities(self.table_name, 1)
+        entity = self._create_default_entity_dict()
+        etag = self.ts.insert_entity(self.table_name, entity)
 
         # Act
-        sent_entity = self._create_updated_entity_dict('MyPartition', '1')
+        sent_entity = self._create_updated_entity_dict(entity['PartitionKey'], entity['RowKey'])
         batch = TableBatch()
-        batch.update_entity(sent_entity, if_match=etags[0])
+        batch.update_entity(sent_entity, etag)
         resp = self.ts.commit_batch(self.table_name, batch)
 
         # Assert
         self.assertIsNotNone(resp)
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1')
+        received_entity = self.ts.get_entity(self.table_name, entity['PartitionKey'], entity['RowKey'])
         self._assert_updated_entity(received_entity)
         self.assertEqual(resp[0], received_entity.etag)
 
     @record
     def test_batch_update_if_doesnt_match(self):
         # Arrange
-        self._create_table_with_default_entities(self.table_name, 2)
+        entity = self._create_default_entity_dict()
+        self.ts.insert_entity(self.table_name, entity)
 
         # Act
-        sent_entity1 = self._create_updated_entity_dict('MyPartition', '1')
-        sent_entity2 = self._create_updated_entity_dict('MyPartition', '2')
+        sent_entity1 = self._create_updated_entity_dict(entity['PartitionKey'], entity['RowKey'])
 
         batch = TableBatch()
         batch.update_entity(
             sent_entity1,
             if_match=u'W/"datetime\'2012-06-15T22%3A51%3A44.9662825Z\'"')
-        batch.update_entity(sent_entity2)
         try:
             self.ts.commit_batch(self.table_name, batch)
         except AzureBatchOperationError as error:
             self.assertEqual(error.code, 'UpdateConditionNotSatisfied')
-            self.assertTrue(str(error).startswith('0:The update condition specified in the request was not satisfied.'))
+            self.assertTrue(str(error).startswith('The update condition specified in the request was not satisfied.'))
         else:
             self.fail('AzureBatchOperationError was expected')
 
         # Assert
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '1')
-        self._assert_default_entity(received_entity)
-        received_entity = self.ts.get_entity(
-            self.table_name, 'MyPartition', '2')
+        received_entity = self.ts.get_entity(self.table_name, entity['PartitionKey'], entity['RowKey'])
         self._assert_default_entity(received_entity)
 
     @record
     def test_batch_insert_replace(self):
         # Arrange
-        self._create_table(self.table_name)
 
         # Act
         entity = Entity()
@@ -335,7 +307,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_insert_merge(self):
         # Arrange
-        self._create_table(self.table_name)
 
         # Act
         entity = Entity()
@@ -363,7 +334,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_delete(self):
         # Arrange
-        self._create_table(self.table_name)
 
         # Act
         entity = Entity()
@@ -390,7 +360,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_inserts(self):
         # Arrange
-        self._create_table(self.table_name)
 
         # Act
         entity = Entity()
@@ -406,8 +375,7 @@ class StorageTableBatchTest(StorageTestCase):
             batch.insert_entity(entity)
         self.ts.commit_batch(self.table_name, batch)
 
-        entities = self.ts.query_entities(
-            self.table_name, "PartitionKey eq 'batch_inserts'", '')
+        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq 'batch_inserts'", ''))
 
         # Assert
         self.assertIsNotNone(entities)
@@ -416,7 +384,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_all_operations_together(self):
         # Arrange
-        self._create_table(self.table_name)
 
          # Act
         entity = Entity()
@@ -455,14 +422,12 @@ class StorageTableBatchTest(StorageTestCase):
 
         # Assert
         self.assertEqual(6, len(resp))
-        entities = self.ts.query_entities(
-            self.table_name, "PartitionKey eq '003'", '')
+        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq '003'", ''))
         self.assertEqual(5, len(entities))
 
     @record
     def test_batch_all_operations_together_context_manager(self):
         # Arrange
-        self._create_table(self.table_name)
 
          # Act
         entity = Entity()
@@ -499,17 +464,15 @@ class StorageTableBatchTest(StorageTestCase):
             batch.insert_or_merge_entity(entity)
 
         # Assert
-        entities = self.ts.query_entities(
-            self.table_name, "PartitionKey eq '003'", '')
+        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq '003'", ''))
         self.assertEqual(5, len(entities))
 
     @record
     def test_batch_reuse(self):
         # Arrange
-        self._create_table(self.table_name)
 
-        self.additional_table_names.append('table2')
-        self._create_table('table2')
+        table2 = self._get_table_reference('table2')
+        self.ts.create_table(table2)
 
          # Act
         entity = Entity()
@@ -531,7 +494,7 @@ class StorageTableBatchTest(StorageTestCase):
         batch.insert_entity(entity)
 
         self.ts.commit_batch(self.table_name, batch)
-        self.ts.commit_batch('table2', batch)
+        self.ts.commit_batch(table2, batch)
 
         batch = TableBatch()
         entity.RowKey = 'batch_all_operations_together'
@@ -551,18 +514,16 @@ class StorageTableBatchTest(StorageTestCase):
         batch.insert_or_merge_entity(entity)
 
         self.ts.commit_batch(self.table_name, batch)
-        resp = self.ts.commit_batch('table2', batch)
+        resp = self.ts.commit_batch(table2, batch)
 
         # Assert
         self.assertEqual(6, len(resp))
-        entities = self.ts.query_entities(
-            self.table_name, "PartitionKey eq '003'", '')
+        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq '003'", ''))
         self.assertEqual(5, len(entities))
 
     @record
     def test_batch_same_row_operations_fail(self):
         # Arrange
-        self._create_table(self.table_name)
         entity = self._create_default_entity_dict('001', 'batch_negative_1')
         self.ts.insert_entity(self.table_name, entity)
 
@@ -583,7 +544,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_different_partition_operations_fail(self):
         # Arrange
-        self._create_table(self.table_name)
         entity = self._create_default_entity_dict('001', 'batch_negative_1')
         self.ts.insert_entity(self.table_name, entity)
 
@@ -604,7 +564,6 @@ class StorageTableBatchTest(StorageTestCase):
     @record
     def test_batch_too_many_ops(self):
         # Arrange
-        self._create_table(self.table_name)
         entity = self._create_default_entity_dict('001', 'batch_negative_1')
         self.ts.insert_entity(self.table_name, entity)
 

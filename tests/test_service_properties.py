@@ -27,10 +27,10 @@ from azure.storage.blob import BlockBlobService
 from azure.storage.queue import QueueService
 from azure.storage.table import TableService
 from azure.storage.file import FileService
-from tests.common_recordingtestcase import (
+from tests.testcase import (
+    StorageTestCase,
     record,
 )
-from tests.testcase import StorageTestCase
 
 
 #------------------------------------------------------------------------------
@@ -45,9 +45,6 @@ class ServicePropertiesTest(StorageTestCase):
         self.qs = self._create_storage_service(QueueService, self.settings)
         self.ts = self._create_storage_service(TableService, self.settings)
         self.fs = self._create_storage_service(FileService, self.settings)
-
-    def tearDown(self):
-        return super(ServicePropertiesTest, self).tearDown()
 
     #--Helpers-----------------------------------------------------------------
     def _assert_properties_default(self, prop):

@@ -22,16 +22,14 @@ from azure.storage.queue import (
 from azure.common import (
     AzureHttpError,
 )
-from tests.common_recordingtestcase import (
-    TestMode,
+from tests.testcase import (
+    StorageTestCase,
     record,
 )
-from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 TEST_QUEUE_PREFIX = 'mytestqueue'
 #------------------------------------------------------------------------------
-
 
 class StorageQueueEncodingTest(StorageTestCase):
 
@@ -39,7 +37,6 @@ class StorageQueueEncodingTest(StorageTestCase):
         super(StorageQueueEncodingTest, self).setUp()
 
         self.qs = self._create_storage_service(QueueService, self.settings)
-
         self.test_queues = []
 
     def tearDown(self):
@@ -51,6 +48,7 @@ class StorageQueueEncodingTest(StorageTestCase):
                     pass
         return super(StorageQueueEncodingTest, self).tearDown()
 
+    #--Helpers-----------------------------------------------------------------
     def _get_queue_reference(self):
         queue_name = self.get_resource_name(TEST_QUEUE_PREFIX + str(len(self.test_queues)))
         self.test_queues.append(queue_name)
@@ -72,7 +70,7 @@ class StorageQueueEncodingTest(StorageTestCase):
         messages = qs.get_messages(queue_name)
         self.assertEqual(message, messages[0].content)
 
-#------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
 
     @record
     def test_message_text_xml(self):
