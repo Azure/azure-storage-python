@@ -56,7 +56,6 @@ from ..constants import (
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
-    _convert_xml_to_signed_identifiers,
     _get_download_size,
     _parse_metadata,
     _parse_properties,
@@ -73,6 +72,7 @@ from ._deserialization import (
     _parse_snapshot_blob,
     _parse_lease_time,
     _parse_lease_id,
+    _convert_xml_to_signed_identifiers_and_access,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -638,7 +638,7 @@ class _BaseBlobService(_StorageClient):
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
 
         response = self._perform_request(request)
-        return _convert_xml_to_signed_identifiers(response.body)
+        return _convert_xml_to_signed_identifiers_and_access(response)
 
     def set_container_acl(self, container_name, signed_identifiers=None,
                           blob_public_access=None, lease_id=None,

@@ -75,11 +75,11 @@ class StorageQueueTest(StorageTestCase):
         # Action
         queue_name = self._get_queue_reference()
         self.qs.create_queue(queue_name)
-        metadata, count = self.qs.get_queue_metadata(queue_name)
+        metadata = self.qs.get_queue_metadata(queue_name)
 
         # Asserts
         self.assertEqual(0, len(metadata))
-        self.assertEqual(0, count)
+        self.assertEqual(0, metadata.approximate_message_count)
 
     @record
     def test_create_queue_already_exist(self):
@@ -110,10 +110,10 @@ class StorageQueueTest(StorageTestCase):
         self.qs.create_queue(
             queue_name,
             metadata={'val1': 'test', 'val2': 'blah'})
-        metadata, count = self.qs.get_queue_metadata(queue_name)
+        metadata = self.qs.get_queue_metadata(queue_name)
 
         # Asserts
-        self.assertEqual(0, count)
+        self.assertEqual(0, metadata.approximate_message_count)
         self.assertEqual(2, len(metadata))
         self.assertEqual('test', metadata['val1'])
         self.assertEqual('blah', metadata['val2'])
@@ -209,10 +209,10 @@ class StorageQueueTest(StorageTestCase):
         self.qs.set_queue_metadata(
             queue_name,
             metadata={'val1': 'test', 'val2': 'blah'})
-        metadata, count = self.qs.get_queue_metadata(queue_name)
+        metadata = self.qs.get_queue_metadata(queue_name)
 
         # Asserts
-        self.assertEqual(0, count)
+        self.assertEqual(0, metadata.approximate_message_count)
         self.assertEqual(2, len(metadata))
         self.assertEqual('test', metadata['val1'])
         self.assertEqual('blah', metadata['val2'])
@@ -222,10 +222,10 @@ class StorageQueueTest(StorageTestCase):
         # Action
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, 'message1')
-        metadata, count = self.qs.get_queue_metadata(queue_name)
+        metadata = self.qs.get_queue_metadata(queue_name)
 
         # Asserts
-        self.assertTrue(count >= 1)
+        self.assertTrue(metadata.approximate_message_count >= 1)
         self.assertEqual(0, len(metadata))
 
     @record

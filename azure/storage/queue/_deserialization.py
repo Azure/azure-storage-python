@@ -28,14 +28,19 @@ from ..models import (
 from .._deserialization import (
     _int_or_none,
     _parse_response_for_dict,
+    _parse_metadata,
 )
 
-def _parse_approximate_message_count(response):
+def _parse_metadata_and_message_count(response):
     '''
     Extracts approximate messages count header.
     '''
+    metadata = _parse_metadata(response)
+
     headers = _parse_response_for_dict(response)
-    return _int_or_none(headers.get('x-ms-approximate-messages-count'))
+    metadata.approximate_message_count = _int_or_none(headers.get('x-ms-approximate-messages-count'))
+
+    return metadata
 
 def _parse_queue_message_from_headers(response):
     '''

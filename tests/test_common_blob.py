@@ -275,6 +275,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertTrue(created)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
+        self.assertEqual('container', acl.public_access)
 
     @record
     def test_create_container_with_public_access_blob(self):
@@ -287,6 +288,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertTrue(created)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
+        self.assertEqual('blob', acl.public_access)
 
     @record
     def test_create_container_with_metadata(self):
@@ -597,6 +599,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 0)
+        self.assertIsNone(acl.public_access)
 
     @record
     def test_get_container_acl_with_lease_id(self):
@@ -610,6 +613,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 0)
+        self.assertIsNone(acl.public_access)
 
     @record
     def test_get_container_acl_with_non_matching_lease_id(self):
@@ -647,6 +651,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNone(resp)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
+        self.assertIsNone(acl.public_access)
 
     @record
     def test_set_container_acl_with_lease_id(self):
@@ -661,6 +666,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNone(resp)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
+        self.assertIsNone(acl.public_access)
 
     @record
     def test_set_container_acl_with_non_matching_lease_id(self):
@@ -689,6 +695,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNone(resp)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
+        self.assertEqual('container', acl.public_access)
 
     @record
     def test_set_container_acl_with_public_access_blob(self):
@@ -702,6 +709,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNone(resp)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
+        self.assertEqual('blob', acl.public_access)
 
     @record
     def test_set_container_acl_with_empty_signed_identifiers(self):
@@ -716,6 +724,7 @@ class StorageCommonBlobTest(StorageTestCase):
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 0)
+        self.assertIsNone(acl.public_access)
 
     @record
     def test_set_container_acl_with_signed_identifiers(self):
@@ -738,6 +747,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 1)
         self.assertTrue('testid' in acl)
+        self.assertIsNone(acl.public_access)
 
     @record
     def test_set_container_acl_with_non_existing_container(self):
