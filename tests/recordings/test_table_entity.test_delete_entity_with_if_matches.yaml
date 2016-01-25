@@ -1,0 +1,95 @@
+interactions:
+- request:
+    body: !!binary |
+      eyJiaW5hcnkiOiBudWxsLCAiYmlydGhkYXlAb2RhdGEudHlwZSI6ICJFZG0uRGF0ZVRpbWUiLCAi
+      Y2xzaWQiOiAiYzlkYTY0NTUtMjEzZC00MmM5LTlhNzktM2U5MTQ5YTU3ODMzIiwgImJpcnRoZGF5
+      IjogIjE5NzAtMTAtMDRUMDA6MDA6MDBaIiwgInJhdGlvIjogMy4xLCAiYWdlIjogIjM5IiwgInNl
+      eCI6ICJtYWxlIiwgImFnZUBvZGF0YS50eXBlIjogIkVkbS5JbnQ2NCIsICJtYXJyaWVkIjogdHJ1
+      ZSwgImV2ZW5yYXRpbyI6IDMuMCwgIkJpcnRoZGF5QG9kYXRhLnR5cGUiOiAiRWRtLkRhdGVUaW1l
+      IiwgIkJpcnRoZGF5IjogIjE5NzMtMTAtMDRUMDA6MDA6MDBaIiwgImxhcmdlIjogIjkzMzMxMTEw
+      MCIsICJvdGhlciI6IDIwLCAiUm93S2V5IjogInJrMzgwMTE1NmQiLCAibGFyZ2VAb2RhdGEudHlw
+      ZSI6ICJFZG0uSW50NjQiLCAib3B0aW9uYWwiOiBudWxsLCAiZGVjZWFzZWQiOiBmYWxzZSwgImNs
+      c2lkQG9kYXRhLnR5cGUiOiAiRWRtLkd1aWQiLCAiUGFydGl0aW9uS2V5IjogInBrMzgwMTE1NmQi
+      fQ==
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['514']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:33:02 GMT']
+      x-ms-version: ['2015-04-05']
+    method: POST
+    uri: https://storagename.table.core.windows.net/uttable3801156d
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      DataServiceId: ['https://storagename.table.core.windows.net/uttable3801156d(PartitionKey=''pk3801156d'',RowKey=''rk3801156d'')']
+      Date: ['Mon, 25 Jan 2016 19:33:02 GMT']
+      ETag: [W/"datetime'2016-01-25T19%3A33%3A02.7460522Z'"]
+      Location: ['https://storagename.table.core.windows.net/uttable3801156d(PartitionKey=''pk3801156d'',RowKey=''rk3801156d'')']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [ce3ef1d9-0002-0056-7ca7-57177a000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      DataServiceVersion: [3.0;NetFx]
+      If-Match: [W/"datetime'2016-01-25T19%3A33%3A02.7460522Z'"]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:33:02 GMT']
+      x-ms-version: ['2015-04-05']
+    method: DELETE
+    uri: https://storagename.table.core.windows.net/uttable3801156d(PartitionKey='pk3801156d',RowKey='rk3801156d')
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Mon, 25 Jan 2016 19:33:02 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [ce3ef1db-0002-0056-7ea7-57177a000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:33:02 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.table.core.windows.net/uttable3801156d(PartitionKey='pk3801156d',RowKey='rk3801156d')
+  response:
+    body: {string: '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
+        specified resource does not exist.\nRequestId:ce3ef1dd-0002-0056-80a7-57177a000000\nTime:2016-01-25T19:33:02.8270721Z"}}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Mon, 25 Jan 2016 19:33:02 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [ce3ef1dd-0002-0056-80a7-57177a000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 404, message: Not Found}
+version: 1

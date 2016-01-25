@@ -1,0 +1,92 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:01:55 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharecb001c44/dir1?restype=directory
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:01:55 GMT']
+      ETag: ['"0x8D325B9FE3E1962"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:01:55 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [ceaf429b-001a-0067-41a2-574cad000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:01:55 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharecb001c44/dir1?restype=directory
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceAlreadyExists</Code><Message>The\
+        \ specified resource already exists.\nRequestId:ceaf429c-001a-0067-42a2-574cad000000\n\
+        Time:2016-01-25T19:01:56.7140014Z</Message></Error>"}
+    headers:
+      Content-Length: ['228']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:01:56 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [ceaf429c-001a-0067-42a2-574cad000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 409, message: The specified resource already exists.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:25:44 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharecb001c44/dir1?restype=directory
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:25:45 GMT']
+      ETag: ['"0x8D325BD5245CC71"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:25:44 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [02461b2a-001a-0020-6ca6-5793c6000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:25:45 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharecb001c44/dir1?restype=directory
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceAlreadyExists</Code><Message>The\
+        \ specified resource already exists.\nRequestId:02461b2b-001a-0020-6da6-5793c6000000\n\
+        Time:2016-01-25T19:25:45.3657231Z</Message></Error>"}
+    headers:
+      Content-Length: ['228']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:25:45 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [02461b2b-001a-0020-6da6-5793c6000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 409, message: The specified resource already exists.}
+version: 1

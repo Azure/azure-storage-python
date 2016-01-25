@@ -1,0 +1,25 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:08:20 GMT']
+      x-ms-version: ['2015-04-05']
+    method: DELETE
+    uri: https://storagename.blob.core.windows.net/utcontainer8d2416f2/blob8d2416f2
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>BlobNotFound</Code><Message>The\
+        \ specified blob does not exist.\nRequestId:992e8083-0001-0040-7ca3-57d6e4000000\n\
+        Time:2016-01-25T19:08:20.6414372Z</Message></Error>"}
+    headers:
+      Content-Length: ['215']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:08:19 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [992e8083-0001-0040-7ca3-57d6e4000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 404, message: The specified blob does not exist.}
+version: 1

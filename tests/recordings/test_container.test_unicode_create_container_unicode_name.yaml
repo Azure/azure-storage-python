@@ -1,0 +1,48 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:05:22 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/%E5%95%8A%E9%BD%84%E4%B8%82%E7%8B%9B%E7%8B%9C?restype=container
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidResourceName</Code><Message>The\
+        \ specifed resource name contains invalid characters.\nRequestId:d3152075-0001-0070-52a3-578cce000000\n\
+        Time:2016-01-25T19:05:23.3029779Z</Message></Error>"}
+    headers:
+      Content-Length: ['243']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:05:23 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [d3152075-0001-0070-52a3-578cce000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 400, message: The specifed resource name contains invalid characters.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:30:01 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/%E5%95%8A%E9%BD%84%E4%B8%82%E7%8B%9B%E7%8B%9C?restype=container
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidResourceName</Code><Message>The\
+        \ specifed resource name contains invalid characters.\nRequestId:811cbf68-0001-0089-6ea6-57462e000000\n\
+        Time:2016-01-25T19:30:02.6325664Z</Message></Error>"}
+    headers:
+      Content-Length: ['243']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:30:02 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [811cbf68-0001-0089-6ea6-57462e000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 400, message: The specifed resource name contains invalid characters.}
+version: 1

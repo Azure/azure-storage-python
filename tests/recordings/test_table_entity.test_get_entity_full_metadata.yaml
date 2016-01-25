@@ -1,0 +1,69 @@
+interactions:
+- request:
+    body: !!binary |
+      eyJQYXJ0aXRpb25LZXkiOiAicGtkMWNiMTM1ZiIsICJhZ2VAb2RhdGEudHlwZSI6ICJFZG0uSW50
+      NjQiLCAiY2xzaWRAb2RhdGEudHlwZSI6ICJFZG0uR3VpZCIsICJzZXgiOiAibWFsZSIsICJjbHNp
+      ZCI6ICJjOWRhNjQ1NS0yMTNkLTQyYzktOWE3OS0zZTkxNDlhNTc4MzMiLCAib3RoZXIiOiAyMCwg
+      ImV2ZW5yYXRpbyI6IDMuMCwgImJpcnRoZGF5IjogIjE5NzAtMTAtMDRUMDA6MDA6MDBaIiwgIlJv
+      d0tleSI6ICJya2QxY2IxMzVmIiwgImJpcnRoZGF5QG9kYXRhLnR5cGUiOiAiRWRtLkRhdGVUaW1l
+      IiwgImRlY2Vhc2VkIjogZmFsc2UsICJsYXJnZUBvZGF0YS50eXBlIjogIkVkbS5JbnQ2NCIsICJs
+      YXJnZSI6ICI5MzMzMTExMDAiLCAibWFycmllZCI6IHRydWUsICJyYXRpbyI6IDMuMSwgIm9wdGlv
+      bmFsIjogbnVsbCwgImFnZSI6ICIzOSIsICJiaW5hcnkiOiBudWxsLCAiQmlydGhkYXlAb2RhdGEu
+      dHlwZSI6ICJFZG0uRGF0ZVRpbWUiLCAiQmlydGhkYXkiOiAiMTk3My0xMC0wNFQwMDowMDowMFoi
+      fQ==
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['514']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:32:57 GMT']
+      x-ms-version: ['2015-04-05']
+    method: POST
+    uri: https://storagename.table.core.windows.net/uttabled1cb135f
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      DataServiceId: ['https://storagename.table.core.windows.net/uttabled1cb135f(PartitionKey=''pkd1cb135f'',RowKey=''rkd1cb135f'')']
+      Date: ['Mon, 25 Jan 2016 19:32:56 GMT']
+      ETag: [W/"datetime'2016-01-25T19%3A32%3A57.3927085Z'"]
+      Location: ['https://storagename.table.core.windows.net/uttabled1cb135f(PartitionKey=''pkd1cb135f'',RowKey=''rkd1cb135f'')']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [504a579f-0002-0019-37a7-57d362000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=fullmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:32:57 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.table.core.windows.net/uttabled1cb135f(PartitionKey='pkd1cb135f',RowKey='rkd1cb135f')
+  response:
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttabled1cb135f/@Element","odata.type":"storagename.uttabled1cb135f","odata.id":"https://storagename.table.core.windows.net/uttabled1cb135f(PartitionKey=''pkd1cb135f'',RowKey=''rkd1cb135f'')","odata.etag":"W/\"datetime''2016-01-25T19%3A32%3A57.3927085Z''\"","odata.editLink":"uttabled1cb135f(PartitionKey=''pkd1cb135f'',RowKey=''rkd1cb135f'')","PartitionKey":"pkd1cb135f","RowKey":"rkd1cb135f","Timestamp@odata.type":"Edm.DateTime","Timestamp":"2016-01-25T19:32:57.3927085Z","sex":"male","clsid@odata.type":"Edm.Guid","clsid":"c9da6455-213d-42c9-9a79-3e9149a57833","other":20,"evenratio":3.0,"birthday@odata.type":"Edm.DateTime","birthday":"1970-10-04T00:00:00Z","deceased":false,"large@odata.type":"Edm.Int64","large":"933311100","married":true,"ratio":3.1,"age@odata.type":"Edm.Int64","age":"39","Birthday@odata.type":"Edm.DateTime","Birthday":"1973-10-04T00:00:00Z"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=fullmetadata;streaming=true;charset=utf-8]
+      Date: ['Mon, 25 Jan 2016 19:32:56 GMT']
+      ETag: [W/"datetime'2016-01-25T19%3A32%3A57.3927085Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [504a57ab-0002-0019-42a7-57d362000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

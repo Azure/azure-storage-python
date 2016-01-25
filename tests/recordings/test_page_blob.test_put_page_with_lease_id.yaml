@@ -1,0 +1,128 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-blob-content-length: ['512']
+      x-ms-blob-type: [PageBlob]
+      x-ms-date: ['Mon, 25 Jan 2016 21:27:57 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer6f75110d/blob6f75110d
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 21:27:56 GMT']
+      ETag: ['"0x8D325CE6506DA97"']
+      Last-Modified: ['Mon, 25 Jan 2016 21:27:57 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [1b3dec6e-0001-0035-25b7-57515f000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:27:57 GMT']
+      x-ms-lease-action: [acquire]
+      x-ms-lease-duration: ['-1']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer6f75110d/blob6f75110d?comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 21:27:56 GMT']
+      ETag: ['"0x8D325CE6506DA97"']
+      Last-Modified: ['Mon, 25 Jan 2016 21:27:57 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [06e59c7e-37f3-49ff-bb79-6b5e6d7995c0]
+      x-ms-request-id: [1b3dec7e-0001-0035-35b7-57515f000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      Fn2+hzmsLECY3d+hNw2SyePLeUgqaQnKUMNaN9SU3T6KD0B2X1yFGvg13dz4RW/iejESBCy49ULn
+      3NfZbFUzbNdT1MiPt7LwJnXxEQvYJLtoCW5mORlTrUUEJ177u4s+lZNkdmNF0PbE+76xf3cNfDsp
+      T0iu69E/bKSzrhs0VdNdx+T0mtBTRSlNQMmzk5dx8PrystGCDrsuiQtD/nqzrrDD0B2wEowmwLZ8
+      ZtpE/Fv6Z8r3C6uKKxuwfT9SiSV2+7+GpreoU8lqT8mVCL7vZof2WplckascMheIlxaoqNZ/b2H1
+      uXHPrDAYlx6JHlOqpINPJeQtMxiUS5Bv4i3OiLemp2c4fgHjl6qryHgQhfF9zoVDSedZT7K0VGto
+      zjqkCzk/2IfukbOrtv8V3X3WVy11jgn7UdfK/W6Ey1ksZtNpzQBcN20vCuq3qhMFT84vicTvVGWf
+      OWOegdDogC/UzOljMilYUa3o2JU/Na0XJcKr4wU0JFNAj9gLDTCJBLLhhW+KiZ5+Qga7Sy2U2/yV
+      QfiJSrfhrvtCE2Quyvk8/17dl/iw7QOlJ9jqBsmZCoCaynswFEbzrx2mlX1Nhyo/JQix0WrVx4dc
+      DDI7rCiQZKMsDaoRZo+jbDDdnyqlkpLnyyWNW58luRE4GU9JrtikqmxRqCL3vrb6OjDKpDLzIq0=
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['512']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:27:57 GMT']
+      x-ms-lease-id: [06e59c7e-37f3-49ff-bb79-6b5e6d7995c0]
+      x-ms-page-write: [update]
+      x-ms-range: [bytes=0-511]
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer6f75110d/blob6f75110d?comp=page
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [iq1onYxAiVkYCgi3Z9b5ig==]
+      Date: ['Mon, 25 Jan 2016 21:27:56 GMT']
+      ETag: ['"0x8D325CE65124CC4"']
+      Last-Modified: ['Mon, 25 Jan 2016 21:27:57 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-blob-sequence-number: ['0']
+      x-ms-request-id: [1b3dec8a-0001-0035-41b7-57515f000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:27:57 GMT']
+      x-ms-lease-id: [06e59c7e-37f3-49ff-bb79-6b5e6d7995c0]
+      x-ms-range: [bytes=None-]
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer6f75110d/blob6f75110d
+  response:
+    body:
+      string: !!binary |
+        Fn2+hzmsLECY3d+hNw2SyePLeUgqaQnKUMNaN9SU3T6KD0B2X1yFGvg13dz4RW/iejESBCy49ULn
+        3NfZbFUzbNdT1MiPt7LwJnXxEQvYJLtoCW5mORlTrUUEJ177u4s+lZNkdmNF0PbE+76xf3cNfDsp
+        T0iu69E/bKSzrhs0VdNdx+T0mtBTRSlNQMmzk5dx8PrystGCDrsuiQtD/nqzrrDD0B2wEowmwLZ8
+        ZtpE/Fv6Z8r3C6uKKxuwfT9SiSV2+7+GpreoU8lqT8mVCL7vZof2WplckascMheIlxaoqNZ/b2H1
+        uXHPrDAYlx6JHlOqpINPJeQtMxiUS5Bv4i3OiLemp2c4fgHjl6qryHgQhfF9zoVDSedZT7K0VGto
+        zjqkCzk/2IfukbOrtv8V3X3WVy11jgn7UdfK/W6Ey1ksZtNpzQBcN20vCuq3qhMFT84vicTvVGWf
+        OWOegdDogC/UzOljMilYUa3o2JU/Na0XJcKr4wU0JFNAj9gLDTCJBLLhhW+KiZ5+Qga7Sy2U2/yV
+        QfiJSrfhrvtCE2Quyvk8/17dl/iw7QOlJ9jqBsmZCoCaynswFEbzrx2mlX1Nhyo/JQix0WrVx4dc
+        DDI7rCiQZKMsDaoRZo+jbDDdnyqlkpLnyyWNW58luRE4GU9JrtikqmxRqCL3vrb6OjDKpDLzIq0=
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['512']
+      Content-Type: [application/octet-stream]
+      Date: ['Mon, 25 Jan 2016 21:27:56 GMT']
+      ETag: ['"0x8D325CE65124CC4"']
+      Last-Modified: ['Mon, 25 Jan 2016 21:27:57 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Vary: [Origin]
+      x-ms-blob-sequence-number: ['0']
+      x-ms-blob-type: [PageBlob]
+      x-ms-lease-duration: [infinite]
+      x-ms-lease-state: [leased]
+      x-ms-lease-status: [locked]
+      x-ms-request-id: [1b3dec99-0001-0035-4fb7-57515f000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1
