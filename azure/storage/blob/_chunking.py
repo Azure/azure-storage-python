@@ -211,13 +211,12 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
 class _PageBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_start, chunk_data):
         chunk_end = chunk_start + len(chunk_data) - 1
-        self.blob_service.put_page(
+        self.blob_service.update_page(
             self.container_name,
             self.blob_name,
             chunk_data,
             chunk_start,
             chunk_end,
-            'update',
             lease_id=self.lease_id,
             timeout=self.timeout,
         )

@@ -200,7 +200,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertIsNone(resp)
 
     @record
-    def test_put_page_with_lease_id(self):
+    def test_update_page_with_lease_id(self):
         # Arrange
         self._create_container_and_blob(
             self.container_name, 'blob1', 512)
@@ -208,9 +208,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act        
         data = b'abcdefghijklmnop' * 32
-        resp = self.bs.put_page(
-            self.container_name, 'blob1', data, 0, 511, 'update',
-            lease_id=lease_id)
+        resp = self.bs.update_page(self.container_name, 'blob1', data, 0, 511, lease_id=lease_id)
 
         # Assert
         blob = self.bs.get_blob_to_bytes(
@@ -235,34 +233,32 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertDictEqual(md, metadata)
 
     @record
-    def test_put_page_update(self):
+    def test_update_page_update(self):
         # Arrange
         self._create_container_and_blob(
             self.container_name, 'blob1', 1024)
 
         # Act
         data = b'abcdefghijklmnop' * 32
-        resp = self.bs.put_page(
-            self.container_name, 'blob1', data, 0, 511, 'update')
+        resp = self.bs.update_page(self.container_name, 'blob1', data, 0, 511)
 
         # Assert
         self.assertIsNone(resp)
 
     @record
-    def test_put_page_clear(self):
+    def test_clear_page(self):
         # Arrange
         self._create_container_and_blob(
             self.container_name, 'blob1', 1024)
 
         # Act
-        resp = self.bs.put_page(
-            self.container_name, 'blob1', b'', 0, 511, 'clear')
+        resp = self.bs.clear_page(self.container_name, 'blob1', 0, 511)
 
         # Assert
         self.assertIsNone(resp)
 
     @record
-    def test_put_page_if_sequence_number_lt_success(self):
+    def test_update_page_if_sequence_number_lt_success(self):
         # Arrange
         self._create_container(self.container_name)
         data = b'ab' * 256
@@ -271,15 +267,14 @@ class StoragePageBlobTest(StorageTestCase):
                             sequence_number=start_sequence)
 
         # Act
-        self.bs.put_page(self.container_name, 'blob1', data, 0, 511,
-                         'update',
+        self.bs.update_page(self.container_name, 'blob1', data, 0, 511,
                          if_sequence_number_lt=start_sequence + 1)
 
         # Assert
         self.assertBlobEqual(self.container_name, 'blob1', data)
 
     @record
-    def test_put_page_if_sequence_number_lt_failure(self):
+    def test_update_page_if_sequence_number_lt_failure(self):
         # Arrange
         self._create_container(self.container_name)
         data = b'ab' * 256
@@ -289,14 +284,13 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.put_page(self.container_name, 'blob1', data, 0, 511,
-                             'update',
+            self.bs.update_page(self.container_name, 'blob1', data, 0, 511,
                              if_sequence_number_lt=start_sequence)
 
         # Assert
 
     @record
-    def test_put_page_if_sequence_number_lte_success(self):
+    def test_update_page_if_sequence_number_lte_success(self):
         # Arrange
         self._create_container(self.container_name)
         data = b'ab' * 256
@@ -305,14 +299,14 @@ class StoragePageBlobTest(StorageTestCase):
                             sequence_number=start_sequence)
 
         # Act
-        self.bs.put_page(self.container_name, 'blob1', data, 0, 511,
-                         'update', if_sequence_number_lte=start_sequence)
+        self.bs.update_page(self.container_name, 'blob1', data, 0, 511,
+                            if_sequence_number_lte=start_sequence)
 
         # Assert
         self.assertBlobEqual(self.container_name, 'blob1', data)
 
     @record
-    def test_put_page_if_sequence_number_lte_failure(self):
+    def test_update_page_if_sequence_number_lte_failure(self):
         # Arrange
         self._create_container(self.container_name)
         data = b'ab' * 256
@@ -322,14 +316,13 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.put_page(self.container_name, 'blob1', data, 0, 511,
-                             'update',
-                             if_sequence_number_lte=start_sequence - 1)
+            self.bs.update_page(self.container_name, 'blob1', data, 0, 511,
+                                if_sequence_number_lte=start_sequence - 1)
 
         # Assert
 
     @record
-    def test_put_page_if_sequence_number_eq_success(self):
+    def test_update_page_if_sequence_number_eq_success(self):
         # Arrange
         self._create_container(self.container_name)
         data = b'ab' * 256
@@ -338,14 +331,14 @@ class StoragePageBlobTest(StorageTestCase):
                             sequence_number=start_sequence)
 
         # Act
-        self.bs.put_page(self.container_name, 'blob1', data, 0, 511,
-                         'update', if_sequence_number_eq=start_sequence)
+        self.bs.update_page(self.container_name, 'blob1', data, 0, 511,
+                            if_sequence_number_eq=start_sequence)
 
         # Assert
         self.assertBlobEqual(self.container_name, 'blob1', data)
 
     @record
-    def test_put_page_if_sequence_number_eq_failure(self):
+    def test_update_page_if_sequence_number_eq_failure(self):
         # Arrange
         self._create_container(self.container_name)
         data = b'ab' * 256
@@ -355,22 +348,20 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.put_page(self.container_name, 'blob1', data, 0, 511,
-                             'update',
-                             if_sequence_number_eq=start_sequence - 1)
+            self.bs.update_page(self.container_name, 'blob1', data, 0, 511,
+                                if_sequence_number_eq=start_sequence - 1)
 
         # Assert
 
     @record
-    def test_put_page_unicode(self):
+    def test_update_page_unicode(self):
         # Arrange
         self._create_container_and_blob(self.container_name, 'blob1', 512)
 
         # Act
         data = u'abcdefghijklmnop' * 32
         with self.assertRaises(TypeError):
-            self.bs.put_page(self.container_name, 'blob1',
-                             data, 0, 511, 'update')
+            self.bs.update_page(self.container_name, 'blob1', data, 0, 511)
 
         # Assert
 
@@ -394,10 +385,8 @@ class StoragePageBlobTest(StorageTestCase):
         self._create_container_and_blob(
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
-        resp1 = self.bs.put_page(
-            self.container_name, 'blob1', data, 0, 511, 'update')
-        resp2 = self.bs.put_page(
-            self.container_name, 'blob1', data, 1024, 1535, 'update')
+        resp1 = self.bs.update_page(self.container_name, 'blob1', data, 0, 511)
+        resp2 = self.bs.update_page(self.container_name, 'blob1', data, 1024, 1535)
 
         # Act
         ranges = self.bs.get_page_ranges(self.container_name, 'blob1')
@@ -417,10 +406,8 @@ class StoragePageBlobTest(StorageTestCase):
         self._create_container_and_blob(
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
-        resp1 = self.bs.put_page(
-            self.container_name, 'blob1', data, 0, 511, 'update')
-        resp2 = self.bs.put_page(
-            self.container_name, 'blob1', data, 1024, 1535, 'update')
+        resp1 = self.bs.update_page(self.container_name, 'blob1', data, 0, 511)
+        resp2 = self.bs.update_page(self.container_name, 'blob1', data, 1024, 1535)
 
         # Act
         ranges = self.bs.get_page_ranges(self.container_name, 'blob1')
@@ -433,18 +420,16 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertIsInstance(ranges[1], PageRange)
 
     @record
-    def test_put_page_fail(self):
+    def test_update_page_fail(self):
         # Arrange
         self._create_container_and_blob(
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
-        resp1 = self.bs.put_page(
-            self.container_name, 'blob1', data, 0, 511, 'update')
+        resp1 = self.bs.update_page(self.container_name, 'blob1', data, 0, 511)
 
         # Act
         try:
-            resp2 = self.bs.put_page(
-                self.container_name, 'blob1', data, 1024, 1536, 'update')
+            resp2 = self.bs.update_page(self.container_name, 'blob1', data, 1024, 1536)
         except ValueError as e:
             self.assertEqual(str(e), 'end_range must align with 512 page size')
             return
