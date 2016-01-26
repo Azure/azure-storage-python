@@ -17,6 +17,7 @@ from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
+    _ERROR_PARALLEL_NOT_SEEKABLE
 )
 from .._common_conversion import (
     _int_or_none,
@@ -1503,6 +1504,9 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
+
+        if max_connections > 1 and not stream.seekable():
+            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
 
         # Only get properties if parallelism will actually be used
         blob_size = None

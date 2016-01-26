@@ -29,11 +29,11 @@ _ERROR_EMULATOR_DOES_NOT_SUPPORT_FILES = \
 _ERROR_ACCESS_POLICY = \
     'share_access_policy must be either SignedIdentifier or AccessPolicy ' + \
     'instance'
+_ERROR_PARALLEL_NOT_SEEKABLE = 'Parallel operations require a seekable stream.'
 _ERROR_VALUE_SHOULD_BE_BYTES = '{0} should be of type bytes.'
 _ERROR_VALUE_NONE = '{0} should not be None.'
 _ERROR_VALUE_NONE_OR_EMPTY = '{0} should not be None or empty.'
 _ERROR_VALUE_NEGATIVE = '{0} should not be negative.'
-
 
 def _dont_fail_on_exist(error):
     ''' don't throw exception if the resource exists.
