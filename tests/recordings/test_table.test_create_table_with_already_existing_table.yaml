@@ -1,0 +1,90 @@
+interactions:
+- request:
+    body: !!binary |
+      eyJUYWJsZU5hbWUiOiAidGFibGU4OThkMTZkZCJ9
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['30']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:31:03 GMT']
+      x-ms-version: ['2015-04-05']
+    method: POST
+    uri: https://storagename.table.core.windows.net/Tables
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      DataServiceId: ['https://storagename.table.core.windows.net/Tables(''table898d16dd'')']
+      Date: ['Mon, 25 Jan 2016 21:31:04 GMT']
+      Location: ['https://storagename.table.core.windows.net/Tables(''table898d16dd'')']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [cafead58-0002-003c-09b7-574bd1000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 204, message: No Content}
+- request:
+    body: !!binary |
+      eyJUYWJsZU5hbWUiOiAidGFibGU4OThkMTZkZCJ9
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['30']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:31:04 GMT']
+      x-ms-version: ['2015-04-05']
+    method: POST
+    uri: https://storagename.table.core.windows.net/Tables
+  response:
+    body: {string: '{"odata.error":{"code":"TableAlreadyExists","message":{"lang":"en-US","value":"The
+        table specified already exists.\nRequestId:cafead7e-0002-003c-2fb7-574bd1000000\nTime:2016-01-25T21:31:04.5205772Z"}}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Mon, 25 Jan 2016 21:31:04 GMT']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [cafead7e-0002-003c-2fb7-574bd1000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 409, message: Conflict}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=nometadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:31:04 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.table.core.windows.net/Tables('table898d16dd')
+  response:
+    body: {string: '{"TableName":"table898d16dd"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=nometadata;streaming=true;charset=utf-8]
+      Date: ['Mon, 25 Jan 2016 21:31:04 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      Vary: [Origin]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [cafead89-0002-003c-3ab7-574bd1000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

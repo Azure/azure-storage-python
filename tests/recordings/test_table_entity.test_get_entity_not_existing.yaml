@@ -1,0 +1,28 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:33:01 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.table.core.windows.net/uttablebf5d1327(PartitionKey='pkbf5d1327',RowKey='rkbf5d1327')
+  response:
+    body: {string: '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
+        specified resource does not exist.\nRequestId:9a294aad-0002-0050-5ca7-57e002000000\nTime:2016-01-25T19:33:01.1756801Z"}}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Mon, 25 Jan 2016 19:33:00 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [9a294aad-0002-0050-5ca7-57e002000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 404, message: Not Found}
+version: 1

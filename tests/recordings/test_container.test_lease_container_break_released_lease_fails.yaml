@@ -1,0 +1,192 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:05:51 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container1e4e193b?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:05:51 GMT']
+      ETag: ['"0x8D325BA8B871798"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [dee72aca-0001-0008-0ea3-57e479000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      x-ms-lease-action: [acquire]
+      x-ms-lease-duration: ['-1']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container1e4e193b?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      ETag: ['"0x8D325BA8B871798"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [02f24320-a25b-4e46-8d1b-d83be4e84b65]
+      x-ms-request-id: [dee72aeb-0001-0008-2ca3-57e479000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      x-ms-lease-action: [release]
+      x-ms-lease-id: [02f24320-a25b-4e46-8d1b-d83be4e84b65]
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container1e4e193b?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      ETag: ['"0x8D325BA8B871798"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [dee72b09-0001-0008-49a3-57e479000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      x-ms-lease-action: [break]
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container1e4e193b?restype=container&comp=lease
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>LeaseNotPresentWithLeaseOperation</Code><Message>There\
+        \ is currently no lease on the container.\nRequestId:dee72b25-0001-0008-64a3-57e479000000\n\
+        Time:2016-01-25T19:05:52.5713268Z</Message></Error>"}
+    headers:
+      Content-Length: ['247']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:05:52 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [dee72b25-0001-0008-64a3-57e479000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 409, message: There is currently no lease on the container.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:30:32 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container1e4e193b?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:30:32 GMT']
+      ETag: ['"0x8D325BDFE250219"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:30:33 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [df2dfc13-0001-0025-6aa6-5767b9000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:30:33 GMT']
+      x-ms-lease-action: [acquire]
+      x-ms-lease-duration: ['-1']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container1e4e193b?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:30:32 GMT']
+      ETag: ['"0x8D325BDFE250219"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:30:33 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-lease-id: [82382de5-505b-47fa-9fb3-92505ed11aaa]
+      x-ms-request-id: [df2dfc2c-0001-0025-02a6-5767b9000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:30:33 GMT']
+      x-ms-lease-action: [release]
+      x-ms-lease-id: [82382de5-505b-47fa-9fb3-92505ed11aaa]
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container1e4e193b?restype=container&comp=lease
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:30:32 GMT']
+      ETag: ['"0x8D325BDFE250219"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:30:33 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [df2dfc66-0001-0025-3ca6-5767b9000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:30:33 GMT']
+      x-ms-lease-action: [break]
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container1e4e193b?restype=container&comp=lease
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>LeaseNotPresentWithLeaseOperation</Code><Message>There\
+        \ is currently no lease on the container.\nRequestId:df2dfc93-0001-0025-62a6-5767b9000000\n\
+        Time:2016-01-25T19:30:33.4407087Z</Message></Error>"}
+    headers:
+      Content-Length: ['247']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:30:32 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [df2dfc93-0001-0025-62a6-5767b9000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 409, message: There is currently no lease on the container.}
+version: 1

@@ -1,0 +1,49 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-content-length: ['1024']
+      x-ms-date: ['Mon, 25 Jan 2016 21:25:32 GMT']
+      x-ms-type: [file]
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharecace0cb7/filecace0cb7
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 21:25:33 GMT']
+      ETag: ['"0x8D325CE0EB448E3"']
+      Last-Modified: ['Mon, 25 Jan 2016 21:25:32 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [132084d9-001a-006d-5db6-575524000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:25:32 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utsharecace0cb7/filecace0cb7?comp=rangelist
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Ranges />"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 21:25:33 GMT']
+      ETag: ['"0x8D325CE0EB448E3"']
+      Last-Modified: ['Mon, 25 Jan 2016 21:25:32 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-content-length: ['1024']
+      x-ms-request-id: [132084da-001a-006d-5eb6-575524000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

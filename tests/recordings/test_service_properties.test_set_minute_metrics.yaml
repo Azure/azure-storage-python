@@ -1,0 +1,48 @@
+interactions:
+- request:
+    body: !!binary |
+      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFN0b3JhZ2VTZXJ2aWNlUHJv
+      cGVydGllcz48TWludXRlTWV0cmljcz48VmVyc2lvbj4xLjA8L1ZlcnNpb24+PEVuYWJsZWQ+VHJ1
+      ZTwvRW5hYmxlZD48SW5jbHVkZUFQSXM+VHJ1ZTwvSW5jbHVkZUFQSXM+PFJldGVudGlvblBvbGlj
+      eT48RW5hYmxlZD5UcnVlPC9FbmFibGVkPjxEYXlzPjU8L0RheXM+PC9SZXRlbnRpb25Qb2xpY3k+
+      PC9NaW51dGVNZXRyaWNzPjwvU3RvcmFnZVNlcnZpY2VQcm9wZXJ0aWVzPg==
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['271']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:16:01 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 19:16:05 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [18d6dc07-0001-002f-5ba4-577e30000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:16:04 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>5</Days></RetentionPolicy></MinuteMetrics><Cors\
+        \ /><DefaultServiceVersion>2014-02-14</DefaultServiceVersion></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:16:05 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [18d6e109-0001-002f-72a4-577e30000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

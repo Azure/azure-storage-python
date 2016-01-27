@@ -1,0 +1,65 @@
+interactions:
+- request:
+    body: !!binary |
+      BkwDQ1kdigL+cznbORaLflYDpWMwEpKeZv/w6oGbN+Kj8/RWdqQyV+u/0GKWAWiBvBbGuEjJ0wSk
+      TwrrX9qcbyVZhUS8HbTOHFvs3CtDR3HTiFJxtRWxbl9qavfSBQpQIn43YhFaZIDfBLJeq+1sHeve
+      cfCw1u7tk1crZJmnPhxX7BIWHbgf2pBfGmQ4aJo7S7rc2hhTMeF/LSsSwOVTkKq4xnyOiLv8ODDm
+      8XiJUUtBfmMpSXV1aU52Hjn6tUe3EGvzOABfvCpdvqsNGU7QKQv3Osq+l7UaccVqbG2/jt3aIWAz
+      fpiRbei2ePfMJ5+VSLgsc+epIiKLITJmmz28i3zw3dYpX8delsvvQyFC09cr4NiQ7gv3+NLCZHo+
+      9O+JLokfalPm7dgz60PhGkWvnqs9Az8d4cL4yriQjOkZIuMTLRb9NjeieIzEKQGN6hLcrdrrhix5
+      LB6IT5FFFWyYQyI8vL/7YtbKfLQ2gNB7YFcf/G7IEOLMpN5w7/tTHh7U9U3ZzTSqdK/k475KdkEI
+      2wFhZP+LgdMe2d0PPGZlMe8nRJ6A57IIXxBONnyD7i7r2ao5fUusCFG56UHADx3Pijl/pdjOVxDX
+      xFxnSTEewSprFnQc6x3iNFADAH3KibajehdZnwkqNfV9QHTHqB1vGvqOGGGSqBKHLMEYQ1eN1Ql8
+      ksVWoxhcwigtdvkL7W5r1jSxEYkSvhJ9d08mwajJjzyoFWi9yLmseqrgtLvMiwBxH84P2hJVjzvo
+      6L9Bd6WIc+tIaCDN7KN2auhgZP8qWzFPjYgUQ70WCkYF/a0i/H0ZcC8c/uatAYAUw7MpAZXu4Yt4
+      Ag8xKLdoSPs/cWxTXwOkCYoJmqkqR/d0iAetI46CHsLlQugXba4DwbUlMYuVBMTosXF+jcDzrrix
+      qH5/GV0OQNXtdJzvvOa+1rPIA4D3BKm2bjAFY0rf4YCU2t+JRwBNbM9vigq0D4vcnMh0R3K+OKKm
+      e1ITHkyPrz+TdXLY2+XaaseSYTOoec49/3Fi3OlEuhR0rjssyZRdgQUV0yP+W/FkTcZd2qEsijBR
+      1ZyUjAwfX3fiNQrsrfc+W0gMQQgBQb9RLDNIMzfQ1oKfM18mBooPZ5ZIE1v0F7Mpb6dn5jeFoork
+      1SsdEUnv8yNQc95ZlWSX11NAsZkv/dNyGu1haYFo16HS+8DQJRcMZyKnb2855it20H02+IHzbyfN
+      8dxGKlWcJXeULLDqy3lEa22EIX1yqQUdfH6vqc7MaMjdo8kO7r5rD4HUfbMGPG3ImDcmId4eqTOg
+      eUMu+f+7xPRDzw0oI7AC5ZDuuGxUMAJr55vrJR8bdxtQu0tGy0+Zja3F4d6sqS38TcwdHaq8MA==
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-date: ['Mon, 25 Jan 2016 19:08:35 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer61f810cf/blob61f810cf
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [tW3r4DhkDAivU4SsCDvltg==]
+      Date: ['Mon, 25 Jan 2016 19:08:34 GMT']
+      ETag: ['"0x8D325BAECF7FB21"']
+      Last-Modified: ['Mon, 25 Jan 2016 19:08:35 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [1a78d411-0001-004a-1ca3-57cf6d000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.9.1]
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer61f810cf/blob61f810cf
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
+        \ specified resource does not exist.\nRequestId:b306a3c1-0001-0023-2ca3-5790c1000000\n\
+        Time:2016-01-25T19:08:36.0433154Z</Message></Error>"}
+    headers:
+      Content-Length: ['223']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:08:35 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [b306a3c1-0001-0023-2ca3-5790c1000000]
+      x-ms-version: ['2014-02-14']
+    status: {code: 404, message: The specified resource does not exist.}
+version: 1

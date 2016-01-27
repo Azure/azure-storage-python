@@ -1,0 +1,59 @@
+interactions:
+- request:
+    body: !!binary |
+      eyJhZ2UiOiAiYWJjIiwgInNpZ24iOiAiYXF1YXJpdXMiLCAic2V4IjogImZlbWFsZSIsICJSb3dL
+      ZXkiOiAicms0MTlkMWUwOCIsICJiaXJ0aGRheSI6ICIxOTkxLTEwLTA0VDAwOjAwOjAwWiIsICJi
+      aXJ0aGRheUBvZGF0YS50eXBlIjogIkVkbS5EYXRlVGltZSIsICJQYXJ0aXRpb25LZXkiOiAicGs0
+      MTlkMWUwOCJ9
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['180']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:32:52 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.table.core.windows.net/uttable419d1e08(PartitionKey='pk419d1e08',RowKey='rk419d1e08')
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      Date: ['Mon, 25 Jan 2016 19:32:52 GMT']
+      ETag: [W/"datetime'2016-01-25T19%3A32%3A52.8660557Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [8268d754-0002-001a-74a7-57d065000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:32:52 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.table.core.windows.net/uttable419d1e08(PartitionKey='pk419d1e08',RowKey='rk419d1e08')
+  response:
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttable419d1e08/@Element","odata.etag":"W/\"datetime''2016-01-25T19%3A32%3A52.8660557Z''\"","PartitionKey":"pk419d1e08","RowKey":"rk419d1e08","Timestamp":"2016-01-25T19:32:52.8660557Z","age":"abc","birthday@odata.type":"Edm.DateTime","birthday":"1991-10-04T00:00:00Z","sex":"female","sign":"aquarius"}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Mon, 25 Jan 2016 19:32:52 GMT']
+      ETag: [W/"datetime'2016-01-25T19%3A32%3A52.8660557Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [8268d759-0002-001a-79a7-57d065000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

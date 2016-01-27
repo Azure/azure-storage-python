@@ -1,0 +1,62 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-blob-content-length: ['512']
+      x-ms-blob-sequence-number: ['10']
+      x-ms-blob-type: [PageBlob]
+      x-ms-date: ['Mon, 25 Jan 2016 21:27:36 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerb85417b1/blobb85417b1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 25 Jan 2016 21:27:35 GMT']
+      ETag: ['"0x8D325CE58A55446"']
+      Last-Modified: ['Mon, 25 Jan 2016 21:27:37 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [00de5e38-0001-007f-0bb7-576138000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      guFhb19bCt9feRMIlQcNuAANCs2Bhb6/ePObLIMHuTAmjQRuJ+Jh5gLgv3sGI3zkPYL31v7i8GRX
+      Ttvc2PAMO8or9oH3dIsOv7pLUWtFzpq0CeSB7ecFrydQHDa/sWEAPC4UulVVfsfMdPU4+Zl8z9uL
+      dVDf7fEKqYP542ltKse5Td6LguVfjtdvnxdRLP5dDS0B8ouWQQ+W/TZ8ReKS/F6qF0TKVj0ZP2eo
+      eRmqPTdkzv3Hh8fd4IQzypIG4FieMTpsO8vQsIG3xsfryEDdtK3CjDyAYu8wrhlwPwoLrdbVNb/U
+      WgJ9kKmYuKfN3thGGwXDvuEGQfmHw/tji6k4Cg5Dk6cp/2HJ9HAaCNNIVgZqoFkqQBYDQpk9m9dF
+      p1NmxqK7u+CRdzr+TF6Nk1jFsf4sqos9of6ydc304Oa4cVtFJ2NxF0dzzAccaadu+QFCMZERVKOY
+      4Y+jqYbURvPTtpJ7R8hWK/yiHMuIsmmcwlasFypVMzxz6TKg9FYx5WU8KDK5MekQ791zLbdvttHU
+      6uyMHeWVO9CexuLBUEod7A4oE8P2KdDKB1PmzKncDXXgVgEGb4mkPBO5PvRT6/8WSHfteGXzqy/j
+      X9u0ln6toN2iqoZqZkizIH1fPXnaRg7b7edYwTfI3J1xG9T24OYu9/Vlu8Or8HCION4f51a/lCw=
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['512']
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:27:36 GMT']
+      x-ms-if-sequence-number-lt: ['10']
+      x-ms-page-write: [update]
+      x-ms-range: [bytes=0-511]
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerb85417b1/blobb85417b1?comp=page
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>SequenceNumberConditionNotMet</Code><Message>The\
+        \ sequence number condition specified was not met.\nRequestId:00de5e4e-0001-007f-1eb7-576138000000\n\
+        Time:2016-01-25T21:27:36.8709522Z</Message></Error>"}
+    headers:
+      Content-Length: ['250']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 21:27:35 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [00de5e4e-0001-007f-1eb7-576138000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 412, message: The sequence number condition specified was not met.}
+version: 1

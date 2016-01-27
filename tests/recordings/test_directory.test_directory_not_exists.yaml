@@ -1,0 +1,46 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:02:02 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utshare553610c6/missing?restype=directory
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
+        \ specified resource does not exist.\nRequestId:bdbd955f-001a-0075-10a2-5778b1000000\n\
+        Time:2016-01-25T19:02:03.7151798Z</Message></Error>"}
+    headers:
+      Content-Length: ['223']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:02:03 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [bdbd955f-001a-0075-10a2-5778b1000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 404, message: The specified resource does not exist.}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 19:26:01 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utshare553610c6/missing?restype=directory
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
+        \ specified resource does not exist.\nRequestId:60040796-001a-000e-24a6-571301000000\n\
+        Time:2016-01-25T19:26:09.9743861Z</Message></Error>"}
+    headers:
+      Content-Length: ['223']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 19:26:09 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [60040796-001a-000e-24a6-571301000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 404, message: The specified resource does not exist.}
+version: 1

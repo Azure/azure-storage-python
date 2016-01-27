@@ -28,10 +28,10 @@ from azure.storage.blob import (
     PageRange,
     ContentSettings,
 )
-from tests.common_recordingtestcase import (
+from tests.testcase import (
+    StorageTestCase,
     record,
 )
-from tests.testcase import StorageTestCase
 
 #------------------------------------------------------------------------------
 
@@ -82,16 +82,6 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         resp = self.abs.create_blob(container_name, blob_name)
         self.assertIsNone(resp)
 
-    class NonSeekableFile(object):
-        def __init__(self, wrapped_file):
-            self.wrapped_file = wrapped_file
-
-        def write(self, data):
-            self.wrapped_file.write(data)
-
-        def read(self, count):
-            return self.wrapped_file.read(count)
-
     #--Test cases for blob service --------------------------------------------
     @record
     def test_set_container_metadata_with_if_modified(self):    
@@ -111,8 +101,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.assertIsNone(resp)
         md = self.bs.get_container_metadata(self.container_name)
         self.assertIsNotNone(md)
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '43')
+        self.assertEqual(md['hello'], 'world')
+        self.assertEqual(md['number'], '43')
 
     @record
     def test_set_container_metadata_with_if_modified_fail(self):    
@@ -201,14 +191,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                         .strftime('%a, %d %b %Y %H:%M:%S GMT')
 
         # Act
-        lease = self.bs.acquire_container_lease(self.container_name,
-                                                if_modified_since=test_datetime) 
-        self.bs.break_container_lease(self.container_name,
-                                      lease_id=lease['x-ms-lease-id'])
+        self.bs.acquire_container_lease(self.container_name, if_modified_since=test_datetime) 
+        self.bs.break_container_lease(self.container_name)
 
         # Assert
-        self.assertIsNotNone(lease)
-        self.assertIsNotNone(lease['x-ms-lease-id'])
 
     @record
     def test_lease_container_acquire_with_if_modified_fail(self):
@@ -234,15 +220,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                         .strftime('%a, %d %b %Y %H:%M:%S GMT')
 
         # Act
-        lease = self.bs.acquire_container_lease(self.container_name,
-                                                if_unmodified_since=test_datetime) 
-        self.bs.break_container_lease(
-            self.container_name,
-            lease_id=lease['x-ms-lease-id'])
+        self.bs.acquire_container_lease(self.container_name, if_unmodified_since=test_datetime) 
+        self.bs.break_container_lease(self.container_name)
 
         # Assert
-        self.assertIsNotNone(lease)
-        self.assertIsNotNone(lease['x-ms-lease-id'])
 
     @record
     def test_lease_container_acquire_with_if_unmodified_fail(self):
@@ -1009,9 +990,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
         self.assertEqual(3, len(md))
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
-        self.assertEqual(md['x-ms-meta-up'], 'UPval')
+        self.assertEqual(md['hello'], 'world')
+        self.assertEqual(md['number'], '42')
+        self.assertEqual(md['up'], 'UPval')
 
     @record
     def test_set_blob_metadata_with_if_modified_fail(self):
@@ -1052,9 +1033,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
         self.assertEqual(3, len(md))
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
-        self.assertEqual(md['x-ms-meta-up'], 'UPval')
+        self.assertEqual(md['hello'], 'world')
+        self.assertEqual(md['number'], '42')
+        self.assertEqual(md['up'], 'UPval')
 
     @record
     def test_set_blob_metadata_with_if_unmodified_fail(self):
@@ -1093,9 +1074,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
         self.assertEqual(3, len(md))
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
-        self.assertEqual(md['x-ms-meta-up'], 'UPval')
+        self.assertEqual(md['hello'], 'world')
+        self.assertEqual(md['number'], '42')
+        self.assertEqual(md['up'], 'UPval')
 
     @record
     def test_set_blob_metadata_with_if_match_fail(self):
@@ -1130,9 +1111,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
         self.assertEqual(3, len(md))
-        self.assertEqual(md['x-ms-meta-hello'], 'world')
-        self.assertEqual(md['x-ms-meta-number'], '42')
-        self.assertEqual(md['x-ms-meta-up'], 'UPval')
+        self.assertEqual(md['hello'], 'world')
+        self.assertEqual(md['number'], '42')
+        self.assertEqual(md['up'], 'UPval')
 
     @record
     def test_set_blob_metadata_with_if_none_match_fail(self):
@@ -1282,7 +1263,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(resp)
-        self.assertIsNotNone(resp['x-ms-snapshot'])
+        self.assertIsNotNone(resp.snapshot)
 
     @record
     def test_snapshot_blob_with_if_modified_fail(self):
@@ -1315,7 +1296,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(resp)
-        self.assertIsNotNone(resp['x-ms-snapshot'])
+        self.assertIsNotNone(resp.snapshot)
 
     @record
     def test_snapshot_blob_with_if_unmodified_fail(self):
@@ -1346,7 +1327,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(resp)
-        self.assertIsNotNone(resp['x-ms-snapshot'])
+        self.assertIsNotNone(resp.snapshot)
 
     @record
     def test_snapshot_blob_with_if_match_fail(self):
@@ -1373,7 +1354,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Assert
         self.assertIsNotNone(resp)
-        self.assertIsNotNone(resp['x-ms-snapshot'])
+        self.assertIsNotNone(resp.snapshot)
 
     @record
     def test_snapshot_blob_with_if_none_match_fail(self):
@@ -1405,9 +1386,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             if_modified_since=test_datetime,
             proposed_lease_id=test_lease_id)
 
-        self.bs.break_blob_lease(
-            self.container_name, 'blob1',
-            lease_id=test_lease_id)
+        self.bs.break_blob_lease( self.container_name, 'blob1')
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -1445,9 +1424,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             if_unmodified_since=test_datetime,
             proposed_lease_id=test_lease_id)
 
-        self.bs.break_blob_lease(
-            self.container_name, 'blob1',
-            lease_id=test_lease_id)
+        self.bs.break_blob_lease(self.container_name, 'blob1')
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -1483,9 +1460,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             proposed_lease_id=test_lease_id,
             if_match=etag)
 
-        self.bs.break_blob_lease(
-            self.container_name, 'blob1',
-            lease_id=test_lease_id)
+        self.bs.break_blob_lease(self.container_name, 'blob1')
 
         # Assert
         self.assertIsNotNone(resp1)
@@ -1516,9 +1491,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             proposed_lease_id=test_lease_id,
             if_none_match='0x111111111111111')
 
-        self.bs.break_blob_lease(
-            self.container_name, 'blob1',
-            lease_id=test_lease_id)
+        self.bs.break_blob_lease(self.container_name, 'blob1')
 
 
         # Assert

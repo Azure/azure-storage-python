@@ -1,0 +1,24 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Mon, 25 Jan 2016 21:28:49 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.queue.core.windows.net/missingdb9b0d66?comp=metadata
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>QueueNotFound</Code><Message>The\
+        \ specified queue does not exist.\nRequestId:c99e68d9-0003-0029-11b7-578948000000\n\
+        Time:2016-01-25T21:28:50.7011910Z</Message></Error>"}
+    headers:
+      Content-Length: ['217']
+      Content-Type: [application/xml]
+      Date: ['Mon, 25 Jan 2016 21:28:50 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [c99e68d9-0003-0029-11b7-578948000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 404, message: The specified queue does not exist.}
+version: 1
