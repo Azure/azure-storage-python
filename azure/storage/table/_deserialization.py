@@ -219,10 +219,7 @@ def _convert_json_response_to_entities(response, property_resolver):
 
     entities = _list()
 
-    continuation = _get_continuation_from_response_headers(response)
-    tables.next_marker = object()
-    tables.next_marker.next_partition_key = continuation.get('NextPartitionKey')
-    tables.next_marker.next_row_key = continuation.get('NextRowKey')
+    entities.next_marker = _get_continuation_from_response_headers(response)
 
     root = loads(response.body.decode('utf-8'))
 

@@ -43,7 +43,7 @@ class _StorageSharedKeyAuthentication(object):
                 x_ms_headers.append((name.lower(), value))
         x_ms_headers.sort()
         for name, value in x_ms_headers:
-            if value:
+            if value is not None:
                 string_to_sign += ''.join([name, ':', value, '\n'])
         return string_to_sign
 

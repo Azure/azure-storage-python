@@ -17,6 +17,7 @@ from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
+    _ERROR_PARALLEL_NOT_SEEKABLE
 )
 from .._common_conversion import (
     _int_or_none,
@@ -56,7 +57,6 @@ from ..constants import (
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
-    _convert_xml_to_signed_identifiers,
     _get_download_size,
     _parse_metadata,
     _parse_properties,
@@ -73,6 +73,7 @@ from ._deserialization import (
     _parse_snapshot_blob,
     _parse_lease_time,
     _parse_lease_id,
+    _convert_xml_to_signed_identifiers_and_access,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -638,7 +639,7 @@ class _BaseBlobService(_StorageClient):
         request.headers = [('x-ms-lease-id', _str_or_none(lease_id))]
 
         response = self._perform_request(request)
-        return _convert_xml_to_signed_identifiers(response.body)
+        return _convert_xml_to_signed_identifiers_and_access(response)
 
     def set_container_acl(self, container_name, signed_identifiers=None,
                           blob_public_access=None, lease_id=None,
@@ -1503,6 +1504,9 @@ class _BaseBlobService(_StorageClient):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
+
+        if max_connections > 1 and not stream.seekable():
+            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
 
         # Only get properties if parallelism will actually be used
         blob_size = None

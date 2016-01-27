@@ -462,20 +462,6 @@ class BlockBlobService(_BaseBlobService):
             if progress_callback:
                 progress_callback(count, count)
         else:
-            self._put_blob(
-                container_name=container_name,
-                blob_name=blob_name,
-                blob=None,
-                content_settings=content_settings,
-                metadata=metadata,
-                lease_id=lease_id,
-                if_modified_since=if_modified_since,
-                if_unmodified_since=if_unmodified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                timeout=timeout
-            )
-
             block_ids = _upload_blob_chunks(
                 blob_service=self,
                 container_name=container_name,

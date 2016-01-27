@@ -31,6 +31,10 @@ class _list(list):
     '''Used so that a continuation token can be set on the return object'''
     pass
 
+class _dict(dict):
+    '''Used so that additional properties can be set on the return dictionary'''
+    pass
+
 class ListGenerator(object):
     def __init__(self, resources, list_method, list_args, list_kwargs):
         self.items = resources

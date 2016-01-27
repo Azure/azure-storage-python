@@ -167,15 +167,14 @@ class PageBlobService(_BaseBlobService):
 
         self._perform_request(request)
 
-    def put_page(
+    def update_page(
         self, container_name, blob_name, page, start_range, end_range,
-        page_write, content_md5=None,
-        lease_id=None, if_sequence_number_lte=None,
+        content_md5=None, lease_id=None, if_sequence_number_lte=None,
         if_sequence_number_lt=None, if_sequence_number_eq=None,
         if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
-        Writes a range of pages to a page blob.
+        Updates a range of pages.
 
         container_name:
             Name of existing container.
@@ -193,18 +192,6 @@ class PageBlobService(_BaseBlobService):
             Pages must be aligned with 512-byte boundaries, the start offset
             must be a modulus of 512 and the end offset must be a modulus of
             512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
-        page_write:
-            You may specify one of the following options:
-                update (lower case):
-                    Writes the bytes specified by the request body into the
-                    specified range. The Range and Content-Length headers must
-                    match to perform the update.
-                clear (lower case):
-                    Clears the specified range and releases the space used in
-                    storage for that range. To clear a range, set the
-                    Content-Length header to zero, and the Range header to a
-                    value that indicates the range to clear, up to maximum
-                    blob size.
         content_md5:
             An MD5 hash of the page content. This hash is used to
             verify the integrity of the page during transport. When this header
@@ -248,7 +235,7 @@ class PageBlobService(_BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('page', page)
-        _validate_not_none('page_write', page_write)
+
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
@@ -259,7 +246,7 @@ class PageBlobService(_BaseBlobService):
         ]
         request.headers = [
             ('Content-MD5', _str_or_none(content_md5)),
-            ('x-ms-page-write', _str_or_none(page_write)),
+            ('x-ms-page-write', 'update'),
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-if-sequence-number-le',
              _str_or_none(if_sequence_number_lte)),
@@ -278,6 +265,95 @@ class PageBlobService(_BaseBlobService):
             end_range,
             align_to_page=True)
         request.body = _get_request_body_bytes_only('page', page)
+
+        self._perform_request(request)
+
+    def clear_page(
+        self, container_name, blob_name, start_range, end_range,
+        lease_id=None, if_sequence_number_lte=None,
+        if_sequence_number_lt=None, if_sequence_number_eq=None,
+        if_modified_since=None, if_unmodified_since=None,
+        if_match=None, if_none_match=None, timeout=None):
+        '''
+        Clears a range of pages.
+
+        container_name:
+            Name of existing container.
+        blob_name:
+            Name of existing blob.
+        start_range:
+            Start of byte range to clear.
+            Pages must be aligned with 512-byte boundaries, the start offset
+            must be a modulus of 512 and the end offset must be a modulus of
+            512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
+        end_range:
+            End of byte range to clear.
+            Pages must be aligned with 512-byte boundaries, the start offset
+            must be a modulus of 512 and the end offset must be a modulus of
+            512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
+        lease_id:
+            Required if the blob has an active lease.
+        if_sequence_number_lte:
+            If the blob's sequence number is less than or equal to
+            the specified value, the request proceeds; otherwise it fails.
+        if_sequence_number_lt:
+            If the blob's sequence number is less than the specified
+            value, the request proceeds; otherwise it fails.
+        if_sequence_number_eq:
+            If the blob's sequence number is equal to the specified
+            value, the request proceeds; otherwise it fails.
+        if_modified_since:
+            A DateTime value. Specify this conditional header to
+            write the page only if the blob has been modified since the
+            specified date/time. If the blob has not been modified, the Blob
+            service fails.
+        if_unmodified_since:
+            A DateTime value. Specify this conditional header to
+            write the page only if the blob has not been modified since the
+            specified date/time. If the blob has been modified, the Blob
+            service fails.
+        if_match:
+            An ETag value. Specify an ETag value for this conditional
+            header to write the page only if the blob's ETag value matches the
+            value specified. If the values do not match, the Blob service fails.
+        if_none_match:
+            An ETag value. Specify an ETag value for this conditional
+            header to write the page only if the blob's ETag value does not
+            match the value specified. If the values are identical, the Blob
+            service fails.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host = self._get_host()
+        request.path = _get_path(container_name, blob_name)
+        request.query = [
+            ('comp', 'page'),
+            ('timeout', _int_or_none(timeout)),
+        ]
+        request.headers = [
+            ('x-ms-page-write', 'clear'),
+            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-if-sequence-number-le',
+             _str_or_none(if_sequence_number_lte)),
+            ('x-ms-if-sequence-number-lt',
+             _str_or_none(if_sequence_number_lt)),
+            ('x-ms-if-sequence-number-eq',
+             _str_or_none(if_sequence_number_eq)),
+            ('If-Modified-Since', _str_or_none(if_modified_since)),
+            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Match', _str_or_none(if_match)),
+            ('If-None-Match', _str_or_none(if_none_match))
+        ]
+        _validate_and_format_range_headers(
+            request,
+            start_range,
+            end_range,
+            align_to_page=True)
 
         self._perform_request(request)
 

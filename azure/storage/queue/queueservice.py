@@ -59,7 +59,6 @@ from .._serialization import (
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
-    _parse_metadata,
 )
 from ._serialization import (
     _convert_queue_message_xml,
@@ -68,8 +67,8 @@ from ._serialization import (
 from ._deserialization import (
     _convert_xml_to_queues,
     _convert_xml_to_queue_messages,
-    _parse_approximate_message_count,
     _parse_queue_message_from_headers,
+    _parse_metadata_and_message_count,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -450,7 +449,7 @@ class QueueService(_StorageClient):
         ]
         response = self._perform_request(request)
 
-        return _parse_metadata(response), _parse_approximate_message_count(response)
+        return _parse_metadata_and_message_count(response)
 
     def set_queue_metadata(self, queue_name, metadata=None, timeout=None):
         '''

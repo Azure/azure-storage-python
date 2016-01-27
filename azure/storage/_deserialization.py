@@ -26,6 +26,7 @@ from .models import (
     CorsRule,
     AccessPolicy,
     HeaderDict,
+    _dict,
 )
 
 def _int_or_none(value):
@@ -74,7 +75,7 @@ def _parse_metadata(response):
     if response is None or response.headers is None:
         return None
 
-    metadata = {}
+    metadata = _dict()
     for key, value in response.headers:
         if key.startswith('x-ms-meta-'):
             metadata[key[10:]] = _str_or_none(value)
@@ -120,7 +121,7 @@ def _parse_response_for_dict(response):
 
 def _convert_xml_to_signed_identifiers(xml):
     list_element = ETree.fromstring(xml)
-    signed_identifiers = dict()
+    signed_identifiers = _dict()
 
     for signed_identifier_element in list_element.findall('SignedIdentifier'):
         # Id element

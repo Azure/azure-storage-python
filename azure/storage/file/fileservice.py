@@ -21,6 +21,7 @@ from .._error import (
     _ERROR_VALUE_NEGATIVE,
     _ERROR_STORAGE_MISSING_INFO,
     _ERROR_EMULATOR_DOES_NOT_SUPPORT_FILES,
+    _ERROR_PARALLEL_NOT_SEEKABLE,
 )
 from .._common_conversion import (
     _int_or_none,
@@ -1762,6 +1763,9 @@ class FileService(_StorageClient):
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
         _validate_not_none('stream', stream)
+
+        if max_connections > 1 and not stream.seekable():
+            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
 
         # Only get properties if parallelism will actually be used
         file_size = None

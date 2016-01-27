@@ -26,6 +26,7 @@ from .._deserialization import (
     _int_or_none,
     _parse_metadata,
     _parse_response_for_dict,
+    _convert_xml_to_signed_identifiers,
 )
 from .models import (
     Container,
@@ -98,6 +99,14 @@ def _parse_container(name, response):
     metadata = _parse_metadata(response)
     props = _parse_properties(response, ContainerProperties)
     return Container(name, props, metadata)
+
+def _convert_xml_to_signed_identifiers_and_access(response):
+    acl = _convert_xml_to_signed_identifiers(response.body)
+
+    raw_headers = _parse_response_for_dict(response)
+    acl.public_access = raw_headers.get('x-ms-blob-public-access')
+
+    return acl
 
 def _convert_xml_to_containers(response):
     '''
