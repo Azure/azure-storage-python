@@ -274,7 +274,7 @@ def _convert_metrics_to_xml(metrics, root):
     ETree.SubElement(root, 'Enabled').text = str(metrics.enabled)
 
     # IncludeAPIs
-    if metrics.include_apis:
+    if metrics.enabled and metrics.include_apis is not None:
         ETree.SubElement(root, 'IncludeAPIs').text = str(metrics.include_apis)
 
     # RetentionPolicy
