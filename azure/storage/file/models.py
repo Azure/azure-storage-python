@@ -193,8 +193,8 @@ FilePermissions.DELETE = FilePermissions(delete=True)
 class SharePermissions(object):
 
     '''
-    SharePermissions class to be used with `._FileService.generate_share_shared_access_signature`
-    method and for the AccessPolicies used with `._FileService.set_share_acl`. 
+    SharePermissions class to be used with `azure.storage.file.FileService.generate_share_shared_access_signature`
+    method and for the AccessPolicies used with `azure.storage.file.FileService.set_share_acl`. 
 
     :param bool read:
         Read the content, properties or metadata of any file in the share. Use any 

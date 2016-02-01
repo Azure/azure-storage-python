@@ -98,8 +98,8 @@ class EdmType(object):
 class TablePermissions(object):
 
     '''
-    TablePermissions class to be used with `.TableService.generate_table_shared_access_signature`
-    method and for the AccessPolicies used with `.TableService.set_table_acl`. 
+    TablePermissions class to be used with `azure.storage.table.TableService.generate_table_shared_access_signature`
+    method and for the AccessPolicies used with `azure.storage.table.TableService.set_table_acl`. 
 
     :param bool query:
         Get entities and query entities.

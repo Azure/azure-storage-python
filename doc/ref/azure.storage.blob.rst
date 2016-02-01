@@ -6,8 +6,11 @@ Submodules
 
 .. toctree::
 
-   azure.storage.blob.blobservice
+   azure.storage.blob.appendblobservice
+   azure.storage.blob.baseblobservice
+   azure.storage.blob.blockblobservice
    azure.storage.blob.models
+   azure.storage.blob.pageblobservice
 
 Module contents
 ---------------

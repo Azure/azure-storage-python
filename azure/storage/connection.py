@@ -18,7 +18,6 @@ if sys.version_info >= (3,):
     from urllib.parse import urlparse
 else:
     from urlparse import urlparse
-import configparser
 
 from .constants import (
     SERVICE_HOST_BASE,

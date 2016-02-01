@@ -45,7 +45,7 @@ from ._serialization import (
     _validate_and_format_range_headers,
 )
 from ._deserialization import _convert_xml_to_page_ranges
-from ._baseblobservice import _BaseBlobService
+from .baseblobservice import BaseBlobService
 from os import path
 import sys
 if sys.version_info >= (3,):
@@ -57,7 +57,7 @@ else:
 _PAGE_SIZE = 512
 
 
-class PageBlobService(_BaseBlobService):
+class PageBlobService(BaseBlobService):
     
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
@@ -114,31 +114,32 @@ class PageBlobService(_BaseBlobService):
         creation and upload of large blobs with automatic chunking and
         progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        content_length:
+        :param int content_length:
             Required. This header specifies the maximum size
             for the page blob, up to 1 TB. The page blob size must be aligned
             to a 512-byte boundary.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set properties on the blob.
-        sequence_number:
+        :param int sequence_number:
             The sequence number is a user-controlled value that you can use to
             track requests. The value of the sequence number must be between 0
             and 2^63 - 1.The default value is 0.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        lease_id:
+        :type metadata: a dict mapping str to str
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -176,55 +177,55 @@ class PageBlobService(_BaseBlobService):
         '''
         Updates a range of pages.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        page:
+        :param bytes page:
             Content of the page.
-        start_range:
+        :param int start_range:
             Start of byte range to use for writing to a section of the blob.
             Pages must be aligned with 512-byte boundaries, the start offset
             must be a modulus of 512 and the end offset must be a modulus of
             512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
-        end_range:
+        :param int end_range:
             End of byte range to use for writing to a section of the blob.
             Pages must be aligned with 512-byte boundaries, the start offset
             must be a modulus of 512 and the end offset must be a modulus of
             512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
-        content_md5:
+        :param int content_md5:
             An MD5 hash of the page content. This hash is used to
             verify the integrity of the page during transport. When this header
             is specified, the storage service compares the hash of the content
             that has arrived with the header value that was sent. If the two
             hashes do not match, the operation will fail with error code 400
             (Bad Request).
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_sequence_number_lte:
+        :param int if_sequence_number_lte:
             If the blob's sequence number is less than or equal to
             the specified value, the request proceeds; otherwise it fails.
-        if_sequence_number_lt:
+        :param int if_sequence_number_lt:
             If the blob's sequence number is less than the specified
             value, the request proceeds; otherwise it fails.
-        if_sequence_number_eq:
+        :param int if_sequence_number_eq:
             If the blob's sequence number is equal to the specified
             value, the request proceeds; otherwise it fails.
-        if_modified_since:
+        :param datetime if_modified_since:
             A DateTime value. Specify this conditional header to
             write the page only if the blob has been modified since the
             specified date/time. If the blob has not been modified, the Blob
             service fails.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             A DateTime value. Specify this conditional header to
             write the page only if the blob has not been modified since the
             specified date/time. If the blob has been modified, the Blob
             service fails.
-        if_match:
+        :param str if_match:
             An ETag value. Specify an ETag value for this conditional
             header to write the page only if the blob's ETag value matches the
             value specified. If the values do not match, the Blob service fails.
-        if_none_match:
+        :param str if_none_match:
             An ETag value. Specify an ETag value for this conditional
             header to write the page only if the blob's ETag value does not
             match the value specified. If the values are identical, the Blob
@@ -365,21 +366,21 @@ class PageBlobService(_BaseBlobService):
         Returns the list of valid page ranges for a page blob or snapshot
         of a page blob.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve information
             from.
-        start_range:
+        :param int start_range:
             Start of byte range to use for getting valid page ranges.
             If no end_range is given, all bytes after the start_range will be searched.
             Pages must be aligned with 512-byte boundaries, the start offset
             must be a modulus of 512 and the end offset must be a modulus of
             512-1. Examples of valid byte ranges are 0-511, 512-, etc.
-        end_range:
+        :param int end_range:
             End of byte range to use for getting valid page ranges.
             If end_range is given, start_range must be provided.
             This range will return valid page ranges for from the offset start up to
@@ -387,15 +388,15 @@ class PageBlobService(_BaseBlobService):
             Pages must be aligned with 512-byte boundaries, the start offset
             must be a modulus of 512 and the end offset must be a modulus of
             512-1. Examples of valid byte ranges are 0-511, 512-, etc.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -438,24 +439,24 @@ class PageBlobService(_BaseBlobService):
         '''
         Sets the blob sequence number.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        sequence_number:
+        :param str sequence_number:
             Sequence number for blob.
-        sequence_number_action:
+        :param str sequence_number_action:
             Action for sequence number change.
             Valid options: max, update, increment.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -492,21 +493,21 @@ class PageBlobService(_BaseBlobService):
         '''
         Resizes the blob to a new length.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        content_length:
+        :param int content_length:
             Size to resize blob to.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -544,39 +545,41 @@ class PageBlobService(_BaseBlobService):
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        file_path:
+        :param str file_path:
             Path of the file to upload as the blob content.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        progress_callback:
+        :type metadata: a dict mapping str to str
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Maximum number of parallel connections to use when the blob size
             exceeds 64MB.
             Set to 1 to upload the blob chunks sequentially.
             Set to 2 or more to upload the blob chunks in parallel. This uses
             more system resources but will upload faster.
-        max_retries:
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -617,43 +620,45 @@ class PageBlobService(_BaseBlobService):
         Creates a new blob from a file/stream, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        stream:
+        :param io.IOBase stream:
             Opened file/stream to upload as the blob content.
-        count:
+        :param int count:
             Number of bytes to read from the stream. This is required, a page
             blob cannot be created if the count is unknown.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set the blob properties.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        progress_callback:
+        :type metadata: a dict mapping str to str
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Maximum number of parallel connections to use when the blob size
             exceeds 64MB.
             Set to 1 to upload the blob chunks sequentially.
             Set to 2 or more to upload the blob chunks in parallel. This uses
             more system resources but will upload faster.
             Note that parallel upload requires the stream to be seekable.
-        max_retries:
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -712,44 +717,46 @@ class PageBlobService(_BaseBlobService):
         of an existing blob, with automatic chunking and progress
         notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        blob:
+        :param bytes blob:
             Content of blob as an array of bytes.
-        index:
+        :param int index:
             Start index in the array of bytes.
-        count:
+        :param int count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        progress_callback:
+        :type metadata: a dict mapping str to str
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Maximum number of parallel connections to use when the blob size
             exceeds 64MB.
             Set to 1 to upload the blob chunks sequentially.
             Set to 2 or more to upload the blob chunks in parallel. This uses
             more system resources but will upload faster.
-        max_retries:
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 

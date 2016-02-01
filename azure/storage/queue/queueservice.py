@@ -165,9 +165,9 @@ class QueueService(_StorageClient):
         Generates a shared access signature for the queue service.
         Use the returned signature with the sas_token parameter of QueueService.
 
-        :param ResourceTypes resource_types:
+        :param azure.storage.models.ResourceTypes resource_types:
             Specifies the resource types that are accessible with the account SAS.
-        :param AccountPermissions permission:
+        :param azure.storage.models.AccountPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
@@ -480,7 +480,7 @@ class QueueService(_StorageClient):
         '''
         Returns a boolean indicating whether the queue exists.
 
-        queue_name:
+        :param str queue_name:
             Name of queue to check for existence.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -502,7 +502,7 @@ class QueueService(_StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A dictionary of access policies associated with the queue.
-        :rtype: dict of str to :class:`.AccessPolicy`:
+        :rtype: dict of str to :class:`azure.storage.models.AccessPolicy`:
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -528,7 +528,7 @@ class QueueService(_StorageClient):
             A dictionary of access policies to associate with the queue. The 
             dictionary may contain up to 5 elements. An empty dictionary  
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
+        :type signed_identifiers: dict of str to :class:`azure.storage.models.AccessPolicy`:
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -592,7 +592,7 @@ class QueueService(_StorageClient):
         '''
         Retrieves one or more messages from the front of the queue.
 
-        :param str :param str queue_name:
+        :param str queue_name:
             Name of the queue.
         :param int num_messages:
             A nonzero integer value that specifies the number of
@@ -609,7 +609,7 @@ class QueueService(_StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A list of QueueMessage objects.
-        :rtype: list of `.QueueMessage`s
+        :rtype: list of `azure.storage.queue.models.QueueMessage`s
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -630,7 +630,7 @@ class QueueService(_StorageClient):
         Retrieves one or more messages from the front of the queue, but does
         not alter the visibility of the message.
 
-        :param str :param str queue_name:
+        :param str queue_name:
             Name of the queue.
         :param int num_messages:
             A nonzero integer value that specifies the number of
@@ -639,7 +639,7 @@ class QueueService(_StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A list of QueueMessage objects.
-        :rtype: list of `.QueueMessage`s
+        :rtype: list of `azure.storage.queue.models.QueueMessage`s
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -658,7 +658,7 @@ class QueueService(_StorageClient):
         '''
         Deletes the specified message.
 
-        :param str :param str queue_name:
+        :param str queue_name:
             Name of the queue.
         :param str message_id:
             Message to delete.
@@ -684,7 +684,7 @@ class QueueService(_StorageClient):
         '''
         Deletes all messages from the specified queue.
 
-        :param str :param str queue_name:
+        :param str queue_name:
             Name of the queue.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -749,19 +749,19 @@ class QueueService(_StorageClient):
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
         existing settings on the service for that functionality are preserved.
 
-        :param Logging logging:
+        :param azure.storage.models.Logging logging:
             Groups the Azure Analytics Logging settings.
-        :param Metrics hour_metrics:
+        :param azure.storage.models.Metrics hour_metrics:
             The hour metrics settings provide a summary of request 
             statistics grouped by API in hourly aggregates for blobs.
-        :param Metrics minute_metrics:
+        :param azure.storage.models.Metrics minute_metrics:
             The minute metrics settings provide request statistics 
             for each minute for blobs.
         :param cors:
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 
             and CORS will be disabled for the service.
-        :type cors: list of :class:`CorsRule`
+        :type cors: list of :class:`azure.storage.models.CorsRule`
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''

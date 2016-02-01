@@ -153,9 +153,9 @@ class TableService(_StorageClient):
         Generates a shared access signature for the table service.
         Use the returned signature with the sas_token parameter of TableService.
 
-        :param ResourceTypes resource_types:
+        :param azure.storage.models.ResourceTypes resource_types:
             Specifies the resource types that are accessible with the account SAS.
-        :param AccountPermissions permission:
+        :param azure.storage.models.AccountPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
@@ -206,7 +206,7 @@ class TableService(_StorageClient):
 
         :param str table_name:
             Name of table.
-        :param TablePermissions permission:
+        :param azure.storage.table.models.TablePermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
@@ -310,19 +310,19 @@ class TableService(_StorageClient):
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
         existing settings on the service for that functionality are preserved.
 
-        :param Logging logging:
+        :param azure.storage.models.Logging logging:
             Groups the Azure Analytics Logging settings.
-        :param Metrics hour_metrics:
+        :param azure.storage.models.Metrics hour_metrics:
             The hour metrics settings provide a summary of request 
             statistics grouped by API in hourly aggregates for blobs.
-        :param Metrics minute_metrics:
+        :param azure.storage.models.Metrics minute_metrics:
             The minute metrics settings provide request statistics 
             for each minute for blobs.
         :param cors:
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 
             and CORS will be disabled for the service.
-        :type cors: list of :class:`CorsRule`
+        :type cors: list of :class:`azure.storage.models.CorsRule`
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -344,15 +344,16 @@ class TableService(_StorageClient):
         '''
         Returns a list of tables under the specified account.
 
-        max_results:
+        :param int max_results:
             Optional. Maximum number of tables to return.
-        marker:
+        :param marker:
             A string value that identifies the portion of the query to be
             returned with the next query operation. The operation returns a
             next_marker element within the response body if the list returned
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
             queues. The marker value is opaque to the client.
+        :type marker: a dict mapping str to str
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -365,15 +366,16 @@ class TableService(_StorageClient):
         '''
         Returns a list of tables under the specified account.
 
-        max_results:
+        :param int max_results:
             Optional. Maximum number of tables to return.
-        marker:
+        :param marker:
             A string value that identifies the portion of the query to be
             returned with the next query operation. The operation returns a
             next_marker element within the response body if the list returned
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
             queues. The marker value is opaque to the client.
+        :type marker: a dict mapping str to str
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -391,15 +393,15 @@ class TableService(_StorageClient):
         response = self._perform_request(request)
         return _convert_json_response_to_tables(response)
 
-    def create_table(self, table, fail_on_exist=False, timeout=None):
+    def create_table(self, table_name, fail_on_exist=False, timeout=None):
         '''
         Creates a new table in the storage account.
 
-        table:
+        :param str table_name:
             Name of the table to create. Table name may contain only
             alphanumeric characters and cannot begin with a numeric character.
             It is case-insensitive and must be from 3 to 63 characters long.
-        fail_on_exist:
+        :param bool fail_on_exist:
             Specify whether throw exception when table exists.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -430,7 +432,7 @@ class TableService(_StorageClient):
         '''
         Returns a boolean indicating whether the table exists.
 
-        table_name:
+        :param str table_name:
             Name of table to check for existence.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -452,9 +454,9 @@ class TableService(_StorageClient):
 
     def delete_table(self, table_name, fail_not_exist=False, timeout=None):
         '''
-        table_name:
+        :param str table_name:
             Name of the table to delete.
-        fail_not_exist:
+        :param bool fail_not_exist:
             Specify whether throw exception when table doesn't exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -485,10 +487,10 @@ class TableService(_StorageClient):
 
         :param str table_name:
             Name of existing table.
-        :return: A dictionary of access policies associated with the table.
-        :rtype: dict of str to :class:`.AccessPolicy`:
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: A dictionary of access policies associated with the table.
+        :rtype: dict of str to :class:`azure.storage.models.AccessPolicy`:
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
@@ -514,7 +516,7 @@ class TableService(_StorageClient):
             A dictionary of access policies to associate with the table. The 
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
+        :type signed_identifiers: dict of str to :class:`azure.storage.models.AccessPolicy`:
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -538,29 +540,32 @@ class TableService(_StorageClient):
         '''
         Get entities in a table; includes the $filter and $select options.
 
-        table_name:
+        :param str table_name:
             Table to query.
-        filter:
+        :param str filter:
             Optional. Filter as described at
             http://msdn.microsoft.com/en-us/library/windowsazure/dd894031.aspx
-        select:
+        :param str select:
             Optional. Property names to select from the entities.
-        top:
+        :param str top:
             Optional. Maximum number of entities to return.
-        marker:
+        :param marker:
             A value that identifies the portion of the list
             to be returned with the next list operation. The operation returns
             a next_marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of list items. The marker value is
             opaque to the client.
-        accept:
+        :type marker: a dict mapping str to str
+        :param accept:
             Required. Specifies the accepted content type of the response 
             payload. See TablePayloadFormat for possible values.
-        property_resolver:
+        :type accept: select an option from :class:`azure.storage.table.models.TablePayloadFormat`
+        :param property_resolver:
             Optional. A function which given the partition key, row key, 
             property name, property value, and the property EdmType if 
             returned by the service, returns the EdmType of the property.
+        :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -577,29 +582,32 @@ class TableService(_StorageClient):
         '''
         Get entities in a table; includes the $filter and $select options.
 
-        table_name:
+        :param str table_name:
             Table to query.
-        filter:
+        :param str filter:
             Optional. Filter as described at
             http://msdn.microsoft.com/en-us/library/windowsazure/dd894031.aspx
-        select:
+        :param str select:
             Optional. Property names to select from the entities.
-        top:
+        :param str top:
             Optional. Maximum number of entities to return.
-        marker:
+        :param marker:
             A value that identifies the portion of the query
             to be returned with the next query operation. The operation returns
             a next_marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of query items. The marker value is
             opaque to the client.
-        accept:
+        :type marker: a dict mapping str to str
+        :param str accept:
             Required. Specifies the accepted content type of the response 
             payload. See TablePayloadFormat for possible values.
-        property_resolver:
+        :type accept: select an option from :class:`azure.storage.table.models.TablePayloadFormat`
+        :param property_resolver:
             Optional. A function which given the partition key, row key, 
             property name, property value, and the property EdmType if 
             returned by the service, returns the EdmType of the property.
+        :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -629,10 +637,10 @@ class TableService(_StorageClient):
         '''
         Commits a batch request.
 
-        table_name:
+        :param str table_name:
             Table name.
-        batch:
-            a Batch object
+        :param azure.storage.table.tablebatch.TableBatch batch:
+            A Batch object.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -669,7 +677,7 @@ class TableService(_StorageClient):
         Creates a batch object which can be used as a context manager.
         Commits the batch on exit.
 
-        table_name:
+        :param str table_name:
             Table name.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -684,21 +692,23 @@ class TableService(_StorageClient):
         '''
         Get an entity in a table; includes the $select options.
 
-        table_name:
+        :param str table_name:
             Table name.
-        partition_key:
+        :param str partition_key:
             PartitionKey of the entity.
-        row_key:
+        :param str row_key:
             RowKey of the entity.
-        select:
+        :param str select:
             Optional. Property names to select.
-        accept:
+        :param accept:
             Required. Specifies the accepted content type of the response 
             payload. See TablePayloadFormat for possible values.
-        property_resolver:
+        :type accept: select an option from :class:`azure.storage.table.models.TablePayloadFormat`
+        :param property_resolver:
             Optional. A function which given the partition key, row key, 
             property name, property value, and the property EdmType if 
             returned by the service, returns the EdmType of the property.
+        :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -715,11 +725,12 @@ class TableService(_StorageClient):
         '''
         Inserts a new entity into a table.
 
-        table_name:
+        :param str table_name:
             Table name.
-        entity:
+        :param entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -737,12 +748,13 @@ class TableService(_StorageClient):
         Updates an existing entity in a table. The Update Entity operation
         replaces the entire entity and can be used to remove properties.
 
-        table_name:
+        :param str table_name:
             Table name.
-        entity:
+        :param entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
-        if_match:
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :param str if_match:
             Required. The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The update operation 
@@ -768,12 +780,13 @@ class TableService(_StorageClient):
         operation does not replace the existing entity as the Update Entity
         operation does.
 
-        table_name:
+        :param str table_name:
             Table name.
-        entity:
+        :param entity:
             Required. The entity object to insert. Can be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
-        if_match:
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :param str if_match:
             Required. The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The merge operation 
@@ -798,13 +811,13 @@ class TableService(_StorageClient):
         '''
         Deletes an existing entity in a table.
 
-        table_name:
+        :param str table_name:
             Table name.
-        partition_key:
+        :param str partition_key:
             PartitionKey of the entity.
-        row_key:
+        :param str row_key:
             RowKey of the entity.
-        if_match:
+        :param str if_match:
             Required. The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The delete operation 
@@ -829,11 +842,12 @@ class TableService(_StorageClient):
         exist in the table. Because this operation can insert or update an
         entity, it is also known as an "upsert" operation.
 
-        table_name:
+        :param str table_name:
             Table name.
-        entity:
+        :param entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -852,11 +866,12 @@ class TableService(_StorageClient):
         in the table. Because this operation can insert or update an entity,
         it is also known as an "upsert" operation.
 
-        table_name:
+        :param str table_name:
             Table name.
-        entity:
+        :param entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''

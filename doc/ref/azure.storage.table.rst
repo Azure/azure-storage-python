@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    azure.storage.table.models
+   azure.storage.table.tablebatch
    azure.storage.table.tableservice
 
 Module contents
