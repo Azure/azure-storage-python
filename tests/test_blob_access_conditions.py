@@ -88,8 +88,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.set_container_metadata(
@@ -110,8 +109,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         contianer_name = self.container_name
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -127,8 +125,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-                    datetime.timedelta(minutes=15))\
-                   .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         # Act
         resp = self.bs.set_container_acl(self.container_name,
                                          if_modified_since=test_datetime) 
@@ -143,8 +140,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-                    datetime.timedelta(minutes=15))\
-                   .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.set_container_acl(self.container_name,
@@ -157,8 +153,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-                    datetime.timedelta(minutes=15))\
-                   .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         # Act
         resp = self.bs.set_container_acl(self.container_name,
                                          if_unmodified_since=test_datetime) 
@@ -173,8 +168,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-                    datetime.timedelta(minutes=15))\
-                   .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.set_container_acl(self.container_name,
@@ -187,8 +181,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         self.bs.acquire_container_lease(self.container_name, if_modified_since=test_datetime) 
@@ -201,8 +194,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -216,8 +208,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         self.bs.acquire_container_lease(self.container_name, if_unmodified_since=test_datetime) 
@@ -230,8 +221,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -245,8 +235,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-                    datetime.timedelta(minutes=15))\
-                   .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         # Act
         deleted = self.bs.delete_container(self.container_name,
                                            if_modified_since=test_datetime) 
@@ -261,8 +250,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-                    datetime.timedelta(minutes=15))\
-                   .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.delete_container(self.container_name,
@@ -275,8 +263,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() +
-                    datetime.timedelta(minutes=15))\
-                   .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         # Act
         deleted = self.bs.delete_container(self.container_name,
                                            if_unmodified_since=test_datetime) 
@@ -291,8 +278,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         test_datetime = (datetime.datetime.utcnow() -
-                    datetime.timedelta(minutes=15))\
-                   .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.delete_container(self.container_name,
@@ -305,8 +291,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', data)
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.create_blob_from_bytes(
@@ -323,8 +308,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', data)
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -341,8 +325,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', data)
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.create_blob_from_bytes(
@@ -359,8 +342,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', data)
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -438,8 +420,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1',
@@ -455,8 +436,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -471,8 +451,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1',
@@ -488,8 +467,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -559,8 +537,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         resp = self.bs.set_blob_properties(
             self.container_name,
@@ -583,8 +560,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             resp = self.bs.set_blob_properties(
@@ -604,8 +580,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         resp = self.bs.set_blob_properties(
             self.container_name,
@@ -628,8 +603,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             resp = self.bs.set_blob_properties(
@@ -733,8 +707,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         blob = self.bs.get_blob_properties(self.container_name, 'blob1',
                                             if_modified_since=test_datetime)
@@ -751,8 +724,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.get_blob_properties(self.container_name, 'blob1',
@@ -766,8 +738,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         blob = self.bs.get_blob_properties(self.container_name, 'blob1',
                                             if_unmodified_since=test_datetime)
@@ -784,8 +755,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.get_blob_properties(self.container_name, 'blob1',
@@ -859,8 +829,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         md = self.bs.get_blob_metadata(self.container_name, 'blob1',
@@ -875,8 +844,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -891,8 +859,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         md = self.bs.get_blob_metadata(self.container_name, 'blob1',
@@ -907,8 +874,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -976,8 +942,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.set_blob_metadata(
@@ -1000,8 +965,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1019,8 +983,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.set_blob_metadata(
@@ -1043,8 +1006,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1136,8 +1098,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
     def test_delete_blob_with_if_modified(self):
         # Arrange
         test_datetime = (datetime.datetime.utcnow() -
-                    datetime.timedelta(minutes=15))\
-                .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
 
@@ -1152,8 +1113,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
     def test_delete_blob_with_if_modified_fail(self):
         # Arrange
         test_datetime = (datetime.datetime.utcnow() +
-                    datetime.timedelta(minutes=15))\
-                .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
 
@@ -1168,8 +1128,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
     def test_delete_blob_with_if_unmodified(self):
         # Arrange
         test_datetime = (datetime.datetime.utcnow() +
-                    datetime.timedelta(minutes=15))\
-                .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
 
@@ -1184,8 +1143,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
     def test_delete_blob_with_if_unmodified_fail(self):
         # Arrange
         test_datetime = (datetime.datetime.utcnow() -
-                    datetime.timedelta(minutes=15))\
-                .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                    datetime.timedelta(minutes=15))
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
 
@@ -1254,8 +1212,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.snapshot_blob(self.container_name, 'blob1',
@@ -1271,8 +1228,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1287,8 +1243,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.snapshot_blob(self.container_name, 'blob1',
@@ -1304,8 +1259,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1377,8 +1331,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
         test_lease_id = '00000000-1111-2222-3333-444444444444'
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp1 = self.bs.acquire_blob_lease(
@@ -1397,8 +1350,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1415,8 +1367,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
         test_lease_id = '00000000-1111-2222-3333-444444444444'
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp1 = self.bs.acquire_blob_lease(
@@ -1435,8 +1386,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_block_blob(
             self.container_name, 'blob1', b'hello world')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1520,8 +1470,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.put_block_list(
@@ -1542,8 +1491,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1562,8 +1510,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         resp = self.bs.put_block_list(
@@ -1584,8 +1531,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
 
         # Act
         with self.assertRaises(AzureHttpError):
@@ -1675,8 +1621,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 1024)
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         data = b'abcdefghijklmnop' * 32
 
         # Act
@@ -1692,8 +1637,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 1024)
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         data = b'abcdefghijklmnop' * 32
 
         # Act
@@ -1709,8 +1653,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 1024)
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         data = b'abcdefghijklmnop' * 32
 
         # Act
@@ -1726,8 +1669,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self._create_container_and_page_blob(
             self.container_name, 'blob1', 1024)
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         data = b'abcdefghijklmnop' * 32
 
         # Act
@@ -1802,8 +1744,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         self.pbs.update_page(self.container_name, 'blob1', data, 0, 511)
         self.pbs.update_page(self.container_name, 'blob1', data, 1024, 1535)
 
@@ -1825,8 +1766,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         self.pbs.update_page(self.container_name, 'blob1', data, 0, 511)
         self.pbs.update_page(self.container_name, 'blob1', data, 1024, 1535)
 
@@ -1844,8 +1784,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         self.pbs.update_page(self.container_name, 'blob1', data, 0, 511)
         self.pbs.update_page(self.container_name, 'blob1', data, 1024, 1535)
 
@@ -1867,8 +1806,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', 2048)
         data = b'abcdefghijklmnop' * 32
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         self.pbs.update_page(self.container_name, 'blob1', data, 0, 511)
         self.pbs.update_page(self.container_name, 'blob1', data, 1024, 1535)
 
@@ -1958,8 +1896,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_append_blob(self.container_name, 'blob1')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         for i in range(5):
             resp = self.abs.append_block(
@@ -1977,8 +1914,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_append_blob(self.container_name, 'blob1')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             for i in range(5):
@@ -1994,8 +1930,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_append_blob(self.container_name, 'blob1')
         test_datetime = (datetime.datetime.utcnow() +
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         for i in range(5):
             resp = self.abs.append_block(
@@ -2013,8 +1948,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         # Arrange
         self._create_container_and_append_blob(self.container_name, 'blob1')
         test_datetime = (datetime.datetime.utcnow() -
-                         datetime.timedelta(minutes=15))\
-                        .strftime('%a, %d %b %Y %H:%M:%S GMT')
+                         datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
             for i in range(5):

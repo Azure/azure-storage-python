@@ -131,7 +131,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act        
         data = self.get_random_bytes(512)
-        self.bs.put_page(self.container_name, blob_name, data, 0, 511, 'update', lease_id=lease_id)
+        self.bs.update_page(self.container_name, blob_name, data, 0, 511, lease_id=lease_id)
 
         # Assert
         blob = self.bs.get_blob_to_bytes(self.container_name, blob_name, lease_id=lease_id)

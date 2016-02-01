@@ -406,7 +406,7 @@ class TableService(_StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
-        _validate_not_none('table', table)
+        _validate_not_none('table', table_name)
         request = HTTPRequest()
         request.method = 'POST'
         request.host = self._get_host()
@@ -415,7 +415,7 @@ class TableService(_StorageClient):
         request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
                            _DEFAULT_PREFER_HEADER,
                            _DEFAULT_ACCEPT_HEADER]
-        request.body = _get_request_body(_convert_table_to_json(table))
+        request.body = _get_request_body(_convert_table_to_json(table_name))
 
         if not fail_on_exist:
             try:

@@ -60,6 +60,12 @@ def _bool_or_none(value):
     return str(value)
 
 
+def _datetime_to_str(value):
+    if value is None:
+        return None
+
+    return value.strftime('%a, %d %b %Y %H:%M:%S GMT')
+
 def _encode_base64(data):
     if isinstance(data, _unicode_type):
         data = data.encode('utf-8')
