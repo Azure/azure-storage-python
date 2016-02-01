@@ -41,7 +41,7 @@ from ._serialization import (
 from ._deserialization import (
     _parse_append_block,
 )
-from ._baseblobservice import _BaseBlobService
+from .baseblobservice import BaseBlobService
 from os import path
 import sys
 if sys.version_info >= (3,):
@@ -50,7 +50,7 @@ else:
     from cStringIO import StringIO as BytesIO
 
 
-class AppendBlobService(_BaseBlobService):
+class AppendBlobService(BaseBlobService):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
@@ -108,23 +108,24 @@ class AppendBlobService(_BaseBlobService):
         functions that handle the creation and upload of large blobs with
         automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        lease_id:
+        :type metadata: a dict mapping str to str
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -160,39 +161,39 @@ class AppendBlobService(_BaseBlobService):
         The Append Block operation commits a new block of data
         to the end of an existing append blob.
         
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        block:
+        :param bytes block:
             Content of the block in bytes.
-        content_md5:
+        :param int content_md5:
             An MD5 hash of the block content. This hash is used to
             verify the integrity of the blob during transport. When this
             header is specified, the storage service checks the hash that has
             arrived with the one that was sent.
-        maxsize_condition:
+        :param int maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        appendpos_condition:
+        :param int appendpos_condition:
             Optional conditional header, used only for the Append Block operation.
             A number indicating the byte offset to compare. Append Block will
             succeed only if the append position is equal to this number. If it
             is not, the request will fail with the
             AppendPositionConditionNotMet error
             (HTTP status code 412 – Precondition Failed).
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -233,27 +234,28 @@ class AppendBlobService(_BaseBlobService):
         Appends to the content of an existing blob from a file path, with automatic
         chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        file_path:
+        :param str file_path:
             Path of the file to upload as the blob content.
-        maxsize_condition:
+        :param int maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        progress_callback:
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_retries:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -286,32 +288,33 @@ class AppendBlobService(_BaseBlobService):
         Appends to the content of an existing blob from an array of bytes, with
         automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        blob:
+        :param bytes blob:
             Content of blob as an array of bytes.
-        index:
+        :param int index:
             Start index in the array of bytes.
-        count:
+        :param int count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        maxsize_condition:
+        :param int maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        progress_callback:
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_retries:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -353,29 +356,30 @@ class AppendBlobService(_BaseBlobService):
         Appends to the content of an existing blob from str/unicode, with
         automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        text:
+        :param str text:
             Text to upload to the blob.
-        encoding:
+        :param str encoding:
             Python encoding to use to convert the text to bytes.
-        maxsize_condition:
+        :param int maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        progress_callback:
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_retries:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -411,30 +415,31 @@ class AppendBlobService(_BaseBlobService):
         Appends to the content of an existing blob from a file/stream, with
         automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        stream:
+        :param io.IOBase stream:
             Opened file/stream to upload as the blob content.
-        count:
+        :param int count:
             Number of bytes to read from the stream. This is optional, but
             should be supplied for optimal performance.
-        maxsize_condition:
+        :param int maxsize_condition:
             Conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
             MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
-        progress_callback:
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_retries:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -444,7 +449,7 @@ class AppendBlobService(_BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
-        
+
         _upload_blob_chunks(
             blob_service=self,
             container_name=container_name,

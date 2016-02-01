@@ -38,7 +38,7 @@ class TableBatch(object):
 
     def __init__(self,):
         '''
-        table_name:
+        :param str table_name:
             Table name.
         '''
         self._requests = []
@@ -50,9 +50,10 @@ class TableBatch(object):
         Adds an insert entity operation to the batch. 
         The operation will not be executed until the batch is committed.
 
-        entity:
+        :param entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
         '''
         request = _insert_entity(entity)
         self._add_to_batch(entity['PartitionKey'], entity['RowKey'], request)
@@ -63,10 +64,11 @@ class TableBatch(object):
         replaces the entire entity and can be used to remove properties.
         The operation will not be executed until the batch is committed.
 
-        entity:
+        :param entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
-        if_match:
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :param str if_match:
             Required. The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The update operation 
@@ -84,10 +86,11 @@ class TableBatch(object):
         the existing entity as the Update Entity operation does.
         The operation will not be executed until the batch is committed.
 
-        entity:
+        :param entity:
             Required. The entity object to insert. Can be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
-        if_match:
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :param str if_match:
             Required. The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The merge operation 
@@ -105,11 +108,11 @@ class TableBatch(object):
         Adds a delete entity operation to the batch.
         The operation will not be executed until the batch is committed.
 
-        partition_key:
+        :param str partition_key:
             PartitionKey of the entity.
-        row_key:
+        :param str row_key:
             RowKey of the entity.
-        if_match:
+        :param str if_match:
             Required. The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The delete operation 
@@ -129,10 +132,11 @@ class TableBatch(object):
         entity, it is also known as an "upsert" operation.
         The operation will not be executed until the batch is committed.
 
-        entity:
+        :param entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
-        '''
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+       '''
         request = _insert_or_replace_entity(entity)
         self._add_to_batch(entity['PartitionKey'], entity['RowKey'], request)
 
@@ -144,9 +148,10 @@ class TableBatch(object):
         it is also known as an "upsert" operation.
         The operation will not be executed until the batch is committed.
 
-        entity:
+        :param entity:
             Required. The entity object to insert. Could be a dict format or
             entity object. Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`azure.storage.table.models.Entity`
         '''
         request = _insert_or_merge_entity(entity)
         self._add_to_batch(entity['PartitionKey'], entity['RowKey'], request)
@@ -154,8 +159,12 @@ class TableBatch(object):
     def _add_to_batch(self, partition_key, row_key, request):
         '''
         Validates batch-specific rules.
-
-        request:
+        
+        :param str partition_key:
+            PartitionKey of the entity.
+        :param str row_key:
+            RowKey of the entity.
+        :param request:
             the request to insert, update or delete entity
         '''
         # All same partition keys

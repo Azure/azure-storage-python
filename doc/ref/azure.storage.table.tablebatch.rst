@@ -1,7 +1,7 @@
-azure.storage.blob.blobservice module
+azure.storage.table.tablebatch module
 =====================================
 
-.. automodule:: azure.storage.blob.blobservice
+.. automodule:: azure.storage.table.tablebatch
     :members:
     :undoc-members:
     :show-inheritance:

@@ -46,7 +46,7 @@ from ._serialization import (
 from ._deserialization import (
     _convert_xml_to_block_list,
 )
-from ._baseblobservice import _BaseBlobService
+from .baseblobservice import BaseBlobService
 from os import path
 import sys
 if sys.version_info >= (3,):
@@ -55,7 +55,7 @@ else:
     from cStringIO import StringIO as BytesIO
 
 
-class BlockBlobService(_BaseBlobService):
+class BlockBlobService(BaseBlobService):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
@@ -112,26 +112,26 @@ class BlockBlobService(_BaseBlobService):
         functions that handle the creation and upload of large blobs with
         automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        blob:
+        :param bytes blob:
             Content of blob as bytes (size < 64MB). For larger size, you
             must call put_block and put_block_list to set content of blob.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set properties on the blob.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -163,21 +163,21 @@ class BlockBlobService(_BaseBlobService):
         '''
         Creates a new block to be committed as part of a blob.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        block:
+        :param bytes block:
             Content of the block.
-        block_id:
+        :param str block_id:
             A value that identifies the block. The string must be
             less than or equal to 64 bytes in size.
-        content_md5:
+        :param int content_md5:
             An MD5 hash of the block content. This hash is used to
             verify the integrity of the blob during transport. When this
             header is specified, the storage service checks the hash that has
             arrived with the one that was sent.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -215,30 +215,32 @@ class BlockBlobService(_BaseBlobService):
         successfully written to the server in a prior Put Block (REST API)
         operation.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        block_list:
+        :param block_list:
             A list of BlobBlock containing the block ids and block state.
-        transactional_content_md5:
+        :type block_list: list of :class:`azure.storage.blob.models.BlobBlock`
+        :param str transactional_content_md5:
             An MD5 hash of the block content. This hash is used to
             verify the integrity of the blob during transport. When this header
             is specified, the storage service checks the hash that has arrived
             with the one that was sent.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set properties on the blob.
-        metadata:
+        :param metadata:
             Dict containing name and value pairs.
-        lease_id:
+        :type metadata: a dict mapping str to str
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -276,17 +278,17 @@ class BlockBlobService(_BaseBlobService):
         Retrieves the list of blocks that have been uploaded as part of a
         block blob.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        snapshot:
+        :param str snapshot:
             Datetime to determine the time to retrieve the blocks.
-        block_list_type:
+        :param str block_list_type:
             Specifies whether to return the list of committed blocks, the list
             of uncommitted blocks, or both lists together. Valid values are:
             committed, uncommitted, or all.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -320,39 +322,41 @@ class BlockBlobService(_BaseBlobService):
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        file_path:
+        :param str file_path:
             Path of the file to upload as the blob content.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        progress_callback:
+        :type metadata: a dict mapping str to str
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Maximum number of parallel connections to use when the blob size
             exceeds 64MB.
             Set to 1 to upload the blob chunks sequentially.
             Set to 2 or more to upload the blob chunks in parallel. This uses
             more system resources but will upload faster.
-        max_retries:
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -394,43 +398,45 @@ class BlockBlobService(_BaseBlobService):
         an existing blob, with automatic chunking and progress
         notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        stream:
+        :param io.IOBase stream:
             Opened file/stream to upload as the blob content.
-        count:
+        :param int count:
             Number of bytes to read from the stream. This is optional, but
             should be supplied for optimal performance.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        progress_callback:
+        :type metadata: a dict mapping str to str
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Maximum number of parallel connections to use when the blob size
             exceeds 64MB.
             Set to 1 to upload the blob chunks sequentially.
             Set to 2 or more to upload the blob chunks in parallel. This uses
             more system resources but will upload faster.
             Note that parallel upload requires the stream to be seekable.
-        max_retries:
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -503,44 +509,46 @@ class BlockBlobService(_BaseBlobService):
         of an existing blob, with automatic chunking and progress
         notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        blob:
+        :param bytes blob:
             Content of blob as an array of bytes.
-        index:
+        :param int index:
             Start index in the array of bytes.
-        count:
+        :param int count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        progress_callback:
+        :type metadata: a dict mapping str to str
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Maximum number of parallel connections to use when the blob size
             exceeds 64MB.
             Set to 1 to upload the blob chunks sequentially.
             Set to 2 or more to upload the blob chunks in parallel. This uses
             more system resources but will upload faster.
-        max_retries:
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -611,41 +619,43 @@ class BlockBlobService(_BaseBlobService):
         Creates a new blob from str/unicode, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of blob to create or update.
-        text:
+        :param str text:
             Text to upload to the blob.
-        encoding:
+        :param str encoding:
             Python encoding to use to convert the text to bytes.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
-        progress_callback:
+        :type metadata: a dict mapping str to str
+        :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Maximum number of parallel connections to use when the blob size
             exceeds 64MB.
             Set to 1 to upload the blob chunks sequentially.
             Set to 2 or more to upload the blob chunks in parallel. This uses
             more system resources but will upload faster.
-        max_retries:
+        :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 

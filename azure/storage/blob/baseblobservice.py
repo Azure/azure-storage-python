@@ -85,7 +85,7 @@ if sys.version_info >= (3,):
 else:
     from cStringIO import StringIO as BytesIO
 
-class _BaseBlobService(_StorageClient):
+class BaseBlobService(_StorageClient):
 
     '''
     This is the main class managing Blob resources.
@@ -146,7 +146,7 @@ class _BaseBlobService(_StorageClient):
             request_session=request_session,
             connection_string=connection_string)
 
-        super(_BaseBlobService, self).__init__(service_params)
+        super(BaseBlobService, self).__init__(service_params)
 
         if self.account_key:
             self.authentication = _StorageSharedKeyAuthentication(
@@ -162,14 +162,14 @@ class _BaseBlobService(_StorageClient):
         '''
         Creates the url to access a blob.
 
-        container_name:
+        :param str container_name:
             Name of container.
-        blob_name:
+        :param str blob_name:
             Name of blob.
-        protocol:
+        :param str protocol:
             Protocol to use: 'http' or 'https'. If not specified, uses the
-            protocol specified when _BaseBlobService was initialized.
-        sas_token:
+            protocol specified when BaseBlobService was initialized.
+        :param str sas_token:
             Shared access signature token created with
             generate_shared_access_signature.
         '''
@@ -192,9 +192,9 @@ class _BaseBlobService(_StorageClient):
         Generates a shared access signature for the blob service.
         Use the returned signature with the sas_token parameter of any BlobService.
 
-        :param ResourceTypes resource_types:
+        :param azure.storage.models.ResourceTypes resource_types:
             Specifies the resource types that are accessible with the account SAS.
-        :param AccountPermissions permission:
+        :param azure.storage.models.AccountPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
@@ -331,7 +331,7 @@ class _BaseBlobService(_StorageClient):
             Name of container.
         :param str blob_name:
             Name of blob.
-        :param BlobPermissions permission:
+        :param azure.storage.blob.models.BlobPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions.
             Permissions must be ordered read, write, delete, list.
@@ -411,19 +411,19 @@ class _BaseBlobService(_StorageClient):
         The List Containers operation returns a list of the containers under
         the specified account.
 
-        prefix:
+        :param str prefix:
             Filters the results to return only containers whose names
             begin with the specified prefix.
-        marker:
+        :param str marker:
             A string value that identifies the portion of the list
             to be returned with the next list operation. The operation returns
             a next_marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of list items. The marker value is
             opaque to the client.
-        max_results:
+        :param int max_results:
             Specifies the maximum number of containers to return.
-        include:
+        :param str include:
             Include this parameter to specify that the container's
             metadata be returned as part of the response body. set this
             parameter to string 'metadata' to get container's metadata.
@@ -443,19 +443,19 @@ class _BaseBlobService(_StorageClient):
         The List Containers operation returns a list of the containers under
         the specified account.
 
-        prefix:
+        :param str prefix:
             Filters the results to return only containers whose names
             begin with the specified prefix.
-        marker:
+        :param str marker:
             A string value that identifies the portion of the list
             to be returned with the next list operation. The operation returns
             a next_marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of list items. The marker value is
             opaque to the client.
-        max_results:
+        :param int max_results:
             Specifies the maximum number of containers to return.
-        include:
+        :param str include:
             Include this parameter to specify that the container's
             metadata be returned as part of the response body. set this
             parameter to string 'metadata' to get container's metadata.
@@ -484,14 +484,15 @@ class _BaseBlobService(_StorageClient):
         Creates a new container under the specified account. If the container
         with the same name already exists, the operation fails.
 
-        container_name:
+        :param str container_name:
             Name of container to create.
-        metadata:
+        :param metadata:
             A dict with name_value pairs to associate with the
             container as metadata. Example:{'Category':'test'}
-        blob_public_access:
+        :type metadata: a dict mapping str to str
+        :param str blob_public_access:
             Possible values include: container, blob
-        fail_on_exist:
+        :param bool fail_on_exist:
             specify whether to throw an exception when the container exists.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -525,9 +526,9 @@ class _BaseBlobService(_StorageClient):
         Returns all user-defined metadata and system properties for the
         specified container.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        lease_id:
+        :param str lease_id:
             If specified, get_container_properties only succeeds if the
             container's lease is active and matches this ID.
         :param int timeout:
@@ -552,9 +553,9 @@ class _BaseBlobService(_StorageClient):
         Returns all user-defined metadata for the specified container. The
         metadata will be in returned dictionary['x-ms-meta-(name)'].
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        lease_id:
+        :param str lease_id:
             If specified, get_container_metadata only succeeds if the
             container's lease is active and matches this ID.
         :param int timeout:
@@ -581,15 +582,16 @@ class _BaseBlobService(_StorageClient):
         Sets one or more user-defined name-value pairs for the specified
         container.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        metadata:
+        :param metadata:
             A dict containing name, value for metadata.
             Example: {'category':'test'}
-        lease_id:
+        :type metadata: a dict mapping str to str
+        :param str lease_id:
             If specified, set_container_metadata only succeeds if the
             container's lease is active and matches this ID.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -621,10 +623,10 @@ class _BaseBlobService(_StorageClient):
         :param lease_id:
             If specified, get_container_acl only succeeds if the
             container's lease is active and matches this ID.
-        :return: A dictionary of access policies associated with the container.
-        :rtype: dict of str to :class:`.AccessPolicy`:
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: A dictionary of access policies associated with the container.
+        :rtype: dict of str to :class:`.AccessPolicy`:
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -660,9 +662,9 @@ class _BaseBlobService(_StorageClient):
         :param str lease_id:
             If specified, set_container_acl only succeeds if the
             container's lease is active and matches this ID.
-        :param str if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        :param str if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -694,16 +696,16 @@ class _BaseBlobService(_StorageClient):
         '''
         Marks the specified container for deletion.
 
-        container_name:
+        :param str container_name:
             Name of container to delete.
-        fail_not_exist:
+        :param bool fail_not_exist:
             Specify whether to throw an exception when the container doesn't
             exist.
-        lease_id:
+        :param str lease_id:
             Required if the container has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -742,19 +744,19 @@ class _BaseBlobService(_StorageClient):
         Establishes and manages a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        lease_action:
+        :param str lease_action:
             Possible LeaseActions values: acquire|renew|release|break|change
-        lease_id:
+        :param str lease_id:
             Required if the container has an active lease.
-        lease_duration:
+        :param int lease_duration:
             Specifies the duration of the lease, in seconds, or negative one
             (-1) for a lease that never expires. A non-infinite lease can be
             between 15 and 60 seconds. A lease duration cannot be changed
             using renew or change. For backwards compatibility, the default is
             60, and the value is only used on an acquire operation.
-        lease_break_period:
+        :param int lease_break_period:
             For a break operation, this is the proposed duration of
             seconds that the lease should continue before it is broken, between
             0 and 60 seconds. This break period is only used if it is shorter
@@ -764,12 +766,12 @@ class _BaseBlobService(_StorageClient):
             the break period. If this header does not appear with a break
             operation, a fixed-duration lease breaks after the remaining lease
             period elapses, and an infinite lease breaks immediately.
-        proposed_lease_id:
+        :param str proposed_lease_id:
             Optional for acquire, required for change. Proposed lease ID, in a
             GUID string format.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -804,18 +806,18 @@ class _BaseBlobService(_StorageClient):
         Acquires a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds or infinite.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        lease_duration:
+        :param int lease_duration:
             Specifies the duration of the lease, in seconds, or negative one
             (-1) for a lease that never expires. A non-infinite lease can be
             between 15 and 60 seconds. A lease duration cannot be changed
             using renew or change. Default is -1 (infinite lease).
-        proposed_lease_id:
+        :param str proposed_lease_id:
             Proposed lease ID, in a GUID string format.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -842,13 +844,13 @@ class _BaseBlobService(_StorageClient):
         '''
         Renews a lock on a container for delete operations.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        lease_id:
+        :param str lease_id:
             Lease ID for active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -873,18 +875,14 @@ class _BaseBlobService(_StorageClient):
         Releases a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        lease_id:
+        :param str lease_id:
             Lease ID for active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
-            An ETag value.
-        if_none_match:
-            An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -907,9 +905,9 @@ class _BaseBlobService(_StorageClient):
         Breaks a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        lease_break_period:
+        :param int lease_break_period:
             This is the proposed duration of seconds that the lease
             should continue before it is broken, between 0 and 60 seconds. This
             break period is only used if it is shorter than the time remaining
@@ -919,9 +917,9 @@ class _BaseBlobService(_StorageClient):
             period. If this header does not appear with a break
             operation, a fixed-duration lease breaks after the remaining lease
             period elapses, and an infinite lease breaks immediately.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -947,16 +945,16 @@ class _BaseBlobService(_StorageClient):
         Changes a lock on a container for delete operations.
         The lock duration can be 15 to 60 seconds, or can be infinite.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        lease_id:
+        :param str lease_id:
             Lease ID for active lease.
-        proposed_lease_id:
+        :param str proposed_lease_id:
             Proposed lease ID, in a GUID string format.
             period elapses, and an infinite lease breaks immediately.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -978,25 +976,25 @@ class _BaseBlobService(_StorageClient):
         '''
         Returns the list of blobs under the specified container.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        prefix:
+        :param str prefix:
             Filters the results to return only blobs whose names
             begin with the specified prefix.
-        marker:
+        :param str marker:
             A string value that identifies the portion of the list
             to be returned with the next list operation. The operation returns
             a next_marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of list items. The marker value is
             opaque to the client.
-        max_results:
+        :param int max_results:
             Specifies the maximum number of blobs to return,
             including all BlobPrefix elements. If the request does not specify
             max_results or specifies a value greater than 5,000, the server will
             return up to 5,000 items. Setting max_results to a value less than
             or equal to zero results in error response code 400 (Bad Request).
-        include:
+        :param str include:
             Specifies one or more datasets to include in the
             response. To specify more than one of these options on the URI,
             you must separate each option with a comma. Valid values are:
@@ -1014,7 +1012,7 @@ class _BaseBlobService(_StorageClient):
                     Version 2012-02-12 and newer. Specifies that metadata
                     related to any current or previous Copy Blob operation
                     should be included in the response.
-        delimiter:
+        :param str delimiter:
             When the request includes this parameter, the operation
             returns a BlobPrefix element in the response body that acts as a
             placeholder for all blobs whose names begin with the same
@@ -1035,25 +1033,25 @@ class _BaseBlobService(_StorageClient):
         '''
         Returns the list of blobs under the specified container.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        prefix:
+        :parm str prefix:
             Filters the results to return only blobs whose names
             begin with the specified prefix.
-        marker:
+        :param str marker:
             A string value that identifies the portion of the list
             to be returned with the next list operation. The operation returns
             a next_marker value within the response body if the list returned was
             not complete. The marker value may then be used in a subsequent
             call to request the next set of list items. The marker value is
             opaque to the client.
-        max_results:
+        :param int max_results:
             Specifies the maximum number of blobs to return,
             including all BlobPrefix elements. If the request does not specify
             max_results or specifies a value greater than 5,000, the server will
             return up to 5,000 items. Setting max_results to a value less than
             or equal to zero results in error response code 400 (Bad Request).
-        include:
+        :param str include:
             Specifies one or more datasets to include in the
             response. To specify more than one of these options on the URI,
             you must separate each option with a comma. Valid values are:
@@ -1071,7 +1069,7 @@ class _BaseBlobService(_StorageClient):
                     Version 2012-02-12 and newer. Specifies that metadata
                     related to any current or previous Copy Blob operation
                     should be included in the response.
-        delimiter:
+        :param str delimiter:
             When the request includes this parameter, the operation
             returns a BlobPrefix element in the response body that acts as a
             placeholder for all blobs whose names begin with the same
@@ -1107,7 +1105,7 @@ class _BaseBlobService(_StorageClient):
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
         existing settings on the service for that functionality are preserved.
 
-        :param Logging logging:
+        :param azure.stroage.models.Logging logging:
             Groups the Azure Analytics Logging settings.
         :param Metrics hour_metrics:
             The hour metrics settings provide a summary of request 
@@ -1145,7 +1143,7 @@ class _BaseBlobService(_StorageClient):
         Gets the properties of a storage account's Blob service, including
         Azure Storage Analytics.
 
-        timeout:
+        :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         request = HTTPRequest()
@@ -1169,22 +1167,22 @@ class _BaseBlobService(_StorageClient):
         Returns a BlobProperties along with a metadata dict. BlobProperties contains
         standard HTTP properties and system properties for the blob.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1213,25 +1211,25 @@ class _BaseBlobService(_StorageClient):
     def set_blob_properties(
         self, container_name, blob_name, content_settings=None, lease_id=None,
         if_modified_since=None, if_unmodified_since=None, if_match=None,
-        if_none_match=None, blob_properties=None, timeout=None):
+        if_none_match=None, timeout=None):
         '''
         Sets system properties on the blob.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        content_settings:
+        :param azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1263,11 +1261,11 @@ class _BaseBlobService(_StorageClient):
         Returns a boolean indicating whether the container exists (if blob_name 
         is None), or otherwise a boolean indicating whether the blob exists.
 
-        container_name:
+        :param str container_name:
             Name of a container.
-        blob_name:
+        :param str blob_name:
             Name of a blob.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the snapshot.
         :param int timeout:
@@ -1297,33 +1295,33 @@ class _BaseBlobService(_StorageClient):
         See get_blob_to_* for high level functions that handle the download
         of large blobs with automatic chunking and progress notifications.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        start_range:
+        :param int start_range:
             Start of byte range to use for downloading a section of the blob.
             If no end_range is given, all bytes after the start_range will be downloaded.
-        end_range:
+        :param int end_range:
             End of byte range to use for downloading a section of the blob.
             If end_range is given, start_range must be provided.
             This range will return bytes from the offset start up to offset end. 
-        range_get_content_md5:
+        :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1367,49 +1365,50 @@ class _BaseBlobService(_StorageClient):
         Downloads a blob to a file path, with automatic chunking and progress
         notifications. Returns an instance of Blob with properties and metadata.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        file_path:
+        :param str file_path:
             Path of file to write to.
-        open_mode:
+        :param str open_mode:
             Mode to use when opening the file.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        start_range:
+        :param int start_range:
             Start of byte range to use for downloading a section of the blob.
             If no end_range is given, all bytes after the start_range will be downloaded.
-        end_range:
+        :param int end_range:
             End of byte range to use for downloading a section of the blob.
             If end_range is given, start_range must be provided.
             This range will return bytes from the offset start up to offset end. 
-        range_get_content_md5:
+        :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
-        progress_callback:
+        :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the blob if known.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Set to 1 to download the blob sequentially.
             Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
             If the blob size does not exceed 64MB it will be downloaded in one chunk.
-        max_retries:
+        :param int max_retries:
             Number of times to retry download of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -1454,47 +1453,48 @@ class _BaseBlobService(_StorageClient):
         Downloads a blob to a stream, with automatic chunking and progress
         notifications. Returns an instance of Blob with properties and metadata.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        stream:
+        :param io.IOBase stream:
             Opened file/stream to write to.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        start_range:
+        :param int start_range:
             Start of byte range to use for downloading a section of the blob.
             If no end_range is given, all bytes after the start_range will be downloaded.
-        end_range:
+        :param int end_range:
             End of byte range to use for downloading a section of the blob.
             If end_range is given, start_range must be provided.
             This range will return bytes from the offset start up to offset end. 
-        range_get_content_md5:
+        :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
-        progress_callback:
+        :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the blob if known.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Set to 1 to download the blob sequentially.
             Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
             If the blob size does not exceed 64MB it will be downloaded in one chunk.
-        max_retries:
+        :param int max_retries:
             Number of times to retry download of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -1572,45 +1572,46 @@ class _BaseBlobService(_StorageClient):
         Downloads a blob as an array of bytes, with automatic chunking and
         progress notifications. Returns an instance of Blob with properties, metadata, and content.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        start_range:
+        :param int start_range:
             Start of byte range to use for downloading a section of the blob.
             If no end_range is given, all bytes after the start_range will be downloaded.
-        end_range:
+        :param int end_range:
             End of byte range to use for downloading a section of the blob.
             If end_range is given, start_range must be provided.
             This range will return bytes from the offset start up to offset end. 
-        range_get_content_md5:
+        :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
-        progress_callback:
+        :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the blob if known.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Set to 1 to download the blob sequentially.
             Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
             If the blob size does not exceed 64MB it will be downloaded in one chunk.
-        max_retries:
+        :param int max_retries:
             Number of times to retry download of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -1654,47 +1655,48 @@ class _BaseBlobService(_StorageClient):
         Downloads a blob as unicode text, with automatic chunking and progress
         notifications. Returns an instance of Blob with properties, metadata, and content.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        encoding:
+        :param str encoding:
             Python encoding to use when decoding the blob data.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        start_range:
+        :param int start_range:
             Start of byte range to use for downloading a section of the blob.
             If no end_range is given, all bytes after the start_range will be downloaded.
-        end_range:
+        :param int end_range:
             End of byte range to use for downloading a section of the blob.
             If end_range is given, start_range must be provided.
             This range will return bytes from the offset start up to offset end.
-        range_get_content_md5:
+        :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
-        progress_callback:
+        :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the blob if known.
-        max_connections:
+        :type progress_callback: callback function in format of func(current, total)
+        :param int max_connections:
             Set to 1 to download the blob sequentially.
             Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
             If the blob size does not exceed 64MB it will be downloaded in one chunk.
-        max_retries:
+        :param int max_retries:
             Number of times to retry download of blob chunk if an error occurs.
-        retry_wait:
+        :param int retry_wait:
             Sleep time in secs between retries.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -1731,22 +1733,22 @@ class _BaseBlobService(_StorageClient):
         '''
         Returns all user-defined metadata for the specified blob or snapshot.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1781,21 +1783,22 @@ class _BaseBlobService(_StorageClient):
         Sets user-defined metadata for the specified blob as one or more
         name-value pairs.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        metadata:
+        :param metadata:
             Dict containing name and value pairs.
-        lease_id:
+        :type metadata: a dict mapping str to str
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1830,20 +1833,20 @@ class _BaseBlobService(_StorageClient):
         Establishes and manages a lock on a blob for write and delete
         operations.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        lease_action:
+        :param str lease_action:
             Possible LeaseActions acquire|renew|release|break|change
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        lease_duration:
+        :param int lease_duration:
             Specifies the duration of the lease, in seconds, or negative one
             (-1) for a lease that never expires. A non-infinite lease can be
             between 15 and 60 seconds. A lease duration cannot be changed
             using renew or change.
-        lease_break_period:
+        :param int lease_break_period:
             For a break operation, this is the proposed duration of
             seconds that the lease should continue before it is broken, between
             0 and 60 seconds. This break period is only used if it is shorter
@@ -1853,17 +1856,17 @@ class _BaseBlobService(_StorageClient):
             the break period. If this header does not appear with a break
             operation, a fixed-duration lease breaks after the remaining lease
             period elapses, and an infinite lease breaks immediately.
-        proposed_lease_id:
+        :param str proposed_lease_id:
             Optional for acquire, required for change. Proposed lease ID, in a
             GUID string format.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             Snapshot the blob only if its ETag value matches the
             value specified.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1903,24 +1906,24 @@ class _BaseBlobService(_StorageClient):
         '''
         Acquires a lock on a blob for write and delete operations.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        lease_duration:
+        :param int lease_duration:
             Specifies the duration of the lease, in seconds, or negative one
             (-1) for a lease that never expires. A non-infinite lease can be
             between 15 and 60 seconds. A lease duration cannot be changed
             using renew or change. Default is -1 (infinite lease).
-        proposed_lease_id:
+        :param str proposed_lease_id:
             Proposed lease ID, in a GUID string format.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1951,19 +1954,19 @@ class _BaseBlobService(_StorageClient):
         '''
         Renews a lock on a blob for write and delete operations.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        lease_id:
+        :param str lease_id:
             Lease ID for active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1991,19 +1994,19 @@ class _BaseBlobService(_StorageClient):
         '''
         Releases a lock on a blob for write and delete operations.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        lease_id:
+        :param str lease_id:
             Lease ID for active lease.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -2032,11 +2035,11 @@ class _BaseBlobService(_StorageClient):
         '''
         Breaks a lock on a blob for write and delete operations.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        lease_break_period:
+        :param int lease_break_period:
             For a break operation, this is the proposed duration of
             seconds that the lease should continue before it is broken, between
             0 and 60 seconds. This break period is only used if it is shorter
@@ -2046,13 +2049,13 @@ class _BaseBlobService(_StorageClient):
             the break period. If this header does not appear with a break
             operation, a fixed-duration lease breaks after the remaining lease
             period elapses, and an infinite lease breaks immediately.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -2084,21 +2087,21 @@ class _BaseBlobService(_StorageClient):
         '''
         Changes a lock on a blob for write and delete operations.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        proposed_lease_id:
+        :param str proposed_lease_id:
             Proposed lease ID, in a GUID string format.
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -2123,21 +2126,22 @@ class _BaseBlobService(_StorageClient):
         '''
         Creates a read-only snapshot of a blob.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        metadata:
+        :param metadata:
             Dict containing name and value pairs.
-        if_modified_since:
+        :type metadata: a dict mapping str to str
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -2169,49 +2173,54 @@ class _BaseBlobService(_StorageClient):
                   source_if_modified_since=None,
                   source_if_unmodified_since=None,
                   source_if_match=None, source_if_none_match=None,
-                  if_modified_since=None, if_unmodified_since=None,
-                  if_match=None, if_none_match=None, lease_id=None,
+                  destination_if_modified_since=None,
+                  destination_if_unmodified_since=None,
+                  destination_if_match=None,
+                  destination_if_none_match=None,
+                  destination_lease_id=None,
                   source_lease_id=None, timeout=None):
         '''
         Copies a blob to a destination within the storage account.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        copy_source:
+        :param str copy_source:
             URL up to 2 KB in length that specifies a blob. A source blob in
             the same account can be private, but a blob in another account
             must be public or accept credentials included in this URL, such as
             a Shared Access Signature. Examples:
             https://myaccount.blob.core.windows.net/mycontainer/myblob
             https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
-        metadata:
+        :param metadata:
             Dict containing name and value pairs.
-        source_if_modified_since:
-            An ETag value. Specify this conditional header to copy
-            the source blob only if its ETag matches the value specified.
-        source_if_unmodified_since:
-            An ETag value. Specify this conditional header to copy
-            the blob only if its ETag does not match the value specified.
-        source_if_match:
+        :type metadata: A dict mapping str to str.
+        :param datetime source_if_modified_since:
             A DateTime value. Specify this conditional header to
             copy the blob only if the source blob has been modified since the
             specified date/time.
-        source_if_none_match:
+        :param datetime source_if_unmodified_since:
+            A DateTime value. Specify this conditional header to
+            copy the blob only if the source blob has not been modified since the
+            specified date/time.
+        :param ETag source_if_match:
             An ETag value. Specify this conditional header to copy
             the source blob only if its ETag matches the value specified.
-        if_modified_since:
+        :param ETag source_if_none_match:
+            An ETag value. Specify this conditional header to copy
+            the source blob only if its ETag does not matches the values specified.
+        :param datetime destination_if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime destination_if_unmodified_since:
             DateTime string.
-        if_match:
+        :param ETag destination_if_match:
             An ETag value.
-        if_none_match:
+        :param ETag destination_if_none_match:
             An ETag value
-        lease_id:
+        :param str destination_lease_id:
             Required if the blob has an active lease.
-        source_lease_id:
+        :param str source_lease_id:
             Specify this to perform the Copy Blob operation only if
             the lease ID given matches the active lease ID of the source blob.
         :param int timeout:
@@ -2252,11 +2261,11 @@ class _BaseBlobService(_StorageClient):
             ('x-ms-source-if-match', _str_or_none(source_if_match)),
             ('x-ms-source-if-none-match',
              _str_or_none(source_if_none_match)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match)),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('If-Modified-Since', _str_or_none(destination_if_modified_since)),
+            ('If-Unmodified-Since', _str_or_none(destination_if_unmodified_since)),
+            ('If-Match', _str_or_none(destination_if_match)),
+            ('If-None-Match', _str_or_none(destination_if_none_match)),
+            ('x-ms-lease-id', _str_or_none(destination_lease_id)),
             ('x-ms-source-lease-id', _str_or_none(source_lease_id))
         ]
 
@@ -2270,17 +2279,17 @@ class _BaseBlobService(_StorageClient):
          Aborts a pending copy_blob operation, and leaves a destination blob
          with zero length and full metadata.
 
-         container_name:
+         :param str container_name:
              Name of destination container.
-         blob_name:
+         :param str blob_name:
              Name of destination blob.
-         copy_id:
-            Copy identifier provided in the x-ms-copy-id of the original
-            copy_blob operation.
-         lease_id:
-            Required if the destination blob has an active infinite lease.
-        :param int timeout:
-            The timeout parameter is expressed in seconds.
+         :param str copy_id:
+             Copy identifier provided in the x-ms-copy-id of the original
+             copy_blob operation.
+         :param str lease_id:
+             Required if the destination blob has an active infinite lease.
+         :param int timeout:
+             The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -2312,16 +2321,16 @@ class _BaseBlobService(_StorageClient):
         To mark a specific snapshot for deletion provide the date/time of the
         snapshot via the snapshot parameter.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        snapshot:
+        :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to delete.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        delete_snapshots:
+        :param str delete_snapshots:
             Required if the blob has associated snapshots. Specify one of the
             following two options:
                 include:
@@ -2334,13 +2343,13 @@ class _BaseBlobService(_StorageClient):
             (Bad Request). If this header is not specified on the request and
             the blob has associated snapshots, the Blob service returns status
             code 409 (Conflict).
-        if_modified_since:
+        :param datetime if_modified_since:
             Datetime string.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             DateTime string.
-        if_match:
+        :param str if_match:
             An ETag value.
-        if_none_match:
+        :param str if_none_match:
             An ETag value.
         :param int timeout:
             The timeout parameter is expressed in seconds.

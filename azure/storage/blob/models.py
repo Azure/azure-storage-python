@@ -197,7 +197,7 @@ class BlobPermissions(object):
 
     '''
     BlobPermissions class to be used with 
-    `._BaseBlobService.generate_blob_shared_access_signature` method.
+    :method:`azure.storage.blob.baseblobservice.generate_blob_shared_access_signature` method.
 
     :param bool read:
         Read the content, properties, metadata and block list. Use the blob as 
@@ -261,8 +261,8 @@ BlobPermissions.DELETE = BlobPermissions(delete=True)
 class ContainerPermissions(object):
 
     '''
-    ContainerPermissions class to be used with `._BaseBlobService.generate_container_shared_access_signature`
-    method and for the AccessPolicies used with `._BaseBlobService.set_container_acl`. 
+    ContainerPermissions class to be used with `azure.storage.blob.BaseBlobService.generate_container_shared_access_signature`
+    method and for the AccessPolicies used with `azure.storage.blob.BaseBlobService.set_container_acl`. 
 
     :param bool read:
         Read the content, properties, metadata or block list of any blob in the 

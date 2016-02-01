@@ -147,8 +147,8 @@ class QueueMessageFormat:
 class QueuePermissions(object):
 
     '''
-    QueuePermissions class to be used with `.QueueService.generate_queue_shared_access_signature`
-    method and for the AccessPolicies used with `.QueueService.set_queue_acl`. 
+    QueuePermissions class to be used with `azure.storage.queue.QueueService.generate_queue_shared_access_signature`
+    method and for the AccessPolicies used with `azure.storage.queue.QueueService.set_queue_acl`. 
 
     :param bool read:
         Read metadata and properties, including message count. Peek at messages.
