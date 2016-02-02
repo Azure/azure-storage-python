@@ -407,7 +407,7 @@ class BaseBlobService(_StorageClient):
         )
 
     def list_containers(self, prefix=None, marker=None, max_results=None,
-                        include=None, timeout=None):
+                        include_metadata=False, timeout=None):
         '''
         The List Containers operation returns a list of the containers under
         the specified account.
@@ -424,13 +424,12 @@ class BaseBlobService(_StorageClient):
             opaque to the client.
         :param int max_results:
             Specifies the maximum number of containers to return.
-        :param str include:
-            Include this parameter to specify that the container's
-            metadata be returned as part of the response body. set this
-            parameter to string 'metadata' to get container's metadata.
+        :param bool include_metadata:
+            Specifies that container metadata be returned in the response.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
+        include = 'metadata' if include_metadata else None
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
                 'include': include, 'timeout': timeout}
         resp = self._list_containers(**kwargs)

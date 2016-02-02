@@ -433,7 +433,7 @@ class PageBlobService(BaseBlobService):
         return _convert_xml_to_page_ranges(response)
 
     def set_sequence_number(
-        self, container_name, blob_name, sequence_number, sequence_number_action,
+        self, container_name, blob_name, sequence_number_action, sequence_number=None,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         
@@ -444,11 +444,11 @@ class PageBlobService(BaseBlobService):
             Name of existing container.
         :param str blob_name:
             Name of existing blob.
-        :param str sequence_number:
-            Sequence number for blob.
         :param str sequence_number_action:
             Action for sequence number change.
             Valid options: max, update, increment.
+        :param str sequence_number:
+            Sequence number for blob.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -464,7 +464,6 @@ class PageBlobService(BaseBlobService):
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
-        _validate_not_none('sequence_number', sequence_number)
         _validate_not_none('sequence_number_action', sequence_number_action)
         request = HTTPRequest()
         request.method = 'PUT'
@@ -476,7 +475,7 @@ class PageBlobService(BaseBlobService):
         ]
         request.headers = [
             ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
-            ('x-ms-sequence-number-action', _str_or_none(sequence_number_action)),
+            ('x-ms-sequence-number-action', _str(sequence_number_action)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),

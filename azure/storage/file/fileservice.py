@@ -484,7 +484,7 @@ class FileService(_StorageClient):
         return _convert_xml_to_service_properties(response.body)
 
     def list_shares(self, prefix=None, marker=None, max_results=None, 
-                    include=None, timeout=None):
+                    include_metadata=False, timeout=None):
         '''
         The List Shares operation returns a list of the shares under
         the specified account.
@@ -501,13 +501,12 @@ class FileService(_StorageClient):
             opaque to the client.
         :param int max_results:
             Specifies the maximum number of shares to return.
-        :param str include:
-            Include this parameter to specify that the share's
-            metadata be returned as part of the response body. set this
-            parameter to string 'metadata' to get share's metadata.
+        :param bool include_metadata:
+            Specifies that share metadata be returned in the response.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
+        include = 'metadata' if include_metadata else None
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
                 'include': include, 'timeout': timeout}
         resp = self._list_shares(**kwargs)

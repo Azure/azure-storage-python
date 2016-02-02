@@ -163,6 +163,64 @@ class AppendBlockProperties(object):
         self.append_offset = None
         self.committed_block_count = None
 
+
+class PublicAccess(object):
+    '''
+    Specifies whether data in the container may be accessed publicly and the level of access.
+    '''
+
+    '''
+    Specifies full public read access for container and blob data. Clients can enumerate 
+    blobs within the container via anonymous request, but cannot enumerate containers 
+    within the storage account.
+    '''
+    Container = 'container'
+
+    '''
+    Specifies public read access for blobs. Blob data within this container can be read 
+    via anonymous request, but container data is not available. Clients cannot enumerate 
+    blobs within the container via anonymous request.
+    '''
+    Blob = 'blob'
+
+
+class BlockListType(object):
+    '''
+    Specifies whether to return the list of committed blocks, the list of uncommitted 
+    blocks, or both lists together.
+    '''
+
+    '''Uncommitted blocks'''
+    Uncommitted = 'uncommitted'
+
+    '''Committed blocks'''
+    Committed = 'committed'
+
+    '''Both committed and uncommitted blocks'''
+    All = 'all'
+
+
+class SequenceNumberAction(object):
+    ''' Sequence number actions '''
+
+    '''
+    Sets the sequence number to be the higher of the value included with the 
+    request and the value currently stored for the blob.
+    '''
+    Max = 'max'
+
+    '''
+    Sets the sequence number to the value included with the request.
+    '''
+    Update = 'update'
+
+    '''
+    Increments the value of the sequence number by 1. If specifying this option, 
+    do not include the x-ms-blob-sequence-number header.
+    '''
+    Increment = 'increment'
+
+
 class LeaseActions(object):
     '''Actions for a lease'''
 
@@ -192,6 +250,71 @@ class _BlobTypes(object):
 
     '''Append blob type.'''
     AppendBlob = 'AppendBlob'
+
+
+class Include(object):
+
+    '''
+    Specifies the datasets to include in the blob list response.
+
+    :param bool snapshots:
+         Specifies that snapshots should be included in the enumeration.
+    :param bool metadata:
+        Specifies that metadata be returned in the response.
+    :param bool uncommitted_blobs:
+        Specifies that blobs for which blocks have been uploaded, but which have 
+        not been committed using Put Block List, be included in the response.
+    :param bool copy: 
+        Specifies that metadata related to any current or previous Copy Blob 
+        operation should be included in the response. 
+    :param str _str: 
+        A string representing the includes.
+    '''
+    def __init__(self, snapshots=False, metadata=False, uncommitted_blobs=False, 
+                 copy=False, _str=None):
+        if not _str:
+            _str = ''
+        components = _str.split(',')
+        self.snapshots = snapshots or ('snapshots' in components)
+        self.metadata = metadata or ('metadata' in components)
+        self.uncommitted_blobs = uncommitted_blobs or ('uncommittedblobs' in components)
+        self.copy = copy or ('copy' in components)
+    
+    def __or__(self, other):
+        return Include(_str=str(self) + str(other))
+
+    def __add__(self, other):
+        return Include(_str=str(self) + str(other))
+    
+    def __str__(self):
+        include = (('snapshots,' if self.snapshots else '') + 
+                   ('metadata,' if self.metadata else '') +
+                   ('uncommittedblobs,' if self.uncommitted_blobs else '') +
+                   ('copy,' if self.copy else ''))
+        return include.rstrip(',')
+
+'''
+Specifies that snapshots should be included in the enumeration.
+'''
+Include.SNAPSHOTS = Include(snapshots=True)
+
+'''
+Specifies that metadata be returned in the response.
+'''
+Include.METADATA = Include(metadata=True)
+
+'''
+Specifies that blobs for which blocks have been uploaded, but which have not 
+been committed using Put Block List, be included in the response.
+'''
+Include.UNCOMMITTED_BLOBS = Include(uncommitted_blobs=True)
+    
+'''
+Specifies that metadata related to any current or previous Copy Blob operation 
+should be included in the response. 
+'''    
+Include.COPY = Include(copy=True)
+
 
 class BlobPermissions(object):
 

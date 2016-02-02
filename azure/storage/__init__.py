@@ -28,6 +28,7 @@ from .models import (
     ResourceTypes,
     Services,
     AccountPermissions,
+    Protocol,
 )
 
 from .cloudstorageaccount import CloudStorageAccount

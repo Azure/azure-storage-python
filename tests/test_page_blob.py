@@ -21,6 +21,7 @@ from azure.common import AzureHttpError
 from azure.storage.blob import (
     Blob,
     PageBlobService,
+    SequenceNumberAction,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -324,7 +325,7 @@ class StoragePageBlobTest(StorageTestCase):
         blob_name = self._create_blob()
         
         # Act
-        self.bs.set_sequence_number(self.container_name, blob_name, 6, 'update')
+        self.bs.set_sequence_number(self.container_name, blob_name, SequenceNumberAction.Update, 6)
         blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         #Assert
