@@ -144,28 +144,6 @@ class StorageFileTest(StorageTestCase):
         actual_data = self.fs.get_file_to_bytes(share_name, dir_name, file_name)
         self.assertEqual(actual_data.content, expected_data)
 
-    def _get_expected_upload_progress(self, file_size, unknown_size=True):
-        result = []
-        index = 0
-        total = None if unknown_size else file_size
-        while (index < file_size):
-            result.append((index, total))
-            index += self.fs._FILE_MAX_CHUNK_DATA_SIZE
-        result.append((file_size, total))
-        return result
-
-    def _get_expected_download_progress(self, file_size, single_download=True):
-        result = []
-        index = 0
-        if single_download:
-            result.append((0, None))
-        else:
-            while (index < file_size):
-                result.append((index, file_size))
-                index += self.fs._FILE_MAX_CHUNK_DATA_SIZE
-        result.append((file_size, file_size))
-        return result
-
     class NonSeekableFile(object):
         def __init__(self, wrapped_file):
             self.wrapped_file = wrapped_file
@@ -766,7 +744,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(data, file.content)
-        self.assertEqual(self._get_expected_download_progress(len(data)), progress)
+        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_get_file_to_bytes_with_progress_parallel(self):
@@ -789,7 +767,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(data, file.content)
-        self.assertEqual(self._get_expected_download_progress(len(data), False), progress)
+        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
 
     @record
     def test_get_file_to_stream(self):
@@ -893,7 +871,7 @@ class StorageFileTest(StorageTestCase):
         with open(OUTPUT_FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assertEqual(self._get_expected_download_progress(len(data)), progress)
+        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
 
     def test_get_file_to_stream_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -922,7 +900,7 @@ class StorageFileTest(StorageTestCase):
         with open(OUTPUT_FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assertEqual(self._get_expected_download_progress(len(data), False), progress)
+        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
 
     @record
     def test_get_file_to_path(self):
@@ -1041,7 +1019,7 @@ class StorageFileTest(StorageTestCase):
         with open(OUTPUT_FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assertEqual(self._get_expected_download_progress(len(data)), progress)
+        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_get_file_to_path_with_progress_parallel(self):
@@ -1068,7 +1046,7 @@ class StorageFileTest(StorageTestCase):
         with open(OUTPUT_FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assertEqual(self._get_expected_download_progress(len(data), False), progress)
+        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
 
     @record
     def test_get_file_to_path_with_mode(self):
@@ -1155,7 +1133,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(data, file.content)
-        self.assertEqual(self._get_expected_download_progress(len(data.encode('utf-8'))), progress)
+        self.assert_download_progress(len(data.encode('utf-8')), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_get_file_to_text_with_encoding(self):
@@ -1190,7 +1168,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text, file.content)
-        self.assertEqual(self._get_expected_download_progress(len(data)), progress)
+        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_create_file_from_bytes_with_progress(self):
@@ -1344,7 +1322,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, data)
-        self.assertEqual(progress, self._get_expected_upload_progress(len(data), False))
+        self.assert_upload_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, unknown_size=False)
 
     @record
     def test_create_file_from_stream_chunked_upload(self):
@@ -1445,7 +1423,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, data[:file_size])
-        self.assertEqual(progress, self._get_expected_upload_progress(len(data), False))
+        self.assert_upload_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, unknown_size=False)
 
     def test_create_file_from_stream_with_progress_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -1471,7 +1449,8 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, data[:file_size])
-        self.assertEqual(progress, self._get_expected_upload_progress(len(data), False))
+
+        self.assert_upload_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, unknown_size=False)
 
     @record
     def test_create_file_from_stream_chunked_upload_truncated(self):
@@ -1530,7 +1509,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, data[:file_size])
-        self.assertEqual(progress, self._get_expected_upload_progress(file_size, False))
+        self.assert_upload_progress(file_size, self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, unknown_size=False)
 
 
     @record

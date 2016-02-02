@@ -76,16 +76,6 @@ class StorageAppendBlobTest(StorageTestCase):
         actual_data = self.bs.get_blob_to_bytes(container_name, blob_name)
         self.assertEqual(actual_data.content, expected_data)
 
-    def _get_expected_progress(self, blob_size, unknown_size=False):
-        result = []
-        index = 0
-        total = None if unknown_size else blob_size
-        while (index < blob_size):
-            result.append((index, total))
-            index += self.bs._BLOB_MAX_CHUNK_DATA_SIZE
-        result.append((blob_size, total))
-        return result
-
     class NonSeekableFile(object):
         def __init__(self, wrapped_file):
             self.wrapped_file = wrapped_file
@@ -188,7 +178,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_append_blob_from_bytes_with_index(self):
@@ -242,7 +232,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_append_blob_from_bytes_chunked_upload_with_index_and_count(self):
@@ -290,7 +280,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_append_blob_from_stream_chunked_upload(self):
@@ -439,7 +429,7 @@ class StorageAppendBlobTest(StorageTestCase):
                                       progress_callback=callback)
 
         # Assert
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_append_blob_from_text_chunked_upload(self):

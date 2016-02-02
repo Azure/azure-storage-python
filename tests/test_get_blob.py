@@ -77,18 +77,6 @@ class StorageGetBlobTest(StorageTestCase):
     def _get_blob_reference(self):
         return self.get_resource_name(TEST_BLOB_PREFIX)
 
-    def _get_expected_progress(self, blob_size, single_download=True):
-        result = []
-        index = 0
-        if single_download:
-            result.append((0, None))
-        else:
-            while (index < blob_size):
-                result.append((index, blob_size))
-                index += self.bs._BLOB_MAX_CHUNK_DATA_SIZE
-        result.append((blob_size, blob_size))
-        return result
-
     class NonSeekableFile(object):
         def __init__(self, wrapped_file):
             self.wrapped_file = wrapped_file
@@ -168,7 +156,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
-        self.assertEqual(self._get_expected_progress(len(self.byte_data)), progress)
+        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_get_blob_to_bytes_with_progress_parallel(self):
@@ -188,7 +176,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
-        self.assertEqual(self._get_expected_progress(len(self.byte_data), False), progress)
+        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
 
     @record
     def test_get_blob_to_stream(self):
@@ -277,7 +265,7 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assertEqual(self._get_expected_progress(len(self.byte_data)), progress)
+        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     def test_get_blob_to_stream_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -303,7 +291,7 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assertEqual(self._get_expected_progress(len(self.byte_data), False), progress)
+        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
 
     @record
     def test_get_blob_to_path(self):
@@ -404,7 +392,7 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assertEqual(self._get_expected_progress(len(self.byte_data)), progress)
+        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_get_blob_to_path_with_progress_parallel(self):
@@ -429,7 +417,7 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assertEqual(self._get_expected_progress(len(self.byte_data), False), progress)
+        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
 
     @record
     def test_get_blob_to_path_with_mode(self):
@@ -510,7 +498,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text_data, blob.content)
-        self.assertEqual(self._get_expected_progress(len(text_data.encode('utf-8'))), progress)
+        self.assert_download_progress(len(text_data.encode('utf-8')), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_get_blob_to_text_with_encoding(self):
@@ -545,7 +533,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text, blob.content)
-        self.assertEqual(self._get_expected_progress(len(data)), progress)
+        self.assert_download_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

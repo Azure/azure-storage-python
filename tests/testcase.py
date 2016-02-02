@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------
+﻿#-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@ import os.path
 import time
 import vcr
 import zlib
+import math
 import uuid
 import unittest
 import sys
@@ -304,6 +305,29 @@ class StorageTestCase(unittest.TestCase):
                     else:
                         val = val.replace(real_val, fake_val)
         return val
+
+    def assert_upload_progress(self, size, max_chunk_size, progress, unknown_size=False):
+        '''Validates that the progress chunks align with our chunking procedure.'''
+        index = 0
+        total = None if unknown_size else size
+        small_chunk_size = size % max_chunk_size
+        self.assertEqual(len(progress), 1 + math.ceil(size / max_chunk_size))
+        for i in progress:
+            self.assertTrue(i[0] % max_chunk_size == 0 or i[0] % max_chunk_size == small_chunk_size)
+            self.assertEqual(i[1], total)
+
+    def assert_download_progress(self, size, max_chunk_size, progress, single_download=True):
+        '''Validates that the progress chunks align with our chunking procedure.'''
+        if single_download:
+            self.assertEqual(len(progress), 2)
+            self.assertEqual((0, None), progress[0])
+            self.assertEqual((size, size), progress[1])
+        else:
+            small_chunk_size = size % max_chunk_size
+            self.assertEqual(len(progress), 1 + math.ceil(size / max_chunk_size))
+            for i in progress:
+                self.assertTrue(i[0] % max_chunk_size == 0 or i[0] % max_chunk_size == small_chunk_size)
+                self.assertEqual(i[1], size)
 
 def record(test):
     def recording_test(self):
