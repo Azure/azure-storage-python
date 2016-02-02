@@ -145,7 +145,7 @@ class QueueSamples():
             print(queue.name) # queue1, queue2
 
         # Metadata
-        queues = list(service.list_queues(prefix='queue', include='metadata'))
+        queues = list(service.list_queues(prefix='queue', include_metadata=True))
         queue = next((q for q in queues if q.name == 'queue1'), None)
         metadata = queue.metadata # {'val1': 'foo', 'val2': 'blah'}
 

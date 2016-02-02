@@ -36,6 +36,7 @@ from ._chunking import (
 )
 from .models import (
     _BlobTypes,
+    PageBlobProperties,
 )
 from ..constants import (
     SERVICE_HOST_BASE,
@@ -45,7 +46,10 @@ from ._serialization import (
     _get_path,
     _validate_and_format_range_headers,
 )
-from ._deserialization import _convert_xml_to_page_ranges
+from ._deserialization import (
+    _convert_xml_to_page_ranges,
+    _parse_page_properties,
+)
 from .baseblobservice import BaseBlobService
 from os import path
 import sys
@@ -167,7 +171,8 @@ class PageBlobService(BaseBlobService):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_page_properties(response)
 
     def update_page(
         self, container_name, blob_name, page, start_range, end_range,
@@ -268,7 +273,8 @@ class PageBlobService(BaseBlobService):
             align_to_page=True)
         request.body = _get_request_body_bytes_only('page', page)
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_page_properties(response)
 
     def clear_page(
         self, container_name, blob_name, start_range, end_range,
@@ -279,46 +285,46 @@ class PageBlobService(BaseBlobService):
         '''
         Clears a range of pages.
 
-        container_name:
+        :param str container_name:
             Name of existing container.
-        blob_name:
+        :param str blob_name:
             Name of existing blob.
-        start_range:
-            Start of byte range to clear.
+        :param int start_range:
+            Start of byte range to use for writing to a section of the blob.
             Pages must be aligned with 512-byte boundaries, the start offset
             must be a modulus of 512 and the end offset must be a modulus of
             512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
-        end_range:
-            End of byte range to clear.
+        :param int end_range:
+            End of byte range to use for writing to a section of the blob.
             Pages must be aligned with 512-byte boundaries, the start offset
             must be a modulus of 512 and the end offset must be a modulus of
             512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
-        lease_id:
+        :param str lease_id:
             Required if the blob has an active lease.
-        if_sequence_number_lte:
+        :param int if_sequence_number_lte:
             If the blob's sequence number is less than or equal to
             the specified value, the request proceeds; otherwise it fails.
-        if_sequence_number_lt:
+        :param int if_sequence_number_lt:
             If the blob's sequence number is less than the specified
             value, the request proceeds; otherwise it fails.
-        if_sequence_number_eq:
+        :param int if_sequence_number_eq:
             If the blob's sequence number is equal to the specified
             value, the request proceeds; otherwise it fails.
-        if_modified_since:
+        :param datetime if_modified_since:
             A DateTime value. Specify this conditional header to
             write the page only if the blob has been modified since the
             specified date/time. If the blob has not been modified, the Blob
             service fails.
-        if_unmodified_since:
+        :param datetime if_unmodified_since:
             A DateTime value. Specify this conditional header to
             write the page only if the blob has not been modified since the
             specified date/time. If the blob has been modified, the Blob
             service fails.
-        if_match:
+        :param str if_match:
             An ETag value. Specify an ETag value for this conditional
             header to write the page only if the blob's ETag value matches the
             value specified. If the values do not match, the Blob service fails.
-        if_none_match:
+        :param str if_none_match:
             An ETag value. Specify an ETag value for this conditional
             header to write the page only if the blob's ETag value does not
             match the value specified. If the values are identical, the Blob
@@ -357,7 +363,8 @@ class PageBlobService(BaseBlobService):
             end_range,
             align_to_page=True)
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_page_properties(response)
 
     def get_page_ranges(
         self, container_name, blob_name, snapshot=None, start_range=None,
@@ -433,7 +440,7 @@ class PageBlobService(BaseBlobService):
         return _convert_xml_to_page_ranges(response)
 
     def set_sequence_number(
-        self, container_name, blob_name, sequence_number, sequence_number_action,
+        self, container_name, blob_name, sequence_number_action, sequence_number=None,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         
@@ -444,11 +451,11 @@ class PageBlobService(BaseBlobService):
             Name of existing container.
         :param str blob_name:
             Name of existing blob.
-        :param str sequence_number:
-            Sequence number for blob.
         :param str sequence_number_action:
             Action for sequence number change.
             Valid options: max, update, increment.
+        :param str sequence_number:
+            Sequence number for blob.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -464,7 +471,6 @@ class PageBlobService(BaseBlobService):
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
-        _validate_not_none('sequence_number', sequence_number)
         _validate_not_none('sequence_number_action', sequence_number_action)
         request = HTTPRequest()
         request.method = 'PUT'
@@ -476,7 +482,7 @@ class PageBlobService(BaseBlobService):
         ]
         request.headers = [
             ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
-            ('x-ms-sequence-number-action', _str_or_none(sequence_number_action)),
+            ('x-ms-sequence-number-action', _str(sequence_number_action)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
@@ -484,7 +490,8 @@ class PageBlobService(BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_page_properties(response)
 
     def resize(
         self, container_name, blob_name, content_length,
@@ -533,7 +540,8 @@ class PageBlobService(BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_page_properties(response)
 
     #----Convenience APIs-----------------------------------------------------
 
@@ -677,7 +685,7 @@ class PageBlobService(BaseBlobService):
         if count % _PAGE_SIZE != 0:
             raise ValueError(_ERROR_PAGE_BLOB_SIZE_ALIGNMENT.format(count))
 
-        self.create_blob(
+        response = self.create_blob(
             container_name=container_name,
             blob_name=blob_name,
             content_length=count,
@@ -704,6 +712,7 @@ class PageBlobService(BaseBlobService):
             progress_callback=progress_callback,
             lease_id=lease_id,
             uploader_class=_PageBlobChunkUploader,
+            if_match=response.etag,
             timeout=timeout
         )
 

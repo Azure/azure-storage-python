@@ -215,7 +215,7 @@ class StorageShareTest(StorageTestCase):
         resp = self.fs.set_share_metadata(share_name, metadata)
 
         # Act
-        shares = list(self.fs.list_shares(share_name, None, None, 'metadata'))
+        shares = list(self.fs.list_shares(share_name, include_metadata=True))
 
         # Assert
         self.assertIsNotNone(shares)

@@ -75,6 +75,7 @@ from ._deserialization import (
     _parse_lease_time,
     _parse_lease_id,
     _convert_xml_to_signed_identifiers_and_access,
+    _parse_base_properties,
 )
 from ..sharedaccesssignature import (
     SharedAccessSignature,
@@ -407,7 +408,7 @@ class BaseBlobService(_StorageClient):
         )
 
     def list_containers(self, prefix=None, marker=None, max_results=None,
-                        include=None, timeout=None):
+                        include_metadata=False, timeout=None):
         '''
         The List Containers operation returns a list of the containers under
         the specified account.
@@ -424,13 +425,12 @@ class BaseBlobService(_StorageClient):
             opaque to the client.
         :param int max_results:
             Specifies the maximum number of containers to return.
-        :param str include:
-            Include this parameter to specify that the container's
-            metadata be returned as part of the response body. set this
-            parameter to string 'metadata' to get container's metadata.
+        :param bool include_metadata:
+            Specifies that container metadata be returned in the response.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
+        include = 'metadata' if include_metadata else None
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
                 'include': include, 'timeout': timeout}
         resp = self._list_containers(**kwargs)
@@ -613,7 +613,8 @@ class BaseBlobService(_StorageClient):
             ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_base_properties(response)
 
     def get_container_acl(self, container_name, lease_id=None, timeout=None):
         '''
@@ -689,7 +690,8 @@ class BaseBlobService(_StorageClient):
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_base_properties(response)
 
     def delete_container(self, container_name, fail_not_exist=False,
                          lease_id=None, if_modified_since=None,
@@ -1255,7 +1257,8 @@ class BaseBlobService(_StorageClient):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_base_properties(response)
 
     def exists(self, container_name, blob_name=None, snapshot=None, timeout=None):
         '''
@@ -1530,6 +1533,10 @@ class BaseBlobService(_StorageClient):
                     max_retries,
                     retry_wait,
                     progress_callback,
+                    if_modified_since,
+                    if_unmodified_since,
+                    if_match,
+                    if_none_match,
                     timeout,
                 )
                 return blob
@@ -1823,7 +1830,8 @@ class BaseBlobService(_StorageClient):
             ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_base_properties(response)
 
     def _lease_blob_impl(self, container_name, blob_name,
                          lease_action, lease_id,

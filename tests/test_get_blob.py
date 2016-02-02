@@ -40,22 +40,22 @@ class StorageGetBlobTest(StorageTestCase):
 
         self.bs = self._create_storage_service(BlockBlobService, self.settings)
 
-        # test chunking functionality by reducing the threshold
-        # for chunking and the size of each chunk, otherwise
-        # the tests would take too long to execute
-        self.bs._BLOB_MAX_DATA_SIZE = 64 * 1024
-        self.bs._BLOB_MAX_CHUNK_DATA_SIZE = 4 * 1024
-
         self.container_name = self.get_resource_name('utcontainer')
 
         if not self.is_playback():
             self.bs.create_container(self.container_name)
 
         self.byte_blob = self.get_resource_name('byteblob')
-        self.byte_data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        self.byte_data = self.get_random_bytes(64 * 1024 + 1)
 
         if not self.is_playback():
             self.bs.create_blob_from_bytes(self.container_name, self.byte_blob, self.byte_data)
+
+        # test chunking functionality by reducing the threshold
+        # for chunking and the size of each chunk, otherwise
+        # the tests would take too long to execute
+        self.bs._BLOB_MAX_DATA_SIZE = 64 * 1024
+        self.bs._BLOB_MAX_CHUNK_DATA_SIZE = 4 * 1024
 
     def tearDown(self):
         if not self.is_playback():

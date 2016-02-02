@@ -26,6 +26,12 @@ from .models import (
     BlobPermissions,
     LeaseActions,
     AppendBlockProperties,
+    PageBlobProperties,
+    ResourceProperties,
+    Include,
+    SequenceNumberAction,
+    BlockListType,
+    PublicAccess,
 )
 
 from .blockblobservice import BlockBlobService

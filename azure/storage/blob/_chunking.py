@@ -27,7 +27,8 @@ from .models import BlobBlock
 class _BlobChunkDownloader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
                  chunk_size, start_range, end_range, stream, max_retries,
-                 retry_wait, progress_callback, timeout):
+                 retry_wait, progress_callback, if_modified_since, 
+                 if_unmodified_since, if_match, if_none_match, timeout):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
@@ -51,6 +52,11 @@ class _BlobChunkDownloader(object):
         self.max_retries = max_retries
         self.retry_wait = retry_wait
         self.timeout = timeout
+
+        self.if_modified_since=if_modified_since
+        self.if_unmodified_since=if_unmodified_since
+        self.if_match=if_match
+        self.if_none_match=if_none_match
 
     def get_chunk_offsets(self):
         index = self.start_index
@@ -86,13 +92,22 @@ class _BlobChunkDownloader(object):
         retries = self.max_retries
         while True:
             try:
-                return self.blob_service._get_blob(
+                response = self.blob_service._get_blob(
                     self.container_name,
                     self.blob_name,
                     start_range=chunk_start,
                     end_range=chunk_end - 1,
+                    if_modified_since=self.if_modified_since,
+                    if_unmodified_since=self.if_unmodified_since,
+                    if_match=self.if_match,
+                    if_none_match=self.if_none_match,
                     timeout=self.timeout
                 )
+
+                # This makes sure that if_match is set so that we can validate 
+                # that subsequent downloads are to an unmodified blob
+                self.if_match = response.properties.etag
+                return response
             except AzureHttpError:
                 if retries > 0:
                     retries -= 1
@@ -111,6 +126,7 @@ class _BlobChunkUploader(object):
         self.blob_size = blob_size
         self.chunk_size = chunk_size
         self.stream = stream
+        self.parallel = parallel
         self.stream_start = stream.tell() if parallel else None
         self.stream_lock = threading.Lock() if parallel else None
         self.progress_callback = progress_callback
@@ -211,16 +227,19 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
 class _PageBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_start, chunk_data):
         chunk_end = chunk_start + len(chunk_data) - 1
-        self.blob_service.update_page(
+        resp = self.blob_service.update_page(
             self.container_name,
             self.blob_name,
             chunk_data,
             chunk_start,
             chunk_end,
             lease_id=self.lease_id,
+            if_match=self.if_match,
             timeout=self.timeout,
         )
-        return 'bytes={0}-{1}'.format(chunk_start, chunk_end)
+
+        if not self.parallel:
+            self.if_match = resp.etag
 
 class _AppendBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_offset, chunk_data):
@@ -250,6 +269,7 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
 def _download_blob_chunks(blob_service, container_name, blob_name,
                           blob_size, block_size, start_range, end_range, stream,
                           max_connections, max_retries, retry_wait, progress_callback,
+                          if_modified_since, if_unmodified_since, if_match, if_none_match, 
                           timeout):
     if max_connections <= 1:
         raise ValueError(
@@ -269,6 +289,10 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
         max_retries,
         retry_wait,
         progress_callback,
+        if_modified_since,
+        if_unmodified_since,
+        if_match,
+        if_none_match,
         timeout
     )
 
@@ -283,7 +307,8 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
 def _upload_blob_chunks(blob_service, container_name, blob_name,
                         blob_size, block_size, stream, max_connections,
                         max_retries, retry_wait, progress_callback,
-                        lease_id, uploader_class, maxsize_condition=None, timeout=None):
+                        lease_id, uploader_class, maxsize_condition=None, 
+                        if_match=None, timeout=None):
     uploader = uploader_class(
         blob_service,
         container_name,
@@ -300,6 +325,10 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
     )
 
     uploader.maxsize_condition = maxsize_condition
+
+    # ETag matching does not work with parallelism as a ranged upload may start 
+    # before the previous finishes and provides an etag
+    uploader.if_match = if_match if not max_connections > 1 else None
 
     if progress_callback is not None:
         progress_callback(0, blob_size)

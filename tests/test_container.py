@@ -27,6 +27,7 @@ from azure.storage import (
 from azure.storage.blob import (
     BlockBlobService,
     ContainerPermissions,
+    Include,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -245,7 +246,7 @@ class StorageContainerTest(StorageTestCase):
         resp = self.bs.set_container_metadata(container_name, metadata)
 
         # Act
-        containers = list(self.bs.list_containers(container_name, None, None, 'metadata'))
+        containers = list(self.bs.list_containers(container_name, include_metadata=True))
 
         # Assert
         self.assertIsNotNone(containers)
@@ -729,7 +730,7 @@ class StorageContainerTest(StorageTestCase):
         self.bs.create_blob_from_bytes (container_name, 'blobb1', data, )
 
         # Act
-        blobs = list(self.bs.list_blobs(container_name, None, None, 2))
+        blobs = list(self.bs.list_blobs(container_name, max_results=2))
 
         # Assert
         self.assertIsNotNone(blobs)
@@ -747,7 +748,7 @@ class StorageContainerTest(StorageTestCase):
         self.bs.snapshot_blob(container_name, 'blob1')
 
         # Act
-        blobs = list(self.bs.list_blobs(container_name, include='snapshots'))
+        blobs = list(self.bs.list_blobs(container_name, include=Include.SNAPSHOTS))
 
         # Assert
         self.assertEqual(len(blobs), 3)
@@ -770,7 +771,7 @@ class StorageContainerTest(StorageTestCase):
         self.bs.snapshot_blob(container_name, 'blob1')
 
         # Act
-        blobs =list(self.bs.list_blobs(container_name, include='metadata'))
+        blobs =list(self.bs.list_blobs(container_name, include=Include.METADATA))
 
         # Assert
         self.assertEqual(len(blobs), 2)
@@ -793,7 +794,7 @@ class StorageContainerTest(StorageTestCase):
                          metadata={'number': '2', 'name': 'car'})
 
         # Act
-        blobs = list(self.bs.list_blobs(container_name, include='uncommittedblobs'))
+        blobs = list(self.bs.list_blobs(container_name, include=Include.UNCOMMITTED_BLOBS))
 
         # Assert
         self.assertEqual(len(blobs), 2)
@@ -815,7 +816,7 @@ class StorageContainerTest(StorageTestCase):
                           sourceblob, {'status': 'copy'})
 
         # Act
-        blobs = list(self.bs.list_blobs(container_name, include='copy'))
+        blobs = list(self.bs.list_blobs(container_name, include=Include.COPY))
 
         # Assert
         self.assertEqual(len(blobs), 2)
@@ -868,7 +869,7 @@ class StorageContainerTest(StorageTestCase):
         self.bs.snapshot_blob(container_name, 'blob1')
 
         # Act
-        blobs = list(self.bs.list_blobs(container_name, include='snapshots,metadata'))
+        blobs = list(self.bs.list_blobs(container_name, include=Include(snapshots=True, metadata=True)))
 
         # Assert
         self.assertEqual(len(blobs), 3)

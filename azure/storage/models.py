@@ -258,6 +258,16 @@ class AccessPolicy(object):
         self.permission = permission
 
 
+class Protocol(object):
+
+    '''
+    Specifies the protocol permitted for a SAS token. Note that HTTP only is 
+    not allowed.
+    '''
+    HTTPS = 'https'
+    HTTPS_HTTP = 'https,http'
+
+
 class ResourceTypes(object):
 
     '''
