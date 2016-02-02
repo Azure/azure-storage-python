@@ -26,6 +26,8 @@ from .models import (
     BlobPermissions,
     LeaseActions,
     AppendBlockProperties,
+    PageBlobProperties,
+    ResourceProperties,
     Include,
     SequenceNumberAction,
     BlockListType,

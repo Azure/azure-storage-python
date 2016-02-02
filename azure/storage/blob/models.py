@@ -153,15 +153,31 @@ class PageRange(object):
         self.start = start
         self.end = end
 
-class AppendBlockProperties(object):
+class ResourceProperties(object):
 
-    ''' Response for an append block request. '''
+    ''' Base response for a resource request. '''
 
     def __init__(self):
         self.last_modified = None
         self.etag = None
+
+class AppendBlockProperties(ResourceProperties):
+
+    ''' Response for an append block request. '''
+
+    def __init__(self):
+        super(ResourceProperties, self).__init__()
         self.append_offset = None
         self.committed_block_count = None
+
+
+class PageBlobProperties(ResourceProperties):
+
+    ''' Response for a page request. '''
+
+    def __init__(self):
+        super(ResourceProperties, self).__init__()
+        self.sequence_number = None
 
 
 class PublicAccess(object):

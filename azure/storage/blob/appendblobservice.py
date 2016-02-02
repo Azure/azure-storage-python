@@ -41,6 +41,7 @@ from ._serialization import (
 )
 from ._deserialization import (
     _parse_append_block,
+    _parse_base_properties,
 )
 from .baseblobservice import BaseBlobService
 from os import path
@@ -150,7 +151,8 @@ class AppendBlobService(BaseBlobService):
         if content_settings is not None:
             request.headers += content_settings.to_headers()
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_base_properties(response)
 
     def append_block(self, container_name, blob_name, block,
                      content_md5=None, maxsize_condition=None,

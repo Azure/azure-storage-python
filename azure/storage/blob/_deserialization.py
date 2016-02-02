@@ -38,21 +38,39 @@ from .models import (
     PageRange,
     ContainerProperties,
     AppendBlockProperties,
+    PageBlobProperties,
+    ResourceProperties,
 )
 from ..models import _list
 
-def _parse_snapshot_blob(name, response):
+def _parse_base_properties(response):
     '''
-    Extracts append block return headers.
+    Extracts basic response headers.
     '''   
     raw_headers = _parse_response_for_dict(response)
-    snapshot = raw_headers.get('x-ms-snapshot')
 
-    return _parse_blob(name, snapshot, response)
+    resource_properties = ResourceProperties()
+    resource_properties.last_modified = parser.parse(raw_headers.get('last-modified'))
+    resource_properties.etag = raw_headers.get('etag')
+
+    return resource_properties
+
+def _parse_page_properties(response):
+    '''
+    Extracts page response headers.
+    '''   
+    raw_headers = _parse_response_for_dict(response)
+
+    put_page = PageBlobProperties()
+    put_page.last_modified = parser.parse(raw_headers.get('last-modified'))
+    put_page.etag = raw_headers.get('etag')
+    put_page.sequence_number = _int_or_none(raw_headers.get('x-ms-blob-sequence-number'))
+
+    return put_page
 
 def _parse_append_block(response):
     '''
-    Extracts append block return headers.
+    Extracts append block response headers.
     '''   
     raw_headers = _parse_response_for_dict(response)
 
@@ -63,6 +81,15 @@ def _parse_append_block(response):
     append_block.committed_block_count = _int_or_none(raw_headers.get('x-ms-blob-committed-block-count'))
 
     return append_block
+
+def _parse_snapshot_blob(name, response):
+    '''
+    Extracts append block return headers.
+    '''   
+    raw_headers = _parse_response_for_dict(response)
+    snapshot = raw_headers.get('x-ms-snapshot')
+
+    return _parse_blob(name, snapshot, response)
 
 def _parse_lease_time(response):
     '''

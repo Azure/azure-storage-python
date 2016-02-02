@@ -46,6 +46,7 @@ from ._serialization import (
 )
 from ._deserialization import (
     _convert_xml_to_block_list,
+    _parse_base_properties,
 )
 from .baseblobservice import BaseBlobService
 from os import path
@@ -157,7 +158,8 @@ class BlockBlobService(BaseBlobService):
             request.headers += content_settings.to_headers()
         request.body = _get_request_body_bytes_only('blob', blob)
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_base_properties(response)
 
     def put_block(self, container_name, blob_name, block, block_id,
                   content_md5=None, lease_id=None, timeout=None):
@@ -271,7 +273,8 @@ class BlockBlobService(BaseBlobService):
         request.body = _get_request_body(
             _convert_block_list_to_xml(block_list))
 
-        self._perform_request(request)
+        response = self._perform_request(request)
+        return _parse_base_properties(response)
 
     def get_block_list(self, container_name, blob_name, snapshot=None,
                        block_list_type=None, lease_id=None, timeout=None):
@@ -568,47 +571,26 @@ class BlockBlobService(BaseBlobService):
         if count is None or count < 0:
             count = len(blob) - index
 
-        if count < self._BLOB_MAX_DATA_SIZE:
-            if progress_callback:
-                progress_callback(0, count)
+        stream = BytesIO(blob)
+        stream.seek(index)
 
-            data = blob[index: index + count]
-            self._put_blob(
-                container_name=container_name,
-                blob_name=blob_name,
-                blob=data,
-                content_settings=content_settings,
-                metadata=metadata,
-                lease_id=lease_id,
-                if_modified_since=if_modified_since,
-                if_unmodified_since=if_unmodified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                timeout=timeout)
-
-            if progress_callback:
-                progress_callback(count, count)
-        else:
-            stream = BytesIO(blob)
-            stream.seek(index)
-
-            self.create_blob_from_stream(
-                container_name=container_name,
-                blob_name=blob_name,
-                stream=stream,
-                count=count,
-                content_settings=content_settings,
-                metadata=metadata,
-                progress_callback=progress_callback,
-                max_connections=max_connections,
-                max_retries=max_retries,
-                retry_wait=retry_wait,
-                lease_id=lease_id,
-                if_modified_since=if_modified_since,
-                if_unmodified_since=if_unmodified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                timeout=timeout)
+        self.create_blob_from_stream(
+            container_name=container_name,
+            blob_name=blob_name,
+            stream=stream,
+            count=count,
+            content_settings=content_settings,
+            metadata=metadata,
+            progress_callback=progress_callback,
+            max_connections=max_connections,
+            max_retries=max_retries,
+            retry_wait=retry_wait,
+            lease_id=lease_id,
+            if_modified_since=if_modified_since,
+            if_unmodified_since=if_unmodified_since,
+            if_match=if_match,
+            if_none_match=if_none_match,
+            timeout=timeout)
 
     def create_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
