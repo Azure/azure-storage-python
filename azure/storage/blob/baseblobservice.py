@@ -23,6 +23,7 @@ from .._common_conversion import (
     _int_or_none,
     _str,
     _str_or_none,
+    _datetime_to_utc_string,
 )
 from abc import ABCMeta
 from .._serialization import (
@@ -608,7 +609,7 @@ class BaseBlobService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
 
@@ -681,8 +682,8 @@ class BaseBlobService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-blob-public-access', _str_or_none(blob_public_access)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
         ]
         request.body = _get_request_body(
@@ -721,8 +722,8 @@ class BaseBlobService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),          
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),          
         ]
 
         if not fail_not_exist:
@@ -793,8 +794,8 @@ class BaseBlobService(_StorageClient):
             ('x-ms-lease-duration', _str_or_none(lease_duration)),
             ('x-ms-lease-break-period', _str_or_none(lease_break_period)),
             ('x-ms-proposed-lease-id', _str_or_none(proposed_lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
         ]
 
         return self._perform_request(request)
@@ -1199,8 +1200,8 @@ class BaseBlobService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
@@ -1245,8 +1246,8 @@ class BaseBlobService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers += [
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
             ('x-ms-lease-id', _str_or_none(lease_id))
@@ -1338,8 +1339,8 @@ class BaseBlobService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
@@ -1766,8 +1767,8 @@ class BaseBlobService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]     
@@ -1815,8 +1816,8 @@ class BaseBlobService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
@@ -1888,8 +1889,8 @@ class BaseBlobService(_StorageClient):
             ('x-ms-lease-duration', _str_or_none(lease_duration)),
             ('x-ms-lease-break-period', _str_or_none(lease_break_period)),
             ('x-ms-proposed-lease-id', _str_or_none(proposed_lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
@@ -2158,8 +2159,8 @@ class BaseBlobService(_StorageClient):
         ]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
             ('x-ms-lease-id', _str_or_none(lease_id))
@@ -2261,8 +2262,8 @@ class BaseBlobService(_StorageClient):
             ('x-ms-source-if-match', _str_or_none(source_if_match)),
             ('x-ms-source-if-none-match',
              _str_or_none(source_if_none_match)),
-            ('If-Modified-Since', _str_or_none(destination_if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(destination_if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(destination_if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(destination_if_unmodified_since)),
             ('If-Match', _str_or_none(destination_if_match)),
             ('If-None-Match', _str_or_none(destination_if_none_match)),
             ('x-ms-lease-id', _str_or_none(destination_lease_id)),
@@ -2363,8 +2364,8 @@ class BaseBlobService(_StorageClient):
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-delete-snapshots', _str_or_none(delete_snapshots)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]

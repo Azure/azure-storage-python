@@ -22,6 +22,7 @@ from .._common_conversion import (
     _str,
     _str_or_none,
     _int_or_none,
+    _datetime_to_utc_string,
 )
 from .._serialization import (
     _get_request_body,
@@ -147,8 +148,8 @@ class BlockBlobService(BaseBlobService):
             ('x-ms-blob-type', _str_or_none(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
@@ -260,8 +261,8 @@ class BlockBlobService(BaseBlobService):
             ('Content-MD5', _str_or_none(transactional_content_md5)),
             ('x-ms-meta-name-values', metadata),
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]

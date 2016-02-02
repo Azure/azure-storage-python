@@ -80,16 +80,6 @@ class StorageBlockBlobTest(StorageTestCase):
         actual_data = self.bs.get_blob_to_bytes(container_name, blob_name)
         self.assertEqual(actual_data.content, expected_data)
 
-    def _get_expected_progress(self, blob_size, unknown_size=False):
-        result = []
-        index = 0
-        total = None if unknown_size else blob_size
-        while (index < blob_size):
-            result.append((index, total))
-            index += self.bs._BLOB_MAX_CHUNK_DATA_SIZE
-        result.append((blob_size, total))
-        return result
-
     class NonSeekableFile(object):
         def __init__(self, wrapped_file):
             self.wrapped_file = wrapped_file
@@ -293,7 +283,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_create_blob_from_bytes_with_index(self):
@@ -396,7 +386,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_create_blob_from_bytes_parallel_with_index_and_count(self):
@@ -467,7 +457,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_create_blob_from_path_parallel_with_properties(self):
@@ -596,7 +586,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data), unknown_size=True))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, unknown_size=True)
 
     def test_create_blob_from_stream_with_progress_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -621,7 +611,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data), unknown_size=True))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, unknown_size=True)
 
     @record
     def test_create_blob_from_stream_chunked_upload_with_count(self):
@@ -748,7 +738,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assertEqual(progress, self._get_expected_progress(len(data)))
+        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
 
     @record
     def test_create_blob_from_text_chunked_upload(self):

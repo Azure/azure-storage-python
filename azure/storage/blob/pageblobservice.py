@@ -21,6 +21,7 @@ from .._common_conversion import (
     _int_or_none,
     _str,
     _str_or_none,
+    _datetime_to_utc_string,
 )
 from .._serialization import (
     _get_request_body_bytes_only,
@@ -158,8 +159,8 @@ class PageBlobService(BaseBlobService):
             ('x-ms-blob-content-length', _str_or_none(content_length)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
             ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
@@ -255,8 +256,8 @@ class PageBlobService(BaseBlobService):
              _str_or_none(if_sequence_number_lt)),
             ('x-ms-if-sequence-number-eq',
              _str_or_none(if_sequence_number_eq)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
@@ -345,8 +346,8 @@ class PageBlobService(BaseBlobService):
              _str_or_none(if_sequence_number_lt)),
             ('x-ms-if-sequence-number-eq',
              _str_or_none(if_sequence_number_eq)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match))
         ]
@@ -414,8 +415,8 @@ class PageBlobService(BaseBlobService):
         ]
         request.headers = [
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
@@ -477,8 +478,8 @@ class PageBlobService(BaseBlobService):
             ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
             ('x-ms-sequence-number-action', _str_or_none(sequence_number_action)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
@@ -526,8 +527,8 @@ class PageBlobService(BaseBlobService):
         request.headers = [
             ('x-ms-blob-content-length', _str_or_none(content_length)),
             ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('If-Modified-Since', _str_or_none(if_modified_since)),
-            ('If-Unmodified-Since', _str_or_none(if_unmodified_since)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _str_or_none(if_match)),
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
