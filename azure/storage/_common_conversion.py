@@ -17,6 +17,7 @@ import base64
 import hashlib
 import hmac
 import sys
+from dateutil.tz import tzutc
 
 from .models import (
     _unicode_type,
@@ -59,10 +60,19 @@ def _bool_or_none(value):
 
     return str(value)
 
+def _to_utc_datetime(value):
 
-def _datetime_to_str(value):
+    return value.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+def _datetime_to_utc_string(value):
+    # Azure expects the date value passed in to be UTC.
+    # Azure will always return values as UTC.
+    # If a date is passed in without timezone info, it is assumed to be UTC.
     if value is None:
         return None
+
+    if value.tzinfo:
+        value = value.astimezone(tzutc())
 
     return value.strftime('%a, %d %b %Y %H:%M:%S GMT')
 
