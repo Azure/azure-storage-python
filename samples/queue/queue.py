@@ -1,6 +1,4 @@
-﻿# coding: utf-8
-
-#-------------------------------------------------------------------------
+﻿#-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -138,6 +136,12 @@ class QueueSamples():
         # queues = list(service.list_queues())
         # for queue in queues:
         #    print(queue.name) # queue1, queue2, thirdq, all other queues created in the service        
+
+        # Max results
+        # Will return in alphabetical order. 
+        queues = list(service.list_queues(max_results=2))
+        for queue in queues:
+            print(queue.name) # queue1, queue2
 
         # Prefix
         queues = list(service.list_queues(prefix='queue'))
@@ -355,8 +359,7 @@ class QueueSamples():
         metadata = {'val1': 'foo', 'val2': 'blah'}
         service.set_queue_metadata(queue_name, metadata=metadata)
 
-        # Access to all messages in the queues and the queues themselves
-        # Read permissions to access messages and the queue
+        # Access to read operations on the queues themselves
         # Expires in an hour
         token = service.generate_account_shared_access_signature(
             ResourceTypes.CONTAINER,
