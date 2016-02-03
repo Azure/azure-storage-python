@@ -59,11 +59,13 @@ else:
     from cStringIO import StringIO as BytesIO
 
 # Keep this value sync with _ERROR_PAGE_BLOB_SIZE_ALIGNMENT
-_PAGE_SIZE = 512
+_PAGE_ALIGNMENT = 512
 
 
 class PageBlobService(BaseBlobService):
     
+    MAX_PAGE_SIZE = 4 * 1024 * 1024
+
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
                  custom_domain=None, request_session=None, connection_string=None):
@@ -682,7 +684,7 @@ class PageBlobService(BaseBlobService):
         if count < 0:
             raise ValueError(_ERROR_VALUE_NEGATIVE.format('count'))
 
-        if count % _PAGE_SIZE != 0:
+        if count % _PAGE_ALIGNMENT != 0:
             raise ValueError(_ERROR_PAGE_BLOB_SIZE_ALIGNMENT.format(count))
 
         response = self.create_blob(
@@ -704,7 +706,7 @@ class PageBlobService(BaseBlobService):
             container_name=container_name,
             blob_name=blob_name,
             blob_size=count,
-            block_size=self._BLOB_MAX_CHUNK_DATA_SIZE,
+            block_size=self.MAX_PAGE_SIZE,
             stream=stream,
             max_connections=max_connections,
             max_retries=max_retries,

@@ -54,8 +54,8 @@ class StorageGetBlobTest(StorageTestCase):
         # test chunking functionality by reducing the threshold
         # for chunking and the size of each chunk, otherwise
         # the tests would take too long to execute
-        self.bs._BLOB_MAX_DATA_SIZE = 64 * 1024
-        self.bs._BLOB_MAX_CHUNK_DATA_SIZE = 4 * 1024
+        self.bs.MAX_SINGLE_GET_SIZE = 64 * 1024
+        self.bs.MAX_CHUNK_GET_SIZE = 4 * 1024
 
     def tearDown(self):
         if not self.is_playback():
@@ -156,7 +156,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
-        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress)
 
     @record
     def test_get_blob_to_bytes_with_progress_parallel(self):
@@ -176,7 +176,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
-        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress, single_download=False)
 
     @record
     def test_get_blob_to_stream(self):
@@ -265,7 +265,7 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress)
 
     def test_get_blob_to_stream_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -291,7 +291,7 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress, single_download=False)
 
     @record
     def test_get_blob_to_path(self):
@@ -392,7 +392,7 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress)
 
     @record
     def test_get_blob_to_path_with_progress_parallel(self):
@@ -417,7 +417,7 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress, single_download=False)
 
     @record
     def test_get_blob_to_path_with_mode(self):
@@ -455,7 +455,7 @@ class StorageGetBlobTest(StorageTestCase):
     def test_get_blob_to_text(self):
         # Arrange
         text_blob = self.get_resource_name('textblob')
-        text_data = self.get_random_text_data(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        text_data = self.get_random_text_data(self.bs.MAX_SINGLE_GET_SIZE + 1)
         self.bs.create_blob_from_text(self.container_name, text_blob, text_data)
 
         # Act
@@ -471,7 +471,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Arrange
         text_blob = self.get_resource_name('textblob')
-        text_data = self.get_random_text_data(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        text_data = self.get_random_text_data(self.bs.MAX_SINGLE_GET_SIZE + 1)
         self.bs.create_blob_from_text(self.container_name, text_blob, text_data)
 
         # Act
@@ -484,7 +484,7 @@ class StorageGetBlobTest(StorageTestCase):
     def test_get_blob_to_text_with_progress(self):
         # Arrange
         text_blob = self.get_resource_name('textblob')
-        text_data = self.get_random_text_data(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        text_data = self.get_random_text_data(self.bs.MAX_SINGLE_GET_SIZE + 1)
         self.bs.create_blob_from_text(self.container_name, text_blob, text_data)
 
         # Act
@@ -498,7 +498,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text_data, blob.content)
-        self.assert_download_progress(len(text_data.encode('utf-8')), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(text_data.encode('utf-8')), self.bs.MAX_CHUNK_GET_SIZE, progress)
 
     @record
     def test_get_blob_to_text_with_encoding(self):
@@ -533,7 +533,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text, blob.content)
-        self.assert_download_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(data), self.bs.MAX_CHUNK_GET_SIZE, progress)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

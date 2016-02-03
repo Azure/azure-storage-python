@@ -93,9 +93,9 @@ class FileService(_StorageClient):
     '''
     This is the main class managing File resources.
     '''
-
-    _FILE_MAX_DATA_SIZE = 64 * 1024 * 1024
-    _FILE_MAX_CHUNK_DATA_SIZE = 4 * 1024 * 1024
+    MAX_SINGLE_GET_SIZE = 64 * 1024 * 1024
+    MAX_CHUNK_GET_SIZE = 4 * 1024 * 1024
+    MAX_RANGE_SIZE = 4 * 1024 * 1024
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE, 
@@ -1616,7 +1616,7 @@ class FileService(_StorageClient):
             directory_name,
             file_name,
             count,
-            self._FILE_MAX_CHUNK_DATA_SIZE,
+            self.MAX_RANGE_SIZE,
             stream,
             max_connections,
             max_retries,
@@ -1796,14 +1796,14 @@ class FileService(_StorageClient):
             file_size = file.properties.content_length
 
             # If file size is large, use parallel download
-            if file_size >= self._FILE_MAX_DATA_SIZE:
+            if file_size >= self.MAX_SINGLE_GET_SIZE:
                 _download_file_chunks(
                     self,
                     share_name,
                     directory_name,
                     file_name,
                     file_size,
-                    self._FILE_MAX_CHUNK_DATA_SIZE,
+                    self.MAX_CHUNK_GET_SIZE,
                     start_range,
                     end_range,
                     stream,

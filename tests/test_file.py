@@ -48,6 +48,7 @@ TEST_DIRECTORY_PREFIX = 'dir'
 TEST_FILE_PREFIX = 'file'
 INPUT_FILE_PATH = 'file_input.temp.dat'
 OUTPUT_FILE_PATH = 'file_output.temp.dat'
+LARGE_FILE_SIZE = 64 * 1024
 #------------------------------------------------------------------------------
 
 class StorageFileTest(StorageTestCase):
@@ -60,8 +61,9 @@ class StorageFileTest(StorageTestCase):
         # test chunking functionality by reducing the threshold
         # for chunking and the size of each chunk, otherwise
         # the tests would take too long to execute
-        self.fs._FILE_MAX_DATA_SIZE = 64 * 1024
-        self.fs._FILE_MAX_CHUNK_DATA_SIZE = 4 * 1024
+        self.fs.MAX_SINGLE_GET_SIZE = 64 * 1024
+        self.fs.MAX_CHUNK_GET_SIZE = 4 * 1024
+        self.fs.MAX_RANGE_SIZE = 4 * 1024
 
         self.share_name = self.get_resource_name('utshare')
 
@@ -702,7 +704,7 @@ class StorageFileTest(StorageTestCase):
     def test_get_file_to_bytes(self):
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE - 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE - 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -718,7 +720,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -731,7 +733,7 @@ class StorageFileTest(StorageTestCase):
     def test_get_file_to_bytes_with_progress(self):
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE - 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE - 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -744,7 +746,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(data, file.content)
-        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(data), self.fs.MAX_RANGE_SIZE, progress)
 
     @record
     def test_get_file_to_bytes_with_progress_parallel(self):
@@ -754,7 +756,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -767,13 +769,13 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(data, file.content)
-        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
+        self.assert_download_progress(len(data), self.fs.MAX_RANGE_SIZE, progress, single_download=False)
 
     @record
     def test_get_file_to_stream(self):
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE - 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE - 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -794,7 +796,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -815,7 +817,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -836,7 +838,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -853,7 +855,7 @@ class StorageFileTest(StorageTestCase):
     def test_get_file_to_stream_with_progress(self):
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -871,7 +873,7 @@ class StorageFileTest(StorageTestCase):
         with open(OUTPUT_FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(data), self.fs.MAX_RANGE_SIZE, progress)
 
     def test_get_file_to_stream_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -880,7 +882,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -900,13 +902,13 @@ class StorageFileTest(StorageTestCase):
         with open(OUTPUT_FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
+        self.assert_download_progress(len(data), self.fs.MAX_RANGE_SIZE, progress, single_download=False)
 
     @record
     def test_get_file_to_path(self):
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -925,7 +927,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -945,7 +947,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -966,7 +968,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -987,7 +989,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -1002,7 +1004,7 @@ class StorageFileTest(StorageTestCase):
     def test_get_file_to_path_with_progress(self):
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -1019,7 +1021,7 @@ class StorageFileTest(StorageTestCase):
         with open(OUTPUT_FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(data), self.fs.MAX_RANGE_SIZE, progress)
 
     @record
     def test_get_file_to_path_with_progress_parallel(self):
@@ -1028,7 +1030,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
 
         # Act
@@ -1046,13 +1048,13 @@ class StorageFileTest(StorageTestCase):
         with open(OUTPUT_FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(data, actual)
-        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, single_download=False)
+        self.assert_download_progress(len(data), self.fs.MAX_RANGE_SIZE, progress, single_download=False)
 
     @record
     def test_get_file_to_path_with_mode(self):
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
         with open(OUTPUT_FILE_PATH, 'wb') as stream:
             stream.write(b'abcdef')
@@ -1071,7 +1073,7 @@ class StorageFileTest(StorageTestCase):
     def test_get_file_to_path_with_mode_parallel(self):
         # Arrange
         input_file = self.get_resource_name('bytefile')
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_bytes(self.share_name, None, input_file, data)
         with open(OUTPUT_FILE_PATH, 'wb') as stream:
             stream.write(b'abcdef')
@@ -1090,7 +1092,7 @@ class StorageFileTest(StorageTestCase):
     def test_get_file_to_text(self):
         # Arrange
         input_file = self.get_resource_name('textfile')
-        data = self.get_random_text_data(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_text_data(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_text(self.share_name, None, input_file, data)
 
         # Act
@@ -1106,7 +1108,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange
         input_file = self.get_resource_name('textfile')
-        data = self.get_random_text_data(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_text_data(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_text(self.share_name, None, input_file, data)
 
         # Act
@@ -1119,7 +1121,7 @@ class StorageFileTest(StorageTestCase):
     def test_get_file_to_text_with_progress(self):
         # Arrange
         input_file = self.get_resource_name('textfile')
-        data = self.get_random_text_data(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_text_data(self.fs.MAX_SINGLE_GET_SIZE + 512)
         self.fs.create_file_from_text(self.share_name, None, input_file, data)
 
         # Act
@@ -1133,7 +1135,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(data, file.content)
-        self.assert_download_progress(len(data.encode('utf-8')), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(data.encode('utf-8')), self.fs.MAX_RANGE_SIZE, progress)
 
     @record
     def test_get_file_to_text_with_encoding(self):
@@ -1168,7 +1170,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text, file.content)
-        self.assert_download_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_download_progress(len(data), self.fs.MAX_RANGE_SIZE, progress)
 
     @record
     def test_create_file_from_bytes_with_progress(self):
@@ -1218,7 +1220,7 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_from_bytes_chunked_upload(self):
         # Arrange      
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
 
         # Act
         self.fs.create_file_from_bytes(self.share_name, None, file_name, data)
@@ -1233,7 +1235,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange      
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
 
         # Act
         self.fs.create_file_from_bytes(self.share_name, None, file_name, data, max_connections=5)
@@ -1245,7 +1247,7 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_from_bytes_chunked_upload_with_index_and_count(self):
         # Arrange      
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         index = 512
         count = len(data) - 1024
 
@@ -1262,7 +1264,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange      
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         index = 512
         count = len(data) - 1024
 
@@ -1276,7 +1278,7 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_from_path_chunked_upload(self):
         # Arrange        
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1293,7 +1295,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange      
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1307,7 +1309,7 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_from_path_with_progress_chunked_upload(self):
         # Arrange        
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1322,14 +1324,14 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, data)
-        self.assert_upload_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, unknown_size=False)
+        self.assert_upload_progress(len(data), self.fs.MAX_RANGE_SIZE, progress, unknown_size=False)
 
     @record
     def test_create_file_from_stream_chunked_upload(self):
         # Arrange
         
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1348,7 +1350,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange        
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1365,7 +1367,7 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_from_stream_non_seekable_chunked_upload(self):
         # Arrange      
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1386,7 +1388,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange        
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1406,7 +1408,7 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_from_stream_with_progress_chunked_upload(self):
         # Arrange      
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1423,7 +1425,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, data[:file_size])
-        self.assert_upload_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, unknown_size=False)
+        self.assert_upload_progress(len(data), self.fs.MAX_RANGE_SIZE, progress, unknown_size=False)
 
     def test_create_file_from_stream_with_progress_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -1432,7 +1434,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange      
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1450,13 +1452,13 @@ class StorageFileTest(StorageTestCase):
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, data[:file_size])
 
-        self.assert_upload_progress(len(data), self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, unknown_size=False)
+        self.assert_upload_progress(len(data), self.fs.MAX_RANGE_SIZE, progress, unknown_size=False)
 
     @record
     def test_create_file_from_stream_chunked_upload_truncated(self):
         # Arrange       
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1475,7 +1477,7 @@ class StorageFileTest(StorageTestCase):
 
         # Arrange        
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1492,7 +1494,7 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_from_stream_with_progress_chunked_upload_truncated(self):
         # Arrange       
         file_name = self._get_file_reference()
-        data = self.get_random_bytes(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
         with open(INPUT_FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -1509,7 +1511,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, data[:file_size])
-        self.assert_upload_progress(file_size, self.fs._FILE_MAX_CHUNK_DATA_SIZE, progress, unknown_size=False)
+        self.assert_upload_progress(file_size, self.fs.MAX_RANGE_SIZE, progress, unknown_size=False)
 
 
     @record
@@ -1542,7 +1544,7 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_from_text_chunked_upload(self):
         # Arrange
         file_name = self._get_file_reference()
-        data = self.get_random_text_data(self.fs._FILE_MAX_DATA_SIZE + 512)
+        data = self.get_random_text_data(LARGE_FILE_SIZE)
         encoded_data = data.encode('utf-8')
 
         # Act
