@@ -349,7 +349,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = self._create_block_blob()
 
         # Act
-        resp = self.bs.set_blob_properties(
+        self.bs.set_blob_properties(
             self.container_name,
             blob_name,
             content_settings=ContentSettings(
@@ -358,7 +358,6 @@ class StorageCommonBlobTest(StorageTestCase):
         )
 
         # Assert
-        self.assertIsNone(resp)
         blob = self.bs.get_blob_properties(self.container_name, blob_name)
         self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
         self.assertEqual(blob.properties.content_settings.content_disposition, 'inline')
@@ -372,14 +371,13 @@ class StorageCommonBlobTest(StorageTestCase):
         # Act
         blob.properties.content_settings.content_language = 'spanish'
         blob.properties.content_settings.content_disposition = 'inline'
-        resp = self.bs.set_blob_properties(
+        self.bs.set_blob_properties(
             self.container_name,
             blob_name,
             content_settings=blob.properties.content_settings,
         )
 
         # Assert
-        self.assertIsNone(resp)
         blob = self.bs.get_blob_properties(self.container_name, blob_name)
         self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
         self.assertEqual(blob.properties.content_settings.content_disposition, 'inline')
@@ -449,10 +447,9 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = self._create_block_blob()
 
         # Act
-        resp = self.bs.set_blob_metadata(self.container_name, blob_name, metadata)
+        self.bs.set_blob_metadata(self.container_name, blob_name, metadata)
 
         # Assert
-        self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, blob_name)
         self.assertEqual(3, len(md))
         self.assertEqual(md['hello'], 'world')

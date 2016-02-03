@@ -49,6 +49,7 @@ from ._serialization import (
 from ._deserialization import (
     _convert_xml_to_page_ranges,
     _parse_page_properties,
+    _parse_base_properties,
 )
 from .baseblobservice import BaseBlobService
 from os import path
@@ -174,7 +175,7 @@ class PageBlobService(BaseBlobService):
             request.headers += content_settings.to_headers()
 
         response = self._perform_request(request)
-        return _parse_page_properties(response)
+        return _parse_base_properties(response)
 
     def update_page(
         self, container_name, blob_name, page, start_range, end_range,

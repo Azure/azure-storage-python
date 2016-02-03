@@ -75,12 +75,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                                         content_length):
         self._create_container(container_name)
         resp = self.pbs.create_blob(self.container_name, blob_name, str(content_length))
-        self.assertIsNone(resp)
 
     def _create_container_and_append_blob(self, container_name, blob_name):
         self._create_container(container_name)
         resp = self.abs.create_blob(container_name, blob_name)
-        self.assertIsNone(resp)
 
     #--Test cases for blob service --------------------------------------------
     @record
@@ -91,17 +89,12 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))
 
         # Act
-        resp = self.bs.set_container_metadata(
-            self.container_name,
-            {'hello': 'world', 'number': '43'},
-            if_modified_since=test_datetime)
+        metadata = {'hello': 'world', 'number': '43'}
+        self.bs.set_container_metadata(self.container_name, metadata, if_modified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
         md = self.bs.get_container_metadata(self.container_name)
-        self.assertIsNotNone(md)
-        self.assertEqual(md['hello'], 'world')
-        self.assertEqual(md['number'], '43')
+        self.assertDictEqual(metadata, md)
 
     @record
     def test_set_container_metadata_with_if_modified_fail(self):    
@@ -113,10 +106,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.set_container_metadata(
-                self.container_name,
-                {'hello': 'world', 'number': '43'},
-                if_modified_since=test_datetime)
+            metadata = {'hello': 'world', 'number': '43'}
+            self.bs.set_container_metadata(self.container_name, metadata, if_modified_since=test_datetime)
 
         # Assert
 
@@ -127,11 +118,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         test_datetime = (datetime.datetime.utcnow() -
                     datetime.timedelta(minutes=15))
         # Act
-        resp = self.bs.set_container_acl(self.container_name,
-                                         if_modified_since=test_datetime) 
+        self.bs.set_container_acl(self.container_name, if_modified_since=test_datetime) 
 
         # Assert
-        self.assertIsNone(resp)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
 
@@ -143,8 +132,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                     datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.set_container_acl(self.container_name,
-                                      if_modified_since=test_datetime) 
+            self.bs.set_container_acl(self.container_name, if_modified_since=test_datetime) 
 
         # Assert
 
@@ -155,11 +143,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         test_datetime = (datetime.datetime.utcnow() +
                     datetime.timedelta(minutes=15))
         # Act
-        resp = self.bs.set_container_acl(self.container_name,
-                                         if_unmodified_since=test_datetime) 
+        self.bs.set_container_acl(self.container_name, if_unmodified_since=test_datetime) 
 
         # Assert
-        self.assertIsNone(resp)
         acl = self.bs.get_container_acl(self.container_name)
         self.assertIsNotNone(acl)
 
@@ -171,8 +157,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                     datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.set_container_acl(self.container_name,
-                                      if_unmodified_since=test_datetime) 
+            self.bs.set_container_acl(self.container_name, if_unmodified_since=test_datetime) 
 
         # Assert
 
@@ -539,20 +524,15 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         test_datetime = (datetime.datetime.utcnow() -
                          datetime.timedelta(minutes=15))
         # Act
-        resp = self.bs.set_blob_properties(
-            self.container_name,
-            'blob1',
-            content_settings=ContentSettings(
-                content_language='spanish',
-                content_disposition='inline'),
-            if_modified_since=test_datetime,
-        )
+        content_settings=ContentSettings(
+            content_language='spanish',
+            content_disposition='inline')
+        self.bs.set_blob_properties(self.container_name, 'blob1', content_settings, if_modified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
-        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
-        self.assertEqual(blob.properties.content_settings.content_disposition, 'inline')
+        properties = self.bs.get_blob_properties(self.container_name, 'blob1').properties
+        self.assertEqual(content_settings.content_language, properties.content_settings.content_language)
+        self.assertEqual(content_settings.content_disposition, properties.content_settings.content_disposition)
 
     @record
     def test_set_blob_properties_with_if_modified_fail(self):
@@ -563,14 +543,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
-            resp = self.bs.set_blob_properties(
-                self.container_name,
-                'blob1',
-                content_settings=ContentSettings(
-                    content_language='spanish',
-                    content_disposition='inline'),
-                if_modified_since=test_datetime,
-            )
+            content_settings=ContentSettings(
+                content_language='spanish',
+                content_disposition='inline')
+            self.bs.set_blob_properties(self.container_name, 'blob1', content_settings, if_modified_since=test_datetime)
 
         # Assert
 
@@ -582,20 +558,15 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         test_datetime = (datetime.datetime.utcnow() +
                          datetime.timedelta(minutes=15))
         # Act
-        resp = self.bs.set_blob_properties(
-            self.container_name,
-            'blob1',
-            content_settings=ContentSettings(
-                content_language='spanish',
-                content_disposition='inline'),
-            if_unmodified_since=test_datetime,
-        )
+        content_settings=ContentSettings(
+            content_language='spanish',
+            content_disposition='inline')
+        self.bs.set_blob_properties(self.container_name, 'blob1', content_settings, if_unmodified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
-        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
-        self.assertEqual(blob.properties.content_settings.content_disposition, 'inline')
+        properties = self.bs.get_blob_properties(self.container_name, 'blob1').properties
+        self.assertEqual(content_settings.content_language, properties.content_settings.content_language)
+        self.assertEqual(content_settings.content_disposition, properties.content_settings.content_disposition)
 
     @record
     def test_set_blob_properties_with_if_unmodified_fail(self):
@@ -606,14 +577,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))
         # Act
         with self.assertRaises(AzureHttpError):
-            resp = self.bs.set_blob_properties(
-                self.container_name,
-                'blob1',
-                content_settings=ContentSettings(
-                    content_language='spanish',
-                    content_disposition='inline'),
-                if_unmodified_since=test_datetime,
-            )
+            content_settings=ContentSettings(
+                content_language='spanish',
+                content_disposition='inline')
+            self.bs.set_blob_properties(self.container_name, 'blob1', content_settings, if_unmodified_since=test_datetime)
 
         # Assert
 
@@ -625,20 +592,15 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         etag = self.bs.get_blob_properties(self.container_name, 'blob1').properties.etag
 
         # Act
-        resp = self.bs.set_blob_properties(
-            self.container_name,
-            'blob1',
-            content_settings=ContentSettings(
-                content_language='spanish',
-                content_disposition='inline'),
-            if_match=etag,
-        )
+        content_settings=ContentSettings(
+            content_language='spanish',
+            content_disposition='inline')
+        self.bs.set_blob_properties(self.container_name, 'blob1', content_settings, if_match=etag)
 
         # Assert
-        self.assertIsNone(resp)
-        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
-        self.assertEqual(blob.properties.content_settings.content_disposition, 'inline')
+        properties = self.bs.get_blob_properties(self.container_name, 'blob1').properties
+        self.assertEqual(content_settings.content_language, properties.content_settings.content_language)
+        self.assertEqual(content_settings.content_disposition, properties.content_settings.content_disposition)
 
     @record
     def test_set_blob_properties_with_if_match_fail(self):
@@ -648,14 +610,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            resp = self.bs.set_blob_properties(
-                self.container_name,
-                'blob1',
-                content_settings=ContentSettings(
-                    content_language='spanish',
-                    content_disposition='inline'),
-                if_match='0x111111111111111',
-            )
+            content_settings=ContentSettings(
+                content_language='spanish',
+                content_disposition='inline')
+            self.bs.set_blob_properties(self.container_name, 'blob1', content_settings, if_match='0x111111111111111')
 
         # Assert
 
@@ -666,20 +624,15 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
 
         # Act
-        resp = self.bs.set_blob_properties(
-            self.container_name,
-            'blob1',
-            content_settings=ContentSettings(
-                content_language='spanish',
-                content_disposition='inline'),
-            if_none_match='0x111111111111111',
-        )
+        content_settings=ContentSettings(
+            content_language='spanish',
+            content_disposition='inline')
+        self.bs.set_blob_properties(self.container_name, 'blob1', content_settings, if_none_match='0x111111111111111')
 
         # Assert
-        self.assertIsNone(resp)
-        blob = self.bs.get_blob_properties(self.container_name, 'blob1')
-        self.assertEqual(blob.properties.content_settings.content_language, 'spanish')
-        self.assertEqual(blob.properties.content_settings.content_disposition, 'inline')
+        properties = self.bs.get_blob_properties(self.container_name, 'blob1').properties
+        self.assertEqual(content_settings.content_language, properties.content_settings.content_language)
+        self.assertEqual(content_settings.content_disposition, properties.content_settings.content_disposition)
 
     @record
     def test_set_blob_properties_with_if_none_match_fail(self):
@@ -690,14 +643,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            resp = self.bs.set_blob_properties(
-                self.container_name,
-                'blob1',
-                content_settings=ContentSettings(
-                    content_language='spanish',
-                    content_disposition='inline'),
-                if_none_match=etag,
-            )
+            content_settings=ContentSettings(
+                content_language='spanish',
+                content_disposition='inline')
+            self.bs.set_blob_properties(self.container_name, 'blob1', content_settings, if_none_match=etag)
 
         # Assert
 
@@ -945,19 +894,12 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))
 
         # Act
-        resp = self.bs.set_blob_metadata(
-            self.container_name,
-            'blob1',
-            {'hello': 'world', 'number': '42', 'UP': 'UPval'},
-            if_modified_since=test_datetime)
+        metadata = {'hello': 'world', 'number': '42'}
+        self.bs.set_blob_metadata(self.container_name, 'blob1', metadata, if_modified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
-        self.assertEqual(3, len(md))
-        self.assertEqual(md['hello'], 'world')
-        self.assertEqual(md['number'], '42')
-        self.assertEqual(md['up'], 'UPval')
+        self.assertDictEqual(metadata, md)
 
     @record
     def test_set_blob_metadata_with_if_modified_fail(self):
@@ -969,11 +911,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.set_blob_metadata(
-                self.container_name,
-                'blob1',
-                {'hello': 'world', 'number': '42', 'UP': 'UPval'},
-                if_modified_since=test_datetime)
+            metadata = {'hello': 'world', 'number': '42'}
+            self.bs.set_blob_metadata(self.container_name, 'blob1', metadata, if_modified_since=test_datetime)
 
         # Assert
 
@@ -986,19 +925,12 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))
 
         # Act
-        resp = self.bs.set_blob_metadata(
-            self.container_name,
-            'blob1',
-            {'hello': 'world', 'number': '42', 'UP': 'UPval'},
-            if_unmodified_since=test_datetime)
+        metadata = {'hello': 'world', 'number': '42'}
+        self.bs.set_blob_metadata(self.container_name, 'blob1', metadata, if_unmodified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
-        self.assertEqual(3, len(md))
-        self.assertEqual(md['hello'], 'world')
-        self.assertEqual(md['number'], '42')
-        self.assertEqual(md['up'], 'UPval')
+        self.assertDictEqual(metadata, md)
 
     @record
     def test_set_blob_metadata_with_if_unmodified_fail(self):
@@ -1010,11 +942,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.set_blob_metadata(
-                self.container_name,
-                'blob1',
-                {'hello': 'world', 'number': '42', 'UP': 'UPval'},
-                if_unmodified_since=test_datetime)
+            metadata = {'hello': 'world', 'number': '42'}
+            self.bs.set_blob_metadata(self.container_name, 'blob1', metadata, if_unmodified_since=test_datetime)
 
         # Assert
 
@@ -1026,19 +955,12 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         etag = self.bs.get_blob_properties(self.container_name, 'blob1').properties.etag
         
         # Act
-        resp = self.bs.set_blob_metadata(
-            self.container_name,
-            'blob1',
-            {'hello': 'world', 'number': '42', 'UP': 'UPval'},
-            if_match=etag)
+        metadata = {'hello': 'world', 'number': '42'}
+        self.bs.set_blob_metadata(self.container_name, 'blob1', metadata, if_match=etag)
 
         # Assert
-        self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
-        self.assertEqual(3, len(md))
-        self.assertEqual(md['hello'], 'world')
-        self.assertEqual(md['number'], '42')
-        self.assertEqual(md['up'], 'UPval')
+        self.assertDictEqual(metadata, md)
 
     @record
     def test_set_blob_metadata_with_if_match_fail(self):
@@ -1048,11 +970,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         
         # Act
         with self.assertRaises(AzureHttpError):
-                self.bs.set_blob_metadata(
-                    self.container_name,
-                    'blob1',
-                    {'hello': 'world', 'number': '42', 'UP': 'UPval'},
-                    if_match='0x111111111111111')
+            metadata = {'hello': 'world', 'number': '42'}
+            self.bs.set_blob_metadata(self.container_name, 'blob1', metadata, if_match='0x111111111111111')
 
         # Assert
 
@@ -1063,19 +982,12 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             self.container_name, 'blob1', b'hello world')
         
         # Act
-        resp = self.bs.set_blob_metadata(
-            self.container_name,
-            'blob1',
-            {'hello': 'world', 'number': '42', 'UP': 'UPval'},
-            if_none_match='0x111111111111111')
+        metadata = {'hello': 'world', 'number': '42'}
+        self.bs.set_blob_metadata(self.container_name, 'blob1', metadata, if_none_match='0x111111111111111')
 
         # Assert
-        self.assertIsNone(resp)
         md = self.bs.get_blob_metadata(self.container_name, 'blob1')
-        self.assertEqual(3, len(md))
-        self.assertEqual(md['hello'], 'world')
-        self.assertEqual(md['number'], '42')
-        self.assertEqual(md['up'], 'UPval')
+        self.assertDictEqual(metadata, md)
 
     @record
     def test_set_blob_metadata_with_if_none_match_fail(self):
@@ -1086,11 +998,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         
         # Act
         with self.assertRaises(AzureHttpError):
-                self.bs.set_blob_metadata(
-                    self.container_name,
-                    'blob1',
-                    {'hello': 'world', 'number': '42', 'UP': 'UPval'},
-                    if_none_match=etag)
+            metadata = {'hello': 'world', 'number': '42'}
+            self.bs.set_blob_metadata(self.container_name, 'blob1', metadata, if_none_match=etag)
 
         # Assert
 
@@ -1473,12 +1382,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))
 
         # Act
-        resp = self.bs.put_block_list(
-            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
-            if_modified_since=test_datetime)
+        block_list = [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')]
+        self.bs.put_block_list(self.container_name, 'blob1', block_list, if_modified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
         blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
         self.assertEqual(blob.content, b'AAABBBCCC')
 
@@ -1513,12 +1420,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                          datetime.timedelta(minutes=15))
 
         # Act
-        resp = self.bs.put_block_list(
-            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
-            if_unmodified_since=test_datetime)
+        block_list = [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')]
+        self.bs.put_block_list(self.container_name, 'blob1', block_list, if_unmodified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
         blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
         self.assertEqual(blob.content, b'AAABBBCCC')
 
@@ -1552,12 +1457,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         etag = self.bs.get_blob_properties(self.container_name, 'blob1').properties.etag
 
         # Act
-        resp = self.bs.put_block_list(
-            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
-            if_match=etag)
+        block_list = [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')]
+        self.bs.put_block_list(self.container_name, 'blob1', block_list, if_match=etag)
 
         # Assert
-        self.assertIsNone(resp)
         blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
         self.assertEqual(blob.content, b'AAABBBCCC')
 
@@ -1588,12 +1491,10 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         self.bs.put_block(self.container_name, 'blob1', b'CCC', '3')
 
         # Act
-        resp = self.bs.put_block_list(
-            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
-            if_none_match='0x111111111111111')
+        block_list = [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')]
+        self.bs.put_block_list(self.container_name, 'blob1', block_list, if_none_match='0x111111111111111')
 
         # Assert
-        self.assertIsNone(resp)
         blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1')
         self.assertEqual(blob.content, b'AAABBBCCC')
 
@@ -1609,9 +1510,8 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.bs.put_block_list(
-            self.container_name, 'blob1', [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')],
-                if_none_match=etag)
+            block_list = [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')]
+            self.bs.put_block_list(self.container_name, 'blob1', block_list, if_none_match=etag)
 
         # Assert
 
@@ -1625,11 +1525,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         data = b'abcdefghijklmnop' * 32
 
         # Act
-        resp = self.pbs.update_page(self.container_name, 'blob1', data, 0, 511,
-                                 if_modified_since=test_datetime)
+        self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, if_modified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
 
     @record
     def test_update_page_with_if_modified_fail(self):
@@ -1642,8 +1540,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.pbs.update_page(self.container_name, 'blob1', data, 0, 511,
-                                 if_modified_since=test_datetime)
+            self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, if_modified_since=test_datetime)
 
         # Assert
 
@@ -1657,11 +1554,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         data = b'abcdefghijklmnop' * 32
 
         # Act
-        resp = self.pbs.update_page(self.container_name, 'blob1', data, 0, 511,
-                                    if_unmodified_since=test_datetime)
+        self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, if_unmodified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
 
     @record
     def test_update_page_with_if_unmodified_fail(self):
@@ -1674,8 +1569,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.pbs.update_page( self.container_name, 'blob1', data, 0, 511, 
-                                 if_unmodified_since=test_datetime)
+            self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, if_unmodified_since=test_datetime)
 
         # Assert
 
@@ -1688,11 +1582,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         etag = self.bs.get_blob_properties(self.container_name, 'blob1').properties.etag
 
         # Act
-        resp = self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, 
-                                    if_match=etag)
+        self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, if_match=etag)
 
         # Assert
-        self.assertIsNone(resp)
 
     @record
     def test_update_page_with_if_match_fail(self):
@@ -1703,8 +1595,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.pbs.update_page(self.container_name, 'blob1', data, 0, 511,
-                                 if_match='0x111111111111111')
+            self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, if_match='0x111111111111111')
 
         # Assert
 
@@ -1716,11 +1607,9 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
         data = b'abcdefghijklmnop' * 32
 
         # Act
-        resp = self.pbs.update_page(self.container_name, 'blob1', data, 0, 511,
-                                    if_none_match='0x111111111111111')
+        self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, if_none_match='0x111111111111111')
 
         # Assert
-        self.assertIsNone(resp)
 
     @record
     def test_update_page_with_if_none_match_fail(self):
@@ -1732,8 +1621,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
 
         # Act
         with self.assertRaises(AzureHttpError):
-            self.pbs.update_page(self.container_name, 'blob1', data, 0, 511,
-                                 if_none_match=etag)
+            self.pbs.update_page(self.container_name, 'blob1', data, 0, 511, if_none_match=etag)
 
         # Assert
 

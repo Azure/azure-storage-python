@@ -96,9 +96,11 @@ class StoragePageBlobTest(StorageTestCase):
         blob_name = self._get_blob_reference()
 
         # Act
-        self.bs.create_blob(self.container_name, blob_name, 1024)
+        resp = self.bs.create_blob(self.container_name, blob_name, 1024)
 
         # Assert
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
         self.bs.exists(self.container_name, blob_name)
 
     def test_create_blob_with_metadata(self):
@@ -128,7 +130,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertEqual(blob.content, data)
 
     @record
-    def test_update_page_update(self):
+    def test_update_page(self):
         # Arrange
         blob_name = self._create_blob()
 
@@ -137,6 +139,9 @@ class StoragePageBlobTest(StorageTestCase):
         resp = self.bs.update_page(self.container_name, blob_name, data, 0, 511)
 
         # Assert
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+        self.assertIsNotNone(resp.sequence_number)
         self.assertBlobEqual(self.container_name, blob_name, data)
 
     @record
@@ -145,9 +150,12 @@ class StoragePageBlobTest(StorageTestCase):
         blob_name = self._create_blob()
 
         # Act
-        self.bs.clear_page(self.container_name, blob_name, 0, 511)
+        resp = self.bs.clear_page(self.container_name, blob_name, 0, 511)
 
         # Assert
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+        self.assertIsNotNone(resp.sequence_number)
         self.assertBlobEqual(self.container_name, blob_name, b'\x00' * 512)
 
     @record
@@ -311,10 +319,13 @@ class StoragePageBlobTest(StorageTestCase):
         blob_name = self._create_blob(1024)
         
         # Act
-        self.bs.resize(self.container_name, blob_name, 512)
-        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+        resp = self.bs.resize(self.container_name, blob_name, 512)
 
-        #Assert
+        # Assert
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+        self.assertIsNotNone(resp.sequence_number)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
         self.assertIsInstance(blob, Blob)
         self.assertEqual(blob.properties.content_length, 512)
 
@@ -324,10 +335,13 @@ class StoragePageBlobTest(StorageTestCase):
         blob_name = self._create_blob()
         
         # Act
-        self.bs.set_sequence_number(self.container_name, blob_name, SequenceNumberAction.Update, 6)
-        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+        resp = self.bs.set_sequence_number(self.container_name, blob_name, SequenceNumberAction.Update, 6)     
 
         #Assert
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+        self.assertIsNotNone(resp.sequence_number)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
         self.assertIsInstance(blob, Blob)
         self.assertEqual(blob.properties.page_blob_sequence_number, 6)
 

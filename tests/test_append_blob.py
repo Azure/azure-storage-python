@@ -134,6 +134,8 @@ class StorageAppendBlobTest(StorageTestCase):
                                         u'block {0}'.format(i).encode('utf-8'))          
             self.assertEqual(resp.append_offset, 7 * i)
             self.assertEqual(resp.committed_block_count, i + 1)
+            self.assertIsNotNone(resp.etag)
+            self.assertIsNotNone(resp.last_modified)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, b'block 0block 1block 2block 3block 4')
