@@ -289,10 +289,11 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._create_container()
 
         # Act
-        resp = self.bs.set_container_metadata(container_name, metadata)
+        props = self.bs.set_container_metadata(container_name, metadata)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsNotNone(props.etag)
+        self.assertIsNotNone(props.last_modified)
         md = self.bs.get_container_metadata(container_name)
         self.assertDictEqual(md, metadata)
 
@@ -304,10 +305,9 @@ class StorageContainerTest(StorageTestCase):
         lease_id = self.bs.acquire_container_lease(container_name)
 
         # Act
-        resp = self.bs.set_container_metadata(container_name, metadata, lease_id)
+        self.bs.set_container_metadata(container_name, metadata, lease_id)
 
         # Assert
-        self.assertIsNone(resp)
         md = self.bs.get_container_metadata(container_name)
         self.assertDictEqual(md, metadata)
 
