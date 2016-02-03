@@ -33,6 +33,7 @@ from tests.testcase import (
 #------------------------------------------------------------------------------
 TEST_BLOB_PREFIX = 'blob'
 FILE_PATH = 'blob_input.temp.dat'
+LARGE_BLOB_SIZE = 64 * 1024 + 1
 #------------------------------------------------------------------------------
 
 class StorageBlockBlobTest(StorageTestCase):
@@ -49,8 +50,8 @@ class StorageBlockBlobTest(StorageTestCase):
         # test chunking functionality by reducing the threshold
         # for chunking and the size of each chunk, otherwise
         # the tests would take too long to execute
-        self.bs._BLOB_MAX_DATA_SIZE = 64 * 1024
-        self.bs._BLOB_MAX_CHUNK_DATA_SIZE = 4 * 1024
+        self.bs.MAX_BLOCK_SIZE = 4 * 1024
+        self.bs.MAX_SINGLE_PUT_SIZE = 64 * 1024
 
     def tearDown(self):
         if not self.is_playback():
@@ -243,7 +244,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_from_bytes_blob_with_lease_id(self):
         # Arrange
         blob_name = self._create_blob()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         lease_id = self.bs.acquire_blob_lease(self.container_name, blob_name)
 
         # Act
@@ -257,7 +258,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_metadata(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         metadata = {'hello': 'world', 'number': '42'}
 
         # Act
@@ -271,7 +272,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_progress(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         progress = []
@@ -283,13 +284,13 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_upload_progress(len(data), self.bs.MAX_BLOCK_SIZE, progress)
 
     @record
     def test_create_blob_from_bytes_with_index(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 3)
@@ -301,7 +302,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_index_and_count(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 3, 5)
@@ -313,7 +314,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_index_and_count_and_properties(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         content_settings=ContentSettings(
@@ -334,7 +335,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         self.bs.create_blob_from_bytes(self.container_name, blob_name, data, max_connections=5)
@@ -350,7 +351,7 @@ class StorageBlockBlobTest(StorageTestCase):
         
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         content_settings=ContentSettings(
@@ -373,7 +374,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         progress = []
@@ -386,13 +387,13 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_upload_progress(len(data), self.bs.MAX_BLOCK_SIZE, progress)
 
     @record
     def test_create_blob_from_bytes_parallel_with_index_and_count(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         index = 33
         blob_size = len(data) - 66
 
@@ -407,7 +408,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_path(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -424,7 +425,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -442,7 +443,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -457,13 +458,13 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_upload_progress(len(data), self.bs.MAX_BLOCK_SIZE, progress)
 
     @record
     def test_create_blob_from_path_parallel_with_properties(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -483,7 +484,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_chunked_upload(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -501,7 +502,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -516,7 +517,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_non_seekable_chunked_upload_known_size(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         blob_size = len(data) - 66
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
@@ -533,7 +534,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_non_seekable_chunked_upload_unknown_size(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -553,7 +554,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -571,7 +572,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_with_progress_chunked_upload(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -586,7 +587,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, unknown_size=True)
+        self.assert_upload_progress(len(data), self.bs.MAX_BLOCK_SIZE, progress, unknown_size=True)
 
     def test_create_blob_from_stream_with_progress_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
@@ -595,7 +596,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -611,13 +612,13 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress, unknown_size=True)
+        self.assert_upload_progress(len(data), self.bs.MAX_BLOCK_SIZE, progress, unknown_size=True)
 
     @record
     def test_create_blob_from_stream_chunked_upload_with_count(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -636,7 +637,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -653,7 +654,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_chunked_upload_with_count_and_properties(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -676,7 +677,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_chunked_upload_with_properties(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -738,13 +739,13 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
-        self.assert_upload_progress(len(data), self.bs._BLOB_MAX_CHUNK_DATA_SIZE, progress)
+        self.assert_upload_progress(len(data), self.bs.MAX_BLOCK_SIZE, progress)
 
     @record
     def test_create_blob_from_text_chunked_upload(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_text_data(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_text_data(LARGE_BLOB_SIZE)
         encoded_data = data.encode('utf-8')
 
         # Act
@@ -760,7 +761,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_text_data(self.bs._BLOB_MAX_DATA_SIZE + 1)
+        data = self.get_random_text_data(LARGE_BLOB_SIZE)
         encoded_data = data.encode('utf-8')
 
         # Act

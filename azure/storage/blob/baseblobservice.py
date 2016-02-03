@@ -94,8 +94,8 @@ class BaseBlobService(_StorageClient):
     '''
 
     __metaclass__ = ABCMeta
-    _BLOB_MAX_DATA_SIZE = 64 * 1024 * 1024
-    _BLOB_MAX_CHUNK_DATA_SIZE = 4 * 1024 * 1024
+    MAX_SINGLE_GET_SIZE = 64 * 1024 * 1024
+    MAX_CHUNK_GET_SIZE = 4 * 1024 * 1024
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
@@ -1519,13 +1519,13 @@ class BaseBlobService(_StorageClient):
             blob_size = blob.properties.content_length
 
             # If blob size is large, use parallel download
-            if blob_size >= self._BLOB_MAX_DATA_SIZE:
+            if blob_size >= self.MAX_SINGLE_GET_SIZE:
                 _download_blob_chunks(
                     self,
                     container_name,
                     blob_name,
                     blob_size,
-                    self._BLOB_MAX_CHUNK_DATA_SIZE,
+                    self.MAX_CHUNK_GET_SIZE,
                     start_range,
                     end_range,
                     stream,

@@ -59,6 +59,9 @@ else:
 
 class BlockBlobService(BaseBlobService):
 
+    MAX_SINGLE_PUT_SIZE = 64 * 1024 * 1024
+    MAX_BLOCK_SIZE = 4 * 1024 * 1024
+
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
                  custom_domain=None, request_session=None, connection_string=None):
@@ -451,7 +454,7 @@ class BlockBlobService(BaseBlobService):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
 
-        if count and count < self._BLOB_MAX_DATA_SIZE:
+        if count and count < self.MAX_SINGLE_PUT_SIZE:
             if progress_callback:
                 progress_callback(0, count)
 
@@ -477,7 +480,7 @@ class BlockBlobService(BaseBlobService):
                 container_name=container_name,
                 blob_name=blob_name,
                 blob_size=count,
-                block_size=self._BLOB_MAX_CHUNK_DATA_SIZE,
+                block_size=self.MAX_BLOCK_SIZE,
                 stream=stream,
                 max_connections=max_connections,
                 max_retries=max_retries,

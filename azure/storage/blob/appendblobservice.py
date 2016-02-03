@@ -54,6 +54,8 @@ else:
 
 class AppendBlobService(BaseBlobService):
 
+    MAX_BLOCK_SIZE = 4 * 1024 * 1024
+
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
                  custom_domain=None, request_session=None, connection_string=None):
@@ -458,7 +460,7 @@ class AppendBlobService(BaseBlobService):
             container_name=container_name,
             blob_name=blob_name,
             blob_size=count,
-            block_size=self._BLOB_MAX_CHUNK_DATA_SIZE,
+            block_size=self.MAX_BLOCK_SIZE,
             stream=stream,
             max_connections=1, # upload not easily parallelizable
             max_retries=max_retries,
