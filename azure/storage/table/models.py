@@ -21,20 +21,42 @@ from ._error import (
 )
 
 class AzureBatchValidationError(AzureException):
+    '''
+    Indicates that a batch operation cannot proceed due to invalid input.
 
-    '''Indicates that a batch operation cannot proceed due to invalid input'''
-
+    :ivar str message: 
+        A detailed error message indicating the reason for the failure. 
+    '''
 
 class AzureBatchOperationError(AzureHttpError):
 
-    '''Indicates that a batch operation failed'''
+    '''
+    Indicates that a batch operation failed.
+    
+    :ivar str message: 
+        A detailed error message indicating the index of the batch 
+        request which failed and the reason for the failure. For example, 
+        '0:One of the request inputs is out of range.' indicates the 0th batch 
+        request failed as one of its property values was out of range.
+    :ivar int status_code: 
+        The HTTP status code of the batch request. For example, 400.
+    :ivar str batch_code: 
+        The batch status code. For example, 'OutOfRangeInput'.
+    '''
 
     def __init__(self, message, status_code, batch_code):
         super(AzureBatchOperationError, self).__init__(message, status_code)
         self.code = batch_code
 
 class Entity(dict):
-    ''' Entity class. The attributes of entity will be created dynamically. '''
+    '''
+    An entity object. Can be accessed as a dict or as an obj. The attributes of 
+    the entity will be created dynamically. For example, the following are both 
+    valid::
+        entity = Entity()
+        entity.a = 'b'
+        entity['x'] = 'y'
+    '''
 
     def __getattr__(self, name):
         try:
@@ -55,16 +77,34 @@ class Entity(dict):
 
 
 class EntityProperty(object):
-    ''' Entity property. contains type and value.  '''
+    '''
+    An entity property. Used to explicitly set :class:`~EdmType` when necessary. 
+    
+    Values which require explicit typing are GUID, INT32, and BINARY. Other EdmTypes
+    may be explicitly create as EntityProperty objects but need not be. For example, 
+    the below with both create STRING typed properties on the entity::
+        entity = Entity()
+        entity.a = 'b'
+        entity.x = EntityProperty(EdmType.STRING, 'y')
+    '''
 
     def __init__(self, type=None, value=None):
+        '''
+        Represents an Azure Table. Returned by list_tables.
+
+        :param str type: The type of the property.
+        :param EdmType value: The value of the property.
+        '''
         self.type = type
         self.value = value
 
 
 class Table(object):
-    ''' Only for IntelliSense and telling user the return type. '''
+    '''
+    Represents an Azure Table. Returned by list_tables.
 
+    :ivar str name: The name of the table.
+    '''
     pass
 
 
@@ -73,46 +113,72 @@ class TablePayloadFormat(object):
     Specifies the accepted content type of the response payload. More information
     can be found here: https://msdn.microsoft.com/en-us/library/azure/dn535600.aspx
     '''
-
-    '''Returns no type information for the entity properties.'''
+   
     JSON_NO_METADATA = 'application/json;odata=nometadata'
-
-    '''Returns minimal type information for the entity properties.'''
+    '''Returns no type information for the entity properties.'''
+    
     JSON_MINIMAL_METADATA = 'application/json;odata=minimalmetadata'
-
-    '''Returns minimal type information for the entity properties plus some extra odata properties.'''
+    '''Returns minimal type information for the entity properties.'''
+    
     JSON_FULL_METADATA = 'application/json;odata=fullmetadata'
+    '''Returns minimal type information for the entity properties plus some extra odata properties.'''
 
 
 class EdmType(object):
+    '''
+    Used by :class:`~.EntityProperty` to represent the type of the entity property 
+    to be stored by the Table service.
+    '''
+
     BINARY = 'Edm.Binary'
+    ''' Represents byte data. Must be specified. '''
+
     INT64 = 'Edm.Int64'
+    ''' Represents a number between -(2^31) and 2^31. This is the default type for Python numbers. '''
+
     GUID = 'Edm.Guid'
+    ''' Represents a GUID. Must be specified. '''
+
     DATETIME = 'Edm.DateTime'
+    ''' Represents a date. This type will be inferred for Python datetime objects. '''
+
     STRING = 'Edm.String'
+    ''' Represents a string. This type will be inferred for Python strings. '''
+
     INT32 = 'Edm.Int32'
+    ''' Represents a number between -(2^15) and 2^15. Must be specified or numbers will default to INT64. '''
+
     DOUBLE = 'Edm.Double'
+    ''' Represents a double. This type will be inferred for Python floating point numbers. '''
+
     BOOLEAN = 'Edm.Boolean'
+    ''' Represents a boolean. This type will be inferred for Python bools. '''
 
 
 class TablePermissions(object):
-
     '''
-    TablePermissions class to be used with `azure.storage.table.TableService.generate_table_shared_access_signature`
-    method and for the AccessPolicies used with `azure.storage.table.TableService.set_table_acl`. 
+    TablePermissions class to be used with the :func:`~azure.storage.table.tableservice.TableService.generate_table_shared_access_signature`
+    method and for the AccessPolicies used with :func:`~azure.storage.table.tableservice.TableService.set_table_acl`.
 
-    :param bool query:
-        Get entities and query entities.
-    :param bool add:
-        Add entities. Add and Update permissions are required for upsert operations.
-    :param bool update:
-        Update entities. Add and Update permissions are required for upsert operations.
-    :param bool delete: 
-        Delete entities.
-    :param str _str: 
-        A string representing the permissions.
+    :ivar TablePermissions TablePermissions.QUERY: Get entities and query entities.
+    :ivar TablePermissions TablePermissions.ADD: Add entities.
+    :ivar TablePermissions TablePermissions.UPDATE: Update entities.
+    :ivar TablePermissions TablePermissions.DELETE: Delete entities.
     '''
+
     def __init__(self, query=False, add=False, update=False, delete=False, _str=None):
+        '''
+        :param bool query:
+            Get entities and query entities.
+        :param bool add:
+            Add entities. Add and Update permissions are required for upsert operations.
+        :param bool update:
+            Update entities. Add and Update permissions are required for upsert operations.
+        :param bool delete: 
+            Delete entities.
+        :param str _str: 
+            A string representing the permissions.
+        '''
         if not _str:
             _str = ''
         self.query = query or ('r' in _str)
@@ -132,14 +198,7 @@ class TablePermissions(object):
                 ('u' if self.update else '') +
                 ('d' if self.delete else ''))
 
-''' Get entities and query entities. '''
 TablePermissions.QUERY = TablePermissions(query=True)
-
-''' Add entities. '''
 TablePermissions.ADD = TablePermissions(add=True)
-
-''' Update entities. '''
 TablePermissions.UPDATE = TablePermissions(update=True)
-
-''' Delete entities. '''
 TablePermissions.DELETE = TablePermissions(delete=True)

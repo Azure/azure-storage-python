@@ -29,15 +29,14 @@ class Queue(object):
     ''' 
     Queue class.
      
-    :ivar name: 
+    :ivar str name: 
         The name of the queue.
-    :vartype name: str
     :ivar metadata: 
         A dict containing name-value pairs associated with the queue as metadata.
         This var is set to None unless the include=metadata param was included 
         for the list queues operation. If this parameter was specified but the 
         queue has no metadata, metadata will be set to an empty dictionary.
-    :vartype metadata: dict
+    :vartype metadata: dict mapping str to str
     '''
 
     def __init__(self):
@@ -46,40 +45,32 @@ class Queue(object):
 
 
 class QueueMessage(object):
-
     ''' 
     Queue message class. 
 
-    :ivar id: 
+    :ivar str id: 
         A GUID value assigned to the message by the Queue service that 
         identifies the message in the queue. This value may be used together 
         with the value of pop_receipt to delete a message from the queue after 
         it has been retrieved with the get messages operation. 
-    :vartype id: str
-    :ivar insertion_time: 
+    :ivar date insertion_time: 
         A UTC date value representing the time the messages was inserted.
-    :vartype insertion_time: date
-    :ivar expiration_time: 
+    :ivar date expiration_time: 
         A UTC date value representing the time the message expires.
-    :vartype expiration_time: date
-    :ivar dequeue_count: 
+    :ivar int dequeue_count: 
         Begins with a value of 1 the first time the message is dequeued. This 
         value is incremented each time the message is subsequently dequeued.
-    :vartype dequeue_count: int
-    :ivar content: 
+    :ivar obj content: 
         The message content. Type is determined by the decode_function set on 
         the service. Default is str.
-    :vartype message: obj
-    :ivar pop_receipt: 
+    :ivar str pop_receipt: 
         A receipt str which can be used together with the message_id element to 
         delete a message from the queue after it has been retrieved with the get 
         messages operation. Only returned by get messages operations. Set to 
         None for peek messages.
-    :vartype pop_receipt: str
-    :ivar time_next_visible: 
+    :ivar date time_next_visible: 
         A UTC date value representing the time the message will next be visible. 
         Only returned by get messages operations. Set to None for peek messages.
-    :vartype time_next_visible: date
     '''
 
     def __init__(self):
@@ -102,11 +93,25 @@ class QueueMessageFormat:
 
     @staticmethod
     def text_base64encode(data):
+        '''
+        Base64 encode unicode text.
+        
+        :param str data: String to encode.
+        :return: Base64 encoded string.
+        :rtype: str
+        '''
         _validate_message_type_text(data)
         return b64encode(data.encode('utf-8')).decode('utf-8')
      
     @staticmethod
-    def text_base64decode(data):    
+    def text_base64decode(data):   
+        '''
+        Base64 decode to unicode text.
+        
+        :param str data: String data to decode to unicode.
+        :return: Base64 decoded string.
+        :rtype: str
+        ''' 
         try:
             return b64decode(data.encode('utf-8')).decode('utf-8')
         except (ValueError, TypeError):
@@ -115,11 +120,25 @@ class QueueMessageFormat:
 
     @staticmethod
     def binary_base64encode(data):
+        '''
+        Base64 encode byte strings.
+        
+        :param str data: Binary string to encode.
+        :return: Base64 encoded data.
+        :rtype: str
+        '''
         _validate_message_type_bytes(data)
         return b64encode(data).decode('utf-8')
      
     @staticmethod
     def binary_base64decode(data):
+        '''
+        Base64 decode to byte string.
+        
+        :param str data: Data to decode to a byte string.
+        :return: Base64 decoded data.
+        :rtype: str
+        ''' 
         try:
             return b64decode(data.encode('utf-8'))
         except (ValueError, TypeError):
@@ -128,41 +147,80 @@ class QueueMessageFormat:
 
     @staticmethod
     def text_xmlencode(data):
+        ''' 
+        XML encode unicode text.
+
+        :param str data: Unicode string to encode
+        :return: XML encoded data.
+        :rtype: str
+        '''
         _validate_message_type_text(data)
         return xml_escape(data)
        
     @staticmethod 
     def text_xmldecode(data):
+        ''' 
+        XML decode to unicode text.
+
+        :param str data: Data to decode to unicode.
+        :return: XML decoded data.
+        :rtype: str
+        '''
         return xml_unescape(data)
 
     @staticmethod
     def noencode(data):
+        ''' 
+        Do no encoding. 
+
+        :param str data: Data.
+        :return: The data passed in is returned unmodified.
+        :rtype: str
+        '''
         return data
         
     @staticmethod
     def nodecode(data):
+        '''
+        Do no decoding.
+        
+        :param str data: Data.
+        :return: The data passed in is returned unmodified.
+        :rtype: str        
+        '''
         return data
 
 
 class QueuePermissions(object):
 
     '''
-    QueuePermissions class to be used with `azure.storage.queue.QueueService.generate_queue_shared_access_signature`
-    method and for the AccessPolicies used with `azure.storage.queue.QueueService.set_queue_acl`. 
+    QueuePermissions class to be used with :func:`~azure.storage.queue.queueservice.QueueService.generate_queue_shared_access_signature`
+    method and for the AccessPolicies used with :func:`~azure.storage.queue.queueservice.QueueService.set_queue_acl`. 
 
-    :param bool read:
-        Read metadata and properties, including message count. Peek at messages.
-    :param bool add:
+    :ivar QueuePermissions QueuePermissions.READ: 
+        Read metadata and properties, including message count. Peek at messages. 
+    :ivar QueuePermissions QueuePermissions.ADD: 
         Add messages to the queue.
-    :param bool update:
+    :ivar QueuePermissions QueuePermissions.UPDATE:
         Update messages in the queue. Note: Use the Process permission with 
         Update so you can first get the message you want to update.
-    :param bool process: 
-        Get and delete messages from the queue.
-    :param str _str: 
-        A string representing the permissions.
+    :ivar QueuePermissions QueuePermissions.PROCESS: Delete entities.
+        Get and delete messages from the queue. 
     '''
     def __init__(self, read=False, add=False, update=False, process=False, _str=None):
+        '''
+        :param bool read:
+            Read metadata and properties, including message count. Peek at messages.
+        :param bool add:
+            Add messages to the queue.
+        :param bool update:
+            Update messages in the queue. Note: Use the Process permission with 
+            Update so you can first get the message you want to update.
+        :param bool process: 
+            Get and delete messages from the queue.
+        :param str _str: 
+            A string representing the permissions.
+        '''
         if not _str:
             _str = ''
         self.read = read or ('r' in _str)
@@ -182,17 +240,7 @@ class QueuePermissions(object):
                 ('u' if self.update else '') +
                 ('p' if self.process else ''))
 
-''' Read metadata and properties, including message count. Peek at messages. '''
 QueuePermissions.READ = QueuePermissions(read=True)
-
-''' Add messages to the queue. '''
 QueuePermissions.ADD = QueuePermissions(add=True)
-
-''' 
-Update messages in the queue. Note: Use the Process permission with 
-Update so you can first get the message you want to update.
-'''
 QueuePermissions.UPDATE = QueuePermissions(update=True)
-
-''' Get and delete messages from the queue. '''
 QueuePermissions.PROCESS = QueuePermissions(process=True)

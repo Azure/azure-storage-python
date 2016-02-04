@@ -83,22 +83,27 @@ class QueueService(_StorageClient):
     '''
     This is the main class managing queue resources.
 
-    :ivar encode_function: A function used to encode queue messages. Takes as 
-    a parameter the data passed to the put_message API and returns the encoded 
-    message. Defaults to take text and xml encode, but bytes and other 
-    encodings can be used. For example, base64 may be preferable for developing 
-    across multiple Azure Storage libraries in different languages. See the 
-    `.QueueMessageFormat` class for xml, base64 and no encoding methods as well 
-    as binary equivalents.
-    :vartype encode_function: function(data)
-    :ivar decode_function: A function used to encode decode messages. Takes as 
-    a parameter the data returned by the get_messages and peek_messages APIs and 
-    returns the decoded message. Defaults to return text and xml decode, but 
-    bytes and other decodings can be used. For example, base64 may be preferable 
-    for developing across multiple Azure Storage libraries in different languages. 
-    See the `.QueueMessageFormat` class for xml, base64 and no decoding methods 
-    as well as binary equivalents.
-    :vartype decode_function: function(data)
+    The Queue service stores messages. A queue can contain an unlimited number of 
+    messages, each of which can be up to 64KB in size. Messages are generally added 
+    to the end of the queue and retrieved from the front of the queue, although 
+    first in, first out (FIFO) behavior is not guaranteed.
+
+    :ivar function(data) encode_function: 
+        A function used to encode queue messages. Takes as 
+        a parameter the data passed to the put_message API and returns the encoded 
+        message. Defaults to take text and xml encode, but bytes and other 
+        encodings can be used. For example, base64 may be preferable for developing 
+        across multiple Azure Storage libraries in different languages. See the 
+        :class:`~azure.storage.queue.models.QueueMessageFormat` for xml, base64 and 
+        no encoding methods as well as binary equivalents.
+    :ivar function(data) decode_function: 
+        A function used to encode decode messages. Takes as 
+        a parameter the data returned by the get_messages and peek_messages APIs and 
+        returns the decoded message. Defaults to return text and xml decode, but 
+        bytes and other decodings can be used. For example, base64 may be preferable 
+        for developing across multiple Azure Storage libraries in different languages. 
+        See the :class:`~azure.storage.queue.models.QueueMessageFormat` for xml, base64 
+        and no decoding methods as well as binary equivalents.
     '''
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
@@ -165,9 +170,9 @@ class QueueService(_StorageClient):
         Generates a shared access signature for the queue service.
         Use the returned signature with the sas_token parameter of QueueService.
 
-        :param azure.storage.models.ResourceTypes resource_types:
+        :param ResourceTypes resource_types:
             Specifies the resource types that are accessible with the account SAS.
-        :param azure.storage.models.AccountPermissions permission:
+        :param AccountPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
@@ -195,9 +200,10 @@ class QueueService(_StorageClient):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+        :return: A Shared Access Signature (sas) token.
+        :rtype: str
         '''
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
@@ -217,15 +223,13 @@ class QueueService(_StorageClient):
         Use the returned signature with the sas_token parameter of QueueService.
 
         :param str queue_name:
-            Name of queue.
-        :param str permission:
+            The name of the queue to create a SAS token for.
+        :param QueuePermissions permission:
             The permissions associated with the shared access signature. The 
-            user is restricted to operations allowed by the permissions.
-            Permissions must be ordered read, add, update, process.
+            user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
             which contains this field. This field must be omitted if it has been 
             specified in an associated stored access policy.
-            See :class:`.QueueSharedAccessPermissions`
         :param expiry:
             The time at which the shared access signature becomes invalid. 
             Required unless an id is given referencing a stored access policy 
@@ -249,12 +253,13 @@ class QueueService(_StorageClient):
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
             or address range specified on the SAS token, the request is not authenticated.
-            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
+            For example, specifying sip='168.1.5.65' or sip='168.1.5.60-168.1.5.70' on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+        :return: A Shared Access Signature (sas) token.
+        :rtype: str
         '''
         _validate_not_none('queue_name', queue_name)
         _validate_not_none('self.account_name', self.account_name)
@@ -273,11 +278,13 @@ class QueueService(_StorageClient):
 
     def get_queue_service_properties(self, timeout=None):
         '''
-        Gets the properties of a storage account's Queue Service, including
-        Azure Storage Analytics.
+        Gets the properties of a storage account's Queue service, including
+        logging, analytics and CORS rules.
 
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: The queue service properties.
+        :rtype: :class:`~azure.storage.models.ServiceProperties`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -292,28 +299,75 @@ class QueueService(_StorageClient):
 
         return _convert_xml_to_service_properties(response.body)
 
+    def set_queue_service_properties(self, logging=None, hour_metrics=None, 
+                                    minute_metrics=None, cors=None, timeout=None):
+        '''
+        Sets the properties of a storage account's Queue service, including
+        Azure Storage Analytics. If an element (ex Logging) is left as None, the 
+        existing settings on the service for that functionality are preserved. 
+        For more information on Azure Storage Analytics, see 
+        https://msdn.microsoft.com/en-us/library/azure/hh343270.aspx.
+
+        :param Logging logging:
+            The logging settings provide request logs.
+        :param Metrics hour_metrics:
+            The hour metrics settings provide a summary of request 
+            statistics grouped by API in hourly aggregates for blobs.
+        :param Metrics minute_metrics:
+            The minute metrics settings provide request statistics 
+            for each minute for blobs.
+        :param cors:
+            You can include up to five CorsRule elements in the 
+            list. If an empty list is specified, all CORS rules will be deleted, 
+            and CORS will be disabled for the service. For detailed information 
+            about CORS rules and evaluation logic, see 
+            https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx.
+        :type cors: list of :class:`~azure.storage.models.CorsRule`
+        :param int timeout:
+            The server timeout, expressed in seconds.
+        '''
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host = self._get_host()
+        request.path = _get_path()
+        request.query = [
+            ('restype', 'service'),
+            ('comp', 'properties'),
+            ('timeout', _int_or_none(timeout)),
+        ]
+        request.body = _get_request_body(
+            _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
+        self._perform_request(request)
+
     def list_queues(self, prefix=None, marker=None, max_results=None,
                     include_metadata=False, timeout=None):
         '''
-        Lists all of the queues in a given storage account.
+        Returns a generator to list the queues. The generator will lazily follow 
+        the continuation tokens returned by the service and stop when all queues 
+        have been returned or max_results is reached.
+
+        If max_results is specified and the account has more than that number of 
+        queues, the generator will have a populated next_marker field once it 
+        finishes. This marker can be used to create a new generator if more 
+        results are desired.
 
         :param str prefix:
             Filters the results to return only queues with names that begin
             with the specified prefix.
         :param str marker:
-            A string value that identifies the portion of the list
-            to be returned with the next list operation. The operation returns
-            a next_marker value within the response body if the list returned was
-            not complete. The marker value may then be used in a subsequent
-            call to request the next set of list items. The marker value is
-            opaque to the client.
+            An opaque continuation token. This value can be retrieved from the 
+            next_marker field of a previous generator object if max_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
         :param int max_results:
-            Specifies the maximum number of queues to return. If maxresults is
-            not specified, the server will return up to 5,000 items.
+            The maximum number of queues to return.
         :param bool include_metadata:
             Specifies that container metadata be returned in the response.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds. This function may make multiple 
+            calls to the service in which case the timeout value specified will be 
+            applied to each individual call.
         '''
         include = 'metadata' if include_metadata else None
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
@@ -325,26 +379,28 @@ class QueueService(_StorageClient):
     def _list_queues(self, prefix=None, marker=None, max_results=None,
                     include=None, timeout=None):
         '''
-        Lists all of the queues in a given storage account.
+        Returns a list of queues under the specified account. Makes a single list 
+        request to the service. Used internally by the list_queues method.
 
         :param str prefix:
             Filters the results to return only queues with names that begin
             with the specified prefix.
         :param str marker:
-            A string value that identifies the portion of the list to be
-            returned with the next list operation. The operation returns a
-            NextMarker element within the response body if the list returned
+            A token which identifies the portion of the query to be
+            returned with the next query operation. The operation returns a
+            next_marker element within the response body if the list returned
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
             queues. The marker value is opaque to the client.
         :param int max_results:
-            Specifies the maximum number of queues to return. If maxresults is
-            not specified, the server will return up to 5,000 items.
+            The maximum number of queues to return. A single list request may 
+            return up to 1000 queues and potentially a continuation token which 
+            should be followed to get additional resutls.
         :param str include:
             Include this parameter to specify that the container's
             metadata be returned as part of the response body.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -362,20 +418,30 @@ class QueueService(_StorageClient):
 
         return _convert_xml_to_queues(response)
 
-    def create_queue(self, queue_name, metadata=None,
-                     fail_on_exist=False, timeout=None):
+    def create_queue(self, queue_name, metadata=None, fail_on_exist=False, timeout=None):
         '''
         Creates a queue under the given account.
 
         :param str queue_name:
-            name of the queue.
-        :param dict metadata:
-            A dict containing name-value pairs to associate with the
-            queue as metadata.
+            The name of the queue to create. A queue name must be from 3 through 
+            63 characters long and may only contain lowercase letters, numbers, 
+            and the dash (-) character. The first and last letters in the queue 
+            must be alphanumeric. The dash (-) character cannot be the first or 
+            last character. Consecutive dash characters are not permitted in the 
+            queue name.
+        :param metadata:
+            A dict containing name-value pairs to associate with the queue as 
+            metadata. Note that metadata names preserve the case with which they 
+            were created, but are case-insensitive when set or read. 
+        :type metadata: a dict mapping str to str 
         :param bool fail_on_exist:
-            Specify whether throw exception when queue exists.
+            Specifies whether to throw an exception if the queue already exists.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return:
+            A boolean indicating whether the queue was created. If fail_on_exist 
+            was set to True, this will throw instead of returning false.
+        :rtype: bool
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -402,14 +468,26 @@ class QueueService(_StorageClient):
 
     def delete_queue(self, queue_name, fail_not_exist=False, timeout=None):
         '''
-        Permanently deletes the specified queue.
+        Deletes the specified queue and any messages it contains.
+
+        When a queue is successfully deleted, it is immediately marked for deletion 
+        and is no longer accessible to clients. The queue is later removed from 
+        the Queue service during garbage collection.
+
+        Note that deleting a queue is likely to take at least 40 seconds to complete. 
+        If an operation is attempted against the queue while it was being deleted, 
+        an :class:`AzureConflictHttpError` will be thrown.
 
         :param str queue_name:
-            Name of the queue.
+            The name of the queue to delete.
         :param bool fail_not_exist:
-            Specify whether throw exception when queue doesn't exist.
+            Specifies whether to throw an exception if the queue doesn't exist.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return:
+            A boolean indicating whether the queue was deleted. If fail_not_exist 
+            was set to True, this will throw instead of returning false.
+        :rtype: bool
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -431,12 +509,17 @@ class QueueService(_StorageClient):
     def get_queue_metadata(self, queue_name, timeout=None):
         '''
         Retrieves user-defined metadata and queue properties on the specified
-        queue. Metadata is associated with the queue as name-values pairs.
+        queue. Metadata is associated with the queue as name-value pairs.
 
         :param str queue_name:
-            Name of the queue.
+            The name of an existing queue.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return:
+            A dictionary representing the queue metadata with an 
+            approximate_message_count int property on the dict estimating the 
+            number of messages in the queue.
+        :rtype: a dict mapping str to str
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -457,12 +540,12 @@ class QueueService(_StorageClient):
         associated with the queue as name-value pairs.
 
         :param str queue_name:
-            Name of the queue.
+            The name of an existing queue.
         :param dict metadata:
             A dict containing name-value pairs to associate with the
             queue as metadata.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -481,9 +564,11 @@ class QueueService(_StorageClient):
         Returns a boolean indicating whether the queue exists.
 
         :param str queue_name:
-            Name of queue to check for existence.
+            The name of queue to check for existence.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: A boolean indicating whether the queue exists.
+        :rtype: bool
         '''
         try:
             self.get_queue_metadata(queue_name, timeout=timeout)
@@ -498,11 +583,11 @@ class QueueService(_StorageClient):
         queue that may be used with Shared Access Signatures.
 
         :param str queue_name:
-            Name of existing queue.
+            The name of an existing queue.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         :return: A dictionary of access policies associated with the queue.
-        :rtype: dict of str to :class:`azure.storage.models.AccessPolicy`:
+        :rtype: dict of str to :class:`~azure.storage.models.AccessPolicy`
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -519,18 +604,29 @@ class QueueService(_StorageClient):
 
     def set_queue_acl(self, queue_name, signed_identifiers=None, timeout=None):
         '''
-        Sets stored access policies for the queue that may be used with
-        Shared Access Signatures.
+        Sets stored access policies for the queue that may be used with Shared 
+        Access Signatures. 
+        
+        When you set permissions for a queue, the existing permissions are replaced. 
+        To update the queue’s permissions, call :func:`~get_queue_acl` to fetch 
+        all access policies associated with the queue, modify the access policy 
+        that you wish to change, and then call this function with the complete 
+        set of data to perform the update.
+
+        When you establish a stored access policy on a queue, it may take up to 
+        30 seconds to take effect. During this interval, a shared access signature 
+        that is associated with the stored access policy will throw an 
+        :class:`AzureHttpError` until the access policy becomes active.
 
         :param str queue_name:
-            Name of existing queue.
+            The name of an existing queue.
         :param signed_identifiers:
             A dictionary of access policies to associate with the queue. The 
-            dictionary may contain up to 5 elements. An empty dictionary  
+            dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`azure.storage.models.AccessPolicy`:
+        :type signed_identifiers: dict of str to :class:`~azure.storage.models.AccessPolicy`
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -548,21 +644,26 @@ class QueueService(_StorageClient):
     def put_message(self, queue_name, content, visibility_timeout=None,
                     time_to_live=None, timeout=None):
         '''
-        Adds a new message to the back of the message queue. A visibility
-        timeout can also be specified to make the message invisible until the
-        visibility timeout expires. A message must be in a format that can be
-        included in an XML request with UTF-8 encoding. The encoded message can
-        be up to 64KB in size.
+        Adds a new message to the back of the message queue. 
+
+        The visibility timeout specifies the time that the message will be 
+        invisible. After the timeout expires, the message will become visible. 
+        If a visibility timeout is not specified, the default value of 0 is used.
+
+        The message time-to-live specifies how long a message will remain in the 
+        queue. The message will be deleted from the queue when the time-to-live 
+        period expires.
 
         :param str queue_name:
-            Name of the queue.
+            The name of the queue to put the message into.
         :param obj content:
             Message content. Allowed type is determined by the encode_function 
-            set on the service. Default is str.
+            set on the service. Default is str. The encoded message can be up to 
+            64KB in size.
         :param int visibility_timeout:
             If not specified, the default value is 0. Specifies the
             new visibility timeout value, in seconds, relative to server time.
-            The new value must be larger than or equal to 0, and cannot be
+            The value must be larger than or equal to 0, and cannot be
             larger than 7 days. The visibility timeout of a message cannot be
             set to a value later than the expiry time. visibility_timeout
             should be set to a value smaller than the time-to-live value.
@@ -571,7 +672,7 @@ class QueueService(_StorageClient):
             seconds. The maximum time-to-live allowed is 7 days. If this
             parameter is omitted, the default time-to-live is 7 days.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         _validate_not_none('content', content)
@@ -592,8 +693,14 @@ class QueueService(_StorageClient):
         '''
         Retrieves one or more messages from the front of the queue.
 
+        When a message is retrieved from the queue, the response includes the message 
+        content and a pop_receipt value, which is required to delete the message. 
+        The message is not automatically deleted from the queue, but after it has 
+        been retrieved, it is not visible to other clients for the time interval 
+        specified by the visibility_timeout parameter.
+
         :param str queue_name:
-            Name of the queue.
+            The name of the queue to get messages from.
         :param int num_messages:
             A nonzero integer value that specifies the number of
             messages to retrieve from the queue, up to a maximum of 32. If
@@ -602,14 +709,12 @@ class QueueService(_StorageClient):
         :param int visibility_timeout:
             Specifies the new visibility timeout value, in seconds, relative
             to server time. The new value must be larger than or equal to 1
-            second, and cannot be larger than 7 days, or larger than 2 hours
-            on REST protocol versions prior to version 2011-08-18. The
-            visibility timeout of a message can be set to a value later than
-            the expiry time.
+            second, and cannot be larger than 7 days. The visibility timeout of 
+            a message can be set to a value later than the expiry time.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
-        :return: A list of QueueMessage objects.
-        :rtype: list of `azure.storage.queue.models.QueueMessage`s
+            The server timeout, expressed in seconds.
+        :return: A list of :class:`~azure.storage.queue.models.QueueMessage` objects.
+        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -630,16 +735,27 @@ class QueueService(_StorageClient):
         Retrieves one or more messages from the front of the queue, but does
         not alter the visibility of the message.
 
+        Only messages that are visible may be retrieved. When a message is retrieved 
+        for the first time with a call to get_messages, its dequeue_count property 
+        is set to 1. If it is not deleted and is subsequently retrieved again, the 
+        dequeue_count property is incremented. The client may use this value to 
+        determine how many times a message has been retrieved. Note that a call 
+        to peek_messages does not increment the value of DequeueCount, but returns 
+        this value for the client to read.
+
         :param str queue_name:
-            Name of the queue.
+            The name of the queue to peek messages from.
         :param int num_messages:
             A nonzero integer value that specifies the number of
             messages to peek from the queue, up to a maximum of 32. By default,
             a single message is peeked from the queue with this operation.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
-        :return: A list of QueueMessage objects.
-        :rtype: list of `azure.storage.queue.models.QueueMessage`s
+            The server timeout, expressed in seconds.
+        :return: 
+            A list of :class:`~azure.storage.queue.models.QueueMessage` objects. Note that 
+            time_next_visible and pop_receipt will not be populated as peek does 
+            not pop the message and can only retrieve already visible messages.
+        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -658,15 +774,25 @@ class QueueService(_StorageClient):
         '''
         Deletes the specified message.
 
+        Normally after a client retrieves a message with the get_messages operation, 
+        the client is expected to process and delete the message. To delete the 
+        message, you must have two items of data: id and pop_receipt. The 
+        id is returned from the previous get_messages operation. The 
+        pop_receipt is returned from the most recent :func:`~get_messages` or 
+        :func:`~update_message` operation. In order for the delete_message operation 
+        to succeed, the pop_receipt specified on the request must match the 
+        pop_receipt returned from the :func:`~get_messages` or :func:`~update_message` 
+        operation. 
+
         :param str queue_name:
-            Name of the queue.
+            The name of the queue from which to delete the message.
         :param str message_id:
-            Message to delete.
+            The message id identifying the message to delete.
         :param str pop_receipt:
             A valid pop receipt value returned from an earlier call
-            to the Get Messages or Update Message operation.
+            to the :func:`~get_messages` or :func:`~update_message`.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         _validate_not_none('message_id', message_id)
@@ -685,9 +811,9 @@ class QueueService(_StorageClient):
         Deletes all messages from the specified queue.
 
         :param str queue_name:
-            Name of the queue.
+            The name of the queue whose messages to clear.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -703,13 +829,21 @@ class QueueService(_StorageClient):
         Updates the visibility timeout of a message. You can also use this
         operation to update the contents of a message.
 
+        This operation can be used to continually extend the invisibility of a 
+        queue message. This functionality can be useful if you want a worker role 
+        to “lease” a queue message. For example, if a worker role calls get_messages 
+        and recognizes that it needs more time to process a message, it can 
+        continually extend the message’s invisibility until it is processed. If 
+        the worker role were to fail during processing, eventually the message 
+        would become visible again and another worker role could process it.
+
         :param str queue_name:
-            Name of the queue.
+            The name of the queue containing the message to update.
         :param str message_id:
-            Message to update.
+            The message id identifying the message to update.
         :param str pop_receipt:
             A valid pop receipt value returned from an earlier call
-            to the Get Messages or Update Message operation.
+            to the :func:`~get_messages` or :func:`~update_message` operation.
         :param int visibility_timeout:
             Specifies the new visibility timeout value, in seconds,
             relative to server time. The new value must be larger than or equal
@@ -720,7 +854,11 @@ class QueueService(_StorageClient):
             Message content. Allowed type is determined by the encode_function 
             set on the service. Default is str.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: 
+            A list of :class:`~azure.storage.queue.models.QueueMessage` objects. Note that 
+            only time_next_visible and pop_receipt will be populated.
+        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
         _validate_not_none('queue_name', queue_name)
         _validate_not_none('message_id', message_id)
@@ -741,39 +879,3 @@ class QueueService(_StorageClient):
 
         response = self._perform_request(request)
         return _parse_queue_message_from_headers(response)
-
-    def set_queue_service_properties(self, logging=None, hour_metrics=None, 
-                                    minute_metrics=None, cors=None, timeout=None):
-        '''
-        Sets the properties of a storage account's Queue service, including
-        Azure Storage Analytics. If an element (ex Logging) is left as None, the 
-        existing settings on the service for that functionality are preserved.
-
-        :param azure.storage.models.Logging logging:
-            Groups the Azure Analytics Logging settings.
-        :param azure.storage.models.Metrics hour_metrics:
-            The hour metrics settings provide a summary of request 
-            statistics grouped by API in hourly aggregates for blobs.
-        :param azure.storage.models.Metrics minute_metrics:
-            The minute metrics settings provide request statistics 
-            for each minute for blobs.
-        :param cors:
-            You can include up to five CorsRule elements in the 
-            list. If an empty list is specified, all CORS rules will be deleted, 
-            and CORS will be disabled for the service.
-        :type cors: list of :class:`azure.storage.models.CorsRule`
-        :param int timeout:
-            The timeout parameter is expressed in seconds.
-        '''
-        request = HTTPRequest()
-        request.method = 'PUT'
-        request.host = self._get_host()
-        request.path = _get_path()
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),
-        ]
-        request.body = _get_request_body(
-            _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
-        self._perform_request(request)
