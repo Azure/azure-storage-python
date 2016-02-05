@@ -88,7 +88,15 @@ from .tablebatch import TableBatch
 class TableService(_StorageClient):
 
     '''
-    This is the main class managing Table resources.
+    This is the main class managing Azure Table resources.
+
+    The Azure Table service offers structured storage in the form of tables. Tables 
+    store data as collections of entities. Entities are similar to rows. An entity 
+    has a primary key and a set of properties. A property is a name, typed-value pair, 
+    similar to a column. The Table service does not enforce any schema for tables, 
+    so two entities in the same table may have different sets of properties. Developers 
+    may choose to enforce a schema on the client side. A table may contain any number 
+    of entities.
     '''
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
@@ -153,9 +161,9 @@ class TableService(_StorageClient):
         Generates a shared access signature for the table service.
         Use the returned signature with the sas_token parameter of TableService.
 
-        :param azure.storage.models.ResourceTypes resource_types:
+        :param ResourceTypes resource_types:
             Specifies the resource types that are accessible with the account SAS.
-        :param azure.storage.models.AccountPermissions permission:
+        :param AccountPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
@@ -183,9 +191,10 @@ class TableService(_StorageClient):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+        :return: A Shared Access Signature (sas) token.
+        :rtype: str
         '''
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
@@ -205,15 +214,13 @@ class TableService(_StorageClient):
         Use the returned signature with the sas_token parameter of TableService.
 
         :param str table_name:
-            Name of table.
-        :param azure.storage.table.models.TablePermissions permission:
+            The name of the table to create a SAS token for.
+        :param TablePermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
             which contains this field. This field must be omitted if it has been 
             specified in an associated stored access policy.
-            Permissions must be ordered query, add, update, delete if passed as 
-            a string.
         :param expiry:
             The time at which the shared access signature becomes invalid. 
             Required unless an id is given referencing a stored access policy 
@@ -231,18 +238,16 @@ class TableService(_StorageClient):
         :type start: date or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
-            stored access policy. To create a stored access policy, use 
-            set_blob_service_properties.
+            stored access policy. To create a stored access policy, use :func:`~set_table_acl`.
         :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
             or address range specified on the SAS token, the request is not authenticated.
-            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
+            For example, specifying sip='168.1.5.65' or sip='168.1.5.60-168.1.5.70' on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
         :param str start_pk
             The minimum partition key accessible with this shared access 
             signature. startpk must accompany startrk. Key values are inclusive. 
@@ -262,6 +267,8 @@ class TableService(_StorageClient):
             The maximum row key accessible with this shared access signature. 
             endpk must accompany endrk. Key values are inclusive. If omitted, 
             there is no upper bound on the table entities that can be accessed.
+        :return: A Shared Access Signature (sas) token.
+        :rtype: str
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('self.account_name', self.account_name)
@@ -285,10 +292,12 @@ class TableService(_StorageClient):
     def get_table_service_properties(self, timeout=None):
         '''
         Gets the properties of a storage account's Table service, including
-        Azure Storage Analytics.
+        logging, analytics and CORS rules.
 
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: The table service properties.
+        :rtype: :class:`~azure.storage.models.ServiceProperties`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -308,23 +317,27 @@ class TableService(_StorageClient):
         '''
         Sets the properties of a storage account's Table service, including
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
-        existing settings on the service for that functionality are preserved.
+        existing settings on the service for that functionality are preserved. 
+        For more information on Azure Storage Analytics, see 
+        https://msdn.microsoft.com/en-us/library/azure/hh343270.aspx.
 
-        :param azure.storage.models.Logging logging:
-            Groups the Azure Analytics Logging settings.
-        :param azure.storage.models.Metrics hour_metrics:
+        :param Logging logging:
+            The logging settings provide request logs.
+        :param Metrics hour_metrics:
             The hour metrics settings provide a summary of request 
             statistics grouped by API in hourly aggregates for blobs.
-        :param azure.storage.models.Metrics minute_metrics:
+        :param Metrics minute_metrics:
             The minute metrics settings provide request statistics 
             for each minute for blobs.
         :param cors:
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 
-            and CORS will be disabled for the service.
-        :type cors: list of :class:`azure.storage.models.CorsRule`
+            and CORS will be disabled for the service. For detailed information 
+            about CORS rules and evaluation logic, see 
+            https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx.
+        :type cors: list of :class:`~azure.storage.models.CorsRule`
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         request = HTTPRequest()
         request.method = 'PUT'
@@ -342,20 +355,30 @@ class TableService(_StorageClient):
 
     def list_tables(self, max_results=None, marker=None, timeout=None):
         '''
-        Returns a list of tables under the specified account.
+        Returns a generator to list the tables. The generator will lazily follow 
+        the continuation tokens returned by the service and stop when all tables 
+        have been returned or max_results is reached.
+
+        If max_results is specified and the account has more than that number of 
+        tables, the generator will have a populated next_marker field once it 
+        finishes. This marker can be used to create a new generator if more 
+        results are desired.
 
         :param int max_results:
-            Optional. Maximum number of tables to return.
+            The maximum number of tables to return.
         :param marker:
-            A string value that identifies the portion of the query to be
-            returned with the next query operation. The operation returns a
-            next_marker element within the response body if the list returned
-            was not complete. This value may then be used as a query parameter
-            in a subsequent call to request the next portion of the list of
-            queues. The marker value is opaque to the client.
-        :type marker: a dict mapping str to str
+            An opaque continuation object. This value can be retrieved from the 
+            next_marker field of a previous generator object if max_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
+        :type marker: obj
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds. This function may make multiple 
+            calls to the service in which case the timeout value specified will be 
+            applied to each individual call.
+        :return: A generator which produces :class:`~azure.storage.models.table.Table` objects.
+        :rtype: :class:`~azure.storage.models.ListGenerator`:
         '''
         kwargs = {'max_results': max_results, 'marker': marker, 'timeout': timeout}
         resp = self._list_tables(**kwargs)
@@ -364,20 +387,25 @@ class TableService(_StorageClient):
 
     def _list_tables(self, max_results=None, marker=None, timeout=None):
         '''
-        Returns a list of tables under the specified account.
+        Returns a list of tables under the specified account. Makes a single list 
+        request to the service. Used internally by the list_tables method.
 
         :param int max_results:
-            Optional. Maximum number of tables to return.
+            The maximum number of tables to return. A single list request may 
+            return up to 1000 tables and potentially a continuation token which 
+            should be followed to get additional resutls.
         :param marker:
-            A string value that identifies the portion of the query to be
+            A dictionary which identifies the portion of the query to be
             returned with the next query operation. The operation returns a
             next_marker element within the response body if the list returned
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
             queues. The marker value is opaque to the client.
-        :type marker: a dict mapping str to str
+        :type marker: obj
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: A list of tables, potentially with a next_marker property.
+        :rtype: list of :class:`~azure.storage.models.table.Table`:  
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -398,13 +426,17 @@ class TableService(_StorageClient):
         Creates a new table in the storage account.
 
         :param str table_name:
-            Name of the table to create. Table name may contain only
+            The name of the table to create. The table name may contain only
             alphanumeric characters and cannot begin with a numeric character.
             It is case-insensitive and must be from 3 to 63 characters long.
         :param bool fail_on_exist:
-            Specify whether throw exception when table exists.
+            Specifies whether to throw an exception if the table already exists.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return:
+            A boolean indicating whether the table was created. If fail_on_exist 
+            was set to True, this will throw instead of returning false.
+        :rtype: bool
         '''
         _validate_not_none('table', table_name)
         request = HTTPRequest()
@@ -433,9 +465,11 @@ class TableService(_StorageClient):
         Returns a boolean indicating whether the table exists.
 
         :param str table_name:
-            Name of table to check for existence.
+            The name of table to check for existence.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: A boolean indicating whether the table exists.
+        :rtype: bool
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
@@ -454,12 +488,26 @@ class TableService(_StorageClient):
 
     def delete_table(self, table_name, fail_not_exist=False, timeout=None):
         '''
+        Deletes the specified table and any data it contains.
+
+        When a table is successfully deleted, it is immediately marked for deletion 
+        and is no longer accessible to clients. The table is later removed from 
+        the Table service during garbage collection.
+
+        Note that deleting a table is likely to take at least 40 seconds to complete. 
+        If an operation is attempted against the table while it was being deleted, 
+        an :class:`AzureConflictHttpError` will be thrown.
+
         :param str table_name:
-            Name of the table to delete.
+            The name of the table to delete.
         :param bool fail_not_exist:
-            Specify whether throw exception when table doesn't exist.
+            Specifies whether to throw an exception if the table doesn't exist.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return:
+            A boolean indicating whether the table was deleted. If fail_not_exist 
+            was set to True, this will throw instead of returning false.
+        :rtype: bool
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
@@ -486,11 +534,11 @@ class TableService(_StorageClient):
         table that may be used with Shared Access Signatures.
 
         :param str table_name:
-            Name of existing table.
+            The name of an existing table.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         :return: A dictionary of access policies associated with the table.
-        :rtype: dict of str to :class:`azure.storage.models.AccessPolicy`:
+        :rtype: dict of str to :class:`~azure.storage.models.AccessPolicy`:
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
@@ -507,18 +555,29 @@ class TableService(_StorageClient):
 
     def set_table_acl(self, table_name, signed_identifiers=None, timeout=None):
         '''
-        Sets stored access policies for the table that may be used with
-        Shared Access Signatures.
+        Sets stored access policies for the table that may be used with Shared 
+        Access Signatures. 
+        
+        When you set permissions for a table, the existing permissions are replaced. 
+        To update the table’s permissions, call :func:`~get_table_acl` to fetch 
+        all access policies associated with the table, modify the access policy 
+        that you wish to change, and then call this function with the complete 
+        set of data to perform the update.
+
+        When you establish a stored access policy on a table, it may take up to 
+        30 seconds to take effect. During this interval, a shared access signature 
+        that is associated with the stored access policy will throw an 
+        :class:`AzureHttpError` until the access policy becomes active.
 
         :param str table_name:
-            Name of existing table.
+            The name of an existing table.
         :param signed_identifiers:
             A dictionary of access policies to associate with the table. The 
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`azure.storage.models.AccessPolicy`:
+        :type signed_identifiers: dict of str to :class:`~azure.storage.models.AccessPolicy`
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
@@ -538,36 +597,50 @@ class TableService(_StorageClient):
                        marker=None, accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
                        property_resolver=None, timeout=None):
         '''
-        Get entities in a table; includes the $filter and $select options.
+        Returns a generator to list the entities in the table specified. The 
+        generator will lazily follow the continuation tokens returned by the 
+        service and stop when all entities have been returned or max_results is 
+        reached.
+
+        If max_results is specified and the account has more than that number of 
+        entities, the generator will have a populated next_marker field once it 
+        finishes. This marker can be used to create a new generator if more 
+        results are desired.
 
         :param str table_name:
-            Table to query.
+            The name of the table to query.
         :param str filter:
-            Optional. Filter as described at
-            http://msdn.microsoft.com/en-us/library/windowsazure/dd894031.aspx
+            Returns only entities that satisfy the specified filter. Note that 
+            no more than 15 discrete comparisons are permitted within a $filter 
+            string. See http://msdn.microsoft.com/en-us/library/windowsazure/dd894031.aspx 
+            for more information on constructing filters.
         :param str select:
-            Optional. Property names to select from the entities.
-        :param str top:
-            Optional. Maximum number of entities to return.
+            Returns only the desired properties of an entity from the set.
+        :param int top:
+            The maximum number of entities to return.
         :param marker:
-            A value that identifies the portion of the list
-            to be returned with the next list operation. The operation returns
-            a next_marker value within the response body if the list returned was
-            not complete. The marker value may then be used in a subsequent
-            call to request the next set of list items. The marker value is
-            opaque to the client.
-        :type marker: a dict mapping str to str
-        :param accept:
-            Required. Specifies the accepted content type of the response 
-            payload. See TablePayloadFormat for possible values.
-        :type accept: select an option from :class:`azure.storage.table.models.TablePayloadFormat`
+            An opaque continuation object. This value can be retrieved from the 
+            next_marker field of a previous generator object if max_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
+        :type marker: obj
+        :param str accept:
+            Specifies the accepted content type of the response payload. See 
+            :class:`~azure.storage.table.models.TablePayloadFormat` for possible 
+            values.
         :param property_resolver:
-            Optional. A function which given the partition key, row key, 
-            property name, property value, and the property EdmType if 
-            returned by the service, returns the EdmType of the property.
+            A function which given the partition key, row key, property name, 
+            property value, and the property EdmType if returned by the service, 
+            returns the EdmType of the property. Generally used if accept is set 
+            to JSON_NO_METADATA.
         :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds. This function may make multiple 
+            calls to the service in which case the timeout value specified will be 
+            applied to each individual call.
+        :return: A generator which produces :class:`~azure.storage.table.models.Entity` objects.
+        :rtype: :class:`~azure.storage.models.ListGenerator`
         '''
         args = (table_name,)
         kwargs = {'filter': filter, 'select': select, 'max_results': top, 'marker': marker, 
@@ -580,36 +653,42 @@ class TableService(_StorageClient):
                        marker=None, accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
                        property_resolver=None, timeout=None):
         '''
-        Get entities in a table; includes the $filter and $select options.
+        Returns a list of entities under the specified table. Makes a single list 
+        request to the service. Used internally by the query_entities method.
 
         :param str table_name:
-            Table to query.
+            The name of the table to query.
         :param str filter:
-            Optional. Filter as described at
-            http://msdn.microsoft.com/en-us/library/windowsazure/dd894031.aspx
+            Returns only entities that satisfy the specified filter. Note that 
+            no more than 15 discrete comparisons are permitted within a $filter 
+            string. See http://msdn.microsoft.com/en-us/library/windowsazure/dd894031.aspx 
+            for more information on constructing filters.
         :param str select:
-            Optional. Property names to select from the entities.
-        :param str top:
-            Optional. Maximum number of entities to return.
+            Returns only the desired properties of an entity from the set.
+        :param int top:
+            The maximum number of entities to return.
         :param marker:
-            A value that identifies the portion of the query
-            to be returned with the next query operation. The operation returns
-            a next_marker value within the response body if the list returned was
-            not complete. The marker value may then be used in a subsequent
-            call to request the next set of query items. The marker value is
-            opaque to the client.
-        :type marker: a dict mapping str to str
+            A dictionary which identifies the portion of the query to be
+            returned with the next query operation. The operation returns a
+            next_marker element within the response body if the list returned
+            was not complete. This value may then be used as a query parameter
+            in a subsequent call to request the next portion of the list of
+            queues. The marker value is opaque to the client.
+        :type marker: obj
         :param str accept:
-            Required. Specifies the accepted content type of the response 
-            payload. See TablePayloadFormat for possible values.
-        :type accept: select an option from :class:`azure.storage.table.models.TablePayloadFormat`
+            Specifies the accepted content type of the response payload. See 
+            :class:`~azure.storage.table.models.TablePayloadFormat` for possible 
+            values.
         :param property_resolver:
-            Optional. A function which given the partition key, row key, 
-            property name, property value, and the property EdmType if 
-            returned by the service, returns the EdmType of the property.
+            A function which given the partition key, row key, property name, 
+            property value, and the property EdmType if returned by the service, 
+            returns the EdmType of the property. Generally used if accept is set 
+            to JSON_NO_METADATA.
         :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: A list of entities, potentially with a next_marker property.
+        :rtype: list of :class:`~azure.storage.table.models.Entity`
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('accept', accept)
@@ -635,14 +714,16 @@ class TableService(_StorageClient):
 
     def commit_batch(self, table_name, batch, timeout=None):
         '''
-        Commits a batch request.
+        Commits a :class:`~azure.storage.table.TableBatch` request.
 
         :param str table_name:
-            Table name.
-        :param azure.storage.table.tablebatch.TableBatch batch:
-            A Batch object.
+            The name of the table to commit the batch to.
+        :param TableBatch batch:
+            The batch to commit.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: A list of the batch responses corresponding to the requests in the batch.
+        :rtype: list of response objects
         '''
         _validate_not_none('table_name', table_name)
 
@@ -674,13 +755,12 @@ class TableService(_StorageClient):
     @contextmanager
     def batch(self, table_name, timeout=None):
         '''
-        Creates a batch object which can be used as a context manager.
-        Commits the batch on exit.
+        Creates a batch object which can be used as a context manager. Commits the batch on exit.
 
         :param str table_name:
-            Table name.
+            The name of the table to commit the batch to.
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         batch = TableBatch()
         yield batch
@@ -690,27 +770,30 @@ class TableService(_StorageClient):
                    accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
                    property_resolver=None, timeout=None):
         '''
-        Get an entity in a table; includes the $select options.
+        Get an entity from the specified table. Throws if the entity does not exist.
 
         :param str table_name:
-            Table name.
+            The name of the table to get the entity from.
         :param str partition_key:
-            PartitionKey of the entity.
+            The PartitionKey of the entity.
         :param str row_key:
-            RowKey of the entity.
+            The RowKey of the entity.
         :param str select:
-            Optional. Property names to select.
-        :param accept:
-            Required. Specifies the accepted content type of the response 
-            payload. See TablePayloadFormat for possible values.
-        :type accept: select an option from :class:`azure.storage.table.models.TablePayloadFormat`
+            Returns only the desired properties of an entity from the set.
+        :param str accept:
+            Specifies the accepted content type of the response payload. See 
+            :class:`~azure.storage.table.models.TablePayloadFormat` for possible 
+            values.
         :param property_resolver:
-            Optional. A function which given the partition key, row key, 
-            property name, property value, and the property EdmType if 
-            returned by the service, returns the EdmType of the property.
+            A function which given the partition key, row key, property name, 
+            property value, and the property EdmType if returned by the service, 
+            returns the EdmType of the property. Generally used if accept is set 
+            to JSON_NO_METADATA.
         :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: The retrieved entity.
+        :rtype: :class:`~azure.storage.table.models.Entity`
         '''
         _validate_not_none('table_name', table_name)
         request = _get_entity(partition_key, row_key, select, accept)
@@ -723,16 +806,28 @@ class TableService(_StorageClient):
 
     def insert_entity(self, table_name, entity, timeout=None):
         '''
-        Inserts a new entity into a table.
+        Inserts a new entity into the table. Throws if an entity with the same 
+        PartitionKey and RowKey already exists.
+
+        When inserting an entity into a table, you must specify values for the 
+        PartitionKey and RowKey system properties. Together, these properties 
+        form the primary key and must be unique within the table. Both the 
+        PartitionKey and RowKey values must be string values; each key value may 
+        be up to 64 KB in size. If you are using an integer value for the key 
+        value, you should convert the integer to a fixed-width string, because 
+        they are canonically sorted. For example, you should convert the value 
+        1 to 0000001 to ensure proper sorting.
 
         :param str table_name:
-            Table name.
+            The name of the table to insert the entity into.
         :param entity:
-            Required. The entity object to insert. Could be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+            The entity to insert. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: The etag of the inserted entity.
+        :rtype: str
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_entity(entity)
@@ -745,17 +840,18 @@ class TableService(_StorageClient):
 
     def update_entity(self, table_name, entity, if_match='*', timeout=None):
         '''
-        Updates an existing entity in a table. The Update Entity operation
-        replaces the entire entity and can be used to remove properties.
+        Updates an existing entity in a table. Throws if the entity does not exist. 
+        The update_entity operation replaces the entire entity and can be used to 
+        remove properties.
 
         :param str table_name:
-            Table name.
+            The name of the table containing the entity to update.
         :param entity:
-            Required. The entity object to insert. Could be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+            The entity to update. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
         :param str if_match:
-            Required. The client may specify the ETag for the entity on the 
+            The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The update operation 
             will be performed only if the ETag sent by the client matches the 
@@ -763,7 +859,9 @@ class TableService(_StorageClient):
             not been modified since it was retrieved by the client. To force 
             an unconditional update, set If-Match to the wildcard character (*).
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: The etag of the entity.
+        :rtype: str
         '''
         _validate_not_none('table_name', table_name)
         request = _update_entity(entity, if_match)
@@ -776,18 +874,23 @@ class TableService(_StorageClient):
 
     def merge_entity(self, table_name, entity, if_match='*', timeout=None):
         '''
-        Updates an existing entity by updating the entity's properties. This
-        operation does not replace the existing entity as the Update Entity
-        operation does.
+        Updates an existing entity by merging the entity's properties. Throws 
+        if the entity does not exist. 
+        
+        This operation does not replace the existing entity as the update_entity
+        operation does. A property cannot be removed with merge_entity.
+        
+        Any properties with null values are ignored. All other properties will be 
+        updated or added.
 
         :param str table_name:
-            Table name.
+            The name of the table containing the entity to merge.
         :param entity:
-            Required. The entity object to insert. Can be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+            The entity to merge. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
         :param str if_match:
-            Required. The client may specify the ETag for the entity on the 
+            The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The merge operation 
             will be performed only if the ETag sent by the client matches the 
@@ -795,7 +898,9 @@ class TableService(_StorageClient):
             not been modified since it was retrieved by the client. To force 
             an unconditional merge, set If-Match to the wildcard character (*).
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: The etag of the entity.
+        :rtype: str
         '''
         _validate_not_none('table_name', table_name)
         request = _merge_entity(entity, if_match)
@@ -809,16 +914,20 @@ class TableService(_StorageClient):
     def delete_entity(self, table_name, partition_key, row_key,
                       if_match='*', timeout=None):
         '''
-        Deletes an existing entity in a table.
+        Deletes an existing entity in a table. Throws if the entity does not exist.
+
+        When an entity is successfully deleted, the entity is immediately marked 
+        for deletion and is no longer accessible to clients. The entity is later 
+        removed from the Table service during garbage collection.
 
         :param str table_name:
-            Table name.
+            The name of the table containing the entity to delete.
         :param str partition_key:
-            PartitionKey of the entity.
+            The PartitionKey of the entity.
         :param str row_key:
-            RowKey of the entity.
+            The RowKey of the entity.
         :param str if_match:
-            Required. The client may specify the ETag for the entity on the 
+            The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The delete operation 
             will be performed only if the ETag sent by the client matches the 
@@ -826,7 +935,7 @@ class TableService(_StorageClient):
             not been modified since it was retrieved by the client. To force 
             an unconditional delete, set If-Match to the wildcard character (*).
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
         request = _delete_entity(partition_key, row_key, if_match)
@@ -842,14 +951,20 @@ class TableService(_StorageClient):
         exist in the table. Because this operation can insert or update an
         entity, it is also known as an "upsert" operation.
 
+        If insert_or_replace_entity is used to replace an entity, any properties 
+        from the previous entity will be removed if the new entity does not define 
+        them.
+
         :param str table_name:
-            Table name.
+            The name of the table in which to insert or replace the entity.
         :param entity:
-            Required. The entity object to insert. Could be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+            The entity to insert or replace. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: The etag of the entity.
+        :rtype: str
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_or_replace_entity(entity)
@@ -863,17 +978,22 @@ class TableService(_StorageClient):
     def insert_or_merge_entity(self, table_name, entity, timeout=None):
         '''
         Merges an existing entity or inserts a new entity if it does not exist
-        in the table. Because this operation can insert or update an entity,
-        it is also known as an "upsert" operation.
+        in the table. 
+
+        If insert_or_merge_entity is used to merge an entity, any properties from 
+        the previous entity will be retained if the request does not define or 
+        include them.
 
         :param str table_name:
-            Table name.
+            The name of the table in which to insert or merge the entity.
         :param entity:
-            Required. The entity object to insert. Could be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+            The entity to insert or merge. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
+        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
         :param int timeout:
-            The timeout parameter is expressed in seconds.
+            The server timeout, expressed in seconds.
+        :return: The etag of the entity.
+        :rtype: str
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_or_merge_entity(entity)

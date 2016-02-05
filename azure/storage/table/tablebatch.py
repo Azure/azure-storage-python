@@ -32,27 +32,30 @@ from ._request import (
 class TableBatch(object):
 
     '''
-    This is the class that is used for batch operation for storage table
-    service. It only supports one changeset.
+    This is the class that is used for batch operation for storage table service.
+
+    The Table service supports batch transactions on entities that are in the 
+    same table and belong to the same partition group. Multiple operations are 
+    supported within a single transaction. The batch can include at most 100 
+    entities, and its total payload may be no more than 4 MB in size.
     '''
 
-    def __init__(self,):
-        '''
-        :param str table_name:
-            Table name.
-        '''
+    def __init__(self):
         self._requests = []
         self._partition_key = None
         self._row_keys = []
 
     def insert_entity(self, entity):
         '''
-        Adds an insert entity operation to the batch. 
+        Adds an insert entity operation to the batch. See 
+        :func:`~azure.storage.table.tableservice.TableService.insert_entity` for more 
+        information on inserts.
+        
         The operation will not be executed until the batch is committed.
 
         :param entity:
-            Required. The entity object to insert. Could be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
+            The entity to insert. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
         :type entity: a dict or :class:`azure.storage.table.models.Entity`
         '''
         request = _insert_entity(entity)
@@ -60,16 +63,18 @@ class TableBatch(object):
 
     def update_entity(self, entity, if_match='*'):
         '''
-        Adds an update entity operation to the batch. The Update Entity operation
-        replaces the entire entity and can be used to remove properties.
+        Adds an update entity operation to the batch. See 
+        :func:`~azure.storage.table.tableservice.TableService.update_entity` for more 
+        information on updates.
+        
         The operation will not be executed until the batch is committed.
 
         :param entity:
-            Required. The entity object to insert. Could be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
+            The entity to update. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
         :type entity: a dict or :class:`azure.storage.table.models.Entity`
         :param str if_match:
-            Required. The client may specify the ETag for the entity on the 
+            The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The update operation 
             will be performed only if the ETag sent by the client matches the 
@@ -82,16 +87,18 @@ class TableBatch(object):
 
     def merge_entity(self, entity, if_match='*'):
         '''
-        Adds a merge entity operation to the batch. This operation does not replace 
-        the existing entity as the Update Entity operation does.
+        Adds a merge entity operation to the batch. See 
+        :func:`~azure.storage.table.tableservice.TableService.merge_entity` for more 
+        information on merges.
+        
         The operation will not be executed until the batch is committed.
 
         :param entity:
-            Required. The entity object to insert. Can be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
+            The entity to merge. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
         :type entity: a dict or :class:`azure.storage.table.models.Entity`
         :param str if_match:
-            Required. The client may specify the ETag for the entity on the 
+            The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The merge operation 
             will be performed only if the ETag sent by the client matches the 
@@ -105,15 +112,18 @@ class TableBatch(object):
     def delete_entity(self, partition_key, row_key,
                       if_match='*'):
         '''
-        Adds a delete entity operation to the batch.
+        Adds a delete entity operation to the batch. See 
+        :func:`~azure.storage.table.tableservice.TableService.delete_entity` for more 
+        information on deletes.
+
         The operation will not be executed until the batch is committed.
 
         :param str partition_key:
-            PartitionKey of the entity.
+            The PartitionKey of the entity.
         :param str row_key:
-            RowKey of the entity.
+            The RowKey of the entity.
         :param str if_match:
-            Required. The client may specify the ETag for the entity on the 
+            The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
             for the purpose of optimistic concurrency. The delete operation 
             will be performed only if the ETag sent by the client matches the 
@@ -126,15 +136,15 @@ class TableBatch(object):
 
     def insert_or_replace_entity(self, entity):
         '''
-        Adds an insert or replace entity operation to the batch. This
-        replaces an existing entity or inserts a new entity if it does not
-        exist in the table. Because this operation can insert or update an
-        entity, it is also known as an "upsert" operation.
+        Adds an insert or replace entity operation to the batch. See 
+        :func:`~azure.storage.table.tableservice.TableService.insert_or_replace_entity` for more 
+        information on insert or replace operations.
+
         The operation will not be executed until the batch is committed.
 
         :param entity:
-            Required. The entity object to insert. Could be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
+            The entity to insert or replace. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
         :type entity: a dict or :class:`azure.storage.table.models.Entity`
        '''
         request = _insert_or_replace_entity(entity)
@@ -142,15 +152,15 @@ class TableBatch(object):
 
     def insert_or_merge_entity(self, entity):
         '''
-        Adds an insert or replace entity operation to the batch. This 
-        merges an existing entity or inserts a new entity if it does not exist
-        in the table. Because this operation can insert or update an entity,
-        it is also known as an "upsert" operation.
+        Adds an insert or merge entity operation to the batch. See 
+        :func:`~azure.storage.table.tableservice.TableService.insert_or_merge_entity` for more 
+        information on insert or merge operations.
+
         The operation will not be executed until the batch is committed.
 
         :param entity:
-            Required. The entity object to insert. Could be a dict format or
-            entity object. Must contain a PartitionKey and a RowKey.
+            The entity to insert or merge. Could be a dict or an entity object. 
+            Must contain a PartitionKey and a RowKey.
         :type entity: a dict or :class:`azure.storage.table.models.Entity`
         '''
         request = _insert_or_merge_entity(entity)
