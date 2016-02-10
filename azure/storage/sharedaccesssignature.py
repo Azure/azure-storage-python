@@ -23,20 +23,23 @@ from ._serialization import (
     url_quote,
     _to_utc_datetime,
 )
-from .constants import X_MS_VERSION
+from ._constants import X_MS_VERSION
 
 class SharedAccessSignature(object):
-
     '''
-    The main class used to do the signing and generating of shared access signatures.
-
-    :param str account_name:
-        The storage account name used to generate the shared access signatures.
-    :param str account_key:
-        The access key to genenerate the share access signatures.
+    Provides a factory for creating blob, queue, table, and file shares access 
+    signature tokens with a common account name and account key.  Users can either 
+    use the factory or can construct the appropriate service and use the 
+    generate_*_shared_access_signature method directly.
     '''
 
     def __init__(self, account_name, account_key):
+        '''
+        :param str account_name:
+            The storage account name used to generate the shared access signatures.
+        :param str account_key:
+            The access key to genenerate the shares access signatures.
+        '''
         self.account_name = account_name
         self.account_key = account_key
 
@@ -57,8 +60,6 @@ class SharedAccessSignature(object):
             Required unless an id is given referencing a stored access policy 
             which contains this field. This field must be omitted if it has been 
             specified in an associated stored access policy.
-            Permissions must be ordered query, add, update, delete if passed as 
-            a string.
         :param expiry:
             The time at which the shared access signature becomes invalid. 
             Required unless an id is given referencing a stored access policy 
@@ -85,25 +86,24 @@ class SharedAccessSignature(object):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
-        :param str start_pk
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+        :param str start_pk:
             The minimum partition key accessible with this shared access 
             signature. startpk must accompany startrk. Key values are inclusive. 
             If omitted, there is no lower bound on the table entities that can 
             be accessed.
-        :param str start_rk
+        :param str start_rk:
             The minimum row key accessible with this shared access signature. 
             startpk must accompany startrk. Key values are inclusive. If 
             omitted, there is no lower bound on the table entities that can be 
             accessed.
-        :param str end_pk
+        :param str end_pk:
             The maximum partition key accessible with this shared access 
             signature. endpk must accompany endrk. Key values are inclusive. If 
             omitted, there is no upper bound on the table entities that can be 
             accessed.
-        :param str end_rk
+        :param str end_rk:
             The maximum row key accessible with this shared access signature. 
             endpk must accompany endrk. Key values are inclusive. If omitted, 
             there is no upper bound on the table entities that can be accessed.
@@ -125,14 +125,13 @@ class SharedAccessSignature(object):
 
         :param str queue_name:
             Name of queue.
-        :param str permission:
+        :param QueuePermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions.
             Permissions must be ordered read, add, update, process.
             Required unless an id is given referencing a stored access policy 
             which contains this field. This field must be omitted if it has been 
             specified in an associated stored access policy.
-            See :class:`.QueueSharedAccessPermissions`
         :param expiry:
             The time at which the shared access signature becomes invalid. 
             Required unless an id is given referencing a stored access policy 
@@ -159,9 +158,8 @@ class SharedAccessSignature(object):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
         '''
         sas = _SharedAccessHelper()
         sas.add_base(permission, expiry, start, ip, protocol)
@@ -216,9 +214,8 @@ class SharedAccessSignature(object):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
         :param str cache_control:
             Response header value for Cache-Control when resource is accessed
             using this shared access signature.
@@ -292,9 +289,8 @@ class SharedAccessSignature(object):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
         :param str cache_control:
             Response header value for Cache-Control when resource is accessed
             using this shared access signature.
@@ -371,9 +367,8 @@ class SharedAccessSignature(object):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
         :param str cache_control:
             Response header value for Cache-Control when resource is accessed
             using this shared access signature.
@@ -450,9 +445,8 @@ class SharedAccessSignature(object):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
         :param str cache_control:
             Response header value for Cache-Control when resource is accessed
             using this shared access signature.
@@ -490,7 +484,7 @@ class SharedAccessSignature(object):
         :param Services services:
             Specifies the services accessible with the account SAS. You can 
             combine values to provide access to more than one service. 
-        :param ResourceType resource_type:
+        :param ResourceTypes resource_type:
             Specifies the resource types that are accessible with the account 
             SAS. You can combine values to provide access to more than one 
             resource type. 
@@ -523,9 +517,8 @@ class SharedAccessSignature(object):
             For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
             restricts the request to those IP addresses.
         :param str protocol:
-            Specifies the protocol permitted for a request made. Possible values are
-            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
-            is https,http. Note that HTTP only is not a permitted value.
+            Specifies the protocol permitted for a request made. The default value
+            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
         '''
         sas = _SharedAccessHelper()
         sas.add_base(permission, expiry, start, ip, protocol)

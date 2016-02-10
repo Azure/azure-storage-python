@@ -17,7 +17,8 @@ import sys
 import copy
 import requests
 
-from .constants import (
+from abc import ABCMeta
+from ._constants import (
     _USER_AGENT_STRING,
     _SOCKET_TIMEOUT
 )
@@ -31,16 +32,18 @@ from ._error import (
     _ERROR_STORAGE_MISSING_INFO,
 )
 
-class _StorageClient(object):
+class StorageClient(object):
 
     '''
-    This is the base class for BlobManager, TableManager, QueueManager, and FileManager.
+    This is the base class for service objects. Service objects are used to do 
+    all requests to Storage. This class cannot be instantiated directly.
     '''
+
+    __metaclass__ = ABCMeta
 
     def __init__(self, connection_params):
         '''
-        connection_params:
-            The parameters to use to construct the client.
+        :param obj connection_params: The parameters to use to construct the client.
         '''
         self.account_name = connection_params.account_name
         self.account_key = connection_params.account_key
@@ -64,11 +67,15 @@ class _StorageClient(object):
     def with_filter(self, filter):
         '''
         Returns a new service which will process requests with the specified
-        filter.  Filtering operations can include logging, automatic retrying,
-        etc...  The filter is a lambda which receives the HTTPRequest and
-        another lambda.  The filter can perform any pre-processing on the
+        filter. Filtering operations can include logging, automatic retrying,
+        etc... The filter is a lambda which receives the HTTPRequest and
+        another lambda. The filter can perform any pre-processing on the
         request, pass it off to the next lambda, and then perform any
         post-processing on the response.
+
+        :param function(request) filter: A filter function.
+        :return: A new service using the specified filter.
+        :rtype: a subclass of :class:`StorageClient`
         '''
         res = copy.deepcopy(self)
         old_filter = self._filter
@@ -83,14 +90,10 @@ class _StorageClient(object):
         '''
         Sets the proxy server host and port for the HTTP CONNECT Tunnelling.
 
-        host:
-            Address of the proxy. Ex: '192.168.0.100'
-        port:
-            Port of the proxy. Ex: 6000
-        user:
-            User for proxy authorization.
-        password:
-            Password for proxy authorization.
+        :param str host: Address of the proxy. Ex: '192.168.0.100'
+        :param int port: Port of the proxy. Ex: 6000
+        :param str user: User for proxy authorization.
+        :param str password: Password for proxy authorization.
         '''
         self._httpclient.set_proxy(host, port, user, password)
 
@@ -104,7 +107,7 @@ class _StorageClient(object):
 
     def _perform_request(self, request, encoding='utf-8'):
         '''
-        Sends the request and return response. Catches HTTPError and hand it
+        Sends the request and return response. Catches HTTPError and hands it
         to error handler
         '''
         try:

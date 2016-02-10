@@ -46,13 +46,13 @@ from .models import (
     Container,
     ContainerProperties,
 )
-from ..auth import (
+from .._auth import (
     _StorageSASAuthentication,
     _StorageSharedKeyAuthentication,
     _StorageNoAuthentication,
 )
-from ..connection import _ServiceParameters
-from ..constants import (
+from .._connection import _ServiceParameters
+from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
 )
@@ -80,14 +80,14 @@ from ._deserialization import (
 from ..sharedaccesssignature import (
     SharedAccessSignature,
 )
-from ..storageclient import _StorageClient
+from ..storageclient import StorageClient
 import sys
 if sys.version_info >= (3,):
     from io import BytesIO
 else:
     from cStringIO import StringIO as BytesIO
 
-class BaseBlobService(_StorageClient):
+class BaseBlobService(StorageClient):
 
     '''
     This is the main class managing Blob resources.

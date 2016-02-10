@@ -54,12 +54,12 @@ from ._chunking import (
     _download_file_chunks,
     _upload_file_chunks,
 )
-from ..auth import (
+from .._auth import (
     _StorageSharedKeyAuthentication,
     _StorageSASAuthentication,
 )
-from ..connection import _ServiceParameters
-from ..constants import (
+from .._connection import _ServiceParameters
+from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
     DEV_ACCOUNT_NAME,
@@ -80,7 +80,7 @@ from ._deserialization import (
 from ..sharedaccesssignature import (
     SharedAccessSignature,
 )
-from ..storageclient import _StorageClient
+from ..storageclient import StorageClient
 from os import path
 import sys
 if sys.version_info >= (3,):
@@ -88,7 +88,7 @@ if sys.version_info >= (3,):
 else:
     from cStringIO import StringIO as BytesIO
 
-class FileService(_StorageClient):
+class FileService(StorageClient):
 
     '''
     This is the main class managing File resources.

@@ -39,13 +39,11 @@ from ..models import (
     ListGenerator,
 )
 from .models import TablePayloadFormat
-from ..auth import (
+from .._auth import (
     _StorageSASAuthentication,
     _StorageTableSharedKeyAuthentication,
 )
-from ..connection import (
-    _ServiceParameters,
-)
+from .._connection import _ServiceParameters
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
@@ -66,7 +64,7 @@ from ._deserialization import (
     _parse_batch_response,
     _extract_etag,
 )
-from ..constants import (
+from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
 )
@@ -82,10 +80,10 @@ from ._request import (
 from ..sharedaccesssignature import (
     SharedAccessSignature,
 )
-from ..storageclient import _StorageClient
+from ..storageclient import StorageClient
 from .tablebatch import TableBatch
 
-class TableService(_StorageClient):
+class TableService(StorageClient):
 
     '''
     This is the main class managing Azure Table resources.
@@ -248,22 +246,22 @@ class TableService(_StorageClient):
         :param str protocol:
             Specifies the protocol permitted for a request made. The default value
             is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
-        :param str start_pk
+        :param str start_pk:
             The minimum partition key accessible with this shared access 
             signature. startpk must accompany startrk. Key values are inclusive. 
             If omitted, there is no lower bound on the table entities that can 
             be accessed.
-        :param str start_rk
+        :param str start_rk:
             The minimum row key accessible with this shared access signature. 
             startpk must accompany startrk. Key values are inclusive. If 
             omitted, there is no lower bound on the table entities that can be 
             accessed.
-        :param str end_pk
+        :param str end_pk:
             The maximum partition key accessible with this shared access 
             signature. endpk must accompany endrk. Key values are inclusive. If 
             omitted, there is no upper bound on the table entities that can be 
             accessed.
-        :param str end_rk
+        :param str end_rk:
             The maximum row key accessible with this shared access signature. 
             endpk must accompany endrk. Key values are inclusive. If omitted, 
             there is no upper bound on the table entities that can be accessed.

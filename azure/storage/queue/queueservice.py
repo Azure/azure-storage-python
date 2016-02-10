@@ -16,7 +16,7 @@ from azure.common import (
     AzureConflictHttpError,
     AzureHttpError,
 )
-from ..constants import (
+from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
 )
@@ -45,13 +45,11 @@ from ..models import (
 from .models import (
     QueueMessageFormat,
 )
-from ..auth import (
+from .._auth import (
     _StorageSASAuthentication,
     _StorageSharedKeyAuthentication,
 )
-from ..connection import (
-    _ServiceParameters,
-)
+from .._connection import _ServiceParameters
 from .._serialization import (
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
@@ -73,12 +71,12 @@ from ._deserialization import (
 from ..sharedaccesssignature import (
     SharedAccessSignature,
 )
-from ..storageclient import _StorageClient
+from ..storageclient import StorageClient
 
 
 _HTTP_RESPONSE_NO_CONTENT = 204
 
-class QueueService(_StorageClient):
+class QueueService(StorageClient):
 
     '''
     This is the main class managing queue resources.
