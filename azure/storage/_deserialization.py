@@ -25,7 +25,7 @@ from .models import (
     Metrics,
     CorsRule,
     AccessPolicy,
-    HeaderDict,
+    _HeaderDict,
     _dict,
 )
 
@@ -111,7 +111,7 @@ def _parse_response_for_dict(response):
         return None
     http_headers = ['server', 'date', 'location', 'host',
                     'via', 'proxy-connection', 'connection']
-    return_dict = HeaderDict()
+    return_dict = _HeaderDict()
     if response.headers:
         for name, value in response.headers:
             if not name.lower() in http_headers:

@@ -34,7 +34,7 @@ from ._error import (
     _general_error_handler,
     _ERROR_VALUE_SHOULD_BE_BYTES,
 )
-from .constants import (
+from ._constants import (
     X_MS_VERSION,
 )
 from .models import (

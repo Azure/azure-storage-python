@@ -42,7 +42,7 @@ from .models import (
 )
 from ..models import (
     _list,
-    HeaderDict,
+    _HeaderDict,
 )
 
 def _get_continuation_from_response_headers(response):

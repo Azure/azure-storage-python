@@ -36,7 +36,7 @@ from ._chunking import (
 from .models import (
     _BlobTypes,
 )
-from ..constants import (
+from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
 )

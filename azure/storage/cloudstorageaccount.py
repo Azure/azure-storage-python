@@ -29,7 +29,6 @@ from .models import (
 from ._error import _validate_not_none
 
 class CloudStorageAccount(object):
-
     """
     Provides a factory for creating the blob, queue, table, and file services
     with a common account name and account key or sas token.  Users can either 
@@ -37,42 +36,100 @@ class CloudStorageAccount(object):
     """
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, is_emulated=None):
+        '''
+        :param str account_name:
+            The storage account name. This is used to authenticate requests 
+            signed with an account key and to construct the storage endpoint. It 
+            is required unless a connection string is given.
+        :param str account_key:
+            The storage account key. This is used for shared key authentication. 
+        :param str sas_token:
+             A shared access signature token to use to authenticate requests 
+             instead of the account key. If account key and sas token are both 
+             specified, account key will be used to sign.
+        :param bool is_emulated:
+            Whether to use the emulator. Defaults to False. If specified, will 
+            override all other parameters besides connection string and request 
+            session.
+        '''
         self.account_name = account_name
         self.account_key = account_key
         self.sas_token = sas_token
         self.is_emulated = is_emulated
 
     def create_block_blob_service(self):
+        '''
+        Creates a BlockBlobService object with the settings specified in the 
+        CloudStorageAccount.
+
+        :return: A service object.
+        :rtype: :class:`~azure.storage.blob.blockblobservice.BlockBlobService`
+        '''
         from .blob.blockblobservice import BlockBlobService
         return BlockBlobService(self.account_name, self.account_key, 
                                 sas_token=self.sas_token,
                                 is_emulated=self.is_emulated)
 
     def create_page_blob_service(self):
+        '''
+        Creates a PageBlobService object with the settings specified in the 
+        CloudStorageAccount.
+
+        :return: A service object.
+        :rtype: :class:`~azure.storage.blob.pageblobservice.PageBlobService`
+        '''
         from .blob.pageblobservice import PageBlobService
         return PageBlobService(self.account_name, self.account_key,
                                sas_token=self.sas_token,
                                is_emulated=self.is_emulated)
 
     def create_append_blob_service(self):
+        '''
+        Creates a AppendBlobService object with the settings specified in the 
+        CloudStorageAccount.
+
+        :return: A service object.
+        :rtype: :class:`~azure.storage.blob.appendblobservice.AppendBlobService`
+        '''
         from .blob.appendblobservice import AppendBlobService
         return AppendBlobService(self.account_name, self.account_key,
                                  sas_token=self.sas_token,
                                  is_emulated=self.is_emulated)
 
     def create_table_service(self):
+        '''
+        Creates a TableService object with the settings specified in the 
+        CloudStorageAccount.
+
+        :return: A service object.
+        :rtype: :class:`~azure.storage.table.tableservice.TableService`
+        '''
         from .table.tableservice import TableService
         return TableService(self.account_name, self.account_key,
                             sas_token=self.sas_token,
                             is_emulated=self.is_emulated)
 
     def create_queue_service(self):
+        '''
+        Creates a QueueService object with the settings specified in the 
+        CloudStorageAccount.
+
+        :return: A service object.
+        :rtype: :class:`~azure.storage.queue.queueservice.QueueService`
+        '''
         from .queue.queueservice import QueueService
         return QueueService(self.account_name, self.account_key,
                             sas_token=self.sas_token,
                             is_emulated=self.is_emulated)
 
     def create_file_service(self):
+        '''
+        Creates a FileService object with the settings specified in the 
+        CloudStorageAccount.
+
+        :return: A service object.
+        :rtype: :class:`~azure.storage.file.fileservice.FileService`
+        '''
         from .file.fileservice import FileService
         return FileService(self.account_name, self.account_key,
                            sas_token=self.sas_token)
@@ -88,7 +145,7 @@ class CloudStorageAccount(object):
         :param Services services:
             Specifies the services accessible with the account SAS. You can 
             combine values to provide access to more than one service. 
-        :param ResourceType resource_type:
+        :param ResourceTypes resource_type:
             Specifies the resource types that are accessible with the account 
             SAS. You can combine values to provide access to more than one 
             resource type. 

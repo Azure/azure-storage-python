@@ -19,7 +19,7 @@ if sys.version_info >= (3,):
 else:
     from urlparse import urlparse
 
-from .constants import (
+from ._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
     DEV_ACCOUNT_NAME,

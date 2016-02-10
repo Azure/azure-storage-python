@@ -38,7 +38,7 @@ from .models import (
     _BlobTypes,
     PageBlobProperties,
 )
-from ..constants import (
+from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
 )

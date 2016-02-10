@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from .constants import (
+from ._constants import (
     __author__,
     __version__,
     X_MS_VERSION,
