@@ -361,11 +361,10 @@ class StorageShareTest(StorageTestCase):
         self.fs.create_file_from_text(share_name, None, 'file1', b'hello world')
 
         # Act
-        stats = self.fs.get_share_stats(share_name)
+        share_usage = self.fs.get_share_stats(share_name)
 
         # Assert
-        self.assertIsNotNone(stats)
-        self.assertEqual(stats.share_usage, 1)
+        self.assertEqual(share_usage, 1)
 
 
     @record

@@ -23,7 +23,6 @@ from .models import (
     File,
     FileProperties,
     Range,
-    ShareStats,
     ShareProperties,
     DirectoryProperties,
 )
@@ -212,8 +211,5 @@ def _convert_xml_to_share_stats(response):
     if response is None or response.body is None:
         return response
 
-    share_stats = ShareStats()
     share_stats_element = ETree.fromstring(response.body)
-    share_stats.share_usage = int(share_stats_element.findtext('ShareUsage'))
-
-    return share_stats
+    return int(share_stats_element.findtext('ShareUsage'))

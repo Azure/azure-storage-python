@@ -822,7 +822,7 @@ class FileService(_StorageClient):
             self._perform_request(request)
             return True
 
-    def create_directory(self, share_name, directory_name,
+    def create_directory(self, share_name, directory_name, metadata=None,
                          fail_on_exist=False, timeout=None):
         '''
         Creates a new directory under the specified share or parent directory. 
@@ -835,6 +835,10 @@ class FileService(_StorageClient):
         :param str directory_name:
             Name of directory to create, including the path to the parent 
             directory.
+        :param metadata:
+            A dict with name_value pairs to associate with the
+            share as metadata. Example:{'Category':'test'}
+        :type metadata: dict of str to str:
         :param bool fail_on_exist:
             specify whether to throw an exception when the directory exists.
             False by default.
@@ -851,6 +855,7 @@ class FileService(_StorageClient):
             ('restype', 'directory'),
             ('timeout', _int_or_none(timeout)),
         ]
+        request.headers = [('x-ms-meta-name-values', metadata)]
 
         if not fail_on_exist:
             try:
@@ -1154,8 +1159,8 @@ class FileService(_StorageClient):
 
         self._perform_request(request)
 
-    def set_file_properties(self, share_name, directory_name, 
-                            file_name, content_settings=None, timeout=None):
+    def set_file_properties(self, share_name, directory_name, file_name, 
+                            content_settings, timeout=None):
         '''
         Sets system properties on the file.
 
@@ -1172,6 +1177,7 @@ class FileService(_StorageClient):
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
+        _validate_not_none('content_settings', content_settings)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
@@ -1181,8 +1187,7 @@ class FileService(_StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = None
-        if content_settings is not None:
-            request.headers = content_settings.to_headers()
+        request.headers = content_settings.to_headers()
 
         self._perform_request(request)
 

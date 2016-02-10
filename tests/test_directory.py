@@ -68,6 +68,18 @@ class StorageDirectoryTest(StorageTestCase):
         self.assertTrue(created)
 
     @record
+    def test_create_directories_with_metadata(self):
+        # Arrange
+        metadata={'hello': 'world', 'number': '42'}
+
+        # Act
+        self.fs.create_directory(self.share_name, 'dir1', metadata=metadata)
+
+        # Assert
+        md = self.fs.get_directory_metadata(self.share_name, 'dir1')
+        self.assertDictEqual(md, metadata)
+
+    @record
     def test_create_directories_fail_on_exist(self):
         # Arrange
 

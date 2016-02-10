@@ -20,7 +20,6 @@ from .models import (
     Directory,
     DirectoryProperties,
     Range,
-    ShareStats,
     ContentSettings,
     CopyProperties,
     SharePermissions,
