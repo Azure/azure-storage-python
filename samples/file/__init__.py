@@ -12,5 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from .sas_usage import TableSasSamples
-from .table_usage import TableSamples
+from .sas_usage import FileSasSamples
+from .share_usage import ShareSamples
+from .directory_usage import DirectorySamples
+from .file_usage import FileSamples

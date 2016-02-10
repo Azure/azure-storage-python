@@ -121,13 +121,6 @@ class Range(object):
         self.start = None
         self.end = None
 
-class ShareStats(object):
-
-    ''' Share Stats. '''
-
-    def __init__(self):
-        self.share_usage = None
-
 
 class FilePermissions(object):
 
