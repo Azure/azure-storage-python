@@ -24,7 +24,7 @@ from .models import (
     CopyProperties,
     ContainerPermissions,
     BlobPermissions,
-    LeaseActions,
+    _LeaseActions,
     AppendBlockProperties,
     PageBlobProperties,
     ResourceProperties,

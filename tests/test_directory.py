@@ -86,7 +86,7 @@ class StorageDirectoryTest(StorageTestCase):
         # Act
         created = self.fs.create_directory(self.share_name, 'dir1')
         with self.assertRaises(AzureConflictHttpError):
-            self.fs.create_directory(self.share_name, 'dir1', True)
+            self.fs.create_directory(self.share_name, 'dir1', fail_on_exist=True)
 
         # Assert
         self.assertTrue(created)

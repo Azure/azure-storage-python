@@ -91,6 +91,7 @@ class ListGenerator(object):
 class RetentionPolicy(object):
 
     '''
+<<<<<<< e165056c3dcda3f2950b025eb18405a0ac2935c4
     By default, Storage Analytics will not delete any logging or metrics data. Blobs 
     and table entities will continue to be written until the shared 20TB limit is 
     reached. Once the 20TB limit is reached, Storage Analytics will stop writing 
@@ -101,6 +102,19 @@ class RetentionPolicy(object):
     requests or by setting a data retention policy. Manual requests to delete Storage 
     Analytics data are billable, but delete requests resulting from a retention policy 
     are not billable.
+=======
+    RetentionPolicy class to be used with :class:`ServiceProperties`.
+    
+    :param bool enabled: 
+        Indicates whether a retention policy is enabled for the 
+        storage service. If disabled, logging and metrics data will be retained 
+        infinitely by the service unless explicitly deleted.
+    :param int days: 
+        Required if enabled is true. Indicates the number of 
+        days that metrics or logging data should be retained. All data older 
+        than this value will be deleted. The minimum value you can specify is 1; 
+        the largest value is 365 (one year).
+>>>>>>> Update Blob inline documentation.
     '''
 
     def __init__(self, enabled=False, days=None):
@@ -126,6 +140,7 @@ class RetentionPolicy(object):
 class Logging(object):
 
     '''
+<<<<<<< e165056c3dcda3f2950b025eb18405a0ac2935c4
     Storage Analytics logs detailed information about successful and failed requests 
     to a storage service. This information can be used to monitor individual requests 
     and to diagnose issues with a storage service. Requests are logged on a best-effort 
@@ -138,6 +153,18 @@ class Logging(object):
     its contents can be deleted.
 
     For more information, see  https://msdn.microsoft.com/en-us/library/azure/hh343262.aspx
+=======
+    Logging class to be used with :class:`ServiceProperties`.
+
+    :param bool delete: 
+        Indicates whether all delete requests should be logged.
+    :param bool read: 
+        Indicates whether all read requests should be logged.
+    :param bool write: 
+        Indicates whether all write requests should be logged.
+    :param RetentionPolicy retention_policy: 
+        The retention policy for the metrics.
+>>>>>>> Update Blob inline documentation.
     '''
 
     def __init__(self, delete=False, read=False, write=False,
@@ -166,6 +193,7 @@ class Logging(object):
 class Metrics(object):
 
     ''' 
+<<<<<<< e165056c3dcda3f2950b025eb18405a0ac2935c4
     Metrics include aggregated transaction statistics and capacity data about requests 
     to a storage service. Transactions are reported at both the API operation level 
     as well as at the storage service level, and capacity is reported at the storage 
@@ -174,6 +202,18 @@ class Metrics(object):
     performance of applications that use a service.
 
     For more information, see https://msdn.microsoft.com/en-us/library/azure/hh343258.aspx
+=======
+    Metrics class to be used with :class:`ServiceProperties`.
+
+    :param bool enabled: 
+        Indicates whether metrics are enabled for 
+        the service.
+    :param bool include_apis: 
+        Required if enabled is True. Indicates whether metrics 
+        should generate summary statistics for called API operations.
+    :param RetentionPolicy retention_policy: 
+        The retention policy for the metrics.
+>>>>>>> Update Blob inline documentation.
     '''
 
     def __init__(self, enabled=False, include_apis=None,
@@ -201,6 +241,7 @@ class Metrics(object):
 class CorsRule(object):
 
     '''
+<<<<<<< e165056c3dcda3f2950b025eb18405a0ac2935c4
     CORS is an HTTP feature that enables a web application running under one domain 
     to access resources in another domain. Web browsers implement a security 
     restriction known as same-origin policy that prevents a web page from calling 
@@ -208,6 +249,33 @@ class CorsRule(object):
     (the origin domain) to call APIs in another domain. 
 
     For more information, see https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx
+=======
+    Cors Rule class to be used with :class:`ServiceProperties`.
+    
+    :param allowed_origins: 
+        A list of origin domains that will be allowed via CORS, or "*" to allow 
+        all domains. The list of must contain at least one entry. Limited to 64 
+        origin domains. Each allowed origin can have up to 256 characters.
+    :type allowed_origins: list of str
+    :param allowed_methods:
+        A list of HTTP methods that are allowed to be executed by the origin. 
+        The list of must contain at least one entry. For Azure Storage, 
+        permitted methods are DELETE, GET, HEAD, MERGE, POST, OPTIONS or PUT.
+    :type allowed_methods: list of str
+    :param int max_age_in_seconds:
+        The number of seconds that the client/browser should cache a 
+        preflight response.
+    :param exposed_headers:
+        Defaults to an empty list. A list of response headers to expose to CORS 
+        clients. Limited to 64 defined headers and two prefixed headers. Each 
+        header can be up to 256 characters.
+    :type exposed_headers: list of str
+    :param allowed_headers:
+        Defaults to an empty list. A list of headers allowed to be part of 
+        the cross-origin request. Limited to 64 defined headers and 2 prefixed 
+        headers. Each header can be up to 256 characters.
+    :type allowed_headers: list of str
+>>>>>>> Update Blob inline documentation.
     '''
 
     def __init__(self, allowed_origins, allowed_methods, max_age_in_seconds=0,
@@ -249,6 +317,7 @@ class CorsRule(object):
 
 
 class ServiceProperties(object):
+<<<<<<< e165056c3dcda3f2950b025eb18405a0ac2935c4
     ''' 
     Returned by get_*_service_properties functions. Contains the properties of a 
     storage service, including Analytics and CORS rules.
@@ -268,6 +337,9 @@ class ServiceProperties(object):
 
     For more information on CORS, see https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx
     '''
+=======
+    ''' Storage Service Properties. '''
+>>>>>>> Update Blob inline documentation.
 
     pass
 

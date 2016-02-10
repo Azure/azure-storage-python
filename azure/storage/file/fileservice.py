@@ -196,9 +196,9 @@ class FileService(StorageClient):
         Generates a shared access signature for the file service.
         Use the returned signature with the sas_token parameter of the FileService.
 
-        :param azure.storage.models.ResourceTypes resource_types:
+        :param ResourceTypes resource_types:
             Specifies the resource types that are accessible with the account SAS.
-        :param azure.storage.models.AccountPermissions permission:
+        :param AccountPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions. 
             Required unless an id is given referencing a stored access policy 
@@ -255,7 +255,7 @@ class FileService(StorageClient):
 
         :param str share_name:
             Name of share.
-        :param azure.storage.file.models.SharePermissions permission:
+        :param SharePermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions.
             Permissions must be ordered read, create, write, delete, list.
@@ -352,7 +352,7 @@ class FileService(StorageClient):
             this parameter should only be present if file_name is provided.
         :param str file_name:
             Name of file.
-        :param azure.storage.file.models.FilePermissions permission:
+        :param FilePermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions.
             Permissions must be ordered read, create, write, delete, list.
@@ -686,7 +686,7 @@ class FileService(StorageClient):
         :param str share_name:
             Name of existing share.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
             Example: {'category':'test'}
         :type metadata: a dict mapping str to str
         :param int timeout:
@@ -770,7 +770,7 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: Returns statistics related to the share.
-        :rtype: :class:`azure.storage.file.models.ShareStats`
+        :rtype: :class:`~azure.storage.file.models.ShareStats`
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -1170,7 +1170,7 @@ class FileService(StorageClient):
             The path to the directory.
         :param str file_name:
             Name of existing file.
-        :param azure.storage.file.models.ContentSettings content_settings:
+        :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set the file properties.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1187,7 +1187,7 @@ class FileService(StorageClient):
             ('timeout', _int_or_none(timeout)),
         ]
         request.headers = None
-        request.headers = content_settings.to_headers()
+        request.headers = content_settings._to_headers()
 
         self._perform_request(request)
 
@@ -1368,10 +1368,10 @@ class FileService(StorageClient):
             The path to the directory.
         :param str file_name:
             Name of file to create or update.
-        :param azure.storage.file.models.ContentSettings content_settings:
+        :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1390,7 +1390,7 @@ class FileService(StorageClient):
             ('x-ms-type', 'file')
         ]
         if content_settings is not None:
-            request.headers += content_settings.to_headers()
+            request.headers += content_settings._to_headers()
 
         self._perform_request(request)
 
@@ -1410,10 +1410,10 @@ class FileService(StorageClient):
             Name of file to create or update.
         :param str local_file_path:
             Path of the local file to upload as the file content.
-        :param azure.storage.file.models.ContentSettings content_settings:
+        :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used for setting file properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1463,10 +1463,10 @@ class FileService(StorageClient):
             Text to upload to the file.
         :param str encoding:
             Encoding to use to convert the text to bytes.
-        :param azure.storage.file.models.ContentSettings content_settings:
+        :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -1508,10 +1508,10 @@ class FileService(StorageClient):
         :param int count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        :param azure.storage.file.models.ContentSettings content_settings:
+        :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1571,10 +1571,10 @@ class FileService(StorageClient):
         :param int count:
             Number of bytes to read from the stream. This is required, a page
             file cannot be created if the count is unknown.
-        :param azure.storage.file.models.ContentSettings content_settings:
+        :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1650,10 +1650,13 @@ class FileService(StorageClient):
         :param int start_range:
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
-            This range will return bytes from the offset start up to offset end. 
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1700,10 +1703,13 @@ class FileService(StorageClient):
         :param int start_range:
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
-            This range will return bytes from the offset start up to offset end. 
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1760,10 +1766,13 @@ class FileService(StorageClient):
         :param int start_range:
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
-            This range will return bytes from the offset start up to offset end. 
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1861,10 +1870,13 @@ class FileService(StorageClient):
         :param int start_range:
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
-            This range will return bytes from the offset start up to offset end. 
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1928,10 +1940,13 @@ class FileService(StorageClient):
         :param int start_range:
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
-            This range will return bytes from the offset start up to offset end.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1990,9 +2005,13 @@ class FileService(StorageClient):
         :param int start_range:
             Start of byte range to use for updating a section of the file.
             The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int end_range:
             End of byte range to use for updating a section of the file.
             The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param str content_md5:
             An MD5 hash of the range content. This hash is used to
             verify the integrity of the range during transport. When this header
@@ -2038,9 +2057,13 @@ class FileService(StorageClient):
         :param int start_range:
             Start of byte range to use for clearing a section of the file.
             The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int end_range:
             End of byte range to use for clearing a section of the file.
             The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -2086,8 +2109,12 @@ class FileService(StorageClient):
             Name of existing file.
         :param int start_range:
             Specifies the start offset of bytes over which to list ranges.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int end_range:
             Specifies the end offset of bytes over which to list ranges.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''

@@ -58,6 +58,16 @@ else:
 
 
 class BlockBlobService(BaseBlobService):
+    '''
+    Block blobs let you upload large blobs efficiently. Block blobs are comprised
+    of blocks, each of which is identified by a block ID. You create or modify a
+    block blob by writing a set of blocks and committing them by their block IDs.
+    Each block can be a different size, up to a maximum of 4 MB, and a block blob
+    can include up to 50,000 blocks. The maximum size of a block blob is therefore
+    slightly more than 195 GB (4 MB X 50,000 blocks). If you are writing a block
+    blob that is no more than 64 MB in size, you can upload it in its entirety with
+    a single write operation; see create_blob_from_bytes. 
+    '''
 
     MAX_SINGLE_PUT_SIZE = 64 * 1024 * 1024
     MAX_BLOCK_SIZE = 4 * 1024 * 1024
@@ -124,22 +134,37 @@ class BlockBlobService(BaseBlobService):
         :param bytes blob:
             Content of blob as bytes (size < 64MB). For larger size, you
             must call put_block and put_block_list to set content of blob.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set properties on the blob.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the new Block Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -158,7 +183,7 @@ class BlockBlobService(BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match))
         ]
         if content_settings is not None:
-            request.headers += content_settings.to_headers()
+            request.headers += content_settings._to_headers()
         request.body = _get_request_body_bytes_only('blob', blob)
 
         response = self._perform_request(request)
@@ -176,8 +201,11 @@ class BlockBlobService(BaseBlobService):
         :param bytes block:
             Content of the block.
         :param str block_id:
-            A value that identifies the block. The string must be
-            less than or equal to 64 bytes in size.
+            A valid Base64 string value that identifies the block. Prior to
+            encoding, the string must be less than or equal to 64 bytes in size.
+            For a given blob, the length of the value specified for the blockid
+            parameter must be the same size for each block. Note that the Base64
+            string must be URL-encoded.
         :param int content_md5:
             An MD5 hash of the block content. This hash is used to
             verify the integrity of the blob during transport. When this
@@ -216,40 +244,61 @@ class BlockBlobService(BaseBlobService):
         if_unmodified_since=None, if_match=None, if_none_match=None, 
         timeout=None):
         '''
-        Writes a blob by specifying the list of block IDs that make up the
-        blob. In order to be written as part of a blob, a block must have been
-        successfully written to the server in a prior Put Block (REST API)
-        operation.
+        Writes a blob by specifying the list of block IDs that make up the blob.
+        In order to be written as part of a blob, a block must have been
+        successfully written to the server in a prior Put Block operation.
+
+        You can call Put Block List to update a blob by uploading only those
+        blocks that have changed, then committing the new and existing blocks
+        together. You can do this by specifying whether to commit a block from
+        the committed block list or from the uncommitted block list, or to commit
+        the most recently uploaded version of the block, whichever list it may
+        belong to.
 
         :param str container_name:
             Name of existing container.
         :param str blob_name:
             Name of existing blob.
         :param block_list:
-            A list of BlobBlock containing the block ids and block state.
-        :type block_list: list of :class:`azure.storage.blob.models.BlobBlock`
+            A list of :class:`~azure.storeage.blob.models.BlobBlock` containing the block ids and block state.
+        :type block_list: list of :class:`~azure.storage.blob.models.BlobBlock`
         :param str transactional_content_md5:
             An MD5 hash of the block content. This hash is used to
             verify the integrity of the blob during transport. When this header
             is specified, the storage service checks the hash that has arrived
             with the one that was sent.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set properties on the blob.
         :param metadata:
-            Dict containing name and value pairs.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the updated Block Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -272,7 +321,7 @@ class BlockBlobService(BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match)),
         ]
         if content_settings is not None:
-            request.headers += content_settings.to_headers()
+            request.headers += content_settings._to_headers()
         request.body = _get_request_body(
             _convert_block_list_to_xml(block_list))
 
@@ -283,7 +332,15 @@ class BlockBlobService(BaseBlobService):
                        block_list_type=None, lease_id=None, timeout=None):
         '''
         Retrieves the list of blocks that have been uploaded as part of a
-        block blob.
+        block blob. There are two block lists maintained for a blob:
+            Committed Block List:
+                The list of blocks that have been successfully committed to a
+                given blob with Put Block List.
+            Uncommitted Block List:
+                The list of blocks that have been uploaded for a blob using
+                Put Block, but that have not yet been committed. These blocks
+                are stored in Azure in association with a blob, but do not yet
+                form part of the blob.
 
         :param str container_name:
             Name of existing container.
@@ -299,6 +356,8 @@ class BlockBlobService(BaseBlobService):
             Required if the blob has an active lease.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: list committed and/or uncommitted blocks for Block Blob
+        :rtype: :class:`~azure.storage.blob.models.BlobBlockList`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -335,10 +394,10 @@ class BlockBlobService(BaseBlobService):
             Name of blob to create or update.
         :param str file_path:
             Path of the file to upload as the blob content.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -358,13 +417,26 @@ class BlockBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -414,10 +486,10 @@ class BlockBlobService(BaseBlobService):
         :param int count:
             Number of bytes to read from the stream. This is optional, but
             should be supplied for optimal performance.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -438,13 +510,26 @@ class BlockBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -527,10 +612,10 @@ class BlockBlobService(BaseBlobService):
         :param int count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -550,13 +635,26 @@ class BlockBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -613,10 +711,10 @@ class BlockBlobService(BaseBlobService):
             Text to upload to the blob.
         :param str encoding:
             Python encoding to use to convert the text to bytes.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -636,13 +734,26 @@ class BlockBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
