@@ -53,7 +53,16 @@ else:
 
 
 class AppendBlobService(BaseBlobService):
+    '''
+    An append blob is comprised of blocks and is optimized for append operations.
+    When you modify an append blob, blocks are added to the end of the blob only,
+    via the append_block operation. Updating or deleting of existing blocks is not
+    supported. Unlike a block blob, an append blob does not expose its block IDs. 
 
+    Each block in an append blob can be a different size, up to a maximum of 4 MB,
+    and an append blob can include up to 50,000 blocks. The maximum size of an
+    append blob is therefore slightly more than 195 GB (4 MB X 50,000 blocks).
+    '''
     MAX_BLOCK_SIZE = 4 * 1024 * 1024
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
@@ -116,23 +125,38 @@ class AppendBlobService(BaseBlobService):
             Name of existing container.
         :param str blob_name:
             Name of blob to create or update.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to
+            perform the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the updated Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -151,7 +175,7 @@ class AppendBlobService(BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match))
         ]
         if content_settings is not None:
-            request.headers += content_settings.to_headers()
+            request.headers += content_settings._to_headers()
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -163,8 +187,7 @@ class AppendBlobService(BaseBlobService):
                      if_unmodified_since=None, if_match=None,
                      if_none_match=None, timeout=None):
         '''
-        The Append Block operation commits a new block of data
-        to the end of an existing append blob.
+        Commits a new block of data to the end of an existing append blob.
         
         :param str container_name:
             Name of existing container.
@@ -193,15 +216,32 @@ class AppendBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return:
+            ETag, last modified, append offset, and committed block count 
+            properties for the updated Append Blob
+        :rtype: :class:`~azure.storage.blob.models.AppendBlockProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -425,7 +465,7 @@ class AppendBlobService(BaseBlobService):
         :param str blob_name:
             Name of blob to create or update.
         :param io.IOBase stream:
-            Opened file/stream to upload as the blob content.
+            Opened stream to upload as the blob content.
         :param int count:
             Number of bytes to read from the stream. This is optional, but
             should be supplied for optimal performance.

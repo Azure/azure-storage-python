@@ -84,7 +84,7 @@ def _parse_append_block(response):
 
 def _parse_snapshot_blob(name, response):
     '''
-    Extracts append block return headers.
+    Extracts snapshot return header.
     '''   
     raw_headers = _parse_response_for_dict(response)
     snapshot = raw_headers.get('x-ms-snapshot')
@@ -93,7 +93,7 @@ def _parse_snapshot_blob(name, response):
 
 def _parse_lease_time(response):
     '''
-    Extracts append block return headers.
+    Extracts lease time return header.
     '''   
     raw_headers = _parse_response_for_dict(response)
     lease_time = raw_headers.get('x-ms-lease-time')
@@ -104,7 +104,7 @@ def _parse_lease_time(response):
 
 def _parse_lease_id(response):
     '''
-    Extracts append block return headers.
+    Extracts lease ID return header.
     '''   
     raw_headers = _parse_response_for_dict(response)
     lease_id = raw_headers.get('x-ms-lease-id')

@@ -64,7 +64,17 @@ _PAGE_ALIGNMENT = 512
 
 
 class PageBlobService(BaseBlobService):
-    
+    '''
+    Page blobs are a collection of 512-byte pages optimized for random read and
+    write operations. To create a page blob, you initialize the page blob and
+    specify the maximum size the page blob will grow. To add or update the
+    contents of a page blob, you write a page or pages by specifying an offset
+    and a range that align to 512-byte page boundaries. A write to a page blob
+    can overwrite just one page, some pages, or up to 4 MB of the page blob.
+    Writes to page blobs happen in-place and are immediately committed to the
+    blob. The maximum size for a page blob is 1 TB.
+    '''
+
     MAX_PAGE_SIZE = 4 * 1024 * 1024
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
@@ -116,7 +126,7 @@ class PageBlobService(BaseBlobService):
         sequence_number=None, metadata=None, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
-        Creates a new page blob.
+        Creates a new Page Blob.
 
         See create_blob_from_* for high level functions that handle the
         creation and upload of large blobs with automatic chunking and
@@ -130,27 +140,42 @@ class PageBlobService(BaseBlobService):
             Required. This header specifies the maximum size
             for the page blob, up to 1 TB. The page blob size must be aligned
             to a 512-byte boundary.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set properties on the blob.
         :param int sequence_number:
             The sequence number is a user-controlled value that you can use to
             track requests. The value of the sequence number must be between 0
             and 2^63 - 1.The default value is 0.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the new Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -172,7 +197,7 @@ class PageBlobService(BaseBlobService):
             ('If-None-Match', _str_or_none(if_none_match))
         ]
         if content_settings is not None:
-            request.headers += content_settings.to_headers()
+            request.headers += content_settings._to_headers()
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -221,26 +246,30 @@ class PageBlobService(BaseBlobService):
             If the blob's sequence number is equal to the specified
             value, the request proceeds; otherwise it fails.
         :param datetime if_modified_since:
-            A DateTime value. Specify this conditional header to
-            write the page only if the blob has been modified since the
-            specified date/time. If the blob has not been modified, the Blob
-            service fails.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            A DateTime value. Specify this conditional header to
-            write the page only if the blob has not been modified since the
-            specified date/time. If the blob has been modified, the Blob
-            service fails.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value. Specify an ETag value for this conditional
+            An ETag value, or the wildcard character (*). Specify an ETag value for this conditional
             header to write the page only if the blob's ETag value matches the
             value specified. If the values do not match, the Blob service fails.
         :param str if_none_match:
-            An ETag value. Specify an ETag value for this conditional
+            An ETag value, or the wildcard character (*). Specify an ETag value for this conditional
             header to write the page only if the blob's ETag value does not
             match the value specified. If the values are identical, the Blob
             service fails.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the updated Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -314,26 +343,30 @@ class PageBlobService(BaseBlobService):
             If the blob's sequence number is equal to the specified
             value, the request proceeds; otherwise it fails.
         :param datetime if_modified_since:
-            A DateTime value. Specify this conditional header to
-            write the page only if the blob has been modified since the
-            specified date/time. If the blob has not been modified, the Blob
-            service fails.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            A DateTime value. Specify this conditional header to
-            write the page only if the blob has not been modified since the
-            specified date/time. If the blob has been modified, the Blob
-            service fails.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value. Specify an ETag value for this conditional
+            An ETag value, or the wildcard character (*). Specify an ETag value for this conditional
             header to write the page only if the blob's ETag value matches the
             value specified. If the values do not match, the Blob service fails.
         :param str if_none_match:
-            An ETag value. Specify an ETag value for this conditional
+            An ETag value, or the wildcard character (*). Specify an ETag value for this conditional
             header to write the page only if the blob's ETag value does not
             match the value specified. If the values are identical, the Blob
             service fails.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the updated Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -374,7 +407,7 @@ class PageBlobService(BaseBlobService):
         end_range=None, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
-        Returns the list of valid page ranges for a page blob or snapshot
+        Returns the list of valid page ranges for a Page Blob or snapshot
         of a page blob.
 
         :param str container_name:
@@ -402,15 +435,30 @@ class PageBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: A list of valid Page Ranges for the Page Blob.
+        :rtype: list of :class:`~azure.storage.blob.models.PageRange`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -455,22 +503,39 @@ class PageBlobService(BaseBlobService):
         :param str blob_name:
             Name of existing blob.
         :param str sequence_number_action:
-            Action for sequence number change.
-            Valid options: max, update, increment.
+            This property indicates how the service should modify the blob's sequence
+            number. See :class:`.SequenceNumberAction` for more information.
         :param str sequence_number:
-            Sequence number for blob.
+            This property sets the blob's sequence number. The sequence number is a
+            user-controlled property that you can use to track requests and manage
+            concurrency issues.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the updated Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -502,7 +567,9 @@ class PageBlobService(BaseBlobService):
         if_match=None, if_none_match=None, timeout=None):
         
         '''
-        Resizes the blob to a new length.
+        Resizes a page blob to the specified size. If the specified value is less
+        than the current size of the blob, then all pages above the specified value
+        are cleared.
 
         :param str container_name:
             Name of existing container.
@@ -513,15 +580,30 @@ class PageBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the updated Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -563,10 +645,10 @@ class PageBlobService(BaseBlobService):
             Name of blob to create or update.
         :param str file_path:
             Path of the file to upload as the blob content.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -586,13 +668,26 @@ class PageBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -641,10 +736,10 @@ class PageBlobService(BaseBlobService):
         :param int count:
             Number of bytes to read from the stream. This is required, a page
             blob cannot be created if the count is unknown.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set the blob properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -665,13 +760,26 @@ class PageBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -737,14 +845,14 @@ class PageBlobService(BaseBlobService):
         :param bytes blob:
             Content of blob as an array of bytes.
         :param int index:
-            Start index in the array of bytes.
+            Start index in the byte array.
         :param int count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
-        :param azure.storage.blob.models.ContentSettings content_settings:
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set blob properties.
         :param metadata:
-            A dict containing name, value for metadata.
+            Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -764,13 +872,26 @@ class PageBlobService(BaseBlobService):
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
-            Datetime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
-            DateTime string.
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param str if_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
         :param str if_none_match:
-            An ETag value.
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 

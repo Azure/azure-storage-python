@@ -87,7 +87,7 @@ class ContentSettings(object):
         self.cache_control = cache_control
         self.content_md5 = content_md5
 
-    def to_headers(self):
+    def _to_headers(self):
         return [
             ('x-ms-cache-control', _str_or_none(self.cache_control)),
             ('x-ms-content-type', _str_or_none(self.content_type)),

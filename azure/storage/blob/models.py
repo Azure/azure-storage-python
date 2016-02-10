@@ -15,7 +15,20 @@
 from .._common_conversion import _str_or_none
 class Container(object):
 
-    ''' Blob container class. '''
+    '''
+    Blob container class. 
+    
+    :ivar str name: 
+        The name of the container.
+    :ivar metadata: 
+        A dict containing name-value pairs associated with the container as metadata.
+        This var is set to None unless the include=metadata param was included 
+        for the list containers operation. If this parameter was specified but the 
+        container has no metadata, metadata will be set to an empty dictionary.
+    :vartype metadata: dict mapping str to str
+    :ivar ContainerProperties properties:
+        System properties for the container.
+    '''
 
     def __init__(self, name=None, props=None, metadata=None):
         self.name = name
@@ -25,7 +38,17 @@ class Container(object):
 
 class ContainerProperties(object):
 
-    ''' Blob container's properties class. '''
+    '''
+    Blob container's properties class.
+    
+    :ivar datetime last_modified:
+        A datetime object representing the last time the container was modified.
+    :ivar str etag:
+        The ETag contains a value that you can use to perform operations
+        conditionally.
+    :ivar LeaseProperties lease:
+        Stores all the lease information for the container.
+    '''
 
     def __init__(self):
         self.last_modified = None
@@ -35,7 +58,22 @@ class ContainerProperties(object):
 
 class Blob(object):
 
-    ''' Blob class'''
+    '''
+    Blob class.
+    
+    :ivar str name:
+        Name of blob.
+    :ivar str content:
+        Blob content.
+    :ivar str snapshot:
+        A DateTime value that uniquely identifies the snapshot. The value of
+        this header indicates the snapshot version, and may be used in
+        subsequent requests to access the snapshot.
+    :ivar BlobProperties properties:
+        Stores all the system properties for the blob.
+    :ivar metadata:
+        Name-value pairs associated with the blob as metadata.
+    '''
     def __init__(self, name=None, snapshot=None, content=None, props=None, metadata=None):
         self.name = name
         self.content = content
@@ -46,7 +84,30 @@ class Blob(object):
 
 class BlobProperties(object):
 
-    ''' Blob Properties '''
+    '''
+    Blob Properties
+    
+    :ivar str blob_type:
+        String indicating this blob's type.
+    :ivar datetime last_modified:
+        A datetime object representing the last time the blob was modified.
+    :ivar str etag:
+        The ETag contains a value that you can use to perform operations
+        conditionally.
+    :ivar int content_length:
+        Length of blob in bytes.
+    :ivar int append_blob_committed_block_count:
+        (For Append Blobs) Number of committed blocks in the blob.
+    :ivar int page_blob_sequence_number:
+        (For Page Blobs) Sequence number for page blob used for coordinating
+        concurrent writes.
+    :ivar CopyProperties copy:
+        Stores all the copy properties for the blob.
+    :ivar ~azure.storage.blob.models.ContentSettings content_settings:
+        Stores all the content settings for the blob.
+    :ivar LeaseProperties lease:
+        Stores all the lease information for the blob.
+    '''
 
     def __init__(self):
         self.blob_type = None
@@ -62,7 +123,30 @@ class BlobProperties(object):
 
 class ContentSettings(object):
 
-    '''ContentSettings object used for Blob services.'''
+    '''
+    ContentSettings object used for Blob services.
+    
+    :ivar str content_type:
+        The content type specified for the blob. If no content type was
+        specified, the default content type is application/octet-stream. 
+    :ivar str content_encoding:
+        If the Content-Encoding request header has previously been set
+        for the blob, that value is stored.
+    :ivar str content_language:
+        If the Content-Language request header has previously been set
+        for the blob, that value is stored.
+    :ivar str content_disposition:
+        The Content-Disposition response header field conveys additional
+        information about how to process the response payload, and also
+        can be used to attach additional metadata.
+    :ivar str cache_control:
+        If the Cache-Control request header has previously been set for
+        the blob, that value is stored.
+    :ivar str content_md5:
+        If the Content-MD5 header has been set for the blob, this response
+        header is stored so that the client can check for message content
+        integrity.
+    '''
 
     def __init__(
         self, content_type=None, content_encoding=None,
@@ -76,7 +160,7 @@ class ContentSettings(object):
         self.cache_control = cache_control
         self.content_md5 = content_md5
 
-    def to_headers(self):
+    def _to_headers(self):
         return [
             ('x-ms-blob-cache-control', _str_or_none(self.cache_control)),
             ('x-ms-blob-content-type', _str_or_none(self.content_type)),
@@ -91,7 +175,40 @@ class ContentSettings(object):
 
 
 class CopyProperties(object):
-    '''Blob Copy Properties'''
+    '''
+    Blob Copy Properties.
+    
+    :ivar str id:
+        String identifier for the last attempted Copy Blob operation where this blob
+        was the destination blob. This header does not appear if this blob has never
+        been the destination in a Copy Blob operation, or if this blob has been
+        modified after a concluded Copy Blob operation using Set Blob Properties,
+        Put Blob, or Put Block List.
+    :ivar str source:
+        URL up to 2 KB in length that specifies the source blob used in the last attempted
+        Copy Blob operation where this blob was the destination blob. This header does not
+        appear if this blob has never been the destination in a Copy Blob operation, or if
+        this blob has been modified after a concluded Copy Blob operation using
+        Set Blob Properties, Put Blob, or Put Block List.
+    :ivar str status:
+        State of the copy operation identified by Copy ID, with these values:
+            success: Copy completed successfully.
+            pending: Copy is in progress. Check copy_status_description if intermittent,
+                non-fatal errors impede copy progress but don’t cause failure.
+            aborted: Copy was ended by Abort Copy Blob.
+            failed: Copy failed. See copy_status_description for failure details.
+    :ivar str progress:
+        Contains the number of bytes copied and the total bytes in the source in the last
+        attempted Copy Blob operation where this blob was the destination blob. Can show
+        between 0 and Content-Length bytes copied.
+    :ivar datetime completion_time:
+        Conclusion time of the last attempted Copy Blob operation where this blob was the
+        destination blob. This value can specify the time of a completed, aborted, or
+        failed copy attempt.
+    :ivar str status_description:
+        only appears when x-ms-copy-status is failed or pending. Describes cause of fatal
+        or non-fatal copy operation failure.
+    '''
 
     def __init__(self):
         self.id = None
@@ -104,7 +221,17 @@ class CopyProperties(object):
 
 class LeaseProperties(object):
 
-    '''Blob Lease Properties'''
+    '''
+    Blob Lease Properties.
+    
+    :ivar str status:
+        The lease status of the blob.
+    :ivar str state:
+        Lease state of the blob.
+        Possible values: pending|success|aborted|failed
+    :ivar str duration:
+        When a blob is leased, specifies whether the lease is of infinite or fixed duration.
+    '''
 
     def __init__(self):
         self.status = None
@@ -113,21 +240,31 @@ class LeaseProperties(object):
 
 
 class BlobBlockState(object):
-    '''Block blob block types'''
+    '''Block blob block types.'''
 
-    '''Uncommitted blocks'''
-    Uncommitted = 'Uncommitted'
-
-    '''Committed blocks'''
     Committed = 'Committed'
+    '''Committed blocks.'''
 
-    '''Latest blocks'''
     Latest = 'Latest'
+    '''Latest blocks.'''
+
+    Uncommitted = 'Uncommitted'
+    '''Uncommitted blocks.'''
 
 
 class BlobBlock(object):
 
-    ''' BlobBlock class '''
+    '''
+    BlockBlob Block class.
+    
+    :ivar str id:
+        Block id.
+    :ivar str state:
+        Block state.
+        Possible valuse: committed|uncommitted
+    :ivar int size:
+        Block size in bytes.
+    '''
 
     def __init__(self, id=None, state=BlobBlockState.Latest):
         self.id = id
@@ -139,7 +276,16 @@ class BlobBlock(object):
 
 class BlobBlockList(object):
 
-    ''' BlobBlockList class '''
+    '''
+    Blob Block List class.
+   
+    :ivar committed_blocks:
+        List of committed blocks.
+    :vartype committed_blocks: list of :class:`BlobBlock`
+    :ivar uncommitted_blocks:
+        List of uncommitted blocks.
+    :vartype uncommitted_blocks: list of :class:`BlobBlock`
+    '''
 
     def __init__(self):
         self.committed_blocks = list()
@@ -147,7 +293,14 @@ class BlobBlockList(object):
 
 class PageRange(object):
 
-    ''' Page Range for page blob. '''
+    '''
+    Page Range for page blob.
+    
+    :ivar int start:
+        Start of page range in bytes.
+    :ivar int end:
+        End of page range in bytes.
+    '''
 
     def __init__(self, start=None, end=None):
         self.start = start
@@ -155,7 +308,15 @@ class PageRange(object):
 
 class ResourceProperties(object):
 
-    ''' Base response for a resource request. '''
+    '''
+    Base response for a resource request.
+    
+    :ivar str etag:
+        Opaque etag value that can be used to check if resource
+        has been modified.
+    :ivar datetime last_modified:
+        Datetime for last time resource was modified.
+    '''
 
     def __init__(self):
         self.last_modified = None
@@ -163,7 +324,14 @@ class ResourceProperties(object):
 
 class AppendBlockProperties(ResourceProperties):
 
-    ''' Response for an append block request. '''
+    '''
+    Response for an append block request.
+    
+    :ivar int append_offset:
+        Position to start next append.
+    :ivar int committed_block_count:
+        Number of committed append blocks.
+    '''
 
     def __init__(self):
         super(ResourceProperties, self).__init__()
@@ -173,7 +341,12 @@ class AppendBlockProperties(ResourceProperties):
 
 class PageBlobProperties(ResourceProperties):
 
-    ''' Response for a page request. '''
+    '''
+    Response for a page request.
+    
+    :ivar int sequence_number:
+        Identifer for page blobs to help handle concurrent writes.
+    '''
 
     def __init__(self):
         super(ResourceProperties, self).__init__()
@@ -185,20 +358,19 @@ class PublicAccess(object):
     Specifies whether data in the container may be accessed publicly and the level of access.
     '''
 
-    '''
-    Specifies full public read access for container and blob data. Clients can enumerate 
-    blobs within the container via anonymous request, but cannot enumerate containers 
-    within the storage account.
-    '''
-    Container = 'container'
-
+    Blob = 'blob'
     '''
     Specifies public read access for blobs. Blob data within this container can be read 
     via anonymous request, but container data is not available. Clients cannot enumerate 
     blobs within the container via anonymous request.
     '''
-    Blob = 'blob'
 
+    Container = 'container'
+    '''
+    Specifies full public read access for container and blob data. Clients can enumerate 
+    blobs within the container via anonymous request, but cannot enumerate containers 
+    within the storage account.
+    '''
 
 class BlockListType(object):
     '''
@@ -206,88 +378,98 @@ class BlockListType(object):
     blocks, or both lists together.
     '''
 
-    '''Uncommitted blocks'''
-    Uncommitted = 'uncommitted'
-
-    '''Committed blocks'''
-    Committed = 'committed'
-
-    '''Both committed and uncommitted blocks'''
     All = 'all'
+    '''Both committed and uncommitted blocks.'''
+
+    Committed = 'committed'
+    '''Committed blocks.'''
+
+    Uncommitted = 'uncommitted'
+    '''Uncommitted blocks.'''
 
 
 class SequenceNumberAction(object):
-    ''' Sequence number actions '''
+    '''Sequence number actions.'''
 
-    '''
-    Sets the sequence number to be the higher of the value included with the 
-    request and the value currently stored for the blob.
-    '''
-    Max = 'max'
-
-    '''
-    Sets the sequence number to the value included with the request.
-    '''
-    Update = 'update'
-
+    Increment = 'increment'
     '''
     Increments the value of the sequence number by 1. If specifying this option, 
     do not include the x-ms-blob-sequence-number header.
     '''
-    Increment = 'increment'
+
+    Max = 'max'
+    '''
+    Sets the sequence number to be the higher of the value included with the 
+    request and the value currently stored for the blob.
+    '''
+
+    Update = 'update'
+    '''Sets the sequence number to the value included with the request.'''
 
 
-class LeaseActions(object):
-    '''Actions for a lease'''
+class _LeaseActions(object):
+    '''Actions for a lease.'''
 
-    '''Acquire the lease.'''
     Acquire = 'acquire'
+    '''Acquire the lease.'''
 
-    '''Renew the lease.'''
-    Renew = 'renew'
-
-    '''Release the lease.'''
-    Release = 'release'
-
-    '''Break the lease.'''
     Break = 'break'
+    '''Break the lease.'''
 
-    '''Change the lease ID.'''
     Change = 'change'
+    '''Change the lease ID.'''
+
+    Release = 'release'
+    '''Release the lease.'''
+
+    Renew = 'renew'
+    '''Renew the lease.'''
 
 class _BlobTypes(object):
-    '''Blob type options'''
+    '''Blob type options.'''
 
-    '''Block blob type.'''
-    BlockBlob = 'BlockBlob'
-
-    '''Page blob type.'''
-    PageBlob = 'PageBlob'
-
-    '''Append blob type.'''
     AppendBlob = 'AppendBlob'
+    '''Append blob type.'''
 
+    BlockBlob = 'BlockBlob'
+    '''Block blob type.'''
+
+    PageBlob = 'PageBlob'
+    '''Page blob type.'''
 
 class Include(object):
 
     '''
     Specifies the datasets to include in the blob list response.
 
-    :param bool snapshots:
-         Specifies that snapshots should be included in the enumeration.
-    :param bool metadata:
+    :ivar Include Include.COPY: 
+        Specifies that metadata related to any current or previous Copy Blob operation 
+        should be included in the response.
+    :ivar Include Include.METADATA: 
         Specifies that metadata be returned in the response.
-    :param bool uncommitted_blobs:
-        Specifies that blobs for which blocks have been uploaded, but which have 
-        not been committed using Put Block List, be included in the response.
-    :param bool copy: 
-        Specifies that metadata related to any current or previous Copy Blob 
-        operation should be included in the response. 
-    :param str _str: 
-        A string representing the includes.
+    :ivar Include Include.SNAPSHOTS: 
+        Specifies that snapshots should be included in the enumeration.
+    :ivar Include Include.UNCOMMITTED_BLOBS: 
+        Specifies that blobs for which blocks have been uploaded, but which have not 
+        been committed using Put Block List, be included in the response.
     '''
+
     def __init__(self, snapshots=False, metadata=False, uncommitted_blobs=False, 
                  copy=False, _str=None):
+        '''
+        :param bool snapshots:
+             Specifies that snapshots should be included in the enumeration.
+        :param bool metadata:
+            Specifies that metadata be returned in the response.
+        :param bool uncommitted_blobs:
+            Specifies that blobs for which blocks have been uploaded, but which have 
+            not been committed using Put Block List, be included in the response.
+        :param bool copy: 
+            Specifies that metadata related to any current or previous Copy Blob 
+            operation should be included in the response. 
+        :param str _str: 
+            A string representing the includes.
+        '''
         if not _str:
             _str = ''
         components = _str.split(',')
@@ -309,53 +491,51 @@ class Include(object):
                    ('copy,' if self.copy else ''))
         return include.rstrip(',')
 
-'''
-Specifies that snapshots should be included in the enumeration.
-'''
-Include.SNAPSHOTS = Include(snapshots=True)
-
-'''
-Specifies that metadata be returned in the response.
-'''
-Include.METADATA = Include(metadata=True)
-
-'''
-Specifies that blobs for which blocks have been uploaded, but which have not 
-been committed using Put Block List, be included in the response.
-'''
-Include.UNCOMMITTED_BLOBS = Include(uncommitted_blobs=True)
-    
-'''
-Specifies that metadata related to any current or previous Copy Blob operation 
-should be included in the response. 
-'''    
 Include.COPY = Include(copy=True)
+Include.METADATA = Include(metadata=True)
+Include.SNAPSHOTS = Include(snapshots=True)
+Include.UNCOMMITTED_BLOBS = Include(uncommitted_blobs=True)
 
 
 class BlobPermissions(object):
 
     '''
     BlobPermissions class to be used with 
-    :method:`azure.storage.blob.baseblobservice.generate_blob_shared_access_signature` method.
+    :func:`~azure.storage.blob.baseblobservice.BaseBlobService.generate_blob_shared_access_signature` method.
 
-    :param bool read:
-        Read the content, properties, metadata and block list. Use the blob as 
-        the source of a copy operation.
-    :param bool add:
+    :ivar BlobPermissions add:
         Add a block to an append blob.
-    :param bool create:
+    :ivar BlobPermissions create:
         Write a new blob, snapshot a blob, or copy a blob to a new blob.
-    :param bool write: 
-        Create or write content, properties, metadata, or block list. Snapshot 
-        or lease the blob. Resize the blob (page blob only). Use the blob as the 
-        destination of a copy operation within the same account.
-    :param bool delete: 
+    :ivar BlobPermissions delete:
         Delete the blob.
-    :param str _str: 
-        A string representing the permissions.
+    :ivar BlobPermissions read:
+        Read the content, properties, metadata and block list. Use the blob as the source of a copy operation.
+    :ivar BlobPermissions write:
+        Create or write content, properties, metadata, or block list. Snapshot or lease 
+        the blob. Resize the blob (page blob only). Use the blob as the destination of a 
+        copy operation within the same account.
     '''
+
     def __init__(self, read=False, add=False, create=False, write=False, 
                  delete=False, _str=None):
+        '''    
+        :param bool read:
+            Read the content, properties, metadata and block list. Use the blob as 
+            the source of a copy operation.
+        :param bool add:
+            Add a block to an append blob.
+        :param bool create:
+            Write a new blob, snapshot a blob, or copy a blob to a new blob.
+        :param bool write: 
+            Create or write content, properties, metadata, or block list. Snapshot 
+            or lease the blob. Resize the blob (page blob only). Use the blob as the 
+            destination of a copy operation within the same account.
+        :param bool delete: 
+            Delete the blob.
+        :param str _str: 
+            A string representing the permissions.
+        '''
         if not _str:
             _str = ''
         self.read = read or ('r' in _str)
@@ -377,52 +557,57 @@ class BlobPermissions(object):
                 ('w' if self.write else '') +
                 ('d' if self.delete else ''))
 
-''' Read the content, properties, metadata and block list. Use the blob as the source of a copy operation. '''
-BlobPermissions.READ = BlobPermissions(read=True)
-
-'''Add a block to an append blob. '''
 BlobPermissions.ADD = BlobPermissions(add=True)
-
-''' Write a new blob, snapshot a blob, or copy a blob to a new blob. '''
 BlobPermissions.CREATE = BlobPermissions(create=True)
-
-''' 
-Create or write content, properties, metadata, or block list. Snapshot or lease 
-the blob. Resize the blob (page blob only). Use the blob as the destination of a 
-copy operation within the same account.
-'''
-BlobPermissions.WRITE = BlobPermissions(write=True)
-
-''' Delete the blob. '''
 BlobPermissions.DELETE = BlobPermissions(delete=True)
+BlobPermissions.READ = BlobPermissions(read=True)
+BlobPermissions.WRITE = BlobPermissions(write=True)
 
 
 class ContainerPermissions(object):
 
     '''
-    ContainerPermissions class to be used with `azure.storage.blob.BaseBlobService.generate_container_shared_access_signature`
-    method and for the AccessPolicies used with `azure.storage.blob.BaseBlobService.set_container_acl`. 
+    ContainerPermissions class to be used with :func:`~azure.storage.blob.baseblobservice.BaseBlobService.generate_container_shared_access_signature`
+    API and for the AccessPolicies used with :func:`~azure.storage.blob.baseblobservice.BaseBlobService.set_container_acl`. 
 
-    :param bool read:
+    :ivar ContainerPermissions delete:
+        Delete any blob in the container. Note: You cannot grant permissions to 
+        delete a container with a container SAS. Use an account SAS instead.
+    :ivar ContainerPermissions list:
+        List blobs in the container.
+    :ivar ContainerPermissions read:
         Read the content, properties, metadata or block list of any blob in the 
         container. Use any blob in the container as the source of a copy operation.
-    :param bool write: 
+    :ivar ContainerPermissions write:
         For any blob in the container, create or write content, properties, 
         metadata, or block list. Snapshot or lease the blob. Resize the blob 
         (page blob only). Use the blob as the destination of a copy operation 
         within the same account. Note: You cannot grant permissions to read or 
         write container properties or metadata, nor to lease a container, with 
         a container SAS. Use an account SAS instead.
-    :param bool delete: 
-        Delete any blob in the container. Note: You cannot grant permissions to 
-        delete a container with a container SAS. Use an account SAS instead.
-    :param bool list: 
-        List blobs in the container.
-    :param str _str: 
-        A string representing the permissions.
     '''
+
     def __init__(self, read=False, write=False, delete=False, list=False, 
                  _str=None):
+        '''
+        :param bool read:
+            Read the content, properties, metadata or block list of any blob in the 
+            container. Use any blob in the container as the source of a copy operation.
+        :param bool write: 
+            For any blob in the container, create or write content, properties, 
+            metadata, or block list. Snapshot or lease the blob. Resize the blob 
+            (page blob only). Use the blob as the destination of a copy operation 
+            within the same account. Note: You cannot grant permissions to read or 
+            write container properties or metadata, nor to lease a container, with 
+            a container SAS. Use an account SAS instead.
+        :param bool delete: 
+            Delete any blob in the container. Note: You cannot grant permissions to 
+            delete a container with a container SAS. Use an account SAS instead.
+        :param bool list: 
+            List blobs in the container.
+        :param str _str: 
+            A string representing the permissions.
+        '''
         if not _str:
             _str = ''
         self.read = read or ('r' in _str)
@@ -442,27 +627,7 @@ class ContainerPermissions(object):
                 ('d' if self.delete else '') + 
                 ('l' if self.list else ''))
 
-'''
-Read the content, properties, metadata or block list of any blob in the 
-container. Use any blob in the container as the source of a copy operation.
-'''
-ContainerPermissions.READ = ContainerPermissions(read=True)
-
-''' 
-For any blob in the container, create or write content, properties, 
-metadata, or block list. Snapshot or lease the blob. Resize the blob 
-(page blob only). Use the blob as the destination of a copy operation 
-within the same account. Note: You cannot grant permissions to read or 
-write container properties or metadata, nor to lease a container, with 
-a container SAS. Use an account SAS instead.
-'''
-ContainerPermissions.WRITE = ContainerPermissions(write=True)
-
-''' 
-Delete any blob in the container. Note: You cannot grant permissions to 
-delete a container with a container SAS. Use an account SAS instead.
-'''
 ContainerPermissions.DELETE = ContainerPermissions(delete=True)
-
-''' List blobs in the container. '''
 ContainerPermissions.LIST = ContainerPermissions(list=True)
+ContainerPermissions.READ = ContainerPermissions(read=True)
+ContainerPermissions.WRITE = ContainerPermissions(write=True)
