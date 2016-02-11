@@ -165,7 +165,7 @@ class StorageQueueTest(StorageTestCase):
             self._create_queue(prefix + str(i))
 
         # Action
-        generator1 = self.qs.list_queues(prefix=prefix, max_results=3)
+        generator1 = self.qs.list_queues(prefix=prefix, num_results=3)
         queues1 = list(generator1)
 
         generator2 = self.qs.list_queues(
@@ -195,7 +195,7 @@ class StorageQueueTest(StorageTestCase):
             queue_name,
             metadata={'val1': 'test', 'val2': 'blah'})
 
-        queue = list(self.qs.list_queues(queue_name, max_results=1, include_metadata=True))[0]
+        queue = list(self.qs.list_queues(queue_name, num_results=1, include_metadata=True))[0]
 
         # Asserts
         self.assertIsNotNone(queue)

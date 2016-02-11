@@ -501,14 +501,15 @@ class FileService(StorageClient):
         response = self._perform_request(request)
         return _convert_xml_to_service_properties(response.body)
 
-    def list_shares(self, prefix=None, marker=None, max_results=None, 
+    def list_shares(self, prefix=None, marker=None, num_results=None, 
                     include_metadata=False, timeout=None):
         '''
         Returns a generator to list the shares under the specified account.
         The generator will lazily follow the continuation tokens returned by
-        the service and stop when all shares have been returned or max_results is reached.
+        the service and stop when all shares have been returned or num_results 
+        is reached.
 
-        If max_results is specified and the account has more than that number of 
+        If num_results is specified and the account has more than that number of 
         shares, the generator will have a populated next_marker field once it 
         finishes. This marker can be used to create a new generator if more 
         results are desired.
@@ -516,29 +517,28 @@ class FileService(StorageClient):
         :param str prefix:
             Filters the results to return only shares whose names
             begin with the specified prefix.
-        :param str marker:
-            A string value that identifies the portion of the list
-            to be returned with the next list operation. The operation returns
-            a next_marker value within the response body if the list returned was
-            not complete. The marker value may then be used in a subsequent
-            call to request the next set of list items. The marker value is
-            opaque to the client.
-        :param int max_results:
+        :param int num_results:
             Specifies the maximum number of shares to return.
         :param bool include_metadata:
             Specifies that share metadata be returned in the response.
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the 
+            next_marker field of a previous generator object if num_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         include = 'metadata' if include_metadata else None
-        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
+        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results, 
                 'include': include, 'timeout': timeout}
         resp = self._list_shares(**kwargs)
 
         return ListGenerator(resp, self._list_shares, (), kwargs)
 
     def _list_shares(self, prefix=None, marker=None, max_results=None, 
-                    include=None, timeout=None):
+                     include=None, timeout=None):
         '''
         Returns a list of the shares under the specified account.
 
@@ -1045,14 +1045,14 @@ class FileService(StorageClient):
         self._perform_request(request)
 
     def list_directories_and_files(self, share_name, directory_name=None, 
-                                   marker=None, max_results=None, timeout=None):
+                                   num_results=None, marker=None, timeout=None):
         '''
         Returns a generator to list the directories and files under the specified share.
         The generator will lazily follow the continuation tokens returned by
         the service and stop when all directories and files have been returned or
-        max_results is reached.
+        num_results is reached.
 
-        If max_results is specified and the share has more than that number of 
+        If num_results is specified and the share has more than that number of 
         containers, the generator will have a populated next_marker field once it 
         finishes. This marker can be used to create a new generator if more 
         results are desired.
@@ -1061,24 +1061,23 @@ class FileService(StorageClient):
             Name of existing share.
         :param str directory_name:
             The path to the directory.
-        :param str marker:
-            A string value that identifies the portion of the list
-            to be returned with the next list operation. The operation returns
-            a next_marker value within the response body if the list returned was
-            not complete. The marker value may then be used in a subsequent
-            call to request the next set of list items. The marker value is
-            opaque to the client.
-        :param int max_results:
+        :param int num_results:
             Specifies the maximum number of files to return,
             including all directory elements. If the request does not specify
-            max_results or specifies a value greater than 5,000, the server will
-            return up to 5,000 items. Setting max_results to a value less than
+            num_results or specifies a value greater than 5,000, the server will
+            return up to 5,000 items. Setting num_results to a value less than
             or equal to zero results in error response code 400 (Bad Request).
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the 
+            next_marker field of a previous generator object if num_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         args = (share_name, directory_name)
-        kwargs = {'marker': marker, 'max_results': max_results, 'timeout': timeout}
+        kwargs = {'marker': marker, 'max_results': num_results, 'timeout': timeout}
         resp = self._list_directories_and_files(*args, **kwargs)
 
         return ListGenerator(resp, self._list_directories_and_files, args, kwargs)

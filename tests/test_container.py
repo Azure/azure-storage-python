@@ -229,7 +229,7 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._create_container()
 
         # Act
-        containers = list(self.bs.list_containers(container_name))
+        containers = list(self.bs.list_containers(prefix=container_name))
 
         # Assert
         self.assertIsNotNone(containers)
@@ -246,7 +246,7 @@ class StorageContainerTest(StorageTestCase):
         resp = self.bs.set_container_metadata(container_name, metadata)
 
         # Act
-        containers = list(self.bs.list_containers(container_name, include_metadata=True))
+        containers = list(self.bs.list_containers(prefix=container_name, include_metadata=True))
 
         # Assert
         self.assertIsNotNone(containers)
@@ -256,7 +256,7 @@ class StorageContainerTest(StorageTestCase):
         self.assertDictEqual(containers[0].metadata, metadata)
 
     @record
-    def test_list_containers_with_maxresults_and_marker(self):
+    def test_list_containers_with_num_results_and_marker(self):
         # Arrange
         prefix = 'listcontainer'
         container_names = []
@@ -266,8 +266,10 @@ class StorageContainerTest(StorageTestCase):
         container_names.sort()
 
         # Act
-        generator1 = self.bs.list_containers(prefix, None, 2)
-        generator2 = self.bs.list_containers(prefix, generator1.next_marker, 2)
+        generator1 = self.bs.list_containers(prefix=prefix, num_results=2)
+        generator2 = self.bs.list_containers(prefix=prefix, 
+                                             marker=generator1.next_marker, 
+                                             num_results=2)
 
         containers1 = generator1.items
         containers2 = generator2.items
@@ -720,7 +722,7 @@ class StorageContainerTest(StorageTestCase):
         self.assertNamedItemInContainer(resp, 'bloba2')
 
     @record
-    def test_list_blobs_with_max_results(self):
+    def test_list_blobs_with_num_results(self):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
@@ -730,7 +732,7 @@ class StorageContainerTest(StorageTestCase):
         self.bs.create_blob_from_bytes (container_name, 'blobb1', data, )
 
         # Act
-        blobs = list(self.bs.list_blobs(container_name, max_results=2))
+        blobs = list(self.bs.list_blobs(container_name, num_results=2))
 
         # Assert
         self.assertIsNotNone(blobs)

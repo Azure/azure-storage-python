@@ -266,9 +266,9 @@ class QueueSamples():
         # for queue in queues:
         #    print(queue.name) # queue1, queue2, thirdq, all other queues created in the self.service        
 
-        # Max results
+        # Num results
         # Will return in alphabetical order. 
-        queues = list(self.service.list_queues(max_results=2))
+        queues = list(self.service.list_queues(num_results=2))
         for queue in queues:
             print(queue.name) # queue1, queue2
 

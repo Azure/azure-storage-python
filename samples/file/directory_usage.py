@@ -67,8 +67,8 @@ class DirectorySamples():
         for res in dir1:
             print(res.name) # file1, file2
 
-        # Max results
-        root_file_dir = list(self.service.list_directories_and_files(share_name, max_results=2))
+        # Num results
+        root_file_dir = list(self.service.list_directories_and_files(share_name, num_results=2))
         for res in root_file_dir:
             print(res.name) # dir1, dir2
 
