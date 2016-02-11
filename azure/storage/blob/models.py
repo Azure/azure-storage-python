@@ -63,12 +63,13 @@ class Blob(object):
     
     :ivar str name:
         Name of blob.
-    :ivar str content:
-        Blob content.
     :ivar str snapshot:
         A DateTime value that uniquely identifies the snapshot. The value of
         this header indicates the snapshot version, and may be used in
         subsequent requests to access the snapshot.
+    :ivar content:
+        Blob content.
+    :vartype content: str or bytes
     :ivar BlobProperties properties:
         Stores all the system properties for the blob.
     :ivar metadata:
@@ -76,8 +77,8 @@ class Blob(object):
     '''
     def __init__(self, name=None, snapshot=None, content=None, props=None, metadata=None):
         self.name = name
-        self.content = content
         self.snapshot = snapshot
+        self.content = content
         self.properties = props or BlobProperties()
         self.metadata = metadata
 
@@ -101,7 +102,7 @@ class BlobProperties(object):
     :ivar int page_blob_sequence_number:
         (For Page Blobs) Sequence number for page blob used for coordinating
         concurrent writes.
-    :ivar CopyProperties copy:
+    :ivar ~azure.storage.blob.models.CopyProperties copy:
         Stores all the copy properties for the blob.
     :ivar ~azure.storage.blob.models.ContentSettings content_settings:
         Stores all the content settings for the blob.
@@ -124,26 +125,27 @@ class BlobProperties(object):
 class ContentSettings(object):
 
     '''
-    ContentSettings object used for Blob services.
+    Used to store the content settings of a blob.
     
     :ivar str content_type:
         The content type specified for the blob. If no content type was
         specified, the default content type is application/octet-stream. 
     :ivar str content_encoding:
-        If the Content-Encoding request header has previously been set
+        If the content_encoding has previously been set
         for the blob, that value is stored.
     :ivar str content_language:
-        If the Content-Language request header has previously been set
+        If the content_language has previously been set
         for the blob, that value is stored.
     :ivar str content_disposition:
-        The Content-Disposition response header field conveys additional
-        information about how to process the response payload, and also
-        can be used to attach additional metadata.
+        content_disposition conveys additional information about how to
+        process the response payload, and also can be used to attach
+        additional metadata. If content_disposition has previously been set
+        for the blob, that value is stored.
     :ivar str cache_control:
-        If the Cache-Control request header has previously been set for
+        If the cache_control has previously been set for
         the blob, that value is stored.
     :ivar str content_md5:
-        If the Content-MD5 header has been set for the blob, this response
+        If the content_md5 has been set for the blob, this response
         header is stored so that the client can check for message content
         integrity.
     '''
@@ -192,11 +194,15 @@ class CopyProperties(object):
         Set Blob Properties, Put Blob, or Put Block List.
     :ivar str status:
         State of the copy operation identified by Copy ID, with these values:
-            success: Copy completed successfully.
-            pending: Copy is in progress. Check copy_status_description if intermittent,
+            success:
+                Copy completed successfully.
+            pending:
+                Copy is in progress. Check copy_status_description if intermittent,
                 non-fatal errors impede copy progress but don’t cause failure.
-            aborted: Copy was ended by Abort Copy Blob.
-            failed: Copy failed. See copy_status_description for failure details.
+            aborted:
+                Copy was ended by Abort Copy Blob.
+            failed:
+                Copy failed. See copy_status_description for failure details.
     :ivar str progress:
         Contains the number of bytes copied and the total bytes in the source in the last
         attempted Copy Blob operation where this blob was the destination blob. Can show
@@ -501,17 +507,17 @@ class BlobPermissions(object):
 
     '''
     BlobPermissions class to be used with 
-    :func:`~azure.storage.blob.baseblobservice.BaseBlobService.generate_blob_shared_access_signature` method.
+    :func:`~azure.storage.blob.baseblobservice.BaseBlobService.generate_blob_shared_access_signature` API.
 
-    :ivar BlobPermissions add:
+    :ivar BlobPermissions BlobPermissions.ADD:
         Add a block to an append blob.
-    :ivar BlobPermissions create:
+    :ivar BlobPermissions BlobPermissions.CREATE:
         Write a new blob, snapshot a blob, or copy a blob to a new blob.
-    :ivar BlobPermissions delete:
+    :ivar BlobPermissions BlobPermissions.DELETE:
         Delete the blob.
-    :ivar BlobPermissions read:
+    :ivar BlobPermissions BlobPermissions.READ:
         Read the content, properties, metadata and block list. Use the blob as the source of a copy operation.
-    :ivar BlobPermissions write:
+    :ivar BlobPermissions BlobPermissions.WRITE:
         Create or write content, properties, metadata, or block list. Snapshot or lease 
         the blob. Resize the blob (page blob only). Use the blob as the destination of a 
         copy operation within the same account.
@@ -570,15 +576,15 @@ class ContainerPermissions(object):
     ContainerPermissions class to be used with :func:`~azure.storage.blob.baseblobservice.BaseBlobService.generate_container_shared_access_signature`
     API and for the AccessPolicies used with :func:`~azure.storage.blob.baseblobservice.BaseBlobService.set_container_acl`. 
 
-    :ivar ContainerPermissions delete:
+    :ivar ContainerPermissions ContainerPermissions.DELETE:
         Delete any blob in the container. Note: You cannot grant permissions to 
         delete a container with a container SAS. Use an account SAS instead.
-    :ivar ContainerPermissions list:
+    :ivar ContainerPermissions ContainerPermissions.LIST:
         List blobs in the container.
-    :ivar ContainerPermissions read:
+    :ivar ContainerPermissions ContainerPermissions.READ:
         Read the content, properties, metadata or block list of any blob in the 
         container. Use any blob in the container as the source of a copy operation.
-    :ivar ContainerPermissions write:
+    :ivar ContainerPermissions ContainerPermissions.WRITE:
         For any blob in the container, create or write content, properties, 
         metadata, or block list. Snapshot or lease the blob. Resize the blob 
         (page blob only). Use the blob as the destination of a copy operation 
