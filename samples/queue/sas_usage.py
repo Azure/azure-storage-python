@@ -94,7 +94,7 @@ class QueueSasSamples():
     def queue_acl(self):
         queue_name = self._create_queue()
 
-        # Basic
+        # Create a READ level access policy and set it on the queue
         access_policy = AccessPolicy(permission=QueuePermissions.READ,
                                      expiry=datetime.utcnow() + timedelta(hours=1))
         identifiers = {'id': access_policy}

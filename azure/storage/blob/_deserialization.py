@@ -40,6 +40,7 @@ from .models import (
     AppendBlockProperties,
     PageBlobProperties,
     ResourceProperties,
+    BlobPrefix,
 )
 from ..models import _list
 
@@ -273,7 +274,9 @@ def _convert_xml_to_blob_list(response):
     blob_prefix_elements = blobs_element.findall('BlobPrefix')
     if blob_prefix_elements is not None:
         for blob_prefix_element in blob_prefix_elements:
-            blob_list.append(blob_prefix_element.findtext('Name'))
+            prefix = BlobPrefix()
+            prefix.name = blob_prefix_element.findtext('Name')
+            blob_list.append(prefix)
 
     for blob_element in blobs_element.findall('Blob'):
         blob = Blob()
