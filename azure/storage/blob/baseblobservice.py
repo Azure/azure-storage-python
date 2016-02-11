@@ -418,14 +418,14 @@ class BaseBlobService(StorageClient):
             content_type=content_type,
         )
 
-    def list_containers(self, prefix=None, marker=None, max_results=None,
-                        include_metadata=False, timeout=None):
+    def list_containers(self, prefix=None, num_results=None, include_metadata=False, 
+                        marker=None, timeout=None):
         '''
         Returns a generator to list the containers under the specified account.
         The generator will lazily follow the continuation tokens returned by
-        the service and stop when all containers have been returned or max_results is reached.
+        the service and stop when all containers have been returned or num_results is reached.
 
-        If max_results is specified and the account has more than that number of 
+        If num_results is specified and the account has more than that number of 
         containers, the generator will have a populated next_marker field once it 
         finishes. This marker can be used to create a new generator if more 
         results are desired.
@@ -433,32 +433,31 @@ class BaseBlobService(StorageClient):
         :param str prefix:
             Filters the results to return only containers whose names
             begin with the specified prefix.
-        :param str marker:
-            A string value that identifies the portion of the list
-            to be returned with the next list operation. The operation returns
-            a next_marker value within the response body if the list returned was
-            not complete. The marker value may then be used in a subsequent
-            call to request the next set of list items. The marker value is
-            opaque to the client.
-        :param int max_results:
+        :param int num_results:
             Specifies the maximum number of containers to return. A single list
             request may return up to 1000 contianers and potentially a continuation
             token which should be followed to get additional resutls.
         :param bool include_metadata:
             Specifies that container metadata be returned in the response.
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the 
+            next_marker field of a previous generator object if num_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         include = 'metadata' if include_metadata else None
-        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
+        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results, 
                 'include': include, 'timeout': timeout}
         resp = self._list_containers(**kwargs)
 
         return ListGenerator(resp, self._list_containers, (), kwargs)
 
 
-    def _list_containers(self, prefix=None, marker=None, max_results=None,
-                        include=None, timeout=None):
+    def _list_containers(self, prefix=None, marker=None, max_results=None, 
+                         include=None, timeout=None):
         '''
         Returns a list of the containers under the specified account.
 
@@ -1105,14 +1104,14 @@ class BaseBlobService(StorageClient):
                                     if_unmodified_since,
                                     timeout)
 
-    def list_blobs(self, container_name, prefix=None, marker=None,
-                   max_results=None, include=None, delimiter=None, timeout=None):
+    def list_blobs(self, container_name, prefix=None, num_results=None, include=None, 
+                   delimiter=None, marker=None, timeout=None):
         '''
         Returns a generator to list the blobs under the specified container.
         The generator will lazily follow the continuation tokens returned by
-        the service and stop when all blobs have been returned or max_results is reached.
+        the service and stop when all blobs have been returned or num_results is reached.
 
-        If max_results is specified and the account has more than that number of 
+        If num_results is specified and the account has more than that number of 
         blobs, the generator will have a populated next_marker field once it 
         finishes. This marker can be used to create a new generator if more 
         results are desired.
@@ -1122,18 +1121,11 @@ class BaseBlobService(StorageClient):
         :param str prefix:
             Filters the results to return only blobs whose names
             begin with the specified prefix.
-        :param str marker:
-            A string value that identifies the portion of the list
-            to be returned with the next list operation. The operation returns
-            a next_marker value within the response body if the list returned was
-            not complete. The marker value may then be used in a subsequent
-            call to request the next set of list items. The marker value is
-            opaque to the client.
-        :param int max_results:
+        :param int num_results:
             Specifies the maximum number of blobs to return,
             including all :class:`BlobPrefix` elements. If the request does not specify
-            max_results or specifies a value greater than 5,000, the server will
-            return up to 5,000 items. Setting max_results to a value less than
+            num_results or specifies a value greater than 5,000, the server will
+            return up to 5,000 items. Setting num_results to a value less than
             or equal to zero results in error response code 400 (Bad Request).
         :param str include:
             Specifies one or more datasets to include in the
@@ -1159,11 +1151,17 @@ class BaseBlobService(StorageClient):
             result list that acts as a placeholder for all blobs whose names begin
             with the same substring up to the appearance of the delimiter character.
             The delimiter may be a single character or a string.
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the 
+            next_marker field of a previous generator object if num_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         args = (container_name,)
-        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
+        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results, 
                 'include': include, 'delimiter': delimiter, 'timeout': timeout}
         resp = self._list_blobs(*args, **kwargs)
 

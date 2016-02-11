@@ -164,9 +164,9 @@ class ShareSamples():
         # for share in shares:
         #    print(share.name) # share1, share2, thirdq, all other shares created in the service        
 
-        # Max results
+        # Num results
         # Will return in alphabetical order. 
-        shares = list(self.service.list_shares(max_results=2))
+        shares = list(self.service.list_shares(num_results=2))
         for share in shares:
             print(share.name) # share1, share2
 

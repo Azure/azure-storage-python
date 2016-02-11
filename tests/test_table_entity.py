@@ -956,7 +956,7 @@ class StorageTableEntityTest(StorageTestCase):
         entity = self._insert_random_entity()
 
         # Act
-        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq '{}'".format(entity.PartitionKey)))
+        entities = list(self.ts.query_entities(self.table_name, filter="PartitionKey eq '{}'".format(entity.PartitionKey)))
 
         # Assert
         self.assertEqual(len(entities), 1)
@@ -969,7 +969,7 @@ class StorageTableEntityTest(StorageTestCase):
         table_name = self._create_query_table(2)
 
         # Act
-        entities = list(self.ts.query_entities(table_name, None, 'age,sex'))
+        entities = list(self.ts.query_entities(table_name, select='age,sex'))
 
         # Assert
         self.assertEqual(len(entities), 2)
@@ -985,7 +985,7 @@ class StorageTableEntityTest(StorageTestCase):
         table_name = self._create_query_table(3)
 
         # Act
-        entities = list(self.ts.query_entities(table_name, None, None, 2))
+        entities = list(self.ts.query_entities(table_name, num_results=2))
 
         # Assert
         self.assertEqual(len(entities), 2)
@@ -996,9 +996,9 @@ class StorageTableEntityTest(StorageTestCase):
         table_name = self._create_query_table(5)
 
         # Act
-        resp1 = self.ts.query_entities(table_name, None, None, 2)
-        resp2 = self.ts.query_entities(table_name, None, None, 2, resp1.next_marker)
-        resp3 = self.ts.query_entities(table_name, None, None, 2, resp2.next_marker)
+        resp1 = self.ts.query_entities(table_name, num_results=2)
+        resp2 = self.ts.query_entities(table_name, num_results=2, marker=resp1.next_marker)
+        resp3 = self.ts.query_entities(table_name, num_results=2, marker=resp2.next_marker)
 
         entities1 = resp1.items
         entities2 = resp2.items
@@ -1035,7 +1035,8 @@ class StorageTableEntityTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq '{}'".format(entity['PartitionKey'])))
+        entities = list(self.ts.query_entities(self.table_name, 
+                                               filter="PartitionKey eq '{}'".format(entity['PartitionKey'])))
 
         # Assert
         self.assertEqual(len(entities), 1)
@@ -1207,7 +1208,7 @@ class StorageTableEntityTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        entities = list(self.ts.query_entities(self.table_name, "PartitionKey eq '{}'".format(entity.PartitionKey)))
+        entities = list(self.ts.query_entities(self.table_name, filter="PartitionKey eq '{}'".format(entity.PartitionKey)))
 
         # Assert
         self.assertEqual(len(entities), 1)

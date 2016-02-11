@@ -337,14 +337,14 @@ class QueueService(StorageClient):
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
         self._perform_request(request)
 
-    def list_queues(self, prefix=None, marker=None, max_results=None,
-                    include_metadata=False, timeout=None):
+    def list_queues(self, prefix=None, num_results=None, include_metadata=False, 
+                    marker=None, timeout=None):
         '''
         Returns a generator to list the queues. The generator will lazily follow 
         the continuation tokens returned by the service and stop when all queues 
-        have been returned or max_results is reached.
+        have been returned or num_results is reached.
 
-        If max_results is specified and the account has more than that number of 
+        If num_results is specified and the account has more than that number of 
         queues, the generator will have a populated next_marker field once it 
         finishes. This marker can be used to create a new generator if more 
         results are desired.
@@ -352,24 +352,24 @@ class QueueService(StorageClient):
         :param str prefix:
             Filters the results to return only queues with names that begin
             with the specified prefix.
-        :param str marker:
-            An opaque continuation token. This value can be retrieved from the 
-            next_marker field of a previous generator object if max_results was 
-            specified and that generator has finished enumerating results. If 
-            specified, this generator will begin returning results from the point 
-            where the previous generator stopped.
-        :param int max_results:
+        :param int num_results:
             The maximum number of queues to return.
         :param bool include_metadata:
             Specifies that container metadata be returned in the response.
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the 
+            next_marker field of a previous generator object if num_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
         :param int timeout:
             The server timeout, expressed in seconds. This function may make multiple 
             calls to the service in which case the timeout value specified will be 
             applied to each individual call.
         '''
         include = 'metadata' if include_metadata else None
-        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': max_results, 
-                'include': include, 'timeout': timeout}
+        kwargs = {'prefix': prefix, 'max_results': num_results, 'include': include, 
+                  'marker': marker, 'timeout': timeout}
         resp = self._list_queues(**kwargs)
 
         return ListGenerator(resp, self._list_queues, (), kwargs)

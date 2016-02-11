@@ -351,22 +351,22 @@ class TableService(StorageClient):
 
         self._perform_request(request)
 
-    def list_tables(self, max_results=None, marker=None, timeout=None):
+    def list_tables(self, num_results=None, marker=None, timeout=None):
         '''
         Returns a generator to list the tables. The generator will lazily follow 
         the continuation tokens returned by the service and stop when all tables 
-        have been returned or max_results is reached.
+        have been returned or num_results is reached.
 
-        If max_results is specified and the account has more than that number of 
+        If num_results is specified and the account has more than that number of 
         tables, the generator will have a populated next_marker field once it 
         finishes. This marker can be used to create a new generator if more 
         results are desired.
 
-        :param int max_results:
+        :param int num_results:
             The maximum number of tables to return.
         :param marker:
             An opaque continuation object. This value can be retrieved from the 
-            next_marker field of a previous generator object if max_results was 
+            next_marker field of a previous generator object if num_results was 
             specified and that generator has finished enumerating results. If 
             specified, this generator will begin returning results from the point 
             where the previous generator stopped.
@@ -378,7 +378,7 @@ class TableService(StorageClient):
         :return: A generator which produces :class:`~azure.storage.models.table.Table` objects.
         :rtype: :class:`~azure.storage.models.ListGenerator`:
         '''
-        kwargs = {'max_results': max_results, 'marker': marker, 'timeout': timeout}
+        kwargs = {'max_results': num_results, 'marker': marker, 'timeout': timeout}
         resp = self._list_tables(**kwargs)
 
         return ListGenerator(resp, self._list_tables, (), kwargs)
@@ -591,7 +591,7 @@ class TableService(StorageClient):
 
         self._perform_request(request)
 
-    def query_entities(self, table_name, filter=None, select=None, top=None,
+    def query_entities(self, table_name, filter=None, select=None, num_results=None,
                        marker=None, accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
                        property_resolver=None, timeout=None):
         '''
@@ -614,7 +614,7 @@ class TableService(StorageClient):
             for more information on constructing filters.
         :param str select:
             Returns only the desired properties of an entity from the set.
-        :param int top:
+        :param int num_results:
             The maximum number of entities to return.
         :param marker:
             An opaque continuation object. This value can be retrieved from the 
@@ -641,7 +641,7 @@ class TableService(StorageClient):
         :rtype: :class:`~azure.storage.models.ListGenerator`
         '''
         args = (table_name,)
-        kwargs = {'filter': filter, 'select': select, 'max_results': top, 'marker': marker, 
+        kwargs = {'filter': filter, 'select': select, 'max_results': num_results, 'marker': marker, 
                   'accept': accept, 'property_resolver': property_resolver, 'timeout': timeout}
         resp = self._query_entities(*args, **kwargs)
 

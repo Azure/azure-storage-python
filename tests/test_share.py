@@ -198,7 +198,7 @@ class StorageShareTest(StorageTestCase):
         share_name = self._create_share()
 
         # Act
-        shares = list(self.fs.list_shares(share_name))
+        shares = list(self.fs.list_shares(prefix=share_name))
 
         # Assert
         self.assertIsNotNone(shares)
@@ -225,7 +225,7 @@ class StorageShareTest(StorageTestCase):
         self.assertDictEqual(shares[0].metadata, metadata)
 
     @record
-    def test_list_shares_with_maxresults_and_marker(self):
+    def test_list_shares_with_num_results_and_marker(self):
         # Arrange
         prefix = 'listshare'
         share_names = []
@@ -235,8 +235,10 @@ class StorageShareTest(StorageTestCase):
         share_names.sort()
 
         # Act
-        generator1 = self.fs.list_shares(prefix, None, 2)
-        generator2 = self.fs.list_shares(prefix, generator1.next_marker, 2)
+        generator1 = self.fs.list_shares(prefix, num_results=2)
+        generator2 = self.fs.list_shares(prefix, 
+                                         marker=generator1.next_marker, 
+                                         num_results=2)
 
         shares1 = generator1.items
         shares2 = generator2.items
@@ -437,7 +439,7 @@ class StorageShareTest(StorageTestCase):
         self.assertNamedItemInContainer(resp, 'file1')
 
     @record
-    def test_list_directories_and_files_with_maxresults(self):
+    def test_list_directories_and_files_with_num_results(self):
         # Arrange
         share_name = self._create_share()
         self.fs.create_directory(share_name, 'dir1')
@@ -447,7 +449,7 @@ class StorageShareTest(StorageTestCase):
         self.fs.create_file(share_name, None, 'fileb1', 1024)
 
         # Act
-        result = list(self.fs.list_directories_and_files(share_name, None, None, 2))
+        result = list(self.fs.list_directories_and_files(share_name, num_results=2))
 
         # Assert
         self.assertIsNotNone(result)
@@ -456,7 +458,7 @@ class StorageShareTest(StorageTestCase):
         self.assertNamedItemInContainer(result, 'filea1')
 
     @record
-    def test_list_directories_and_files_with_maxresults_and_marker(self):
+    def test_list_directories_and_files_with_num_results_and_marker(self):
         # Arrange
         share_name = self._create_share()
         self.fs.create_directory(share_name, 'dir1')
@@ -466,8 +468,10 @@ class StorageShareTest(StorageTestCase):
         self.fs.create_file(share_name, 'dir1', 'fileb1', 1024)
 
         # Act
-        generator1 = self.fs.list_directories_and_files(share_name, 'dir1', None, 2)
-        generator2 = self.fs.list_directories_and_files(share_name, 'dir1', generator1.next_marker, 2)
+        generator1 = self.fs.list_directories_and_files(share_name, 'dir1', num_results=2)
+        generator2 = self.fs.list_directories_and_files(share_name, 'dir1', 
+                                                        marker=generator1.next_marker, 
+                                                        num_results=2)
 
         result1 = generator1.items
         result2 = generator2.items

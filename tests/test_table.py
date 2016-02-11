@@ -161,16 +161,16 @@ class StorageTableTest(StorageTestCase):
         self.assertNamedItemInContainer(tables, table_name)
 
     @record
-    def test_list_tables_with_max_results(self):
+    def test_list_tables_with_num_results(self):
         # Arrange
         for i in range(0,4):
             self._create_table()
 
         # Act
-        tables = list(self.ts.list_tables(3))
+        tables = list(self.ts.list_tables(num_results=3))
 
         # Assert
-        self.assertEqual(len(tables), 3)
+        self.assertEqual(len(tables), num_results=3)
 
     @record
     def test_list_tables_with_marker(self):
@@ -183,8 +183,8 @@ class StorageTableTest(StorageTestCase):
         table_names.sort()
 
         # Act
-        generator1 = self.ts.list_tables(max_results=2)
-        generator2 = self.ts.list_tables(max_results=2, marker=generator1.next_marker)
+        generator1 = self.ts.list_tables(num_results=2)
+        generator2 = self.ts.list_tables(num_results=2, marker=generator1.next_marker)
 
         tables1 = generator1.items
         tables2 = generator2.items

@@ -130,8 +130,8 @@ class TableSamples():
         for entity in queried_entities:
             print(entity.RowKey) # All 4 John Doe characters
 
-        # Top
-        queried_entities = list(self.service.query_entities(table_name, top=2))
+        # Num results
+        queried_entities = list(self.service.query_entities(table_name, num_results=2))
         for entity in queried_entities:
             print(entity.RowKey) # Doe the 1, Doe the 2
 
@@ -446,9 +446,9 @@ class TableSamples():
         # for table in tables:
         #    print(table.name) # secondtable, table1, all other tables created in the self.service        
 
-        # Max results
+        # Num results
         # Will return in alphabetical order. 
-        tables = list(self.service.list_tables(max_results=2))
+        tables = list(self.service.list_tables(num_results=2))
         for table in tables:
             print(table.name) # secondtable, table1
 
