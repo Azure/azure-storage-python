@@ -220,9 +220,9 @@ class ContainerSamples():
         for blob in blobs:
             print(blob.name) # blob1, blob2
 
-        # Max results
-        blobs = list(self.service.list_blobs(container_name, max_results=2))
-        print('Max Results List:')
+        # Num results
+        blobs = list(self.service.list_blobs(container_name, num_results=2))
+        print('Num Results List:')
         for blob in blobs:
             print(blob.name) # blob1, blob2
 
@@ -277,10 +277,10 @@ class ContainerSamples():
         # for container in containers:
         #    print(container.name) # container1, container2, thirdq, all other containers created in the service        
 
-        # Max results
+        # Num results
         # Will return in alphabetical order. 
-        containers = list(self.service.list_containers(max_results=2))
-        print('Max Results List:')
+        containers = list(self.service.list_containers(num_results=2))
+        print('Num Results List:')
         for container in containers:
             print(container.name) # container1, container2
 
