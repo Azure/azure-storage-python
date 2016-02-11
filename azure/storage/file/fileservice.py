@@ -91,7 +91,14 @@ else:
 class FileService(StorageClient):
 
     '''
-    This is the main class managing File resources.
+    The Server Message Block (SMB) protocol is the preferred file share protocol
+    used on premise today. The Microsoft Azure File service enables customers to
+    leverage the availability and scalability of Azure’s Cloud Infrastructure as
+    a Service (IaaS) SMB without having to rewrite SMB client applications.
+
+    The Azure File service also offers a compelling alternative to traditional
+    Direct Attached Storage (DAS) and Storage Area Network (SAN) solutions, which
+    are often complex and expensive to install, configure, and operate. 
     '''
     MAX_SINGLE_GET_SIZE = 64 * 1024 * 1024
     MAX_CHUNK_GET_SIZE = 4 * 1024 * 1024
@@ -167,6 +174,8 @@ class FileService(StorageClient):
         :param str sas_token:
             Shared access signature token created with
             generate_shared_access_signature.
+        :return: file access URL.
+        :rtype: str
         '''
 
         if directory_name is None:
@@ -229,6 +238,8 @@ class FileService(StorageClient):
             Specifies the protocol permitted for a request made. Possible values are
             both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
             is https,http. Note that HTTP only is not a permitted value.
+        :return: A Shared Access Signature (sas) token.
+        :rtype: str
         '''
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
@@ -306,6 +317,8 @@ class FileService(StorageClient):
         :param str content_type:
             Response header value for Content-Type when resource is accessed
             using this shared access signature.
+        :return: A Shared Access Signature (sas) token.
+        :rtype: str
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('self.account_name', self.account_name)
@@ -403,6 +416,8 @@ class FileService(StorageClient):
         :param str content_type:
             Response header value for Content-Type when resource is accessed
             using this shared access signature.
+        :return: A Shared Access Signature (sas) token.
+        :rtype: str
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -444,7 +459,7 @@ class FileService(StorageClient):
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 
             and CORS will be disabled for the service.
-        :type cors: list of :class:`CorsRule`
+        :type cors: list of :class:`~azure.storage.models.CorsRule`
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -469,6 +484,9 @@ class FileService(StorageClient):
 
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: The file service properties.
+        :rtype:
+            :class:`~azure.storage.models.ServiceProperties`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -486,8 +504,14 @@ class FileService(StorageClient):
     def list_shares(self, prefix=None, marker=None, max_results=None, 
                     include_metadata=False, timeout=None):
         '''
-        The List Shares operation returns a list of the shares under
-        the specified account.
+        Returns a generator to list the shares under the specified account.
+        The generator will lazily follow the continuation tokens returned by
+        the service and stop when all shares have been returned or max_results is reached.
+
+        If max_results is specified and the account has more than that number of 
+        shares, the generator will have a populated next_marker field once it 
+        finishes. This marker can be used to create a new generator if more 
+        results are desired.
 
         :param str prefix:
             Filters the results to return only shares whose names
@@ -516,8 +540,7 @@ class FileService(StorageClient):
     def _list_shares(self, prefix=None, marker=None, max_results=None, 
                     include=None, timeout=None):
         '''
-        The List Shares operation returns a list of the shares under
-        the specified account.
+        Returns a list of the shares under the specified account.
 
         :param str prefix:
             Filters the results to return only shares whose names
@@ -530,7 +553,9 @@ class FileService(StorageClient):
             call to request the next set of list items. The marker value is
             opaque to the client.
         :param int max_results:
-            Specifies the maximum number of shares to return.
+            Specifies the maximum number of shares to return. A single list
+            request may return up to 1000 shares and potentially a continuation
+            token which should be followed to get additional resutls.
         :param string include:
             Include this parameter to specify that the share's
             metadata be returned as part of the response body. set this
@@ -567,7 +592,7 @@ class FileService(StorageClient):
         :param metadata:
             A dict with name_value pairs to associate with the
             share as metadata. Example:{'Category':'test'}
-        :type metadata: dict of str to str:
+        :type metadata: a dict of str to str:
         :param int quota:
             Specifies the maximum size of the share, in gigabytes. Must be 
             greater than 0, and less than or equal to 5TB (5120).
@@ -576,7 +601,8 @@ class FileService(StorageClient):
             False by default.
         :param int timeout:
             The timeout parameter is expressed in seconds.
-        :return: Boolean indicating if the share was created.
+        :return: True if share is created, False if share already exists.
+        :rtype: bool
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -605,14 +631,15 @@ class FileService(StorageClient):
     def get_share_properties(self, share_name, timeout=None):
         '''
         Returns all user-defined metadata and system properties for the
-        specified share.
+        specified share. The data returned does not include the shares's
+        list of files or directories.
 
         :param str share_name:
             Name of existing share.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A Share that exposes properties and metadata.
-        :rtype: :class:`.Share`:
+        :rtype: :class:`.Share`
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -656,13 +683,15 @@ class FileService(StorageClient):
 
     def get_share_metadata(self, share_name, timeout=None):
         '''
-        Returns all user-defined metadata for the specified share. The
-        metadata will be in returned dictionary['x-ms-meta-(name)'].
+        Returns all user-defined metadata for the specified share.
 
         :param str share_name:
             Name of existing share.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return:
+            A dictionary representing the share metadata name, value pairs.
+        :rtype: a dict mapping str to str
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -681,13 +710,15 @@ class FileService(StorageClient):
     def set_share_metadata(self, share_name, metadata=None, timeout=None):
         '''
         Sets one or more user-defined name-value pairs for the specified
-        share.
+        share. Each call to this operation replaces all existing metadata
+        attached to the share. To remove all metadata from the share,
+        call this operation with no metadata dict.
 
         :param str share_name:
             Name of existing share.
         :param metadata:
-            Name-value pairs associated with the blob as metadata.
-            Example: {'category':'test'}
+            A dict containing name-value pairs to associate with the share as 
+            metadata. Example: {'category':'test'}
         :type metadata: a dict mapping str to str
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -715,7 +746,7 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A dictionary of access policies associated with the share.
-        :rtype: dict of str to :class:`.AccessPolicy`:
+        :rtype: dict of str to :class:`.AccessPolicy`
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -742,7 +773,7 @@ class FileService(StorageClient):
             A dictionary of access policies to associate with the share. The 
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
+        :type signed_identifiers: dict of str to :class:`.AccessPolicy`
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -763,14 +794,18 @@ class FileService(StorageClient):
 
     def get_share_stats(self, share_name, timeout=None):
         '''
-        Gets statistics related to the share.
+        Gets the approximate size of the data stored on the share,
+        rounded up to the nearest gigabyte.
+        
+        Note that this value may not include all recently created
+        or recently resized files.
 
         :param str share_name:
             Name of existing share.
         :param int timeout:
             The timeout parameter is expressed in seconds.
-        :return: Returns statistics related to the share.
-        :rtype: :class:`~azure.storage.file.models.ShareStats`
+        :return: the approximate size of the data stored on the share.
+        :rtype: int
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -800,6 +835,8 @@ class FileService(StorageClient):
             exist. False by default.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: True if share is deleted, False share doesn't exist.
+        :rtype: bool
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -844,6 +881,8 @@ class FileService(StorageClient):
             False by default.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: True if directory is created, False if directory already exists.
+        :rtype: bool
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('directory_name', directory_name)
@@ -882,13 +921,15 @@ class FileService(StorageClient):
         :param str share_name:
             Name of existing share.
         :param str directory_name:
-            Name of directory to create, including the path to the parent 
+            Name of directory to delete, including the path to the parent 
             directory.
         :param bool fail_not_exist:
             Specify whether to throw an exception when the directory doesn't
             exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: True if directory is deleted, False otherwise.
+        :rtype: bool
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('directory_name', directory_name)
@@ -915,7 +956,8 @@ class FileService(StorageClient):
     def get_directory_properties(self, share_name, directory_name, timeout=None):
         '''
         Returns all user-defined metadata and system properties for the
-        specified directory.
+        specified directory. The data returned does not include the directory's
+        list of files.
 
         :param str share_name:
             Name of existing share.
@@ -923,6 +965,8 @@ class FileService(StorageClient):
            The path to an existing directory.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: properties for the specified directory within a directory object.
+        :rtype: :class:`~azure.storage.file.models.Directory`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('directory_name', directory_name)
@@ -948,6 +992,9 @@ class FileService(StorageClient):
             The path to the directory.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return:
+            A dictionary representing the directory metadata name, value pairs.
+        :rtype: a dict mapping str to str
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('directory_name', directory_name)
@@ -966,20 +1013,21 @@ class FileService(StorageClient):
 
     def set_directory_metadata(self, share_name, directory_name, metadata=None, timeout=None):
         '''
-        Sets user-defined metadata for the specified directory as one or more
-        name-value pairs.
+        Sets one or more user-defined name-value pairs for the specified
+        directory. Each call to this operation replaces all existing metadata
+        attached to the directory. To remove all metadata from the directory,
+        call this operation with no metadata dict.
 
         :param str share_name:
             Name of existing share.
         :param str directory_name:
             The path to the directory.
         :param metadata:
-            Dict containing name and value pairs.
+            A dict containing name-value pairs to associate with the directory
+            as metadata. Example: {'category':'test'}
         :type metadata: A dict mapping str to str.
         :param int timeout:
             The timeout parameter is expressed in seconds.
-        :return: Dictionary containing directory metadata.
-        :rtype: A dict mapping str to str.
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('directory_name', directory_name)
@@ -999,9 +1047,15 @@ class FileService(StorageClient):
     def list_directories_and_files(self, share_name, directory_name=None, 
                                    marker=None, max_results=None, timeout=None):
         '''
-        Returns a list of files or directories under the specified share or 
-        directory. It lists the contents only for a single level of the directory 
-        hierarchy.
+        Returns a generator to list the directories and files under the specified share.
+        The generator will lazily follow the continuation tokens returned by
+        the service and stop when all directories and files have been returned or
+        max_results is reached.
+
+        If max_results is specified and the share has more than that number of 
+        containers, the generator will have a populated next_marker field once it 
+        finishes. This marker can be used to create a new generator if more 
+        results are desired.
 
         :param str share_name:
             Name of existing share.
@@ -1032,9 +1086,7 @@ class FileService(StorageClient):
     def _list_directories_and_files(self, share_name, directory_name=None, 
                                    marker=None, max_results=None, timeout=None):
         '''
-        Returns a list of files or directories under the specified share or 
-        directory. It lists the contents only for a single level of the directory 
-        hierarchy.
+        Returns a list of the directories and files under the specified share.
 
         :param str share_name:
             Name of existing share.
@@ -1075,7 +1127,8 @@ class FileService(StorageClient):
     def get_file_properties(self, share_name, directory_name, file_name, timeout=None):
         '''
         Returns all user-defined metadata, standard HTTP properties, and
-        system properties for the file. Returns an instance of File with properties and metadata.
+        system properties for the file. Returns an instance of :class:`.File` with
+        :class:`.FileProperties` and a metadata dict.
 
         :param str share_name:
             Name of existing share.
@@ -1085,6 +1138,8 @@ class FileService(StorageClient):
             Name of existing file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: a file object including properties and metadata.
+        :rtype: :class:`~azure.storage.file.models.File`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -1099,8 +1154,10 @@ class FileService(StorageClient):
 
     def exists(self, share_name, directory_name=None, file_name=None, timeout=None):
         '''
-        Returns a boolean indicating whether the share exists, the directory 
-        exists, or the file exists.
+        Returns a boolean indicating whether the share exists if only share name is
+        given. If directory_name is specificed a boolean will be returned indicating
+        if the directory exists. If file_name is specified as well, a boolean will be
+        returned indicating if the file exists.
 
         :param str share_name:
             Name of a share.
@@ -1110,6 +1167,8 @@ class FileService(StorageClient):
             Name of a file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: A boolean indicating whether the resource exists.
+        :rtype: bool
         '''
         _validate_not_none('share_name', share_name)
         try:
@@ -1127,8 +1186,10 @@ class FileService(StorageClient):
     def resize_file(self, share_name, directory_name, 
                     file_name, content_length, timeout=None):
         '''
-        Resizes a file to the specified size.
-
+        Resizes a file to the specified size. If the specified byte
+        value is less than the current size of the file, then all
+        ranges above the specified byte value are cleared.
+        
         :param str share_name:
             Name of existing share.
         :param str directory_name:
@@ -1136,10 +1197,7 @@ class FileService(StorageClient):
         :param str file_name:
             Name of existing file.
         :param int content_length:
-            The length to resize the file to. If the specified byte 
-            value is less than the current size of the file,
-            then all ranges above the specified byte value 
-            are cleared.
+            The length to resize the file to.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -1162,7 +1220,8 @@ class FileService(StorageClient):
     def set_file_properties(self, share_name, directory_name, file_name, 
                             content_settings, timeout=None):
         '''
-        Sets system properties on the file.
+        Sets system properties on the file. If one property is set for the
+        content_settings, all properties will be overriden.
 
         :param str share_name:
             Name of existing share.
@@ -1203,7 +1262,8 @@ class FileService(StorageClient):
             Name of existing file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
-        :return: A dictionary containing file metadata.
+        :return:
+            A dictionary representing the file metadata name, value pairs.
         :rtype: dict mapping str to str.
         '''
         _validate_not_none('share_name', share_name)
@@ -1233,7 +1293,9 @@ class FileService(StorageClient):
         :param str file_name:
             Name of existing file.
         :param metadata:
-            Dict containing name and value pairs.
+            Dict containing name and value pairs. Each call to this operation
+            replaces all existing metadata attached to the file. To remove all
+            metadata from the file, call this operation with no metadata headers.
         :type metadata: dict mapping str to str
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1255,7 +1317,7 @@ class FileService(StorageClient):
     def copy_file(self, share_name, directory_name, file_name, copy_source,
                   metadata=None, timeout=None):
         '''
-        Copies a file to a destination within the storage account.
+        Copies a blob or file to a destination file within the storage account. 
 
         :param str share_name:
             Name of existing share.
@@ -1264,15 +1326,18 @@ class FileService(StorageClient):
         :param str file_name:
             Name of existing file.
         :param str copy_source:
-            Specifies the URL of the source file or file, up to 2 KB in length. 
+            Specifies the URL of the source blob or file, up to 2 KB in length. 
             A source file in the same account can be private, but a file in another account
             must be public or accept credentials included in this URL, such as
-            a Shared Access Signature.
+            a Shared Access Signature. Examples:
+            https://myaccount.file.core.windows.net/myshare/mydirectory/myfile
         :param metadata:
-            Optional. Dict containing name and value pairs.
-        :type metadata: a dict mapping str to str.
+            Dict containing name, value pairs.
+        :type metadata: A dict mapping str to str.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: Copy operation properties such as status, source, and ID.
+        :rtype: :class:`~azure.storage.file.models.CopyProperties`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -1304,7 +1369,7 @@ class FileService(StorageClient):
         :param str file_name:
              Name of destination file.
         :param str copy_id:
-            Copy identifier provided in the copy_id of the original
+            Copy identifier provided in the copy.id of the original
             copy_file operation.
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1355,12 +1420,11 @@ class FileService(StorageClient):
                     content_length, content_settings=None, metadata=None, 
                     timeout=None):
         '''
-        Creates a new block file or range file, or updates the content of an
-        existing block file.
+        Creates a new file.
 
-        See put_block_file_from_* and put_file_range_from_* for high level
-        functions that handle the creation and upload of large files with
-        automatic chunking and progress notifications.
+        See create_file_from_* for high level functions that handle the
+        creation and upload of large files with automatic chunking and
+        progress notifications.
 
         :param str share_name:
             Name of existing share.
@@ -1371,7 +1435,7 @@ class FileService(StorageClient):
         :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
-            Name-value pairs associated with the blob as metadata.
+            Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
         :param int timeout:
             The timeout parameter is expressed in seconds.
@@ -1413,7 +1477,7 @@ class FileService(StorageClient):
         :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used for setting file properties.
         :param metadata:
-            Name-value pairs associated with the blob as metadata.
+            Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1451,7 +1515,7 @@ class FileService(StorageClient):
                            metadata=None, timeout=None):
         '''
         Creates a new file from str/unicode, or updates the content of an
-        existing file.
+        existing file, with automatic chunking and progress notifications.
 
         :param str share_name:
             Name of existing share.
@@ -1462,11 +1526,11 @@ class FileService(StorageClient):
         :param str text:
             Text to upload to the file.
         :param str encoding:
-            Encoding to use to convert the text to bytes.
+            Python encoding to use to convert the text to bytes.
         :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
-            Name-value pairs associated with the blob as metadata.
+            Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
@@ -1491,8 +1555,8 @@ class FileService(StorageClient):
         progress_callback=None, max_connections=1, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
-        Creates a new page file from an array of bytes, or updates the content
-        of an existing page file, with automatic chunking and progress
+        Creates a new file from an array of bytes, or updates the content
+        of an existing file, with automatic chunking and progress
         notifications.
 
         :param str share_name:
@@ -1511,7 +1575,7 @@ class FileService(StorageClient):
         :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
-            Name-value pairs associated with the blob as metadata.
+            Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1557,8 +1621,8 @@ class FileService(StorageClient):
         content_settings=None, metadata=None, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
         '''
-        Creates a new page file from a file/stream, or updates the content of an
-        existing page file, with automatic chunking and progress notifications.
+        Creates a new file from a file/stream, or updates the content of an
+        existing file, with automatic chunking and progress notifications.
 
         :param str share_name:
             Name of existing share.
@@ -1569,12 +1633,12 @@ class FileService(StorageClient):
         :param io.IOBase stream:
             Opened file/stream to upload as the file content.
         :param int count:
-            Number of bytes to read from the stream. This is required, a page
+            Number of bytes to read from the stream. This is required, a
             file cannot be created if the count is unknown.
         :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
-            Name-value pairs associated with the blob as metadata.
+            Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -1651,18 +1715,20 @@ class FileService(StorageClient):
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
             range, as long as the range is less than or equal to 4 MB in size.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :return: A File with content, properties, and metadata.
+        :rtype: :class:`~azure.storage.file.models.File`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -1704,12 +1770,12 @@ class FileService(StorageClient):
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1731,6 +1797,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: A File with properties and metadata.
+        :rtype: :class:`~azure.storage.file.models.File`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -1753,7 +1821,8 @@ class FileService(StorageClient):
         retry_wait=1.0, timeout=None):
         '''
         Downloads a file to a stream, with automatic chunking and progress
-        notifications. Returns an instance of File with properties and metadata.
+        notifications. Returns an instance of :class:`File` with properties
+        and metadata.
 
         :param str share_name:
             Name of existing share.
@@ -1767,12 +1836,12 @@ class FileService(StorageClient):
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1794,6 +1863,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: A File with properties and metadata.
+        :rtype: :class:`~azure.storage.file.models.File`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -1859,7 +1930,8 @@ class FileService(StorageClient):
                           retry_wait=1.0, timeout=None):
         '''
         Downloads a file as an array of bytes, with automatic chunking and
-        progress notifications. Returns an instance of File with properties, metadata, and content.
+        progress notifications. Returns an instance of :class:`File` with
+        properties, metadata, and content.
 
         :param str share_name:
             Name of existing share.
@@ -1871,12 +1943,12 @@ class FileService(StorageClient):
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1898,6 +1970,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: A File with properties, content, and metadata.
+        :rtype: :class:`~azure.storage.file.models.File`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -1927,7 +2001,8 @@ class FileService(StorageClient):
         retry_wait=1.0, timeout=None):
         '''
         Downloads a file as unicode text, with automatic chunking and progress
-        notifications. Returns an instance of File with properties, metadata, and content.
+        notifications. Returns an instance of :class:`File` with properties,
+        metadata, and content.
 
         :param str share_name:
             Name of existing share.
@@ -1941,12 +2016,12 @@ class FileService(StorageClient):
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int end_range:
             End of byte range to use for downloading a section of the file.
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param bool range_get_content_md5:
             When this header is set to True and specified together
             with the Range header, the service returns the MD5 hash for the
@@ -1968,6 +2043,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: A File with properties, content, and metadata.
+        :rtype: :class:`~azure.storage.file.models.File`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -2006,12 +2083,12 @@ class FileService(StorageClient):
             Start of byte range to use for updating a section of the file.
             The range can be up to 4 MB in size.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int end_range:
             End of byte range to use for updating a section of the file.
             The range can be up to 4 MB in size.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param str content_md5:
             An MD5 hash of the range content. This hash is used to
             verify the integrity of the range during transport. When this header
@@ -2043,7 +2120,8 @@ class FileService(StorageClient):
 
         self._perform_request(request)
 
-    def clear_range(self, share_name, directory_name, file_name, start_range, end_range, timeout=None):
+    def clear_range(self, share_name, directory_name, file_name, start_range,
+                    end_range, timeout=None):
         '''
         Clears the specified range and releases the space used in storage for 
         that range.
@@ -2058,12 +2136,12 @@ class FileService(StorageClient):
             Start of byte range to use for clearing a section of the file.
             The range can be up to 4 MB in size.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int end_range:
             End of byte range to use for clearing a section of the file.
             The range can be up to 4 MB in size.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -2089,17 +2167,7 @@ class FileService(StorageClient):
     def list_ranges(self, share_name, directory_name, file_name,
                     start_range=None, end_range=None, timeout=None):
         '''
-        Retrieves the ranges for a file. If the x-ms-range header is specified 
-        on a request, then the service uses the range specified by x-ms-range; 
-        otherwise, the range specified by the Range header is used. If both are
-        omitted, then all ranges for the file are returned.
-
-        Some File service GET operations support the use of the standard HTTP 
-        Range header. Many HTTP clients, including the .NET client library, 
-        limit the size of the Range header to a 32-bit integer, and thus its 
-        value is limited to a maximum of 4 GB. Since files can be larger than 
-        4 GB in size, the File service accepts a custom range header x-ms-range 
-        for any operation that takes an HTTP Range header. 
+        Retrieves the valid ranges for a file.
 
         :param str share_name:
             Name of existing share.
@@ -2110,13 +2178,15 @@ class FileService(StorageClient):
         :param int start_range:
             Specifies the start offset of bytes over which to list ranges.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int end_range:
             Specifies the end offset of bytes over which to list ranges.
             The start_range and end_range params are inclusive.
-            Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :returns: a list of valid ranges
+        :rtype: a list of :class:`.FileRange`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)

@@ -180,6 +180,8 @@ class BaseBlobService(StorageClient):
         :param str sas_token:
             Shared access signature token created with
             generate_shared_access_signature.
+        :return: blob access URL.
+        :rtype: str
         '''
 
         url = '{}://{}/{}/{}'.format(
@@ -557,7 +559,7 @@ class BaseBlobService(StorageClient):
             container's lease is active and matches this ID.
         :param int timeout:
             The timeout parameter is expressed in seconds.
-        :return: properties for the specified container with a container object.
+        :return: properties for the specified container within a container object.
         :rtype: :class:`~azure.storage.blob.models.Container`
         '''
         _validate_not_none('container_name', container_name)
@@ -610,7 +612,7 @@ class BaseBlobService(StorageClient):
         Sets one or more user-defined name-value pairs for the specified
         container. Each call to this operation replaces all existing metadata
         attached to the container. To remove all metadata from the container,
-        call this operation with no metadata headers.
+        call this operation with no metadata dict.
 
         :param str container_name:
             Name of existing container.
@@ -697,7 +699,7 @@ class BaseBlobService(StorageClient):
             A dictionary of access policies to associate with the container. The 
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`.AccessPolicy`:
+        :type signed_identifiers: dict of str to :class:`.AccessPolicy`
         :param blob_public_access:
             Possible values include: container, blob.
         :type str: one of the values listed in the :class:`~azure.storage.blob.models.PublicAccess`enum.
@@ -741,8 +743,8 @@ class BaseBlobService(StorageClient):
                          lease_id=None, if_modified_since=None,
                          if_unmodified_since=None, timeout=None):
         '''
-        Marks the specified container for deletion.
-        The container and any blobs contained within it are later deleted during garbage collection.
+        Marks the specified container for deletion. The container and any blobs
+        contained within it are later deleted during garbage collection.
 
         :param str container_name:
             Name of container to delete.
@@ -1372,7 +1374,8 @@ class BaseBlobService(StorageClient):
         if_modified_since=None, if_unmodified_since=None, if_match=None,
         if_none_match=None, timeout=None):
         '''
-        Sets system properties on the blob.
+        Sets system properties on the blob. If one property is set for the
+        content_settings, all properties will be overriden.
 
         :param str container_name:
             Name of existing container.
@@ -1559,7 +1562,7 @@ class BaseBlobService(StorageClient):
         '''
         Downloads a blob to a file path, with automatic chunking and progress
         notifications. Returns an instance of :class:`Blob` with 
-        properties, metadata, and content.
+        properties and metadata.
 
         :param str container_name:
             Name of existing container.
@@ -1666,7 +1669,7 @@ class BaseBlobService(StorageClient):
         '''
         Downloads a blob to a stream, with automatic chunking and progress
         notifications. Returns an instance of :class:`Blob` with
-        properties, metadata, and content.
+        properties and metadata.
 
         :param str container_name:
             Name of existing container.
@@ -2744,7 +2747,7 @@ class BaseBlobService(StorageClient):
          :param str blob_name:
              Name of destination blob.
          :param str copy_id:
-             Copy identifier provided in the x-ms-copy-id of the original
+             Copy identifier provided in the copy.id of the original
              copy_blob operation.
          :param str lease_id:
              Required if the destination blob has an active infinite lease.

@@ -22,7 +22,7 @@ from .models import (
     Directory,
     File,
     FileProperties,
-    Range,
+    FileRange,
     ShareProperties,
     DirectoryProperties,
 )
@@ -192,9 +192,7 @@ def _convert_xml_to_ranges(response):
 
     for range_element in ranges_element.findall('Range'):
         # Parse range
-        range = Range()
-        range.start = int(range_element.findtext('Start'))
-        range.end = int(range_element.findtext('End'))
+        range = FileRange(int(range_element.findtext('Start')), int(range_element.findtext('End')))
         
         # Add range to list
         ranges.append(range)

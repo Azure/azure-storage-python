@@ -19,7 +19,7 @@ from .models import (
     FileProperties,
     Directory,
     DirectoryProperties,
-    Range,
+    FileRange,
     ContentSettings,
     CopyProperties,
     SharePermissions,
