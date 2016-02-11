@@ -245,6 +245,19 @@ class LeaseProperties(object):
         self.duration = None
 
 
+class BlobPrefix(object):
+    '''
+    BlobPrefix objects may potentially returned in the blob list when 
+    :func:`~azure.storage.blob.baseblobservice.BaseBlobService.list_blobs` is 
+    used with a delimiter. Prefixes can be thought of as virtual blob directories.
+    
+    :ivar str name: The name of the blob prefix.
+    '''
+
+    def __init__(self):
+        self.name = None
+
+
 class BlobBlockState(object):
     '''Block blob block types.'''
 

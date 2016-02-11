@@ -319,7 +319,7 @@ class StoragePageBlobTest(StorageTestCase):
         blob_name = self._create_blob(1024)
         
         # Act
-        resp = self.bs.resize(self.container_name, blob_name, 512)
+        resp = self.bs.resize_blob(self.container_name, blob_name, 512)
 
         # Assert
         self.assertIsNotNone(resp.etag)

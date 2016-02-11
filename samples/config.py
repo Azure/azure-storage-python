@@ -12,29 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from .models import (
-    Container,
-    ContainerProperties,
-    Blob,
-    BlobProperties,
-    BlobBlock,
-    BlobBlockList,
-    PageRange,
-    ContentSettings,
-    CopyProperties,
-    ContainerPermissions,
-    BlobPermissions,
-    _LeaseActions,
-    AppendBlockProperties,
-    PageBlobProperties,
-    ResourceProperties,
-    Include,
-    SequenceNumberAction,
-    BlockListType,
-    PublicAccess,
-    BlobPrefix,
-)
 
-from .blockblobservice import BlockBlobService
-from .pageblobservice import PageBlobService
-from .appendblobservice import AppendBlobService
+STORAGE_ACCOUNT_NAME = ''
+STORAGE_ACCOUNT_KEY = ''
+SAS = ''
+IS_EMULATED = False
