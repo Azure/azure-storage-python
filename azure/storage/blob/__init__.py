@@ -33,6 +33,7 @@ from .models import (
     BlockListType,
     PublicAccess,
     BlobPrefix,
+    DeleteSnapshot,
 )
 
 from .blockblobservice import BlockBlobService

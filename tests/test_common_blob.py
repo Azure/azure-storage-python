@@ -32,6 +32,7 @@ from azure.storage.blob import (
     BlockBlobService,
     BlobPermissions,
     ContentSettings,
+    DeleteSnapshot,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -501,7 +502,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         self.bs.delete_blob(self.container_name, blob_name,
-                            delete_snapshots='only')
+                            delete_snapshots=DeleteSnapshot.Only)
 
         # Assert
         blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
@@ -516,7 +517,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         self.bs.delete_blob(self.container_name, blob_name,
-                            delete_snapshots='include')
+                            delete_snapshots=DeleteSnapshot.Include)
 
         # Assert
         blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
