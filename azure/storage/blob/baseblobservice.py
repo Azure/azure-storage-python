@@ -514,7 +514,7 @@ class BaseBlobService(StorageClient):
         :param blob_public_access:
             Possible values include: container, blob.
         :type blob_public_access:
-            one of the values listed in the :class:`~azure.storage.blob.models.PublicAccess`enum.
+            One of the values listed in the :class:`~azure.storage.blob.models.PublicAccess` enum.
         :param bool fail_on_exist:
             Specify whether to throw an exception when the container exists.
         :param int timeout:
@@ -701,7 +701,8 @@ class BaseBlobService(StorageClient):
         :type signed_identifiers: dict of str to :class:`.AccessPolicy`
         :param blob_public_access:
             Possible values include: container, blob.
-        :type str: one of the values listed in the :class:`~azure.storage.blob.models.PublicAccess`enum.
+        :type blob_public_access: 
+            One of the values listed in the :class:`~azure.storage.blob.models.PublicAccess` enum.
         :param str lease_id:
             If specified, set_container_acl only succeeds if the
             container's lease is active and matches this ID.
@@ -1127,24 +1128,8 @@ class BaseBlobService(StorageClient):
             num_results or specifies a value greater than 5,000, the server will
             return up to 5,000 items. Setting num_results to a value less than
             or equal to zero results in error response code 400 (Bad Request).
-        :param str include:
-            Specifies one or more datasets to include in the
-            response. To specify more than one of these options on the URI,
-            you must separate each option with a comma. Valid values are:
-                snapshots:
-                    Specifies that snapshots should be included in the
-                    enumeration. Snapshots are listed from oldest to newest in
-                    the response.
-                metadata:
-                    Specifies that blob metadata be returned in the response.
-                uncommittedblobs:
-                    Specifies that blobs for which blocks have been uploaded,
-                    but which have not been committed using Put Block List
-                    (REST API), be included in the response.
-                copy:
-                    Version 2012-02-12 and newer. Specifies that metadata
-                    related to any current or previous Copy Blob operation
-                    should be included in the response.
+        :param ~azure.storage.blob.models.Include include:
+            Specifies one or more additional datasets to include in the response.
         :param str delimiter:
             When the request includes this parameter, the operation
             returns a :class:`~azure.storage.blob.models.BlobPrefix` element in the
@@ -2792,19 +2777,10 @@ class BaseBlobService(StorageClient):
             when present, specifies the blob snapshot to delete.
         :param str lease_id:
             Required if the blob has an active lease.
-        :param str delete_snapshots:
-            Required if the blob has associated snapshots. Specify one of the
-            following two options:
-                include:
-                    Delete the base blob and all of its snapshots.
-                only:
-                    Delete only the blob's snapshots and not the blob itself.
-            This header should be specified only for a request against the base
-            blob resource. If this header is specified on a request to delete
-            an individual snapshot, the Blob service returns status code 400
-            (Bad Request). If this header is not specified on the request and
-            the blob has associated snapshots, the Blob service returns status
-            code 409 (Conflict).
+        :param delete_snapshots:
+            Required if the blob has associated snapshots.
+        :type delete_snapshots: 
+            One of the values listed in the :class:`~azure.storage.blob.models.DeleteSnapshot` enum.
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.

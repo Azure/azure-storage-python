@@ -391,6 +391,21 @@ class PublicAccess(object):
     within the storage account.
     '''
 
+class DeleteSnapshot(object):
+    '''
+    Required if the blob has associated snapshots. Specifies how to handle the snapshots.
+    '''
+
+    Include = 'include'
+    '''
+    Delete the base blob and all of its snapshots.
+    '''
+
+    Only = 'only'
+    '''
+    Delete only the blob's snapshots and not the blob itself.
+    '''
+
 class BlockListType(object):
     '''
     Specifies whether to return the list of committed blocks, the list of uncommitted 
@@ -461,14 +476,14 @@ class Include(object):
     '''
     Specifies the datasets to include in the blob list response.
 
-    :ivar Include Include.COPY: 
+    :ivar ~azure.storage.blob.models.Include Include.COPY: 
         Specifies that metadata related to any current or previous Copy Blob operation 
         should be included in the response.
-    :ivar Include Include.METADATA: 
+    :ivar ~azure.storage.blob.models.Include Include.METADATA: 
         Specifies that metadata be returned in the response.
-    :ivar Include Include.SNAPSHOTS: 
+    :ivar ~azure.storage.blob.models.Include Include.SNAPSHOTS: 
         Specifies that snapshots should be included in the enumeration.
-    :ivar Include Include.UNCOMMITTED_BLOBS: 
+    :ivar ~azure.storage.blob.models.Include Include.UNCOMMITTED_BLOBS: 
         Specifies that blobs for which blocks have been uploaded, but which have not 
         been committed using Put Block List, be included in the response.
     '''
