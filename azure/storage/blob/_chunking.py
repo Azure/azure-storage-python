@@ -20,7 +20,7 @@ from .._serialization import url_quote
 from azure.common import (
     AzureHttpError,
 )
-
+from .._error import _ERROR_NO_SINGLE_THREAD_CHUNKING
 from .models import BlobBlock
 
 
@@ -272,10 +272,7 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
                           if_modified_since, if_unmodified_since, if_match, if_none_match, 
                           timeout):
     if max_connections <= 1:
-        raise ValueError(
-            'To use blob chunk downloader more than 1 thread must be ' +
-            'used since get_blob_to_bytes should be called for single threaded ' +
-            'blob downloads.')
+        raise ValueError(_ERROR_NO_SINGLE_THREAD_CHUNKING.format('blob'))
 
     downloader = _BlobChunkDownloader(
         blob_service,

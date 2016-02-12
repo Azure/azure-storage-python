@@ -34,6 +34,16 @@ _ERROR_VALUE_SHOULD_BE_BYTES = '{0} should be of type bytes.'
 _ERROR_VALUE_NONE = '{0} should not be None.'
 _ERROR_VALUE_NONE_OR_EMPTY = '{0} should not be None or empty.'
 _ERROR_VALUE_NEGATIVE = '{0} should not be negative.'
+_ERROR_NO_SINGLE_THREAD_CHUNKING = \
+    'To use {0} chunk downloader more than 1 thread must be ' + \
+    'used since get_{0}_to_bytes should be called for single threaded ' + \
+    '{0} downloads.'
+_ERROR_START_END_NEEDED_FOR_MD5 = \
+    'Both end_range and start_range need to be specified ' + \
+    'for getting content MD5.'
+_ERROR_RANGE_TOO_LARGE_FOR_MD5 = \
+    'Getting content MD5 for a range greater than 4MB ' + \
+    'is not supported.'
 
 def _dont_fail_on_exist(error):
     ''' don't throw exception if the resource exists.
