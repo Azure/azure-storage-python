@@ -24,10 +24,10 @@ please visit https://github.com/Azure/azure-sdk-for-python
    
 Documentation:
 --------------
-* :doc:`Blob<blob>` -- (:doc:`API <ref/azure.storage.blob>`)
-* :doc:`Queue<queue>` -- (:doc:`API <ref/azure.storage.queue>`)
-* :doc:`Table<table>` -- (:doc:`API <ref/azure.storage.table>`)
-* :doc:`File<file>` -- (:doc:`API <ref/azure.storage.file>`)
+* `Blob <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-blob-storage/>`__ -- (:doc:`API <ref/azure.storage.blob>`)
+* `Queue <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-queue-storage/>`__ -- (:doc:`API <ref/azure.storage.queue>`)
+* `Table <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-table-storage/>`__ -- (:doc:`API <ref/azure.storage.table>`)
+* `File <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-file-storage/>`__ -- (:doc:`API <ref/azure.storage.file>`)
 * :ref:`All Documentation <modindex>`
 
 
@@ -115,8 +115,5 @@ Indices and tables
   :hidden:
   :glob:
 
-  blob
-  queue
-  table
-  file
-  ref/*  
+  upgrade
+  ref/*

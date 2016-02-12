@@ -2,7 +2,7 @@
 
 > See the [Change Log](https://github.com/Azure/azure-sdk-for-python/tree/dev/azure-storage/ChangeLog.md) for a summary of storage library changes.
 
-## Version X.X.X
+## Version 0.30.0
 
 ### All:
 - UserAgent string has changed to conform to the Azure Storage standard.
