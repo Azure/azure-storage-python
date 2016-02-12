@@ -18,6 +18,9 @@ import copy
 import requests
 
 from abc import ABCMeta
+from azure.common import (
+    AzureException,
+)
 from ._constants import (
     _USER_AGENT_STRING,
     _SOCKET_TIMEOUT
@@ -117,7 +120,20 @@ class StorageClient(object):
                 encoding:
                 resp = resp.decode(encoding)
 
+        # Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException
         except HTTPError as ex:
             _storage_error_handler(ex)
+
+        # Wrap all other exceptions as AzureExceptions to ease exception handling code
+        except Exception as ex:
+            if sys.version_info >= (3,):
+                # Automatic chaining in Python 3 means we keep the trace
+                raise AzureException
+            else:
+                # There isn't a good solution in 2 for keeping the stack trace 
+                # in general, or that will not result in an error in 3
+                # However, we can keep the previous error type and message
+                # TODO: In the future we will log the trace
+                raise AzureException('{}: {}'.format(ex.__class__.__name__, ex.args[0]))
 
         return resp

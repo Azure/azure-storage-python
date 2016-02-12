@@ -8,6 +8,7 @@
 - UserAgent string has changed to conform to the Azure Storage standard.
 - Added optional timeout parameter to all APIs.
 - Empty headers are signed.
+- Exceptions produced after request construction and before request parsing (ie, connection or HTTP exceptions) are always wrapped as type AzureException.
 
 ### Shared Access Signatures (SAS) and ACL
 - Added support for Account SAS. See CloudStorageAccount.generateSharedAccessSignature and the generate_account_shared_access_signature methods on each service.
