@@ -15,7 +15,7 @@
 import threading
 
 from time import sleep
-
+from .._error import _ERROR_NO_SINGLE_THREAD_CHUNKING
 
 class _FileChunkDownloader(object):
     def __init__(self, file_service, share_name, directory_name, file_name, 
@@ -207,10 +207,7 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
                           max_connections, max_retries, retry_wait, progress_callback,
                           timeout):
     if max_connections <= 1:
-        raise ValueError(
-            'To use file chunk downloader more than 1 thread must be ' +
-            'used since _get_file should be called for single threaded ' +
-            'file downloads.')
+        raise ValueError(_ERROR_NO_SINGLE_THREAD_CHUNKING.format('file'))
 
     downloader = _FileChunkDownloader(
         file_service,

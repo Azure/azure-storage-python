@@ -19,6 +19,10 @@ from .._error import (
     _validate_not_none,
     _ERROR_PARALLEL_NOT_SEEKABLE
 )
+from ._error import (
+    _ERROR_INVALID_LEASE_DURATION,
+    _ERROR_INVALID_LEASE_BREAK_PERIOD,
+)
 from .._common_conversion import (
     _int_or_none,
     _str,
@@ -918,7 +922,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('lease_duration', lease_duration)
         if lease_duration is not -1 and\
            (lease_duration < 15 or lease_duration > 60):
-            raise ValueError("lease_duration param needs to be between 15 and 60 or -1.")
+            raise ValueError(_ERROR_INVALID_LEASE_DURATION)
 
         response = self._lease_container_impl(container_name, 
                                           _LeaseActions.Acquire,
@@ -1051,7 +1055,7 @@ class BaseBlobService(StorageClient):
         :return: int
         '''
         if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
-            raise ValueError("lease_break_period param needs to be between 0 and 60.")
+            raise ValueError(_ERROR_INVALID_LEASE_BREAK_PERIOD)
         
         response = self._lease_container_impl(container_name, 
                                           _LeaseActions.Break,
@@ -2261,7 +2265,7 @@ class BaseBlobService(StorageClient):
 
         if lease_duration is not -1 and\
            (lease_duration < 15 or lease_duration > 60):
-            raise ValueError("lease_duration param needs to be between 15 and 60 or -1.")
+            raise ValueError(_ERROR_INVALID_LEASE_DURATION)
         response = self._lease_blob_impl(container_name,
                                      blob_name,
                                      _LeaseActions.Acquire,
@@ -2436,7 +2440,7 @@ class BaseBlobService(StorageClient):
         :return: int
         '''
         if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
-            raise ValueError("lease_break_period param needs to be between 0 and 60.")
+            raise ValueError(_ERROR_INVALID_LEASE_BREAK_PERIOD)
 
         response = self._lease_blob_impl(container_name,
                                      blob_name,

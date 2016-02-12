@@ -19,6 +19,8 @@ from .._common_conversion import (
 )
 from .._error import (
     _validate_not_none,
+    _ERROR_START_END_NEEDED_FOR_MD5,
+    _ERROR_RANGE_TOO_LARGE_FOR_MD5,
 )
 from .._common_conversion import _str
 
@@ -65,8 +67,8 @@ def _validate_and_format_range_headers(request, start_range, end_range, start_ra
 
     if check_content_md5 == True:
         if start_range is None or end_range is None:
-            raise ValueError('Both end_range and start_range need to be specified for getting content MD5.')
+            raise ValueError(_ERROR_START_END_NEEDED_FOR_MD5)
         if end_range - start_range > 4 * 1024 * 1024:
-            raise ValueError('Getting content MD5 for a range greater than 4MB is not supported.')
+            raise ValueError(_ERROR_RANGE_TOO_LARGE_FOR_MD5)
 
         request.headers.append(('x-ms-range-get-content-md5', 'true'))
