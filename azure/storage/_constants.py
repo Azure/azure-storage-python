@@ -15,12 +15,12 @@
 import platform
 
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '0.20.2'
+__version__ = '0.30.0'
 
 # x-ms-version for storage service.
 X_MS_VERSION = '2015-04-05'
 
-# UserAgent string sample: 'Azure-Storage/0.20.0rc2 (Python CPython 3.4.2; Windows 8)'
+# UserAgent string sample: 'Azure-Storage/0.30.0 (Python CPython 3.4.2; Windows 8)'
 _USER_AGENT_STRING = 'Azure-Storage/{} (Python {} {}; {} {})'.format(__version__, platform.python_implementation(), platform.python_version(), platform.system(), platform.release())
 
 # Live ServiceClient URLs

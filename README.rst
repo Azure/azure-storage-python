@@ -28,6 +28,8 @@ If you see azure==0.11.0 (or any version below 1.0), uninstall it first:
 
     pip uninstall azure
 
+If you are upgrading from a version older than 0.30.0, see the upgrade doc, the 
+usage samples in the samples directory, and the ChangeLog and BreakingChanges.
 
 Features
 ========
@@ -107,7 +109,7 @@ first `create an account`_.
 Code Sample
 -----------
 
-TODO
+See the samples directory for blob, queue, table, and file usage samples.
 
 Need Help?
 ==========

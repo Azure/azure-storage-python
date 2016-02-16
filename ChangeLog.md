@@ -2,7 +2,7 @@
 
 > See [BreakingChanges](https://github.com/Azure/azure-sdk-for-python/tree/dev/azure-storage/BreakingChanges.md) for a detailed list of API breaks.
 
-## Version X.X.X:
+## Version 0.30.0:
 
 ### All:
 - UserAgent string has changed to conform to the Azure Storage standard.
