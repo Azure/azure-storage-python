@@ -88,6 +88,7 @@ class _ServiceParameters(object):
             else:
                 self.secondary_endpoint = None
 
+    @staticmethod
     def get_service_parameters(service, account_name=None, account_key=None, sas_token=None, is_emulated=None, 
                  protocol=None, endpoint_suffix=None, custom_domain=None, request_session=None, 
                  connection_string=None):
@@ -110,6 +111,7 @@ class _ServiceParameters(object):
         params.request_session = request_session
         return params
 
+    @staticmethod
     def _from_connection_string(connection_string, service):
         # Split into key=value pairs removing empties, then split the pairs into a dict
         config = dict(s.split('=', 1) for s in connection_string.split(';') if s)

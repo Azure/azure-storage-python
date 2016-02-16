@@ -223,7 +223,7 @@ class StorageQueueTest(StorageTestCase):
     def test_get_queue_metadata_message_count(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
         metadata = self.qs.get_queue_metadata(queue_name)
 
         # Asserts
@@ -255,19 +255,19 @@ class StorageQueueTest(StorageTestCase):
     def test_put_message(self):
         # Action.  No exception means pass. No asserts needed.
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
-        self.qs.put_message(queue_name, 'message2')
-        self.qs.put_message(queue_name, 'message3')
-        self.qs.put_message(queue_name, 'message4')
+        self.qs.put_message(queue_name, u'message1')
+        self.qs.put_message(queue_name, u'message2')
+        self.qs.put_message(queue_name, u'message3')
+        self.qs.put_message(queue_name, u'message4')
 
     @record
     def test_get_messages(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
-        self.qs.put_message(queue_name, 'message2')
-        self.qs.put_message(queue_name, 'message3')
-        self.qs.put_message(queue_name, 'message4')
+        self.qs.put_message(queue_name, u'message1')
+        self.qs.put_message(queue_name, u'message2')
+        self.qs.put_message(queue_name, u'message3')
+        self.qs.put_message(queue_name, u'message4')
         result = self.qs.get_messages(queue_name)
 
         # Asserts
@@ -276,7 +276,7 @@ class StorageQueueTest(StorageTestCase):
         message = result[0]
         self.assertIsNotNone(message)
         self.assertNotEqual('', message.id)
-        self.assertEqual('message1', message.content)
+        self.assertEqual(u'message1', message.content)
         self.assertNotEqual('', message.pop_receipt)
         self.assertEqual('1', message.dequeue_count)
 
@@ -288,10 +288,10 @@ class StorageQueueTest(StorageTestCase):
     def test_get_messages_with_options(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
-        self.qs.put_message(queue_name, 'message2')
-        self.qs.put_message(queue_name, 'message3')
-        self.qs.put_message(queue_name, 'message4')
+        self.qs.put_message(queue_name, u'message1')
+        self.qs.put_message(queue_name, u'message2')
+        self.qs.put_message(queue_name, u'message3')
+        self.qs.put_message(queue_name, u'message4')
         result = self.qs.get_messages(
             queue_name, num_messages=4, visibility_timeout=20)
 
@@ -313,10 +313,10 @@ class StorageQueueTest(StorageTestCase):
     def test_peek_messages(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
-        self.qs.put_message(queue_name, 'message2')
-        self.qs.put_message(queue_name, 'message3')
-        self.qs.put_message(queue_name, 'message4')
+        self.qs.put_message(queue_name, u'message1')
+        self.qs.put_message(queue_name, u'message2')
+        self.qs.put_message(queue_name, u'message3')
+        self.qs.put_message(queue_name, u'message4')
         result = self.qs.peek_messages(queue_name)
 
         # Asserts
@@ -336,10 +336,10 @@ class StorageQueueTest(StorageTestCase):
     def test_peek_messages_with_options(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
-        self.qs.put_message(queue_name, 'message2')
-        self.qs.put_message(queue_name, 'message3')
-        self.qs.put_message(queue_name, 'message4')
+        self.qs.put_message(queue_name, u'message1')
+        self.qs.put_message(queue_name, u'message2')
+        self.qs.put_message(queue_name, u'message3')
+        self.qs.put_message(queue_name, u'message4')
         result = self.qs.peek_messages(queue_name, num_messages=4)
 
         # Asserts
@@ -359,10 +359,10 @@ class StorageQueueTest(StorageTestCase):
     def test_clear_messages(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
-        self.qs.put_message(queue_name, 'message2')
-        self.qs.put_message(queue_name, 'message3')
-        self.qs.put_message(queue_name, 'message4')
+        self.qs.put_message(queue_name, u'message1')
+        self.qs.put_message(queue_name, u'message2')
+        self.qs.put_message(queue_name, u'message3')
+        self.qs.put_message(queue_name, u'message4')
         self.qs.clear_messages(queue_name)
         result = self.qs.peek_messages(queue_name)
 
@@ -374,10 +374,10 @@ class StorageQueueTest(StorageTestCase):
     def test_delete_message(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
-        self.qs.put_message(queue_name, 'message2')
-        self.qs.put_message(queue_name, 'message3')
-        self.qs.put_message(queue_name, 'message4')
+        self.qs.put_message(queue_name, u'message1')
+        self.qs.put_message(queue_name, u'message2')
+        self.qs.put_message(queue_name, u'message3')
+        self.qs.put_message(queue_name, u'message4')
         result = self.qs.get_messages(queue_name)
         self.qs.delete_message(
             queue_name, result[0].id, result[0].pop_receipt)
@@ -391,7 +391,7 @@ class StorageQueueTest(StorageTestCase):
     def test_update_message(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
         list_result1 = self.qs.get_messages(queue_name)
         message = self.qs.update_message(queue_name,
                                list_result1[0].id,
@@ -411,7 +411,7 @@ class StorageQueueTest(StorageTestCase):
         message = list_result2[0]
         self.assertIsNotNone(message)
         self.assertEqual(list_result1[0].id, message.id)
-        self.assertEqual('message1', message.content)
+        self.assertEqual(u'message1', message.content)
         self.assertEqual('2', message.dequeue_count)
         self.assertIsNotNone(message.pop_receipt)
         self.assertIsNotNone(message.insertion_time)
@@ -422,13 +422,13 @@ class StorageQueueTest(StorageTestCase):
     def test_update_message_content(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
         list_result1 = self.qs.get_messages(queue_name)
         message = self.qs.update_message(queue_name,
                                list_result1[0].id,
                                list_result1[0].pop_receipt,
                                0,
-                               content='new text',)
+                               content=u'new text',)
         list_result2 = self.qs.get_messages(queue_name)
 
         # Asserts
@@ -443,7 +443,7 @@ class StorageQueueTest(StorageTestCase):
         message = list_result2[0]
         self.assertIsNotNone(message)
         self.assertEqual(list_result1[0].id, message.id)
-        self.assertEqual('new text', message.content)
+        self.assertEqual(u'new text', message.content)
         self.assertEqual('2', message.dequeue_count)
         self.assertIsNotNone(message.pop_receipt)
         self.assertIsNotNone(message.insertion_time)
@@ -457,7 +457,7 @@ class StorageQueueTest(StorageTestCase):
 
         # Arrange
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
         token = self.qs.generate_account_shared_access_signature(
             ResourceTypes.OBJECT,
             AccountPermissions.READ,
@@ -479,7 +479,7 @@ class StorageQueueTest(StorageTestCase):
         message = result[0]
         self.assertIsNotNone(message)
         self.assertNotEqual('', message.id)
-        self.assertEqual('message1', message.content)
+        self.assertEqual(u'message1', message.content)
 
     def test_sas_read(self):
         # SAS URL is calculated from storage key, so this test runs live only
@@ -488,7 +488,7 @@ class StorageQueueTest(StorageTestCase):
 
         # Arrange
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
         token = self.qs.generate_queue_shared_access_signature(
             queue_name,
             QueuePermissions.READ,
@@ -510,7 +510,7 @@ class StorageQueueTest(StorageTestCase):
         message = result[0]
         self.assertIsNotNone(message)
         self.assertNotEqual('', message.id)
-        self.assertEqual('message1', message.content)
+        self.assertEqual(u'message1', message.content)
 
     def test_sas_add(self):
         # SAS URL is calculated from storage key, so this test runs live only
@@ -531,11 +531,11 @@ class StorageQueueTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        result = service.put_message(queue_name, 'addedmessage')
+        result = service.put_message(queue_name, u'addedmessage')
 
         # Assert
         result = self.qs.get_messages(queue_name)
-        self.assertEqual('addedmessage', result[0].content)
+        self.assertEqual(u'addedmessage', result[0].content)
 
     def test_sas_update(self):
         # SAS URL is calculated from storage key, so this test runs live only
@@ -544,7 +544,7 @@ class StorageQueueTest(StorageTestCase):
 
         # Arrange
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
         token = self.qs.generate_queue_shared_access_signature(
             queue_name,
             QueuePermissions.UPDATE,
@@ -563,12 +563,12 @@ class StorageQueueTest(StorageTestCase):
             result[0].id,
             result[0].pop_receipt,
             visibility_timeout=0,
-            content='updatedmessage1',
+            content=u'updatedmessage1',
         )
 
         # Assert
         result = self.qs.get_messages(queue_name)
-        self.assertEqual('updatedmessage1', result[0].content)
+        self.assertEqual(u'updatedmessage1', result[0].content)
 
     def test_sas_process(self):
         # SAS URL is calculated from storage key, so this test runs live only
@@ -577,7 +577,7 @@ class StorageQueueTest(StorageTestCase):
 
         # Arrange
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
         token = self.qs.generate_queue_shared_access_signature(
             queue_name,
             QueuePermissions.PROCESS,
@@ -598,7 +598,7 @@ class StorageQueueTest(StorageTestCase):
         message = result[0]
         self.assertIsNotNone(message)
         self.assertNotEqual('', message.id)
-        self.assertEqual('message1', message.content)
+        self.assertEqual(u'message1', message.content)
 
     def test_sas_signed_identifier(self):
         # SAS URL is calculated from storage key, so this test runs live only
@@ -616,7 +616,7 @@ class StorageQueueTest(StorageTestCase):
         queue_name = self._create_queue()
         resp = self.qs.set_queue_acl(queue_name, identifiers)
 
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
 
         token = self.qs.generate_queue_shared_access_signature(
             queue_name,
@@ -637,7 +637,7 @@ class StorageQueueTest(StorageTestCase):
         message = result[0]
         self.assertIsNotNone(message)
         self.assertNotEqual('', message.id)
-        self.assertEqual('message1', message.content)
+        self.assertEqual(u'message1', message.content)
 
     @record
     def test_get_queue_acl(self):
@@ -744,7 +744,7 @@ class StorageQueueTest(StorageTestCase):
             return next(request)
         qc = self.qs.with_filter(my_filter)
         queue_name = self._create_queue()
-        qc.put_message(queue_name, 'message1')
+        qc.put_message(queue_name, u'message1')
 
         self.assertTrue(called)
 
@@ -760,7 +760,7 @@ class StorageQueueTest(StorageTestCase):
             return next(request)
 
         qc = self.qs.with_filter(filter_a).with_filter(filter_b)
-        qc.put_message(queue_name, 'message1')
+        qc.put_message(queue_name, u'message1')
 
         self.assertEqual(called, ['b', 'a'])
 
@@ -799,7 +799,7 @@ class StorageQueueTest(StorageTestCase):
     def test_unicode_update_message_unicode_data(self):
         # Action
         queue_name = self._create_queue()
-        self.qs.put_message(queue_name, 'message1')
+        self.qs.put_message(queue_name, u'message1')
         list_result1 = self.qs.get_messages(queue_name)
         self.qs.update_message(queue_name,
                                list_result1[0].id,

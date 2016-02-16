@@ -161,9 +161,14 @@ def _convert_signed_identifiers_to_xml(signed_identifiers):
             ETree.SubElement(policy, 'Permission').text = _str(access_policy.permission)
 
     # Add xml declaration and serialize
-    with BytesIO() as stream:
+    try:
+        stream = BytesIO()
         ETree.ElementTree(sis).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
+    except:
+        raise
+    finally:
         output = stream.getvalue()
+        stream.close()
     
     return output
 
@@ -251,9 +256,14 @@ def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, co
 
 
     # Add xml declaration and serialize
-    with BytesIO() as stream:
+    try:
+        stream = BytesIO()
         ETree.ElementTree(service_properties_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
+    except:
+        raise
+    finally:
         output = stream.getvalue()
+        stream.close()
     
     return output
 

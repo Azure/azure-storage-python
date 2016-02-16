@@ -62,7 +62,7 @@ def _convert_queue_message_xml(message_text, encode_function):
     queue_message_element = ETree.Element('QueueMessage');
 
     # Enabled
-    message_text = _str(encode_function(message_text))
+    message_text = encode_function(message_text)
     ETree.SubElement(queue_message_element, 'MessageText').text = message_text
 
     # Add xml declaration and serialize

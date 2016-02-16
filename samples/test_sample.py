@@ -37,6 +37,7 @@ from .file import (
     FileSamples,
 )
 
+@unittest.skip('Skip sample tests.')
 class SampleTest(unittest.TestCase):
 
     def setUp(self):

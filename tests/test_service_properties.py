@@ -86,11 +86,11 @@ class ServicePropertiesTest(StorageTestCase):
         for i in range(0, len(cors1)):
             rule1 = cors1[i]
             rule2 = cors2[i]
-            self.assertCountEqual(rule1.allowed_origins, rule2.allowed_origins)
-            self.assertCountEqual(rule1.allowed_methods, rule2.allowed_methods)
+            self.assertEqual(len(rule1.allowed_origins), len(rule2.allowed_origins))
+            self.assertEqual(len(rule1.allowed_methods), len(rule2.allowed_methods))
             self.assertEqual(rule1.max_age_in_seconds, rule2.max_age_in_seconds)
-            self.assertCountEqual(rule1.exposed_headers, rule2.exposed_headers)
-            self.assertCountEqual(rule1.allowed_headers, rule2.allowed_headers)
+            self.assertEqual(len(rule1.exposed_headers), len(rule2.exposed_headers))
+            self.assertEqual(len(rule1.allowed_headers), len(rule2.allowed_headers))
 
     def _assert_retention_equal(self, ret1, ret2):
         self.assertEqual(ret1.enabled, ret2.enabled)
