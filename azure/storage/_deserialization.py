@@ -13,7 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 from dateutil import parser
-from ._common_conversion import _str_or_none
+from ._common_conversion import _to_str
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -29,7 +29,7 @@ from .models import (
     _dict,
 )
 
-def _int_or_none(value):
+def _int_to_str(value):
     return value if value is None else int(value)
 
 def _get_download_size(start_range, end_range, resource_size):
@@ -44,27 +44,27 @@ def _get_download_size(start_range, end_range, resource_size):
 
 GET_PROPERTIES_ATTRIBUTE_MAP = {
     'last-modified': (None, 'last_modified', parser.parse),
-    'etag': (None, 'etag', _str_or_none),
-    'x-ms-blob-type': (None, 'blob_type', _str_or_none),
-    'content-length': (None, 'content_length', _int_or_none),
-    'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_or_none),
-    'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_or_none),
-    'x-ms-share-quota': (None, 'quota', _int_or_none),
-    'content-type': ('content_settings', 'content_type', _str_or_none),
-    'cache-control': ('content_settings', 'cache_control', _str_or_none),
-    'content-encoding': ('content_settings', 'content_encoding', _str_or_none),
-    'content-disposition': ('content_settings', 'content_disposition', _str_or_none),
-    'content-language': ('content_settings', 'content_language', _str_or_none),
-    'content-md5': ('content_settings', 'content_md5', _str_or_none),
-    'x-ms-lease-status': ('lease', 'status', _str_or_none),
-    'x-ms-lease-state': ('lease', 'state', _str_or_none),
-    'x-ms-lease-duration': ('lease', 'duration', _str_or_none),
-    'x-ms-copy-id': ('copy', 'id', _str_or_none),
-    'x-ms-copy-source': ('copy', 'source', _str_or_none),
-    'x-ms-copy-status': ('copy', 'status', _str_or_none),
-    'x-ms-copy-progress': ('copy', 'progress', _str_or_none),
+    'etag': (None, 'etag', _to_str),
+    'x-ms-blob-type': (None, 'blob_type', _to_str),
+    'content-length': (None, 'content_length', _int_to_str),
+    'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_to_str),
+    'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_to_str),
+    'x-ms-share-quota': (None, 'quota', _int_to_str),
+    'content-type': ('content_settings', 'content_type', _to_str),
+    'cache-control': ('content_settings', 'cache_control', _to_str),
+    'content-encoding': ('content_settings', 'content_encoding', _to_str),
+    'content-disposition': ('content_settings', 'content_disposition', _to_str),
+    'content-language': ('content_settings', 'content_language', _to_str),
+    'content-md5': ('content_settings', 'content_md5', _to_str),
+    'x-ms-lease-status': ('lease', 'status', _to_str),
+    'x-ms-lease-state': ('lease', 'state', _to_str),
+    'x-ms-lease-duration': ('lease', 'duration', _to_str),
+    'x-ms-copy-id': ('copy', 'id', _to_str),
+    'x-ms-copy-source': ('copy', 'source', _to_str),
+    'x-ms-copy-status': ('copy', 'status', _to_str),
+    'x-ms-copy-progress': ('copy', 'progress', _to_str),
     'x-ms-copy-completion-time': ('copy', 'completion_time', parser.parse),
-    'x-ms-copy-status-description': ('copy', 'status_description', _str_or_none),
+    'x-ms-copy-status-description': ('copy', 'status_description', _to_str),
 }
 
 def _parse_metadata(response):
@@ -78,7 +78,7 @@ def _parse_metadata(response):
     metadata = _dict()
     for key, value in response.headers:
         if key.startswith('x-ms-meta-'):
-            metadata[key[10:]] = _str_or_none(value)
+            metadata[key[10:]] = _to_str(value)
 
     return metadata
 

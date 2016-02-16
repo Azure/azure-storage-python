@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from .._common_conversion import _str_or_none
+from .._common_conversion import _to_str
 class Container(object):
 
     '''
@@ -164,15 +164,15 @@ class ContentSettings(object):
 
     def _to_headers(self):
         return [
-            ('x-ms-blob-cache-control', _str_or_none(self.cache_control)),
-            ('x-ms-blob-content-type', _str_or_none(self.content_type)),
+            ('x-ms-blob-cache-control', _to_str(self.cache_control)),
+            ('x-ms-blob-content-type', _to_str(self.content_type)),
             ('x-ms-blob-content-disposition',
-                _str_or_none(self.content_disposition)),
-            ('x-ms-blob-content-md5', _str_or_none(self.content_md5)),
+                _to_str(self.content_disposition)),
+            ('x-ms-blob-content-md5', _to_str(self.content_md5)),
             ('x-ms-blob-content-encoding',
-                _str_or_none(self.content_encoding)),
+                _to_str(self.content_encoding)),
             ('x-ms-blob-content-language',
-                _str_or_none(self.content_language)),
+                _to_str(self.content_language)),
         ]
 
 

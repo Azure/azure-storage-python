@@ -24,9 +24,8 @@ from .._error import (
     _ERROR_PARALLEL_NOT_SEEKABLE,
 )
 from .._common_conversion import (
-    _int_or_none,
-    _str,
-    _str_or_none,
+    _int_to_str,
+    _to_str,
 )
 from .._serialization import (
     _get_request_body,
@@ -470,7 +469,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'service'),
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),         
+            ('timeout', _int_to_str(timeout)),         
         ]
         request.body = _get_request_body(
             _convert_service_properties_to_xml(None, hour_metrics, minute_metrics, cors))
@@ -495,7 +494,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'service'),
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),         
+            ('timeout', _int_to_str(timeout)),         
         ]
 
         response = self._perform_request(request)
@@ -569,11 +568,11 @@ class FileService(StorageClient):
         request.path = _get_path()
         request.query = [
             ('comp', 'list'),
-            ('prefix', _str_or_none(prefix)),
-            ('marker', _str_or_none(marker)),
-            ('maxresults', _int_or_none(max_results)),
-            ('include', _str_or_none(include)),
-            ('timeout', _int_or_none(timeout)),
+            ('prefix', _to_str(prefix)),
+            ('marker', _to_str(marker)),
+            ('maxresults', _int_to_str(max_results)),
+            ('include', _to_str(include)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -611,11 +610,11 @@ class FileService(StorageClient):
         request.path = _get_path(share_name)
         request.query = [
             ('restype', 'share'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
-            ('x-ms-share-quota', _int_or_none(quota))]
+            ('x-ms-share-quota', _int_to_str(quota))]
 
         if not fail_on_exist:
             try:
@@ -648,7 +647,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name)
         request.query = [
             ('restype', 'share'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -675,9 +674,9 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'share'),
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
-        request.headers = [('x-ms-share-quota', _int_or_none(quota))]
+        request.headers = [('x-ms-share-quota', _int_to_str(quota))]
 
         self._perform_request(request)
 
@@ -701,7 +700,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'share'),
             ('comp', 'metadata'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -731,7 +730,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'share'),
             ('comp', 'metadata'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
 
@@ -756,7 +755,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'share'),
             ('comp', 'acl'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -785,7 +784,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'share'),
             ('comp', 'acl'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
@@ -815,7 +814,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'share'),
             ('comp', 'stats'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -845,7 +844,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name)
         request.query = [
             ('restype', 'share'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         if not fail_not_exist:
@@ -892,7 +891,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name)
         request.query = [
             ('restype', 'directory'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
 
@@ -939,7 +938,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name)
         request.query = [
             ('restype', 'directory'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         if not fail_not_exist:
@@ -976,7 +975,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name)
         request.query = [
             ('restype', 'directory'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -1005,7 +1004,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'directory'),
             ('comp', 'metadata'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -1038,7 +1037,7 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'directory'),
             ('comp', 'metadata'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
 
@@ -1115,9 +1114,9 @@ class FileService(StorageClient):
         request.query = [
             ('restype', 'directory'),
             ('comp', 'list'),
-            ('marker', _str_or_none(marker)),
-            ('maxresults', _int_or_none(max_results)),
-            ('timeout', _int_or_none(timeout)),
+            ('marker', _to_str(marker)),
+            ('maxresults', _int_to_str(max_results)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -1146,7 +1145,7 @@ class FileService(StorageClient):
         request.method = 'HEAD'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
 
         response = self._perform_request(request)
         return _parse_file(file_name, response)
@@ -1209,10 +1208,10 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-content-length', _str_or_none(content_length))]
+            ('x-ms-content-length', _to_str(content_length))]
 
         self._perform_request(request)
 
@@ -1242,7 +1241,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = None
         request.headers = content_settings._to_headers()
@@ -1273,7 +1272,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [
             ('comp', 'metadata'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
 
         response = self._perform_request(request)
@@ -1307,7 +1306,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [
             ('comp', 'metadata'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
 
@@ -1346,9 +1345,9 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
-            ('x-ms-copy-source', _str_or_none(copy_source)),
+            ('x-ms-copy-source', _to_str(copy_source)),
             ('x-ms-meta-name-values', metadata),
         ]
 
@@ -1382,8 +1381,8 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [
             ('comp', 'copy'),
-            ('copyid', _str(copy_id)),
-            ('timeout', _int_or_none(timeout)),
+            ('copyid', _to_str(copy_id)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
             ('x-ms-copy-action', 'abort'),
@@ -1411,7 +1410,7 @@ class FileService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
 
         self._perform_request(request)
 
@@ -1431,6 +1430,8 @@ class FileService(StorageClient):
             The path to the directory.
         :param str file_name:
             Name of file to create or update.
+        :param int content_length:
+            Length of the file in bytes.
         :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set file properties.
         :param metadata:
@@ -1441,15 +1442,15 @@ class FileService(StorageClient):
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
-        _validate_not_none('x_ms_content_length', content_length)
+        _validate_not_none('content_length', content_length)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
             ('x-ms-meta-name-values', metadata),
-            ('x-ms-content-length', _str_or_none(content_length)),
+            ('x-ms-content-length', _to_str(content_length)),
             ('x-ms-type', 'file')
         ]
         if content_settings is not None:
@@ -1735,7 +1736,7 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
         _validate_and_format_range_headers(
             request,
             start_range,
@@ -2107,10 +2108,10 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [
             ('comp', 'range'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('Content-MD5', _str_or_none(content_md5)),
+            ('Content-MD5', _to_str(content_md5)),
             ('x-ms-write', 'update'),
         ]
         _validate_and_format_range_headers(
@@ -2152,7 +2153,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [
             ('comp', 'range'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
             ('Content-Length', '0'),
@@ -2195,7 +2196,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [
             ('comp', 'rangelist'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         if start_range is not None:
             _validate_and_format_range_headers(

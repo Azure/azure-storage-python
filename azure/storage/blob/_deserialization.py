@@ -19,11 +19,11 @@ except ImportError:
     from xml.etree import ElementTree as ETree
 from .._common_conversion import (
     _decode_base64_to_text,
-    _str_or_none,
+    _to_str,
 )
 from .._deserialization import (
     _parse_properties,
-    _int_or_none,
+    _int_to_str,
     _parse_metadata,
     _parse_response_for_dict,
     _convert_xml_to_signed_identifiers,
@@ -65,7 +65,7 @@ def _parse_page_properties(response):
     put_page = PageBlobProperties()
     put_page.last_modified = parser.parse(raw_headers.get('last-modified'))
     put_page.etag = raw_headers.get('etag')
-    put_page.sequence_number = _int_or_none(raw_headers.get('x-ms-blob-sequence-number'))
+    put_page.sequence_number = _int_to_str(raw_headers.get('x-ms-blob-sequence-number'))
 
     return put_page
 
@@ -78,8 +78,8 @@ def _parse_append_block(response):
     append_block = AppendBlockProperties()
     append_block.last_modified = parser.parse(raw_headers.get('last-modified'))
     append_block.etag = raw_headers.get('etag')
-    append_block.append_offset = _int_or_none(raw_headers.get('x-ms-blob-append-offset'))
-    append_block.committed_block_count = _int_or_none(raw_headers.get('x-ms-blob-committed-block-count'))
+    append_block.append_offset = _int_to_str(raw_headers.get('x-ms-blob-append-offset'))
+    append_block.committed_block_count = _int_to_str(raw_headers.get('x-ms-blob-committed-block-count'))
 
     return append_block
 
@@ -99,7 +99,7 @@ def _parse_lease_time(response):
     raw_headers = _parse_response_for_dict(response)
     lease_time = raw_headers.get('x-ms-lease-time')
     if lease_time:
-        lease_time = _int_or_none(lease_time)
+        lease_time = _int_to_str(lease_time)
 
     return lease_time
 
@@ -199,23 +199,23 @@ def _convert_xml_to_containers(response):
 
 LIST_BLOBS_ATTRIBUTE_MAP = {
     'Last-Modified': ('last_modified', parser.parse),
-    'Etag': ('etag', _str_or_none),
-    'Content-Length': ('content_length', _int_or_none),
-    'Content-Type': ('content_type', _str_or_none),
-    'Content-Encoding': ('content_encoding', _str_or_none),
-    'Content-Language': ('content_language', _str_or_none),
-    'Content-MD5': ('content_md5', _str_or_none),
-    'x-ms-blob-sequence-number': ('sequence_number', _int_or_none),
-    'BlobType': ('blob_type', _str_or_none),
-    'LeaseStatus': ('lease_status', _str_or_none),
-    'LeaseState': ('lease_state', _str_or_none),
-    'LeaseDuration': ('lease_duration', _str_or_none),
-    'CopyId': ('copy_id', _str_or_none),
-    'CopySource': ('copy_source', _str_or_none),
-    'CopyStatus': ('copy_status', _str_or_none),
-    'CopyProgress': ('copy_progress', _str_or_none),
-    'CopyCompletionTime': ('copy_completion_time', _str_or_none),
-    'CopyStatusDescription': ('copy_status_description', _str_or_none),
+    'Etag': ('etag', _to_str),
+    'Content-Length': ('content_length', _int_to_str),
+    'Content-Type': ('content_type', _to_str),
+    'Content-Encoding': ('content_encoding', _to_str),
+    'Content-Language': ('content_language', _to_str),
+    'Content-MD5': ('content_md5', _to_str),
+    'x-ms-blob-sequence-number': ('sequence_number', _int_to_str),
+    'BlobType': ('blob_type', _to_str),
+    'LeaseStatus': ('lease_status', _to_str),
+    'LeaseState': ('lease_state', _to_str),
+    'LeaseDuration': ('lease_duration', _to_str),
+    'CopyId': ('copy_id', _to_str),
+    'CopySource': ('copy_source', _to_str),
+    'CopyStatus': ('copy_status', _to_str),
+    'CopyProgress': ('copy_progress', _to_str),
+    'CopyCompletionTime': ('copy_completion_time', _to_str),
+    'CopyStatusDescription': ('copy_status_description', _to_str),
 }
 
 def _convert_xml_to_blob_list(response):

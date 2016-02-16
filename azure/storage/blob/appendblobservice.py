@@ -18,9 +18,8 @@ from .._error import (
     _ERROR_VALUE_NEGATIVE,
 )
 from .._common_conversion import (
-    _str,
-    _str_or_none,
-    _int_or_none,
+    _to_str,
+    _int_to_str,
     _datetime_to_utc_string,
 )
 from .._serialization import (
@@ -164,15 +163,15 @@ class AppendBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
-            ('x-ms-blob-type', _str_or_none(self.blob_type)),
+            ('x-ms-blob-type', _to_str(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-lease-id', _to_str(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match))
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match))
         ]
         if content_settings is not None:
             request.headers += content_settings._to_headers()
@@ -252,17 +251,17 @@ class AppendBlobService(BaseBlobService):
         request.path = _get_path(container_name, blob_name)
         request.query = [
             ('comp', 'appendblock'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
          ]
         request.headers = [
-            ('Content-MD5', _str_or_none(content_md5)),
-            ('x-ms-blob-condition-maxsize', _str_or_none(maxsize_condition)),
-            ('x-ms-blob-condition-appendpos', _str_or_none(appendpos_condition)),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('Content-MD5', _to_str(content_md5)),
+            ('x-ms-blob-condition-maxsize', _to_str(maxsize_condition)),
+            ('x-ms-blob-condition-appendpos', _to_str(appendpos_condition)),
+            ('x-ms-lease-id', _to_str(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match))
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match))
         ]
         request.body = _get_request_body_bytes_only('block', block)
 

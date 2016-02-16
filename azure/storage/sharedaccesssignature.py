@@ -16,8 +16,7 @@ from datetime import date
 
 from ._common_conversion import (
     _sign_string,
-    _str_or_none,
-    _str,
+    _to_str,
 )
 from ._serialization import (
     url_quote,
@@ -387,8 +386,8 @@ class SharedAccessSignature(object):
         '''
         resource_path = share_name
         if directory_name is not None:
-            resource_path += '/' + _str(directory_name)
-        resource_path += '/' + _str(file_name)
+            resource_path += '/' + _to_str(directory_name)
+        resource_path += '/' + _to_str(file_name)
 
         sas = _SharedAccessHelper()
         sas.add_base(permission, expiry, start, ip, protocol)
@@ -557,7 +556,7 @@ class _SharedAccessHelper():
 
     def _add_query(self, name, val):
         if val:
-            self.query_dict[name] = _str_or_none(val)
+            self.query_dict[name] = _to_str(val)
 
     def add_base(self, permission, expiry, start, ip, protocol):
         if isinstance(start, date):

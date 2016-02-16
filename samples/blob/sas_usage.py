@@ -56,7 +56,7 @@ class BlobSasSamples():
         container_name = self._get_container_reference()
 
         # Create a container with 'Blob' level public access
-        self.service.create_container(container_name, blob_public_access=PublicAccess.Blob)
+        self.service.create_container(container_name, public_access=PublicAccess.Blob)
         self.service.create_blob_from_text(container_name, 'blob1', 'hello world')
 
         # Get the public access level
@@ -68,7 +68,7 @@ class BlobSasSamples():
         anonymous_service.get_blob_to_text(container_name, 'blob1')
 
         # Set the container public access level to 'Container'
-        self.service.set_container_acl(container_name, blob_public_access=PublicAccess.Container)
+        self.service.set_container_acl(container_name, public_access=PublicAccess.Container)
 
         # Wait 30 seconds for it to take effect
         time.sleep(30)

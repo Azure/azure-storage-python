@@ -31,9 +31,8 @@ from .._serialization import (
     _get_request_body,
 )
 from .._common_conversion import (
-    _int_or_none,
-    _str,
-    _str_or_none,
+    _int_to_str,
+    _to_str,
 )
 from .._http import (
     HTTPRequest,
@@ -291,7 +290,7 @@ class QueueService(StorageClient):
         request.query = [
             ('restype', 'service'),
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         response = self._perform_request(request)
 
@@ -331,7 +330,7 @@ class QueueService(StorageClient):
         request.query = [
             ('restype', 'service'),
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
@@ -406,11 +405,11 @@ class QueueService(StorageClient):
         request.path = _get_path()
         request.query = [
             ('comp', 'list'),
-            ('prefix', _str_or_none(prefix)),
-            ('marker', _str_or_none(marker)),
-            ('maxresults', _int_or_none(max_results)),
-            ('include', _str_or_none(include)),
-            ('timeout', _int_or_none(timeout))
+            ('prefix', _to_str(prefix)),
+            ('marker', _to_str(marker)),
+            ('maxresults', _int_to_str(max_results)),
+            ('include', _to_str(include)),
+            ('timeout', _int_to_str(timeout))
         ]
         response = self._perform_request(request)
 
@@ -446,7 +445,7 @@ class QueueService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(queue_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [('x-ms-meta-name-values', metadata)]
         if not fail_on_exist:
             try:
@@ -492,7 +491,7 @@ class QueueService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(queue_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
         if not fail_not_exist:
             try:
                 self._perform_request(request)
@@ -526,7 +525,7 @@ class QueueService(StorageClient):
         request.path = _get_path(queue_name)
         request.query = [
             ('comp', 'metadata'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         response = self._perform_request(request)
 
@@ -552,7 +551,7 @@ class QueueService(StorageClient):
         request.path = _get_path(queue_name)
         request.query = [
             ('comp', 'metadata'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [('x-ms-meta-name-values', metadata)]
         self._perform_request(request)
@@ -594,7 +593,7 @@ class QueueService(StorageClient):
         request.path = _get_path(queue_name)
         request.query = [
             ('comp', 'acl'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         response = self._perform_request(request)
 
@@ -633,7 +632,7 @@ class QueueService(StorageClient):
         request.path = _get_path(queue_name)
         request.query = [
             ('comp', 'acl'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
@@ -679,9 +678,9 @@ class QueueService(StorageClient):
         request.host = self._get_host()
         request.path = _get_path(queue_name, True)
         request.query = [
-            ('visibilitytimeout', _str_or_none(visibility_timeout)),
-            ('messagettl', _str_or_none(time_to_live)),
-            ('timeout', _int_or_none(timeout))
+            ('visibilitytimeout', _to_str(visibility_timeout)),
+            ('messagettl', _to_str(time_to_live)),
+            ('timeout', _int_to_str(timeout))
         ]
         request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
         self._perform_request(request)
@@ -720,9 +719,9 @@ class QueueService(StorageClient):
         request.host = self._get_host()
         request.path = _get_path(queue_name, True)
         request.query = [
-            ('numofmessages', _str_or_none(num_messages)),
-            ('visibilitytimeout', _str_or_none(visibility_timeout)),
-            ('timeout', _int_or_none(timeout))
+            ('numofmessages', _to_str(num_messages)),
+            ('visibilitytimeout', _to_str(visibility_timeout)),
+            ('timeout', _int_to_str(timeout))
         ]
         response = self._perform_request(request)
 
@@ -762,8 +761,8 @@ class QueueService(StorageClient):
         request.path = _get_path(queue_name, True)
         request.query = [
             ('peekonly', 'true'),
-            ('numofmessages', _str_or_none(num_messages)),
-            ('timeout', _int_or_none(timeout))]
+            ('numofmessages', _to_str(num_messages)),
+            ('timeout', _int_to_str(timeout))]
         response = self._perform_request(request)
 
         return _convert_xml_to_queue_messages(response, self.decode_function)
@@ -800,8 +799,8 @@ class QueueService(StorageClient):
         request.host = self._get_host()
         request.path = _get_path(queue_name, True, message_id)
         request.query = [
-            ('popreceipt', _str_or_none(pop_receipt)),
-            ('timeout', _int_or_none(timeout))]
+            ('popreceipt', _to_str(pop_receipt)),
+            ('timeout', _int_to_str(timeout))]
         self._perform_request(request)
 
     def clear_messages(self, queue_name, timeout=None):
@@ -818,7 +817,7 @@ class QueueService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(queue_name, True)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
         self._perform_request(request)
 
     def update_message(self, queue_name, message_id, pop_receipt, visibility_timeout, 
@@ -867,9 +866,9 @@ class QueueService(StorageClient):
         request.host = self._get_host()
         request.path = _get_path(queue_name, True, message_id)
         request.query = [
-            ('popreceipt', _str_or_none(pop_receipt)),
-            ('visibilitytimeout', _int_or_none(visibility_timeout)),
-            ('timeout', _int_or_none(timeout))
+            ('popreceipt', _to_str(pop_receipt)),
+            ('visibilitytimeout', _int_to_str(visibility_timeout)),
+            ('timeout', _int_to_str(timeout))
         ]
 
         if content is not None:

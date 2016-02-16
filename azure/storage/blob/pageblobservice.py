@@ -18,9 +18,8 @@ from .._error import (
     _ERROR_VALUE_NEGATIVE,
 )
 from .._common_conversion import (
-    _int_or_none,
-    _str,
-    _str_or_none,
+    _int_to_str,
+    _to_str,
     _datetime_to_utc_string,
 )
 from .._serialization import (
@@ -184,17 +183,17 @@ class PageBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('timeout', _int_or_none(timeout))]
+        request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
-            ('x-ms-blob-type', _str_or_none(self.blob_type)),
+            ('x-ms-blob-type', _to_str(self.blob_type)),
             ('x-ms-meta-name-values', metadata),
-            ('x-ms-blob-content-length', _str_or_none(content_length)),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
-            ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
+            ('x-ms-blob-content-length', _to_str(content_length)),
+            ('x-ms-lease-id', _to_str(lease_id)),
+            ('x-ms-blob-sequence-number', _to_str(sequence_number)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match))
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match))
         ]
         if content_settings is not None:
             request.headers += content_settings._to_headers()
@@ -281,22 +280,22 @@ class PageBlobService(BaseBlobService):
         request.path = _get_path(container_name, blob_name)
         request.query = [
             ('comp', 'page'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('Content-MD5', _str_or_none(content_md5)),
+            ('Content-MD5', _to_str(content_md5)),
             ('x-ms-page-write', 'update'),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-lease-id', _to_str(lease_id)),
             ('x-ms-if-sequence-number-le',
-             _str_or_none(if_sequence_number_lte)),
+             _to_str(if_sequence_number_lte)),
             ('x-ms-if-sequence-number-lt',
-             _str_or_none(if_sequence_number_lt)),
+             _to_str(if_sequence_number_lt)),
             ('x-ms-if-sequence-number-eq',
-             _str_or_none(if_sequence_number_eq)),
+             _to_str(if_sequence_number_eq)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match))
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match))
         ]
         _validate_and_format_range_headers(
             request,
@@ -377,21 +376,21 @@ class PageBlobService(BaseBlobService):
         request.path = _get_path(container_name, blob_name)
         request.query = [
             ('comp', 'page'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
             ('x-ms-page-write', 'clear'),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-lease-id', _to_str(lease_id)),
             ('x-ms-if-sequence-number-le',
-             _str_or_none(if_sequence_number_lte)),
+             _to_str(if_sequence_number_lte)),
             ('x-ms-if-sequence-number-lt',
-             _str_or_none(if_sequence_number_lt)),
+             _to_str(if_sequence_number_lt)),
             ('x-ms-if-sequence-number-eq',
-             _str_or_none(if_sequence_number_eq)),
+             _to_str(if_sequence_number_eq)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match))
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match))
         ]
         _validate_and_format_range_headers(
             request,
@@ -468,15 +467,15 @@ class PageBlobService(BaseBlobService):
         request.path = _get_path(container_name, blob_name)
         request.query = [
             ('comp', 'pagelist'),
-            ('snapshot', _str_or_none(snapshot)),
-            ('timeout', _int_or_none(timeout)),
+            ('snapshot', _to_str(snapshot)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-lease-id', _to_str(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match)),
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match)),
         ]
         if start_range is not None:
             _validate_and_format_range_headers(
@@ -546,16 +545,16 @@ class PageBlobService(BaseBlobService):
         request.path = _get_path(container_name, blob_name)
         request.query = [
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-blob-sequence-number', _str_or_none(sequence_number)),
-            ('x-ms-sequence-number-action', _str(sequence_number_action)),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-blob-sequence-number', _to_str(sequence_number)),
+            ('x-ms-sequence-number-action', _to_str(sequence_number_action)),
+            ('x-ms-lease-id', _to_str(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match)),
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match)),
         ]
 
         response = self._perform_request(request)
@@ -614,15 +613,15 @@ class PageBlobService(BaseBlobService):
         request.path = _get_path(container_name, blob_name)
         request.query = [
             ('comp', 'properties'),
-            ('timeout', _int_or_none(timeout)),
+            ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-blob-content-length', _str_or_none(content_length)),
-            ('x-ms-lease-id', _str_or_none(lease_id)),
+            ('x-ms-blob-content-length', _to_str(content_length)),
+            ('x-ms-lease-id', _to_str(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _str_or_none(if_match)),
-            ('If-None-Match', _str_or_none(if_none_match)),
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match)),
         ]
 
         response = self._perform_request(request)
