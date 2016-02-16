@@ -170,7 +170,7 @@ class StorageTableTest(StorageTestCase):
         tables = list(self.ts.list_tables(num_results=3))
 
         # Assert
-        self.assertEqual(len(tables), num_results=3)
+        self.assertEqual(len(tables), 3)
 
     @record
     def test_list_tables_with_marker(self):

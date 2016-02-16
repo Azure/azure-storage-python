@@ -1728,7 +1728,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
 
-        if max_connections > 1 and not stream.seekable():
+        if sys.version_info >= (3,) and max_connections > 1 and not stream.seekable():
             raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
 
         # Only get properties if parallelism will actually be used
