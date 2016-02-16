@@ -14,8 +14,7 @@
 #--------------------------------------------------------------------------
 from .._http import HTTPRequest
 from .._common_conversion import (
-    _str,
-    _str_or_none,
+    _to_str,
 )
 from .._error import (
     _validate_not_none,
@@ -42,8 +41,8 @@ def _get_entity(partition_key, row_key, select, accept):
     _validate_not_none('accept', accept)
     request = HTTPRequest()
     request.method = 'GET'
-    request.headers = [('Accept', _str(accept))]
-    request.query = [('$select', _str_or_none(select))]
+    request.headers = [('Accept', _to_str(accept))]
+    request.query = [('$select', _to_str(select))]
 
     return request
 
@@ -73,7 +72,7 @@ def _update_entity(entity, if_match):
     request.method = 'PUT'
     request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
                         _DEFAULT_ACCEPT_HEADER,
-                        ('If-Match', _str_or_none(if_match)),]
+                        ('If-Match', _to_str(if_match)),]
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
@@ -89,7 +88,7 @@ def _merge_entity(entity, if_match):
     request.method = 'MERGE'
     request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
                         _DEFAULT_ACCEPT_HEADER,
-                        ('If-Match', _str_or_none(if_match))]
+                        ('If-Match', _to_str(if_match))]
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
@@ -104,7 +103,7 @@ def _delete_entity(partition_key, row_key, if_match):
     request = HTTPRequest()
     request.method = 'DELETE'
     request.headers = [_DEFAULT_ACCEPT_HEADER,
-                        ('If-Match', _str_or_none(if_match))]
+                        ('If-Match', _to_str(if_match))]
 
     return request
 

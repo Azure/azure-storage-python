@@ -14,9 +14,6 @@
 #--------------------------------------------------------------------------
 from time import time
 from wsgiref.handlers import format_date_time
-from .._common_conversion import (
-    _str_or_none,
-)
 from .._error import (
     _validate_not_none,
     _ERROR_START_END_NEEDED_FOR_MD5,

@@ -34,21 +34,13 @@ else:
     _str = str
 
 
-def _str_or_none(value):
-    if value is None:
-        return None
+def _to_str(value):
+    return _str(value) if value is not None else None
 
-    return _str(value)
+def _int_to_str(value):
+    return str(int(value)) if value is not None else None
 
-
-def _int_or_none(value):
-    if value is None:
-        return None
-
-    return str(int(value))
-
-
-def _bool_or_none(value):
+def _bool_to_str(value):
     if value is None:
         return None
 
@@ -61,7 +53,6 @@ def _bool_or_none(value):
     return str(value)
 
 def _to_utc_datetime(value):
-
     return value.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 def _datetime_to_utc_string(value):

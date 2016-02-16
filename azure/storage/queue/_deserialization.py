@@ -26,7 +26,7 @@ from ..models import (
     _list,
 )
 from .._deserialization import (
-    _int_or_none,
+    _int_to_str,
     _parse_response_for_dict,
     _parse_metadata,
 )
@@ -38,7 +38,7 @@ def _parse_metadata_and_message_count(response):
     metadata = _parse_metadata(response)
 
     headers = _parse_response_for_dict(response)
-    metadata.approximate_message_count = _int_or_none(headers.get('x-ms-approximate-messages-count'))
+    metadata.approximate_message_count = _int_to_str(headers.get('x-ms-approximate-messages-count'))
 
     return metadata
 

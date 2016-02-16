@@ -25,7 +25,7 @@ from math import(
 )
 from .._common_conversion import (
     _encode_base64,
-    _str,
+    _to_str,
 )
 from .._serialization import (
     _to_utc_datetime,
@@ -55,9 +55,9 @@ _SUB_HEADERS = ['If-Match', 'Prefer', 'Accept', 'Content-Type', 'DataServiceVers
 
 def _get_entity_path(table_name, partition_key, row_key):
     return '/{0}(PartitionKey=\'{1}\',RowKey=\'{2}\')'.format(
-            _str(table_name), 
-            _str(partition_key), 
-            _str(row_key))
+            _to_str(table_name), 
+            _to_str(partition_key), 
+            _to_str(row_key))
 
 def _update_storage_table_header(request):
     ''' add additional headers for storage table request. '''

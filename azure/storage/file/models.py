@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from .._common_conversion import _str_or_none
+from .._common_conversion import _to_str
 class Share(object):
 
     '''
@@ -188,15 +188,15 @@ class ContentSettings(object):
 
     def _to_headers(self):
         return [
-            ('x-ms-cache-control', _str_or_none(self.cache_control)),
-            ('x-ms-content-type', _str_or_none(self.content_type)),
+            ('x-ms-cache-control', _to_str(self.cache_control)),
+            ('x-ms-content-type', _to_str(self.content_type)),
             ('x-ms-content-disposition',
-                _str_or_none(self.content_disposition)),
-            ('x-ms-content-md5', _str_or_none(self.content_md5)),
+                _to_str(self.content_disposition)),
+            ('x-ms-content-md5', _to_str(self.content_md5)),
             ('x-ms-content-encoding',
-                _str_or_none(self.content_encoding)),
+                _to_str(self.content_encoding)),
             ('x-ms-content-language',
-                _str_or_none(self.content_language)),
+                _to_str(self.content_language)),
         ]
 
 
