@@ -1,0 +1,621 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.models &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.models</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
+    <span class="n">_unicode_type</span> <span class="o">=</span> <span class="nb">unicode</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">_unicode_type</span> <span class="o">=</span> <span class="nb">str</span>
+
+<span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_validate_not_none</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">_HeaderDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">_HeaderDict</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getitem__</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+<span class="k">class</span> <span class="nc">_list</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Used so that additional properties can be set on the return list&#39;&#39;&#39;</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">_dict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Used so that additional properties can be set on the return dictionary&#39;&#39;&#39;</span>
+    <span class="k">pass</span>
+
+<div class="viewcode-block" id="ListGenerator"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.ListGenerator">[docs]</a><span class="k">class</span> <span class="nc">ListGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A generator object used to list storage resources. The generator will lazily </span>
+<span class="sd">    follow the continuation tokens returned by the service and stop when all </span>
+<span class="sd">    resources have been returned or max_results is reached.</span>
+
+<span class="sd">    If max_results is specified and the account has more than that number of </span>
+<span class="sd">    resources, the generator will have a populated next_marker field once it </span>
+<span class="sd">    finishes. This marker can be used to create a new generator if more </span>
+<span class="sd">    results are desired.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resources</span><span class="p">,</span> <span class="n">list_method</span><span class="p">,</span> <span class="n">list_args</span><span class="p">,</span> <span class="n">list_kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">resources</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next_marker</span> <span class="o">=</span> <span class="n">resources</span><span class="o">.</span><span class="n">next_marker</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_method</span> <span class="o">=</span> <span class="n">list_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_args</span> <span class="o">=</span> <span class="n">list_args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_kwargs</span> <span class="o">=</span> <span class="n">list_kwargs</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># return results</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">i</span>
+
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c1"># if no more results on the service, return</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_marker</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># update the marker args</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_list_kwargs</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_marker</span>
+
+            <span class="c1"># handle max results, if present</span>
+            <span class="n">max_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;max_results&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">max_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">max_results</span> <span class="o">=</span> <span class="n">max_results</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+
+                <span class="c1"># if we&#39;ve reached max_results, return</span>
+                <span class="c1"># else, update the max_results arg</span>
+                <span class="k">if</span> <span class="n">max_results</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_list_kwargs</span><span class="p">[</span><span class="s1">&#39;max_results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_results</span>
+
+            <span class="c1"># get the next segment</span>
+            <span class="n">resources</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_method</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="n">resources</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">next_marker</span> <span class="o">=</span> <span class="n">resources</span><span class="o">.</span><span class="n">next_marker</span>
+
+            <span class="c1"># return results</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">i</span></div>
+
+<div class="viewcode-block" id="RetentionPolicy"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.RetentionPolicy">[docs]</a><span class="k">class</span> <span class="nc">RetentionPolicy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    By default, Storage Analytics will not delete any logging or metrics data. Blobs </span>
+<span class="sd">    and table entities will continue to be written until the shared 20TB limit is </span>
+<span class="sd">    reached. Once the 20TB limit is reached, Storage Analytics will stop writing </span>
+<span class="sd">    new data and will not resume until free space is available. This 20TB limit </span>
+<span class="sd">    is independent of the total limit for your storage account.</span>
+
+<span class="sd">    There are two ways to delete Storage Analytics data: by manually making deletion </span>
+<span class="sd">    requests or by setting a data retention policy. Manual requests to delete Storage </span>
+<span class="sd">    Analytics data are billable, but delete requests resulting from a retention policy </span>
+<span class="sd">    are not billable.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool enabled: </span>
+<span class="sd">            Indicates whether a retention policy is enabled for the </span>
+<span class="sd">            storage service. If disabled, logging and metrics data will be retained </span>
+<span class="sd">            infinitely by the service unless explicitly deleted.</span>
+<span class="sd">        :param int days: </span>
+<span class="sd">            Required if enabled is true. Indicates the number of </span>
+<span class="sd">            days that metrics or logging data should be retained. All data older </span>
+<span class="sd">            than this value will be deleted. The minimum value you can specify is 1; </span>
+<span class="sd">            the largest value is 365 (one year).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="n">enabled</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+            <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;days&quot;</span><span class="p">,</span> <span class="n">days</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">enabled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">days</span> <span class="o">=</span> <span class="n">days</span>
+
+
+<div class="viewcode-block" id="Logging"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.Logging">[docs]</a><span class="k">class</span> <span class="nc">Logging</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Storage Analytics logs detailed information about successful and failed requests </span>
+<span class="sd">    to a storage service. This information can be used to monitor individual requests </span>
+<span class="sd">    and to diagnose issues with a storage service. Requests are logged on a best-effort </span>
+<span class="sd">    basis.</span>
+
+<span class="sd">    All logs are stored in block blobs in a container named $logs, which is</span>
+<span class="sd">    automatically created when Storage Analytics is enabled for a storage account. </span>
+<span class="sd">    The $logs container is located in the blob namespace of the storage account. </span>
+<span class="sd">    This container cannot be deleted once Storage Analytics has been enabled, though </span>
+<span class="sd">    its contents can be deleted.</span>
+
+<span class="sd">    For more information, see  https://msdn.microsoft.com/en-us/library/azure/hh343262.aspx</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">retention_policy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool delete: </span>
+<span class="sd">            Indicates whether all delete requests should be logged.</span>
+<span class="sd">        :param bool read: </span>
+<span class="sd">            Indicates whether all read requests should be logged.</span>
+<span class="sd">        :param bool write: </span>
+<span class="sd">            Indicates whether all write requests should be logged.</span>
+<span class="sd">        :param RetentionPolicy retention_policy: </span>
+<span class="sd">            The retention policy for the metrics.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;read&quot;</span><span class="p">,</span> <span class="n">read</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;write&quot;</span><span class="p">,</span> <span class="n">write</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;delete&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="s1">u&#39;1.0&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="o">=</span> <span class="n">delete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">write</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retention_policy</span> <span class="o">=</span> <span class="n">retention_policy</span> <span class="k">if</span> <span class="n">retention_policy</span> <span class="k">else</span> <span class="n">RetentionPolicy</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Metrics"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.Metrics">[docs]</a><span class="k">class</span> <span class="nc">Metrics</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    Metrics include aggregated transaction statistics and capacity data about requests </span>
+<span class="sd">    to a storage service. Transactions are reported at both the API operation level </span>
+<span class="sd">    as well as at the storage service level, and capacity is reported at the storage </span>
+<span class="sd">    service level. Metrics data can be used to analyze storage service usage, diagnose </span>
+<span class="sd">    issues with requests made against the storage service, and to improve the </span>
+<span class="sd">    performance of applications that use a service.</span>
+
+<span class="sd">    For more information, see https://msdn.microsoft.com/en-us/library/azure/hh343258.aspx</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">include_apis</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">retention_policy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool enabled: </span>
+<span class="sd">            Indicates whether metrics are enabled for </span>
+<span class="sd">            the service.</span>
+<span class="sd">        :param bool include_apis: </span>
+<span class="sd">            Required if enabled is True. Indicates whether metrics </span>
+<span class="sd">            should generate summary statistics for called API operations.</span>
+<span class="sd">        :param RetentionPolicy retention_policy: </span>
+<span class="sd">            The retention policy for the metrics.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="n">enabled</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+            <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;include_apis&quot;</span><span class="p">,</span> <span class="n">include_apis</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="s1">u&#39;1.0&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">enabled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_apis</span> <span class="o">=</span> <span class="n">include_apis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retention_policy</span> <span class="o">=</span> <span class="n">retention_policy</span> <span class="k">if</span> <span class="n">retention_policy</span> <span class="k">else</span> <span class="n">RetentionPolicy</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="CorsRule"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.CorsRule">[docs]</a><span class="k">class</span> <span class="nc">CorsRule</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    CORS is an HTTP feature that enables a web application running under one domain </span>
+<span class="sd">    to access resources in another domain. Web browsers implement a security </span>
+<span class="sd">    restriction known as same-origin policy that prevents a web page from calling </span>
+<span class="sd">    APIs in a different domain; CORS provides a secure way to allow one domain </span>
+<span class="sd">    (the origin domain) to call APIs in another domain. </span>
+
+<span class="sd">    For more information, see https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_origins</span><span class="p">,</span> <span class="n">allowed_methods</span><span class="p">,</span> <span class="n">max_age_in_seconds</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">exposed_headers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allowed_headers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param allowed_origins: </span>
+<span class="sd">            A list of origin domains that will be allowed via CORS, or &quot;*&quot; to allow </span>
+<span class="sd">            all domains. The list of must contain at least one entry. Limited to 64 </span>
+<span class="sd">            origin domains. Each allowed origin can have up to 256 characters.</span>
+<span class="sd">        :type allowed_origins: list of str</span>
+<span class="sd">        :param allowed_methods:</span>
+<span class="sd">            A list of HTTP methods that are allowed to be executed by the origin. </span>
+<span class="sd">            The list of must contain at least one entry. For Azure Storage, </span>
+<span class="sd">            permitted methods are DELETE, GET, HEAD, MERGE, POST, OPTIONS or PUT.</span>
+<span class="sd">        :type allowed_methods: list of str</span>
+<span class="sd">        :param int max_age_in_seconds:</span>
+<span class="sd">            The number of seconds that the client/browser should cache a </span>
+<span class="sd">            preflight response.</span>
+<span class="sd">        :param exposed_headers:</span>
+<span class="sd">            Defaults to an empty list. A list of response headers to expose to CORS </span>
+<span class="sd">            clients. Limited to 64 defined headers and two prefixed headers. Each </span>
+<span class="sd">            header can be up to 256 characters.</span>
+<span class="sd">        :type exposed_headers: list of str</span>
+<span class="sd">        :param allowed_headers:</span>
+<span class="sd">            Defaults to an empty list. A list of headers allowed to be part of </span>
+<span class="sd">            the cross-origin request. Limited to 64 defined headers and 2 prefixed </span>
+<span class="sd">            headers. Each header can be up to 256 characters.</span>
+<span class="sd">        :type allowed_headers: list of str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;allowed_origins&quot;</span><span class="p">,</span> <span class="n">allowed_origins</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;allowed_methods&quot;</span><span class="p">,</span> <span class="n">allowed_methods</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s2">&quot;max_age_in_seconds&quot;</span><span class="p">,</span> <span class="n">max_age_in_seconds</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_origins</span> <span class="o">=</span> <span class="n">allowed_origins</span> <span class="k">if</span> <span class="n">allowed_origins</span> <span class="k">else</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_methods</span> <span class="o">=</span> <span class="n">allowed_methods</span> <span class="k">if</span> <span class="n">allowed_methods</span> <span class="k">else</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_age_in_seconds</span> <span class="o">=</span> <span class="n">max_age_in_seconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exposed_headers</span> <span class="o">=</span> <span class="n">exposed_headers</span> <span class="k">if</span> <span class="n">exposed_headers</span> <span class="k">else</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowed_headers</span> <span class="o">=</span> <span class="n">allowed_headers</span> <span class="k">if</span> <span class="n">allowed_headers</span> <span class="k">else</span> <span class="nb">list</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ServiceProperties"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.ServiceProperties">[docs]</a><span class="k">class</span> <span class="nc">ServiceProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    Returned by get_*_service_properties functions. Contains the properties of a </span>
+<span class="sd">    storage service, including Analytics and CORS rules.</span>
+
+<span class="sd">    Azure Storage Analytics performs logging and provides metrics data for a storage </span>
+<span class="sd">    account. You can use this data to trace requests, analyze usage trends, and </span>
+<span class="sd">    diagnose issues with your storage account. To use Storage Analytics, you must </span>
+<span class="sd">    enable it individually for each service you want to monitor.</span>
+
+<span class="sd">    The aggregated data is stored in a well-known blob (for logging) and in well-known </span>
+<span class="sd">    tables (for metrics), which may be accessed using the Blob service and Table </span>
+<span class="sd">    service APIs.</span>
+
+<span class="sd">    For an in-depth guide on using Storage Analytics and other tools to identify, </span>
+<span class="sd">    diagnose, and troubleshoot Azure Storage-related issues, see </span>
+<span class="sd">    http://azure.microsoft.com/documentation/articles/storage-monitoring-diagnosing-troubleshooting/</span>
+
+<span class="sd">    For more information on CORS, see https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AccessPolicy"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.AccessPolicy">[docs]</a><span class="k">class</span> <span class="nc">AccessPolicy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    Access Policy class used by the set and get acl methods in each service.</span>
+
+<span class="sd">    A stored access policy can specify the start time, expiry time, and </span>
+<span class="sd">    permissions for the Shared Access Signatures with which it&#39;s associated. </span>
+<span class="sd">    Depending on how you want to control access to your table resource, you can </span>
+<span class="sd">    specify all of these parameters within the stored access policy, and omit </span>
+<span class="sd">    them from the URL for the Shared Access Signature. Doing so permits you to </span>
+<span class="sd">    modify the associated signature&#39;s behavior at any time, as well as to revoke </span>
+<span class="sd">    it. Or you can specify one or more of the access policy parameters within </span>
+<span class="sd">    the stored access policy, and the others on the URL. Finally, you can </span>
+<span class="sd">    specify all of the parameters on the URL. In this case, you can use the </span>
+<span class="sd">    stored access policy to revoke the signature, but not to modify its behavior.</span>
+
+<span class="sd">    Together the Shared Access Signature and the stored access policy must </span>
+<span class="sd">    include all fields required to authenticate the signature. If any required </span>
+<span class="sd">    fields are missing, the request will fail. Likewise, if a field is specified </span>
+<span class="sd">    both in the Shared Access Signature URL and in the stored access policy, the </span>
+<span class="sd">    request will fail with status code 400 (Bad Request).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param str permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expiry</span> <span class="o">=</span> <span class="n">expiry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">permission</span> <span class="o">=</span> <span class="n">permission</span>
+
+
+<div class="viewcode-block" id="Protocol"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.Protocol">[docs]</a><span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Specifies the protocol permitted for a SAS token. Note that HTTP only is </span>
+<span class="sd">    not allowed.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">HTTPS</span> <span class="o">=</span> <span class="s1">&#39;https&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Allow HTTPS requests only. &#39;&#39;&#39;</span>
+
+    <span class="n">HTTPS_HTTP</span> <span class="o">=</span> <span class="s1">&#39;https,http&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Allow HTTP and HTTPS requests. &#39;&#39;&#39;</span></div>
+
+
+<div class="viewcode-block" id="ResourceTypes"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.ResourceTypes">[docs]</a><span class="k">class</span> <span class="nc">ResourceTypes</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Specifies the resource types that are accessible with the account SAS.</span>
+
+<span class="sd">    :ivar ResourceTypes ResourceTypes.CONTAINER:</span>
+<span class="sd">        Access to container-level APIs (e.g., Create/Delete Container, </span>
+<span class="sd">        Create/Delete Queue, Create/Delete Table, Create/Delete Share, </span>
+<span class="sd">        List Blobs/Files and Directories) </span>
+<span class="sd">    :ivar ResourceTypes ResourceTypes.OBJECT:</span>
+<span class="sd">        Access to object-level APIs for blobs, queue messages, table entities, and </span>
+<span class="sd">        files(e.g. Put Blob, Query Entity, Get Messages, Create File, etc.) </span>
+<span class="sd">    :ivar ResourceTypes ResourceTypes.SERVICE:</span>
+<span class="sd">        Access to service-level APIs (e.g., Get/Set Service Properties, </span>
+<span class="sd">        Get Service Stats, List Containers/Queues/Tables/Shares) </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">object</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool service:</span>
+<span class="sd">            Access to service-level APIs (e.g., Get/Set Service Properties, </span>
+<span class="sd">            Get Service Stats, List Containers/Queues/Tables/Shares) </span>
+<span class="sd">        :param bool container:</span>
+<span class="sd">            Access to container-level APIs (e.g., Create/Delete Container, </span>
+<span class="sd">            Create/Delete Queue, Create/Delete Table, Create/Delete Share, </span>
+<span class="sd">            List Blobs/Files and Directories) </span>
+<span class="sd">        :param bool object:</span>
+<span class="sd">            Access to object-level APIs for blobs, queue messages, table entities, and </span>
+<span class="sd">            files(e.g. Put Blob, Query Entity, Get Messages, Create File, etc.) </span>
+<span class="sd">        :param str _str: </span>
+<span class="sd">            A string representing the resource types.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_str</span><span class="p">:</span>
+            <span class="n">_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="n">service</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;s&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="n">container</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="nb">object</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;o&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ResourceTypes</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ResourceTypes</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;s&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">service</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;c&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;o&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+<span class="n">ResourceTypes</span><span class="o">.</span><span class="n">SERVICE</span> <span class="o">=</span> <span class="n">ResourceTypes</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">ResourceTypes</span><span class="o">.</span><span class="n">CONTAINER</span> <span class="o">=</span> <span class="n">ResourceTypes</span><span class="p">(</span><span class="n">container</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">ResourceTypes</span><span class="o">.</span><span class="n">OBJECT</span> <span class="o">=</span> <span class="n">ResourceTypes</span><span class="p">(</span><span class="nb">object</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Services"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.Services">[docs]</a><span class="k">class</span> <span class="nc">Services</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Specifies the services accessible with the account SAS.</span>
+
+<span class="sd">    :ivar Services Services.BLOB: The blob service.</span>
+<span class="sd">    :ivar Services Services.FILE: The file service </span>
+<span class="sd">    :ivar Services Services.QUEUE: The queue service.</span>
+<span class="sd">    :ivar Services Services.TABLE: The table service </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blob</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">file</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool blob:</span>
+<span class="sd">            Access to any blob service, for example, the `.BlockBlobService`</span>
+<span class="sd">        :param bool queue:</span>
+<span class="sd">            Access to the `.QueueService`</span>
+<span class="sd">        :param bool table:</span>
+<span class="sd">            Access to the `.TableService`</span>
+<span class="sd">        :param bool file:</span>
+<span class="sd">            Access to the `.FileService`</span>
+<span class="sd">        :param str _str: </span>
+<span class="sd">            A string representing the services.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_str</span><span class="p">:</span>
+            <span class="n">_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blob</span> <span class="o">=</span> <span class="n">blob</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">queue</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;q&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;t&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">file</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Services</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Services</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;b&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blob</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;q&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;t&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;f&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+<span class="n">Services</span><span class="o">.</span><span class="n">BLOB</span> <span class="o">=</span> <span class="n">Services</span><span class="p">(</span><span class="n">blob</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">Services</span><span class="o">.</span><span class="n">QUEUE</span> <span class="o">=</span> <span class="n">Services</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">Services</span><span class="o">.</span><span class="n">TABLE</span> <span class="o">=</span> <span class="n">Services</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">Services</span><span class="o">.</span><span class="n">FILE</span> <span class="o">=</span> <span class="n">Services</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="AccountPermissions"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.AccountPermissions">[docs]</a><span class="k">class</span> <span class="nc">AccountPermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :class:`~ResourceTypes` class to be used with generate_shared_access_signature </span>
+<span class="sd">    method and for the AccessPolicies used with set_*_acl. There are two types of </span>
+<span class="sd">    SAS which may be used to grant resource access. One is to grant access to a </span>
+<span class="sd">    specific resource (resource-specific). Another is to grant access to the </span>
+<span class="sd">    entire service for a specific account and allow certain operations based on </span>
+<span class="sd">    perms found here.</span>
+
+<span class="sd">    :ivar AccountPermissions AccountPermissions.ADD:</span>
+<span class="sd">        Valid for the following Object resource types only: queue messages, table </span>
+<span class="sd">        entities, and append blobs. </span>
+<span class="sd">    :ivar AccountPermissions AccountPermissions.CREATE:</span>
+<span class="sd">        Valid for the following Object resource types only: blobs and files. Users </span>
+<span class="sd">        can create new blobs or files, but may not overwrite existing blobs or files. </span>
+<span class="sd">    :ivar AccountPermissions AccountPermissions.DELETE:</span>
+<span class="sd">        Valid for Container and Object resource types, except for queue messages. </span>
+<span class="sd">    :ivar AccountPermissions AccountPermissions.LIST:</span>
+<span class="sd">        Valid for Service and Container resource types only. </span>
+<span class="sd">    :ivar AccountPermissions AccountPermissions.PROCESS:</span>
+<span class="sd">        Valid for the following Object resource type only: queue messages. </span>
+<span class="sd">    :ivar AccountPermissions AccountPermissions.READ:</span>
+<span class="sd">        Valid for all signed resources types (Service, Container, and Object). </span>
+<span class="sd">        Permits read permissions to the specified resource type. </span>
+<span class="sd">    :ivar AccountPermissions AccountPermissions.UPDATE:</span>
+<span class="sd">        Valid for the following Object resource types only: queue messages and table </span>
+<span class="sd">        entities. </span>
+<span class="sd">    :ivar AccountPermissions AccountPermissions.WRITE:</span>
+<span class="sd">        Valid for all signed resources types (Service, Container, and Object). </span>
+<span class="sd">        Permits write permissions to the specified resource type. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">list</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+                 <span class="n">add</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">process</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool read:</span>
+<span class="sd">            Valid for all signed resources types (Service, Container, and Object). </span>
+<span class="sd">            Permits read permissions to the specified resource type.</span>
+<span class="sd">        :param bool write:</span>
+<span class="sd">            Valid for all signed resources types (Service, Container, and Object). </span>
+<span class="sd">            Permits write permissions to the specified resource type.</span>
+<span class="sd">        :param bool delete: </span>
+<span class="sd">            Valid for Container and Object resource types, except for queue messages.</span>
+<span class="sd">        :param bool list:</span>
+<span class="sd">            Valid for Service and Container resource types only.</span>
+<span class="sd">        :param bool add:</span>
+<span class="sd">            Valid for the following Object resource types only: queue messages, </span>
+<span class="sd">            table entities, and append blobs.</span>
+<span class="sd">        :param bool create:</span>
+<span class="sd">            Valid for the following Object resource types only: blobs and files. </span>
+<span class="sd">            Users can create new blobs or files, but may not overwrite existing </span>
+<span class="sd">            blobs or files.</span>
+<span class="sd">        :param bool update:</span>
+<span class="sd">            Valid for the following Object resource types only: queue messages and </span>
+<span class="sd">            table entities.</span>
+<span class="sd">        :param bool process:</span>
+<span class="sd">            Valid for the following Object resource type only: queue messages.</span>
+<span class="sd">        :param str _str: </span>
+<span class="sd">            A string representing the permissions.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_str</span><span class="p">:</span>
+            <span class="n">_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">read</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">write</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="o">=</span> <span class="n">delete</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="nb">list</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;l&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span> <span class="o">=</span> <span class="n">add</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create</span> <span class="o">=</span> <span class="n">create</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">update</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;u&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;p&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ResourceTypes</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ResourceTypes</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;r&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;l&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;a&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;c&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;u&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;p&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+<span class="n">AccountPermissions</span><span class="o">.</span><span class="n">READ</span> <span class="o">=</span> <span class="n">AccountPermissions</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">AccountPermissions</span><span class="o">.</span><span class="n">WRITE</span> <span class="o">=</span> <span class="n">AccountPermissions</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">AccountPermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">AccountPermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">AccountPermissions</span><span class="o">.</span><span class="n">LIST</span> <span class="o">=</span> <span class="n">AccountPermissions</span><span class="p">(</span><span class="nb">list</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">AccountPermissions</span><span class="o">.</span><span class="n">ADD</span> <span class="o">=</span> <span class="n">AccountPermissions</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">AccountPermissions</span><span class="o">.</span><span class="n">CREATE</span> <span class="o">=</span> <span class="n">AccountPermissions</span><span class="p">(</span><span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">AccountPermissions</span><span class="o">.</span><span class="n">UPDATE</span> <span class="o">=</span> <span class="n">AccountPermissions</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">AccountPermissions</span><span class="o">.</span><span class="n">PROCESS</span> <span class="o">=</span> <span class="n">AccountPermissions</span><span class="p">(</span><span class="n">process</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

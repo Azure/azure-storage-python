@@ -1,0 +1,1015 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.blob.pageblobservice &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.blob.pageblobservice</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">.._error</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_validate_not_none</span><span class="p">,</span>
+    <span class="n">_validate_type_bytes</span><span class="p">,</span>
+    <span class="n">_ERROR_VALUE_NEGATIVE</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_int_to_str</span><span class="p">,</span>
+    <span class="n">_to_str</span><span class="p">,</span>
+    <span class="n">_datetime_to_utc_string</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_get_request_body_bytes_only</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._http</span> <span class="kn">import</span> <span class="n">HTTPRequest</span>
+<span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_ERROR_PAGE_BLOB_SIZE_ALIGNMENT</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._chunking</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_PageBlobChunkUploader</span><span class="p">,</span>
+    <span class="n">_upload_blob_chunks</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_BlobTypes</span><span class="p">,</span>
+    <span class="n">PageBlobProperties</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._constants</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
+    <span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_get_path</span><span class="p">,</span>
+    <span class="n">_validate_and_format_range_headers</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._deserialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_convert_xml_to_page_ranges</span><span class="p">,</span>
+    <span class="n">_parse_page_properties</span><span class="p">,</span>
+    <span class="n">_parse_base_properties</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.baseblobservice</span> <span class="kn">import</span> <span class="n">BaseBlobService</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="k">as</span> <span class="n">BytesIO</span>
+
+<span class="c1"># Keep this value sync with _ERROR_PAGE_BLOB_SIZE_ALIGNMENT</span>
+<span class="n">_PAGE_ALIGNMENT</span> <span class="o">=</span> <span class="mi">512</span>
+
+
+<div class="viewcode-block" id="PageBlobService"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService">[docs]</a><span class="k">class</span> <span class="nc">PageBlobService</span><span class="p">(</span><span class="n">BaseBlobService</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Page blobs are a collection of 512-byte pages optimized for random read and</span>
+<span class="sd">    write operations. To create a page blob, you initialize the page blob and</span>
+<span class="sd">    specify the maximum size the page blob will grow. To add or update the</span>
+<span class="sd">    contents of a page blob, you write a page or pages by specifying an offset</span>
+<span class="sd">    and a range that align to 512-byte page boundaries. A write to a page blob</span>
+<span class="sd">    can overwrite just one page, some pages, or up to 4 MB of the page blob.</span>
+<span class="sd">    Writes to page blobs happen in-place and are immediately committed to the</span>
+<span class="sd">    blob. The maximum size for a page blob is 1 TB.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">MAX_PAGE_SIZE</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                 <span class="n">is_emulated</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
+                 <span class="n">custom_domain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">request_session</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">connection_string</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param str account_name:</span>
+<span class="sd">            The storage account name. This is used to authenticate requests </span>
+<span class="sd">            signed with an account key and to construct the storage endpoint. It </span>
+<span class="sd">            is required unless a connection string is given, or if a custom </span>
+<span class="sd">            domain is used with anonymous authentication.</span>
+<span class="sd">        :param str account_key:</span>
+<span class="sd">            The storage account key. This is used for shared key authentication. </span>
+<span class="sd">            If neither account key or sas token is specified, anonymous access </span>
+<span class="sd">            will be used.</span>
+<span class="sd">        :param str sas_token:</span>
+<span class="sd">             A shared access signature token to use to authenticate requests </span>
+<span class="sd">             instead of the account key. If account key and sas token are both </span>
+<span class="sd">             specified, account key will be used to sign. If neither are </span>
+<span class="sd">             specified, anonymous access will be used.</span>
+<span class="sd">        :param bool is_emulated:</span>
+<span class="sd">            Whether to use the emulator. Defaults to False. If specified, will </span>
+<span class="sd">            override all other parameters besides connection string and request </span>
+<span class="sd">            session.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            The protocol to use for requests. Defaults to https.</span>
+<span class="sd">        :param str endpoint_suffix:</span>
+<span class="sd">            The host base component of the url, minus the account name. Defaults </span>
+<span class="sd">            to Azure (core.windows.net). Override this to use the China cloud </span>
+<span class="sd">            (core.chinacloudapi.cn).</span>
+<span class="sd">        :param str custom_domain:</span>
+<span class="sd">            The custom domain to use. This can be set in the Azure Portal. For </span>
+<span class="sd">            example, &#39;www.mydomain.com&#39;.</span>
+<span class="sd">        :param requests.Session request_session:</span>
+<span class="sd">            The session object to use for http requests.</span>
+<span class="sd">        :param str connection_string:</span>
+<span class="sd">            If specified, this will override all other parameters besides </span>
+<span class="sd">            request session. See</span>
+<span class="sd">            http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/</span>
+<span class="sd">            for the connection string format.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blob_type</span> <span class="o">=</span> <span class="n">_BlobTypes</span><span class="o">.</span><span class="n">PageBlob</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PageBlobService</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">account_name</span><span class="p">,</span> <span class="n">account_key</span><span class="p">,</span> <span class="n">sas_token</span><span class="p">,</span> <span class="n">is_emulated</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="p">,</span> 
+            <span class="n">custom_domain</span><span class="p">,</span> <span class="n">request_session</span><span class="p">,</span> <span class="n">connection_string</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PageBlobService.create_blob"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.create_blob">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">content_length</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">sequence_number</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a new Page Blob.</span>
+
+<span class="sd">        See create_blob_from_* for high level functions that handle the</span>
+<span class="sd">        creation and upload of large blobs with automatic chunking and</span>
+<span class="sd">        progress notifications.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of blob to create or update.</span>
+<span class="sd">        :param int content_length:</span>
+<span class="sd">            Required. This header specifies the maximum size</span>
+<span class="sd">            for the page blob, up to 1 TB. The page blob size must be aligned</span>
+<span class="sd">            to a 512-byte boundary.</span>
+<span class="sd">        :param ~azure.storage.blob.models.ContentSettings content_settings:</span>
+<span class="sd">            ContentSettings object used to set properties on the blob.</span>
+<span class="sd">        :param int sequence_number:</span>
+<span class="sd">            The sequence number is a user-controlled value that you can use to</span>
+<span class="sd">            track requests. The value of the sequence number must be between 0</span>
+<span class="sd">            and 2^63 - 1.The default value is 0.</span>
+<span class="sd">        :param metadata:</span>
+<span class="sd">            Name-value pairs associated with the blob as metadata.</span>
+<span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header to perform</span>
+<span class="sd">            the operation only if the resource&#39;s ETag matches the value specified.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header</span>
+<span class="sd">            to perform the operation only if the resource&#39;s ETag does not match</span>
+<span class="sd">            the value specified. Specify the wildcard character (*) to perform</span>
+<span class="sd">            the operation only if the resource does not exist, and fail the</span>
+<span class="sd">            operation if it does exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: ETag and last modified properties for the new Page Blob</span>
+<span class="sd">        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;content_length&#39;</span><span class="p">,</span> <span class="n">content_length</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-blob-type&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blob_type</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-meta-name-values&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-blob-content-length&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">content_length</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-blob-sequence-number&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">sequence_number</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">content_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">+=</span> <span class="n">content_settings</span><span class="o">.</span><span class="n">_to_headers</span><span class="p">()</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_parse_base_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PageBlobService.update_page"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.update_page">[docs]</a>    <span class="k">def</span> <span class="nf">update_page</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">start_range</span><span class="p">,</span> <span class="n">end_range</span><span class="p">,</span>
+        <span class="n">content_md5</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_sequence_number_lte</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_sequence_number_lt</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_sequence_number_eq</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Updates a range of pages.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of existing blob.</span>
+<span class="sd">        :param bytes page:</span>
+<span class="sd">            Content of the page.</span>
+<span class="sd">        :param int start_range:</span>
+<span class="sd">            Start of byte range to use for writing to a section of the blob.</span>
+<span class="sd">            Pages must be aligned with 512-byte boundaries, the start offset</span>
+<span class="sd">            must be a modulus of 512 and the end offset must be a modulus of</span>
+<span class="sd">            512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.</span>
+<span class="sd">        :param int end_range:</span>
+<span class="sd">            End of byte range to use for writing to a section of the blob.</span>
+<span class="sd">            Pages must be aligned with 512-byte boundaries, the start offset</span>
+<span class="sd">            must be a modulus of 512 and the end offset must be a modulus of</span>
+<span class="sd">            512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.</span>
+<span class="sd">        :param int content_md5:</span>
+<span class="sd">            An MD5 hash of the page content. This hash is used to</span>
+<span class="sd">            verify the integrity of the page during transport. When this header</span>
+<span class="sd">            is specified, the storage service compares the hash of the content</span>
+<span class="sd">            that has arrived with the header value that was sent. If the two</span>
+<span class="sd">            hashes do not match, the operation will fail with error code 400</span>
+<span class="sd">            (Bad Request).</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param int if_sequence_number_lte:</span>
+<span class="sd">            If the blob&#39;s sequence number is less than or equal to</span>
+<span class="sd">            the specified value, the request proceeds; otherwise it fails.</span>
+<span class="sd">        :param int if_sequence_number_lt:</span>
+<span class="sd">            If the blob&#39;s sequence number is less than the specified</span>
+<span class="sd">            value, the request proceeds; otherwise it fails.</span>
+<span class="sd">        :param int if_sequence_number_eq:</span>
+<span class="sd">            If the blob&#39;s sequence number is equal to the specified</span>
+<span class="sd">            value, the request proceeds; otherwise it fails.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify an ETag value for this conditional</span>
+<span class="sd">            header to write the page only if the blob&#39;s ETag value matches the</span>
+<span class="sd">            value specified. If the values do not match, the Blob service fails.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify an ETag value for this conditional</span>
+<span class="sd">            header to write the page only if the blob&#39;s ETag value does not</span>
+<span class="sd">            match the value specified. If the values are identical, the Blob</span>
+<span class="sd">            service fails.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: ETag and last modified properties for the updated Page Blob</span>
+<span class="sd">        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="n">page</span><span class="p">)</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;page&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">content_md5</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-page-write&#39;</span><span class="p">,</span> <span class="s1">&#39;update&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-if-sequence-number-le&#39;</span><span class="p">,</span>
+             <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_lte</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-if-sequence-number-lt&#39;</span><span class="p">,</span>
+             <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_lt</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-if-sequence-number-eq&#39;</span><span class="p">,</span>
+             <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_eq</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">_validate_and_format_range_headers</span><span class="p">(</span>
+            <span class="n">request</span><span class="p">,</span>
+            <span class="n">start_range</span><span class="p">,</span>
+            <span class="n">end_range</span><span class="p">,</span>
+            <span class="n">align_to_page</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body_bytes_only</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="n">page</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_parse_page_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PageBlobService.clear_page"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.clear_page">[docs]</a>    <span class="k">def</span> <span class="nf">clear_page</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">start_range</span><span class="p">,</span> <span class="n">end_range</span><span class="p">,</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_sequence_number_lte</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_sequence_number_lt</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_sequence_number_eq</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Clears a range of pages.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of existing blob.</span>
+<span class="sd">        :param int start_range:</span>
+<span class="sd">            Start of byte range to use for writing to a section of the blob.</span>
+<span class="sd">            Pages must be aligned with 512-byte boundaries, the start offset</span>
+<span class="sd">            must be a modulus of 512 and the end offset must be a modulus of</span>
+<span class="sd">            512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.</span>
+<span class="sd">        :param int end_range:</span>
+<span class="sd">            End of byte range to use for writing to a section of the blob.</span>
+<span class="sd">            Pages must be aligned with 512-byte boundaries, the start offset</span>
+<span class="sd">            must be a modulus of 512 and the end offset must be a modulus of</span>
+<span class="sd">            512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param int if_sequence_number_lte:</span>
+<span class="sd">            If the blob&#39;s sequence number is less than or equal to</span>
+<span class="sd">            the specified value, the request proceeds; otherwise it fails.</span>
+<span class="sd">        :param int if_sequence_number_lt:</span>
+<span class="sd">            If the blob&#39;s sequence number is less than the specified</span>
+<span class="sd">            value, the request proceeds; otherwise it fails.</span>
+<span class="sd">        :param int if_sequence_number_eq:</span>
+<span class="sd">            If the blob&#39;s sequence number is equal to the specified</span>
+<span class="sd">            value, the request proceeds; otherwise it fails.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify an ETag value for this conditional</span>
+<span class="sd">            header to write the page only if the blob&#39;s ETag value matches the</span>
+<span class="sd">            value specified. If the values do not match, the Blob service fails.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify an ETag value for this conditional</span>
+<span class="sd">            header to write the page only if the blob&#39;s ETag value does not</span>
+<span class="sd">            match the value specified. If the values are identical, the Blob</span>
+<span class="sd">            service fails.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: ETag and last modified properties for the updated Page Blob</span>
+<span class="sd">        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;page&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-page-write&#39;</span><span class="p">,</span> <span class="s1">&#39;clear&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-if-sequence-number-le&#39;</span><span class="p">,</span>
+             <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_lte</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-if-sequence-number-lt&#39;</span><span class="p">,</span>
+             <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_lt</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-if-sequence-number-eq&#39;</span><span class="p">,</span>
+             <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_eq</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">_validate_and_format_range_headers</span><span class="p">(</span>
+            <span class="n">request</span><span class="p">,</span>
+            <span class="n">start_range</span><span class="p">,</span>
+            <span class="n">end_range</span><span class="p">,</span>
+            <span class="n">align_to_page</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_parse_page_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PageBlobService.get_page_ranges"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.get_page_ranges">[docs]</a>    <span class="k">def</span> <span class="nf">get_page_ranges</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">end_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns the list of valid page ranges for a Page Blob or snapshot</span>
+<span class="sd">        of a page blob.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of existing blob.</span>
+<span class="sd">        :param str snapshot:</span>
+<span class="sd">            The snapshot parameter is an opaque DateTime value that,</span>
+<span class="sd">            when present, specifies the blob snapshot to retrieve information</span>
+<span class="sd">            from.</span>
+<span class="sd">        :param int start_range:</span>
+<span class="sd">            Start of byte range to use for getting valid page ranges.</span>
+<span class="sd">            If no end_range is given, all bytes after the start_range will be searched.</span>
+<span class="sd">            Pages must be aligned with 512-byte boundaries, the start offset</span>
+<span class="sd">            must be a modulus of 512 and the end offset must be a modulus of</span>
+<span class="sd">            512-1. Examples of valid byte ranges are 0-511, 512-, etc.</span>
+<span class="sd">        :param int end_range:</span>
+<span class="sd">            End of byte range to use for getting valid page ranges.</span>
+<span class="sd">            If end_range is given, start_range must be provided.</span>
+<span class="sd">            This range will return valid page ranges for from the offset start up to</span>
+<span class="sd">            offset end.</span>
+<span class="sd">            Pages must be aligned with 512-byte boundaries, the start offset</span>
+<span class="sd">            must be a modulus of 512 and the end offset must be a modulus of</span>
+<span class="sd">            512-1. Examples of valid byte ranges are 0-511, 512-, etc.</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header to perform</span>
+<span class="sd">            the operation only if the resource&#39;s ETag matches the value specified.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header</span>
+<span class="sd">            to perform the operation only if the resource&#39;s ETag does not match</span>
+<span class="sd">            the value specified. Specify the wildcard character (*) to perform</span>
+<span class="sd">            the operation only if the resource does not exist, and fail the</span>
+<span class="sd">            operation if it does exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: A list of valid Page Ranges for the Page Blob.</span>
+<span class="sd">        :rtype: list of :class:`~azure.storage.blob.models.PageRange`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;pagelist&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;snapshot&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">start_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">_validate_and_format_range_headers</span><span class="p">(</span>
+                <span class="n">request</span><span class="p">,</span>
+                <span class="n">start_range</span><span class="p">,</span>
+                <span class="n">end_range</span><span class="p">,</span>
+                <span class="n">start_range_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">end_range_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">align_to_page</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_convert_xml_to_page_ranges</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PageBlobService.set_sequence_number"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.set_sequence_number">[docs]</a>    <span class="k">def</span> <span class="nf">set_sequence_number</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">sequence_number_action</span><span class="p">,</span> <span class="n">sequence_number</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div>
+        
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sets the blob sequence number.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of existing blob.</span>
+<span class="sd">        :param str sequence_number_action:</span>
+<span class="sd">            This property indicates how the service should modify the blob&#39;s sequence</span>
+<span class="sd">            number. See :class:`.SequenceNumberAction` for more information.</span>
+<span class="sd">        :param str sequence_number:</span>
+<span class="sd">            This property sets the blob&#39;s sequence number. The sequence number is a</span>
+<span class="sd">            user-controlled property that you can use to track requests and manage</span>
+<span class="sd">            concurrency issues.</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header to perform</span>
+<span class="sd">            the operation only if the resource&#39;s ETag matches the value specified.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header</span>
+<span class="sd">            to perform the operation only if the resource&#39;s ETag does not match</span>
+<span class="sd">            the value specified. Specify the wildcard character (*) to perform</span>
+<span class="sd">            the operation only if the resource does not exist, and fail the</span>
+<span class="sd">            operation if it does exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: ETag and last modified properties for the updated Page Blob</span>
+<span class="sd">        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;sequence_number_action&#39;</span><span class="p">,</span> <span class="n">sequence_number_action</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-blob-sequence-number&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">sequence_number</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-sequence-number-action&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">sequence_number_action</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)),</span>
+        <span class="p">]</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_parse_page_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PageBlobService.resize_blob"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.resize_blob">[docs]</a>    <span class="k">def</span> <span class="nf">resize_blob</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">content_length</span><span class="p">,</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div>
+        
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Resizes a page blob to the specified size. If the specified value is less</span>
+<span class="sd">        than the current size of the blob, then all pages above the specified value</span>
+<span class="sd">        are cleared.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of existing blob.</span>
+<span class="sd">        :param int content_length:</span>
+<span class="sd">            Size to resize blob to.</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header to perform</span>
+<span class="sd">            the operation only if the resource&#39;s ETag matches the value specified.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header</span>
+<span class="sd">            to perform the operation only if the resource&#39;s ETag does not match</span>
+<span class="sd">            the value specified. Specify the wildcard character (*) to perform</span>
+<span class="sd">            the operation only if the resource does not exist, and fail the</span>
+<span class="sd">            operation if it does exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: ETag and last modified properties for the updated Page Blob</span>
+<span class="sd">        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;content_length&#39;</span><span class="p">,</span> <span class="n">content_length</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-blob-content-length&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">content_length</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)),</span>
+        <span class="p">]</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_parse_page_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="c1">#----Convenience APIs-----------------------------------------------------</span>
+
+<div class="viewcode-block" id="PageBlobService.create_blob_from_path"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.create_blob_from_path">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_path</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a new blob from a file path, or updates the content of an</span>
+<span class="sd">        existing blob, with automatic chunking and progress notifications.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of blob to create or update.</span>
+<span class="sd">        :param str file_path:</span>
+<span class="sd">            Path of the file to upload as the blob content.</span>
+<span class="sd">        :param ~azure.storage.blob.models.ContentSettings content_settings:</span>
+<span class="sd">            ContentSettings object used to set blob properties.</span>
+<span class="sd">        :param metadata:</span>
+<span class="sd">            Name-value pairs associated with the blob as metadata.</span>
+<span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param progress_callback:</span>
+<span class="sd">            Callback for progress with signature function(current, total) where</span>
+<span class="sd">            current is the number of bytes transfered so far, and total is the</span>
+<span class="sd">            size of the blob, or None if the total size is unknown.</span>
+<span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
+<span class="sd">        :param int max_connections:</span>
+<span class="sd">            Maximum number of parallel connections to use when the blob size</span>
+<span class="sd">            exceeds 64MB.</span>
+<span class="sd">            Set to 1 to upload the blob chunks sequentially.</span>
+<span class="sd">            Set to 2 or more to upload the blob chunks in parallel. This uses</span>
+<span class="sd">            more system resources but will upload faster.</span>
+<span class="sd">        :param int max_retries:</span>
+<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
+<span class="sd">        :param int retry_wait:</span>
+<span class="sd">            Sleep time in secs between retries.</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header to perform</span>
+<span class="sd">            the operation only if the resource&#39;s ETag matches the value specified.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header</span>
+<span class="sd">            to perform the operation only if the resource&#39;s ETag does not match</span>
+<span class="sd">            the value specified. Specify the wildcard character (*) to perform</span>
+<span class="sd">            the operation only if the resource does not exist, and fail the</span>
+<span class="sd">            operation if it does exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds. This method may make </span>
+<span class="sd">            multiple calls to the Azure service and the timeout will apply to </span>
+<span class="sd">            each call individually.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;file_path&#39;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+
+        <span class="n">count</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_blob_from_stream</span><span class="p">(</span>
+                <span class="n">container_name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+                <span class="n">blob_name</span><span class="o">=</span><span class="n">blob_name</span><span class="p">,</span>
+                <span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span>
+                <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+                <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
+                <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
+                <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
+                <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
+                <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
+                <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
+                <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
+                <span class="n">if_match</span><span class="o">=</span><span class="n">if_match</span><span class="p">,</span>
+                <span class="n">if_none_match</span><span class="o">=</span><span class="n">if_none_match</span><span class="p">,</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PageBlobService.create_blob_from_stream"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.create_blob_from_stream">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_stream</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a new blob from a file/stream, or updates the content of an</span>
+<span class="sd">        existing blob, with automatic chunking and progress notifications.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of blob to create or update.</span>
+<span class="sd">        :param io.IOBase stream:</span>
+<span class="sd">            Opened file/stream to upload as the blob content.</span>
+<span class="sd">        :param int count:</span>
+<span class="sd">            Number of bytes to read from the stream. This is required, a page</span>
+<span class="sd">            blob cannot be created if the count is unknown.</span>
+<span class="sd">        :param ~azure.storage.blob.models.ContentSettings content_settings:</span>
+<span class="sd">            ContentSettings object used to set the blob properties.</span>
+<span class="sd">        :param metadata:</span>
+<span class="sd">            Name-value pairs associated with the blob as metadata.</span>
+<span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param progress_callback:</span>
+<span class="sd">            Callback for progress with signature function(current, total) where</span>
+<span class="sd">            current is the number of bytes transfered so far, and total is the</span>
+<span class="sd">            size of the blob, or None if the total size is unknown.</span>
+<span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
+<span class="sd">        :param int max_connections:</span>
+<span class="sd">            Maximum number of parallel connections to use when the blob size</span>
+<span class="sd">            exceeds 64MB.</span>
+<span class="sd">            Set to 1 to upload the blob chunks sequentially.</span>
+<span class="sd">            Set to 2 or more to upload the blob chunks in parallel. This uses</span>
+<span class="sd">            more system resources but will upload faster.</span>
+<span class="sd">            Note that parallel upload requires the stream to be seekable.</span>
+<span class="sd">        :param int max_retries:</span>
+<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
+<span class="sd">        :param int retry_wait:</span>
+<span class="sd">            Sleep time in secs between retries.</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header to perform</span>
+<span class="sd">            the operation only if the resource&#39;s ETag matches the value specified.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header</span>
+<span class="sd">            to perform the operation only if the resource&#39;s ETag does not match</span>
+<span class="sd">            the value specified. Specify the wildcard character (*) to perform</span>
+<span class="sd">            the operation only if the resource does not exist, and fail the</span>
+<span class="sd">            operation if it does exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds. This method may make </span>
+<span class="sd">            multiple calls to the Azure service and the timeout will apply to </span>
+<span class="sd">            each call individually.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;stream&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_ERROR_VALUE_NEGATIVE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">count</span> <span class="o">%</span> <span class="n">_PAGE_ALIGNMENT</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_ERROR_PAGE_BLOB_SIZE_ALIGNMENT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count</span><span class="p">))</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_blob</span><span class="p">(</span>
+            <span class="n">container_name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+            <span class="n">blob_name</span><span class="o">=</span><span class="n">blob_name</span><span class="p">,</span>
+            <span class="n">content_length</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+            <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
+            <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
+            <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
+            <span class="n">if_match</span><span class="o">=</span><span class="n">if_match</span><span class="p">,</span>
+            <span class="n">if_none_match</span><span class="o">=</span><span class="n">if_none_match</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+        <span class="p">)</span>
+
+        <span class="n">_upload_blob_chunks</span><span class="p">(</span>
+            <span class="n">blob_service</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">container_name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+            <span class="n">blob_name</span><span class="o">=</span><span class="n">blob_name</span><span class="p">,</span>
+            <span class="n">blob_size</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+            <span class="n">block_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_PAGE_SIZE</span><span class="p">,</span>
+            <span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span>
+            <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
+            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
+            <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
+            <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
+            <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
+            <span class="n">uploader_class</span><span class="o">=</span><span class="n">_PageBlobChunkUploader</span><span class="p">,</span>
+            <span class="n">if_match</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">etag</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PageBlobService.create_blob_from_bytes"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.create_blob_from_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_bytes</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">max_connections</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a new blob from an array of bytes, or updates the content</span>
+<span class="sd">        of an existing blob, with automatic chunking and progress</span>
+<span class="sd">        notifications.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of blob to create or update.</span>
+<span class="sd">        :param bytes blob:</span>
+<span class="sd">            Content of blob as an array of bytes.</span>
+<span class="sd">        :param int index:</span>
+<span class="sd">            Start index in the byte array.</span>
+<span class="sd">        :param int count:</span>
+<span class="sd">            Number of bytes to upload. Set to None or negative value to upload</span>
+<span class="sd">            all bytes starting from index.</span>
+<span class="sd">        :param ~azure.storage.blob.models.ContentSettings content_settings:</span>
+<span class="sd">            ContentSettings object used to set blob properties.</span>
+<span class="sd">        :param metadata:</span>
+<span class="sd">            Name-value pairs associated with the blob as metadata.</span>
+<span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param progress_callback:</span>
+<span class="sd">            Callback for progress with signature function(current, total) where</span>
+<span class="sd">            current is the number of bytes transfered so far, and total is the</span>
+<span class="sd">            size of the blob, or None if the total size is unknown.</span>
+<span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
+<span class="sd">        :param int max_connections:</span>
+<span class="sd">            Maximum number of parallel connections to use when the blob size</span>
+<span class="sd">            exceeds 64MB.</span>
+<span class="sd">            Set to 1 to upload the blob chunks sequentially.</span>
+<span class="sd">            Set to 2 or more to upload the blob chunks in parallel. This uses</span>
+<span class="sd">            more system resources but will upload faster.</span>
+<span class="sd">        :param int max_retries:</span>
+<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
+<span class="sd">        :param int retry_wait:</span>
+<span class="sd">            Sleep time in secs between retries.</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header to perform</span>
+<span class="sd">            the operation only if the resource&#39;s ETag matches the value specified.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header</span>
+<span class="sd">            to perform the operation only if the resource&#39;s ETag does not match</span>
+<span class="sd">            the value specified. Specify the wildcard character (*) to perform</span>
+<span class="sd">            the operation only if the resource does not exist, and fail the</span>
+<span class="sd">            operation if it does exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds. This method may make </span>
+<span class="sd">            multiple calls to the Azure service and the timeout will apply to </span>
+<span class="sd">            each call individually.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="n">blob</span><span class="p">)</span>
+        <span class="n">_validate_type_bytes</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="n">blob</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">_ERROR_VALUE_NEGATIVE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span> <span class="o">-</span> <span class="n">index</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_blob_from_stream</span><span class="p">(</span>
+            <span class="n">container_name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+            <span class="n">blob_name</span><span class="o">=</span><span class="n">blob_name</span><span class="p">,</span>
+            <span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span>
+            <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+            <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
+            <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
+            <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
+            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
+            <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
+            <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
+            <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
+            <span class="n">if_match</span><span class="o">=</span><span class="n">if_match</span><span class="p">,</span>
+            <span class="n">if_none_match</span><span class="o">=</span><span class="n">if_none_match</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

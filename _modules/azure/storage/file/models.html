@@ -1,0 +1,480 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.file.models &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.file.models</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="n">_to_str</span>
+<div class="viewcode-block" id="Share"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.Share">[docs]</a><span class="k">class</span> <span class="nc">Share</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    File share class.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar str name:</span>
+<span class="sd">        The name of the share.</span>
+<span class="sd">    :ivar ShareProperties properties:</span>
+<span class="sd">        System properties for the share.</span>
+<span class="sd">    :ivar metadata:</span>
+<span class="sd">        A dict containing name-value pairs associated with the share as metadata.</span>
+<span class="sd">        This var is set to None unless the include=metadata param was included </span>
+<span class="sd">        for the list shares operation. If this parameter was specified but the </span>
+<span class="sd">        share has no metadata, metadata will be set to an empty dictionary.</span>
+<span class="sd">    :vartype metadata: dict mapping str to str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">props</span> <span class="ow">or</span> <span class="n">ShareProperties</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+
+
+<div class="viewcode-block" id="ShareProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.ShareProperties">[docs]</a><span class="k">class</span> <span class="nc">ShareProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    File share&#39;s properties class.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar datetime last_modified:</span>
+<span class="sd">        A datetime object representing the last time the share was modified.</span>
+<span class="sd">    :ivar str etag:</span>
+<span class="sd">        The ETag contains a value that you can use to perform operations</span>
+<span class="sd">        conditionally.</span>
+<span class="sd">    :ivar int quote:</span>
+<span class="sd">        Returns the current share quota in GB.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quota</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="Directory"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.Directory">[docs]</a><span class="k">class</span> <span class="nc">Directory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Directory class.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar str name:</span>
+<span class="sd">        The name of the directory.</span>
+<span class="sd">    :ivar DirectoryProperties properties:</span>
+<span class="sd">        System properties for the directory.</span>
+<span class="sd">    :ivar metadata:</span>
+<span class="sd">        A dict containing name-value pairs associated with the directory as metadata.</span>
+<span class="sd">        This var is set to None unless the include=metadata param was included </span>
+<span class="sd">        for the list directory operation. If this parameter was specified but the </span>
+<span class="sd">        directory has no metadata, metadata will be set to an empty dictionary.</span>
+<span class="sd">    :vartype metadata: dict mapping str to str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">props</span> <span class="ow">or</span> <span class="n">DirectoryProperties</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+
+<div class="viewcode-block" id="DirectoryProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.DirectoryProperties">[docs]</a><span class="k">class</span> <span class="nc">DirectoryProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    File directory&#39;s properties class.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar datetime last_modified:</span>
+<span class="sd">        A datetime object representing the last time the directory was modified.</span>
+<span class="sd">    :ivar str etag:</span>
+<span class="sd">        The ETag contains a value that you can use to perform operations</span>
+<span class="sd">        conditionally.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    File class.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar str name:</span>
+<span class="sd">        The name of the file.</span>
+<span class="sd">    :ivar content:</span>
+<span class="sd">        File content.</span>
+<span class="sd">    :vartype content: str or bytes</span>
+<span class="sd">    :ivar FileProperties properties:</span>
+<span class="sd">        System properties for the file.</span>
+<span class="sd">    :ivar metadata:</span>
+<span class="sd">        A dict containing name-value pairs associated with the file as metadata.</span>
+<span class="sd">        This var is set to None unless the include=metadata param was included </span>
+<span class="sd">        for the list file operation. If this parameter was specified but the </span>
+<span class="sd">        file has no metadata, metadata will be set to an empty dictionary.</span>
+<span class="sd">    :vartype metadata: dict mapping str to str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">props</span> <span class="ow">or</span> <span class="n">FileProperties</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+
+
+<div class="viewcode-block" id="FileProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FileProperties">[docs]</a><span class="k">class</span> <span class="nc">FileProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    File Properties.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar datetime last_modified:</span>
+<span class="sd">        A datetime object representing the last time the file was modified.</span>
+<span class="sd">    :ivar str etag:</span>
+<span class="sd">        The ETag contains a value that you can use to perform operations</span>
+<span class="sd">        conditionally.</span>
+<span class="sd">    :ivar int content_length:</span>
+<span class="sd">        The size of the file in bytes.</span>
+<span class="sd">    :ivar ~azure.storage.file.models.ContentSettings content_settings:</span>
+<span class="sd">        Stores all the content settings for the file.</span>
+<span class="sd">    :ivar ~azure.storage.file.models.CopyProperties copy:</span>
+<span class="sd">        Stores all the copy properties for the file.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_length</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_settings</span> <span class="o">=</span> <span class="n">ContentSettings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copy</span> <span class="o">=</span> <span class="n">CopyProperties</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ContentSettings"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.ContentSettings">[docs]</a><span class="k">class</span> <span class="nc">ContentSettings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Used to store the content settings of a file.</span>
+
+<span class="sd">    :ivar str content_type:</span>
+<span class="sd">        The content type specified for the file. If no content type was</span>
+<span class="sd">        specified, the default content type is application/octet-stream. </span>
+<span class="sd">    :ivar str content_encoding:</span>
+<span class="sd">        If content_encoding has previously been set</span>
+<span class="sd">        for the file, that value is stored.</span>
+<span class="sd">    :ivar str content_language:</span>
+<span class="sd">        If content_language has previously been set</span>
+<span class="sd">        for the file, that value is stored.</span>
+<span class="sd">    :ivar str content_disposition:</span>
+<span class="sd">        content_disposition conveys additional information about how to</span>
+<span class="sd">        process the response payload, and also can be used to attach</span>
+<span class="sd">        additional metadata. If content_disposition has previously been set</span>
+<span class="sd">        for the file, that value is stored.</span>
+<span class="sd">    :ivar str cache_control:</span>
+<span class="sd">        If cache_control has previously been set for</span>
+<span class="sd">        the file, that value is stored.</span>
+<span class="sd">    :ivar str content_md5:</span>
+<span class="sd">        If the content_md5 has been set for the file, this response</span>
+<span class="sd">        header is stored so that the client can check for message content</span>
+<span class="sd">        integrity.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_md5</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="n">content_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_encoding</span> <span class="o">=</span> <span class="n">content_encoding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_language</span> <span class="o">=</span> <span class="n">content_language</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_disposition</span> <span class="o">=</span> <span class="n">content_disposition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_control</span> <span class="o">=</span> <span class="n">cache_control</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_md5</span> <span class="o">=</span> <span class="n">content_md5</span>
+
+    <span class="k">def</span> <span class="nf">_to_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-cache-control&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cache_control</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-content-type&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_type</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-content-disposition&#39;</span><span class="p">,</span>
+                <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_disposition</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-content-md5&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_md5</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-content-encoding&#39;</span><span class="p">,</span>
+                <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_encoding</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-content-language&#39;</span><span class="p">,</span>
+                <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_language</span><span class="p">)),</span>
+        <span class="p">]</span>
+
+
+<div class="viewcode-block" id="CopyProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.CopyProperties">[docs]</a><span class="k">class</span> <span class="nc">CopyProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    File Copy Properties.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar str id:</span>
+<span class="sd">        String identifier for the last attempted Copy File operation where this file</span>
+<span class="sd">        was the destination file. This header does not appear if this file has never</span>
+<span class="sd">        been the destination in a Copy File operation, or if this file has been</span>
+<span class="sd">        modified after a concluded Copy File operation using Set File Properties or</span>
+<span class="sd">        Put File.</span>
+<span class="sd">    :ivar str source:</span>
+<span class="sd">        URL up to 2 KB in length that specifies the source file used in the last attempted</span>
+<span class="sd">        Copy File operation where this file was the destination file. This header does not</span>
+<span class="sd">        appear if this file has never been the destination in a Copy File operation, or if</span>
+<span class="sd">        this file has been modified after a concluded Copy File operation using</span>
+<span class="sd">        Set File Properties or Put File.</span>
+<span class="sd">    :ivar str status:</span>
+<span class="sd">        State of the copy operation identified by Copy ID, with these values:</span>
+<span class="sd">            success:</span>
+<span class="sd">                Copy completed successfully.</span>
+<span class="sd">            pending: </span>
+<span class="sd">                Copy is in progress. Check copy_status_description if intermittent,</span>
+<span class="sd">                non-fatal errors impede copy progress but don’t cause failure.</span>
+<span class="sd">            aborted:</span>
+<span class="sd">                Copy was ended by Abort Copy File.</span>
+<span class="sd">            failed:</span>
+<span class="sd">                Copy failed. See copy_status_description for failure details.</span>
+<span class="sd">    :ivar str progress:</span>
+<span class="sd">        Contains the number of bytes copied and the total bytes in the source in the last</span>
+<span class="sd">        attempted Copy File operation where this file was the destination file. Can show</span>
+<span class="sd">        between 0 and Content-Length bytes copied.</span>
+<span class="sd">    :ivar datetime completion_time:</span>
+<span class="sd">        Conclusion time of the last attempted Copy File operation where this file was the</span>
+<span class="sd">        destination file. This value can specify the time of a completed, aborted, or</span>
+<span class="sd">        failed copy attempt.</span>
+<span class="sd">    :ivar str status_description:</span>
+<span class="sd">        Only appears when x-ms-copy-status is failed or pending. Describes cause of fatal</span>
+<span class="sd">        or non-fatal copy operation failure. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">completion_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_description</span> <span class="o">=</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="FileRange"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FileRange">[docs]</a><span class="k">class</span> <span class="nc">FileRange</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    File Range.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar int start:</span>
+<span class="sd">        Byte index for start of file range.</span>
+<span class="sd">    :ivar int end:</span>
+<span class="sd">        Byte index for end of file range.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">end</span>
+
+
+<div class="viewcode-block" id="FilePermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FilePermissions">[docs]</a><span class="k">class</span> <span class="nc">FilePermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    FilePermissions class to be used with </span>
+<span class="sd">    :func:`~azure.storage.file.fileservice.FileService.generate_file_shared_access_signature` API.</span>
+
+<span class="sd">    :ivar FilePermissions FilePermissions.CREATE:</span>
+<span class="sd">        Create a new file or copy a file to a new file.</span>
+<span class="sd">    :ivar FilePermissions FilePermissions.DELETE: </span>
+<span class="sd">        Delete the file.</span>
+<span class="sd">    :ivar FilePermissions FilePermissions.READ:</span>
+<span class="sd">        Read the content, properties, metadata. Use the file as the source of a copy </span>
+<span class="sd">        operation.</span>
+<span class="sd">    :ivar FilePermissions FilePermissions.WRITE: </span>
+<span class="sd">        Create or write content, properties, metadata. Resize the file. Use the file </span>
+<span class="sd">        as the destination of a copy operation within the same account.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+                 <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool read:</span>
+<span class="sd">            Read the content, properties, metadata. Use the file as the source of a copy </span>
+<span class="sd">            operation.</span>
+<span class="sd">        :param bool create:</span>
+<span class="sd">            Create a new file or copy a file to a new file.</span>
+<span class="sd">        :param bool write: </span>
+<span class="sd">            Create or write content, properties, metadata. Resize the file. Use the file </span>
+<span class="sd">            as the destination of a copy operation within the same account.</span>
+<span class="sd">        :param bool delete: </span>
+<span class="sd">            Delete the file.</span>
+<span class="sd">        :param str _str: </span>
+<span class="sd">            A string representing the permissions.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_str</span><span class="p">:</span>
+            <span class="n">_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">read</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create</span> <span class="o">=</span> <span class="n">create</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">write</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="o">=</span> <span class="n">delete</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FilePermissions</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FilePermissions</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;r&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;c&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+
+<span class="n">FilePermissions</span><span class="o">.</span><span class="n">CREATE</span> <span class="o">=</span> <span class="n">FilePermissions</span><span class="p">(</span><span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">FilePermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">FilePermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">FilePermissions</span><span class="o">.</span><span class="n">READ</span> <span class="o">=</span> <span class="n">FilePermissions</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">FilePermissions</span><span class="o">.</span><span class="n">WRITE</span> <span class="o">=</span> <span class="n">FilePermissions</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SharePermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.SharePermissions">[docs]</a><span class="k">class</span> <span class="nc">SharePermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    SharePermissions class to be used with `azure.storage.file.FileService.generate_share_shared_access_signature`</span>
+<span class="sd">    method and for the AccessPolicies used with `azure.storage.file.FileService.set_share_acl`. </span>
+
+<span class="sd">    :ivar SharePermissions FilePermissions.DELETE: </span>
+<span class="sd">        Delete any file in the share.</span>
+<span class="sd">        Note: You cannot grant permissions to delete a share with a service SAS. Use </span>
+<span class="sd">        an account SAS instead.</span>
+<span class="sd">    :ivar SharePermissions FilePermissions.LIST: </span>
+<span class="sd">        List files and directories in the share.</span>
+<span class="sd">    :ivar SharePermissions FilePermissions.READ:</span>
+<span class="sd">        Read the content, properties or metadata of any file in the share. Use any </span>
+<span class="sd">        file in the share as the source of a copy operation.</span>
+<span class="sd">    :ivar SharePermissions FilePermissions.WRITE: </span>
+<span class="sd">        For any file in the share, create or write content, properties or metadata. </span>
+<span class="sd">        Resize the file. Use the file as the destination of a copy operation within </span>
+<span class="sd">        the same account.</span>
+<span class="sd">        Note: You cannot grant permissions to read or write share properties or </span>
+<span class="sd">        metadata with a service SAS. Use an account SAS instead.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">list</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+                 <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool read:</span>
+<span class="sd">            Read the content, properties or metadata of any file in the share. Use any </span>
+<span class="sd">            file in the share as the source of a copy operation.</span>
+<span class="sd">        :param bool write: </span>
+<span class="sd">            For any file in the share, create or write content, properties or metadata. </span>
+<span class="sd">            Resize the file. Use the file as the destination of a copy operation within </span>
+<span class="sd">            the same account.</span>
+<span class="sd">            Note: You cannot grant permissions to read or write share properties or </span>
+<span class="sd">            metadata with a service SAS. Use an account SAS instead.</span>
+<span class="sd">        :param bool delete: </span>
+<span class="sd">            Delete any file in the share.</span>
+<span class="sd">            Note: You cannot grant permissions to delete a share with a service SAS. Use </span>
+<span class="sd">            an account SAS instead.</span>
+<span class="sd">        :param bool list: </span>
+<span class="sd">            List files and directories in the share.</span>
+<span class="sd">        :param str _str: </span>
+<span class="sd">            A string representing the permissions</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_str</span><span class="p">:</span>
+            <span class="n">_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">read</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">write</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="o">=</span> <span class="n">delete</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="nb">list</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;l&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SharePermissions</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SharePermissions</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;r&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> 
+                <span class="p">(</span><span class="s1">&#39;l&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+<span class="n">SharePermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">SharePermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">SharePermissions</span><span class="o">.</span><span class="n">LIST</span> <span class="o">=</span> <span class="n">SharePermissions</span><span class="p">(</span><span class="nb">list</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">SharePermissions</span><span class="o">.</span><span class="n">READ</span> <span class="o">=</span> <span class="n">SharePermissions</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">SharePermissions</span><span class="o">.</span><span class="n">WRITE</span> <span class="o">=</span> <span class="n">SharePermissions</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

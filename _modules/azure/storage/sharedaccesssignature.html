@@ -1,0 +1,754 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.sharedaccesssignature &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.sharedaccesssignature</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+
+<span class="kn">from</span> <span class="nn">._common_conversion</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_sign_string</span><span class="p">,</span>
+    <span class="n">_to_str</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">url_quote</span><span class="p">,</span>
+    <span class="n">_to_utc_datetime</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._constants</span> <span class="kn">import</span> <span class="n">X_MS_VERSION</span>
+
+<div class="viewcode-block" id="SharedAccessSignature"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature">[docs]</a><span class="k">class</span> <span class="nc">SharedAccessSignature</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Provides a factory for creating blob, queue, table, and file shares access </span>
+<span class="sd">    signature tokens with a common account name and account key.  Users can either </span>
+<span class="sd">    use the factory or can construct the appropriate service and use the </span>
+<span class="sd">    generate_*_shared_access_signature method directly.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="p">,</span> <span class="n">account_key</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param str account_name:</span>
+<span class="sd">            The storage account name used to generate the shared access signatures.</span>
+<span class="sd">        :param str account_key:</span>
+<span class="sd">            The access key to genenerate the shares access signatures.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">account_name</span> <span class="o">=</span> <span class="n">account_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span> <span class="o">=</span> <span class="n">account_key</span>
+
+<div class="viewcode-block" id="SharedAccessSignature.generate_table"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_table">[docs]</a>    <span class="k">def</span> <span class="nf">generate_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">start_pk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start_rk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">end_pk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end_rk</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the table.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of TableService.</span>
+
+<span class="sd">        :param str table_name:</span>
+<span class="sd">            Name of table.</span>
+<span class="sd">        :param TablePermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str id:</span>
+<span class="sd">            A unique value up to 64 characters in length that correlates to a </span>
+<span class="sd">            stored access policy. To create a stored access policy, use </span>
+<span class="sd">            set_blob_service_properties.</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        :param str start_pk:</span>
+<span class="sd">            The minimum partition key accessible with this shared access </span>
+<span class="sd">            signature. startpk must accompany startrk. Key values are inclusive. </span>
+<span class="sd">            If omitted, there is no lower bound on the table entities that can </span>
+<span class="sd">            be accessed.</span>
+<span class="sd">        :param str start_rk:</span>
+<span class="sd">            The minimum row key accessible with this shared access signature. </span>
+<span class="sd">            startpk must accompany startrk. Key values are inclusive. If </span>
+<span class="sd">            omitted, there is no lower bound on the table entities that can be </span>
+<span class="sd">            accessed.</span>
+<span class="sd">        :param str end_pk:</span>
+<span class="sd">            The maximum partition key accessible with this shared access </span>
+<span class="sd">            signature. endpk must accompany endrk. Key values are inclusive. If </span>
+<span class="sd">            omitted, there is no upper bound on the table entities that can be </span>
+<span class="sd">            accessed.</span>
+<span class="sd">        :param str end_rk:</span>
+<span class="sd">            The maximum row key accessible with this shared access signature. </span>
+<span class="sd">            endpk must accompany endrk. Key values are inclusive. If omitted, </span>
+<span class="sd">            there is no upper bound on the table entities that can be accessed.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">_SharedAccessHelper</span><span class="p">()</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_base</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_table_access_ranges</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">start_pk</span><span class="p">,</span> <span class="n">start_rk</span><span class="p">,</span> <span class="n">end_pk</span><span class="p">,</span> <span class="n">end_rk</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SharedAccessSignature.generate_queue"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_queue">[docs]</a>    <span class="k">def</span> <span class="nf">generate_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the queue.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of QueueService.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            Name of queue.</span>
+<span class="sd">        :param QueuePermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions.</span>
+<span class="sd">            Permissions must be ordered read, add, update, process.</span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str id:</span>
+<span class="sd">            A unique value up to 64 characters in length that correlates to a </span>
+<span class="sd">            stored access policy. To create a stored access policy, use </span>
+<span class="sd">            set_blob_service_properties.</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">_SharedAccessHelper</span><span class="p">()</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_base</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> <span class="s1">&#39;queue&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SharedAccessSignature.generate_blob"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_blob">[docs]</a>    <span class="k">def</span> <span class="nf">generate_blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the blob.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of any BlobService.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of blob.</span>
+<span class="sd">        :param BlobPermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions.</span>
+<span class="sd">            Permissions must be ordered read, write, delete, list.</span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str id:</span>
+<span class="sd">            A unique value up to 64 characters in length that correlates to a </span>
+<span class="sd">            stored access policy. To create a stored access policy, use </span>
+<span class="sd">            set_blob_service_properties.</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        :param str cache_control:</span>
+<span class="sd">            Response header value for Cache-Control when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_disposition:</span>
+<span class="sd">            Response header value for Content-Disposition when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_encoding:</span>
+<span class="sd">            Response header value for Content-Encoding when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_language:</span>
+<span class="sd">            Response header value for Content-Language when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_type:</span>
+<span class="sd">            Response header value for Content-Type when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">resource_path</span> <span class="o">=</span> <span class="n">container_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">blob_name</span>
+
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">_SharedAccessHelper</span><span class="p">()</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_base</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_override_response_headers</span><span class="p">(</span><span class="n">cache_control</span><span class="p">,</span> <span class="n">content_disposition</span><span class="p">,</span> 
+                                          <span class="n">content_encoding</span><span class="p">,</span> <span class="n">content_language</span><span class="p">,</span> 
+                                          <span class="n">content_type</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> <span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="n">resource_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SharedAccessSignature.generate_container"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_container">[docs]</a>    <span class="k">def</span> <span class="nf">generate_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                        <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the container.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of any BlobService.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of container.</span>
+<span class="sd">        :param ContainerPermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions.</span>
+<span class="sd">            Permissions must be ordered read, write, delete, list.</span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str id:</span>
+<span class="sd">            A unique value up to 64 characters in length that correlates to a </span>
+<span class="sd">            stored access policy. To create a stored access policy, use </span>
+<span class="sd">            set_blob_service_properties.</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        :param str cache_control:</span>
+<span class="sd">            Response header value for Cache-Control when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_disposition:</span>
+<span class="sd">            Response header value for Content-Disposition when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_encoding:</span>
+<span class="sd">            Response header value for Content-Encoding when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_language:</span>
+<span class="sd">            Response header value for Content-Language when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_type:</span>
+<span class="sd">            Response header value for Content-Type when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">_SharedAccessHelper</span><span class="p">()</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_base</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_override_response_headers</span><span class="p">(</span><span class="n">cache_control</span><span class="p">,</span> <span class="n">content_disposition</span><span class="p">,</span> 
+                                          <span class="n">content_encoding</span><span class="p">,</span> <span class="n">content_language</span><span class="p">,</span> 
+                                          <span class="n">content_type</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> <span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SharedAccessSignature.generate_file"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_file">[docs]</a>    <span class="k">def</span> <span class="nf">generate_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_name</span><span class="p">,</span> <span class="n">directory_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                      <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                      <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the file.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of FileService.</span>
+
+<span class="sd">        :param str share_name:</span>
+<span class="sd">            Name of share.</span>
+<span class="sd">        :param str directory_name:</span>
+<span class="sd">            Name of directory. SAS tokens cannot be created for directories, so </span>
+<span class="sd">            this parameter should only be present if file_name is provided.</span>
+<span class="sd">        :param str file_name:</span>
+<span class="sd">            Name of file.</span>
+<span class="sd">        :param FilePermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions.</span>
+<span class="sd">            Permissions must be ordered read, create, write, delete, list.</span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str id:</span>
+<span class="sd">            A unique value up to 64 characters in length that correlates to a </span>
+<span class="sd">            stored access policy. To create a stored access policy, use </span>
+<span class="sd">            set_file_service_properties.</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        :param str cache_control:</span>
+<span class="sd">            Response header value for Cache-Control when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_disposition:</span>
+<span class="sd">            Response header value for Content-Disposition when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_encoding:</span>
+<span class="sd">            Response header value for Content-Encoding when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_language:</span>
+<span class="sd">            Response header value for Content-Language when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_type:</span>
+<span class="sd">            Response header value for Content-Type when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">resource_path</span> <span class="o">=</span> <span class="n">share_name</span>
+        <span class="k">if</span> <span class="n">directory_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">resource_path</span> <span class="o">+=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">directory_name</span><span class="p">)</span>
+        <span class="n">resource_path</span> <span class="o">+=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">_SharedAccessHelper</span><span class="p">()</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_base</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource</span><span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_override_response_headers</span><span class="p">(</span><span class="n">cache_control</span><span class="p">,</span> <span class="n">content_disposition</span><span class="p">,</span> 
+                                          <span class="n">content_encoding</span><span class="p">,</span> <span class="n">content_language</span><span class="p">,</span> 
+                                          <span class="n">content_type</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">resource_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SharedAccessSignature.generate_share"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_share">[docs]</a>    <span class="k">def</span> <span class="nf">generate_share</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                       <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                       <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                       <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                       <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the share.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of FileService.</span>
+
+<span class="sd">        :param str share_name:</span>
+<span class="sd">            Name of share.</span>
+<span class="sd">        :param SharePermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions.</span>
+<span class="sd">            Permissions must be ordered read, create, write, delete, list.</span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str id:</span>
+<span class="sd">            A unique value up to 64 characters in length that correlates to a </span>
+<span class="sd">            stored access policy. To create a stored access policy, use </span>
+<span class="sd">            set_file_service_properties.</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        :param str cache_control:</span>
+<span class="sd">            Response header value for Cache-Control when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_disposition:</span>
+<span class="sd">            Response header value for Content-Disposition when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_encoding:</span>
+<span class="sd">            Response header value for Content-Encoding when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_language:</span>
+<span class="sd">            Response header value for Content-Language when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        :param str content_type:</span>
+<span class="sd">            Response header value for Content-Type when resource is accessed</span>
+<span class="sd">            using this shared access signature.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">_SharedAccessHelper</span><span class="p">()</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_base</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_override_response_headers</span><span class="p">(</span><span class="n">cache_control</span><span class="p">,</span> <span class="n">content_disposition</span><span class="p">,</span> 
+                                          <span class="n">content_encoding</span><span class="p">,</span> <span class="n">content_language</span><span class="p">,</span> 
+                                          <span class="n">content_type</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> <span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="n">share_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SharedAccessSignature.generate_account"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_account">[docs]</a>    <span class="k">def</span> <span class="nf">generate_account</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">services</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                         <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the account.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of the service </span>
+<span class="sd">        or to create a new account object.</span>
+
+<span class="sd">        :param Services services:</span>
+<span class="sd">            Specifies the services accessible with the account SAS. You can </span>
+<span class="sd">            combine values to provide access to more than one service. </span>
+<span class="sd">        :param ResourceTypes resource_types:</span>
+<span class="sd">            Specifies the resource types that are accessible with the account </span>
+<span class="sd">            SAS. You can combine values to provide access to more than one </span>
+<span class="sd">            resource type. </span>
+<span class="sd">        :param AccountPermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy. You can combine </span>
+<span class="sd">            values to provide more than one permission.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">_SharedAccessHelper</span><span class="p">()</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_base</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_account</span><span class="p">(</span><span class="n">services</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">)</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_account_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div></div>
+
+<span class="k">class</span> <span class="nc">_QueryStringConstants</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">SIGNED_SIGNATURE</span> <span class="o">=</span> <span class="s1">&#39;sig&#39;</span>
+    <span class="n">SIGNED_PERMISSION</span> <span class="o">=</span> <span class="s1">&#39;sp&#39;</span>
+    <span class="n">SIGNED_START</span> <span class="o">=</span> <span class="s1">&#39;st&#39;</span>
+    <span class="n">SIGNED_EXPIRY</span> <span class="o">=</span> <span class="s1">&#39;se&#39;</span>
+    <span class="n">SIGNED_RESOURCE</span> <span class="o">=</span> <span class="s1">&#39;sr&#39;</span>
+    <span class="n">SIGNED_IDENTIFIER</span> <span class="o">=</span> <span class="s1">&#39;si&#39;</span>
+    <span class="n">SIGNED_IP</span> <span class="o">=</span> <span class="s1">&#39;sip&#39;</span>
+    <span class="n">SIGNED_PROTOCOL</span> <span class="o">=</span> <span class="s1">&#39;spr&#39;</span>
+    <span class="n">SIGNED_VERSION</span> <span class="o">=</span> <span class="s1">&#39;sv&#39;</span>
+    <span class="n">SIGNED_CACHE_CONTROL</span> <span class="o">=</span> <span class="s1">&#39;rscc&#39;</span>
+    <span class="n">SIGNED_CONTENT_DISPOSITION</span> <span class="o">=</span> <span class="s1">&#39;rscd&#39;</span>
+    <span class="n">SIGNED_CONTENT_ENCODING</span> <span class="o">=</span> <span class="s1">&#39;rsce&#39;</span>
+    <span class="n">SIGNED_CONTENT_LANGUAGE</span> <span class="o">=</span> <span class="s1">&#39;rscl&#39;</span>
+    <span class="n">SIGNED_CONTENT_TYPE</span> <span class="o">=</span> <span class="s1">&#39;rsct&#39;</span>
+    <span class="n">TABLE_NAME</span> <span class="o">=</span> <span class="s1">&#39;tn&#39;</span>
+    <span class="n">START_PK</span> <span class="o">=</span> <span class="s1">&#39;spk&#39;</span>
+    <span class="n">START_RK</span> <span class="o">=</span> <span class="s1">&#39;srk&#39;</span>
+    <span class="n">END_PK</span> <span class="o">=</span> <span class="s1">&#39;epk&#39;</span>
+    <span class="n">END_RK</span> <span class="o">=</span> <span class="s1">&#39;erk&#39;</span>
+    <span class="n">SIGNED_RESOURCE_TYPES</span> <span class="o">=</span> <span class="s1">&#39;srt&#39;</span>
+    <span class="n">SIGNED_SERVICES</span> <span class="o">=</span> <span class="s1">&#39;ss&#39;</span>
+
+<span class="k">class</span> <span class="nc">_SharedAccessHelper</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_add_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">query_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_base</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">_to_utc_datetime</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expiry</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
+            <span class="n">expiry</span> <span class="o">=</span> <span class="n">_to_utc_datetime</span><span class="p">(</span><span class="n">expiry</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_START</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_EXPIRY</span><span class="p">,</span> <span class="n">expiry</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_PERMISSION</span><span class="p">,</span> <span class="n">permission</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_IP</span><span class="p">,</span> <span class="n">ip</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_PROTOCOL</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_VERSION</span><span class="p">,</span> <span class="n">X_MS_VERSION</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_RESOURCE</span><span class="p">,</span> <span class="n">resource</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_IDENTIFIER</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_account</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">services</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_SERVICES</span><span class="p">,</span> <span class="n">services</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_RESOURCE_TYPES</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_table_access_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">start_pk</span><span class="p">,</span> <span class="n">start_rk</span><span class="p">,</span> 
+                                    <span class="n">end_pk</span><span class="p">,</span> <span class="n">end_rk</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">TABLE_NAME</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">START_PK</span><span class="p">,</span> <span class="n">start_pk</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">START_RK</span><span class="p">,</span> <span class="n">start_rk</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">END_PK</span><span class="p">,</span> <span class="n">end_pk</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">END_RK</span><span class="p">,</span> <span class="n">end_rk</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_override_response_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_control</span><span class="p">,</span>
+                                        <span class="n">content_disposition</span><span class="p">,</span>
+                                        <span class="n">content_encoding</span><span class="p">,</span>
+                                        <span class="n">content_language</span><span class="p">,</span>
+                                        <span class="n">content_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CACHE_CONTROL</span><span class="p">,</span> <span class="n">cache_control</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CONTENT_DISPOSITION</span><span class="p">,</span> <span class="n">content_disposition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CONTENT_ENCODING</span><span class="p">,</span> <span class="n">content_encoding</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CONTENT_LANGUAGE</span><span class="p">,</span> <span class="n">content_language</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CONTENT_TYPE</span><span class="p">,</span> <span class="n">content_type</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="p">,</span> <span class="n">account_key</span><span class="p">,</span> <span class="n">service</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">get_value_to_append</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+            <span class="n">return_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">return</span> <span class="n">return_value</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="k">if</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">path</span>
+
+        <span class="n">canonicalized_resource</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">service</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">account_name</span> <span class="o">+</span> <span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="c1"># Form the string to sign from shared_access_policy and canonicalized</span>
+        <span class="c1"># resource. The order of values is important.</span>
+        <span class="n">string_to_sign</span> <span class="o">=</span> \
+            <span class="p">(</span><span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_PERMISSION</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_START</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_EXPIRY</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">canonicalized_resource</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_IDENTIFIER</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_IP</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_PROTOCOL</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_VERSION</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">service</span> <span class="o">==</span> <span class="s1">&#39;blob&#39;</span> <span class="ow">or</span> <span class="n">service</span> <span class="o">==</span> <span class="s1">&#39;file&#39;</span><span class="p">:</span>
+            <span class="n">string_to_sign</span> <span class="o">+=</span> \
+                <span class="p">(</span><span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CACHE_CONTROL</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CONTENT_DISPOSITION</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CONTENT_ENCODING</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CONTENT_LANGUAGE</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_CONTENT_TYPE</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">service</span> <span class="o">==</span> <span class="s1">&#39;table&#39;</span><span class="p">:</span>
+            <span class="n">string_to_sign</span> <span class="o">+=</span> \
+                <span class="p">(</span><span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">START_PK</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">START_RK</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">END_PK</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">END_RK</span><span class="p">))</span>
+
+        <span class="c1"># remove the trailing newline</span>
+        <span class="k">if</span> <span class="n">string_to_sign</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">:</span>
+            <span class="n">string_to_sign</span> <span class="o">=</span> <span class="n">string_to_sign</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_SIGNATURE</span><span class="p">,</span> 
+                        <span class="n">_sign_string</span><span class="p">(</span><span class="n">account_key</span><span class="p">,</span> <span class="n">string_to_sign</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">add_account_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="p">,</span> <span class="n">account_key</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">get_value_to_append</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+            <span class="n">return_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">return</span> <span class="n">return_value</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="n">string_to_sign</span> <span class="o">=</span> \
+            <span class="p">(</span><span class="n">account_name</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_PERMISSION</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_SERVICES</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_RESOURCE_TYPES</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_START</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_EXPIRY</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_IP</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_PROTOCOL</span><span class="p">)</span> <span class="o">+</span>
+                <span class="n">get_value_to_append</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_VERSION</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_query</span><span class="p">(</span><span class="n">_QueryStringConstants</span><span class="o">.</span><span class="n">SIGNED_SIGNATURE</span><span class="p">,</span> 
+                        <span class="n">_sign_string</span><span class="p">(</span><span class="n">account_key</span><span class="p">,</span> <span class="n">string_to_sign</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&amp;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;{0}={1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">url_quote</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

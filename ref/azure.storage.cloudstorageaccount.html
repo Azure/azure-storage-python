@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.cloudstorageaccount module &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../index.html" />
+    <link rel="up" title="azure.storage package" href="azure.storage.html" />
+    <link rel="next" title="azure.storage.models module" href="azure.storage.models.html" />
+    <link rel="prev" title="azure.storage.table.tableservice module" href="azure.storage.table.tableservice.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-azure.storage.cloudstorageaccount">
+<span id="azure-storage-cloudstorageaccount-module"></span><h1>azure.storage.cloudstorageaccount module<a class="headerlink" href="#module-azure.storage.cloudstorageaccount" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="azure.storage.cloudstorageaccount.CloudStorageAccount">
+<em class="property">class </em><code class="descclassname">azure.storage.cloudstorageaccount.</code><code class="descname">CloudStorageAccount</code><span class="sig-paren">(</span><em>account_name=None</em>, <em>account_key=None</em>, <em>sas_token=None</em>, <em>is_emulated=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/cloudstorageaccount.html#CloudStorageAccount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.cloudstorageaccount.CloudStorageAccount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Provides a factory for creating the blob, queue, table, and file services
+with a common account name and account key or sas token.  Users can either 
+use the factory or can construct the appropriate service directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>account_name</strong> (<em>str</em>) &#8211; The storage account name. This is used to authenticate requests 
+signed with an account key and to construct the storage endpoint. It 
+is required unless a connection string is given.</li>
+<li><strong>account_key</strong> (<em>str</em>) &#8211; The storage account key. This is used for shared key authentication.</li>
+<li><strong>sas_token</strong> (<em>str</em>) &#8211; A shared access signature token to use to authenticate requests 
+instead of the account key. If account key and sas token are both 
+specified, account key will be used to sign.</li>
+<li><strong>is_emulated</strong> (<em>bool</em>) &#8211; Whether to use the emulator. Defaults to False. If specified, will 
+override all other parameters besides connection string and request 
+session.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="azure.storage.cloudstorageaccount.CloudStorageAccount.create_append_blob_service">
+<code class="descname">create_append_blob_service</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/cloudstorageaccount.html#CloudStorageAccount.create_append_blob_service"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.cloudstorageaccount.CloudStorageAccount.create_append_blob_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a AppendBlobService object with the settings specified in the 
+CloudStorageAccount.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A service object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService" title="azure.storage.blob.appendblobservice.AppendBlobService"><code class="xref py py-class docutils literal"><span class="pre">AppendBlobService</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.cloudstorageaccount.CloudStorageAccount.create_block_blob_service">
+<code class="descname">create_block_blob_service</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/cloudstorageaccount.html#CloudStorageAccount.create_block_blob_service"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.cloudstorageaccount.CloudStorageAccount.create_block_blob_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a BlockBlobService object with the settings specified in the 
+CloudStorageAccount.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A service object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="azure.storage.blob.blockblobservice.html#azure.storage.blob.blockblobservice.BlockBlobService" title="azure.storage.blob.blockblobservice.BlockBlobService"><code class="xref py py-class docutils literal"><span class="pre">BlockBlobService</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.cloudstorageaccount.CloudStorageAccount.create_file_service">
+<code class="descname">create_file_service</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/cloudstorageaccount.html#CloudStorageAccount.create_file_service"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.cloudstorageaccount.CloudStorageAccount.create_file_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a FileService object with the settings specified in the 
+CloudStorageAccount.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A service object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="azure.storage.file.fileservice.html#azure.storage.file.fileservice.FileService" title="azure.storage.file.fileservice.FileService"><code class="xref py py-class docutils literal"><span class="pre">FileService</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.cloudstorageaccount.CloudStorageAccount.create_page_blob_service">
+<code class="descname">create_page_blob_service</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/cloudstorageaccount.html#CloudStorageAccount.create_page_blob_service"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.cloudstorageaccount.CloudStorageAccount.create_page_blob_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a PageBlobService object with the settings specified in the 
+CloudStorageAccount.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A service object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService" title="azure.storage.blob.pageblobservice.PageBlobService"><code class="xref py py-class docutils literal"><span class="pre">PageBlobService</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.cloudstorageaccount.CloudStorageAccount.create_queue_service">
+<code class="descname">create_queue_service</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/cloudstorageaccount.html#CloudStorageAccount.create_queue_service"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.cloudstorageaccount.CloudStorageAccount.create_queue_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a QueueService object with the settings specified in the 
+CloudStorageAccount.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A service object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService" title="azure.storage.queue.queueservice.QueueService"><code class="xref py py-class docutils literal"><span class="pre">QueueService</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.cloudstorageaccount.CloudStorageAccount.create_table_service">
+<code class="descname">create_table_service</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/cloudstorageaccount.html#CloudStorageAccount.create_table_service"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.cloudstorageaccount.CloudStorageAccount.create_table_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a TableService object with the settings specified in the 
+CloudStorageAccount.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A service object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService" title="azure.storage.table.tableservice.TableService"><code class="xref py py-class docutils literal"><span class="pre">TableService</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.cloudstorageaccount.CloudStorageAccount.generate_shared_access_signature">
+<code class="descname">generate_shared_access_signature</code><span class="sig-paren">(</span><em>services</em>, <em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/cloudstorageaccount.html#CloudStorageAccount.generate_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.cloudstorageaccount.CloudStorageAccount.generate_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a shared access signature for the account.
+Use the returned signature with the sas_token parameter of the service 
+or to create a new account object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>services</strong> (<a class="reference internal" href="azure.storage.models.html#azure.storage.models.Services" title="azure.storage.models.Services"><em>Services</em></a>) &#8211; Specifies the services accessible with the account SAS. You can 
+combine values to provide access to more than one service.</li>
+<li><strong>resource_types</strong> (<a class="reference internal" href="azure.storage.models.html#azure.storage.models.ResourceTypes" title="azure.storage.models.ResourceTypes"><em>ResourceTypes</em></a>) &#8211; Specifies the resource types that are accessible with the account 
+SAS. You can combine values to provide access to more than one 
+resource type.</li>
+<li><strong>permission</strong> (<a class="reference internal" href="azure.storage.models.html#azure.storage.models.AccountPermissions" title="azure.storage.models.AccountPermissions"><em>AccountPermissions</em></a>) &#8211; The permissions associated with the shared access signature. The 
+user is restricted to operations allowed by the permissions. 
+Required unless an id is given referencing a stored access policy 
+which contains this field. This field must be omitted if it has been 
+specified in an associated stored access policy. You can combine 
+values to provide more than one permission.</li>
+<li><strong>expiry</strong> (<em>date or str</em>) &#8211; The time at which the shared access signature becomes invalid. 
+Required unless an id is given referencing a stored access policy 
+which contains this field. This field must be omitted if it has 
+been specified in an associated stored access policy. Azure will always 
+convert values to UTC. If a date is passed in without timezone info, it 
+is assumed to be UTC.</li>
+<li><strong>start</strong> (<em>date or str</em>) &#8211; The time at which the shared access signature becomes valid. If 
+omitted, start time for this call is assumed to be the time when the 
+storage service receives the request. Azure will always convert values 
+to UTC. If a date is passed in without timezone info, it is assumed to 
+be UTC.</li>
+<li><strong>ip</strong> (<em>str</em>) &#8211; Specifies an IP address or a range of IP addresses from which to accept requests.
+If the IP address from which the request originates does not match the IP address
+or address range specified on the SAS token, the request is not authenticated.
+For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS
+restricts the request to those IP addresses.</li>
+<li><strong>protocol</strong> (<em>str</em>) &#8211; Specifies the protocol permitted for a request made. Possible values are
+both HTTPS and HTTP (https,http) or HTTPS only (https). The default value
+is https,http. Note that HTTP only is not a permitted value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="azure.html">azure package</a><ul>
+  <li><a href="azure.storage.html">azure.storage package</a><ul>
+      <li>Previous: <a href="azure.storage.table.tableservice.html" title="previous chapter">azure.storage.table.tableservice module</a></li>
+      <li>Next: <a href="azure.storage.models.html" title="next chapter">azure.storage.models module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ref/azure.storage.cloudstorageaccount.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/ref/azure.storage.cloudstorageaccount.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

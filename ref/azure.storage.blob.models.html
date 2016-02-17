@@ -1,0 +1,738 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.blob.models module &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../index.html" />
+    <link rel="up" title="azure.storage.blob package" href="azure.storage.blob.html" />
+    <link rel="next" title="azure.storage.blob.pageblobservice module" href="azure.storage.blob.pageblobservice.html" />
+    <link rel="prev" title="azure.storage.blob.blockblobservice module" href="azure.storage.blob.blockblobservice.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-azure.storage.blob.models">
+<span id="azure-storage-blob-models-module"></span><h1>azure.storage.blob.models module<a class="headerlink" href="#module-azure.storage.blob.models" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="azure.storage.blob.models.AppendBlockProperties">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">AppendBlockProperties</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#AppendBlockProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.AppendBlockProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#azure.storage.blob.models.ResourceProperties" title="azure.storage.blob.models.ResourceProperties"><code class="xref py py-class docutils literal"><span class="pre">azure.storage.blob.models.ResourceProperties</span></code></a></p>
+<p>Response for an append block request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>append_offset</strong> (<em>int</em>) &#8211; Position to start next append.</li>
+<li><strong>committed_block_count</strong> (<em>int</em>) &#8211; Number of committed append blocks.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.Blob">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">Blob</code><span class="sig-paren">(</span><em>name=None</em>, <em>snapshot=None</em>, <em>content=None</em>, <em>props=None</em>, <em>metadata=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/models.html#Blob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.Blob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Blob class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; Name of blob.</li>
+<li><strong>snapshot</strong> (<em>str</em>) &#8211; A DateTime value that uniquely identifies the snapshot. The value of
+this header indicates the snapshot version, and may be used in
+subsequent requests to access the snapshot.</li>
+<li><strong>content</strong> (<em>str or bytes</em>) &#8211; Blob content.</li>
+<li><strong>properties</strong> (<a class="reference internal" href="#azure.storage.blob.models.BlobProperties" title="azure.storage.blob.models.BlobProperties"><em>BlobProperties</em></a>) &#8211; Stores all the system properties for the blob.</li>
+<li><strong>metadata</strong> &#8211; Name-value pairs associated with the blob as metadata.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.BlobBlock">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">BlobBlock</code><span class="sig-paren">(</span><em>id=None</em>, <em>state='Latest'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/models.html#BlobBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.BlobBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>BlockBlob Block class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>str</em>) &#8211; Block id.</li>
+<li><strong>state</strong> (<em>str</em>) &#8211; Block state.
+Possible valuse: committed|uncommitted</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; Block size in bytes.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.BlobBlockList">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">BlobBlockList</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#BlobBlockList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.BlobBlockList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Blob Block List class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>committed_blocks</strong> (list of <a class="reference internal" href="#azure.storage.blob.models.BlobBlock" title="azure.storage.blob.models.BlobBlock"><code class="xref py py-class docutils literal"><span class="pre">BlobBlock</span></code></a>) &#8211; List of committed blocks.</li>
+<li><strong>uncommitted_blocks</strong> (list of <a class="reference internal" href="#azure.storage.blob.models.BlobBlock" title="azure.storage.blob.models.BlobBlock"><code class="xref py py-class docutils literal"><span class="pre">BlobBlock</span></code></a>) &#8211; List of uncommitted blocks.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.BlobBlockState">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">BlobBlockState</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#BlobBlockState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.BlobBlockState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Block blob block types.</p>
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlobBlockState.Committed">
+<code class="descname">Committed</code><em class="property"> = 'Committed'</em><a class="headerlink" href="#azure.storage.blob.models.BlobBlockState.Committed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Committed blocks.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlobBlockState.Latest">
+<code class="descname">Latest</code><em class="property"> = 'Latest'</em><a class="headerlink" href="#azure.storage.blob.models.BlobBlockState.Latest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Latest blocks.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlobBlockState.Uncommitted">
+<code class="descname">Uncommitted</code><em class="property"> = 'Uncommitted'</em><a class="headerlink" href="#azure.storage.blob.models.BlobBlockState.Uncommitted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uncommitted blocks.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.BlobPermissions">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">BlobPermissions</code><span class="sig-paren">(</span><em>read=False</em>, <em>add=False</em>, <em>create=False</em>, <em>write=False</em>, <em>delete=False</em>, <em>_str=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/models.html#BlobPermissions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.BlobPermissions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>BlobPermissions class to be used with 
+<a class="reference internal" href="azure.storage.blob.baseblobservice.html#azure.storage.blob.baseblobservice.BaseBlobService.generate_blob_shared_access_signature" title="azure.storage.blob.baseblobservice.BaseBlobService.generate_blob_shared_access_signature"><code class="xref py py-func docutils literal"><span class="pre">generate_blob_shared_access_signature()</span></code></a> API.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><a class="reference internal" href="#azure.storage.blob.models.BlobPermissions.ADD" title="azure.storage.blob.models.BlobPermissions.ADD"><strong>BlobPermissions.ADD</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.BlobPermissions" title="azure.storage.blob.models.BlobPermissions"><em>BlobPermissions</em></a>) &#8211; Add a block to an append blob.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.BlobPermissions.CREATE" title="azure.storage.blob.models.BlobPermissions.CREATE"><strong>BlobPermissions.CREATE</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.BlobPermissions" title="azure.storage.blob.models.BlobPermissions"><em>BlobPermissions</em></a>) &#8211; Write a new blob, snapshot a blob, or copy a blob to a new blob.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.BlobPermissions.DELETE" title="azure.storage.blob.models.BlobPermissions.DELETE"><strong>BlobPermissions.DELETE</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.BlobPermissions" title="azure.storage.blob.models.BlobPermissions"><em>BlobPermissions</em></a>) &#8211; Delete the blob.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.BlobPermissions.READ" title="azure.storage.blob.models.BlobPermissions.READ"><strong>BlobPermissions.READ</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.BlobPermissions" title="azure.storage.blob.models.BlobPermissions"><em>BlobPermissions</em></a>) &#8211; Read the content, properties, metadata and block list. Use the blob as the source of a copy operation.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.BlobPermissions.WRITE" title="azure.storage.blob.models.BlobPermissions.WRITE"><strong>BlobPermissions.WRITE</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.BlobPermissions" title="azure.storage.blob.models.BlobPermissions"><em>BlobPermissions</em></a>) &#8211; Create or write content, properties, metadata, or block list. Snapshot or lease 
+the blob. Resize the blob (page blob only). Use the blob as the destination of a 
+copy operation within the same account.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>read</strong> (<em>bool</em>) &#8211; Read the content, properties, metadata and block list. Use the blob as 
+the source of a copy operation.</li>
+<li><strong>add</strong> (<em>bool</em>) &#8211; Add a block to an append blob.</li>
+<li><strong>create</strong> (<em>bool</em>) &#8211; Write a new blob, snapshot a blob, or copy a blob to a new blob.</li>
+<li><strong>write</strong> (<em>bool</em>) &#8211; Create or write content, properties, metadata, or block list. Snapshot 
+or lease the blob. Resize the blob (page blob only). Use the blob as the 
+destination of a copy operation within the same account.</li>
+<li><strong>delete</strong> (<em>bool</em>) &#8211; Delete the blob.</li>
+<li><strong>_str</strong> (<em>str</em>) &#8211; A string representing the permissions.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlobPermissions.ADD">
+<code class="descname">ADD</code><em class="property"> = &lt;azure.storage.blob.models.BlobPermissions object at 0x049E1290&gt;</em><a class="headerlink" href="#azure.storage.blob.models.BlobPermissions.ADD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlobPermissions.CREATE">
+<code class="descname">CREATE</code><em class="property"> = &lt;azure.storage.blob.models.BlobPermissions object at 0x049E12B0&gt;</em><a class="headerlink" href="#azure.storage.blob.models.BlobPermissions.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlobPermissions.DELETE">
+<code class="descname">DELETE</code><em class="property"> = &lt;azure.storage.blob.models.BlobPermissions object at 0x049E12D0&gt;</em><a class="headerlink" href="#azure.storage.blob.models.BlobPermissions.DELETE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlobPermissions.READ">
+<code class="descname">READ</code><em class="property"> = &lt;azure.storage.blob.models.BlobPermissions object at 0x049E12F0&gt;</em><a class="headerlink" href="#azure.storage.blob.models.BlobPermissions.READ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlobPermissions.WRITE">
+<code class="descname">WRITE</code><em class="property"> = &lt;azure.storage.blob.models.BlobPermissions object at 0x049E1310&gt;</em><a class="headerlink" href="#azure.storage.blob.models.BlobPermissions.WRITE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.BlobPrefix">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">BlobPrefix</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#BlobPrefix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.BlobPrefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>BlobPrefix objects may potentially returned in the blob list when 
+<a class="reference internal" href="azure.storage.blob.baseblobservice.html#azure.storage.blob.baseblobservice.BaseBlobService.list_blobs" title="azure.storage.blob.baseblobservice.BaseBlobService.list_blobs"><code class="xref py py-func docutils literal"><span class="pre">list_blobs()</span></code></a> is 
+used with a delimiter. Prefixes can be thought of as virtual blob directories.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; The name of the blob prefix.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.BlobProperties">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">BlobProperties</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#BlobProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.BlobProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Blob Properties</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>blob_type</strong> (<em>str</em>) &#8211; String indicating this blob&#8217;s type.</li>
+<li><strong>last_modified</strong> (<em>datetime</em>) &#8211; A datetime object representing the last time the blob was modified.</li>
+<li><strong>etag</strong> (<em>str</em>) &#8211; The ETag contains a value that you can use to perform operations
+conditionally.</li>
+<li><strong>content_length</strong> (<em>int</em>) &#8211; Length of blob in bytes.</li>
+<li><strong>append_blob_committed_block_count</strong> (<em>int</em>) &#8211; (For Append Blobs) Number of committed blocks in the blob.</li>
+<li><strong>page_blob_sequence_number</strong> (<em>int</em>) &#8211; (For Page Blobs) Sequence number for page blob used for coordinating
+concurrent writes.</li>
+<li><strong>copy</strong> (<a class="reference internal" href="#azure.storage.blob.models.CopyProperties" title="azure.storage.blob.models.CopyProperties"><em>CopyProperties</em></a>) &#8211; Stores all the copy properties for the blob.</li>
+<li><strong>content_settings</strong> (<a class="reference internal" href="#azure.storage.blob.models.ContentSettings" title="azure.storage.blob.models.ContentSettings"><em>ContentSettings</em></a>) &#8211; Stores all the content settings for the blob.</li>
+<li><strong>lease</strong> (<a class="reference internal" href="#azure.storage.blob.models.LeaseProperties" title="azure.storage.blob.models.LeaseProperties"><em>LeaseProperties</em></a>) &#8211; Stores all the lease information for the blob.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.BlockListType">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">BlockListType</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#BlockListType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.BlockListType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Specifies whether to return the list of committed blocks, the list of uncommitted 
+blocks, or both lists together.</p>
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlockListType.All">
+<code class="descname">All</code><em class="property"> = 'all'</em><a class="headerlink" href="#azure.storage.blob.models.BlockListType.All" title="Permalink to this definition">¶</a></dt>
+<dd><p>Both committed and uncommitted blocks.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlockListType.Committed">
+<code class="descname">Committed</code><em class="property"> = 'committed'</em><a class="headerlink" href="#azure.storage.blob.models.BlockListType.Committed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Committed blocks.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.BlockListType.Uncommitted">
+<code class="descname">Uncommitted</code><em class="property"> = 'uncommitted'</em><a class="headerlink" href="#azure.storage.blob.models.BlockListType.Uncommitted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uncommitted blocks.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.Container">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">Container</code><span class="sig-paren">(</span><em>name=None</em>, <em>props=None</em>, <em>metadata=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/models.html#Container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.Container" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Blob container class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; The name of the container.</li>
+<li><strong>metadata</strong> (<em>dict mapping str to str</em>) &#8211; A dict containing name-value pairs associated with the container as metadata.
+This var is set to None unless the include=metadata param was included 
+for the list containers operation. If this parameter was specified but the 
+container has no metadata, metadata will be set to an empty dictionary.</li>
+<li><strong>properties</strong> (<a class="reference internal" href="#azure.storage.blob.models.ContainerProperties" title="azure.storage.blob.models.ContainerProperties"><em>ContainerProperties</em></a>) &#8211; System properties for the container.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.ContainerPermissions">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">ContainerPermissions</code><span class="sig-paren">(</span><em>read=False</em>, <em>write=False</em>, <em>delete=False</em>, <em>list=False</em>, <em>_str=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/models.html#ContainerPermissions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.ContainerPermissions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>ContainerPermissions class to be used with <a class="reference internal" href="azure.storage.blob.baseblobservice.html#azure.storage.blob.baseblobservice.BaseBlobService.generate_container_shared_access_signature" title="azure.storage.blob.baseblobservice.BaseBlobService.generate_container_shared_access_signature"><code class="xref py py-func docutils literal"><span class="pre">generate_container_shared_access_signature()</span></code></a>
+API and for the AccessPolicies used with <a class="reference internal" href="azure.storage.blob.baseblobservice.html#azure.storage.blob.baseblobservice.BaseBlobService.set_container_acl" title="azure.storage.blob.baseblobservice.BaseBlobService.set_container_acl"><code class="xref py py-func docutils literal"><span class="pre">set_container_acl()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><a class="reference internal" href="#azure.storage.blob.models.ContainerPermissions.DELETE" title="azure.storage.blob.models.ContainerPermissions.DELETE"><strong>ContainerPermissions.DELETE</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.ContainerPermissions" title="azure.storage.blob.models.ContainerPermissions"><em>ContainerPermissions</em></a>) &#8211; Delete any blob in the container. Note: You cannot grant permissions to 
+delete a container with a container SAS. Use an account SAS instead.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.ContainerPermissions.LIST" title="azure.storage.blob.models.ContainerPermissions.LIST"><strong>ContainerPermissions.LIST</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.ContainerPermissions" title="azure.storage.blob.models.ContainerPermissions"><em>ContainerPermissions</em></a>) &#8211; List blobs in the container.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.ContainerPermissions.READ" title="azure.storage.blob.models.ContainerPermissions.READ"><strong>ContainerPermissions.READ</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.ContainerPermissions" title="azure.storage.blob.models.ContainerPermissions"><em>ContainerPermissions</em></a>) &#8211; Read the content, properties, metadata or block list of any blob in the 
+container. Use any blob in the container as the source of a copy operation.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.ContainerPermissions.WRITE" title="azure.storage.blob.models.ContainerPermissions.WRITE"><strong>ContainerPermissions.WRITE</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.ContainerPermissions" title="azure.storage.blob.models.ContainerPermissions"><em>ContainerPermissions</em></a>) &#8211; For any blob in the container, create or write content, properties, 
+metadata, or block list. Snapshot or lease the blob. Resize the blob 
+(page blob only). Use the blob as the destination of a copy operation 
+within the same account. Note: You cannot grant permissions to read or 
+write container properties or metadata, nor to lease a container, with 
+a container SAS. Use an account SAS instead.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>read</strong> (<em>bool</em>) &#8211; Read the content, properties, metadata or block list of any blob in the 
+container. Use any blob in the container as the source of a copy operation.</li>
+<li><strong>write</strong> (<em>bool</em>) &#8211; For any blob in the container, create or write content, properties, 
+metadata, or block list. Snapshot or lease the blob. Resize the blob 
+(page blob only). Use the blob as the destination of a copy operation 
+within the same account. Note: You cannot grant permissions to read or 
+write container properties or metadata, nor to lease a container, with 
+a container SAS. Use an account SAS instead.</li>
+<li><strong>delete</strong> (<em>bool</em>) &#8211; Delete any blob in the container. Note: You cannot grant permissions to 
+delete a container with a container SAS. Use an account SAS instead.</li>
+<li><strong>list</strong> (<em>bool</em>) &#8211; List blobs in the container.</li>
+<li><strong>_str</strong> (<em>str</em>) &#8211; A string representing the permissions.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="azure.storage.blob.models.ContainerPermissions.DELETE">
+<code class="descname">DELETE</code><em class="property"> = &lt;azure.storage.blob.models.ContainerPermissions object at 0x049E1330&gt;</em><a class="headerlink" href="#azure.storage.blob.models.ContainerPermissions.DELETE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.ContainerPermissions.LIST">
+<code class="descname">LIST</code><em class="property"> = &lt;azure.storage.blob.models.ContainerPermissions object at 0x049E1370&gt;</em><a class="headerlink" href="#azure.storage.blob.models.ContainerPermissions.LIST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.ContainerPermissions.READ">
+<code class="descname">READ</code><em class="property"> = &lt;azure.storage.blob.models.ContainerPermissions object at 0x049E1390&gt;</em><a class="headerlink" href="#azure.storage.blob.models.ContainerPermissions.READ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.ContainerPermissions.WRITE">
+<code class="descname">WRITE</code><em class="property"> = &lt;azure.storage.blob.models.ContainerPermissions object at 0x049E13B0&gt;</em><a class="headerlink" href="#azure.storage.blob.models.ContainerPermissions.WRITE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.ContainerProperties">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">ContainerProperties</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#ContainerProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.ContainerProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Blob container&#8217;s properties class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>last_modified</strong> (<em>datetime</em>) &#8211; A datetime object representing the last time the container was modified.</li>
+<li><strong>etag</strong> (<em>str</em>) &#8211; The ETag contains a value that you can use to perform operations
+conditionally.</li>
+<li><strong>lease</strong> (<a class="reference internal" href="#azure.storage.blob.models.LeaseProperties" title="azure.storage.blob.models.LeaseProperties"><em>LeaseProperties</em></a>) &#8211; Stores all the lease information for the container.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.ContentSettings">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">ContentSettings</code><span class="sig-paren">(</span><em>content_type=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_disposition=None</em>, <em>cache_control=None</em>, <em>content_md5=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/models.html#ContentSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.ContentSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Used to store the content settings of a blob.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>content_type</strong> (<em>str</em>) &#8211; The content type specified for the blob. If no content type was
+specified, the default content type is application/octet-stream.</li>
+<li><strong>content_encoding</strong> (<em>str</em>) &#8211; If the content_encoding has previously been set
+for the blob, that value is stored.</li>
+<li><strong>content_language</strong> (<em>str</em>) &#8211; If the content_language has previously been set
+for the blob, that value is stored.</li>
+<li><strong>content_disposition</strong> (<em>str</em>) &#8211; content_disposition conveys additional information about how to
+process the response payload, and also can be used to attach
+additional metadata. If content_disposition has previously been set
+for the blob, that value is stored.</li>
+<li><strong>cache_control</strong> (<em>str</em>) &#8211; If the cache_control has previously been set for
+the blob, that value is stored.</li>
+<li><strong>content_md5</strong> (<em>str</em>) &#8211; If the content_md5 has been set for the blob, this response
+header is stored so that the client can check for message content
+integrity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.CopyProperties">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">CopyProperties</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#CopyProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.CopyProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Blob Copy Properties.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>str</em>) &#8211; String identifier for the last attempted Copy Blob operation where this blob
+was the destination blob. This header does not appear if this blob has never
+been the destination in a Copy Blob operation, or if this blob has been
+modified after a concluded Copy Blob operation using Set Blob Properties,
+Put Blob, or Put Block List.</li>
+<li><strong>source</strong> (<em>str</em>) &#8211; URL up to 2 KB in length that specifies the source blob used in the last attempted
+Copy Blob operation where this blob was the destination blob. This header does not
+appear if this blob has never been the destination in a Copy Blob operation, or if
+this blob has been modified after a concluded Copy Blob operation using
+Set Blob Properties, Put Blob, or Put Block List.</li>
+<li><strong>status</strong> (<em>str</em>) &#8211; <dl class="docutils">
+<dt>State of the copy operation identified by Copy ID, with these values:</dt>
+<dd><dl class="first last docutils">
+<dt>success:</dt>
+<dd>Copy completed successfully.</dd>
+<dt>pending:</dt>
+<dd>Copy is in progress. Check copy_status_description if intermittent,
+non-fatal errors impede copy progress but don’t cause failure.</dd>
+<dt>aborted:</dt>
+<dd>Copy was ended by Abort Copy Blob.</dd>
+<dt>failed:</dt>
+<dd>Copy failed. See copy_status_description for failure details.</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><strong>progress</strong> (<em>str</em>) &#8211; Contains the number of bytes copied and the total bytes in the source in the last
+attempted Copy Blob operation where this blob was the destination blob. Can show
+between 0 and Content-Length bytes copied.</li>
+<li><strong>completion_time</strong> (<em>datetime</em>) &#8211; Conclusion time of the last attempted Copy Blob operation where this blob was the
+destination blob. This value can specify the time of a completed, aborted, or
+failed copy attempt.</li>
+<li><strong>status_description</strong> (<em>str</em>) &#8211; only appears when x-ms-copy-status is failed or pending. Describes cause of fatal
+or non-fatal copy operation failure.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.DeleteSnapshot">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">DeleteSnapshot</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#DeleteSnapshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.DeleteSnapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Required if the blob has associated snapshots. Specifies how to handle the snapshots.</p>
+<dl class="attribute">
+<dt id="azure.storage.blob.models.DeleteSnapshot.Include">
+<code class="descname">Include</code><em class="property"> = 'include'</em><a class="headerlink" href="#azure.storage.blob.models.DeleteSnapshot.Include" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the base blob and all of its snapshots.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.DeleteSnapshot.Only">
+<code class="descname">Only</code><em class="property"> = 'only'</em><a class="headerlink" href="#azure.storage.blob.models.DeleteSnapshot.Only" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete only the blob&#8217;s snapshots and not the blob itself.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.Include">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">Include</code><span class="sig-paren">(</span><em>snapshots=False</em>, <em>metadata=False</em>, <em>uncommitted_blobs=False</em>, <em>copy=False</em>, <em>_str=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/models.html#Include"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.Include" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Specifies the datasets to include in the blob list response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><a class="reference internal" href="#azure.storage.blob.models.Include.COPY" title="azure.storage.blob.models.Include.COPY"><strong>Include.COPY</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.Include" title="azure.storage.blob.models.Include"><em>Include</em></a>) &#8211; Specifies that metadata related to any current or previous Copy Blob operation 
+should be included in the response.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.Include.METADATA" title="azure.storage.blob.models.Include.METADATA"><strong>Include.METADATA</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.Include" title="azure.storage.blob.models.Include"><em>Include</em></a>) &#8211; Specifies that metadata be returned in the response.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.Include.SNAPSHOTS" title="azure.storage.blob.models.Include.SNAPSHOTS"><strong>Include.SNAPSHOTS</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.Include" title="azure.storage.blob.models.Include"><em>Include</em></a>) &#8211; Specifies that snapshots should be included in the enumeration.</li>
+<li><a class="reference internal" href="#azure.storage.blob.models.Include.UNCOMMITTED_BLOBS" title="azure.storage.blob.models.Include.UNCOMMITTED_BLOBS"><strong>Include.UNCOMMITTED_BLOBS</strong></a> (<a class="reference internal" href="#azure.storage.blob.models.Include" title="azure.storage.blob.models.Include"><em>Include</em></a>) &#8211; Specifies that blobs for which blocks have been uploaded, but which have not 
+been committed using Put Block List, be included in the response.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>snapshots</strong> (<em>bool</em>) &#8211; Specifies that snapshots should be included in the enumeration.</li>
+<li><strong>metadata</strong> (<em>bool</em>) &#8211; Specifies that metadata be returned in the response.</li>
+<li><strong>uncommitted_blobs</strong> (<em>bool</em>) &#8211; Specifies that blobs for which blocks have been uploaded, but which have 
+not been committed using Put Block List, be included in the response.</li>
+<li><strong>copy</strong> (<em>bool</em>) &#8211; Specifies that metadata related to any current or previous Copy Blob 
+operation should be included in the response.</li>
+<li><strong>_str</strong> (<em>str</em>) &#8211; A string representing the includes.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="azure.storage.blob.models.Include.COPY">
+<code class="descname">COPY</code><em class="property"> = &lt;azure.storage.blob.models.Include object at 0x049E11D0&gt;</em><a class="headerlink" href="#azure.storage.blob.models.Include.COPY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.Include.METADATA">
+<code class="descname">METADATA</code><em class="property"> = &lt;azure.storage.blob.models.Include object at 0x049E1230&gt;</em><a class="headerlink" href="#azure.storage.blob.models.Include.METADATA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.Include.SNAPSHOTS">
+<code class="descname">SNAPSHOTS</code><em class="property"> = &lt;azure.storage.blob.models.Include object at 0x049E1250&gt;</em><a class="headerlink" href="#azure.storage.blob.models.Include.SNAPSHOTS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.Include.UNCOMMITTED_BLOBS">
+<code class="descname">UNCOMMITTED_BLOBS</code><em class="property"> = &lt;azure.storage.blob.models.Include object at 0x049E1270&gt;</em><a class="headerlink" href="#azure.storage.blob.models.Include.UNCOMMITTED_BLOBS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.LeaseProperties">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">LeaseProperties</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#LeaseProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.LeaseProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Blob Lease Properties.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>status</strong> (<em>str</em>) &#8211; The lease status of the blob.</li>
+<li><strong>state</strong> (<em>str</em>) &#8211; Lease state of the blob.
+Possible values: pending|success|aborted|failed</li>
+<li><strong>duration</strong> (<em>str</em>) &#8211; When a blob is leased, specifies whether the lease is of infinite or fixed duration.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.PageBlobProperties">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">PageBlobProperties</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#PageBlobProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.PageBlobProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#azure.storage.blob.models.ResourceProperties" title="azure.storage.blob.models.ResourceProperties"><code class="xref py py-class docutils literal"><span class="pre">azure.storage.blob.models.ResourceProperties</span></code></a></p>
+<p>Response for a page request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>sequence_number</strong> (<em>int</em>) &#8211; Identifer for page blobs to help handle concurrent writes.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.PageRange">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">PageRange</code><span class="sig-paren">(</span><em>start=None</em>, <em>end=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/models.html#PageRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.PageRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Page Range for page blob.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>start</strong> (<em>int</em>) &#8211; Start of page range in bytes.</li>
+<li><strong>end</strong> (<em>int</em>) &#8211; End of page range in bytes.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.PublicAccess">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">PublicAccess</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#PublicAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.PublicAccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Specifies whether data in the container may be accessed publicly and the level of access.</p>
+<dl class="attribute">
+<dt id="azure.storage.blob.models.PublicAccess.Blob">
+<code class="descname">Blob</code><em class="property"> = 'blob'</em><a class="headerlink" href="#azure.storage.blob.models.PublicAccess.Blob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies public read access for blobs. Blob data within this container can be read
+via anonymous request, but container data is not available. Clients cannot enumerate
+blobs within the container via anonymous request.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.PublicAccess.Container">
+<code class="descname">Container</code><em class="property"> = 'container'</em><a class="headerlink" href="#azure.storage.blob.models.PublicAccess.Container" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies full public read access for container and blob data. Clients can enumerate
+blobs within the container via anonymous request, but cannot enumerate containers
+within the storage account.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.ResourceProperties">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">ResourceProperties</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#ResourceProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.ResourceProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base response for a resource request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>etag</strong> (<em>str</em>) &#8211; Opaque etag value that can be used to check if resource
+has been modified.</li>
+<li><strong>last_modified</strong> (<em>datetime</em>) &#8211; Datetime for last time resource was modified.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.blob.models.SequenceNumberAction">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.models.</code><code class="descname">SequenceNumberAction</code><a class="reference internal" href="../_modules/azure/storage/blob/models.html#SequenceNumberAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.models.SequenceNumberAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Sequence number actions.</p>
+<dl class="attribute">
+<dt id="azure.storage.blob.models.SequenceNumberAction.Increment">
+<code class="descname">Increment</code><em class="property"> = 'increment'</em><a class="headerlink" href="#azure.storage.blob.models.SequenceNumberAction.Increment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increments the value of the sequence number by 1. If specifying this option,
+do not include the x-ms-blob-sequence-number header.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.SequenceNumberAction.Max">
+<code class="descname">Max</code><em class="property"> = 'max'</em><a class="headerlink" href="#azure.storage.blob.models.SequenceNumberAction.Max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the sequence number to be the higher of the value included with the
+request and the value currently stored for the blob.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.models.SequenceNumberAction.Update">
+<code class="descname">Update</code><em class="property"> = 'update'</em><a class="headerlink" href="#azure.storage.blob.models.SequenceNumberAction.Update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the sequence number to the value included with the request.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="azure.html">azure package</a><ul>
+  <li><a href="azure.storage.html">azure.storage package</a><ul>
+  <li><a href="azure.storage.blob.html">azure.storage.blob package</a><ul>
+      <li>Previous: <a href="azure.storage.blob.blockblobservice.html" title="previous chapter">azure.storage.blob.blockblobservice module</a></li>
+      <li>Next: <a href="azure.storage.blob.pageblobservice.html" title="next chapter">azure.storage.blob.pageblobservice module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ref/azure.storage.blob.models.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/ref/azure.storage.blob.models.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

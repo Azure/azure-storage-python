@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.cloudstorageaccount &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.cloudstorageaccount</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+
+<span class="c1"># Note that we import BlobService/QueueService/TableService on demand</span>
+<span class="c1"># because this module is imported by azure/storage/__init__</span>
+<span class="c1"># ie. we don&#39;t want &#39;import azure.storage&#39; to trigger an automatic import</span>
+<span class="c1"># of blob/queue/table packages.</span>
+
+<span class="kn">from</span> <span class="nn">.sharedaccesssignature</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SharedAccessSignature</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ResourceTypes</span><span class="p">,</span>
+    <span class="n">Services</span><span class="p">,</span>
+    <span class="n">AccountPermissions</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="n">_validate_not_none</span>
+
+<div class="viewcode-block" id="CloudStorageAccount"><a class="viewcode-back" href="../../../ref/azure.storage.cloudstorageaccount.html#azure.storage.cloudstorageaccount.CloudStorageAccount">[docs]</a><span class="k">class</span> <span class="nc">CloudStorageAccount</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Provides a factory for creating the blob, queue, table, and file services</span>
+<span class="sd">    with a common account name and account key or sas token.  Users can either </span>
+<span class="sd">    use the factory or can construct the appropriate service directly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">is_emulated</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param str account_name:</span>
+<span class="sd">            The storage account name. This is used to authenticate requests </span>
+<span class="sd">            signed with an account key and to construct the storage endpoint. It </span>
+<span class="sd">            is required unless a connection string is given.</span>
+<span class="sd">        :param str account_key:</span>
+<span class="sd">            The storage account key. This is used for shared key authentication. </span>
+<span class="sd">        :param str sas_token:</span>
+<span class="sd">             A shared access signature token to use to authenticate requests </span>
+<span class="sd">             instead of the account key. If account key and sas token are both </span>
+<span class="sd">             specified, account key will be used to sign.</span>
+<span class="sd">        :param bool is_emulated:</span>
+<span class="sd">            Whether to use the emulator. Defaults to False. If specified, will </span>
+<span class="sd">            override all other parameters besides connection string and request </span>
+<span class="sd">            session.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">account_name</span> <span class="o">=</span> <span class="n">account_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span> <span class="o">=</span> <span class="n">account_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span> <span class="o">=</span> <span class="n">sas_token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_emulated</span> <span class="o">=</span> <span class="n">is_emulated</span>
+
+<div class="viewcode-block" id="CloudStorageAccount.create_block_blob_service"><a class="viewcode-back" href="../../../ref/azure.storage.cloudstorageaccount.html#azure.storage.cloudstorageaccount.CloudStorageAccount.create_block_blob_service">[docs]</a>    <span class="k">def</span> <span class="nf">create_block_blob_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a BlockBlobService object with the settings specified in the </span>
+<span class="sd">        CloudStorageAccount.</span>
+
+<span class="sd">        :return: A service object.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.blob.blockblobservice.BlockBlobService`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.blob.blockblobservice</span> <span class="kn">import</span> <span class="n">BlockBlobService</span>
+        <span class="k">return</span> <span class="n">BlockBlobService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> 
+                                <span class="n">sas_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span><span class="p">,</span>
+                                <span class="n">is_emulated</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_emulated</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CloudStorageAccount.create_page_blob_service"><a class="viewcode-back" href="../../../ref/azure.storage.cloudstorageaccount.html#azure.storage.cloudstorageaccount.CloudStorageAccount.create_page_blob_service">[docs]</a>    <span class="k">def</span> <span class="nf">create_page_blob_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a PageBlobService object with the settings specified in the </span>
+<span class="sd">        CloudStorageAccount.</span>
+
+<span class="sd">        :return: A service object.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.blob.pageblobservice.PageBlobService`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.blob.pageblobservice</span> <span class="kn">import</span> <span class="n">PageBlobService</span>
+        <span class="k">return</span> <span class="n">PageBlobService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span>
+                               <span class="n">sas_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span><span class="p">,</span>
+                               <span class="n">is_emulated</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_emulated</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CloudStorageAccount.create_append_blob_service"><a class="viewcode-back" href="../../../ref/azure.storage.cloudstorageaccount.html#azure.storage.cloudstorageaccount.CloudStorageAccount.create_append_blob_service">[docs]</a>    <span class="k">def</span> <span class="nf">create_append_blob_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a AppendBlobService object with the settings specified in the </span>
+<span class="sd">        CloudStorageAccount.</span>
+
+<span class="sd">        :return: A service object.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.blob.appendblobservice.AppendBlobService`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.blob.appendblobservice</span> <span class="kn">import</span> <span class="n">AppendBlobService</span>
+        <span class="k">return</span> <span class="n">AppendBlobService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span>
+                                 <span class="n">sas_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span><span class="p">,</span>
+                                 <span class="n">is_emulated</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_emulated</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CloudStorageAccount.create_table_service"><a class="viewcode-back" href="../../../ref/azure.storage.cloudstorageaccount.html#azure.storage.cloudstorageaccount.CloudStorageAccount.create_table_service">[docs]</a>    <span class="k">def</span> <span class="nf">create_table_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a TableService object with the settings specified in the </span>
+<span class="sd">        CloudStorageAccount.</span>
+
+<span class="sd">        :return: A service object.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.table.tableservice.TableService`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.table.tableservice</span> <span class="kn">import</span> <span class="n">TableService</span>
+        <span class="k">return</span> <span class="n">TableService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span>
+                            <span class="n">sas_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span><span class="p">,</span>
+                            <span class="n">is_emulated</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_emulated</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CloudStorageAccount.create_queue_service"><a class="viewcode-back" href="../../../ref/azure.storage.cloudstorageaccount.html#azure.storage.cloudstorageaccount.CloudStorageAccount.create_queue_service">[docs]</a>    <span class="k">def</span> <span class="nf">create_queue_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a QueueService object with the settings specified in the </span>
+<span class="sd">        CloudStorageAccount.</span>
+
+<span class="sd">        :return: A service object.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.queue.queueservice.QueueService`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.queue.queueservice</span> <span class="kn">import</span> <span class="n">QueueService</span>
+        <span class="k">return</span> <span class="n">QueueService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span>
+                            <span class="n">sas_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span><span class="p">,</span>
+                            <span class="n">is_emulated</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_emulated</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CloudStorageAccount.create_file_service"><a class="viewcode-back" href="../../../ref/azure.storage.cloudstorageaccount.html#azure.storage.cloudstorageaccount.CloudStorageAccount.create_file_service">[docs]</a>    <span class="k">def</span> <span class="nf">create_file_service</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a FileService object with the settings specified in the </span>
+<span class="sd">        CloudStorageAccount.</span>
+
+<span class="sd">        :return: A service object.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.file.fileservice.FileService`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">.file.fileservice</span> <span class="kn">import</span> <span class="n">FileService</span>
+        <span class="k">return</span> <span class="n">FileService</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span>
+                           <span class="n">sas_token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CloudStorageAccount.generate_shared_access_signature"><a class="viewcode-back" href="../../../ref/azure.storage.cloudstorageaccount.html#azure.storage.cloudstorageaccount.CloudStorageAccount.generate_shared_access_signature">[docs]</a>    <span class="k">def</span> <span class="nf">generate_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">services</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> 
+                                         <span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                                         <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the account.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of the service </span>
+<span class="sd">        or to create a new account object.</span>
+
+<span class="sd">        :param Services services:</span>
+<span class="sd">            Specifies the services accessible with the account SAS. You can </span>
+<span class="sd">            combine values to provide access to more than one service. </span>
+<span class="sd">        :param ResourceTypes resource_types:</span>
+<span class="sd">            Specifies the resource types that are accessible with the account </span>
+<span class="sd">            SAS. You can combine values to provide access to more than one </span>
+<span class="sd">            resource type. </span>
+<span class="sd">        :param AccountPermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy. You can combine </span>
+<span class="sd">            values to provide more than one permission.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. Possible values are</span>
+<span class="sd">            both HTTPS and HTTP (https,http) or HTTPS only (https). The default value</span>
+<span class="sd">            is https,http. Note that HTTP only is not a permitted value.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;self.account_name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;self.account_key&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
+
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">SharedAccessSignature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">generate_account</span><span class="p">(</span><span class="n">services</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
+                                    <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

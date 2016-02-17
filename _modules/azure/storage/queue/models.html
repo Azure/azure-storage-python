@@ -1,0 +1,332 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.queue.models &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.queue.models</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">xml.sax.saxutils</span> <span class="kn">import</span> <span class="n">escape</span> <span class="k">as</span> <span class="n">xml_escape</span>
+<span class="kn">from</span> <span class="nn">xml.sax.saxutils</span> <span class="kn">import</span> <span class="n">unescape</span> <span class="k">as</span> <span class="n">xml_unescape</span>
+<span class="kn">from</span> <span class="nn">base64</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">b64encode</span><span class="p">,</span>
+    <span class="n">b64decode</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_validate_message_type_bytes</span><span class="p">,</span>
+    <span class="n">_validate_message_type_text</span><span class="p">,</span>
+    <span class="n">_ERROR_MESSAGE_NOT_BASE64</span><span class="p">,</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="Queue"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.Queue">[docs]</a><span class="k">class</span> <span class="nc">Queue</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    Queue class.</span>
+<span class="sd">     </span>
+<span class="sd">    :ivar str name: </span>
+<span class="sd">        The name of the queue.</span>
+<span class="sd">    :ivar metadata: </span>
+<span class="sd">        A dict containing name-value pairs associated with the queue as metadata.</span>
+<span class="sd">        This var is set to None unless the include=metadata param was included </span>
+<span class="sd">        for the list queues operation. If this parameter was specified but the </span>
+<span class="sd">        queue has no metadata, metadata will be set to an empty dictionary.</span>
+<span class="sd">    :vartype metadata: dict mapping str to str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<div class="viewcode-block" id="QueueMessage"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessage">[docs]</a><span class="k">class</span> <span class="nc">QueueMessage</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    Queue message class. </span>
+
+<span class="sd">    :ivar str id: </span>
+<span class="sd">        A GUID value assigned to the message by the Queue service that </span>
+<span class="sd">        identifies the message in the queue. This value may be used together </span>
+<span class="sd">        with the value of pop_receipt to delete a message from the queue after </span>
+<span class="sd">        it has been retrieved with the get messages operation. </span>
+<span class="sd">    :ivar date insertion_time: </span>
+<span class="sd">        A UTC date value representing the time the messages was inserted.</span>
+<span class="sd">    :ivar date expiration_time: </span>
+<span class="sd">        A UTC date value representing the time the message expires.</span>
+<span class="sd">    :ivar int dequeue_count: </span>
+<span class="sd">        Begins with a value of 1 the first time the message is dequeued. This </span>
+<span class="sd">        value is incremented each time the message is subsequently dequeued.</span>
+<span class="sd">    :ivar obj content: </span>
+<span class="sd">        The message content. Type is determined by the decode_function set on </span>
+<span class="sd">        the service. Default is str.</span>
+<span class="sd">    :ivar str pop_receipt: </span>
+<span class="sd">        A receipt str which can be used together with the message_id element to </span>
+<span class="sd">        delete a message from the queue after it has been retrieved with the get </span>
+<span class="sd">        messages operation. Only returned by get messages operations. Set to </span>
+<span class="sd">        None for peek messages.</span>
+<span class="sd">    :ivar date time_next_visible: </span>
+<span class="sd">        A UTC date value representing the time the message will next be visible. </span>
+<span class="sd">        Only returned by get messages operations. Set to None for peek messages.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">insertion_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expiration_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dequeue_count</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pop_receipt</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_next_visible</span> <span class="o">=</span> <span class="bp">None</span></div>
+
+
+<div class="viewcode-block" id="QueueMessageFormat"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat">[docs]</a><span class="k">class</span> <span class="nc">QueueMessageFormat</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    Encoding and decoding methods which can be used to modify how the queue service </span>
+<span class="sd">    encodes and decodes queue messages. Set these to queueservice.encode_function </span>
+<span class="sd">    and queueservice.decode_function to modify the behavior. The defaults are </span>
+<span class="sd">    text_xmlencode and text_xmldecode, respectively.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="QueueMessageFormat.text_base64encode"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat.text_base64encode">[docs]</a>    <span class="k">def</span> <span class="nf">text_base64encode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Base64 encode unicode text.</span>
+<span class="sd">        </span>
+<span class="sd">        :param str data: String to encode.</span>
+<span class="sd">        :return: Base64 encoded string.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_message_type_text</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span></div>
+     
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="QueueMessageFormat.text_base64decode"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat.text_base64decode">[docs]</a>    <span class="k">def</span> <span class="nf">text_base64decode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>   
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Base64 decode to unicode text.</span>
+<span class="sd">        </span>
+<span class="sd">        :param str data: String data to decode to unicode.</span>
+<span class="sd">        :return: Base64 decoded string.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span> 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="c1"># ValueError for Python 3, TypeError for Python 2</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_ERROR_MESSAGE_NOT_BASE64</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="QueueMessageFormat.binary_base64encode"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat.binary_base64encode">[docs]</a>    <span class="k">def</span> <span class="nf">binary_base64encode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Base64 encode byte strings.</span>
+<span class="sd">        </span>
+<span class="sd">        :param str data: Binary string to encode.</span>
+<span class="sd">        :return: Base64 encoded data.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_message_type_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span></div>
+     
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="QueueMessageFormat.binary_base64decode"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat.binary_base64decode">[docs]</a>    <span class="k">def</span> <span class="nf">binary_base64decode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Base64 decode to byte string.</span>
+<span class="sd">        </span>
+<span class="sd">        :param str data: Data to decode to a byte string.</span>
+<span class="sd">        :return: Base64 decoded data.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span> 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">b64decode</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="c1"># ValueError for Python 3, TypeError for Python 2</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_ERROR_MESSAGE_NOT_BASE64</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="QueueMessageFormat.text_xmlencode"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat.text_xmlencode">[docs]</a>    <span class="k">def</span> <span class="nf">text_xmlencode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        XML encode unicode text.</span>
+
+<span class="sd">        :param str data: Unicode string to encode</span>
+<span class="sd">        :return: XML encoded data.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_message_type_text</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">xml_escape</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+       
+    <span class="nd">@staticmethod</span> 
+<div class="viewcode-block" id="QueueMessageFormat.text_xmldecode"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat.text_xmldecode">[docs]</a>    <span class="k">def</span> <span class="nf">text_xmldecode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        XML decode to unicode text.</span>
+
+<span class="sd">        :param str data: Data to decode to unicode.</span>
+<span class="sd">        :return: XML decoded data.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">xml_unescape</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="QueueMessageFormat.noencode"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat.noencode">[docs]</a>    <span class="k">def</span> <span class="nf">noencode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">        Do no encoding. </span>
+
+<span class="sd">        :param str data: Data.</span>
+<span class="sd">        :return: The data passed in is returned unmodified.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+        
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="QueueMessageFormat.nodecode"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat.nodecode">[docs]</a>    <span class="k">def</span> <span class="nf">nodecode</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Do no decoding.</span>
+<span class="sd">        </span>
+<span class="sd">        :param str data: Data.</span>
+<span class="sd">        :return: The data passed in is returned unmodified.</span>
+<span class="sd">        :rtype: str        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">data</span></div></div>
+
+
+<div class="viewcode-block" id="QueuePermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.models.html#azure.storage.queue.models.QueuePermissions">[docs]</a><span class="k">class</span> <span class="nc">QueuePermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    QueuePermissions class to be used with :func:`~azure.storage.queue.queueservice.QueueService.generate_queue_shared_access_signature`</span>
+<span class="sd">    method and for the AccessPolicies used with :func:`~azure.storage.queue.queueservice.QueueService.set_queue_acl`. </span>
+
+<span class="sd">    :ivar QueuePermissions QueuePermissions.READ: </span>
+<span class="sd">        Read metadata and properties, including message count. Peek at messages. </span>
+<span class="sd">    :ivar QueuePermissions QueuePermissions.ADD: </span>
+<span class="sd">        Add messages to the queue.</span>
+<span class="sd">    :ivar QueuePermissions QueuePermissions.UPDATE:</span>
+<span class="sd">        Update messages in the queue. Note: Use the Process permission with </span>
+<span class="sd">        Update so you can first get the message you want to update.</span>
+<span class="sd">    :ivar QueuePermissions QueuePermissions.PROCESS: Delete entities.</span>
+<span class="sd">        Get and delete messages from the queue. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">process</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool read:</span>
+<span class="sd">            Read metadata and properties, including message count. Peek at messages.</span>
+<span class="sd">        :param bool add:</span>
+<span class="sd">            Add messages to the queue.</span>
+<span class="sd">        :param bool update:</span>
+<span class="sd">            Update messages in the queue. Note: Use the Process permission with </span>
+<span class="sd">            Update so you can first get the message you want to update.</span>
+<span class="sd">        :param bool process: </span>
+<span class="sd">            Get and delete messages from the queue.</span>
+<span class="sd">        :param str _str: </span>
+<span class="sd">            A string representing the permissions.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_str</span><span class="p">:</span>
+            <span class="n">_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">read</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span> <span class="o">=</span> <span class="n">add</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">update</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;u&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;p&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QueuePermissions</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QueuePermissions</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;r&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;a&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;u&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;p&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+<span class="n">QueuePermissions</span><span class="o">.</span><span class="n">READ</span> <span class="o">=</span> <span class="n">QueuePermissions</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">QueuePermissions</span><span class="o">.</span><span class="n">ADD</span> <span class="o">=</span> <span class="n">QueuePermissions</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">QueuePermissions</span><span class="o">.</span><span class="n">UPDATE</span> <span class="o">=</span> <span class="n">QueuePermissions</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">QueuePermissions</span><span class="o">.</span><span class="n">PROCESS</span> <span class="o">=</span> <span class="n">QueuePermissions</span><span class="p">(</span><span class="n">process</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.storageclient module &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../index.html" />
+    <link rel="up" title="azure.storage package" href="azure.storage.html" />
+    <link rel="next" title="azure" href="modules.html" />
+    <link rel="prev" title="azure.storage.sharedaccesssignature module" href="azure.storage.sharedaccesssignature.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-azure.storage.storageclient">
+<span id="azure-storage-storageclient-module"></span><h1>azure.storage.storageclient module<a class="headerlink" href="#module-azure.storage.storageclient" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="azure.storage.storageclient.StorageClient">
+<em class="property">class </em><code class="descclassname">azure.storage.storageclient.</code><code class="descname">StorageClient</code><span class="sig-paren">(</span><em>connection_params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/storageclient.html#StorageClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.storageclient.StorageClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This is the base class for service objects. Service objects are used to do 
+all requests to Storage. This class cannot be instantiated directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection_params</strong> (<em>obj</em>) &#8211; The parameters to use to construct the client.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="azure.storage.storageclient.StorageClient.set_proxy">
+<code class="descname">set_proxy</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>user=None</em>, <em>password=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.storageclient.StorageClient.set_proxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the proxy server host and port for the HTTP CONNECT Tunnelling.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> (<em>str</em>) &#8211; Address of the proxy. Ex: &#8216;192.168.0.100&#8217;</li>
+<li><strong>port</strong> (<em>int</em>) &#8211; Port of the proxy. Ex: 6000</li>
+<li><strong>user</strong> (<em>str</em>) &#8211; User for proxy authorization.</li>
+<li><strong>password</strong> (<em>str</em>) &#8211; Password for proxy authorization.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.storageclient.StorageClient.with_filter">
+<code class="descname">with_filter</code><span class="sig-paren">(</span><em>filter</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.storageclient.StorageClient.with_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new service which will process requests with the specified
+filter. Filtering operations can include logging, automatic retrying,
+etc... The filter is a lambda which receives the HTTPRequest and
+another lambda. The filter can perform any pre-processing on the
+request, pass it off to the next lambda, and then perform any
+post-processing on the response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filter</strong> (<em>function(request)</em>) &#8211; A filter function.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new service using the specified filter.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">a subclass of <a class="reference internal" href="#azure.storage.storageclient.StorageClient" title="azure.storage.storageclient.StorageClient"><code class="xref py py-class docutils literal"><span class="pre">StorageClient</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="azure.html">azure package</a><ul>
+  <li><a href="azure.storage.html">azure.storage package</a><ul>
+      <li>Previous: <a href="azure.storage.sharedaccesssignature.html" title="previous chapter">azure.storage.sharedaccesssignature module</a></li>
+      <li>Next: <a href="modules.html" title="next chapter">azure</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ref/azure.storage.storageclient.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/ref/azure.storage.storageclient.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

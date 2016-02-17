@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.table.models &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.table.models</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">azure.common</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AzureException</span><span class="p">,</span>
+    <span class="n">AzureHttpError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_ERROR_ATTRIBUTE_MISSING</span><span class="p">,</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="AzureBatchValidationError"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.AzureBatchValidationError">[docs]</a><span class="k">class</span> <span class="nc">AzureBatchValidationError</span><span class="p">(</span><span class="n">AzureException</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Indicates that a batch operation cannot proceed due to invalid input.</span>
+
+<span class="sd">    :ivar str message: </span>
+<span class="sd">        A detailed error message indicating the reason for the failure. </span>
+<span class="sd">    &#39;&#39;&#39;</span></div>
+
+<div class="viewcode-block" id="AzureBatchOperationError"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.AzureBatchOperationError">[docs]</a><span class="k">class</span> <span class="nc">AzureBatchOperationError</span><span class="p">(</span><span class="n">AzureHttpError</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Indicates that a batch operation failed.</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar str message: </span>
+<span class="sd">        A detailed error message indicating the index of the batch </span>
+<span class="sd">        request which failed and the reason for the failure. For example, </span>
+<span class="sd">        &#39;0:One of the request inputs is out of range.&#39; indicates the 0th batch </span>
+<span class="sd">        request failed as one of its property values was out of range.</span>
+<span class="sd">    :ivar int status_code: </span>
+<span class="sd">        The HTTP status code of the batch request. For example, 400.</span>
+<span class="sd">    :ivar str batch_code: </span>
+<span class="sd">        The batch status code. For example, &#39;OutOfRangeInput&#39;.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">batch_code</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AzureBatchOperationError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">status_code</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">batch_code</span>
+
+<div class="viewcode-block" id="Entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.Entity">[docs]</a><span class="k">class</span> <span class="nc">Entity</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    An entity object. Can be accessed as a dict or as an obj. The attributes of </span>
+<span class="sd">    the entity will be created dynamically. For example, the following are both </span>
+<span class="sd">    valid::</span>
+<span class="sd">        entity = Entity()</span>
+<span class="sd">        entity.a = &#39;b&#39;</span>
+<span class="sd">        entity[&#39;x&#39;] = &#39;y&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">_ERROR_ATTRIBUTE_MISSING</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Entity&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+    <span class="n">__setattr__</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">__setitem__</span>
+
+    <span class="k">def</span> <span class="nf">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">_ERROR_ATTRIBUTE_MISSING</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;Entity&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">dir</span><span class="p">({})</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="EntityProperty"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.EntityProperty">[docs]</a><span class="k">class</span> <span class="nc">EntityProperty</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    An entity property. Used to explicitly set :class:`~EdmType` when necessary. </span>
+<span class="sd">    </span>
+<span class="sd">    Values which require explicit typing are GUID, INT32, and BINARY. Other EdmTypes</span>
+<span class="sd">    may be explicitly create as EntityProperty objects but need not be. For example, </span>
+<span class="sd">    the below with both create STRING typed properties on the entity::</span>
+<span class="sd">        entity = Entity()</span>
+<span class="sd">        entity.a = &#39;b&#39;</span>
+<span class="sd">        entity.x = EntityProperty(EdmType.STRING, &#39;y&#39;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Represents an Azure Table. Returned by list_tables.</span>
+
+<span class="sd">        :param str type: The type of the property.</span>
+<span class="sd">        :param EdmType value: The value of the property.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="Table"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.Table">[docs]</a><span class="k">class</span> <span class="nc">Table</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Represents an Azure Table. Returned by list_tables.</span>
+
+<span class="sd">    :ivar str name: The name of the table.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="TablePayloadFormat"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.TablePayloadFormat">[docs]</a><span class="k">class</span> <span class="nc">TablePayloadFormat</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Specifies the accepted content type of the response payload. More information</span>
+<span class="sd">    can be found here: https://msdn.microsoft.com/en-us/library/azure/dn535600.aspx</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+   
+    <span class="n">JSON_NO_METADATA</span> <span class="o">=</span> <span class="s1">&#39;application/json;odata=nometadata&#39;</span>
+    <span class="sd">&#39;&#39;&#39;Returns no type information for the entity properties.&#39;&#39;&#39;</span>
+    
+    <span class="n">JSON_MINIMAL_METADATA</span> <span class="o">=</span> <span class="s1">&#39;application/json;odata=minimalmetadata&#39;</span>
+    <span class="sd">&#39;&#39;&#39;Returns minimal type information for the entity properties.&#39;&#39;&#39;</span>
+    
+    <span class="n">JSON_FULL_METADATA</span> <span class="o">=</span> <span class="s1">&#39;application/json;odata=fullmetadata&#39;</span>
+    <span class="sd">&#39;&#39;&#39;Returns minimal type information for the entity properties plus some extra odata properties.&#39;&#39;&#39;</span></div>
+
+
+<div class="viewcode-block" id="EdmType"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.EdmType">[docs]</a><span class="k">class</span> <span class="nc">EdmType</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Used by :class:`~.EntityProperty` to represent the type of the entity property </span>
+<span class="sd">    to be stored by the Table service.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">BINARY</span> <span class="o">=</span> <span class="s1">&#39;Edm.Binary&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Represents byte data. Must be specified. &#39;&#39;&#39;</span>
+
+    <span class="n">INT64</span> <span class="o">=</span> <span class="s1">&#39;Edm.Int64&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Represents a number between -(2^31) and 2^31. This is the default type for Python numbers. &#39;&#39;&#39;</span>
+
+    <span class="n">GUID</span> <span class="o">=</span> <span class="s1">&#39;Edm.Guid&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Represents a GUID. Must be specified. &#39;&#39;&#39;</span>
+
+    <span class="n">DATETIME</span> <span class="o">=</span> <span class="s1">&#39;Edm.DateTime&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Represents a date. This type will be inferred for Python datetime objects. &#39;&#39;&#39;</span>
+
+    <span class="n">STRING</span> <span class="o">=</span> <span class="s1">&#39;Edm.String&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Represents a string. This type will be inferred for Python strings. &#39;&#39;&#39;</span>
+
+    <span class="n">INT32</span> <span class="o">=</span> <span class="s1">&#39;Edm.Int32&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Represents a number between -(2^15) and 2^15. Must be specified or numbers will default to INT64. &#39;&#39;&#39;</span>
+
+    <span class="n">DOUBLE</span> <span class="o">=</span> <span class="s1">&#39;Edm.Double&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Represents a double. This type will be inferred for Python floating point numbers. &#39;&#39;&#39;</span>
+
+    <span class="n">BOOLEAN</span> <span class="o">=</span> <span class="s1">&#39;Edm.Boolean&#39;</span>
+    <span class="sd">&#39;&#39;&#39; Represents a boolean. This type will be inferred for Python bools. &#39;&#39;&#39;</span></div>
+
+
+<div class="viewcode-block" id="TablePermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.TablePermissions">[docs]</a><span class="k">class</span> <span class="nc">TablePermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    TablePermissions class to be used with the :func:`~azure.storage.table.tableservice.TableService.generate_table_shared_access_signature`</span>
+<span class="sd">    method and for the AccessPolicies used with :func:`~azure.storage.table.tableservice.TableService.set_table_acl`.</span>
+
+<span class="sd">    :ivar TablePermissions TablePermissions.QUERY: Get entities and query entities.</span>
+<span class="sd">    :ivar TablePermissions TablePermissions.ADD: Add entities.</span>
+<span class="sd">    :ivar TablePermissions TablePermissions.UPDATE: Update entities.</span>
+<span class="sd">    :ivar TablePermissions TablePermissions.DELETE: Delete entities.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param bool query:</span>
+<span class="sd">            Get entities and query entities.</span>
+<span class="sd">        :param bool add:</span>
+<span class="sd">            Add entities. Add and Update permissions are required for upsert operations.</span>
+<span class="sd">        :param bool update:</span>
+<span class="sd">            Update entities. Add and Update permissions are required for upsert operations.</span>
+<span class="sd">        :param bool delete: </span>
+<span class="sd">            Delete entities.</span>
+<span class="sd">        :param str _str: </span>
+<span class="sd">            A string representing the permissions.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_str</span><span class="p">:</span>
+            <span class="n">_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;r&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span> <span class="o">=</span> <span class="n">add</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="o">=</span> <span class="n">update</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;u&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="o">=</span> <span class="n">delete</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="ow">in</span> <span class="n">_str</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">_str</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;r&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;a&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;u&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
+                <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
+
+<span class="n">TablePermissions</span><span class="o">.</span><span class="n">QUERY</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">TablePermissions</span><span class="o">.</span><span class="n">ADD</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">TablePermissions</span><span class="o">.</span><span class="n">UPDATE</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">TablePermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

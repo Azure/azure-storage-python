@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.table.tablebatch &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.table.tablebatch</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_ERROR_INCORRECT_PARTITION_KEY_IN_BATCH</span><span class="p">,</span>
+    <span class="n">_ERROR_DUPLICATE_ROW_KEY_IN_BATCH</span><span class="p">,</span>
+    <span class="n">_ERROR_TOO_MANY_ENTITIES_IN_BATCH</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AzureBatchValidationError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._request</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_insert_entity</span><span class="p">,</span>
+    <span class="n">_update_entity</span><span class="p">,</span>
+    <span class="n">_merge_entity</span><span class="p">,</span>
+    <span class="n">_delete_entity</span><span class="p">,</span>
+    <span class="n">_insert_or_replace_entity</span><span class="p">,</span>
+    <span class="n">_insert_or_merge_entity</span><span class="p">,</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="TableBatch"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tablebatch.html#azure.storage.table.tablebatch.TableBatch">[docs]</a><span class="k">class</span> <span class="nc">TableBatch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This is the class that is used for batch operation for storage table service.</span>
+
+<span class="sd">    The Table service supports batch transactions on entities that are in the </span>
+<span class="sd">    same table and belong to the same partition group. Multiple operations are </span>
+<span class="sd">    supported within a single transaction. The batch can include at most 100 </span>
+<span class="sd">    entities, and its total payload may be no more than 4 MB in size.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_requests</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_partition_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_row_keys</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">insert_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Adds an insert entity operation to the batch. See </span>
+<span class="sd">        :func:`~azure.storage.table.tableservice.TableService.insert_entity` for more </span>
+<span class="sd">        information on inserts.</span>
+<span class="sd">        </span>
+<span class="sd">        The operation will not be executed until the batch is committed.</span>
+
+<span class="sd">        :param entity:</span>
+<span class="sd">            The entity to insert. Could be a dict or an entity object. </span>
+<span class="sd">            Must contain a PartitionKey and a RowKey.</span>
+<span class="sd">        :type entity: a dict or :class:`azure.storage.table.models.Entity`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_batch</span><span class="p">(</span><span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">],</span> <span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Adds an update entity operation to the batch. See </span>
+<span class="sd">        :func:`~azure.storage.table.tableservice.TableService.update_entity` for more </span>
+<span class="sd">        information on updates.</span>
+<span class="sd">        </span>
+<span class="sd">        The operation will not be executed until the batch is committed.</span>
+
+<span class="sd">        :param entity:</span>
+<span class="sd">            The entity to update. Could be a dict or an entity object. </span>
+<span class="sd">            Must contain a PartitionKey and a RowKey.</span>
+<span class="sd">        :type entity: a dict or :class:`azure.storage.table.models.Entity`</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            The client may specify the ETag for the entity on the </span>
+<span class="sd">            request in order to compare to the ETag maintained by the service </span>
+<span class="sd">            for the purpose of optimistic concurrency. The update operation </span>
+<span class="sd">            will be performed only if the ETag sent by the client matches the </span>
+<span class="sd">            value maintained by the server, indicating that the entity has </span>
+<span class="sd">            not been modified since it was retrieved by the client. To force </span>
+<span class="sd">            an unconditional update, set If-Match to the wildcard character (*).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_update_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_batch</span><span class="p">(</span><span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">],</span> <span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">merge_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Adds a merge entity operation to the batch. See </span>
+<span class="sd">        :func:`~azure.storage.table.tableservice.TableService.merge_entity` for more </span>
+<span class="sd">        information on merges.</span>
+<span class="sd">        </span>
+<span class="sd">        The operation will not be executed until the batch is committed.</span>
+
+<span class="sd">        :param entity:</span>
+<span class="sd">            The entity to merge. Could be a dict or an entity object. </span>
+<span class="sd">            Must contain a PartitionKey and a RowKey.</span>
+<span class="sd">        :type entity: a dict or :class:`azure.storage.table.models.Entity`</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            The client may specify the ETag for the entity on the </span>
+<span class="sd">            request in order to compare to the ETag maintained by the service </span>
+<span class="sd">            for the purpose of optimistic concurrency. The merge operation </span>
+<span class="sd">            will be performed only if the ETag sent by the client matches the </span>
+<span class="sd">            value maintained by the server, indicating that the entity has </span>
+<span class="sd">            not been modified since it was retrieved by the client. To force </span>
+<span class="sd">            an unconditional merge, set If-Match to the wildcard character (*).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_merge_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_batch</span><span class="p">(</span><span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">],</span> <span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">delete_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span>
+                      <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Adds a delete entity operation to the batch. See </span>
+<span class="sd">        :func:`~azure.storage.table.tableservice.TableService.delete_entity` for more </span>
+<span class="sd">        information on deletes.</span>
+
+<span class="sd">        The operation will not be executed until the batch is committed.</span>
+
+<span class="sd">        :param str partition_key:</span>
+<span class="sd">            The PartitionKey of the entity.</span>
+<span class="sd">        :param str row_key:</span>
+<span class="sd">            The RowKey of the entity.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            The client may specify the ETag for the entity on the </span>
+<span class="sd">            request in order to compare to the ETag maintained by the service </span>
+<span class="sd">            for the purpose of optimistic concurrency. The delete operation </span>
+<span class="sd">            will be performed only if the ETag sent by the client matches the </span>
+<span class="sd">            value maintained by the server, indicating that the entity has </span>
+<span class="sd">            not been modified since it was retrieved by the client. To force </span>
+<span class="sd">            an unconditional delete, set If-Match to the wildcard character (*).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_delete_entity</span><span class="p">(</span><span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">if_match</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_batch</span><span class="p">(</span><span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">insert_or_replace_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Adds an insert or replace entity operation to the batch. See </span>
+<span class="sd">        :func:`~azure.storage.table.tableservice.TableService.insert_or_replace_entity` for more </span>
+<span class="sd">        information on insert or replace operations.</span>
+
+<span class="sd">        The operation will not be executed until the batch is committed.</span>
+
+<span class="sd">        :param entity:</span>
+<span class="sd">            The entity to insert or replace. Could be a dict or an entity object. </span>
+<span class="sd">            Must contain a PartitionKey and a RowKey.</span>
+<span class="sd">        :type entity: a dict or :class:`azure.storage.table.models.Entity`</span>
+<span class="sd">       &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_or_replace_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_batch</span><span class="p">(</span><span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">],</span> <span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">insert_or_merge_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Adds an insert or merge entity operation to the batch. See </span>
+<span class="sd">        :func:`~azure.storage.table.tableservice.TableService.insert_or_merge_entity` for more </span>
+<span class="sd">        information on insert or merge operations.</span>
+
+<span class="sd">        The operation will not be executed until the batch is committed.</span>
+
+<span class="sd">        :param entity:</span>
+<span class="sd">            The entity to insert or merge. Could be a dict or an entity object. </span>
+<span class="sd">            Must contain a PartitionKey and a RowKey.</span>
+<span class="sd">        :type entity: a dict or :class:`azure.storage.table.models.Entity`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_or_merge_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_batch</span><span class="p">(</span><span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">],</span> <span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_to_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Validates batch-specific rules.</span>
+<span class="sd">        </span>
+<span class="sd">        :param str partition_key:</span>
+<span class="sd">            PartitionKey of the entity.</span>
+<span class="sd">        :param str row_key:</span>
+<span class="sd">            RowKey of the entity.</span>
+<span class="sd">        :param request:</span>
+<span class="sd">            the request to insert, update or delete entity</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># All same partition keys</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partition_key</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_partition_key</span> <span class="o">!=</span> <span class="n">partition_key</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">AzureBatchValidationError</span><span class="p">(</span><span class="n">_ERROR_INCORRECT_PARTITION_KEY_IN_BATCH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_partition_key</span> <span class="o">=</span> <span class="n">partition_key</span>
+
+        <span class="c1"># All different row keys</span>
+        <span class="k">if</span> <span class="n">row_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_keys</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AzureBatchValidationError</span><span class="p">(</span><span class="n">_ERROR_DUPLICATE_ROW_KEY_IN_BATCH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_row_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row_key</span><span class="p">)</span>
+        
+        <span class="c1"># 100 entities</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_requests</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AzureBatchValidationError</span><span class="p">(</span><span class="n">_ERROR_TOO_MANY_ENTITIES_IN_BATCH</span><span class="p">)</span>
+
+        <span class="c1"># Add the request to the batch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_requests</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">row_key</span><span class="p">,</span> <span class="n">request</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

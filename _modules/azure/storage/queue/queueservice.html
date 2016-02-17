@@ -1,0 +1,964 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.queue.queueservice &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for azure.storage.queue.queueservice</h1><div class="highlight"><pre>
+<span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1">#--------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">azure.common</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AzureConflictHttpError</span><span class="p">,</span>
+    <span class="n">AzureHttpError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._constants</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
+    <span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._error</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_dont_fail_not_exist</span><span class="p">,</span>
+    <span class="n">_dont_fail_on_exist</span><span class="p">,</span>
+    <span class="n">_validate_not_none</span><span class="p">,</span>
+    <span class="n">_ERROR_CONFLICT</span><span class="p">,</span>
+    <span class="n">_ERROR_STORAGE_MISSING_INFO</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_get_request_body</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_int_to_str</span><span class="p">,</span>
+    <span class="n">_to_str</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._http</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">HTTPRequest</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Services</span><span class="p">,</span>
+    <span class="n">ListGenerator</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">QueueMessageFormat</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._auth</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_StorageSASAuthentication</span><span class="p">,</span>
+    <span class="n">_StorageSharedKeyAuthentication</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._connection</span> <span class="kn">import</span> <span class="n">_ServiceParameters</span>
+<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_convert_signed_identifiers_to_xml</span><span class="p">,</span>
+    <span class="n">_convert_service_properties_to_xml</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.._deserialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_convert_xml_to_service_properties</span><span class="p">,</span>
+    <span class="n">_convert_xml_to_signed_identifiers</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_convert_queue_message_xml</span><span class="p">,</span>
+    <span class="n">_get_path</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._deserialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_convert_xml_to_queues</span><span class="p">,</span>
+    <span class="n">_convert_xml_to_queue_messages</span><span class="p">,</span>
+    <span class="n">_parse_queue_message_from_headers</span><span class="p">,</span>
+    <span class="n">_parse_metadata_and_message_count</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..sharedaccesssignature</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SharedAccessSignature</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..storageclient</span> <span class="kn">import</span> <span class="n">StorageClient</span>
+
+
+<span class="n">_HTTP_RESPONSE_NO_CONTENT</span> <span class="o">=</span> <span class="mi">204</span>
+
+<div class="viewcode-block" id="QueueService"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService">[docs]</a><span class="k">class</span> <span class="nc">QueueService</span><span class="p">(</span><span class="n">StorageClient</span><span class="p">):</span></div>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This is the main class managing queue resources.</span>
+
+<span class="sd">    The Queue service stores messages. A queue can contain an unlimited number of </span>
+<span class="sd">    messages, each of which can be up to 64KB in size. Messages are generally added </span>
+<span class="sd">    to the end of the queue and retrieved from the front of the queue, although </span>
+<span class="sd">    first in, first out (FIFO) behavior is not guaranteed.</span>
+
+<span class="sd">    :ivar function(data) encode_function: </span>
+<span class="sd">        A function used to encode queue messages. Takes as </span>
+<span class="sd">        a parameter the data passed to the put_message API and returns the encoded </span>
+<span class="sd">        message. Defaults to take text and xml encode, but bytes and other </span>
+<span class="sd">        encodings can be used. For example, base64 may be preferable for developing </span>
+<span class="sd">        across multiple Azure Storage libraries in different languages. See the </span>
+<span class="sd">        :class:`~azure.storage.queue.models.QueueMessageFormat` for xml, base64 and </span>
+<span class="sd">        no encoding methods as well as binary equivalents.</span>
+<span class="sd">    :ivar function(data) decode_function: </span>
+<span class="sd">        A function used to encode decode messages. Takes as </span>
+<span class="sd">        a parameter the data returned by the get_messages and peek_messages APIs and </span>
+<span class="sd">        returns the decoded message. Defaults to return text and xml decode, but </span>
+<span class="sd">        bytes and other decodings can be used. For example, base64 may be preferable </span>
+<span class="sd">        for developing across multiple Azure Storage libraries in different languages. </span>
+<span class="sd">        See the :class:`~azure.storage.queue.models.QueueMessageFormat` for xml, base64 </span>
+<span class="sd">        and no decoding methods as well as binary equivalents.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                 <span class="n">is_emulated</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
+                 <span class="n">request_session</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">connection_string</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :param str account_name:</span>
+<span class="sd">            The storage account name. This is used to authenticate requests </span>
+<span class="sd">            signed with an account key and to construct the storage endpoint. It </span>
+<span class="sd">            is required unless a connection string is given.</span>
+<span class="sd">        :param str account_key:</span>
+<span class="sd">            The storage account key. This is used for shared key authentication. </span>
+<span class="sd">        :param str sas_token:</span>
+<span class="sd">             A shared access signature token to use to authenticate requests </span>
+<span class="sd">             instead of the account key. If account key and sas token are both </span>
+<span class="sd">             specified, account key will be used to sign.</span>
+<span class="sd">        :param bool is_emulated:</span>
+<span class="sd">            Whether to use the emulator. Defaults to False. If specified, will </span>
+<span class="sd">            override all other parameters besides connection string and request </span>
+<span class="sd">            session.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            The protocol to use for requests. Defaults to https.</span>
+<span class="sd">        :param str endpoint_suffix:</span>
+<span class="sd">            The host base component of the url, minus the account name. Defaults </span>
+<span class="sd">            to Azure (core.windows.net). Override this to use the China cloud </span>
+<span class="sd">            (core.chinacloudapi.cn).</span>
+<span class="sd">        :param requests.Session request_session:</span>
+<span class="sd">            The session object to use for http requests.</span>
+<span class="sd">        :param str connection_string:</span>
+<span class="sd">            If specified, this will override all other parameters besides </span>
+<span class="sd">            request session. See</span>
+<span class="sd">            http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/</span>
+<span class="sd">            for the connection string format.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">service_params</span> <span class="o">=</span> <span class="n">_ServiceParameters</span><span class="o">.</span><span class="n">get_service_parameters</span><span class="p">(</span>
+            <span class="s1">&#39;queue&#39;</span><span class="p">,</span>
+            <span class="n">account_name</span><span class="o">=</span><span class="n">account_name</span><span class="p">,</span> 
+            <span class="n">account_key</span><span class="o">=</span><span class="n">account_key</span><span class="p">,</span> 
+            <span class="n">sas_token</span><span class="o">=</span><span class="n">sas_token</span><span class="p">,</span> 
+            <span class="n">is_emulated</span><span class="o">=</span><span class="n">is_emulated</span><span class="p">,</span> 
+            <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> 
+            <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">endpoint_suffix</span><span class="p">,</span>
+            <span class="n">request_session</span><span class="o">=</span><span class="n">request_session</span><span class="p">,</span>
+            <span class="n">connection_string</span><span class="o">=</span><span class="n">connection_string</span><span class="p">)</span>
+            
+        <span class="nb">super</span><span class="p">(</span><span class="n">QueueService</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">service_params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">authentication</span> <span class="o">=</span> <span class="n">_StorageSharedKeyAuthentication</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">authentication</span> <span class="o">=</span> <span class="n">_StorageSASAuthentication</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_ERROR_STORAGE_MISSING_INFO</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">encode_function</span> <span class="o">=</span> <span class="n">QueueMessageFormat</span><span class="o">.</span><span class="n">text_xmlencode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decode_function</span> <span class="o">=</span> <span class="n">QueueMessageFormat</span><span class="o">.</span><span class="n">text_xmldecode</span>
+
+    <span class="k">def</span> <span class="nf">generate_account_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
+                                        <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the queue service.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of QueueService.</span>
+
+<span class="sd">        :param ResourceTypes resource_types:</span>
+<span class="sd">            Specifies the resource types that are accessible with the account SAS.</span>
+<span class="sd">        :param AccountPermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=168.1.5.65 or sip=168.1.5.60-168.1.5.70 on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        :return: A Shared Access Signature (sas) token.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;self.account_name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;self.account_key&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
+
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">SharedAccessSignature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">generate_account</span><span class="p">(</span><span class="n">Services</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
+                                    <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">generate_queue_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span>
+                                         <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                                         <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>                                       
+                                         <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                         <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                         <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a shared access signature for the queue.</span>
+<span class="sd">        Use the returned signature with the sas_token parameter of QueueService.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue to create a SAS token for.</span>
+<span class="sd">        :param QueuePermissions permission:</span>
+<span class="sd">            The permissions associated with the shared access signature. The </span>
+<span class="sd">            user is restricted to operations allowed by the permissions. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has been </span>
+<span class="sd">            specified in an associated stored access policy.</span>
+<span class="sd">        :param expiry:</span>
+<span class="sd">            The time at which the shared access signature becomes invalid. </span>
+<span class="sd">            Required unless an id is given referencing a stored access policy </span>
+<span class="sd">            which contains this field. This field must be omitted if it has </span>
+<span class="sd">            been specified in an associated stored access policy. Azure will always </span>
+<span class="sd">            convert values to UTC. If a date is passed in without timezone info, it </span>
+<span class="sd">            is assumed to be UTC.</span>
+<span class="sd">        :type expiry: date or str</span>
+<span class="sd">        :param start:</span>
+<span class="sd">            The time at which the shared access signature becomes valid. If </span>
+<span class="sd">            omitted, start time for this call is assumed to be the time when the </span>
+<span class="sd">            storage service receives the request. Azure will always convert values </span>
+<span class="sd">            to UTC. If a date is passed in without timezone info, it is assumed to </span>
+<span class="sd">            be UTC.</span>
+<span class="sd">        :type start: date or str</span>
+<span class="sd">        :param str id:</span>
+<span class="sd">            A unique value up to 64 characters in length that correlates to a </span>
+<span class="sd">            stored access policy. To create a stored access policy, use </span>
+<span class="sd">            set_blob_service_properties.</span>
+<span class="sd">        :param str ip:</span>
+<span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
+<span class="sd">            If the IP address from which the request originates does not match the IP address</span>
+<span class="sd">            or address range specified on the SAS token, the request is not authenticated.</span>
+<span class="sd">            For example, specifying sip=&#39;168.1.5.65&#39; or sip=&#39;168.1.5.60-168.1.5.70&#39; on the SAS</span>
+<span class="sd">            restricts the request to those IP addresses.</span>
+<span class="sd">        :param str protocol:</span>
+<span class="sd">            Specifies the protocol permitted for a request made. The default value</span>
+<span class="sd">            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.</span>
+<span class="sd">        :return: A Shared Access Signature (sas) token.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;self.account_name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;self.account_key&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
+
+        <span class="n">sas</span> <span class="o">=</span> <span class="n">SharedAccessSignature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">generate_queue</span><span class="p">(</span>
+            <span class="n">queue_name</span><span class="p">,</span>
+            <span class="n">permission</span><span class="o">=</span><span class="n">permission</span><span class="p">,</span> 
+            <span class="n">expiry</span><span class="o">=</span><span class="n">expiry</span><span class="p">,</span>
+            <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> 
+            <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
+            <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_queue_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Gets the properties of a storage account&#39;s Queue service, including</span>
+<span class="sd">        logging, analytics and CORS rules.</span>
+
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return: The queue service properties.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.models.ServiceProperties`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;restype&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_convert_xml_to_service_properties</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_queue_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logging</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                                    <span class="n">minute_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sets the properties of a storage account&#39;s Queue service, including</span>
+<span class="sd">        Azure Storage Analytics. If an element (ex Logging) is left as None, the </span>
+<span class="sd">        existing settings on the service for that functionality are preserved. </span>
+<span class="sd">        For more information on Azure Storage Analytics, see </span>
+<span class="sd">        https://msdn.microsoft.com/en-us/library/azure/hh343270.aspx.</span>
+
+<span class="sd">        :param Logging logging:</span>
+<span class="sd">            The logging settings provide request logs.</span>
+<span class="sd">        :param Metrics hour_metrics:</span>
+<span class="sd">            The hour metrics settings provide a summary of request </span>
+<span class="sd">            statistics grouped by API in hourly aggregates for blobs.</span>
+<span class="sd">        :param Metrics minute_metrics:</span>
+<span class="sd">            The minute metrics settings provide request statistics </span>
+<span class="sd">            for each minute for blobs.</span>
+<span class="sd">        :param cors:</span>
+<span class="sd">            You can include up to five CorsRule elements in the </span>
+<span class="sd">            list. If an empty list is specified, all CORS rules will be deleted, </span>
+<span class="sd">            and CORS will be disabled for the service. For detailed information </span>
+<span class="sd">            about CORS rules and evaluation logic, see </span>
+<span class="sd">            https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx.</span>
+<span class="sd">        :type cors: list of :class:`~azure.storage.models.CorsRule`</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;restype&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span>
+            <span class="n">_convert_service_properties_to_xml</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="p">,</span> <span class="n">minute_metrics</span><span class="p">,</span> <span class="n">cors</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">list_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">include_metadata</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+                    <span class="n">marker</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a generator to list the queues. The generator will lazily follow </span>
+<span class="sd">        the continuation tokens returned by the service and stop when all queues </span>
+<span class="sd">        have been returned or num_results is reached.</span>
+
+<span class="sd">        If num_results is specified and the account has more than that number of </span>
+<span class="sd">        queues, the generator will have a populated next_marker field once it </span>
+<span class="sd">        finishes. This marker can be used to create a new generator if more </span>
+<span class="sd">        results are desired.</span>
+
+<span class="sd">        :param str prefix:</span>
+<span class="sd">            Filters the results to return only queues with names that begin</span>
+<span class="sd">            with the specified prefix.</span>
+<span class="sd">        :param int num_results:</span>
+<span class="sd">            The maximum number of queues to return.</span>
+<span class="sd">        :param bool include_metadata:</span>
+<span class="sd">            Specifies that container metadata be returned in the response.</span>
+<span class="sd">        :param str marker:</span>
+<span class="sd">            An opaque continuation token. This value can be retrieved from the </span>
+<span class="sd">            next_marker field of a previous generator object if num_results was </span>
+<span class="sd">            specified and that generator has finished enumerating results. If </span>
+<span class="sd">            specified, this generator will begin returning results from the point </span>
+<span class="sd">            where the previous generator stopped.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds. This function may make multiple </span>
+<span class="sd">            calls to the service in which case the timeout value specified will be </span>
+<span class="sd">            applied to each individual call.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">include</span> <span class="o">=</span> <span class="s1">&#39;metadata&#39;</span> <span class="k">if</span> <span class="n">include_metadata</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;prefix&#39;</span><span class="p">:</span> <span class="n">prefix</span><span class="p">,</span> <span class="s1">&#39;max_results&#39;</span><span class="p">:</span> <span class="n">num_results</span><span class="p">,</span> <span class="s1">&#39;include&#39;</span><span class="p">:</span> <span class="n">include</span><span class="p">,</span> 
+                  <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="n">marker</span><span class="p">,</span> <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">}</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_queues</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ListGenerator</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_queues</span><span class="p">,</span> <span class="p">(),</span> <span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_list_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">include</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a list of queues under the specified account. Makes a single list </span>
+<span class="sd">        request to the service. Used internally by the list_queues method.</span>
+
+<span class="sd">        :param str prefix:</span>
+<span class="sd">            Filters the results to return only queues with names that begin</span>
+<span class="sd">            with the specified prefix.</span>
+<span class="sd">        :param str marker:</span>
+<span class="sd">            A token which identifies the portion of the query to be</span>
+<span class="sd">            returned with the next query operation. The operation returns a</span>
+<span class="sd">            next_marker element within the response body if the list returned</span>
+<span class="sd">            was not complete. This value may then be used as a query parameter</span>
+<span class="sd">            in a subsequent call to request the next portion of the list of</span>
+<span class="sd">            queues. The marker value is opaque to the client.</span>
+<span class="sd">        :param int max_results:</span>
+<span class="sd">            The maximum number of queues to return. A single list request may </span>
+<span class="sd">            return up to 1000 queues and potentially a continuation token which </span>
+<span class="sd">            should be followed to get additional resutls.</span>
+<span class="sd">        :param str include:</span>
+<span class="sd">            Include this parameter to specify that the container&#39;s</span>
+<span class="sd">            metadata be returned as part of the response body.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;prefix&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">prefix</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">marker</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;maxresults&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">max_results</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;include&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">include</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_convert_xml_to_queues</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">create_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fail_on_exist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a queue under the given account.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue to create. A queue name must be from 3 through </span>
+<span class="sd">            63 characters long and may only contain lowercase letters, numbers, </span>
+<span class="sd">            and the dash (-) character. The first and last letters in the queue </span>
+<span class="sd">            must be alphanumeric. The dash (-) character cannot be the first or </span>
+<span class="sd">            last character. Consecutive dash characters are not permitted in the </span>
+<span class="sd">            queue name.</span>
+<span class="sd">        :param metadata:</span>
+<span class="sd">            A dict containing name-value pairs to associate with the queue as </span>
+<span class="sd">            metadata. Note that metadata names preserve the case with which they </span>
+<span class="sd">            were created, but are case-insensitive when set or read. </span>
+<span class="sd">        :type metadata: a dict mapping str to str </span>
+<span class="sd">        :param bool fail_on_exist:</span>
+<span class="sd">            Specifies whether to throw an exception if the queue already exists.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return:</span>
+<span class="sd">            A boolean indicating whether the queue was created. If fail_on_exist </span>
+<span class="sd">            was set to True, this will throw instead of returning false.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;x-ms-meta-name-values&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fail_on_exist</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">_HTTP_RESPONSE_NO_CONTENT</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">except</span> <span class="n">AzureHttpError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="n">_dont_fail_on_exist</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">_HTTP_RESPONSE_NO_CONTENT</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">AzureConflictHttpError</span><span class="p">(</span>
+                    <span class="n">_ERROR_CONFLICT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">delete_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">fail_not_exist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Deletes the specified queue and any messages it contains.</span>
+
+<span class="sd">        When a queue is successfully deleted, it is immediately marked for deletion </span>
+<span class="sd">        and is no longer accessible to clients. The queue is later removed from </span>
+<span class="sd">        the Queue service during garbage collection.</span>
+
+<span class="sd">        Note that deleting a queue is likely to take at least 40 seconds to complete. </span>
+<span class="sd">        If an operation is attempted against the queue while it was being deleted, </span>
+<span class="sd">        an :class:`AzureConflictHttpError` will be thrown.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue to delete.</span>
+<span class="sd">        :param bool fail_not_exist:</span>
+<span class="sd">            Specifies whether to throw an exception if the queue doesn&#39;t exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return:</span>
+<span class="sd">            A boolean indicating whether the queue was deleted. If fail_not_exist </span>
+<span class="sd">            was set to True, this will throw instead of returning false.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;DELETE&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fail_not_exist</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">except</span> <span class="n">AzureHttpError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="n">_dont_fail_not_exist</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">get_queue_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Retrieves user-defined metadata and queue properties on the specified</span>
+<span class="sd">        queue. Metadata is associated with the queue as name-value pairs.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of an existing queue.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return:</span>
+<span class="sd">            A dictionary representing the queue metadata with an </span>
+<span class="sd">            approximate_message_count int property on the dict estimating the </span>
+<span class="sd">            number of messages in the queue.</span>
+<span class="sd">        :rtype: a dict mapping str to str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_parse_metadata_and_message_count</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_queue_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sets user-defined metadata on the specified queue. Metadata is</span>
+<span class="sd">        associated with the queue as name-value pairs.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of an existing queue.</span>
+<span class="sd">        :param dict metadata:</span>
+<span class="sd">            A dict containing name-value pairs to associate with the</span>
+<span class="sd">            queue as metadata.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;x-ms-meta-name-values&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns a boolean indicating whether the queue exists.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of queue to check for existence.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return: A boolean indicating whether the queue exists.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_queue_metadata</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="n">AzureHttpError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="n">_dont_fail_not_exist</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">get_queue_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Returns details about any stored access policies specified on the</span>
+<span class="sd">        queue that may be used with Shared Access Signatures.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of an existing queue.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return: A dictionary of access policies associated with the queue.</span>
+<span class="sd">        :rtype: dict of str to :class:`~azure.storage.models.AccessPolicy`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;acl&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_convert_xml_to_signed_identifiers</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_queue_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">signed_identifiers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Sets stored access policies for the queue that may be used with Shared </span>
+<span class="sd">        Access Signatures. </span>
+<span class="sd">        </span>
+<span class="sd">        When you set permissions for a queue, the existing permissions are replaced. </span>
+<span class="sd">        To update the queue’s permissions, call :func:`~get_queue_acl` to fetch </span>
+<span class="sd">        all access policies associated with the queue, modify the access policy </span>
+<span class="sd">        that you wish to change, and then call this function with the complete </span>
+<span class="sd">        set of data to perform the update.</span>
+
+<span class="sd">        When you establish a stored access policy on a queue, it may take up to </span>
+<span class="sd">        30 seconds to take effect. During this interval, a shared access signature </span>
+<span class="sd">        that is associated with the stored access policy will throw an </span>
+<span class="sd">        :class:`AzureHttpError` until the access policy becomes active.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of an existing queue.</span>
+<span class="sd">        :param signed_identifiers:</span>
+<span class="sd">            A dictionary of access policies to associate with the queue. The </span>
+<span class="sd">            dictionary may contain up to 5 elements. An empty dictionary </span>
+<span class="sd">            will clear the access policies set on the service. </span>
+<span class="sd">        :type signed_identifiers: dict of str to :class:`~azure.storage.models.AccessPolicy`</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;acl&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span>
+            <span class="n">_convert_signed_identifiers_to_xml</span><span class="p">(</span><span class="n">signed_identifiers</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">put_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">visibility_timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">time_to_live</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Adds a new message to the back of the message queue. </span>
+
+<span class="sd">        The visibility timeout specifies the time that the message will be </span>
+<span class="sd">        invisible. After the timeout expires, the message will become visible. </span>
+<span class="sd">        If a visibility timeout is not specified, the default value of 0 is used.</span>
+
+<span class="sd">        The message time-to-live specifies how long a message will remain in the </span>
+<span class="sd">        queue. The message will be deleted from the queue when the time-to-live </span>
+<span class="sd">        period expires.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue to put the message into.</span>
+<span class="sd">        :param obj content:</span>
+<span class="sd">            Message content. Allowed type is determined by the encode_function </span>
+<span class="sd">            set on the service. Default is str. The encoded message can be up to </span>
+<span class="sd">            64KB in size.</span>
+<span class="sd">        :param int visibility_timeout:</span>
+<span class="sd">            If not specified, the default value is 0. Specifies the</span>
+<span class="sd">            new visibility timeout value, in seconds, relative to server time.</span>
+<span class="sd">            The value must be larger than or equal to 0, and cannot be</span>
+<span class="sd">            larger than 7 days. The visibility timeout of a message cannot be</span>
+<span class="sd">            set to a value later than the expiry time. visibility_timeout</span>
+<span class="sd">            should be set to a value smaller than the time-to-live value.</span>
+<span class="sd">        :param int time_to_live:</span>
+<span class="sd">            Specifies the time-to-live interval for the message, in</span>
+<span class="sd">            seconds. The maximum time-to-live allowed is 7 days. If this</span>
+<span class="sd">            parameter is omitted, the default time-to-live is 7 days.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;POST&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;messagettl&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">time_to_live</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span><span class="n">_convert_queue_message_xml</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode_function</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">num_messages</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">visibility_timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Retrieves one or more messages from the front of the queue.</span>
+
+<span class="sd">        When a message is retrieved from the queue, the response includes the message </span>
+<span class="sd">        content and a pop_receipt value, which is required to delete the message. </span>
+<span class="sd">        The message is not automatically deleted from the queue, but after it has </span>
+<span class="sd">        been retrieved, it is not visible to other clients for the time interval </span>
+<span class="sd">        specified by the visibility_timeout parameter.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue to get messages from.</span>
+<span class="sd">        :param int num_messages:</span>
+<span class="sd">            A nonzero integer value that specifies the number of</span>
+<span class="sd">            messages to retrieve from the queue, up to a maximum of 32. If</span>
+<span class="sd">            fewer are visible, the visible messages are returned. By default,</span>
+<span class="sd">            a single message is retrieved from the queue with this operation.</span>
+<span class="sd">        :param int visibility_timeout:</span>
+<span class="sd">            Specifies the new visibility timeout value, in seconds, relative</span>
+<span class="sd">            to server time. The new value must be larger than or equal to 1</span>
+<span class="sd">            second, and cannot be larger than 7 days. The visibility timeout of </span>
+<span class="sd">            a message can be set to a value later than the expiry time.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return: A list of :class:`~azure.storage.queue.models.QueueMessage` objects.</span>
+<span class="sd">        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;numofmessages&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">num_messages</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_convert_xml_to_queue_messages</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_function</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">peek_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">num_messages</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Retrieves one or more messages from the front of the queue, but does</span>
+<span class="sd">        not alter the visibility of the message.</span>
+
+<span class="sd">        Only messages that are visible may be retrieved. When a message is retrieved </span>
+<span class="sd">        for the first time with a call to get_messages, its dequeue_count property </span>
+<span class="sd">        is set to 1. If it is not deleted and is subsequently retrieved again, the </span>
+<span class="sd">        dequeue_count property is incremented. The client may use this value to </span>
+<span class="sd">        determine how many times a message has been retrieved. Note that a call </span>
+<span class="sd">        to peek_messages does not increment the value of DequeueCount, but returns </span>
+<span class="sd">        this value for the client to read.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue to peek messages from.</span>
+<span class="sd">        :param int num_messages:</span>
+<span class="sd">            A nonzero integer value that specifies the number of</span>
+<span class="sd">            messages to peek from the queue, up to a maximum of 32. By default,</span>
+<span class="sd">            a single message is peeked from the queue with this operation.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return: </span>
+<span class="sd">            A list of :class:`~azure.storage.queue.models.QueueMessage` objects. Note that </span>
+<span class="sd">            time_next_visible and pop_receipt will not be populated as peek does </span>
+<span class="sd">            not pop the message and can only retrieve already visible messages.</span>
+<span class="sd">        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;peekonly&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;numofmessages&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">num_messages</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_convert_xml_to_queue_messages</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_function</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">delete_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">message_id</span><span class="p">,</span> <span class="n">pop_receipt</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Deletes the specified message.</span>
+
+<span class="sd">        Normally after a client retrieves a message with the get_messages operation, </span>
+<span class="sd">        the client is expected to process and delete the message. To delete the </span>
+<span class="sd">        message, you must have two items of data: id and pop_receipt. The </span>
+<span class="sd">        id is returned from the previous get_messages operation. The </span>
+<span class="sd">        pop_receipt is returned from the most recent :func:`~get_messages` or </span>
+<span class="sd">        :func:`~update_message` operation. In order for the delete_message operation </span>
+<span class="sd">        to succeed, the pop_receipt specified on the request must match the </span>
+<span class="sd">        pop_receipt returned from the :func:`~get_messages` or :func:`~update_message` </span>
+<span class="sd">        operation. </span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue from which to delete the message.</span>
+<span class="sd">        :param str message_id:</span>
+<span class="sd">            The message id identifying the message to delete.</span>
+<span class="sd">        :param str pop_receipt:</span>
+<span class="sd">            A valid pop receipt value returned from an earlier call</span>
+<span class="sd">            to the :func:`~get_messages` or :func:`~update_message`.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;message_id&#39;</span><span class="p">,</span> <span class="n">message_id</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;pop_receipt&#39;</span><span class="p">,</span> <span class="n">pop_receipt</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;DELETE&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">message_id</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;popreceipt&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">pop_receipt</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">clear_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Deletes all messages from the specified queue.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue whose messages to clear.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;DELETE&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">message_id</span><span class="p">,</span> <span class="n">pop_receipt</span><span class="p">,</span> <span class="n">visibility_timeout</span><span class="p">,</span> 
+                       <span class="n">content</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Updates the visibility timeout of a message. You can also use this</span>
+<span class="sd">        operation to update the contents of a message.</span>
+
+<span class="sd">        This operation can be used to continually extend the invisibility of a </span>
+<span class="sd">        queue message. This functionality can be useful if you want a worker role </span>
+<span class="sd">        to “lease” a queue message. For example, if a worker role calls get_messages </span>
+<span class="sd">        and recognizes that it needs more time to process a message, it can </span>
+<span class="sd">        continually extend the message’s invisibility until it is processed. If </span>
+<span class="sd">        the worker role were to fail during processing, eventually the message </span>
+<span class="sd">        would become visible again and another worker role could process it.</span>
+
+<span class="sd">        :param str queue_name:</span>
+<span class="sd">            The name of the queue containing the message to update.</span>
+<span class="sd">        :param str message_id:</span>
+<span class="sd">            The message id identifying the message to update.</span>
+<span class="sd">        :param str pop_receipt:</span>
+<span class="sd">            A valid pop receipt value returned from an earlier call</span>
+<span class="sd">            to the :func:`~get_messages` or :func:`~update_message` operation.</span>
+<span class="sd">        :param int visibility_timeout:</span>
+<span class="sd">            Specifies the new visibility timeout value, in seconds,</span>
+<span class="sd">            relative to server time. The new value must be larger than or equal</span>
+<span class="sd">            to 0, and cannot be larger than 7 days. The visibility timeout of a</span>
+<span class="sd">            message cannot be set to a value later than the expiry time. A</span>
+<span class="sd">            message can be updated until it has been deleted or has expired.</span>
+<span class="sd">        :param obj content:</span>
+<span class="sd">            Message content. Allowed type is determined by the encode_function </span>
+<span class="sd">            set on the service. Default is str.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The server timeout, expressed in seconds.</span>
+<span class="sd">        :return: </span>
+<span class="sd">            A list of :class:`~azure.storage.queue.models.QueueMessage` objects. Note that </span>
+<span class="sd">            only time_next_visible and pop_receipt will be populated.</span>
+<span class="sd">        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;queue_name&#39;</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;message_id&#39;</span><span class="p">,</span> <span class="n">message_id</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;pop_receipt&#39;</span><span class="p">,</span> <span class="n">pop_receipt</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;visibility_timeout&#39;</span><span class="p">,</span> <span class="n">visibility_timeout</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">message_id</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;popreceipt&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">pop_receipt</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span><span class="n">_convert_queue_message_xml</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode_function</span><span class="p">))</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_parse_queue_message_from_headers</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

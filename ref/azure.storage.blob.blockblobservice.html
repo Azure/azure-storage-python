@@ -1,0 +1,517 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.blob.blockblobservice module &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.30.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../index.html" />
+    <link rel="up" title="azure.storage.blob package" href="azure.storage.blob.html" />
+    <link rel="next" title="azure.storage.blob.models module" href="azure.storage.blob.models.html" />
+    <link rel="prev" title="azure.storage.blob.baseblobservice module" href="azure.storage.blob.baseblobservice.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-azure.storage.blob.blockblobservice">
+<span id="azure-storage-blob-blockblobservice-module"></span><h1>azure.storage.blob.blockblobservice module<a class="headerlink" href="#module-azure.storage.blob.blockblobservice" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService">
+<em class="property">class </em><code class="descclassname">azure.storage.blob.blockblobservice.</code><code class="descname">BlockBlobService</code><span class="sig-paren">(</span><em>account_name=None</em>, <em>account_key=None</em>, <em>sas_token=None</em>, <em>is_emulated=False</em>, <em>protocol='https'</em>, <em>endpoint_suffix='core.windows.net'</em>, <em>custom_domain=None</em>, <em>request_session=None</em>, <em>connection_string=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="azure.storage.blob.baseblobservice.html#azure.storage.blob.baseblobservice.BaseBlobService" title="azure.storage.blob.baseblobservice.BaseBlobService"><code class="xref py py-class docutils literal"><span class="pre">azure.storage.blob.baseblobservice.BaseBlobService</span></code></a></p>
+<p>Block blobs let you upload large blobs efficiently. Block blobs are comprised
+of blocks, each of which is identified by a block ID. You create or modify a
+block blob by writing a set of blocks and committing them by their block IDs.
+Each block can be a different size, up to a maximum of 4 MB, and a block blob
+can include up to 50,000 blocks. The maximum size of a block blob is therefore
+slightly more than 195 GB (4 MB X 50,000 blocks). If you are writing a block
+blob that is no more than 64 MB in size, you can upload it in its entirety with
+a single write operation; see create_blob_from_bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>account_name</strong> (<em>str</em>) &#8211; The storage account name. This is used to authenticate requests 
+signed with an account key and to construct the storage endpoint. It 
+is required unless a connection string is given, or if a custom 
+domain is used with anonymous authentication.</li>
+<li><strong>account_key</strong> (<em>str</em>) &#8211; The storage account key. This is used for shared key authentication. 
+If neither account key or sas token is specified, anonymous access 
+will be used.</li>
+<li><strong>sas_token</strong> (<em>str</em>) &#8211; A shared access signature token to use to authenticate requests 
+instead of the account key. If account key and sas token are both 
+specified, account key will be used to sign. If neither are 
+specified, anonymous access will be used.</li>
+<li><strong>is_emulated</strong> (<em>bool</em>) &#8211; Whether to use the emulator. Defaults to False. If specified, will 
+override all other parameters besides connection string and request 
+session.</li>
+<li><strong>protocol</strong> (<em>str</em>) &#8211; The protocol to use for requests. Defaults to https.</li>
+<li><strong>endpoint_suffix</strong> (<em>str</em>) &#8211; The host base component of the url, minus the account name. Defaults 
+to Azure (core.windows.net). Override this to use the China cloud 
+(core.chinacloudapi.cn).</li>
+<li><strong>custom_domain</strong> (<em>str</em>) &#8211; The custom domain to use. This can be set in the Azure Portal. For 
+example, &#8216;www.mydomain.com&#8217;.</li>
+<li><strong>request_session</strong> (<em>requests.Session</em>) &#8211; The session object to use for http requests.</li>
+<li><strong>connection_string</strong> (<em>str</em>) &#8211; If specified, this will override all other parameters besides 
+request session. See
+<a class="reference external" href="http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/">http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/</a>
+for the connection string format.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.MAX_BLOCK_SIZE">
+<code class="descname">MAX_BLOCK_SIZE</code><em class="property"> = 4194304</em><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.MAX_BLOCK_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.MAX_SINGLE_PUT_SIZE">
+<code class="descname">MAX_SINGLE_PUT_SIZE</code><em class="property"> = 67108864</em><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.MAX_SINGLE_PUT_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_bytes">
+<code class="descname">create_blob_from_bytes</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>blob</em>, <em>index=0</em>, <em>count=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new blob from an array of bytes, or updates the content
+of an existing blob, with automatic chunking and progress
+notifications.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of blob to create or update.</li>
+<li><strong>blob</strong> (<em>bytes</em>) &#8211; Content of blob as an array of bytes.</li>
+<li><strong>index</strong> (<em>int</em>) &#8211; Start index in the array of bytes.</li>
+<li><strong>count</strong> (<em>int</em>) &#8211; Number of bytes to upload. Set to None or negative value to upload
+all bytes starting from index.</li>
+<li><strong>content_settings</strong> (<a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.ContentSettings" title="azure.storage.blob.models.ContentSettings"><em>ContentSettings</em></a>) &#8211; ContentSettings object used to set blob properties.</li>
+<li><strong>metadata</strong> (<em>a dict mapping str to str</em>) &#8211; Name-value pairs associated with the blob as metadata.</li>
+<li><strong>progress_callback</strong> (<em>callback function in format of func(current, total)</em>) &#8211; Callback for progress with signature function(current, total) where
+current is the number of bytes transfered so far, and total is the
+size of the blob, or None if the total size is unknown.</li>
+<li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use when the blob size
+exceeds 64MB.
+Set to 1 to upload the blob chunks sequentially.
+Set to 2 or more to upload the blob chunks in parallel. This uses
+more system resources but will upload faster.</li>
+<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of blob chunk if an error occurs.</li>
+<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
+<li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
+<li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC. 
+Specify this header to perform the operation only
+if the resource has been modified since the specified time.</li>
+<li><strong>if_unmodified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC.
+Specify this header to perform the operation only if
+the resource has not been modified since the specified date/time.</li>
+<li><strong>if_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header to perform
+the operation only if the resource&#8217;s ETag matches the value specified.</li>
+<li><strong>if_none_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header
+to perform the operation only if the resource&#8217;s ETag does not match
+the value specified. Specify the wildcard character (*) to perform
+the operation only if the resource does not exist, and fail the
+operation if it does exist.</li>
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
+multiple calls to the Azure service and the timeout will apply to 
+each call individually.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_path">
+<code class="descname">create_blob_from_path</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>file_path</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new blob from a file path, or updates the content of an
+existing blob, with automatic chunking and progress notifications.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of blob to create or update.</li>
+<li><strong>file_path</strong> (<em>str</em>) &#8211; Path of the file to upload as the blob content.</li>
+<li><strong>content_settings</strong> (<a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.ContentSettings" title="azure.storage.blob.models.ContentSettings"><em>ContentSettings</em></a>) &#8211; ContentSettings object used to set blob properties.</li>
+<li><strong>metadata</strong> (<em>a dict mapping str to str</em>) &#8211; Name-value pairs associated with the blob as metadata.</li>
+<li><strong>progress_callback</strong> (<em>callback function in format of func(current, total)</em>) &#8211; Callback for progress with signature function(current, total) where
+current is the number of bytes transfered so far, and total is the
+size of the blob, or None if the total size is unknown.</li>
+<li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use when the blob size
+exceeds 64MB.
+Set to 1 to upload the blob chunks sequentially.
+Set to 2 or more to upload the blob chunks in parallel. This uses
+more system resources but will upload faster.</li>
+<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of blob chunk if an error occurs.</li>
+<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
+<li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
+<li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC. 
+Specify this header to perform the operation only
+if the resource has been modified since the specified time.</li>
+<li><strong>if_unmodified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC.
+Specify this header to perform the operation only if
+the resource has not been modified since the specified date/time.</li>
+<li><strong>if_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header to perform
+the operation only if the resource&#8217;s ETag matches the value specified.</li>
+<li><strong>if_none_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header
+to perform the operation only if the resource&#8217;s ETag does not match
+the value specified. Specify the wildcard character (*) to perform
+the operation only if the resource does not exist, and fail the
+operation if it does exist.</li>
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
+multiple calls to the Azure service and the timeout will apply to 
+each call individually.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_stream">
+<code class="descname">create_blob_from_stream</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>stream</em>, <em>count=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new blob from a file/stream, or updates the content of
+an existing blob, with automatic chunking and progress
+notifications.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of blob to create or update.</li>
+<li><strong>stream</strong> (<em>io.IOBase</em>) &#8211; Opened file/stream to upload as the blob content.</li>
+<li><strong>count</strong> (<em>int</em>) &#8211; Number of bytes to read from the stream. This is optional, but
+should be supplied for optimal performance.</li>
+<li><strong>content_settings</strong> (<a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.ContentSettings" title="azure.storage.blob.models.ContentSettings"><em>ContentSettings</em></a>) &#8211; ContentSettings object used to set blob properties.</li>
+<li><strong>metadata</strong> (<em>a dict mapping str to str</em>) &#8211; Name-value pairs associated with the blob as metadata.</li>
+<li><strong>progress_callback</strong> (<em>callback function in format of func(current, total)</em>) &#8211; Callback for progress with signature function(current, total) where
+current is the number of bytes transfered so far, and total is the
+size of the blob, or None if the total size is unknown.</li>
+<li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use when the blob size
+exceeds 64MB.
+Set to 1 to upload the blob chunks sequentially.
+Set to 2 or more to upload the blob chunks in parallel. This uses
+more system resources but will upload faster.
+Note that parallel upload requires the stream to be seekable.</li>
+<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of blob chunk if an error occurs.</li>
+<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
+<li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
+<li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC. 
+Specify this header to perform the operation only
+if the resource has been modified since the specified time.</li>
+<li><strong>if_unmodified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC.
+Specify this header to perform the operation only if
+the resource has not been modified since the specified date/time.</li>
+<li><strong>if_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header to perform
+the operation only if the resource&#8217;s ETag matches the value specified.</li>
+<li><strong>if_none_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header
+to perform the operation only if the resource&#8217;s ETag does not match
+the value specified. Specify the wildcard character (*) to perform
+the operation only if the resource does not exist, and fail the
+operation if it does exist.</li>
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
+multiple calls to the Azure service and the timeout will apply to 
+each call individually.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_text">
+<code class="descname">create_blob_from_text</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>text</em>, <em>encoding='utf-8'</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new blob from str/unicode, or updates the content of an
+existing blob, with automatic chunking and progress notifications.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of blob to create or update.</li>
+<li><strong>text</strong> (<em>str</em>) &#8211; Text to upload to the blob.</li>
+<li><strong>encoding</strong> (<em>str</em>) &#8211; Python encoding to use to convert the text to bytes.</li>
+<li><strong>content_settings</strong> (<a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.ContentSettings" title="azure.storage.blob.models.ContentSettings"><em>ContentSettings</em></a>) &#8211; ContentSettings object used to set blob properties.</li>
+<li><strong>metadata</strong> (<em>a dict mapping str to str</em>) &#8211; Name-value pairs associated with the blob as metadata.</li>
+<li><strong>progress_callback</strong> (<em>callback function in format of func(current, total)</em>) &#8211; Callback for progress with signature function(current, total) where
+current is the number of bytes transfered so far, and total is the
+size of the blob, or None if the total size is unknown.</li>
+<li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use when the blob size
+exceeds 64MB.
+Set to 1 to upload the blob chunks sequentially.
+Set to 2 or more to upload the blob chunks in parallel. This uses
+more system resources but will upload faster.</li>
+<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of blob chunk if an error occurs.</li>
+<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
+<li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
+<li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC. 
+Specify this header to perform the operation only
+if the resource has been modified since the specified time.</li>
+<li><strong>if_unmodified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC.
+Specify this header to perform the operation only if
+the resource has not been modified since the specified date/time.</li>
+<li><strong>if_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header to perform
+the operation only if the resource&#8217;s ETag matches the value specified.</li>
+<li><strong>if_none_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header
+to perform the operation only if the resource&#8217;s ETag does not match
+the value specified. Specify the wildcard character (*) to perform
+the operation only if the resource does not exist, and fail the
+operation if it does exist.</li>
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
+multiple calls to the Azure service and the timeout will apply to 
+each call individually.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.get_block_list">
+<code class="descname">get_block_list</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>block_list_type=None</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.get_block_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.get_block_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves the list of blocks that have been uploaded as part of a
+block blob. There are two block lists maintained for a blob:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Committed Block List:</dt>
+<dd>The list of blocks that have been successfully committed to a
+given blob with Put Block List.</dd>
+<dt>Uncommitted Block List:</dt>
+<dd>The list of blocks that have been uploaded for a blob using
+Put Block, but that have not yet been committed. These blocks
+are stored in Azure in association with a blob, but do not yet
+form part of the blob.</dd>
+</dl>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of existing blob.</li>
+<li><strong>snapshot</strong> (<em>str</em>) &#8211; Datetime to determine the time to retrieve the blocks.</li>
+<li><strong>block_list_type</strong> (<em>str</em>) &#8211; Specifies whether to return the list of committed blocks, the list
+of uncommitted blocks, or both lists together. Valid values are:
+committed, uncommitted, or all.</li>
+<li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list committed and/or uncommitted blocks for Block Blob</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.BlobBlockList" title="azure.storage.blob.models.BlobBlockList"><code class="xref py py-class docutils literal"><span class="pre">BlobBlockList</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.put_block">
+<code class="descname">put_block</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>block</em>, <em>block_id</em>, <em>content_md5=None</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.put_block"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.put_block" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new block to be committed as part of a blob.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of existing blob.</li>
+<li><strong>block</strong> (<em>bytes</em>) &#8211; Content of the block.</li>
+<li><strong>block_id</strong> (<em>str</em>) &#8211; A valid Base64 string value that identifies the block. Prior to
+encoding, the string must be less than or equal to 64 bytes in size.
+For a given blob, the length of the value specified for the blockid
+parameter must be the same size for each block. Note that the Base64
+string must be URL-encoded.</li>
+<li><strong>content_md5</strong> (<em>int</em>) &#8211; An MD5 hash of the block content. This hash is used to
+verify the integrity of the blob during transport. When this
+header is specified, the storage service checks the hash that has
+arrived with the one that was sent.</li>
+<li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.blob.blockblobservice.BlockBlobService.put_block_list">
+<code class="descname">put_block_list</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>block_list</em>, <em>transactional_content_md5=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.put_block_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.put_block_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a blob by specifying the list of block IDs that make up the blob.
+In order to be written as part of a blob, a block must have been
+successfully written to the server in a prior Put Block operation.</p>
+<p>You can call Put Block List to update a blob by uploading only those
+blocks that have changed, then committing the new and existing blocks
+together. You can do this by specifying whether to commit a block from
+the committed block list or from the uncommitted block list, or to commit
+the most recently uploaded version of the block, whichever list it may
+belong to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of existing blob.</li>
+<li><strong>block_list</strong> (list of <a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.BlobBlock" title="azure.storage.blob.models.BlobBlock"><code class="xref py py-class docutils literal"><span class="pre">BlobBlock</span></code></a>) &#8211; A list of <code class="xref py py-class docutils literal"><span class="pre">BlobBlock</span></code> containing the block ids and block state.</li>
+<li><strong>transactional_content_md5</strong> (<em>str</em>) &#8211; An MD5 hash of the block content. This hash is used to
+verify the integrity of the blob during transport. When this header
+is specified, the storage service checks the hash that has arrived
+with the one that was sent.</li>
+<li><strong>content_settings</strong> (<a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.ContentSettings" title="azure.storage.blob.models.ContentSettings"><em>ContentSettings</em></a>) &#8211; ContentSettings object used to set properties on the blob.</li>
+<li><strong>metadata</strong> (<em>a dict mapping str to str</em>) &#8211; Name-value pairs associated with the blob as metadata.</li>
+<li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
+<li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC. 
+Specify this header to perform the operation only
+if the resource has been modified since the specified time.</li>
+<li><strong>if_unmodified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC.
+Specify this header to perform the operation only if
+the resource has not been modified since the specified date/time.</li>
+<li><strong>if_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header to perform
+the operation only if the resource&#8217;s ETag matches the value specified.</li>
+<li><strong>if_none_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header
+to perform the operation only if the resource&#8217;s ETag does not match
+the value specified. Specify the wildcard character (*) to perform
+the operation only if the resource does not exist, and fail the
+operation if it does exist.</li>
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ETag and last modified properties for the updated Block Blob</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.ResourceProperties" title="azure.storage.blob.models.ResourceProperties"><code class="xref py py-class docutils literal"><span class="pre">ResourceProperties</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="azure.html">azure package</a><ul>
+  <li><a href="azure.storage.html">azure.storage package</a><ul>
+  <li><a href="azure.storage.blob.html">azure.storage.blob package</a><ul>
+      <li>Previous: <a href="azure.storage.blob.baseblobservice.html" title="previous chapter">azure.storage.blob.baseblobservice module</a></li>
+      <li>Next: <a href="azure.storage.blob.models.html" title="next chapter">azure.storage.blob.models module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ref/azure.storage.blob.blockblobservice.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="../_sources/ref/azure.storage.blob.blockblobservice.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
