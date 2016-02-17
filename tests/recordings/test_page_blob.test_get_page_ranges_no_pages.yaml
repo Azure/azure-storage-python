@@ -1,0 +1,49 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-blob-content-length: ['512']
+      x-ms-blob-type: [PageBlob]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:57 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer902711ce/blob902711ce
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Wed, 17 Feb 2016 20:17:56 GMT']
+      ETag: ['"0x8D337D76D12B984"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:57 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [5763940b-0001-0071-10c0-698d33000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:57 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer902711ce/blob902711ce?comp=pagelist
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><PageList />"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Wed, 17 Feb 2016 20:17:56 GMT']
+      ETag: ['"0x8D337D76D12B984"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:57 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-blob-content-length: ['512']
+      x-ms-request-id: [57639430-0001-0071-34c0-698d33000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

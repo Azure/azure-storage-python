@@ -1,0 +1,54 @@
+interactions:
+- request:
+    body: !!binary |
+      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFN0b3JhZ2VTZXJ2aWNlUHJv
+      cGVydGllcz48TG9nZ2luZz48VmVyc2lvbj4xLjA8L1ZlcnNpb24+PERlbGV0ZT5GYWxzZTwvRGVs
+      ZXRlPjxSZWFkPkZhbHNlPC9SZWFkPjxXcml0ZT5GYWxzZTwvV3JpdGU+PFJldGVudGlvblBvbGlj
+      eT48RW5hYmxlZD5GYWxzZTwvRW5hYmxlZD48L1JldGVudGlvblBvbGljeT48L0xvZ2dpbmc+PEhv
+      dXJNZXRyaWNzPjxWZXJzaW9uPjEuMDwvVmVyc2lvbj48RW5hYmxlZD5GYWxzZTwvRW5hYmxlZD48
+      UmV0ZW50aW9uUG9saWN5PjxFbmFibGVkPkZhbHNlPC9FbmFibGVkPjwvUmV0ZW50aW9uUG9saWN5
+      PjwvSG91ck1ldHJpY3M+PE1pbnV0ZU1ldHJpY3M+PFZlcnNpb24+MS4wPC9WZXJzaW9uPjxFbmFi
+      bGVkPkZhbHNlPC9FbmFibGVkPjxSZXRlbnRpb25Qb2xpY3k+PEVuYWJsZWQ+RmFsc2U8L0VuYWJs
+      ZWQ+PC9SZXRlbnRpb25Qb2xpY3k+PC9NaW51dGVNZXRyaWNzPjxDb3JzIC8+PC9TdG9yYWdlU2Vy
+      dmljZVByb3BlcnRpZXM+
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['528']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:05:16 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Wed, 17 Feb 2016 20:05:19 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [bdfe6e91-0003-0038-78be-69be53000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:05:19 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.queue.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
+        \ /></StorageServiceProperties>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Wed, 17 Feb 2016 20:05:19 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [bdfe6f6d-0003-0038-45be-69be53000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

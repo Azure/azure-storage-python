@@ -1,0 +1,47 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:01:59 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/sharef92e1cc1?restype=share
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Wed, 17 Feb 2016 20:01:58 GMT']
+      ETag: ['"0x8D337D531528CD6"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:01:58 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [9da1ad78-001a-0017-13be-693f69000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:01:59 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/sharef92e1cc1?restype=share
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ShareAlreadyExists</Code><Message>The\
+        \ specified share already exists.\nRequestId:9da1ad7a-001a-0017-14be-693f69000000\n\
+        Time:2016-02-17T20:01:58.4797278Z</Message></Error>"}
+    headers:
+      Content-Length: ['222']
+      Content-Type: [application/xml]
+      Date: ['Wed, 17 Feb 2016 20:01:58 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [9da1ad7a-001a-0017-14be-693f69000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 409, message: The specified share already exists.}
+version: 1

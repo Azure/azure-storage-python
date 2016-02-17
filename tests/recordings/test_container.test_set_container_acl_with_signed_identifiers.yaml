@@ -1,0 +1,73 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:04:21 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container9d71916?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Wed, 17 Feb 2016 20:04:21 GMT']
+      ETag: ['"0x8D337D586EE5F66"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:04:22 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [a4485ea1-0001-0081-3fbe-695d5d000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFNpZ25lZElkZW50aWZpZXJz
+      PjxTaWduZWRJZGVudGlmaWVyPjxJZD50ZXN0aWQ8L0lkPjxBY2Nlc3NQb2xpY3k+PFN0YXJ0PjIw
+      MTYtMDItMTdUMjA6MDM6MjFaPC9TdGFydD48RXhwaXJ5PjIwMTYtMDItMTdUMjE6MDQ6MjFaPC9F
+      eHBpcnk+PFBlcm1pc3Npb24+cjwvUGVybWlzc2lvbj48L0FjY2Vzc1BvbGljeT48L1NpZ25lZElk
+      ZW50aWZpZXI+PC9TaWduZWRJZGVudGlmaWVycz4=
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['257']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:04:21 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/container9d71916?restype=container&comp=acl
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Wed, 17 Feb 2016 20:04:21 GMT']
+      ETag: ['"0x8D337D586EE5F67"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:04:22 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [a4485ec5-0001-0081-60be-695d5d000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:04:21 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/container9d71916?restype=container&comp=acl
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>testid</Id><AccessPolicy><Start>2016-02-17T20:03:21.0000000Z</Start><Expiry>2016-02-17T21:04:21.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Wed, 17 Feb 2016 20:04:21 GMT']
+      ETag: ['"0x8D337D586EE5F67"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:04:22 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [a4485ef2-0001-0081-0bbe-695d5d000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

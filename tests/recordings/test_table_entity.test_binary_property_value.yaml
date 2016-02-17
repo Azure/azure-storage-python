@@ -1,0 +1,62 @@
+interactions:
+- request:
+    body: !!binary |
+      eyJiaW5hcnkiOiAiQVFJREJBVUdCd2dKQ2c9PSIsICJQYXJ0aXRpb25LZXkiOiAicGs5OWZlMTI1
+      NiIsICJiaW5hcnlAb2RhdGEudHlwZSI6ICJFZG0uQmluYXJ5IiwgIlJvd0tleSI6ICJyazk5ZmUx
+      MjU2In0=
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['119']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:20:32 GMT']
+      x-ms-version: ['2015-04-05']
+    method: POST
+    uri: https://storagename.table.core.windows.net/uttable99fe1256
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      DataServiceId: ['https://storagename.table.core.windows.net/uttable99fe1256(PartitionKey=''pk99fe1256'',RowKey=''rk99fe1256'')']
+      Date: ['Wed, 17 Feb 2016 20:20:33 GMT']
+      ETag: [W/"datetime'2016-02-17T20%3A20%3A33.436052Z'"]
+      Location: ['https://storagename.table.core.windows.net/uttable99fe1256(PartitionKey=''pk99fe1256'',RowKey=''rk99fe1256'')']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [35c37ce3-0002-0033-12c0-69a627000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:20:33 GMT']
+      x-ms-version: ['2015-04-05']
+    method: GET
+    uri: https://storagename.table.core.windows.net/uttable99fe1256(PartitionKey='pk99fe1256',RowKey='rk99fe1256')
+  response:
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttable99fe1256/@Element","odata.etag":"W/\"datetime''2016-02-17T20%3A20%3A33.436052Z''\"","PartitionKey":"pk99fe1256","RowKey":"rk99fe1256","Timestamp":"2016-02-17T20:20:33.436052Z","binary@odata.type":"Edm.Binary","binary":"AQIDBAUGBwgJCg=="}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Wed, 17 Feb 2016 20:20:33 GMT']
+      ETag: [W/"datetime'2016-02-17T20%3A20%3A33.436052Z'"]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [35c37ce7-0002-0033-16c0-69a627000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 200, message: OK}
+version: 1

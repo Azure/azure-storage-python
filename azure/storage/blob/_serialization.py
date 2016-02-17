@@ -12,104 +12,112 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from time import time
-from wsgiref.handlers import format_date_time
-from .._common_serialization import (
-    _parse_response_for_dict,
-    ETree,
-    _ETreeXmlToObject,
-)
+from xml.sax.saxutils import escape as xml_escape
+try:
+    from xml.etree import cElementTree as ETree
+except ImportError:
+    from xml.etree import ElementTree as ETree
 from .._common_conversion import (
-    _decode_base64_to_text,
     _encode_base64,
+    _str,
 )
-from .._serialization import _update_storage_header
-from .models import (
-    BlobEnumResults,
-    BlobResult,
-    Blob,
-    BlobPrefix,
-    BlobBlock,
-    BlobBlockList,
+from .._error import (
+    _validate_not_none,
+    _ERROR_START_END_NEEDED_FOR_MD5,
+    _ERROR_RANGE_TOO_LARGE_FOR_MD5,
 )
+from ._error import (
+    _ERROR_PAGE_BLOB_START_ALIGNMENT,
+    _ERROR_PAGE_BLOB_END_ALIGNMENT,
+    _ERROR_INVALID_BLOCK_ID,
+)
+import sys
+if sys.version_info >= (3,):
+    from io import BytesIO
+else:
+    from cStringIO import StringIO as BytesIO
 
+def _get_path(container_name=None, blob_name=None):
+    '''
+    Creates the path to access a blob resource.
 
-def _update_storage_blob_header(request, authentication):
-    request = _update_storage_header(request)
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
-    request.headers.append(
-        ('Content-Type', 'application/octet-stream Charset=UTF-8'))
-    authentication.sign_request(request)
+    container_name:
+        Name of container.
+    blob_name:
+        The path to the blob.
+    '''
+    if container_name and blob_name:
+        return '/{0}/{1}'.format(
+            _str(container_name),
+            _str(blob_name))
+    elif container_name:
+        return '/{0}'.format(_str(container_name))
+    else:
+        return '/'
 
-    return request.headers
+def _validate_and_format_range_headers(request, start_range, end_range, start_range_required=True, end_range_required=True, check_content_md5=False, align_to_page=False):
+    request.headers = request.headers or []
+    if start_range_required == True:
+        _validate_not_none('start_range', start_range)
+    if end_range_required == True:
+        _validate_not_none('end_range', end_range)
+    _validate_page_ranges(start_range, end_range, align_to_page)
+    if end_range is not None:
+        request.headers.append(('x-ms-range', "bytes={0}-{1}".format(start_range, end_range)))
+    else:
+        request.headers.append(('x-ms-range', "bytes={0}-".format(start_range)))
 
+    if check_content_md5 == True:
+        if start_range is None or end_range is None:
+            raise ValueError(_ERROR_START_END_NEEDED_FOR_MD5)
+        if end_range - start_range > 4 * 1024 * 1024:
+            raise ValueError(_ERROR_RANGE_TOO_LARGE_FOR_MD5)
 
-def _parse_blob_enum_results_list(response):
-    respbody = response.body
-    return_obj = BlobEnumResults()
-    enum_results = ETree.fromstring(respbody)
+        request.headers.append(('x-ms-range-get-content-md5', 'true'))
 
-    for child in enum_results.findall('./Blobs/Blob'):
-        return_obj.blobs.append(_ETreeXmlToObject.fill_instance_element(child, Blob))
-
-    for child in enum_results.findall('./Blobs/BlobPrefix'):
-        return_obj.prefixes.append(
-            _ETreeXmlToObject.fill_instance_element(child, BlobPrefix))
-
-    for name, value in vars(return_obj).items():
-        if name == 'blobs' or name == 'prefixes':
-            continue
-        value = _ETreeXmlToObject.fill_data_member(enum_results, name, value)
-        if value is not None:
-            setattr(return_obj, name, value)
-
-    return return_obj
-
+def _validate_page_ranges(start_range, end_range, align_to_page):
+    if align_to_page == True:
+        if start_range is not None and start_range % 512 != 0:
+            raise ValueError(_ERROR_PAGE_BLOB_START_ALIGNMENT)
+        if end_range is not None and end_range % 512 != 511:
+            raise ValueError(_ERROR_PAGE_BLOB_END_ALIGNMENT)
 
 def _convert_block_list_to_xml(block_id_list):
     '''
+    <?xml version="1.0" encoding="utf-8"?>
+    <BlockList>
+      <Committed>first-base64-encoded-block-id</Committed>
+      <Uncommitted>second-base64-encoded-block-id</Uncommitted>
+      <Latest>third-base64-encoded-block-id</Latest>
+    </BlockList>
+
     Convert a block list to xml to send.
 
     block_id_list:
-        a str list containing the block ids that are used in put_block_list.
+        A list of BlobBlock containing the block ids and block state that are used in put_block_list.
     Only get block from latest blocks.
     '''
     if block_id_list is None:
         return ''
-    xml = '<?xml version="1.0" encoding="utf-8"?><BlockList>'
-    for value in block_id_list:
-        xml += '<Latest>{0}</Latest>'.format(_encode_base64(value))
 
-    return xml + '</BlockList>'
+    block_list_element = ETree.Element('BlockList');
+    
+    # Enabled
+    for block in block_id_list:
+        if block.id is None:
+            raise ValueError(_ERROR_INVALID_BLOCK_ID)
+        id = xml_escape(_str(format(_encode_base64(block.id))))
+        ETree.SubElement(block_list_element, block.state).text = id
 
-
-def _create_blob_result(response):
-    blob_properties = _parse_response_for_dict(response)
-    return BlobResult(response.body, blob_properties)
-
-
-def _convert_block_etree_element_to_blob_block(block_element):
-    block_id = _decode_base64_to_text(block_element.findtext('./Name', ''))
-    block_size = int(block_element.findtext('./Size'))
-
-    return BlobBlock(block_id, block_size)
-
-
-def _convert_response_to_block_list(response):
-    '''
-    Converts xml response to block list class.
-    '''
-    block_list = BlobBlockList()
-
-    list_element = ETree.fromstring(response.body)
-
-    for block_element in list_element.findall('./CommittedBlocks/Block'):
-        block = _convert_block_etree_element_to_blob_block(block_element)
-        block_list.committed_blocks.append(block)
-
-    for block_element in list_element.findall('./UncommittedBlocks/Block'):
-        block = _convert_block_etree_element_to_blob_block(block_element)
-        block_list.uncommitted_blocks.append(block)
-
-    return block_list
+    # Add xml declaration and serialize
+    try:
+        stream = BytesIO()
+        ETree.ElementTree(block_list_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
+    except:
+        raise
+    finally:
+        output = stream.getvalue()
+        stream.close()
+    
+    # return xml value
+    return output

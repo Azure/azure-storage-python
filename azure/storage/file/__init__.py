@@ -12,22 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from ..constants import (
-    FILE_SERVICE_HOST_BASE,
-    DEV_FILE_HOST,
-)
-
 from .models import (
-    ShareEnumResults,
     Share,
-    Properties,
-    FileAndDirectoryEnumResults,
-    FileResult,
+    ShareProperties,
     File,
     FileProperties,
     Directory,
-    Range,
-    RangeList,
+    DirectoryProperties,
+    FileRange,
+    ContentSettings,
+    CopyProperties,
+    SharePermissions,
+    FilePermissions,
 )
 
 from .fileservice import FileService

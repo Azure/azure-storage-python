@@ -1,0 +1,71 @@
+interactions:
+- request:
+    body: !!binary |
+      eyJCaXJ0aGRheUBvZGF0YS50eXBlIjogIkVkbS5EYXRlVGltZSIsICJiaXJ0aGRheSI6ICIxOTcw
+      LTEwLTA0VDAwOjAwOjAwWiIsICJvcHRpb25hbCI6IG51bGwsICJsYXJnZSI6ICI5MzMzMTExMDAi
+      LCAiYmlydGhkYXlAb2RhdGEudHlwZSI6ICJFZG0uRGF0ZVRpbWUiLCAiYWdlQG9kYXRhLnR5cGUi
+      OiAiRWRtLkludDY0IiwgImRlY2Vhc2VkIjogZmFsc2UsICJvdGhlciI6IDIwLCAic2V4IjogIm1h
+      bGUiLCAiYWdlIjogIjM5IiwgIlBhcnRpdGlvbktleSI6ICJwa2E5OWExNzgxIiwgIlJvd0tleSI6
+      ICJya2E5OWExNzgxIiwgImxhcmdlQG9kYXRhLnR5cGUiOiAiRWRtLkludDY0IiwgIm1hcnJpZWQi
+      OiB0cnVlLCAiY2xzaWQiOiAiYzlkYTY0NTUtMjEzZC00MmM5LTlhNzktM2U5MTQ5YTU3ODMzIiwg
+      ImNsc2lkQG9kYXRhLnR5cGUiOiAiRWRtLkd1aWQiLCAiYmluYXJ5IjogbnVsbCwgInJhdGlvIjog
+      My4xLCAiZXZlbnJhdGlvIjogMy4wLCAiQmlydGhkYXkiOiAiMTk3My0xMC0wNFQwMDowMDowMFoi
+      fQ==
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['514']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:19:40 GMT']
+      x-ms-version: ['2015-04-05']
+    method: POST
+    uri: https://storagename.table.core.windows.net/uttablea99a1781
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      DataServiceId: ['https://storagename.table.core.windows.net/uttablea99a1781(PartitionKey=''pka99a1781'',RowKey=''rka99a1781'')']
+      Date: ['Wed, 17 Feb 2016 20:19:38 GMT']
+      ETag: [W/"datetime'2016-02-17T20%3A19%3A38.8719684Z'"]
+      Location: ['https://storagename.table.core.windows.net/uttablea99a1781(PartitionKey=''pka99a1781'',RowKey=''rka99a1781'')']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [54f05b0f-0002-0017-17c0-693f69000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      DataServiceVersion: [3.0;NetFx]
+      If-Match: [W/"datetime'2012-06-15T22%3A51%3A44.9662825Z'"]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:19:40 GMT']
+      x-ms-version: ['2015-04-05']
+    method: DELETE
+    uri: https://storagename.table.core.windows.net/uttablea99a1781(PartitionKey='pka99a1781',RowKey='rka99a1781')
+  response:
+    body: {string: '{"odata.error":{"code":"UpdateConditionNotSatisfied","message":{"lang":"en-US","value":"The
+        update condition specified in the request was not satisfied.\nRequestId:54f05b17-0002-0017-1fc0-693f69000000\nTime:2016-02-17T20:19:38.9099683Z"}}}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Wed, 17 Feb 2016 20:19:38 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [54f05b17-0002-0017-1fc0-693f69000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 412, message: Precondition Failed}
+version: 1

@@ -13,7 +13,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import base64
-import os
 import sys
 
 if sys.version_info < (3,):
@@ -45,7 +44,7 @@ class _HTTPClient(object):
     '''
 
     def __init__(self, service_instance, cert_file=None, protocol='https',
-                 request_session=None, timeout=65, user_agent=''):
+                 request_session=None, timeout=None, user_agent=''):
         '''
         service_instance:
             service client instance.

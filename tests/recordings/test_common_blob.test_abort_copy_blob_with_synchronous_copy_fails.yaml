@@ -1,0 +1,93 @@
+interactions:
+- request:
+    body: !!binary |
+      0j7gi6enNa5hiN17vq/7dQO0pxBYwkjgdOePIEVU9GhF4US5DFzyZ/1SBBYEioVJYedqYcHlnZv8
+      qs/1xHgKgKvIHhQCnoMHOwBMT9cuzmHOWoRBBGhwfaulXpMEM7kTysRWlMVycnwv503cqcah/yCC
+      jV5zyYEfDFIDEtpS8thaxLAD7g4XlPmQzs5WAn6T/NdQXrzlVTkXKtH3P74ogL6G/MAal6ckHVPl
+      vNQruAzVTThe8QbZfwuk9QTI0nw5ha3bsrbJEbKZzRvfxrbWe/hEhZulHUSoks1ma4IrNJKGTwWy
+      nRjnTrlf2owxpsgOibsQGV1BGK6RcKVqEbuu4J6hT5Jh29S9mPNQ2vAt/xOmqIZt6hPQu6rWRtvW
+      rOvZGCejwYJy6WlpC8JvUp9siGmmVV+/SkmtBJ6fcr2x1dxyR9/olNspWTQ9DDwNN+DlNHa5VuXk
+      TAvHDIFJ+k/jJCJaK2XqCHTPP1k9+z/kK/bHbM7fs7iqPR+jE0hvDA/oH11/4fV/UARr0bQTQjiI
+      4+W/tEnguFwU6bHb90eijFnbpYCxA5qJ1AMTDwPKDJtOZrijAFaFo2qzsR92xgp6nh8NBlyOpfNs
+      GEfqpEzvlSI9MNR4h7ZfWgyva8ZBs3Sx4yI9EzBeH66yYam/LEN9vYJ902i5sPoyJ/cVGQ7ezCbb
+      mR7sCILYSVXENHc7wRZcg0PhKJ7QNLaP9ZPM0LckFD5LD+UQBsAIUBhWkhgaWgQlQW+49P9O7OzM
+      Ywmynrke75a3tq46Acuq9uLldzysXamamvU8XzC02gDKaIKrS+mXBQeG8A4gyr/7eEnyt6tLub9W
+      JJW34SV7REh9Z3szp0pRnCz8ZFFmcoLWrHoM80s61/J1V2Y9lchOPuQkR8YqjlQrvHwO/bfvPNpa
+      xylRhxsO3MidKkKO3ANrWGHzTqjC1DzxDzoKSdo3BqgoM+MSkkRM8Yo6W5ybZipM4y++ICjdTsEL
+      uY1h9t1MIhFIdMuJBjl0dq50WPDIb4oiqRDN4xgIao2GiXK4U9bWFk+igIfXNFpIuV90oEGbzMul
+      n4lEsJTCo4KIDItNP+n6xVdSylndHjUFT8cvREowJFTsKp5IReFsMFu64W/0fN4m4Mx/xaoyaql3
+      TfRpJGNbozfsm9z9pVPw8OK1iBgf2E1crLbEKn9EUQNMPOR3QEZEUXherfJmtuB8x1kVUsWj3Oyp
+      czW7n3dhuy09M3fJBQfSJadEqlGfI0/cKgcWEIcm7FcZDecE1sVmuQzSEsqerkrLE8BJwyMUDNKm
+      nvnP4t8FNFnvWx4RcVK9isSQN+JnvRrkafhaYKEfmz+tutExm4vkEpLHOIqTO+PLZokiIox4dw==
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-date: ['Wed, 17 Feb 2016 20:08:25 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer741a1af1/blob741a1af1
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [mrrQXfFriRkYM/bJ6E6+kg==]
+      Date: ['Wed, 17 Feb 2016 20:08:24 GMT']
+      ETag: ['"0x8D337D6184F9C11"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:08:25 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [fbbb3d60-0001-0004-6fbe-690a88000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-copy-source: ['https://xclientdev.blob.core.windows.net/utcontainer741a1af1/blob741a1af1']
+      x-ms-date: ['Wed, 17 Feb 2016 20:08:25 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer741a1af1/targetblob
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Wed, 17 Feb 2016 20:08:24 GMT']
+      ETag: ['"0x8D337D61856A12D"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:08:26 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-copy-id: [2210762a-f81d-4138-a8aa-68b4ac3ec9cc]
+      x-ms-copy-status: [success]
+      x-ms-request-id: [fbbb3da0-0001-0004-2dbe-690a88000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-copy-action: [abort]
+      x-ms-date: ['Wed, 17 Feb 2016 20:08:25 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer741a1af1/targetblob?comp=copy&copyid=2210762a-f81d-4138-a8aa-68b4ac3ec9cc
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>NoPendingCopyOperation</Code><Message>There\
+        \ is currently no pending copy operation.\nRequestId:fbbb3dc0-0001-0004-4dbe-690a88000000\n\
+        Time:2016-02-17T20:08:25.4926072Z</Message></Error>"}
+    headers:
+      Content-Length: ['236']
+      Content-Type: [application/xml]
+      Date: ['Wed, 17 Feb 2016 20:08:24 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [fbbb3dc0-0001-0004-4dbe-690a88000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 409, message: There is currently no pending copy operation.}
+version: 1

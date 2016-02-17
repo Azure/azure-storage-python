@@ -16,10 +16,7 @@ Submodules
 
 .. toctree::
 
-   azure.storage.auth
    azure.storage.cloudstorageaccount
-   azure.storage.connection
-   azure.storage.constants
    azure.storage.models
    azure.storage.sharedaccesssignature
    azure.storage.storageclient

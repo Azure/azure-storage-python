@@ -1,0 +1,47 @@
+interactions:
+- request:
+    body: !!binary |
+      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFN0b3JhZ2VTZXJ2aWNlUHJv
+      cGVydGllcz48Q29ycz48Q29yc1J1bGU+PEFsbG93ZWRPcmlnaW5zPnd3dy54eXouY29tPC9BbGxv
+      d2VkT3JpZ2lucz48QWxsb3dlZE1ldGhvZHM+R0VUPC9BbGxvd2VkTWV0aG9kcz48TWF4QWdlSW5T
+      ZWNvbmRzPjA8L01heEFnZUluU2Vjb25kcz48RXhwb3NlZEhlYWRlcnMgLz48QWxsb3dlZEhlYWRl
+      cnMgLz48L0NvcnNSdWxlPjxDb3JzUnVsZT48QWxsb3dlZE9yaWdpbnM+d3d3Lnh5ei5jb208L0Fs
+      bG93ZWRPcmlnaW5zPjxBbGxvd2VkTWV0aG9kcz5HRVQ8L0FsbG93ZWRNZXRob2RzPjxNYXhBZ2VJ
+      blNlY29uZHM+MDwvTWF4QWdlSW5TZWNvbmRzPjxFeHBvc2VkSGVhZGVycyAvPjxBbGxvd2VkSGVh
+      ZGVycyAvPjwvQ29yc1J1bGU+PENvcnNSdWxlPjxBbGxvd2VkT3JpZ2lucz53d3cueHl6LmNvbTwv
+      QWxsb3dlZE9yaWdpbnM+PEFsbG93ZWRNZXRob2RzPkdFVDwvQWxsb3dlZE1ldGhvZHM+PE1heEFn
+      ZUluU2Vjb25kcz4wPC9NYXhBZ2VJblNlY29uZHM+PEV4cG9zZWRIZWFkZXJzIC8+PEFsbG93ZWRI
+      ZWFkZXJzIC8+PC9Db3JzUnVsZT48Q29yc1J1bGU+PEFsbG93ZWRPcmlnaW5zPnd3dy54eXouY29t
+      PC9BbGxvd2VkT3JpZ2lucz48QWxsb3dlZE1ldGhvZHM+R0VUPC9BbGxvd2VkTWV0aG9kcz48TWF4
+      QWdlSW5TZWNvbmRzPjA8L01heEFnZUluU2Vjb25kcz48RXhwb3NlZEhlYWRlcnMgLz48QWxsb3dl
+      ZEhlYWRlcnMgLz48L0NvcnNSdWxlPjxDb3JzUnVsZT48QWxsb3dlZE9yaWdpbnM+d3d3Lnh5ei5j
+      b208L0FsbG93ZWRPcmlnaW5zPjxBbGxvd2VkTWV0aG9kcz5HRVQ8L0FsbG93ZWRNZXRob2RzPjxN
+      YXhBZ2VJblNlY29uZHM+MDwvTWF4QWdlSW5TZWNvbmRzPjxFeHBvc2VkSGVhZGVycyAvPjxBbGxv
+      d2VkSGVhZGVycyAvPjwvQ29yc1J1bGU+PENvcnNSdWxlPjxBbGxvd2VkT3JpZ2lucz53d3cueHl6
+      LmNvbTwvQWxsb3dlZE9yaWdpbnM+PEFsbG93ZWRNZXRob2RzPkdFVDwvQWxsb3dlZE1ldGhvZHM+
+      PE1heEFnZUluU2Vjb25kcz4wPC9NYXhBZ2VJblNlY29uZHM+PEV4cG9zZWRIZWFkZXJzIC8+PEFs
+      bG93ZWRIZWFkZXJzIC8+PC9Db3JzUnVsZT48L0NvcnM+PC9TdG9yYWdlU2VydmljZVByb3BlcnRp
+      ZXM+
+    headers:
+      Accept-Encoding: [identity]
+      Connection: [keep-alive]
+      Content-Length: ['1143']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:05:06 GMT']
+      x-ms-version: ['2015-04-05']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML\
+        \ specified is not syntactically valid.\nRequestId:c2a38f57-0001-0080-51be-695ca0000000\n\
+        Time:2016-02-17T20:05:07.0952389Z</Message><LineNumber>0</LineNumber><LinePosition>0</LinePosition><Reason\
+        \ /></Error>"}
+    headers:
+      Content-Length: ['294']
+      Content-Type: [application/xml]
+      Date: ['Wed, 17 Feb 2016 20:05:06 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [c2a38f57-0001-0080-51be-695ca0000000]
+      x-ms-version: ['2015-04-05']
+    status: {code: 400, message: XML specified is not syntactically valid.}
+version: 1

@@ -16,8 +16,12 @@ import os
 import datetime
 import sys
 
-from azure.storage.blob import BlobService
-import tests.storage_settings_real as settings
+from azure.storage.blob import (
+    BlockBlobService,
+    PageBlobService,
+    AppendBlobService,
+)
+import tests.settings_real as settings
 
 # Warning:
 # This script will take a while to run with everything enabled.
@@ -38,6 +42,13 @@ LOCAL_PAGE_BLOB_FILES = [
     ('PAGE-2500M+000B', 2500, 0),
 ]
 
+LOCAL_APPEND_BLOB_FILES = [
+    ('APPD-0072M+000B', 80, 0),
+    ('APPD-0072M+512B', 80, 13),
+    ('APPD-0500M+000B', 500, 0),
+    ('APPD-2500M+000B', 2500, 0),
+]
+
 CONNECTION_COUNTS = [1, 2, 5, 10, 50]
 
 CONTAINER_NAME = 'performance'
@@ -50,7 +61,6 @@ def input_file(name):
 def output_file(name):
     return 'output-' + name
 
-
 def create_random_content_file(name, size_in_megs, additional_byte_count=0):
     file_name = input_file(name)
     if not os.path.exists(file_name):
@@ -61,21 +71,25 @@ def create_random_content_file(name, size_in_megs, additional_byte_count=0):
             if additional_byte_count > 0:
                 stream.write(os.urandom(additional_byte_count))
 
-
-def upload_blob(service, name, connections, is_page_blob):
+def upload_blob(service, name, connections):
     blob_name = name
     file_name = input_file(name)
     sys.stdout.write('\tUp:')
     start_time = datetime.datetime.now()
-    if is_page_blob:
-        service.put_page_blob_from_path(
+    if isinstance(service, BlockBlobService):
+        service.create_blob_from_path(
+            CONTAINER_NAME, blob_name, file_name, max_connections=connections)
+    elif isinstance(service, PageBlobService):
+        service.create_blob_from_path(
+            CONTAINER_NAME, blob_name, file_name, max_connections=connections)
+    elif isinstance(service, AppendBlobService):
+        service.append_blob_from_path(
             CONTAINER_NAME, blob_name, file_name, max_connections=connections)
     else:
-        service.put_block_blob_from_path(
+        service.create_blob_from_path(
             CONTAINER_NAME, blob_name, file_name, max_connections=connections)
     elapsed_time = datetime.datetime.now() - start_time
     sys.stdout.write('{0}s'.format(elapsed_time.total_seconds()))
-
 
 def download_blob(service, name, connections):
     blob_name = name
@@ -88,7 +102,6 @@ def download_blob(service, name, connections):
         CONTAINER_NAME, blob_name, target_file_name, max_connections=connections)
     elapsed_time = datetime.datetime.now() - start_time
     sys.stdout.write('{0}s'.format(elapsed_time.total_seconds()))
-
 
 def file_contents_equal(first_file_path, second_file_path):
     first_size = os.path.getsize(first_file_path);
@@ -105,7 +118,6 @@ def file_contents_equal(first_file_path, second_file_path):
                 if not first_data:
                     return True
 
-
 def compare_files(name):
     first_file_path = input_file(name)
     second_file_path = output_file(name)
@@ -115,28 +127,28 @@ def compare_files(name):
     else:
         sys.stdout.write('ERR!')
 
-
-def process(service, blobs, counts, is_page_blob):
+def process(service, blobs, counts):
     for name, size_in_megs, additional in blobs:
         create_random_content_file(name, size_in_megs, additional)
 
     for name, _, _ in blobs:
         for max_conn in counts:
             sys.stdout.write('{0}\tParallel:{1}'.format(name, max_conn))
-            upload_blob(service, name, max_conn, is_page_blob)
+            upload_blob(service, name, max_conn)
             download_blob(service, name, max_conn)
             compare_files(name)
             print('')
         print('')
 
-
 def main():
-    service = BlobService(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
+    bbs = BlockBlobService(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
+    pbs = PageBlobService(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
+    abs = AppendBlobService(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
     service.create_container(CONTAINER_NAME)
 
-    process(service, LOCAL_BLOCK_BLOB_FILES, CONNECTION_COUNTS, is_page_blob=False)
-    process(service, LOCAL_PAGE_BLOB_FILES, CONNECTION_COUNTS, is_page_blob=True)
-
+    process(bbs, LOCAL_BLOCK_BLOB_FILES, CONNECTION_COUNTS)
+    process(pbs, LOCAL_PAGE_BLOB_FILES, CONNECTION_COUNTS)
+    process(abs, LOCAL_APPEND_BLOB_FILES, CONNECTION_COUNTS)
 
 if __name__ == '__main__':
     main()
