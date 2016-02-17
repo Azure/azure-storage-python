@@ -103,6 +103,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertIsNotNone(resp.last_modified)
         self.bs.exists(self.container_name, blob_name)
 
+    @record
     def test_create_blob_with_metadata(self):
         # Arrange
         blob_name = self._get_blob_reference()

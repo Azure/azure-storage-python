@@ -5,20 +5,20 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:01:59 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:01:18 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 25 Jan 2016 19:01:58 GMT']
-      ETag: ['"0x8D325BA008BC300"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:01:59 GMT']
+      Date: ['Wed, 17 Feb 2016 20:01:18 GMT']
+      ETag: ['"0x8D337D519803E1D"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:01:18 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [1d7c979e-001a-0062-4ea2-57b8d2000000]
+      x-ms-request-id: [f94d5d71-001a-0005-60bd-690b75000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -27,18 +27,18 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:01:59 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:01:18 GMT']
       x-ms-version: ['2015-04-05']
     method: DELETE
     uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 25 Jan 2016 19:01:58 GMT']
+      Date: ['Wed, 17 Feb 2016 20:01:18 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [1d7c979f-001a-0062-4fa2-57b8d2000000]
+      x-ms-request-id: [f94d5d72-001a-0005-61bd-690b75000000]
       x-ms-version: ['2015-04-05']
     status: {code: 202, message: Accepted}
 - request:
@@ -46,85 +46,21 @@ interactions:
     headers:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:01:59 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:01:18 GMT']
       x-ms-version: ['2015-04-05']
     method: GET
     uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
-        \ specified resource does not exist.\nRequestId:1d7c97a0-001a-0062-50a2-57b8d2000000\n\
-        Time:2016-01-25T19:01:59.7502056Z</Message></Error>"}
+        \ specified resource does not exist.\nRequestId:f94d5d73-001a-0005-62bd-690b75000000\n\
+        Time:2016-02-17T20:01:18.8145402Z</Message></Error>"}
     headers:
       Content-Length: ['223']
       Content-Type: [application/xml]
-      Date: ['Mon, 25 Jan 2016 19:01:58 GMT']
+      Date: ['Wed, 17 Feb 2016 20:01:18 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [1d7c97a0-001a-0062-50a2-57b8d2000000]
-      x-ms-version: ['2015-04-05']
-    status: {code: 404, message: The specified resource does not exist.}
-- request:
-    body: null
-    headers:
-      Accept-Encoding: [identity]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:25:50 GMT']
-      x-ms-version: ['2015-04-05']
-    method: PUT
-    uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
-  response:
-    body: {string: ''}
-    headers:
-      Date: ['Mon, 25 Jan 2016 19:25:51 GMT']
-      ETag: ['"0x8D325BD5664E78B"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:25:51 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [7771f263-001a-0030-65a6-57a520000000]
-      x-ms-version: ['2015-04-05']
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Accept-Encoding: [identity]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:25:51 GMT']
-      x-ms-version: ['2015-04-05']
-    method: DELETE
-    uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
-  response:
-    body: {string: ''}
-    headers:
-      Date: ['Mon, 25 Jan 2016 19:25:51 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [7771f267-001a-0030-67a6-57a520000000]
-      x-ms-version: ['2015-04-05']
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept-Encoding: [identity]
-      Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:25:52 GMT']
-      x-ms-version: ['2015-04-05']
-    method: GET
-    uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
-  response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
-        \ specified resource does not exist.\nRequestId:7771f268-001a-0030-68a6-57a520000000\n\
-        Time:2016-01-25T19:26:00.8310869Z</Message></Error>"}
-    headers:
-      Content-Length: ['223']
-      Content-Type: [application/xml]
-      Date: ['Mon, 25 Jan 2016 19:25:59 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [7771f268-001a-0030-68a6-57a520000000]
+      x-ms-request-id: [f94d5d73-001a-0005-62bd-690b75000000]
       x-ms-version: ['2015-04-05']
     status: {code: 404, message: The specified resource does not exist.}
 version: 1

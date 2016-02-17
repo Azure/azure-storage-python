@@ -5,20 +5,20 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:11:08 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:10:06 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer859a1acb?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 25 Jan 2016 19:11:09 GMT']
-      ETag: ['"0x8D325BB48B756EC"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:11:09 GMT']
+      Date: ['Wed, 17 Feb 2016 20:10:06 GMT']
+      ETag: ['"0x8D337D654A67DF2"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:10:07 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [57e50604-0001-007d-48a4-5763c2000000]
+      x-ms-request-id: [7c1c373c-0001-0005-2abf-690b75000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -28,9 +28,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-date: ['Mon, 25 Jan 2016 19:11:09 GMT']
+      x-ms-date: ['Wed, 17 Feb 2016 20:10:06 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer859a1acb/blob1
@@ -38,12 +38,12 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Mon, 25 Jan 2016 19:11:09 GMT']
-      ETag: ['"0x8D325BB4897BF87"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:11:09 GMT']
+      Date: ['Wed, 17 Feb 2016 20:10:06 GMT']
+      ETag: ['"0x8D337D654BCC419"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:10:07 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [57e50646-0001-007d-06a4-5763c2000000]
+      x-ms-request-id: [7c1c3757-0001-0005-42bf-690b75000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -52,22 +52,22 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-Modified-Since: ['Mon, 25 Jan 2016 19:26:08 GMT']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:11:09 GMT']
+      If-Modified-Since: ['Wed, 17 Feb 2016 20:25:06 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:10:07 GMT']
       x-ms-version: ['2015-04-05']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/utcontainer859a1acb/blob1
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ConditionNotMet</Code><Message>The\
-        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:57e50679-0001-007d-37a4-5763c2000000\n\
-        Time:2016-01-25T19:11:09.9759061Z</Message></Error>"}
+        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:7c1c376d-0001-0005-58bf-690b75000000\n\
+        Time:2016-02-17T20:10:07.2778394Z</Message></Error>"}
     headers:
       Content-Length: ['252']
       Content-Type: [application/xml]
-      Date: ['Mon, 25 Jan 2016 19:11:09 GMT']
+      Date: ['Wed, 17 Feb 2016 20:10:06 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [57e50679-0001-007d-37a4-5763c2000000]
+      x-ms-request-id: [7c1c376d-0001-0005-58bf-690b75000000]
       x-ms-version: ['2015-04-05']
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}

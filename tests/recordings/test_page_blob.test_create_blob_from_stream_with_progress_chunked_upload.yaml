@@ -5,22 +5,22 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-blob-content-length: ['66048']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-blob-content-length: ['65536']
       x-ms-blob-type: [PageBlob]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:28 GMT']
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:32 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer2f9c1d8c/blob2f9c1d8c
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE54151C83"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75E998B3B"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [54a6779f-0001-001d-23b7-5726e0000000]
+      x-ms-request-id: [d5fc63b1-0001-0034-65c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -101,8 +101,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75E998B3B"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=0-4095]
       x-ms-version: ['2015-04-05']
@@ -112,13 +113,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [nZHS+2S9uUl7h1RY+1mW+Q==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE541B101E"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75E9E6D5E"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a677bb-0001-001d-3cb7-5726e0000000]
+      x-ms-request-id: [d5fc63cf-0001-0034-80c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -199,8 +200,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75E9E6D5E"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=4096-8191]
       x-ms-version: ['2015-04-05']
@@ -210,13 +212,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [vR5s1vAe0b9A/ySexn7hEQ==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE54206788"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EA3015E"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a677dd-0001-001d-5cb7-5726e0000000]
+      x-ms-request-id: [d5fc63dc-0001-0034-0dc0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -297,8 +299,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EA3015E"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=8192-12287]
       x-ms-version: ['2015-04-05']
@@ -308,13 +311,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [TxevW/v3lALnzkTm9uyJ9w==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE54274589"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EA79578"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a677ff-0001-001d-7eb7-5726e0000000]
+      x-ms-request-id: [d5fc63eb-0001-0034-1cc0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -395,8 +398,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EA79578"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=12288-16383]
       x-ms-version: ['2015-04-05']
@@ -406,13 +410,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [M6CCaJXCvowI75/jXyAu3A==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE54326981"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EAC50BB"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a67827-0001-001d-26b7-5726e0000000]
+      x-ms-request-id: [d5fc63fc-0001-0034-2dc0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -493,8 +497,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EAC50BB"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=16384-20479]
       x-ms-version: ['2015-04-05']
@@ -504,13 +509,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [4/nr8GW3iPsLB6kpH4Ygrw==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE5437E7EB"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EB21D1B"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a67838-0001-001d-37b7-5726e0000000]
+      x-ms-request-id: [d5fc640c-0001-0034-3cc0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -591,8 +596,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EB21D1B"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=20480-24575]
       x-ms-version: ['2015-04-05']
@@ -602,13 +608,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [7ndieWXTud5aN+6aHLwLKQ==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE543DB48F"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EB72654"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a6784e-0001-001d-4db7-5726e0000000]
+      x-ms-request-id: [d5fc641a-0001-0034-49c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -689,8 +695,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EB72654"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=24576-28671]
       x-ms-version: ['2015-04-05']
@@ -700,13 +707,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [3KSN980WrV5WN1KwkSOqbw==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE54483C3B"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EBBE177"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a6786f-0001-001d-6bb7-5726e0000000]
+      x-ms-request-id: [d5fc6429-0001-0034-54c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -787,8 +794,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EBBE177"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=28672-32767]
       x-ms-version: ['2015-04-05']
@@ -798,13 +806,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [wbq52wULsnRphOYZX8OdzA==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE5450049E"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EC0C391"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a6788a-0001-001d-05b7-5726e0000000]
+      x-ms-request-id: [d5fc643e-0001-0034-64c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -885,8 +893,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EC0C391"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=32768-36863]
       x-ms-version: ['2015-04-05']
@@ -896,13 +905,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [/3CrMrKkIapyNo/qmMiO4Q==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE54600ACB"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EC55799"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a678bd-0001-001d-30b7-5726e0000000]
+      x-ms-request-id: [d5fc644c-0001-0034-72c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -983,8 +992,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EC55799"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=36864-40959]
       x-ms-version: ['2015-04-05']
@@ -994,13 +1004,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [9FPYgHMJbixSkbnJOQTMeQ==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE5465D761"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75ECA12BC"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a678d0-0001-001d-41b7-5726e0000000]
+      x-ms-request-id: [d5fc6466-0001-0034-08c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -1081,8 +1091,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75ECA12BC"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=40960-45055]
       x-ms-version: ['2015-04-05']
@@ -1092,13 +1103,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [vXOxFbQPKML5pgOciOZ+Ig==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE546B079F"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75ECEA6C9"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a678e1-0001-001d-50b7-5726e0000000]
+      x-ms-request-id: [d5fc647b-0001-0034-1cc0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -1179,8 +1190,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75ECEA6C9"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=45056-49151]
       x-ms-version: ['2015-04-05']
@@ -1190,13 +1202,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [fxtHGczQONU00mtRqQecVA==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE5471708A"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75ED33ADA"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a678f4-0001-001d-62b7-5726e0000000]
+      x-ms-request-id: [d5fc6491-0001-0034-32c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -1277,8 +1289,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75ED33ADA"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=49152-53247]
       x-ms-version: ['2015-04-05']
@@ -1288,13 +1301,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [L1AwmzX+CZvDqjC8q0Jg6A==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE5476A0DE"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75ED81D02"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a67909-0001-001d-76b7-5726e0000000]
+      x-ms-request-id: [d5fc64af-0001-0034-4ec0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -1375,8 +1388,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75ED81D02"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=53248-57343]
       x-ms-version: ['2015-04-05']
@@ -1386,13 +1400,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [GSmfHYnRNtQSlRbXyjtJrw==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE547BD112"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:30 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EDCD80E"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a67918-0001-001d-03b7-5726e0000000]
+      x-ms-request-id: [d5fc64c8-0001-0034-64c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -1473,8 +1487,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EDCD80E"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=57344-61439]
       x-ms-version: ['2015-04-05']
@@ -1484,13 +1499,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [vzp8vU1f9mhuOlwDHXC7Xw==]
-      Date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      ETag: ['"0x8D325CE5483E7B4"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:30 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EE1932D"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a67936-0001-001d-20b7-5726e0000000]
+      x-ms-request-id: [d5fc64df-0001-0034-78c0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -1571,8 +1586,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['4096']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      If-Match: ['"0x8D337D75EE1932D"']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=61440-65535]
       x-ms-version: ['2015-04-05']
@@ -1582,48 +1598,13 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [YA2AR0GIgrPBL+N8PDx6fA==]
-      Date: ['Mon, 25 Jan 2016 21:27:30 GMT']
-      ETag: ['"0x8D325CE5489DB46"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:30 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:32 GMT']
+      ETag: ['"0x8D337D75EE64E42"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a6794a-0001-001d-34b7-5726e0000000]
-      x-ms-version: ['2015-04-05']
-    status: {code: 201, message: Created}
-- request:
-    body: !!binary |
-      e/t+WkMg1+Iye/CzwCsxjZkvGDIlZiuNuCQxczCMdZr2lTsagpABFJNWagjH6b2SaJFnV+ql540N
-      T5KLYfQj4cpfDWMy4tIstPruLiUhToYXmUFT75U+Vru6OLmEJ1RFdaQzDla0e+EFu7KfJyIm+WcU
-      ZDrywPHsHWyiTOjQmyz6O4ENGTk9GYTJcLOE2u0xa8hsYGPSnykS4Wdtbi2kR38sgMFbqsWjcssx
-      0WfV/iQM9GcEKX3CjasmE/faueeBQItx78cHoK4qNkJyUQ7N57atbMyHQ3PRzfvH1vK4UGpWR6hi
-      s7cscqpK816D2Ny+F6TlvhpQZcpx0MyaRlWxdpYzd8GPv1qvOh3Vw+uUjM/lhJd/t5LEFEjsKIVL
-      +LXs56eG9kzjAoBqtxTmnpMPazmwWnsnoldFganBdNEOg33y0pTK2bikZpXcLRHURQiO1z1ruRyS
-      +y3oDo07mQxOgUuTdCrA5rPmrfnryIPF2umLqP7qIcvk0U+trzwJ+oNUpwB+JLL/sxIONgyezQ9Q
-      ijR5W1yzUW/Zz9qdZKlDpxgkW3HEToPXNGcjWa/rbbDYTaelrN+PdVMSsM/tqHuobDZzdVkXN0FH
-      fEGyPhIhTBjiQBQM1ta8Bkkv80YhFce55btjBsZ2tCXhGPKZne8Jm07oRTA8UXcHmcfxo3pYNug=
-    headers:
-      Accept-Encoding: [identity]
-      Connection: [keep-alive]
-      Content-Length: ['512']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
-      x-ms-page-write: [update]
-      x-ms-range: [bytes=65536-66047]
-      x-ms-version: ['2015-04-05']
-    method: PUT
-    uri: https://storagename.blob.core.windows.net/utcontainer2f9c1d8c/blob2f9c1d8c?comp=page
-  response:
-    body: {string: ''}
-    headers:
-      Content-MD5: [VJ5eidpnN6ZgZifyCwtYqQ==]
-      Date: ['Mon, 25 Jan 2016 21:27:30 GMT']
-      ETag: ['"0x8D325CE5490442C"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:30 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-blob-sequence-number: ['0']
-      x-ms-request-id: [54a67961-0001-001d-4ab7-5726e0000000]
+      x-ms-request-id: [d5fc64f1-0001-0034-0ac0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -1631,8 +1612,8 @@ interactions:
     headers:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 21:27:29 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:17:33 GMT']
       x-ms-range: [bytes=None-]
       x-ms-version: ['2015-04-05']
     method: GET
@@ -2789,30 +2770,20 @@ interactions:
         EfHaY8OM+4H9IlzWTslpt+CicYxV/559lYQShqrqtiMss4Bh/UE4BATN94M5KNyxoLKmgYHIDcKb
         SvlBnfoNH6KiauUNZIg4GTbyPnVwlYZ9Bb/7Gly9rj/rihibL7FoehyPKOOs51LbLicyHPatmZ6S
         udbTZpQibmH+Tvji5FMc69D11hgQhB0+xcisJrmT4T/7Pc/nSYupHEuxMHj4wMS0rTgtftZRxnQ1
-        tXg9f6s5L7Ul7k50w++flLOF6aAGp/wrZmL8LwsF87fhp8aMERfkvOrwNHv7flpDINfiMnvws8Ar
-        MY2ZLxgyJWYrjbgkMXMwjHWa9pU7GoKQARSTVmoIx+m9kmiRZ1fqpeeNDU+Si2H0I+HKXw1jMuLS
-        LLT67i4lIU6GF5lBU++VPla7uji5hCdURXWkMw5WtHvhBbuynyciJvlnFGQ68sDx7B1sokzo0Jss
-        +juBDRk5PRmEyXCzhNrtMWvIbGBj0p8pEuFnbW4tpEd/LIDBW6rFo3LLMdFn1f4kDPRnBCl9wo2r
-        JhP32rnngUCLce/HB6CuKjZCclEOzee2rWzMh0Nz0c37x9byuFBqVkeoYrO3LHKqSvNeg9jcvhek
-        5b4aUGXKcdDMmkZVsXaWM3fBj79arzod1cPrlIzP5YSXf7eSxBRI7CiFS/i17OenhvZM4wKAarcU
-        5p6TD2s5sFp7J6JXRYGpwXTRDoN98tKUytm4pGaV3C0R1EUIjtc9a7kckvst6A6NO5kMToFLk3Qq
-        wOaz5q3568iDxdrpi6j+6iHL5NFPra88CfqDVKcAfiSy/7MSDjYMns0PUIo0eVtcs1Fv2c/anWSp
-        Q6cYJFtxxE6D1zRnI1mv622w2E2npazfj3VTErDP7ah7qGw2c3VZFzdBR3xBsj4SIUwY4kAUDNbW
-        vAZJL/NGIRXHueW7YwbGdrQl4RjymZ3vCZtO6EUwPFF3B5nH8aN6WDbo
+        tXg9f6s5L7Ul7k50w++flLOF6aAGp/wrZmL8LwsF87fhp8aMERfkvOrwNA==
     headers:
       Accept-Ranges: [bytes]
-      Content-Length: ['66048']
+      Content-Length: ['65536']
       Content-Type: [application/octet-stream]
-      Date: ['Mon, 25 Jan 2016 21:27:30 GMT']
-      ETag: ['"0x8D325CE5490442C"']
-      Last-Modified: ['Mon, 25 Jan 2016 21:27:30 GMT']
+      Date: ['Wed, 17 Feb 2016 20:17:33 GMT']
+      ETag: ['"0x8D337D75EE64E42"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:17:33 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Vary: [Origin]
       x-ms-blob-sequence-number: ['0']
       x-ms-blob-type: [PageBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
-      x-ms-request-id: [54a67971-0001-001d-5ab7-5726e0000000]
+      x-ms-request-id: [d5fc650a-0001-0034-1fc0-6950a2000000]
       x-ms-version: ['2015-04-05']
     status: {code: 200, message: OK}
 version: 1

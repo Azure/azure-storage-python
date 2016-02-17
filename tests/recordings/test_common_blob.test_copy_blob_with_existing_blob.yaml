@@ -23,9 +23,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['1024']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-date: ['Mon, 25 Jan 2016 19:09:25 GMT']
+      x-ms-date: ['Wed, 17 Feb 2016 20:08:26 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerc531490/blobc531490
@@ -33,12 +33,12 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [TSFF5HknKip3wnDvBh9w8g==]
-      Date: ['Mon, 25 Jan 2016 19:09:25 GMT']
-      ETag: ['"0x8D325BB0A90618D"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:09:25 GMT']
+      Date: ['Wed, 17 Feb 2016 20:08:26 GMT']
+      ETag: ['"0x8D337D61912A4B0"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:08:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [369a1d44-0001-0078-26a3-5797bd000000]
+      x-ms-request-id: [7bd2e8fa-0001-001d-38be-6926e0000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -47,23 +47,23 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
       x-ms-copy-source: ['https://xclientdev.blob.core.windows.net/utcontainerc531490/blobc531490']
-      x-ms-date: ['Mon, 25 Jan 2016 19:09:25 GMT']
+      x-ms-date: ['Wed, 17 Feb 2016 20:08:26 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerc531490/blob1copy
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 25 Jan 2016 19:09:25 GMT']
-      ETag: ['"0x8D325BB0A97186F"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:09:25 GMT']
+      Date: ['Wed, 17 Feb 2016 20:08:26 GMT']
+      ETag: ['"0x8D337D619195BCD"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:08:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-copy-id: [7c98fcf1-e0b8-4f1d-8b89-28122cf0b6cd]
+      x-ms-copy-id: [5ff542ba-6c9a-4eab-b632-e5bca41e4255]
       x-ms-copy-status: [success]
-      x-ms-request-id: [369a1d54-0001-0078-31a3-5797bd000000]
+      x-ms-request-id: [7bd2e917-0001-001d-53be-6926e0000000]
       x-ms-version: ['2015-04-05']
     status: {code: 202, message: Accepted}
 - request:
@@ -71,8 +71,8 @@ interactions:
     headers:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:09:25 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:08:26 GMT']
       x-ms-range: [bytes=None-]
       x-ms-version: ['2015-04-05']
     method: GET
@@ -103,19 +103,19 @@ interactions:
       Content-Length: ['1024']
       Content-MD5: [TSFF5HknKip3wnDvBh9w8g==]
       Content-Type: [application/octet-stream]
-      Date: ['Mon, 25 Jan 2016 19:09:25 GMT']
-      ETag: ['"0x8D325BB0A97186F"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:09:25 GMT']
+      Date: ['Wed, 17 Feb 2016 20:08:26 GMT']
+      ETag: ['"0x8D337D619195BCD"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:08:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-blob-type: [BlockBlob]
-      x-ms-copy-completion-time: ['Mon, 25 Jan 2016 19:09:25 GMT']
-      x-ms-copy-id: [7c98fcf1-e0b8-4f1d-8b89-28122cf0b6cd]
+      x-ms-copy-completion-time: ['Wed, 17 Feb 2016 20:08:27 GMT']
+      x-ms-copy-id: [5ff542ba-6c9a-4eab-b632-e5bca41e4255]
       x-ms-copy-progress: [1024/1024]
       x-ms-copy-source: ['https://storagename.blob.core.windows.net/utcontainerc531490/blobc531490']
       x-ms-copy-status: [success]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
-      x-ms-request-id: [369a1d60-0001-0078-3ba3-5797bd000000]
+      x-ms-request-id: [7bd2e932-0001-001d-6dbe-6926e0000000]
       x-ms-version: ['2015-04-05']
     status: {code: 200, message: OK}
 version: 1

@@ -5,20 +5,20 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:11:27 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:10:23 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer6ab21a62?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 25 Jan 2016 19:11:28 GMT']
-      ETag: ['"0x8D325BB53B40E5D"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:11:28 GMT']
+      Date: ['Wed, 17 Feb 2016 20:10:22 GMT']
+      ETag: ['"0x8D337D65E82BCB9"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:10:23 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [e0717bba-0001-0022-70a4-57913c000000]
+      x-ms-request-id: [c4da8217-0001-003f-64bf-6948d6000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -28,9 +28,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-date: ['Mon, 25 Jan 2016 19:11:27 GMT']
+      x-ms-date: ['Wed, 17 Feb 2016 20:10:23 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer6ab21a62/blob1
@@ -38,12 +38,12 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Mon, 25 Jan 2016 19:11:28 GMT']
-      ETag: ['"0x8D325BB537C83E4"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:11:27 GMT']
+      Date: ['Wed, 17 Feb 2016 20:10:22 GMT']
+      ETag: ['"0x8D337D65EA5BAA3"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:10:23 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [e0717bc9-0001-0022-7ea4-57913c000000]
+      x-ms-request-id: [c4da823b-0001-003f-06bf-6948d6000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -52,9 +52,9 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-Modified-Since: ['Mon, 25 Jan 2016 19:26:27 GMT']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:11:27 GMT']
+      If-Modified-Since: ['Wed, 17 Feb 2016 20:25:23 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:10:23 GMT']
       x-ms-lease-action: [acquire]
       x-ms-lease-duration: ['-1']
       x-ms-version: ['2015-04-05']
@@ -62,14 +62,14 @@ interactions:
     uri: https://storagename.blob.core.windows.net/utcontainer6ab21a62/blob1?comp=lease
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ConditionNotMet</Code><Message>The\
-        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:e0717bde-0001-0022-12a4-57913c000000\n\
-        Time:2016-01-25T19:11:28.3523143Z</Message></Error>"}
+        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:c4da8256-0001-003f-1fbf-6948d6000000\n\
+        Time:2016-02-17T20:10:23.8267299Z</Message></Error>"}
     headers:
       Content-Length: ['252']
       Content-Type: [application/xml]
-      Date: ['Mon, 25 Jan 2016 19:11:28 GMT']
+      Date: ['Wed, 17 Feb 2016 20:10:22 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [e0717bde-0001-0022-12a4-57913c000000]
+      x-ms-request-id: [c4da8256-0001-003f-1fbf-6948d6000000]
       x-ms-version: ['2015-04-05']
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}
