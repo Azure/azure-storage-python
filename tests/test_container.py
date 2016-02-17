@@ -679,7 +679,7 @@ class StorageContainerTest(StorageTestCase):
         self.assertNamedItemInContainer(blobs, 'blob1')
         self.assertNamedItemInContainer(blobs, 'blob2')
         self.assertEqual(blobs[0].properties.content_length, 11)
-        self.assertEqual(blobs[1].properties.content_type,
+        self.assertEqual(blobs[1].properties.content_settings.content_type,
                          'application/octet-stream')
 
     @record
@@ -699,9 +699,9 @@ class StorageContainerTest(StorageTestCase):
         self.assertIsNotNone(resp[0])
         self.assertNamedItemInContainer(resp, 'blob1')
         self.assertEqual(resp[0].properties.content_length, 11)
-        self.assertEqual(resp[0].properties.lease_duration, 'infinite')
-        self.assertEqual(resp[0].properties.lease_status, 'locked')
-        self.assertEqual(resp[0].properties.lease_state, 'leased')
+        self.assertEqual(resp[0].properties.lease.duration, 'infinite')
+        self.assertEqual(resp[0].properties.lease.status, 'locked')
+        self.assertEqual(resp[0].properties.lease.state, 'leased')
 
     @record
     def test_list_blobs_with_prefix(self):
@@ -824,20 +824,22 @@ class StorageContainerTest(StorageTestCase):
         self.assertEqual(len(blobs), 2)
         self.assertEqual(blobs[0].name, 'blob1')
         self.assertEqual(blobs[1].name, 'blob1copy')
-        self.assertEqual(blobs[1].properties.content_length, 11)
-        self.assertEqual(blobs[1].properties.content_type,
-                         'application/octet-stream')
-        self.assertEqual(blobs[1].properties.content_encoding, None)
-        self.assertEqual(blobs[1].properties.content_language, None)
-        self.assertNotEqual(blobs[1].properties.content_md5, None)
         self.assertEqual(blobs[1].properties.blob_type, self.bs.blob_type)
-        self.assertEqual(blobs[1].properties.lease_status, 'unlocked')
-        self.assertEqual(blobs[1].properties.lease_state, 'available')
-        self.assertNotEqual(blobs[1].properties.copy_id, None)
-        self.assertEqual(blobs[1].properties.copy_source, sourceblob)
-        self.assertEqual(blobs[1].properties.copy_status, 'success')
-        self.assertEqual(blobs[1].properties.copy_progress, '11/11')
-        self.assertNotEqual(blobs[1].properties.copy_completion_time, None)
+        self.assertEqual(blobs[1].properties.content_length, 11)
+        self.assertEqual(blobs[1].properties.content_settings.content_type,
+                         'application/octet-stream')
+        self.assertEqual(blobs[1].properties.content_settings.cache_control, None)
+        self.assertEqual(blobs[1].properties.content_settings.content_encoding, None)
+        self.assertEqual(blobs[1].properties.content_settings.content_language, None)
+        self.assertEqual(blobs[1].properties.content_settings.content_disposition, None)
+        self.assertNotEqual(blobs[1].properties.content_settings.content_md5, None)
+        self.assertEqual(blobs[1].properties.lease.status, 'unlocked')
+        self.assertEqual(blobs[1].properties.lease.state, 'available')
+        self.assertNotEqual(blobs[1].properties.copy.id, None)
+        self.assertEqual(blobs[1].properties.copy.source, sourceblob)
+        self.assertEqual(blobs[1].properties.copy.status, 'success')
+        self.assertEqual(blobs[1].properties.copy.progress, '11/11')
+        self.assertNotEqual(blobs[1].properties.copy.completion_time, None)
 
     @record
     def test_list_blobs_with_delimiter(self):
