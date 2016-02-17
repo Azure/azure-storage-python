@@ -46,7 +46,7 @@ class QueueSasSamples():
 
     def queue_sas(self):
         queue_name = self._create_queue()
-        self.service.put_message(queue_name, 'message1')
+        self.service.put_message(queue_name, u'message1')
 
         # Access only to the messages in the given queue
         # Process permissions to access messages
@@ -125,7 +125,7 @@ class QueueSasSamples():
 
     def sas_with_signed_identifiers(self):
         queue_name = self._create_queue()
-        self.service.put_message(queue_name, 'message1')
+        self.service.put_message(queue_name, u'message1')
 
         # Set access policy on queue
         access_policy = AccessPolicy(permission=QueuePermissions.PROCESS,

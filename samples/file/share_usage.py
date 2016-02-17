@@ -39,8 +39,10 @@ class ShareSamples():
         self.share_stats()
         self.share_exists()
 
-        self.list_shares()   
-        self.service_properties()
+        self.list_shares()
+
+        # This method contains sleeps, so don't run by default
+        # self.service_properties()
 
     def _get_share_reference(self, prefix='share'):
         return '{}{}'.format(prefix, str(uuid.uuid4()).replace('-', ''))

@@ -5,20 +5,20 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:05:33 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:04:26 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerc5151c0e?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 25 Jan 2016 19:05:33 GMT']
-      ETag: ['"0x8D325BA8085F90C"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:05:33 GMT']
+      Date: ['Wed, 17 Feb 2016 20:04:27 GMT']
+      ETag: ['"0x8D337D58A735295"']
+      Last-Modified: ['Wed, 17 Feb 2016 20:04:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [58229a88-0001-0015-01a3-573d93000000]
+      x-ms-request-id: [fb3fac23-0001-002d-10be-697cca000000]
       x-ms-version: ['2015-04-05']
     status: {code: 201, message: Created}
 - request:
@@ -27,66 +27,21 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:05:33 GMT']
+      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-date: ['Wed, 17 Feb 2016 20:04:27 GMT']
       x-ms-version: ['2015-04-05']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerc5151c0e?restype=container
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The\
-        \ specified container already exists.\nRequestId:58229aa1-0001-0015-1aa3-573d93000000\n\
-        Time:2016-01-25T19:05:34.0210458Z</Message></Error>"}
+        \ specified container already exists.\nRequestId:fb3facb6-0001-002d-1dbe-697cca000000\n\
+        Time:2016-02-17T20:04:28.0217278Z</Message></Error>"}
     headers:
       Content-Length: ['230']
       Content-Type: [application/xml]
-      Date: ['Mon, 25 Jan 2016 19:05:33 GMT']
+      Date: ['Wed, 17 Feb 2016 20:04:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [58229aa1-0001-0015-1aa3-573d93000000]
-      x-ms-version: ['2015-04-05']
-    status: {code: 409, message: The specified container already exists.}
-- request:
-    body: null
-    headers:
-      Accept-Encoding: [identity]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:30:12 GMT']
-      x-ms-version: ['2015-04-05']
-    method: PUT
-    uri: https://storagename.blob.core.windows.net/containerc5151c0e?restype=container
-  response:
-    body: {string: ''}
-    headers:
-      Date: ['Mon, 25 Jan 2016 19:30:12 GMT']
-      ETag: ['"0x8D325BDF207C863"']
-      Last-Modified: ['Mon, 25 Jan 2016 19:30:12 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [7d223190-0001-0024-39a6-576644000000]
-      x-ms-version: ['2015-04-05']
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Accept-Encoding: [identity]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.20.2 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Mon, 25 Jan 2016 19:30:12 GMT']
-      x-ms-version: ['2015-04-05']
-    method: PUT
-    uri: https://storagename.blob.core.windows.net/containerc5151c0e?restype=container
-  response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The\
-        \ specified container already exists.\nRequestId:7d22319e-0001-0024-45a6-576644000000\n\
-        Time:2016-01-25T19:30:12.9504925Z</Message></Error>"}
-    headers:
-      Content-Length: ['230']
-      Content-Type: [application/xml]
-      Date: ['Mon, 25 Jan 2016 19:30:12 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [7d22319e-0001-0024-45a6-576644000000]
+      x-ms-request-id: [fb3facb6-0001-002d-1dbe-697cca000000]
       x-ms-version: ['2015-04-05']
     status: {code: 409, message: The specified container already exists.}
 version: 1

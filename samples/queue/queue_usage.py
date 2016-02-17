@@ -50,7 +50,9 @@ class QueueSamples():
 
         self.list_queues()
         self.alternative_encoding()
-        self.service_properties()
+
+        # This method contains sleeps, so don't run by default
+        # self.service_properties()
 
     def _get_queue_reference(self, prefix='queue'):
         queue_name = '{}{}'.format(prefix, str(uuid.uuid4()).replace('-', ''))
@@ -140,24 +142,24 @@ class QueueSamples():
 
         # Basic
         # immediately visibile and expires in 7 days
-        self.service.put_message(queue_name, 'message1')
+        self.service.put_message(queue_name, u'message1')
 
         # Visbility timeout
         # visible in 5 seconds and expires in 7 days
-        self.service.put_message(queue_name, 'message2', visibility_timeout=5)
+        self.service.put_message(queue_name, u'message2', visibility_timeout=5)
 
         # Time to live
         # immediately visibile and expires in 60 seconds
-        self.service.put_message(queue_name, 'message3', time_to_live=60)
+        self.service.put_message(queue_name, u'message3', time_to_live=60)
 
         self.service.delete_queue(queue_name)
     
     def get_messages(self):
         queue_name = self._create_queue()
-        self.service.put_message(queue_name, 'message1')
-        self.service.put_message(queue_name, 'message2')
-        self.service.put_message(queue_name, 'message3')
-        self.service.put_message(queue_name, 'message4')
+        self.service.put_message(queue_name, u'message1')
+        self.service.put_message(queue_name, u'message2')
+        self.service.put_message(queue_name, u'message3')
+        self.service.put_message(queue_name, u'message4')
 
         # Azure queues are not strictly ordered so the below messages returned are estimates
         # Ex: We may return message2 for the first sample and then message1 and message3 for the second
@@ -182,8 +184,8 @@ class QueueSamples():
     
     def peek_messages(self):
         queue_name = self._create_queue()
-        self.service.put_message(queue_name, 'message1')
-        self.service.put_message(queue_name, 'message2')
+        self.service.put_message(queue_name, u'message1')
+        self.service.put_message(queue_name, u'message2')
 
         # Azure queues are not strictly ordered so the below messages returned are estimates
         # Ex: We may return message2 for the first sample and then message1 and message2 for the second
@@ -204,19 +206,19 @@ class QueueSamples():
     
     def clear_messages(self):
         queue_name = self._create_queue()
-        self.service.put_message(queue_name, 'message1')
-        self.service.put_message(queue_name, 'message2')
+        self.service.put_message(queue_name, u'message1')
+        self.service.put_message(queue_name, u'message2')
 
         # Basic
         self.service.clear_messages(queue_name)
-        messages = self.service.peek_messages(queue_name) # messages = {}
+        messages = self.service.peek_messages(queue_name) # messages = []
 
         self.service.delete_queue(queue_name)
     
     def delete_message(self):
         queue_name = self._create_queue()
-        self.service.put_message(queue_name, 'message1')
-        self.service.put_message(queue_name, 'message2')
+        self.service.put_message(queue_name, u'message1')
+        self.service.put_message(queue_name, u'message2')
         messages = self.service.get_messages(queue_name)
 
         # Basic
@@ -231,7 +233,7 @@ class QueueSamples():
     
     def update_message(self):
         queue_name = self._create_queue()
-        self.service.put_message(queue_name, 'message1')
+        self.service.put_message(queue_name, u'message1')
         messages = self.service.get_messages(queue_name)
 
         # Basic
@@ -249,7 +251,7 @@ class QueueSamples():
                                messages[0].id,
                                message.pop_receipt,
                                30,
-                               content='new text')       
+                               content=u'new text')       
 
         self.service.delete_queue(queue_name)
 
@@ -270,12 +272,12 @@ class QueueSamples():
         # Will return in alphabetical order. 
         queues = list(self.service.list_queues(num_results=2))
         for queue in queues:
-            print(queue.name) # queue1, queue2
+            print(queue.name) # queue1, queue2, or whichever 2 queues are alphabetically first in your account
 
         # Prefix
         queues = list(self.service.list_queues(prefix='queue'))
         for queue in queues:
-            print(queue.name) # queue1, queue2
+            print(queue.name) # queue1, queue2, and any other queues in your account with this prefix
 
         # Metadata
         queues = list(self.service.list_queues(prefix='queue', include_metadata=True))
