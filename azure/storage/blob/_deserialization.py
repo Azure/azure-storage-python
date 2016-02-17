@@ -198,24 +198,26 @@ def _convert_xml_to_containers(response):
     return containers
 
 LIST_BLOBS_ATTRIBUTE_MAP = {
-    'Last-Modified': ('last_modified', parser.parse),
-    'Etag': ('etag', _to_str),
-    'Content-Length': ('content_length', _int_to_str),
-    'Content-Type': ('content_type', _to_str),
-    'Content-Encoding': ('content_encoding', _to_str),
-    'Content-Language': ('content_language', _to_str),
-    'Content-MD5': ('content_md5', _to_str),
-    'x-ms-blob-sequence-number': ('sequence_number', _int_to_str),
-    'BlobType': ('blob_type', _to_str),
-    'LeaseStatus': ('lease_status', _to_str),
-    'LeaseState': ('lease_state', _to_str),
-    'LeaseDuration': ('lease_duration', _to_str),
-    'CopyId': ('copy_id', _to_str),
-    'CopySource': ('copy_source', _to_str),
-    'CopyStatus': ('copy_status', _to_str),
-    'CopyProgress': ('copy_progress', _to_str),
-    'CopyCompletionTime': ('copy_completion_time', _to_str),
-    'CopyStatusDescription': ('copy_status_description', _to_str),
+    'Last-Modified': (None, 'last_modified', parser.parse),
+    'Etag': (None, 'etag', _to_str),
+    'x-ms-blob-sequence-number': (None, 'sequence_number', _int_to_str),
+    'BlobType': (None, 'blob_type', _to_str),
+    'Content-Length': (None, 'content_length', _int_to_str),
+    'Content-Type': ('content_settings', 'content_type', _to_str),
+    'Content-Encoding': ('content_settings', 'content_encoding', _to_str),
+    'Content-Disposition': ('content_settings', 'content_disposition', _to_str),
+    'Content-Language': ('content_settings', 'content_language', _to_str),
+    'Content-MD5': ('content_settings', 'content_md5', _to_str),
+    'Cache-Control': ('content_settings', 'cache_control', _to_str),
+    'LeaseStatus': ('lease', 'status', _to_str),
+    'LeaseState': ('lease', 'state', _to_str),
+    'LeaseDuration': ('lease', 'duration', _to_str),
+    'CopyId': ('copy', 'id', _to_str),
+    'CopySource': ('copy', 'source', _to_str),
+    'CopyStatus': ('copy', 'status', _to_str),
+    'CopyProgress': ('copy', 'progress', _to_str),
+    'CopyCompletionTime': ('copy', 'completion_time', _to_str),
+    'CopyStatusDescription': ('copy', 'status_description', _to_str),
 }
 
 def _convert_xml_to_blob_list(response):
@@ -288,9 +290,14 @@ def _convert_xml_to_blob_list(response):
         if properties_element is not None:
             for property_element in properties_element:
                 info = LIST_BLOBS_ATTRIBUTE_MAP.get(property_element.tag)
-                if not info:
-                    info = property_element.tag, str
-                setattr(blob.properties, info[0], info[1](property_element.text))
+                if info is None:
+                    setattr(blob.properties, property_element.tag, _to_str(property_element.text))                   
+                elif info[0] is None:
+                    setattr(blob.properties, info[1], info[2](property_element.text))
+                else:
+                    attr = getattr(blob.properties, info[0])
+                    setattr(attr, info[1], info[2](property_element.text))
+
 
         # Metadata
         metadata_root_element = blob_element.find('Metadata')
