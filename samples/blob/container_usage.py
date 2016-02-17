@@ -18,6 +18,7 @@ import uuid
 from azure.storage import (
     Metrics,
     CorsRule,
+    Logging,
 )
 from azure.storage.blob import (
     Include,
@@ -43,8 +44,10 @@ class ContainerSamples():
         self.lease_container()
         self.list_blobs()
 
-        self.list_containers()   
-        self.service_properties()
+        self.list_containers()
+
+        # This method contains sleeps, so don't run by default
+        # self.service_properties()
 
     def _get_container_reference(self, prefix='container'):
         return '{}{}'.format(prefix, str(uuid.uuid4()).replace('-', ''))
@@ -282,13 +285,13 @@ class ContainerSamples():
         containers = list(self.service.list_containers(num_results=2))
         print('Num Results List:')
         for container in containers:
-            print(container.name) # container1, container2
+            print(container.name) # container1, container2, or whichever 2 queues are alphabetically first in your account
 
         # Prefix
         containers = list(self.service.list_containers(prefix='container'))
         print('Prefix List:')
         for container in containers:
-            print(container.name) # container1, container2
+            print(container.name) # container1, container2,  and any other containers in your account with this prefix
 
         # Metadata
         containers = list(self.service.list_containers(prefix='container', include_metadata=True))
@@ -301,7 +304,8 @@ class ContainerSamples():
 
     def service_properties(self):
         # Basic
-        self.service.set_blob_service_properties(hour_metrics=Metrics(enabled=True, include_apis=True),
+        self.service.set_blob_service_properties(logging=Logging(delete=True),
+                                                 hour_metrics=Metrics(enabled=True, include_apis=True),
                                                  minute_metrics=Metrics(enabled=True, include_apis=False),
                                                  cors=[CorsRule(allowed_origins=['*'], allowed_methods=['GET'])])
 

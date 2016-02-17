@@ -59,7 +59,9 @@ class TableSamples():
         self.delete_entity()     
 
         self.list_tables()  
-        self.service_properties()
+
+        # This method contains sleeps, so don't run by default
+        # self.service_properties()
 
     def _get_table_reference(self, prefix='table'):
         table_name = '{}{}'.format(prefix, str(uuid.uuid4()).replace('-', ''))
@@ -161,7 +163,7 @@ class TableSamples():
         def resolver(pk, rk, name, value, type):
             if name == 'birthday':
                 return EdmType.DATETIME
-        entity = list(self.service.query_entities(table_name, 
+        queried_entities = list(self.service.query_entities(table_name, 
                                              accept=TablePayloadFormat.JSON_NO_METADATA, 
                                              property_resolver=resolver)) # entityentities w/ all properties, missing type resolved client side
         queried_entities[0].birthday # (datetime)
@@ -450,7 +452,7 @@ class TableSamples():
         # Will return in alphabetical order. 
         tables = list(self.service.list_tables(num_results=2))
         for table in tables:
-            print(table.name) # secondtable, table1
+            print(table.name) # secondtable, table1, or whichever 2 queues are alphabetically first in your account
 
         self.service.delete_table(table_name1)
         self.service.delete_table(table_name2)
