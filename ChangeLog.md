@@ -1,10 +1,11 @@
 # Change Log
 
-> See [BreakingChanges](https://github.com/Azure/azure-sdk-for-python/tree/dev/azure-storage/BreakingChanges.md) for a detailed list of API breaks.
+> See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
 ## Version 0.30.0:
 
 ### All:
+- Support for 2015-04-05 REST version. Please see our REST API documentation and blogs for information about the related added features.
 - UserAgent string has changed to conform to the Azure Storage standard.
 - Added optional timeout parameter to all APIs.
 - Empty headers are signed.

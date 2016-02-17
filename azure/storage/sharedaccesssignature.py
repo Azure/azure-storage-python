@@ -483,7 +483,7 @@ class SharedAccessSignature(object):
         :param Services services:
             Specifies the services accessible with the account SAS. You can 
             combine values to provide access to more than one service. 
-        :param ResourceTypes resource_type:
+        :param ResourceTypes resource_types:
             Specifies the resource types that are accessible with the account 
             SAS. You can combine values to provide access to more than one 
             resource type. 
