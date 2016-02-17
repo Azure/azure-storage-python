@@ -1,6 +1,6 @@
 # Breaking Changes
 
-> See the [Change Log](https://github.com/Azure/azure-sdk-for-python/tree/dev/azure-storage/ChangeLog.md) for a summary of storage library changes.
+> See the [Change Log](ChangeLog.md) for a summary of storage library changes.
 
 ## Version 0.30.0
 
