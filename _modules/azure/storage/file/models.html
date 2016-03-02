@@ -38,7 +38,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.file.models</h1><div class="highlight"><pre>
-<span class="c1">#-------------------------------------------------------------------------</span>
+<span></span><span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -53,7 +53,7 @@
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#--------------------------------------------------------------------------</span>
 <span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="n">_to_str</span>
-<div class="viewcode-block" id="Share"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.Share">[docs]</a><span class="k">class</span> <span class="nc">Share</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="Share"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.Share">[docs]</a><span class="k">class</span> <span class="nc">Share</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    File share class.</span>
@@ -73,10 +73,10 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">props</span> <span class="ow">or</span> <span class="n">ShareProperties</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span></div>
 
 
-<div class="viewcode-block" id="ShareProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.ShareProperties">[docs]</a><span class="k">class</span> <span class="nc">ShareProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="ShareProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.ShareProperties">[docs]</a><span class="k">class</span> <span class="nc">ShareProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    File share&#39;s properties class.</span>
@@ -93,9 +93,9 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">quota</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quota</span> <span class="o">=</span> <span class="bp">None</span></div>
 
-<div class="viewcode-block" id="Directory"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.Directory">[docs]</a><span class="k">class</span> <span class="nc">Directory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="Directory"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.Directory">[docs]</a><span class="k">class</span> <span class="nc">Directory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Directory class.</span>
@@ -115,9 +115,9 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">props</span> <span class="ow">or</span> <span class="n">DirectoryProperties</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span></div>
 
-<div class="viewcode-block" id="DirectoryProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.DirectoryProperties">[docs]</a><span class="k">class</span> <span class="nc">DirectoryProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="DirectoryProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.DirectoryProperties">[docs]</a><span class="k">class</span> <span class="nc">DirectoryProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    File directory&#39;s properties class.</span>
@@ -131,9 +131,9 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span></div>
 
-<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    File class.</span>
@@ -157,10 +157,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">props</span> <span class="ow">or</span> <span class="n">FileProperties</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span></div>
 
 
-<div class="viewcode-block" id="FileProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FileProperties">[docs]</a><span class="k">class</span> <span class="nc">FileProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="FileProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FileProperties">[docs]</a><span class="k">class</span> <span class="nc">FileProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    File Properties.</span>
@@ -183,10 +183,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">content_length</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">content_settings</span> <span class="o">=</span> <span class="n">ContentSettings</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">copy</span> <span class="o">=</span> <span class="n">CopyProperties</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copy</span> <span class="o">=</span> <span class="n">CopyProperties</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="ContentSettings"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.ContentSettings">[docs]</a><span class="k">class</span> <span class="nc">ContentSettings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="ContentSettings"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.ContentSettings">[docs]</a><span class="k">class</span> <span class="nc">ContentSettings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Used to store the content settings of a file.</span>
@@ -237,7 +237,7 @@
                 <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_encoding</span><span class="p">)),</span>
             <span class="p">(</span><span class="s1">&#39;x-ms-content-language&#39;</span><span class="p">,</span>
                 <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_language</span><span class="p">)),</span>
-        <span class="p">]</span>
+        <span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="CopyProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.CopyProperties">[docs]</a><span class="k">class</span> <span class="nc">CopyProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -289,7 +289,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">status_description</span> <span class="o">=</span> <span class="bp">None</span></div>
 
 
-<div class="viewcode-block" id="FileRange"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FileRange">[docs]</a><span class="k">class</span> <span class="nc">FileRange</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="FileRange"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FileRange">[docs]</a><span class="k">class</span> <span class="nc">FileRange</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    File Range.</span>
@@ -302,10 +302,10 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">end</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">end</span></div>
 
 
-<div class="viewcode-block" id="FilePermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FilePermissions">[docs]</a><span class="k">class</span> <span class="nc">FilePermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="FilePermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.FilePermissions">[docs]</a><span class="k">class</span> <span class="nc">FilePermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    FilePermissions class to be used with </span>
@@ -356,7 +356,7 @@
         <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;r&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;c&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
-                <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
 
 
 <span class="n">FilePermissions</span><span class="o">.</span><span class="n">CREATE</span> <span class="o">=</span> <span class="n">FilePermissions</span><span class="p">(</span><span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -365,7 +365,7 @@
 <span class="n">FilePermissions</span><span class="o">.</span><span class="n">WRITE</span> <span class="o">=</span> <span class="n">FilePermissions</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="SharePermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.SharePermissions">[docs]</a><span class="k">class</span> <span class="nc">SharePermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="SharePermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.file.models.html#azure.storage.file.models.SharePermissions">[docs]</a><span class="k">class</span> <span class="nc">SharePermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    SharePermissions class to be used with `azure.storage.file.FileService.generate_share_shared_access_signature`</span>
@@ -426,7 +426,7 @@
         <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;r&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> 
-                <span class="p">(</span><span class="s1">&#39;l&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                <span class="p">(</span><span class="s1">&#39;l&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
 
 <span class="n">SharePermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">SharePermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="n">SharePermissions</span><span class="o">.</span><span class="n">LIST</span> <span class="o">=</span> <span class="n">SharePermissions</span><span class="p">(</span><span class="nb">list</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -468,7 +468,7 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
     </div>

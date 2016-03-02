@@ -52,7 +52,7 @@ supported within a single transaction. The batch can include at most 100
 entities, and its total payload may be no more than 4 MB in size.</p>
 <dl class="method">
 <dt id="azure.storage.table.tablebatch.TableBatch.delete_entity">
-<code class="descname">delete_entity</code><span class="sig-paren">(</span><em>partition_key</em>, <em>row_key</em>, <em>if_match='*'</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.delete_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_entity</code><span class="sig-paren">(</span><em>partition_key</em>, <em>row_key</em>, <em>if_match='*'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tablebatch.html#TableBatch.delete_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.delete_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a delete entity operation to the batch. See 
 <a class="reference internal" href="azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.delete_entity" title="azure.storage.table.tableservice.TableService.delete_entity"><code class="xref py py-func docutils literal"><span class="pre">delete_entity()</span></code></a> for more 
 information on deletes.</p>
@@ -80,7 +80,7 @@ an unconditional delete, set If-Match to the wildcard character (*).</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tablebatch.TableBatch.insert_entity">
-<code class="descname">insert_entity</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.insert_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">insert_entity</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tablebatch.html#TableBatch.insert_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.insert_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds an insert entity operation to the batch. See 
 <a class="reference internal" href="azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.insert_entity" title="azure.storage.table.tableservice.TableService.insert_entity"><code class="xref py py-func docutils literal"><span class="pre">insert_entity()</span></code></a> for more 
 information on inserts.</p>
@@ -98,7 +98,7 @@ Must contain a PartitionKey and a RowKey.</td>
 
 <dl class="method">
 <dt id="azure.storage.table.tablebatch.TableBatch.insert_or_merge_entity">
-<code class="descname">insert_or_merge_entity</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.insert_or_merge_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">insert_or_merge_entity</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tablebatch.html#TableBatch.insert_or_merge_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.insert_or_merge_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds an insert or merge entity operation to the batch. See 
 <a class="reference internal" href="azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.insert_or_merge_entity" title="azure.storage.table.tableservice.TableService.insert_or_merge_entity"><code class="xref py py-func docutils literal"><span class="pre">insert_or_merge_entity()</span></code></a> for more 
 information on insert or merge operations.</p>
@@ -116,7 +116,7 @@ Must contain a PartitionKey and a RowKey.</td>
 
 <dl class="method">
 <dt id="azure.storage.table.tablebatch.TableBatch.insert_or_replace_entity">
-<code class="descname">insert_or_replace_entity</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.insert_or_replace_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">insert_or_replace_entity</code><span class="sig-paren">(</span><em>entity</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tablebatch.html#TableBatch.insert_or_replace_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.insert_or_replace_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds an insert or replace entity operation to the batch. See 
 <a class="reference internal" href="azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.insert_or_replace_entity" title="azure.storage.table.tableservice.TableService.insert_or_replace_entity"><code class="xref py py-func docutils literal"><span class="pre">insert_or_replace_entity()</span></code></a> for more 
 information on insert or replace operations.</p>
@@ -134,7 +134,7 @@ Must contain a PartitionKey and a RowKey.</td>
 
 <dl class="method">
 <dt id="azure.storage.table.tablebatch.TableBatch.merge_entity">
-<code class="descname">merge_entity</code><span class="sig-paren">(</span><em>entity</em>, <em>if_match='*'</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.merge_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">merge_entity</code><span class="sig-paren">(</span><em>entity</em>, <em>if_match='*'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tablebatch.html#TableBatch.merge_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.merge_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a merge entity operation to the batch. See 
 <a class="reference internal" href="azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.merge_entity" title="azure.storage.table.tableservice.TableService.merge_entity"><code class="xref py py-func docutils literal"><span class="pre">merge_entity()</span></code></a> for more 
 information on merges.</p>
@@ -162,7 +162,7 @@ an unconditional merge, set If-Match to the wildcard character (*).</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tablebatch.TableBatch.update_entity">
-<code class="descname">update_entity</code><span class="sig-paren">(</span><em>entity</em>, <em>if_match='*'</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.update_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update_entity</code><span class="sig-paren">(</span><em>entity</em>, <em>if_match='*'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tablebatch.html#TableBatch.update_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tablebatch.TableBatch.update_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds an update entity operation to the batch. See 
 <a class="reference internal" href="azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.update_entity" title="azure.storage.table.tableservice.TableService.update_entity"><code class="xref py py-func docutils literal"><span class="pre">update_entity()</span></code></a> for more 
 information on updates.</p>
@@ -240,7 +240,7 @@ an unconditional update, set If-Match to the wildcard character (*).</li>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |
