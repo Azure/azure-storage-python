@@ -24,53 +24,52 @@ please visit https://github.com/Azure/azure-sdk-for-python
    
 Documentation:
 --------------
-* `Blob <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-blob-storage/>`__ -- (:doc:`API <ref/azure.storage.blob>`)
-* `Queue <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-queue-storage/>`__ -- (:doc:`API <ref/azure.storage.queue>`)
-* `Table <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-table-storage/>`__ -- (:doc:`API <ref/azure.storage.table>`)
-* `File <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-file-storage/>`__ -- (:doc:`API <ref/azure.storage.file>`)
-* :ref:`All Documentation <modindex>`
+* `Blob Getting Started Doc <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-blob-storage/>`__ -- (:doc:`API <ref/azure.storage.blob>`)
+* `Queue Getting Started Doc <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-queue-storage/>`__ -- (:doc:`API <ref/azure.storage.queue>`)
+* `Table Getting Started Doc <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-table-storage/>`__ -- (:doc:`API <ref/azure.storage.table>`)
+* `File Getting Started Doc <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-file-storage/>`__ -- (:doc:`API <ref/azure.storage.file>`)
+* :ref:`Reference Documentation - All Services<modindex>`
 
 
 Features:
 ---------
 
--  Blobs
+-  Blob
 
-   -  create, list, and delete containers, work with container metadata
-      and permissions, list blobs in container
-   -  create block and page blobs (from a stream, a file, or a string),
-      work with blob blocks and pages, delete blobs
-   -  work with blob properties, metadata, leases, snapshot a blob
+   -  Create/Read/Update/Delete Containers
+   -  Create/Read/Update/Delete Blobs
+   -  Advanced Blob Operations
 
--  Queues
+-  Queue
 
-   -  create, list, and delete queues, and work with queue metadata
-   -  create, get, peek, update, delete messages
+   -  Create/Delete Queues
+   -  Insert/Peek Queue Messages
+   -  Advanced Queue Operations
 
--  Tables
+-  Table
 
-   -  create and delete tables
-   -  create, query, insert, update, merge, and delete entities
+   -  Create/Read/Update/Delete Tables
+   -  Create/Read/Update/Delete Entities
+   -  Batch operations
+   -  Advanced Table Operations
 
 -  Files
 
-   -  create, list, and delete shares, work with share metadata, 
-      list directories and files in share
-   -  create and delete directories, work with directory properties
-      and metdata
-   -  create files (from a stream, a local file, or a string)
-   -  work with file and directory properties and metadata
+   -  Create/Update/Delete Shares
+   -  Create/Update/Delete Directories
+   -  Create/Read/Update/Delete Files
+   -  Advanced File Operations
 
 
 System Requirements:
 --------------------
 
-The supported Python versions are 2.7.x, 3.3.x, and 3.4.x
+The supported Python versions are 2.7.x, 3.3.x, 3.4.x, and 3.5.x.
 To download Python, please visit
 https://www.python.org/download/
 
 
-We recommend Python Tools for Visual Studio as a development environment for developing your applications.  Please visit http://aka.ms/python for more information.
+We recommend Python Tools for Visual Studio as a development environment for developing your applications. Please visit http://aka.ms/python for more information.
 
 
 Need Help?:
@@ -85,12 +84,12 @@ Contributing:
 Contribute Code or Provide Feedback:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you would like to become an active contributor to this project please
+If you would like to become an active contributor to this project, please
 follow the instructions provided in `Microsoft Azure Projects
 Contribution
 Guidelines <http://windowsazure.github.com/guidelines.html>`__.
 
-If you encounter any bugs with the library please file an issue in the
+If you encounter any bugs with the library, please file an issue in the
 `Issues <https://github.com/Azure/azure-storage-python/issues>`__
 section of the project.
 

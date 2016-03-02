@@ -38,7 +38,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.storageclient</h1><div class="highlight"><pre>
-<span class="c1">#-------------------------------------------------------------------------</span>
+<span></span><span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -75,7 +75,7 @@
     <span class="n">_ERROR_STORAGE_MISSING_INFO</span><span class="p">,</span>
 <span class="p">)</span>
 
-<div class="viewcode-block" id="StorageClient"><a class="viewcode-back" href="../../../ref/azure.storage.storageclient.html#azure.storage.storageclient.StorageClient">[docs]</a><span class="k">class</span> <span class="nc">StorageClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="StorageClient"><a class="viewcode-back" href="../../../ref/azure.storage.storageclient.html#azure.storage.storageclient.StorageClient">[docs]</a><span class="k">class</span> <span class="nc">StorageClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This is the base class for service objects. Service objects are used to do </span>
@@ -107,7 +107,7 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request_worker</span>
 
-    <span class="k">def</span> <span class="nf">with_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">filter</span><span class="p">):</span>
+<div class="viewcode-block" id="StorageClient.with_filter"><a class="viewcode-back" href="../../../ref/azure.storage.storageclient.html#azure.storage.storageclient.StorageClient.with_filter">[docs]</a>    <span class="k">def</span> <span class="nf">with_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">filter</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a new service which will process requests with the specified</span>
 <span class="sd">        filter. Filtering operations can include logging, automatic retrying,</span>
@@ -127,9 +127,9 @@
             <span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">old_filter</span><span class="p">)</span>
 
         <span class="n">res</span><span class="o">.</span><span class="n">_filter</span> <span class="o">=</span> <span class="n">new_filter</span>
-        <span class="k">return</span> <span class="n">res</span>
+        <span class="k">return</span> <span class="n">res</span></div>
 
-    <span class="k">def</span> <span class="nf">set_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="StorageClient.set_proxy"><a class="viewcode-back" href="../../../ref/azure.storage.storageclient.html#azure.storage.storageclient.StorageClient.set_proxy">[docs]</a>    <span class="k">def</span> <span class="nf">set_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets the proxy server host and port for the HTTP CONNECT Tunnelling.</span>
 
@@ -138,7 +138,7 @@
 <span class="sd">        :param str user: User for proxy authorization.</span>
 <span class="sd">        :param str password: Password for proxy authorization.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">set_proxy</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">set_proxy</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_get_host</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary_endpoint</span>
@@ -176,7 +176,7 @@
                 <span class="c1"># TODO: In the future we will log the trace</span>
                 <span class="k">raise</span> <span class="n">AzureException</span><span class="p">(</span><span class="s1">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-        <span class="k">return</span> <span class="n">resp</span>
+        <span class="k">return</span> <span class="n">resp</span></div>
 </pre></div>
 
           </div>
@@ -213,7 +213,7 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
     </div>
