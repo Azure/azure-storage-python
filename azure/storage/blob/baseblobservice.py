@@ -806,8 +806,7 @@ class BaseBlobService(StorageClient):
         lease_break_period, proposed_lease_id, if_modified_since,
         if_unmodified_since, timeout):
         '''
-        Establishes and manages a lock on a container for delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Establishes and manages a lease on a container.
         The Lease Container operation can be called in one of five modes
             Acquire, to request a new lease
             Renew, to renew an existing lease
@@ -888,8 +887,9 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_duration=-1, proposed_lease_id=None,
         if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
-        Acquires a lock on a container for delete operations.
-        The lock duration can be 15 to 60 seconds or infinite.
+        Requests a new lease. If the container does not have an active lease,
+        the Blob service creates a lease on the container and returns a new
+        lease ID.
 
         :param str container_name:
             Name of existing container.
@@ -938,9 +938,12 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_id, if_modified_since=None,
         if_unmodified_since=None, timeout=None):
         '''
-        Renews a lock on a container for delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
-
+        Renews the lease. The lease can be renewed if the lease ID specified
+        matches that associated with the container. Note that
+        the lease may be renewed even if it has expired as long as the container
+        has not been leased again since the expiration of that lease. When you
+        renew a lease, the lease duration clock resets.
+        
         :param str container_name:
             Name of existing container.
         :param str lease_id:
@@ -979,10 +982,9 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_id, if_modified_since=None,
         if_unmodified_since=None, timeout=None):
         '''
-        Releases a lock on a container for delete operations, to free the
-        lease if it is no longer needed so that another client may
-        immediately acquire a lease against the container. The lock duration
-        can be 15 to 60 seconds, or can be infinite.
+        Release the lease. The lease may be released if the lease_id specified matches
+        that associated with the container. Releasing the lease allows another client
+        to immediately acquire the lease for the container as soon as the release is complete. 
 
         :param str container_name:
             Name of existing container.
@@ -1019,10 +1021,13 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_break_period=None,
         if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
-        Breaks a lock on a container for delete operations.
-        Use to end the lease but ensure that another client cannot
-        acquire a new lease until the current lease period has expired.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Break the lease, if the container has an active lease. Once a lease is
+        broken, it cannot be renewed. Any authorized request can break the lease;
+        the request is not required to specify a matching lease ID. When a lease
+        is broken, the lease break period is allowed to elapse, during which time
+        no lease operation except break and release can be performed on the container.
+        When a lease is successfully broken, the response indicates the interval
+        in seconds until a new lease can be acquired. 
 
         :param str container_name:
             Name of existing container.
@@ -1071,8 +1076,8 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_id, proposed_lease_id,
         if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
-        Changes the lease ID for a lock on a container for delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Change the lease ID of an active lease. A change must include the current
+        lease ID and a new lease ID.
 
         :param str container_name:
             Name of existing container.
@@ -2128,8 +2133,15 @@ class BaseBlobService(StorageClient):
                          proposed_lease_id, if_modified_since,
                          if_unmodified_since, if_match, if_none_match, timeout=None):
         '''
-        Establishes and manages a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Establishes and manages a lease on a blob for write and delete operations.
+        The Lease Blob operation can be called in one of five modes:
+            Acquire, to request a new lease.
+            Renew, to renew an existing lease.
+            Change, to change the ID of an existing lease.
+            Release, to free the lease if it is no longer needed so that another
+                client may immediately acquire a lease against the blob.
+            Break, to end the lease but ensure that another client cannot acquire
+                a new lease until the current lease period has expired.
 
         :param str container_name:
             Name of existing container.
@@ -2218,9 +2230,9 @@ class BaseBlobService(StorageClient):
                            if_match=None,
                            if_none_match=None, timeout=None):
         '''
-        Acquires a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
-
+        Requests a new lease. If the blob does not have an active lease, the Blob
+        service creates a lease on the blob and returns a new lease ID.
+        
         :param str container_name:
             Name of existing container.
         :param str blob_name:
@@ -2284,9 +2296,12 @@ class BaseBlobService(StorageClient):
                          if_unmodified_since=None, if_match=None,
                          if_none_match=None, timeout=None):
         '''
-        Renews a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
-
+        Renews the lease. The lease can be renewed if the lease ID specified on
+        the request matches that associated with the blob. Note that the lease may
+        be renewed even if it has expired as long as the blob has not been modified
+        or leased again since the expiration of that lease. When you renew a lease,
+        the lease duration clock resets. 
+        
         :param str container_name:
             Name of existing container.
         :param str blob_name:
@@ -2340,9 +2355,10 @@ class BaseBlobService(StorageClient):
                            if_unmodified_since=None, if_match=None,
                            if_none_match=None, timeout=None):
         '''
-        Releases a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
-
+        Releases the lease. The lease may be released if the lease ID specified on the
+        request matches that associated with the blob. Releasing the lease allows another
+        client to immediately acquire the lease for the blob as soon as the release is complete. 
+        
         :param str container_name:
             Name of existing container.
         :param str blob_name:
@@ -2395,8 +2411,15 @@ class BaseBlobService(StorageClient):
                          if_match=None,
                          if_none_match=None, timeout=None):
         '''
-        Breaks a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Breaks the lease, if the blob has an active lease. Once a lease is broken,
+        it cannot be renewed. Any authorized request can break the lease; the request
+        is not required to specify a matching lease ID. When a lease is broken,
+        the lease break period is allowed to elapse, during which time no lease operation
+        except break and release can be performed on the blob. When a lease is successfully
+        broken, the response indicates the interval in seconds until a new lease can be acquired. 
+
+        A lease that has been broken can also be released, in which case another client may
+        immediately acquire the lease on the blob.
 
         :param str container_name:
             Name of existing container.
@@ -2463,8 +2486,8 @@ class BaseBlobService(StorageClient):
                          if_match=None,
                          if_none_match=None, timeout=None):
         '''
-        Changes a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Changes the lease ID of an active lease. A change must include the current
+        lease ID and a new lease ID.
 
         :param str container_name:
             Name of existing container.
