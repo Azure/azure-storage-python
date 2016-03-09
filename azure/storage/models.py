@@ -14,8 +14,10 @@
 #--------------------------------------------------------------------------
 import sys
 if sys.version_info < (3,):
+    from collections import Iterable
     _unicode_type = unicode
 else:
+    from collections.abc import Iterable
     _unicode_type = str
 
 from ._error import (
@@ -35,7 +37,7 @@ class _dict(dict):
     '''Used so that additional properties can be set on the return dictionary'''
     pass
 
-class ListGenerator(object):
+class ListGenerator(Iterable):
     '''
     A generator object used to list storage resources. The generator will lazily 
     follow the continuation tokens returned by the service and stop when all 

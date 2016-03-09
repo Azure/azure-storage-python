@@ -1035,7 +1035,7 @@ class StorageTableEntityTest(StorageTestCase):
             sas_token=token,
         )
         self._set_service_options(service, self.settings)
-        entities = list(self.ts.query_entities(self.table_name, 
+        entities = list(service.query_entities(self.table_name, 
                                                filter="PartitionKey eq '{}'".format(entity['PartitionKey'])))
 
         # Assert
@@ -1179,6 +1179,36 @@ class StorageTableEntityTest(StorageTestCase):
         # Assert
         with self.assertRaises(AzureMissingResourceHttpError):
             self.ts.get_entity(self.table_name, entity.PartitionKey, entity.RowKey)
+
+    @record
+    def test_sas_upper_case_table_name(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recordingfile(self.test_mode):
+            return
+
+        # Arrange
+        entity = self._insert_random_entity()
+
+        # Table names are case insensitive, so simply upper case our existing table name to test
+        token = self.ts.generate_table_shared_access_signature(
+            self.table_name.upper(),
+            TablePermissions.QUERY,
+            datetime.utcnow() + timedelta(hours=1),
+            datetime.utcnow() - timedelta(minutes=1),
+        )
+
+        # Act
+        service = TableService(
+            account_name=self.settings.STORAGE_ACCOUNT_NAME,
+            sas_token=token,
+        )
+        self._set_service_options(service, self.settings)
+        entities = list(service.query_entities(self.table_name, 
+                                               filter="PartitionKey eq '{}'".format(entity['PartitionKey'])))
+
+        # Assert
+        self.assertEqual(len(entities), 1)
+        self._assert_default_entity(entities[0])
 
     @record
     def test_sas_signed_identifier(self):

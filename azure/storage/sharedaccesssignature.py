@@ -111,7 +111,10 @@ class SharedAccessSignature(object):
         sas.add_base(permission, expiry, start, ip, protocol)
         sas.add_id(id)
         sas.add_table_access_ranges(table_name, start_pk, start_rk, end_pk, end_rk)
-        sas.add_resource_signature(self.account_name, self.account_key, 'table', table_name)
+
+        # Table names must be signed lower case
+        resource_path = table_name.lower()
+        sas.add_resource_signature(self.account_name, self.account_key, 'table', resource_path)
 
         return sas.get_token()
 
