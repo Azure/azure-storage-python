@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.30.1:
+- ListGenerator extends Iterable
+
 ## Version 0.30.0:
 
 ### All:
