@@ -106,7 +106,7 @@ class BlobProperties(object):
         Stores all the copy properties for the blob.
     :ivar ~azure.storage.blob.models.ContentSettings content_settings:
         Stores all the content settings for the blob.
-    :ivar LeaseProperties lease:
+    :ivar ~azure.storage.blob.models.LeaseProperties lease:
         Stores all the lease information for the blob.
     '''
 

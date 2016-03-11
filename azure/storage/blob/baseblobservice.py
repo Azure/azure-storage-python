@@ -2615,23 +2615,55 @@ class BaseBlobService(StorageClient):
                   destination_lease_id=None,
                   source_lease_id=None, timeout=None):
         '''
-        Copies a blob to a destination within the storage account.
-        The source for a Copy Blob operation can be a committed blob 
-        or an Azure file in any Azure storage account.
+        Copies a blob asynchronously. This operation returns a copy operation 
+        properties object, including a copy ID you can use to check or abort the 
+        copy operation. The Blob service copies blobs on a best-effort basis.
+
+        The source blob for a copy operation may be a block blob, an append blob, 
+        or a page blob. If the destination blob already exists, it must be of the 
+        same blob type as the source blob. Any existing destination blob will be 
+        overwritten. The destination blob cannot be modified while a copy operation 
+        is in progress.
+
+        When copying from a page blob, the Blob service creates a destination page 
+        blob of the source blob’s length, initially containing all zeroes. Then 
+        the source page ranges are enumerated, and non-empty ranges are copied. 
+
+        For a block blob or an append blob, the Blob service creates a committed 
+        blob of zero length before returning from this operation. When copying 
+        from a block blob, all committed blocks and their block IDs are copied. 
+        Uncommitted blocks are not copied. At the end of the copy operation, the 
+        destination blob will have the same committed block count as the source.
+
+        When copying from an append blob, all committed blocks are copied. At the 
+        end of the copy operation, the destination blob will have the same committed 
+        block count as the source.
+
+        For all blob types, you can call get_blob_properties on the destination 
+        blob to check the status of the copy operation. The final blob will be 
+        committed when the copy completes.
 
         :param str container_name:
-            Name of existing container.
+            Name of the destination container. The container must exist.
         :param str blob_name:
-            Name of existing blob.
+            Name of the destination blob. If the destination blob exists, it will 
+            be overwritten. Otherwise, it will be created.
         :param str copy_source:
-            URL up to 2 KB in length that specifies a blob. A source blob in
-            the same account can be private, but a blob in another account
-            must be public or accept credentials included in this URL, such as
-            a Shared Access Signature. Examples:
+            A URL of up to 2 KB in length that specifies an Azure file or blob. 
+            The value should be URL-encoded as it would appear in a request URI. 
+            If the source is in another account, the source must either be public 
+            or must be authenticated via a shared access signature. If the source 
+            is public, no authentication is required.
+            Examples:
             https://myaccount.blob.core.windows.net/mycontainer/myblob
             https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
+            https://otheraccount.blob.core.windows.net/mycontainer/myblob?sastoken
         :param metadata:
-            Dict containing name and value pairs.
+            Name-value pairs associated with the blob as metadata. If no name-value 
+            pairs are specified, the operation will copy the metadata from the 
+            source blob or file to the destination blob. If one or more name-value 
+            pairs are specified, the destination blob is created with the specified 
+            metadata, and metadata is not copied from the source blob or file. 
         :type metadata: A dict mapping str to str.
         :param datetime source_if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
