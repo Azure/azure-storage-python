@@ -1052,9 +1052,9 @@ class FileService(StorageClient):
         num_results is reached.
 
         If num_results is specified and the share has more than that number of 
-        containers, the generator will have a populated next_marker field once it 
-        finishes. This marker can be used to create a new generator if more 
-        results are desired.
+        files and directories, the generator will have a populated next_marker 
+        field once it finishes. This marker can be used to create a new generator 
+        if more results are desired.
 
         :param str share_name:
             Name of existing share.
@@ -1315,22 +1315,36 @@ class FileService(StorageClient):
     def copy_file(self, share_name, directory_name, file_name, copy_source,
                   metadata=None, timeout=None):
         '''
-        Copies a blob or file to a destination file within the storage account. 
+        Copies a file asynchronously. This operation returns a copy operation 
+        properties object, including a copy ID you can use to check or abort the 
+        copy operation. The File service copies files on a best-effort basis.
+
+        If the destination file exists, it will be overwritten. The destination 
+        file cannot be modified while the copy operation is in progress.
 
         :param str share_name:
-            Name of existing share.
+            Name of the destination share. The share must exist.
         :param str directory_name:
-            The path to the directory.
+            Name of the destination directory. The directory must exist.
         :param str file_name:
-            Name of existing file.
+            Name of the destination file. If the destination file exists, it will 
+            be overwritten. Otherwise, it will be created.
         :param str copy_source:
-            Specifies the URL of the source blob or file, up to 2 KB in length. 
-            A source file in the same account can be private, but a file in another account
-            must be public or accept credentials included in this URL, such as
-            a Shared Access Signature. Examples:
-            https://myaccount.file.core.windows.net/myshare/mydirectory/myfile
+            A URL of up to 2 KB in length that specifies an Azure file or blob. 
+            The value should be URL-encoded as it would appear in a request URI. 
+            If the source is in another account, the source must either be public 
+            or must be authenticated via a shared access signature. If the source 
+            is public, no authentication is required.
+            Examples:
+            https://myaccount.file.core.windows.net/myshare/mydir/myfile
+            https://myaccount.file.core.windows.net/myshare/my/dir/myfile?snapshot=<DateTime>
+            https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken
         :param metadata:
-            Dict containing name, value pairs.
+            Name-value pairs associated with the file as metadata. If no name-value 
+            pairs are specified, the operation will copy the metadata from the 
+            source blob or file to the destination file. If one or more name-value 
+            pairs are specified, the destination file is created with the specified 
+            metadata, and the metadata is not copied from the source blob or file. 
         :type metadata: A dict mapping str to str.
         :param int timeout:
             The timeout parameter is expressed in seconds.
