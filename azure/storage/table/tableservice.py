@@ -46,6 +46,7 @@ from .._connection import _ServiceParameters
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
+    _convert_xml_to_service_stats,
 )
 from ._serialization import (
     _convert_table_to_json,
@@ -286,6 +287,43 @@ class TableService(StorageClient):
             end_rk=end_rk,
         )
 
+    def get_table_service_stats(self, timeout=None):
+        '''
+        Retrieves statistics related to replication for the Table service. It is 
+        only available when read-access geo-redundant replication is enabled for 
+        the storage account.
+
+        With geo-redundant replication, Azure Storage maintains your data durable 
+        in two locations. In both locations, Azure Storage constantly maintains 
+        multiple healthy replicas of your data. The location where you read, 
+        create, update, or delete data is the primary storage account location. 
+        The primary location exists in the region you choose at the time you 
+        create an account via the Azure Management Azure classic portal, for 
+        example, North Central US. The location to which your data is replicated 
+        is the secondary location. The secondary location is automatically 
+        determined based on the location of the primary; it is in a second data 
+        center that resides in the same region as the primary location. Read-only 
+        access is available from the secondary location, if read-access geo-redundant 
+        replication is enabled for your storage account.
+
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: The table service stats.
+        :rtype: :class:`~azure.storage.models.ServiceStats`
+        '''
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self.secondary_endpoint
+        request.path = '/'
+        request.query = [
+            ('restype', 'service'),
+            ('comp', 'stats'),
+            ('timeout', _int_to_str(timeout)),
+        ]
+
+        response = self._perform_request(request)
+        return _convert_xml_to_service_stats(response.body)
+
     def get_table_service_properties(self, timeout=None):
         '''
         Gets the properties of a storage account's Table service, including
@@ -322,10 +360,10 @@ class TableService(StorageClient):
             The logging settings provide request logs.
         :param Metrics hour_metrics:
             The hour metrics settings provide a summary of request 
-            statistics grouped by API in hourly aggregates for blobs.
+            statistics grouped by API in hourly aggregates for tables.
         :param Metrics minute_metrics:
             The minute metrics settings provide request statistics 
-            for each minute for blobs.
+            for each minute for tables.
         :param cors:
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 
@@ -397,7 +435,7 @@ class TableService(StorageClient):
             next_marker element within the response body if the list returned
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
-            queues. The marker value is opaque to the client.
+            tables. The marker value is opaque to the client.
         :type marker: obj
         :param int timeout:
             The server timeout, expressed in seconds.
@@ -670,7 +708,7 @@ class TableService(StorageClient):
             next_marker element within the response body if the list returned
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
-            queues. The marker value is opaque to the client.
+            table. The marker value is opaque to the client.
         :type marker: obj
         :param str accept:
             Specifies the accepted content type of the response payload. See 

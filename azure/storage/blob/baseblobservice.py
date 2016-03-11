@@ -64,6 +64,7 @@ from .._deserialization import (
     _get_download_size,
     _parse_metadata,
     _parse_properties,
+    _convert_xml_to_service_stats,
 )
 from ._serialization import (
     _get_path,
@@ -1228,6 +1229,43 @@ class BaseBlobService(StorageClient):
 
         response = self._perform_request(request)
         return _convert_xml_to_blob_list(response)
+
+    def get_blob_service_stats(self, timeout=None):
+        '''
+        Retrieves statistics related to replication for the Blob service. It is 
+        only available when read-access geo-redundant replication is enabled for 
+        the storage account.
+
+        With geo-redundant replication, Azure Storage maintains your data durable 
+        in two locations. In both locations, Azure Storage constantly maintains 
+        multiple healthy replicas of your data. The location where you read, 
+        create, update, or delete data is the primary storage account location. 
+        The primary location exists in the region you choose at the time you 
+        create an account via the Azure Management Azure classic portal, for 
+        example, North Central US. The location to which your data is replicated 
+        is the secondary location. The secondary location is automatically 
+        determined based on the location of the primary; it is in a second data 
+        center that resides in the same region as the primary location. Read-only 
+        access is available from the secondary location, if read-access geo-redundant 
+        replication is enabled for your storage account.
+
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: The blob service stats.
+        :rtype: :class:`~azure.storage.models.ServiceStats`
+        '''
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self.secondary_endpoint
+        request.path = _get_path()
+        request.query = [
+            ('restype', 'service'),
+            ('comp', 'stats'),
+            ('timeout', _int_to_str(timeout)),
+        ]
+
+        response = self._perform_request(request)
+        return _convert_xml_to_service_stats(response.body)
 
     def set_blob_service_properties(
         self, logging=None, hour_metrics=None, minute_metrics=None,
