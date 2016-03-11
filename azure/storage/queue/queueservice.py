@@ -56,6 +56,7 @@ from .._serialization import (
 from .._deserialization import (
     _convert_xml_to_service_properties,
     _convert_xml_to_signed_identifiers,
+    _convert_xml_to_service_stats,
 )
 from ._serialization import (
     _convert_queue_message_xml,
@@ -245,7 +246,7 @@ class QueueService(StorageClient):
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
             stored access policy. To create a stored access policy, use 
-            set_blob_service_properties.
+            set_queue_service_properties.
         :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
@@ -272,6 +273,43 @@ class QueueService(StorageClient):
             ip=ip,
             protocol=protocol,
         )
+
+    def get_queue_service_stats(self, timeout=None):
+        '''
+        Retrieves statistics related to replication for the Queue service. It is 
+        only available when read-access geo-redundant replication is enabled for 
+        the storage account.
+
+        With geo-redundant replication, Azure Storage maintains your data durable 
+        in two locations. In both locations, Azure Storage constantly maintains 
+        multiple healthy replicas of your data. The location where you read, 
+        create, update, or delete data is the primary storage account location. 
+        The primary location exists in the region you choose at the time you 
+        create an account via the Azure Management Azure classic portal, for 
+        example, North Central US. The location to which your data is replicated 
+        is the secondary location. The secondary location is automatically 
+        determined based on the location of the primary; it is in a second data 
+        center that resides in the same region as the primary location. Read-only 
+        access is available from the secondary location, if read-access geo-redundant 
+        replication is enabled for your storage account.
+
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: The queue service stats.
+        :rtype: :class:`~azure.storage.models.ServiceStats`
+        '''
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self.secondary_endpoint
+        request.path = _get_path()
+        request.query = [
+            ('restype', 'service'),
+            ('comp', 'stats'),
+            ('timeout', _int_to_str(timeout)),
+        ]
+
+        response = self._perform_request(request)
+        return _convert_xml_to_service_stats(response.body)
 
     def get_queue_service_properties(self, timeout=None):
         '''
@@ -309,10 +347,10 @@ class QueueService(StorageClient):
             The logging settings provide request logs.
         :param Metrics hour_metrics:
             The hour metrics settings provide a summary of request 
-            statistics grouped by API in hourly aggregates for blobs.
+            statistics grouped by API in hourly aggregates for queuess.
         :param Metrics minute_metrics:
             The minute metrics settings provide request statistics 
-            for each minute for blobs.
+            for each minute for queues.
         :param cors:
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 

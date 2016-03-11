@@ -27,6 +27,8 @@ from .models import (
     AccessPolicy,
     _HeaderDict,
     _dict,
+    GeoReplication,
+    ServiceStats,
 )
 
 def _int_to_str(value):
@@ -120,6 +122,19 @@ def _parse_response_for_dict(response):
     return return_dict
 
 def _convert_xml_to_signed_identifiers(xml):
+    '''
+    <?xml version="1.0" encoding="utf-8"?>
+    <SignedIdentifiers>
+      <SignedIdentifier>
+        <Id>unique-value</Id>
+        <AccessPolicy>
+          <Start>start-time</Start>
+          <Expiry>expiry-time</Expiry>
+          <Permission>abbreviated-permission-list</Permission>
+        </AccessPolicy>
+      </SignedIdentifier>
+    </SignedIdentifiers>
+    '''
     list_element = ETree.fromstring(xml)
     signed_identifiers = _dict()
 
@@ -144,6 +159,28 @@ def _convert_xml_to_signed_identifiers(xml):
         signed_identifiers[id] = access_policy
 
     return signed_identifiers
+
+def _convert_xml_to_service_stats(xml):
+    '''
+    <?xml version="1.0" encoding="utf-8"?>
+    <StorageServiceStats>
+      <GeoReplication>      
+          <Status>live|bootstrap|unavailable</Status>
+          <LastSyncTime>sync-time|<empty></LastSyncTime>
+      </GeoReplication>
+    </StorageServiceStats>
+    '''
+    service_stats_element = ETree.fromstring(xml)
+
+    geo_replication_element = service_stats_element.find('GeoReplication')
+
+    geo_replication = GeoReplication()
+    geo_replication.status = geo_replication_element.find('Status').text
+    geo_replication.last_sync_time = parser.parse(geo_replication_element.find('LastSyncTime').text)
+
+    service_stats = ServiceStats()
+    service_stats.geo_replication = geo_replication
+    return service_stats
 
 def _convert_xml_to_service_properties(xml):
     '''
