@@ -6,6 +6,7 @@
 - ListGenerator extends Iterable
 - Fixed a bug in table SAS generation where table names with capital letters were not signed correctly.
 - Added get_*_service_stats APIs to retrieve statistics related to replication for read-access geo-redundant storage accounts.
+- Fixed a bug where custom endpoints with a trailing slash were not handled correctly.
 
 ## Version 0.30.0:
 
