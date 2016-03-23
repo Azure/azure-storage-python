@@ -124,7 +124,7 @@ Contribute Code or Provide Feedback
 
 If you would like to become an active contributor to this project, please
 follow the instructions provided in `Azure Projects Contribution
-Guidelines`_.
+Guidelines`_. You can find more details for contributing in the [CONTRIBUTING.md doc](CONTRIBUTING.md).
 
 If you encounter any bugs with the library, please file an issue in the
 `Issues`_ section of the project.
