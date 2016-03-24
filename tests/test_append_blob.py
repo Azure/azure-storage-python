@@ -370,7 +370,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
     def test_append_blob_from_stream_chunked_upload_with_count_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
