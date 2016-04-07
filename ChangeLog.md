@@ -8,6 +8,7 @@
 - Added get_*_service_stats APIs to retrieve statistics related to replication for read-access geo-redundant storage accounts.
 - Fixed a bug where custom endpoints with a trailing slash were not handled correctly.
 - QueueMessage dequeue_count was documented as and intended to be an int but was instead returned as a string. Changed it to be an int.
+- Fixed a bug where list tables did not parse continuation tokens correctly.
 
 ## Version 0.30.0:
 

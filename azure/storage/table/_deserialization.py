@@ -194,7 +194,7 @@ def _convert_json_response_to_tables(response):
     tables = _list()
 
     continuation = _get_continuation_from_response_headers(response)
-    tables.next_marker = continuation.get('NextTableName')
+    tables.next_marker = continuation.get('nexttablename')
 
     root = loads(response.body.decode('utf-8'))
 
