@@ -9,15 +9,16 @@
 - ListGenerator extends Iterable
 - Added get_*_service_stats APIs to retrieve statistics related to replication for read-access geo-redundant storage accounts.
 - Fixed a bug where custom endpoints with a trailing slash were not handled correctly.
-- QueueMessage dequeue_count was documented as and intended to be an int but was instead returned as a string. Changed it to be an int.
-- Fixed a bug where list_tables did not parse continuation tokens correctly.
 
 ### Blob:
 - Diffing support has been added to the get_page_range API which facilitates finding different page ranges between a previous snapshot and newer snapshot (or current Page Blob).
 
 ### Table:
 - Fixed a bug in table SAS generation where table names with capital letters were not signed correctly.
+- Fixed a bug where list_tables did not parse continuation tokens correctly.
 
+### Queue:
+- QueueMessage dequeue_count was documented as and intended to be an int but was instead returned as a string. Changed it to be an int.
 
 ## Version 0.30.0:
 
