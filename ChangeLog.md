@@ -10,7 +10,7 @@
 - Added get_*_service_stats APIs to retrieve statistics related to replication for read-access geo-redundant storage accounts.
 - Fixed a bug where custom endpoints with a trailing slash were not handled correctly.
 - QueueMessage dequeue_count was documented as and intended to be an int but was instead returned as a string. Changed it to be an int.
-- Fixed a bug where list tables did not parse continuation tokens correctly.
+- Fixed a bug where list_tables did not parse continuation tokens correctly.
 
 ### Blob:
 - Diffing support has been added to the get_page_range API which facilitates finding different page ranges between a previous snapshot and newer snapshot (or current Page Blob).

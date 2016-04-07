@@ -28,6 +28,7 @@ import unittest
 import sys
 import random
 import tests.settings_real as settings
+import tests.settings_fake as fake_settings
 
 should_log = os.getenv('SDK_TESTS_LOG', '0')
 if should_log.lower() == 'true' or should_log == '1':
@@ -45,26 +46,29 @@ class TestMode(object):
 
     @staticmethod
     def is_playback(mode):
-        return mode.lower() == TestMode.playback
+        return mode == TestMode.playback
+
     @staticmethod
     def need_recording_file(mode):
-        mode_lower = mode.lower()
-        return mode_lower == TestMode.playback or mode_lower == TestMode.record
+        return mode == TestMode.playback or mode == TestMode.record
 
     @staticmethod
     def need_real_credentials(mode):
-        mode_lower = mode.lower()
-        return mode_lower == TestMode.run_live_no_record or mode_lower == TestMode.record
+        return mode == TestMode.run_live_no_record or mode == TestMode.record
 
 
 class StorageTestCase(unittest.TestCase):
 
     def setUp(self):
         self.working_folder = os.path.dirname(__file__)    
-        
-        self.settings = settings
+
+        self.settings = settings        
+        self.fake_settings = fake_settings
 
         self.test_mode = self.settings.TEST_MODE.lower() or TestMode.playback
+        
+        if self.test_mode == TestMode.playback:
+            self.settings = self.fake_settings
 
         # example of qualified test name:
         # test_mgmt_network.test_public_ip_addresses
@@ -80,7 +84,7 @@ class StorageTestCase(unittest.TestCase):
             time.sleep(seconds)
 
     def is_playback(self):
-        return TestMode.is_playback(self.test_mode)
+        return self.test_mode == TestMode.playback
 
     def get_resource_name(self, prefix):
         # Append a suffix to the name, based on the fully qualified test name
@@ -224,6 +228,7 @@ class StorageTestCase(unittest.TestCase):
             my_vcr = vcr.VCR(
                 before_record_request = self._scrub_sensitive_request_info,
                 before_record_response = self._scrub_sensitive_response_info,
+                record_mode = 'none' if TestMode.is_playback(self.test_mode) else 'all' 
             )
 
             self.assertIsNotNone(self.working_folder)
@@ -268,10 +273,10 @@ class StorageTestCase(unittest.TestCase):
 
     def _scrub(self, val):
         old_to_new_dict = {
-            self.settings.STORAGE_ACCOUNT_NAME: "storagename",
-            self.settings.STORAGE_ACCOUNT_KEY: "NzhL3hKZbJBuJ2484dPTR+xF30kYaWSSCbs2BzLgVVI1woqeST/1IgqaLm6QAOTxtGvxctSNbIR/1hW8yH+bJg==",
-            self.settings.REMOTE_STORAGE_ACCOUNT_KEY: "remotestoragename",
-            self.settings.REMOTE_STORAGE_ACCOUNT_NAME: "3pJwX7wjxoQEW2nKAhJZARpQWpKvPOUN9JwoV/HhlMmJlS1pORhzzHpPfQqgFcwGsriu6dwYqnugWOjGShC5VQ==",
+            self.settings.STORAGE_ACCOUNT_NAME: self.fake_settings.STORAGE_ACCOUNT_NAME,
+            self.settings.STORAGE_ACCOUNT_KEY: self.fake_settings.STORAGE_ACCOUNT_KEY,
+            self.settings.REMOTE_STORAGE_ACCOUNT_KEY: self.fake_settings.REMOTE_STORAGE_ACCOUNT_KEY,
+            self.settings.REMOTE_STORAGE_ACCOUNT_NAME: self.fake_settings.REMOTE_STORAGE_ACCOUNT_NAME,
         }
         replacements = list(old_to_new_dict.keys())
 
