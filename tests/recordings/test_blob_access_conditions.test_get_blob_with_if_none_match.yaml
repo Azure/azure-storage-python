@@ -5,21 +5,21 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Wed, 17 Feb 2016 20:11:57 GMT']
-      x-ms-version: ['2015-04-05']
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
+      x-ms-date: ['Thu, 07 Apr 2016 21:17:08 GMT']
+      x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainereb891878?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 17 Feb 2016 20:11:57 GMT']
-      ETag: ['"0x8D337D696D4CE2E"']
-      Last-Modified: ['Wed, 17 Feb 2016 20:11:58 GMT']
+      Date: ['Thu, 07 Apr 2016 21:17:08 GMT']
+      ETag: ['"0x8D35F29FA932CD5"']
+      Last-Modified: ['Thu, 07 Apr 2016 21:17:09 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [f1e6ba05-0001-003c-17bf-694bd1000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [64c7ea52-0001-0075-4512-9178b1000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: !!binary |
@@ -28,23 +28,23 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-date: ['Wed, 17 Feb 2016 20:11:57 GMT']
-      x-ms-version: ['2015-04-05']
+      x-ms-date: ['Thu, 07 Apr 2016 21:17:09 GMT']
+      x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainereb891878/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 17 Feb 2016 20:11:57 GMT']
-      ETag: ['"0x8D337D696E392F8"']
-      Last-Modified: ['Wed, 17 Feb 2016 20:11:58 GMT']
+      Date: ['Thu, 07 Apr 2016 21:17:08 GMT']
+      ETag: ['"0x8D35F29FABE89FB"']
+      Last-Modified: ['Thu, 07 Apr 2016 21:17:09 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [f1e6ba1c-0001-003c-2bbf-694bd1000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [64c7ea79-0001-0075-6b12-9178b1000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -52,10 +52,10 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       If-None-Match: ['0x111111111111111']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Wed, 17 Feb 2016 20:11:58 GMT']
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
+      x-ms-date: ['Thu, 07 Apr 2016 21:17:09 GMT']
       x-ms-range: [bytes=None-]
-      x-ms-version: ['2015-04-05']
+      x-ms-version: ['2015-07-08']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainereb891878/blob1
   response:
@@ -65,14 +65,14 @@ interactions:
       Content-Length: ['11']
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
       Content-Type: [application/octet-stream]
-      Date: ['Wed, 17 Feb 2016 20:11:57 GMT']
-      ETag: ['"0x8D337D696E392F8"']
-      Last-Modified: ['Wed, 17 Feb 2016 20:11:58 GMT']
+      Date: ['Thu, 07 Apr 2016 21:17:08 GMT']
+      ETag: ['"0x8D35F29FABE89FB"']
+      Last-Modified: ['Thu, 07 Apr 2016 21:17:09 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
-      x-ms-request-id: [f1e6ba3a-0001-003c-49bf-694bd1000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [64c7eaa0-0001-0075-1012-9178b1000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1

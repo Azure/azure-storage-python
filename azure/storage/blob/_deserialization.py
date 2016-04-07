@@ -360,15 +360,19 @@ def _convert_xml_to_page_ranges(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <PageList>
-       <PageRange>
-          <Start>Start Byte</Start>
-          <End>End Byte</End>
-       </PageRange>
-       <PageRange>
-          <Start>Start Byte</Start>
-          <End>End Byte</End>
-       </PageRange>
-    </PageList>
+       <PageRange> 
+          <Start>Start Byte</Start> 
+          <End>End Byte</End> 
+       </PageRange> 
+       <ClearRange> 
+          <Start>Start Byte</Start> 
+          <End>End Byte</End> 
+       </ClearRange> 
+       <PageRange> 
+          <Start>Start Byte</Start> 
+          <End>End Byte</End> 
+       </PageRange> 
+    </PageList> 
     '''
     if response is None or response.body is None:
         return response
@@ -377,12 +381,19 @@ def _convert_xml_to_page_ranges(response):
 
     list_element = ETree.fromstring(response.body)
 
-    page_range_elements = list_element.findall('PageRange')
-    for page_range_element in page_range_elements:
+    for page_range_element in list_element:
+        if page_range_element.tag == 'PageRange':
+            is_cleared = False
+        elif page_range_element.tag == 'ClearRange':
+            is_cleared = True
+        else:
+            pass # ignore any unrecognized Page Range types
+
         page_list.append(
             PageRange(
                 int(page_range_element.findtext('Start')),
-                int(page_range_element.findtext('End'))
+                int(page_range_element.findtext('End')),
+                is_cleared
             )
         )
 

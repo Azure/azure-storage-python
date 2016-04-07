@@ -1017,7 +1017,7 @@ class StorageTableEntityTest(StorageTestCase):
     @record
     def test_sas_query(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1045,7 +1045,7 @@ class StorageTableEntityTest(StorageTestCase):
     @record
     def test_sas_add(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1073,7 +1073,7 @@ class StorageTableEntityTest(StorageTestCase):
     @record
     def test_sas_add_inside_range(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1102,7 +1102,7 @@ class StorageTableEntityTest(StorageTestCase):
     @record
     def test_sas_add_outside_range(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1130,7 +1130,7 @@ class StorageTableEntityTest(StorageTestCase):
     @record
     def test_sas_update(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1157,7 +1157,7 @@ class StorageTableEntityTest(StorageTestCase):
     @record
     def test_sas_delete(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1183,7 +1183,7 @@ class StorageTableEntityTest(StorageTestCase):
     @record
     def test_sas_upper_case_table_name(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1213,7 +1213,7 @@ class StorageTableEntityTest(StorageTestCase):
     @record
     def test_sas_signed_identifier(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange

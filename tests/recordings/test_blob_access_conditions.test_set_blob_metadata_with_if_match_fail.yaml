@@ -5,21 +5,21 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Wed, 17 Feb 2016 20:11:01 GMT']
-      x-ms-version: ['2015-04-05']
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
+      x-ms-date: ['Thu, 07 Apr 2016 21:16:15 GMT']
+      x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerda0c1c10?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 17 Feb 2016 20:11:01 GMT']
-      ETag: ['"0x8D337D6754829D1"']
-      Last-Modified: ['Wed, 17 Feb 2016 20:11:01 GMT']
+      Date: ['Thu, 07 Apr 2016 21:16:14 GMT']
+      ETag: ['"0x8D35F29DAB00350"']
+      Last-Modified: ['Thu, 07 Apr 2016 21:16:15 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [5002d800-0001-0041-06bf-69d719000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [a00d843e-0001-0077-1b12-917a4b000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: !!binary |
@@ -28,23 +28,23 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-date: ['Wed, 17 Feb 2016 20:11:01 GMT']
-      x-ms-version: ['2015-04-05']
+      x-ms-date: ['Thu, 07 Apr 2016 21:16:15 GMT']
+      x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerda0c1c10/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 17 Feb 2016 20:11:01 GMT']
-      ETag: ['"0x8D337D67551E306"']
-      Last-Modified: ['Wed, 17 Feb 2016 20:11:02 GMT']
+      Date: ['Thu, 07 Apr 2016 21:16:14 GMT']
+      ETag: ['"0x8D35F29DB0437F9"']
+      Last-Modified: ['Thu, 07 Apr 2016 21:16:16 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [5002d812-0001-0041-16bf-69d719000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [a00d846a-0001-0077-4412-917a4b000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -53,24 +53,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       If-Match: ['0x111111111111111']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Wed, 17 Feb 2016 20:11:01 GMT']
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
+      x-ms-date: ['Thu, 07 Apr 2016 21:16:16 GMT']
       x-ms-meta-hello: [world]
       x-ms-meta-number: ['42']
-      x-ms-version: ['2015-04-05']
+      x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerda0c1c10/blob1?comp=metadata
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ConditionNotMet</Code><Message>The\
-        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:5002d825-0001-0041-27bf-69d719000000\n\
-        Time:2016-02-17T20:11:02.0364602Z</Message></Error>"}
+        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:a00d84aa-0001-0077-0412-917a4b000000\n\
+        Time:2016-04-07T21:16:15.7908201Z</Message></Error>"}
     headers:
       Content-Length: ['252']
       Content-Type: [application/xml]
-      Date: ['Wed, 17 Feb 2016 20:11:01 GMT']
+      Date: ['Thu, 07 Apr 2016 21:16:14 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [5002d825-0001-0041-27bf-69d719000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [a00d84aa-0001-0077-0412-917a4b000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}
 version: 1

@@ -489,6 +489,101 @@ class PageBlobService(BaseBlobService):
         response = self._perform_request(request)
         return _convert_xml_to_page_ranges(response)
 
+    def get_page_ranges_diff(
+        self, container_name, blob_name, previous_snapshot, snapshot=None,
+        start_range=None, end_range=None, lease_id=None, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+        '''
+        The response will include only the pages that are different between either a
+        recent snapshot or the current blob and a previous snapshot, including pages
+        that were cleared.
+
+        :param str container_name:
+            Name of existing container.
+        :param str blob_name:
+            Name of existing blob.
+        :param str previous_snapshot:
+            The snapshot parameter is an opaque DateTime value that
+            specifies a previous blob snapshot to be compared
+            against a more recent snapshot or the current blob.
+        :param str snapshot:
+            The snapshot parameter is an opaque DateTime value that
+            specifies a more recent blob snapshot to be compared
+            against a previous snapshot (previous_snapshot).
+        :param int start_range:
+            Start of byte range to use for getting different page ranges.
+            If no end_range is given, all bytes after the start_range will be searched.
+            Pages must be aligned with 512-byte boundaries, the start offset
+            must be a modulus of 512 and the end offset must be a modulus of
+            512-1. Examples of valid byte ranges are 0-511, 512-, etc.
+        :param int end_range:
+            End of byte range to use for getting different page ranges.
+            If end_range is given, start_range must be provided.
+            This range will return valid page ranges for from the offset start up to
+            offset end.
+            Pages must be aligned with 512-byte boundaries, the start offset
+            must be a modulus of 512 and the end offset must be a modulus of
+            512-1. Examples of valid byte ranges are 0-511, 512-, etc.
+        :param str lease_id:
+            Required if the blob has an active lease.
+        :param datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+        :param datetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+        :param str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+        :param str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: A list of different Page Ranges for the Page Blob.
+        :rtype: list of :class:`~azure.storage.blob.models.PageRange`
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('previous_snapshot', previous_snapshot)
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self._get_host()
+        request.path = _get_path(container_name, blob_name)
+        request.query = [
+            ('comp', 'pagelist'),
+            ('snapshot', _to_str(snapshot)),
+            ('prevsnapshot', _to_str(previous_snapshot)),
+            ('timeout', _int_to_str(timeout)),
+        ]
+        request.headers = [
+            ('x-ms-lease-id', _to_str(lease_id)),
+            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
+            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
+            ('If-Match', _to_str(if_match)),
+            ('If-None-Match', _to_str(if_none_match)),
+        ]
+        if start_range is not None:
+            _validate_and_format_range_headers(
+                request,
+                start_range,
+                end_range,
+                start_range_required=False,
+                end_range_required=False,
+                align_to_page=True)
+
+        response = self._perform_request(request)
+        return _convert_xml_to_page_ranges(response)
+
     def set_sequence_number(
         self, container_name, blob_name, sequence_number_action, sequence_number=None,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,

@@ -900,7 +900,7 @@ class StorageCommonBlobTest(StorageTestCase):
     @record
     def test_sas_access_blob(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -928,7 +928,7 @@ class StorageCommonBlobTest(StorageTestCase):
     @record
     def test_sas_signed_identifier(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -963,7 +963,7 @@ class StorageCommonBlobTest(StorageTestCase):
     @record
     def test_account_sas(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -990,7 +990,7 @@ class StorageCommonBlobTest(StorageTestCase):
     @record
     def test_shared_read_access_blob(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1018,7 +1018,7 @@ class StorageCommonBlobTest(StorageTestCase):
     @record
     def test_shared_read_access_blob_with_content_query_params(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1055,7 +1055,7 @@ class StorageCommonBlobTest(StorageTestCase):
     @record
     def test_shared_write_access_blob(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1086,7 +1086,7 @@ class StorageCommonBlobTest(StorageTestCase):
     @record
     def test_shared_delete_access_blob(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange

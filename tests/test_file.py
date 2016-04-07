@@ -715,7 +715,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_get_file_to_bytes_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -751,7 +751,7 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_get_file_to_bytes_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -791,7 +791,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_get_file_to_stream_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -812,7 +812,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_get_file_to_stream_non_seekable(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -833,7 +833,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_get_file_to_stream_non_seekable_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -877,7 +877,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_get_file_to_stream_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -922,7 +922,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_get_file_to_path_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -942,7 +942,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_ranged_get_file_to_path(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -963,7 +963,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_ranged_get_file_to_path_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -984,7 +984,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_ranged_get_file_to_path_md5_without_end_range_fail(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1025,7 +1025,7 @@ class StorageFileTest(StorageTestCase):
 
     @record
     def test_get_file_to_path_with_progress_parallel(self):
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1103,7 +1103,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_get_file_to_text_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1230,7 +1230,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_create_file_from_bytes_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange      
@@ -1259,7 +1259,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_create_file_from_bytes_chunked_upload_with_index_and_count_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange      
@@ -1290,7 +1290,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_create_file_from_path_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange      
@@ -1345,7 +1345,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_create_file_from_stream_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange        
@@ -1383,7 +1383,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_create_file_from_stream_non_seekable_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange        
@@ -1429,7 +1429,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_create_file_from_stream_with_progress_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange      
@@ -1472,7 +1472,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_create_file_from_stream_chunked_upload_truncated_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange        
@@ -1558,7 +1558,7 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_sas_access_file(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1587,7 +1587,7 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_sas_signed_identifier(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1624,7 +1624,7 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_account_sas(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1652,7 +1652,7 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_shared_read_access_file(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1682,7 +1682,7 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_shared_read_access_file_with_content_query_params(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1721,7 +1721,7 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_shared_write_access_file(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -1754,7 +1754,7 @@ class StorageFileTest(StorageTestCase):
     @record
     def test_shared_delete_access_file(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange

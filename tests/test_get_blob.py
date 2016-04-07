@@ -131,7 +131,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_get_blob_to_bytes_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -161,7 +161,7 @@ class StorageGetBlobTest(StorageTestCase):
     @record
     def test_get_blob_to_bytes_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -195,7 +195,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_get_blob_to_stream_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -213,7 +213,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_get_blob_to_stream_non_seekable(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -231,7 +231,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_get_blob_to_stream_non_seekable_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -269,7 +269,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_get_blob_to_stream_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -308,7 +308,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_get_blob_to_path_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -325,7 +325,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_ranged_get_blob_to_path(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -343,7 +343,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_ranged_get_blob_to_path_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -361,7 +361,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_ranged_get_blob_to_path_md5_without_end_range_fail(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -397,7 +397,7 @@ class StorageGetBlobTest(StorageTestCase):
     @record
     def test_get_blob_to_path_with_progress_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -466,7 +466,7 @@ class StorageGetBlobTest(StorageTestCase):
 
     def test_get_blob_to_text_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
