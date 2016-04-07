@@ -5,21 +5,21 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Wed, 17 Feb 2016 20:01:55 GMT']
-      x-ms-version: ['2015-04-05']
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
+      x-ms-date: ['Thu, 07 Apr 2016 21:07:52 GMT']
+      x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.file.core.windows.net/sharecb110cc0?restype=share
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 17 Feb 2016 20:01:56 GMT']
-      ETag: ['"0x8D337D53040A528"']
-      Last-Modified: ['Wed, 17 Feb 2016 20:01:56 GMT']
+      Date: ['Thu, 07 Apr 2016 21:07:51 GMT']
+      ETag: ['"0x8D35F28AE92B82B"']
+      Last-Modified: ['Thu, 07 Apr 2016 21:07:52 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [535dbf44-001a-000d-4fbe-691006000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [b9f2fcf0-001a-0029-3311-918948000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -27,23 +27,23 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
       x-ms-content-length: ['11']
-      x-ms-date: ['Wed, 17 Feb 2016 20:01:56 GMT']
+      x-ms-date: ['Thu, 07 Apr 2016 21:07:52 GMT']
       x-ms-type: [file]
-      x-ms-version: ['2015-04-05']
+      x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.file.core.windows.net/sharecb110cc0/file1
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 17 Feb 2016 20:01:56 GMT']
-      ETag: ['"0x8D337D5302882A1"']
-      Last-Modified: ['Wed, 17 Feb 2016 20:01:56 GMT']
+      Date: ['Thu, 07 Apr 2016 21:07:51 GMT']
+      ETag: ['"0x8D35F28AEA5DFDD"']
+      Last-Modified: ['Thu, 07 Apr 2016 21:07:52 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [535dbf46-001a-000d-50be-691006000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [b9f2fcf3-001a-0029-3411-918948000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: !!binary |
@@ -52,10 +52,10 @@ interactions:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Wed, 17 Feb 2016 20:01:56 GMT']
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
+      x-ms-date: ['Thu, 07 Apr 2016 21:07:52 GMT']
       x-ms-range: [bytes=0-10]
-      x-ms-version: ['2015-04-05']
+      x-ms-version: ['2015-07-08']
       x-ms-write: [update]
     method: PUT
     uri: https://storagename.file.core.windows.net/sharecb110cc0/file1?comp=range
@@ -63,32 +63,32 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 17 Feb 2016 20:01:56 GMT']
-      ETag: ['"0x8D337D5302FAEC7"']
-      Last-Modified: ['Wed, 17 Feb 2016 20:01:56 GMT']
+      Date: ['Thu, 07 Apr 2016 21:07:51 GMT']
+      ETag: ['"0x8D35F28AEAFF264"']
+      Last-Modified: ['Thu, 07 Apr 2016 21:07:52 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [535dbf4a-001a-000d-51be-691006000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [b9f2fcf4-001a-0029-3511-918948000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Accept-Encoding: [identity]
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.30.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-date: ['Wed, 17 Feb 2016 20:01:56 GMT']
-      x-ms-version: ['2015-04-05']
+      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
+      x-ms-date: ['Thu, 07 Apr 2016 21:07:52 GMT']
+      x-ms-version: ['2015-07-08']
     method: GET
     uri: https://storagename.file.core.windows.net/sharecb110cc0?restype=share&comp=stats
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><ShareStats><ShareUsage>1</ShareUsage></ShareStats>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Wed, 17 Feb 2016 20:01:56 GMT']
+      Date: ['Thu, 07 Apr 2016 21:07:51 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [535dbf4b-001a-000d-52be-691006000000]
-      x-ms-version: ['2015-04-05']
+      x-ms-request-id: [b9f2fcf5-001a-0029-3611-918948000000]
+      x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1

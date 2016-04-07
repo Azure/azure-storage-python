@@ -426,6 +426,14 @@ class PageBlobSamples():
 
         self.service.delete_container(container_name)
 
+        # Take a page range diff between two versions of page blob
+        snapshot = self.service.snapshot_blob(container_name, blob_name)
+        self.service.update_page(container_name, blob_name, data, 0, 511)
+
+        ranges = self.service.get_page_ranges_diff(container_name, blob_name, snapshot.snapshot)
+        for range in ranges:
+            print('({}, {}, {}) '.format(range.start, range.end, range.is_cleared)) # (0, 511, False)
+
     def set_sequence_number(self):
         container_name = self._create_container()
         blob_name = self._get_blob_reference()
