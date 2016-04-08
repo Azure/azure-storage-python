@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.models &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.models &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -54,8 +54,10 @@
 <span class="c1">#--------------------------------------------------------------------------</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
     <span class="n">_unicode_type</span> <span class="o">=</span> <span class="nb">unicode</span>
 <span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
     <span class="n">_unicode_type</span> <span class="o">=</span> <span class="nb">str</span>
 
 <span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
@@ -75,7 +77,7 @@
     <span class="sd">&#39;&#39;&#39;Used so that additional properties can be set on the return dictionary&#39;&#39;&#39;</span>
     <span class="k">pass</span>
 
-<div class="viewcode-block" id="ListGenerator"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.ListGenerator">[docs]</a><span class="k">class</span> <span class="nc">ListGenerator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="ListGenerator"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.ListGenerator">[docs]</a><span class="k">class</span> <span class="nc">ListGenerator</span><span class="p">(</span><span class="n">Iterable</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    A generator object used to list storage resources. The generator will lazily </span>
 <span class="sd">    follow the continuation tokens returned by the service and stop when all </span>
@@ -309,6 +311,42 @@
 <span class="sd">    For more information on CORS, see https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ServiceStats"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.ServiceStats">[docs]</a><span class="k">class</span> <span class="nc">ServiceStats</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    Returned by get_*_service_stats functions. Contains statistics related to </span>
+<span class="sd">    replication for the given service. It is only available when read-access </span>
+<span class="sd">    geo-redundant replication is enabled for the storage account.</span>
+
+<span class="sd">    :ivar GeoReplication geo_replication:</span>
+<span class="sd">        An object containing statistics related to replication for the given service.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GeoReplication"><a class="viewcode-back" href="../../../ref/azure.storage.models.html#azure.storage.models.GeoReplication">[docs]</a><span class="k">class</span> <span class="nc">GeoReplication</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; </span>
+<span class="sd">    Contains statistics related to replication for the given service.</span>
+
+<span class="sd">    :ivar str status:</span>
+<span class="sd">        The status of the secondary location. Possible values are:</span>
+<span class="sd">            live: Indicates that the secondary location is active and operational.</span>
+<span class="sd">            bootstrap: Indicates initial synchronization from the primary location </span>
+<span class="sd">                to the secondary location is in progress. This typically occurs </span>
+<span class="sd">                when replication is first enabled.</span>
+<span class="sd">            unavailable: Indicates that the secondary location is temporarily </span>
+<span class="sd">                unavailable.</span>
+<span class="sd">    :ivar date last_sync_time:</span>
+<span class="sd">        A GMT date value, to the second. All primary writes preceding this value </span>
+<span class="sd">        are guaranteed to be available for read operations at the secondary. </span>
+<span class="sd">        Primary writes after this point in time may or may not be available for </span>
+<span class="sd">        reads. The value may be empty if LastSyncTime is not available. This can </span>
+<span class="sd">        happen if the replication status is bootstrap or unavailable. Although </span>
+<span class="sd">        geo-replication is continuously enabled, the LastSyncTime result may </span>
+<span class="sd">        reflect a cached value from the service that is refreshed every few minutes.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">pass</span></div>
 
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.sharedaccesssignature &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.sharedaccesssignature &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -151,7 +151,10 @@
         <span class="n">sas</span><span class="o">.</span><span class="n">add_base</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
         <span class="n">sas</span><span class="o">.</span><span class="n">add_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
         <span class="n">sas</span><span class="o">.</span><span class="n">add_table_access_ranges</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">start_pk</span><span class="p">,</span> <span class="n">start_rk</span><span class="p">,</span> <span class="n">end_pk</span><span class="p">,</span> <span class="n">end_rk</span><span class="p">)</span>
-        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
+
+        <span class="c1"># Table names must be signed lower case</span>
+        <span class="n">resource_path</span> <span class="o">=</span> <span class="n">table_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">sas</span><span class="o">.</span><span class="n">add_resource_signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">,</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">resource_path</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.file.fileservice &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.file.fileservice &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
   
@@ -1092,9 +1092,9 @@
 <span class="sd">        num_results is reached.</span>
 
 <span class="sd">        If num_results is specified and the share has more than that number of </span>
-<span class="sd">        containers, the generator will have a populated next_marker field once it </span>
-<span class="sd">        finishes. This marker can be used to create a new generator if more </span>
-<span class="sd">        results are desired.</span>
+<span class="sd">        files and directories, the generator will have a populated next_marker </span>
+<span class="sd">        field once it finishes. This marker can be used to create a new generator </span>
+<span class="sd">        if more results are desired.</span>
 
 <span class="sd">        :param str share_name:</span>
 <span class="sd">            Name of existing share.</span>
@@ -1355,22 +1355,36 @@
 <div class="viewcode-block" id="FileService.copy_file"><a class="viewcode-back" href="../../../../ref/azure.storage.file.fileservice.html#azure.storage.file.fileservice.FileService.copy_file">[docs]</a>    <span class="k">def</span> <span class="nf">copy_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_name</span><span class="p">,</span> <span class="n">directory_name</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">copy_source</span><span class="p">,</span>
                   <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Copies a blob or file to a destination file within the storage account. </span>
+<span class="sd">        Copies a file asynchronously. This operation returns a copy operation </span>
+<span class="sd">        properties object, including a copy ID you can use to check or abort the </span>
+<span class="sd">        copy operation. The File service copies files on a best-effort basis.</span>
+
+<span class="sd">        If the destination file exists, it will be overwritten. The destination </span>
+<span class="sd">        file cannot be modified while the copy operation is in progress.</span>
 
 <span class="sd">        :param str share_name:</span>
-<span class="sd">            Name of existing share.</span>
+<span class="sd">            Name of the destination share. The share must exist.</span>
 <span class="sd">        :param str directory_name:</span>
-<span class="sd">            The path to the directory.</span>
+<span class="sd">            Name of the destination directory. The directory must exist.</span>
 <span class="sd">        :param str file_name:</span>
-<span class="sd">            Name of existing file.</span>
+<span class="sd">            Name of the destination file. If the destination file exists, it will </span>
+<span class="sd">            be overwritten. Otherwise, it will be created.</span>
 <span class="sd">        :param str copy_source:</span>
-<span class="sd">            Specifies the URL of the source blob or file, up to 2 KB in length. </span>
-<span class="sd">            A source file in the same account can be private, but a file in another account</span>
-<span class="sd">            must be public or accept credentials included in this URL, such as</span>
-<span class="sd">            a Shared Access Signature. Examples:</span>
-<span class="sd">            https://myaccount.file.core.windows.net/myshare/mydirectory/myfile</span>
+<span class="sd">            A URL of up to 2 KB in length that specifies an Azure file or blob. </span>
+<span class="sd">            The value should be URL-encoded as it would appear in a request URI. </span>
+<span class="sd">            If the source is in another account, the source must either be public </span>
+<span class="sd">            or must be authenticated via a shared access signature. If the source </span>
+<span class="sd">            is public, no authentication is required.</span>
+<span class="sd">            Examples:</span>
+<span class="sd">            https://myaccount.file.core.windows.net/myshare/mydir/myfile</span>
+<span class="sd">            https://myaccount.file.core.windows.net/myshare/my/dir/myfile?snapshot=&lt;DateTime&gt;</span>
+<span class="sd">            https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken</span>
 <span class="sd">        :param metadata:</span>
-<span class="sd">            Dict containing name, value pairs.</span>
+<span class="sd">            Name-value pairs associated with the file as metadata. If no name-value </span>
+<span class="sd">            pairs are specified, the operation will copy the metadata from the </span>
+<span class="sd">            source blob or file to the destination file. If one or more name-value </span>
+<span class="sd">            pairs are specified, the destination file is created with the specified </span>
+<span class="sd">            metadata, and the metadata is not copied from the source blob or file. </span>
 <span class="sd">        :type metadata: A dict mapping str to str.</span>
 <span class="sd">        :param int timeout:</span>
 <span class="sd">            The timeout parameter is expressed in seconds.</span>

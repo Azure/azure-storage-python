@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.pageblobservice &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.blob.pageblobservice &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
   
@@ -508,6 +508,101 @@
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;pagelist&#39;</span><span class="p">),</span>
             <span class="p">(</span><span class="s1">&#39;snapshot&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">start_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">_validate_and_format_range_headers</span><span class="p">(</span>
+                <span class="n">request</span><span class="p">,</span>
+                <span class="n">start_range</span><span class="p">,</span>
+                <span class="n">end_range</span><span class="p">,</span>
+                <span class="n">start_range_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">end_range_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">align_to_page</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_convert_xml_to_page_ranges</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PageBlobService.get_page_ranges_diff"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.get_page_ranges_diff">[docs]</a>    <span class="k">def</span> <span class="nf">get_page_ranges_diff</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">previous_snapshot</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">start_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        The response will include only the pages that are different between either a</span>
+<span class="sd">        recent snapshot or the current blob and a previous snapshot, including pages</span>
+<span class="sd">        that were cleared.</span>
+
+<span class="sd">        :param str container_name:</span>
+<span class="sd">            Name of existing container.</span>
+<span class="sd">        :param str blob_name:</span>
+<span class="sd">            Name of existing blob.</span>
+<span class="sd">        :param str previous_snapshot:</span>
+<span class="sd">            The snapshot parameter is an opaque DateTime value that</span>
+<span class="sd">            specifies a previous blob snapshot to be compared</span>
+<span class="sd">            against a more recent snapshot or the current blob.</span>
+<span class="sd">        :param str snapshot:</span>
+<span class="sd">            The snapshot parameter is an opaque DateTime value that</span>
+<span class="sd">            specifies a more recent blob snapshot to be compared</span>
+<span class="sd">            against a previous snapshot (previous_snapshot).</span>
+<span class="sd">        :param int start_range:</span>
+<span class="sd">            Start of byte range to use for getting different page ranges.</span>
+<span class="sd">            If no end_range is given, all bytes after the start_range will be searched.</span>
+<span class="sd">            Pages must be aligned with 512-byte boundaries, the start offset</span>
+<span class="sd">            must be a modulus of 512 and the end offset must be a modulus of</span>
+<span class="sd">            512-1. Examples of valid byte ranges are 0-511, 512-, etc.</span>
+<span class="sd">        :param int end_range:</span>
+<span class="sd">            End of byte range to use for getting different page ranges.</span>
+<span class="sd">            If end_range is given, start_range must be provided.</span>
+<span class="sd">            This range will return valid page ranges for from the offset start up to</span>
+<span class="sd">            offset end.</span>
+<span class="sd">            Pages must be aligned with 512-byte boundaries, the start offset</span>
+<span class="sd">            must be a modulus of 512 and the end offset must be a modulus of</span>
+<span class="sd">            512-1. Examples of valid byte ranges are 0-511, 512-, etc.</span>
+<span class="sd">        :param str lease_id:</span>
+<span class="sd">            Required if the blob has an active lease.</span>
+<span class="sd">        :param datetime if_modified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC. </span>
+<span class="sd">            Specify this header to perform the operation only</span>
+<span class="sd">            if the resource has been modified since the specified time.</span>
+<span class="sd">        :param datetime if_unmodified_since:</span>
+<span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>
+<span class="sd">            If timezone is included, any non-UTC datetimes will be converted to UTC.</span>
+<span class="sd">            If a date is passed in without timezone info, it is assumed to be UTC.</span>
+<span class="sd">            Specify this header to perform the operation only if</span>
+<span class="sd">            the resource has not been modified since the specified date/time.</span>
+<span class="sd">        :param str if_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header to perform</span>
+<span class="sd">            the operation only if the resource&#39;s ETag matches the value specified.</span>
+<span class="sd">        :param str if_none_match:</span>
+<span class="sd">            An ETag value, or the wildcard character (*). Specify this header</span>
+<span class="sd">            to perform the operation only if the resource&#39;s ETag does not match</span>
+<span class="sd">            the value specified. Specify the wildcard character (*) to perform</span>
+<span class="sd">            the operation only if the resource does not exist, and fail the</span>
+<span class="sd">            operation if it does exist.</span>
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: A list of different Page Ranges for the Page Blob.</span>
+<span class="sd">        :rtype: list of :class:`~azure.storage.blob.models.PageRange`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;previous_snapshot&#39;</span><span class="p">,</span> <span class="n">previous_snapshot</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;pagelist&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;snapshot&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s1">&#39;prevsnapshot&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">previous_snapshot</span><span class="p">)),</span>
             <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
         <span class="p">]</span>
         <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
