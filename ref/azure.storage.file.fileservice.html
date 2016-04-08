@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.file.fileservice module &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.file.fileservice module &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage.file package" href="azure.storage.file.html" />
     <link rel="next" title="azure.storage.file.models module" href="azure.storage.file.models.html" />
     <link rel="prev" title="azure.storage.file package" href="azure.storage.file.html" />
@@ -149,21 +149,34 @@ Ex: start_range=0, end_range=511 will download first 512 bytes of file.</li>
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.copy_file">
 <code class="descname">copy_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>copy_source</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.copy_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Copies a blob or file to a destination file within the storage account.</p>
+<dd><p>Copies a file asynchronously. This operation returns a copy operation 
+properties object, including a copy ID you can use to check or abort the 
+copy operation. The File service copies files on a best-effort basis.</p>
+<p>If the destination file exists, it will be overwritten. The destination 
+file cannot be modified while the copy operation is in progress.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>share_name</strong> (<em>str</em>) &#8211; Name of existing share.</li>
-<li><strong>directory_name</strong> (<em>str</em>) &#8211; The path to the directory.</li>
-<li><strong>file_name</strong> (<em>str</em>) &#8211; Name of existing file.</li>
-<li><strong>copy_source</strong> (<em>str</em>) &#8211; Specifies the URL of the source blob or file, up to 2 KB in length. 
-A source file in the same account can be private, but a file in another account
-must be public or accept credentials included in this URL, such as
-a Shared Access Signature. Examples:
-<a class="reference external" href="https://myaccount.file.core.windows.net/myshare/mydirectory/myfile">https://myaccount.file.core.windows.net/myshare/mydirectory/myfile</a></li>
-<li><strong>metadata</strong> (<em>A dict mapping str to str.</em>) &#8211; Dict containing name, value pairs.</li>
+<li><strong>share_name</strong> (<em>str</em>) &#8211; Name of the destination share. The share must exist.</li>
+<li><strong>directory_name</strong> (<em>str</em>) &#8211; Name of the destination directory. The directory must exist.</li>
+<li><strong>file_name</strong> (<em>str</em>) &#8211; Name of the destination file. If the destination file exists, it will 
+be overwritten. Otherwise, it will be created.</li>
+<li><strong>copy_source</strong> (<em>str</em>) &#8211; A URL of up to 2 KB in length that specifies an Azure file or blob. 
+The value should be URL-encoded as it would appear in a request URI. 
+If the source is in another account, the source must either be public 
+or must be authenticated via a shared access signature. If the source 
+is public, no authentication is required.
+Examples:
+<a class="reference external" href="https://myaccount.file.core.windows.net/myshare/mydir/myfile">https://myaccount.file.core.windows.net/myshare/mydir/myfile</a>
+<a class="reference external" href="https://myaccount.file.core.windows.net/myshare/my/dir/myfile">https://myaccount.file.core.windows.net/myshare/my/dir/myfile</a>?snapshot=&lt;DateTime&gt;
+<a class="reference external" href="https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken">https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken</a></li>
+<li><strong>metadata</strong> (<em>A dict mapping str to str.</em>) &#8211; Name-value pairs associated with the file as metadata. If no name-value 
+pairs are specified, the operation will copy the metadata from the 
+source blob or file to the destination file. If one or more name-value 
+pairs are specified, the destination file is created with the specified 
+metadata, and the metadata is not copied from the source blob or file.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds.</li>
 </ul>
 </td>
@@ -1132,9 +1145,9 @@ The generator will lazily follow the continuation tokens returned by
 the service and stop when all directories and files have been returned or
 num_results is reached.</p>
 <p>If num_results is specified and the share has more than that number of 
-containers, the generator will have a populated next_marker field once it 
-finishes. This marker can be used to create a new generator if more 
-results are desired.</p>
+files and directories, the generator will have a populated next_marker 
+field once it finishes. This marker can be used to create a new generator 
+if more results are desired.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

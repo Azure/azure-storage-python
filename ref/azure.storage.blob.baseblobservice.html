@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.baseblobservice module &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.blob.baseblobservice module &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage.blob package" href="azure.storage.blob.html" />
     <link rel="next" title="azure.storage.blob.blockblobservice module" href="azure.storage.blob.blockblobservice.html" />
     <link rel="prev" title="azure.storage.blob.appendblobservice module" href="azure.storage.blob.appendblobservice.html" />
@@ -122,8 +122,8 @@ copy_blob operation.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.acquire_blob_lease">
 <code class="descname">acquire_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_duration=-1</em>, <em>proposed_lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.acquire_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.acquire_blob_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acquires a lock on a blob for write and delete operations.
-The lock duration can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Requests a new lease. If the blob does not have an active lease, the Blob
+service creates a lease on the blob and returns a new lease ID.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -172,8 +172,9 @@ operation if it does exist.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.acquire_container_lease">
 <code class="descname">acquire_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_duration=-1</em>, <em>proposed_lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.acquire_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.acquire_container_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acquires a lock on a container for delete operations.
-The lock duration can be 15 to 60 seconds or infinite.</p>
+<dd><p>Requests a new lease. If the container does not have an active lease,
+the Blob service creates a lease on the container and returns a new
+lease ID.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -213,8 +214,14 @@ the resource has not been modified since the specified date/time.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.break_blob_lease">
 <code class="descname">break_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_break_period=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.break_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.break_blob_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Breaks a lock on a blob for write and delete operations.
-The lock duration can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Breaks the lease, if the blob has an active lease. Once a lease is broken,
+it cannot be renewed. Any authorized request can break the lease; the request
+is not required to specify a matching lease ID. When a lease is broken,
+the lease break period is allowed to elapse, during which time no lease operation
+except break and release can be performed on the blob. When a lease is successfully
+broken, the response indicates the interval in seconds until a new lease can be acquired.</p>
+<p>A lease that has been broken can also be released, in which case another client may
+immediately acquire the lease on the blob.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -265,10 +272,13 @@ operation if it does exist.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.break_container_lease">
 <code class="descname">break_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_break_period=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.break_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.break_container_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Breaks a lock on a container for delete operations.
-Use to end the lease but ensure that another client cannot
-acquire a new lease until the current lease period has expired.
-The lock duration can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Break the lease, if the container has an active lease. Once a lease is
+broken, it cannot be renewed. Any authorized request can break the lease;
+the request is not required to specify a matching lease ID. When a lease
+is broken, the lease break period is allowed to elapse, during which time
+no lease operation except break and release can be performed on the container.
+When a lease is successfully broken, the response indicates the interval
+in seconds until a new lease can be acquired.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -311,8 +321,8 @@ the resource has not been modified since the specified date/time.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.change_blob_lease">
 <code class="descname">change_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>proposed_lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.change_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.change_blob_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Changes a lock on a blob for write and delete operations.
-The lock duration can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Changes the lease ID of an active lease. A change must include the current
+lease ID and a new lease ID.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -351,8 +361,8 @@ operation if it does exist.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.change_container_lease">
 <code class="descname">change_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>proposed_lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.change_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.change_container_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Changes the lease ID for a lock on a container for delete operations.
-The lock duration can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Change the lease ID of an active lease. A change must include the current
+lease ID and a new lease ID.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -383,23 +393,50 @@ the resource has not been modified since the specified date/time.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.copy_blob">
 <code class="descname">copy_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>copy_source</em>, <em>metadata=None</em>, <em>source_if_modified_since=None</em>, <em>source_if_unmodified_since=None</em>, <em>source_if_match=None</em>, <em>source_if_none_match=None</em>, <em>destination_if_modified_since=None</em>, <em>destination_if_unmodified_since=None</em>, <em>destination_if_match=None</em>, <em>destination_if_none_match=None</em>, <em>destination_lease_id=None</em>, <em>source_lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.copy_blob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.copy_blob" title="Permalink to this definition">¶</a></dt>
-<dd><p>Copies a blob to a destination within the storage account.
-The source for a Copy Blob operation can be a committed blob 
-or an Azure file in any Azure storage account.</p>
+<dd><p>Copies a blob asynchronously. This operation returns a copy operation 
+properties object, including a copy ID you can use to check or abort the 
+copy operation. The Blob service copies blobs on a best-effort basis.</p>
+<p>The source blob for a copy operation may be a block blob, an append blob, 
+or a page blob. If the destination blob already exists, it must be of the 
+same blob type as the source blob. Any existing destination blob will be 
+overwritten. The destination blob cannot be modified while a copy operation 
+is in progress.</p>
+<p>When copying from a page blob, the Blob service creates a destination page 
+blob of the source blob’s length, initially containing all zeroes. Then 
+the source page ranges are enumerated, and non-empty ranges are copied.</p>
+<p>For a block blob or an append blob, the Blob service creates a committed 
+blob of zero length before returning from this operation. When copying 
+from a block blob, all committed blocks and their block IDs are copied. 
+Uncommitted blocks are not copied. At the end of the copy operation, the 
+destination blob will have the same committed block count as the source.</p>
+<p>When copying from an append blob, all committed blocks are copied. At the 
+end of the copy operation, the destination blob will have the same committed 
+block count as the source.</p>
+<p>For all blob types, you can call get_blob_properties on the destination 
+blob to check the status of the copy operation. The final blob will be 
+committed when the copy completes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
-<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of existing blob.</li>
-<li><strong>copy_source</strong> (<em>str</em>) &#8211; URL up to 2 KB in length that specifies a blob. A source blob in
-the same account can be private, but a blob in another account
-must be public or accept credentials included in this URL, such as
-a Shared Access Signature. Examples:
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of the destination container. The container must exist.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of the destination blob. If the destination blob exists, it will 
+be overwritten. Otherwise, it will be created.</li>
+<li><strong>copy_source</strong> (<em>str</em>) &#8211; A URL of up to 2 KB in length that specifies an Azure file or blob. 
+The value should be URL-encoded as it would appear in a request URI. 
+If the source is in another account, the source must either be public 
+or must be authenticated via a shared access signature. If the source 
+is public, no authentication is required.
+Examples:
 <a class="reference external" href="https://myaccount.blob.core.windows.net/mycontainer/myblob">https://myaccount.blob.core.windows.net/mycontainer/myblob</a>
-<a class="reference external" href="https://myaccount.blob.core.windows.net/mycontainer/myblob">https://myaccount.blob.core.windows.net/mycontainer/myblob</a>?snapshot=&lt;DateTime&gt;</li>
-<li><strong>metadata</strong> (<em>A dict mapping str to str.</em>) &#8211; Dict containing name and value pairs.</li>
+<a class="reference external" href="https://myaccount.blob.core.windows.net/mycontainer/myblob">https://myaccount.blob.core.windows.net/mycontainer/myblob</a>?snapshot=&lt;DateTime&gt;
+<a class="reference external" href="https://otheraccount.blob.core.windows.net/mycontainer/myblob?sastoken">https://otheraccount.blob.core.windows.net/mycontainer/myblob?sastoken</a></li>
+<li><strong>metadata</strong> (<em>A dict mapping str to str.</em>) &#8211; Name-value pairs associated with the blob as metadata. If no name-value 
+pairs are specified, the operation will copy the metadata from the 
+source blob or file to the destination blob. If one or more name-value 
+pairs are specified, the destination blob is created with the specified 
+metadata, and metadata is not copied from the source blob or file.</li>
 <li><strong>source_if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
 If timezone is included, any non-UTC datetimes will be converted to UTC.
 If a date is passed in without timezone info, it is assumed to be UTC.  
@@ -889,6 +926,38 @@ target_version property</td>
 </dd></dl>
 
 <dl class="method">
+<dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_stats">
+<code class="descname">get_blob_service_stats</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_service_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves statistics related to replication for the Blob service. It is 
+only available when read-access geo-redundant replication is enabled for 
+the storage account.</p>
+<p>With geo-redundant replication, Azure Storage maintains your data durable 
+in two locations. In both locations, Azure Storage constantly maintains 
+multiple healthy replicas of your data. The location where you read, 
+create, update, or delete data is the primary storage account location. 
+The primary location exists in the region you choose at the time you 
+create an account via the Azure Management Azure classic portal, for 
+example, North Central US. The location to which your data is replicated 
+is the secondary location. The secondary location is automatically 
+determined based on the location of the primary; it is in a second data 
+center that resides in the same region as the primary location. Read-only 
+access is available from the secondary location, if read-access geo-redundant 
+replication is enabled for your storage account.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The blob service stats.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="azure.storage.models.html#azure.storage.models.ServiceStats" title="azure.storage.models.ServiceStats"><code class="xref py py-class docutils literal"><span class="pre">ServiceStats</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_bytes">
 <code class="descname">get_blob_to_bytes</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>range_get_content_md5=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a blob as an array of bytes, with automatic chunking and
@@ -1352,8 +1421,9 @@ generate_shared_access_signature.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.release_blob_lease">
 <code class="descname">release_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.release_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.release_blob_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Releases a lock on a blob for write and delete operations.
-The lock duration can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Releases the lease. The lease may be released if the lease ID specified on the
+request matches that associated with the blob. Releasing the lease allows another
+client to immediately acquire the lease for the blob as soon as the release is complete.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1390,10 +1460,9 @@ operation if it does exist.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.release_container_lease">
 <code class="descname">release_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.release_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.release_container_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Releases a lock on a container for delete operations, to free the
-lease if it is no longer needed so that another client may
-immediately acquire a lease against the container. The lock duration
-can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Release the lease. The lease may be released if the lease_id specified matches
+that associated with the container. Releasing the lease allows another client
+to immediately acquire the lease for the container as soon as the release is complete.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1422,8 +1491,11 @@ the resource has not been modified since the specified date/time.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.renew_blob_lease">
 <code class="descname">renew_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.renew_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.renew_blob_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Renews a lock on a blob for write and delete operations.
-The lock duration can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Renews the lease. The lease can be renewed if the lease ID specified on
+the request matches that associated with the blob. Note that the lease may
+be renewed even if it has expired as long as the blob has not been modified
+or leased again since the expiration of that lease. When you renew a lease,
+the lease duration clock resets.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1466,8 +1538,11 @@ operation if it does exist.</li>
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.renew_container_lease">
 <code class="descname">renew_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.renew_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.renew_container_lease" title="Permalink to this definition">¶</a></dt>
-<dd><p>Renews a lock on a container for delete operations.
-The lock duration can be 15 to 60 seconds, or can be infinite.</p>
+<dd><p>Renews the lease. The lease can be renewed if the lease ID specified
+matches that associated with the container. Note that
+the lease may be renewed even if it has expired as long as the container
+has not been leased again since the expiration of that lease. When you
+renew a lease, the lease duration clock resets.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

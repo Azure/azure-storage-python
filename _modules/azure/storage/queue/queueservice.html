@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.queue.queueservice &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.queue.queueservice &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
   
@@ -96,6 +96,7 @@
 <span class="kn">from</span> <span class="nn">.._deserialization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_convert_xml_to_service_properties</span><span class="p">,</span>
     <span class="n">_convert_xml_to_signed_identifiers</span><span class="p">,</span>
+    <span class="n">_convert_xml_to_service_stats</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_convert_queue_message_xml</span><span class="p">,</span>
@@ -285,7 +286,7 @@
 <span class="sd">        :param str id:</span>
 <span class="sd">            A unique value up to 64 characters in length that correlates to a </span>
 <span class="sd">            stored access policy. To create a stored access policy, use </span>
-<span class="sd">            set_blob_service_properties.</span>
+<span class="sd">            set_queue_service_properties.</span>
 <span class="sd">        :param str ip:</span>
 <span class="sd">            Specifies an IP address or a range of IP addresses from which to accept requests.</span>
 <span class="sd">            If the IP address from which the request originates does not match the IP address</span>
@@ -312,6 +313,43 @@
             <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="QueueService.get_queue_service_stats"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.get_queue_service_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_queue_service_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Retrieves statistics related to replication for the Queue service. It is </span>
+<span class="sd">        only available when read-access geo-redundant replication is enabled for </span>
+<span class="sd">        the storage account.</span>
+
+<span class="sd">        With geo-redundant replication, Azure Storage maintains your data durable </span>
+<span class="sd">        in two locations. In both locations, Azure Storage constantly maintains </span>
+<span class="sd">        multiple healthy replicas of your data. The location where you read, </span>
+<span class="sd">        create, update, or delete data is the primary storage account location. </span>
+<span class="sd">        The primary location exists in the region you choose at the time you </span>
+<span class="sd">        create an account via the Azure Management Azure classic portal, for </span>
+<span class="sd">        example, North Central US. The location to which your data is replicated </span>
+<span class="sd">        is the secondary location. The secondary location is automatically </span>
+<span class="sd">        determined based on the location of the primary; it is in a second data </span>
+<span class="sd">        center that resides in the same region as the primary location. Read-only </span>
+<span class="sd">        access is available from the secondary location, if read-access geo-redundant </span>
+<span class="sd">        replication is enabled for your storage account.</span>
+
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: The queue service stats.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.models.ServiceStats`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondary_endpoint</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;restype&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;stats&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_convert_xml_to_service_stats</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="QueueService.get_queue_service_properties"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.get_queue_service_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_queue_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -349,10 +387,10 @@
 <span class="sd">            The logging settings provide request logs.</span>
 <span class="sd">        :param Metrics hour_metrics:</span>
 <span class="sd">            The hour metrics settings provide a summary of request </span>
-<span class="sd">            statistics grouped by API in hourly aggregates for blobs.</span>
+<span class="sd">            statistics grouped by API in hourly aggregates for queuess.</span>
 <span class="sd">        :param Metrics minute_metrics:</span>
 <span class="sd">            The minute metrics settings provide request statistics </span>
-<span class="sd">            for each minute for blobs.</span>
+<span class="sd">            for each minute for queues.</span>
 <span class="sd">        :param cors:</span>
 <span class="sd">            You can include up to five CorsRule elements in the </span>
 <span class="sd">            list. If an empty list is specified, all CORS rules will be deleted, </span>

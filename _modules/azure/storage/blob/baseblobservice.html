@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.baseblobservice &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.blob.baseblobservice &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
   
@@ -104,6 +104,7 @@
     <span class="n">_get_download_size</span><span class="p">,</span>
     <span class="n">_parse_metadata</span><span class="p">,</span>
     <span class="n">_parse_properties</span><span class="p">,</span>
+    <span class="n">_convert_xml_to_service_stats</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_get_path</span><span class="p">,</span>
@@ -846,8 +847,7 @@
         <span class="n">lease_break_period</span><span class="p">,</span> <span class="n">proposed_lease_id</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="p">,</span>
         <span class="n">if_unmodified_since</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Establishes and manages a lock on a container for delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
+<span class="sd">        Establishes and manages a lease on a container.</span>
 <span class="sd">        The Lease Container operation can be called in one of five modes</span>
 <span class="sd">            Acquire, to request a new lease</span>
 <span class="sd">            Renew, to renew an existing lease</span>
@@ -928,8 +928,9 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">lease_duration</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">proposed_lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Acquires a lock on a container for delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds or infinite.</span>
+<span class="sd">        Requests a new lease. If the container does not have an active lease,</span>
+<span class="sd">        the Blob service creates a lease on the container and returns a new</span>
+<span class="sd">        lease ID.</span>
 
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
@@ -978,9 +979,12 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">lease_id</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Renews a lock on a container for delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
-
+<span class="sd">        Renews the lease. The lease can be renewed if the lease ID specified</span>
+<span class="sd">        matches that associated with the container. Note that</span>
+<span class="sd">        the lease may be renewed even if it has expired as long as the container</span>
+<span class="sd">        has not been leased again since the expiration of that lease. When you</span>
+<span class="sd">        renew a lease, the lease duration clock resets.</span>
+<span class="sd">        </span>
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
 <span class="sd">        :param str lease_id:</span>
@@ -1019,10 +1023,9 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">lease_id</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Releases a lock on a container for delete operations, to free the</span>
-<span class="sd">        lease if it is no longer needed so that another client may</span>
-<span class="sd">        immediately acquire a lease against the container. The lock duration</span>
-<span class="sd">        can be 15 to 60 seconds, or can be infinite.</span>
+<span class="sd">        Release the lease. The lease may be released if the lease_id specified matches</span>
+<span class="sd">        that associated with the container. Releasing the lease allows another client</span>
+<span class="sd">        to immediately acquire the lease for the container as soon as the release is complete. </span>
 
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
@@ -1059,10 +1062,13 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">lease_break_period</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Breaks a lock on a container for delete operations.</span>
-<span class="sd">        Use to end the lease but ensure that another client cannot</span>
-<span class="sd">        acquire a new lease until the current lease period has expired.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
+<span class="sd">        Break the lease, if the container has an active lease. Once a lease is</span>
+<span class="sd">        broken, it cannot be renewed. Any authorized request can break the lease;</span>
+<span class="sd">        the request is not required to specify a matching lease ID. When a lease</span>
+<span class="sd">        is broken, the lease break period is allowed to elapse, during which time</span>
+<span class="sd">        no lease operation except break and release can be performed on the container.</span>
+<span class="sd">        When a lease is successfully broken, the response indicates the interval</span>
+<span class="sd">        in seconds until a new lease can be acquired. </span>
 
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
@@ -1111,8 +1117,8 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">lease_id</span><span class="p">,</span> <span class="n">proposed_lease_id</span><span class="p">,</span>
         <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Changes the lease ID for a lock on a container for delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
+<span class="sd">        Change the lease ID of an active lease. A change must include the current</span>
+<span class="sd">        lease ID and a new lease ID.</span>
 
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
@@ -1263,6 +1269,43 @@
 
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_convert_xml_to_blob_list</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseBlobService.get_blob_service_stats"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.baseblobservice.html#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_blob_service_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Retrieves statistics related to replication for the Blob service. It is </span>
+<span class="sd">        only available when read-access geo-redundant replication is enabled for </span>
+<span class="sd">        the storage account.</span>
+
+<span class="sd">        With geo-redundant replication, Azure Storage maintains your data durable </span>
+<span class="sd">        in two locations. In both locations, Azure Storage constantly maintains </span>
+<span class="sd">        multiple healthy replicas of your data. The location where you read, </span>
+<span class="sd">        create, update, or delete data is the primary storage account location. </span>
+<span class="sd">        The primary location exists in the region you choose at the time you </span>
+<span class="sd">        create an account via the Azure Management Azure classic portal, for </span>
+<span class="sd">        example, North Central US. The location to which your data is replicated </span>
+<span class="sd">        is the secondary location. The secondary location is automatically </span>
+<span class="sd">        determined based on the location of the primary; it is in a second data </span>
+<span class="sd">        center that resides in the same region as the primary location. Read-only </span>
+<span class="sd">        access is available from the secondary location, if read-access geo-redundant </span>
+<span class="sd">        replication is enabled for your storage account.</span>
+
+<span class="sd">        :param int timeout:</span>
+<span class="sd">            The timeout parameter is expressed in seconds.</span>
+<span class="sd">        :return: The blob service stats.</span>
+<span class="sd">        :rtype: :class:`~azure.storage.models.ServiceStats`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondary_endpoint</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;restype&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;stats&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
+        <span class="p">]</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_convert_xml_to_service_stats</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseBlobService.set_blob_service_properties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.baseblobservice.html#azure.storage.blob.baseblobservice.BaseBlobService.set_blob_service_properties">[docs]</a>    <span class="k">def</span> <span class="nf">set_blob_service_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">logging</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">minute_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -2168,8 +2211,15 @@
                          <span class="n">proposed_lease_id</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="p">,</span>
                          <span class="n">if_unmodified_since</span><span class="p">,</span> <span class="n">if_match</span><span class="p">,</span> <span class="n">if_none_match</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Establishes and manages a lock on a blob for write and delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
+<span class="sd">        Establishes and manages a lease on a blob for write and delete operations.</span>
+<span class="sd">        The Lease Blob operation can be called in one of five modes:</span>
+<span class="sd">            Acquire, to request a new lease.</span>
+<span class="sd">            Renew, to renew an existing lease.</span>
+<span class="sd">            Change, to change the ID of an existing lease.</span>
+<span class="sd">            Release, to free the lease if it is no longer needed so that another</span>
+<span class="sd">                client may immediately acquire a lease against the blob.</span>
+<span class="sd">            Break, to end the lease but ensure that another client cannot acquire</span>
+<span class="sd">                a new lease until the current lease period has expired.</span>
 
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
@@ -2258,9 +2308,9 @@
                            <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                            <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Acquires a lock on a blob for write and delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
-
+<span class="sd">        Requests a new lease. If the blob does not have an active lease, the Blob</span>
+<span class="sd">        service creates a lease on the blob and returns a new lease ID.</span>
+<span class="sd">        </span>
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
 <span class="sd">        :param str blob_name:</span>
@@ -2324,9 +2374,12 @@
                          <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                          <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Renews a lock on a blob for write and delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
-
+<span class="sd">        Renews the lease. The lease can be renewed if the lease ID specified on</span>
+<span class="sd">        the request matches that associated with the blob. Note that the lease may</span>
+<span class="sd">        be renewed even if it has expired as long as the blob has not been modified</span>
+<span class="sd">        or leased again since the expiration of that lease. When you renew a lease,</span>
+<span class="sd">        the lease duration clock resets. </span>
+<span class="sd">        </span>
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
 <span class="sd">        :param str blob_name:</span>
@@ -2380,9 +2433,10 @@
                            <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                            <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Releases a lock on a blob for write and delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
-
+<span class="sd">        Releases the lease. The lease may be released if the lease ID specified on the</span>
+<span class="sd">        request matches that associated with the blob. Releasing the lease allows another</span>
+<span class="sd">        client to immediately acquire the lease for the blob as soon as the release is complete. </span>
+<span class="sd">        </span>
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
 <span class="sd">        :param str blob_name:</span>
@@ -2435,8 +2489,15 @@
                          <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                          <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Breaks a lock on a blob for write and delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
+<span class="sd">        Breaks the lease, if the blob has an active lease. Once a lease is broken,</span>
+<span class="sd">        it cannot be renewed. Any authorized request can break the lease; the request</span>
+<span class="sd">        is not required to specify a matching lease ID. When a lease is broken,</span>
+<span class="sd">        the lease break period is allowed to elapse, during which time no lease operation</span>
+<span class="sd">        except break and release can be performed on the blob. When a lease is successfully</span>
+<span class="sd">        broken, the response indicates the interval in seconds until a new lease can be acquired. </span>
+
+<span class="sd">        A lease that has been broken can also be released, in which case another client may</span>
+<span class="sd">        immediately acquire the lease on the blob.</span>
 
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
@@ -2503,8 +2564,8 @@
                          <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                          <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Changes a lock on a blob for write and delete operations.</span>
-<span class="sd">        The lock duration can be 15 to 60 seconds, or can be infinite.</span>
+<span class="sd">        Changes the lease ID of an active lease. A change must include the current</span>
+<span class="sd">        lease ID and a new lease ID.</span>
 
 <span class="sd">        :param str container_name:</span>
 <span class="sd">            Name of existing container.</span>
@@ -2632,23 +2693,55 @@
                   <span class="n">destination_lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                   <span class="n">source_lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Copies a blob to a destination within the storage account.</span>
-<span class="sd">        The source for a Copy Blob operation can be a committed blob </span>
-<span class="sd">        or an Azure file in any Azure storage account.</span>
+<span class="sd">        Copies a blob asynchronously. This operation returns a copy operation </span>
+<span class="sd">        properties object, including a copy ID you can use to check or abort the </span>
+<span class="sd">        copy operation. The Blob service copies blobs on a best-effort basis.</span>
+
+<span class="sd">        The source blob for a copy operation may be a block blob, an append blob, </span>
+<span class="sd">        or a page blob. If the destination blob already exists, it must be of the </span>
+<span class="sd">        same blob type as the source blob. Any existing destination blob will be </span>
+<span class="sd">        overwritten. The destination blob cannot be modified while a copy operation </span>
+<span class="sd">        is in progress.</span>
+
+<span class="sd">        When copying from a page blob, the Blob service creates a destination page </span>
+<span class="sd">        blob of the source blob’s length, initially containing all zeroes. Then </span>
+<span class="sd">        the source page ranges are enumerated, and non-empty ranges are copied. </span>
+
+<span class="sd">        For a block blob or an append blob, the Blob service creates a committed </span>
+<span class="sd">        blob of zero length before returning from this operation. When copying </span>
+<span class="sd">        from a block blob, all committed blocks and their block IDs are copied. </span>
+<span class="sd">        Uncommitted blocks are not copied. At the end of the copy operation, the </span>
+<span class="sd">        destination blob will have the same committed block count as the source.</span>
+
+<span class="sd">        When copying from an append blob, all committed blocks are copied. At the </span>
+<span class="sd">        end of the copy operation, the destination blob will have the same committed </span>
+<span class="sd">        block count as the source.</span>
+
+<span class="sd">        For all blob types, you can call get_blob_properties on the destination </span>
+<span class="sd">        blob to check the status of the copy operation. The final blob will be </span>
+<span class="sd">        committed when the copy completes.</span>
 
 <span class="sd">        :param str container_name:</span>
-<span class="sd">            Name of existing container.</span>
+<span class="sd">            Name of the destination container. The container must exist.</span>
 <span class="sd">        :param str blob_name:</span>
-<span class="sd">            Name of existing blob.</span>
+<span class="sd">            Name of the destination blob. If the destination blob exists, it will </span>
+<span class="sd">            be overwritten. Otherwise, it will be created.</span>
 <span class="sd">        :param str copy_source:</span>
-<span class="sd">            URL up to 2 KB in length that specifies a blob. A source blob in</span>
-<span class="sd">            the same account can be private, but a blob in another account</span>
-<span class="sd">            must be public or accept credentials included in this URL, such as</span>
-<span class="sd">            a Shared Access Signature. Examples:</span>
+<span class="sd">            A URL of up to 2 KB in length that specifies an Azure file or blob. </span>
+<span class="sd">            The value should be URL-encoded as it would appear in a request URI. </span>
+<span class="sd">            If the source is in another account, the source must either be public </span>
+<span class="sd">            or must be authenticated via a shared access signature. If the source </span>
+<span class="sd">            is public, no authentication is required.</span>
+<span class="sd">            Examples:</span>
 <span class="sd">            https://myaccount.blob.core.windows.net/mycontainer/myblob</span>
 <span class="sd">            https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=&lt;DateTime&gt;</span>
+<span class="sd">            https://otheraccount.blob.core.windows.net/mycontainer/myblob?sastoken</span>
 <span class="sd">        :param metadata:</span>
-<span class="sd">            Dict containing name and value pairs.</span>
+<span class="sd">            Name-value pairs associated with the blob as metadata. If no name-value </span>
+<span class="sd">            pairs are specified, the operation will copy the metadata from the </span>
+<span class="sd">            source blob or file to the destination blob. If one or more name-value </span>
+<span class="sd">            pairs are specified, the destination blob is created with the specified </span>
+<span class="sd">            metadata, and metadata is not copied from the source blob or file. </span>
 <span class="sd">        :type metadata: A dict mapping str to str.</span>
 <span class="sd">        :param datetime source_if_modified_since:</span>
 <span class="sd">            A DateTime value. Azure expects the date value passed in to be UTC.</span>

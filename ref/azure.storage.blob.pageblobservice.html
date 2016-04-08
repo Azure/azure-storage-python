@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.pageblobservice module &mdash; Azure Storage SDK for Python 0.30.0 documentation</title>
+    <title>azure.storage.blob.pageblobservice module &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.30.0',
+        VERSION:     '0.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.30.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage.blob package" href="azure.storage.blob.html" />
     <link rel="next" title="azure.storage.file package" href="azure.storage.file.html" />
     <link rel="prev" title="azure.storage.blob.models module" href="azure.storage.blob.models.html" />
@@ -420,6 +420,69 @@ operation if it does exist.</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of valid Page Ranges for the Page Blob.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of <a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.PageRange" title="azure.storage.blob.models.PageRange"><code class="xref py py-class docutils literal"><span class="pre">PageRange</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="azure.storage.blob.pageblobservice.PageBlobService.get_page_ranges_diff">
+<code class="descname">get_page_ranges_diff</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>previous_snapshot</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/pageblobservice.html#PageBlobService.get_page_ranges_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.pageblobservice.PageBlobService.get_page_ranges_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>The response will include only the pages that are different between either a
+recent snapshot or the current blob and a previous snapshot, including pages
+that were cleared.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
+<li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of existing blob.</li>
+<li><strong>previous_snapshot</strong> (<em>str</em>) &#8211; The snapshot parameter is an opaque DateTime value that
+specifies a previous blob snapshot to be compared
+against a more recent snapshot or the current blob.</li>
+<li><strong>snapshot</strong> (<em>str</em>) &#8211; The snapshot parameter is an opaque DateTime value that
+specifies a more recent blob snapshot to be compared
+against a previous snapshot (previous_snapshot).</li>
+<li><strong>start_range</strong> (<em>int</em>) &#8211; Start of byte range to use for getting different page ranges.
+If no end_range is given, all bytes after the start_range will be searched.
+Pages must be aligned with 512-byte boundaries, the start offset
+must be a modulus of 512 and the end offset must be a modulus of
+512-1. Examples of valid byte ranges are 0-511, 512-, etc.</li>
+<li><strong>end_range</strong> (<em>int</em>) &#8211; End of byte range to use for getting different page ranges.
+If end_range is given, start_range must be provided.
+This range will return valid page ranges for from the offset start up to
+offset end.
+Pages must be aligned with 512-byte boundaries, the start offset
+must be a modulus of 512 and the end offset must be a modulus of
+512-1. Examples of valid byte ranges are 0-511, 512-, etc.</li>
+<li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
+<li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC. 
+Specify this header to perform the operation only
+if the resource has been modified since the specified time.</li>
+<li><strong>if_unmodified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
+If timezone is included, any non-UTC datetimes will be converted to UTC.
+If a date is passed in without timezone info, it is assumed to be UTC.
+Specify this header to perform the operation only if
+the resource has not been modified since the specified date/time.</li>
+<li><strong>if_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header to perform
+the operation only if the resource&#8217;s ETag matches the value specified.</li>
+<li><strong>if_none_match</strong> (<em>str</em>) &#8211; An ETag value, or the wildcard character (*). Specify this header
+to perform the operation only if the resource&#8217;s ETag does not match
+the value specified. Specify the wildcard character (*) to perform
+the operation only if the resource does not exist, and fail the
+operation if it does exist.</li>
+<li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list of different Page Ranges for the Page Blob.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of <a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.PageRange" title="azure.storage.blob.models.PageRange"><code class="xref py py-class docutils literal"><span class="pre">PageRange</span></code></a></p>
