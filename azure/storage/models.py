@@ -14,8 +14,10 @@
 #--------------------------------------------------------------------------
 import sys
 if sys.version_info < (3,):
+    from collections import Iterable
     _unicode_type = unicode
 else:
+    from collections.abc import Iterable
     _unicode_type = str
 
 from ._error import (
@@ -35,7 +37,7 @@ class _dict(dict):
     '''Used so that additional properties can be set on the return dictionary'''
     pass
 
-class ListGenerator(object):
+class ListGenerator(Iterable):
     '''
     A generator object used to list storage resources. The generator will lazily 
     follow the continuation tokens returned by the service and stop when all 
@@ -269,6 +271,42 @@ class ServiceProperties(object):
     For more information on CORS, see https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx
     '''
 
+    pass
+
+
+class ServiceStats(object):
+    ''' 
+    Returned by get_*_service_stats functions. Contains statistics related to 
+    replication for the given service. It is only available when read-access 
+    geo-redundant replication is enabled for the storage account.
+
+    :ivar GeoReplication geo_replication:
+        An object containing statistics related to replication for the given service.
+    '''
+    pass
+
+
+class GeoReplication(object):
+    ''' 
+    Contains statistics related to replication for the given service.
+
+    :ivar str status:
+        The status of the secondary location. Possible values are:
+            live: Indicates that the secondary location is active and operational.
+            bootstrap: Indicates initial synchronization from the primary location 
+                to the secondary location is in progress. This typically occurs 
+                when replication is first enabled.
+            unavailable: Indicates that the secondary location is temporarily 
+                unavailable.
+    :ivar date last_sync_time:
+        A GMT date value, to the second. All primary writes preceding this value 
+        are guaranteed to be available for read operations at the secondary. 
+        Primary writes after this point in time may or may not be available for 
+        reads. The value may be empty if LastSyncTime is not available. This can 
+        happen if the replication status is bootstrap or unavailable. Although 
+        geo-replication is continuously enabled, the LastSyncTime result may 
+        reflect a cached value from the service that is refreshed every few minutes.
+    '''
     pass
 
 

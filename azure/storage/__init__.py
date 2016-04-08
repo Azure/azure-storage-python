@@ -29,6 +29,8 @@ from .models import (
     Services,
     AccountPermissions,
     Protocol,
+    ServiceStats,
+    GeoReplication,
 )
 
 from .cloudstorageaccount import CloudStorageAccount

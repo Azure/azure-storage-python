@@ -75,7 +75,11 @@ class _ServiceParameters(object):
             # Setup the primary endpoint
             if custom_domain:
                 parsed_url = urlparse(custom_domain)
-                self.primary_endpoint = parsed_url.netloc + parsed_url.path
+
+                # Trim any trailing slashes from the path
+                path = parsed_url.path.rstrip('/')
+
+                self.primary_endpoint = parsed_url.netloc + path
                 self.protocol = self.protocol if parsed_url.scheme is '' else parsed_url.scheme
             else:
                 if not self.account_name:

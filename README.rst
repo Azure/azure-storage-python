@@ -36,8 +36,8 @@ Features
 
 -  Blob
 
-   -  Create/Read/Update/Delete containers
-   -  Create/Read/Update/Delete blobs
+   -  Create/Read/Update/Delete Containers
+   -  Create/Read/Update/Delete Blobs
    -  Advanced Blob Operations
 
 -  Queue
@@ -48,13 +48,14 @@ Features
 
 -  Table
 
-   -  Create/Read/Update/Delete tables
-   -  Create/Read/Update/Delete entities
+   -  Create/Read/Update/Delete Tables
+   -  Create/Read/Update/Delete Entities
    -  Batch operations
    -  Advanced Table Operations
 
 -  Files
 
+   -  Create/Update/Delete Shares
    -  Create/Update/Delete Directories
    -  Create/Read/Update/Delete Files
    -  Advanced File Operations
@@ -97,7 +98,7 @@ Download a zip of the code via GitHub or PyPi. Then, type:
 Minimum Requirements
 --------------------
 
--  Python 2.7, 3.3, or 3.4.
+-  Python 2.7, 3.3, 3.4, or 3.5.
 -  See setup.py for dependencies
 
 Usage
@@ -121,11 +122,11 @@ provided code.
 Contribute Code or Provide Feedback
 ===================================
 
-If you would like to become an active contributor to this project please
+If you would like to become an active contributor to this project, please
 follow the instructions provided in `Azure Projects Contribution
-Guidelines`_.
+Guidelines`_. You can find more details for contributing in the [CONTRIBUTING.md doc](CONTRIBUTING.md).
 
-If you encounter any bugs with the library please file an issue in the
+If you encounter any bugs with the library, please file an issue in the
 `Issues`_ section of the project.
 
 Learn More

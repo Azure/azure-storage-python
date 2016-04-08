@@ -278,7 +278,7 @@ class StorageQueueTest(StorageTestCase):
         self.assertNotEqual('', message.id)
         self.assertEqual(u'message1', message.content)
         self.assertNotEqual('', message.pop_receipt)
-        self.assertEqual('1', message.dequeue_count)
+        self.assertEqual(1, message.dequeue_count)
 
         self.assertIsInstance(message.insertion_time, datetime)
         self.assertIsInstance(message.expiration_time, datetime)
@@ -304,7 +304,7 @@ class StorageQueueTest(StorageTestCase):
             self.assertNotEqual('', message.id)
             self.assertNotEqual('', message.content)
             self.assertNotEqual('', message.pop_receipt)
-            self.assertEqual('1', message.dequeue_count)
+            self.assertEqual(1, message.dequeue_count)
             self.assertNotEqual('', message.insertion_time)
             self.assertNotEqual('', message.expiration_time)
             self.assertNotEqual('', message.time_next_visible)
@@ -327,7 +327,7 @@ class StorageQueueTest(StorageTestCase):
         self.assertNotEqual('', message.id)
         self.assertNotEqual('', message.content)
         self.assertIsNone(message.pop_receipt)
-        self.assertEqual('0', message.dequeue_count)
+        self.assertEqual(0, message.dequeue_count)
         self.assertNotEqual('', message.insertion_time)
         self.assertNotEqual('', message.expiration_time)
         self.assertIsNone(message.time_next_visible)
@@ -350,7 +350,7 @@ class StorageQueueTest(StorageTestCase):
             self.assertNotEqual('', message.id)
             self.assertNotEqual('', message.content)
             self.assertIsNone(message.pop_receipt)
-            self.assertEqual('0', message.dequeue_count)
+            self.assertEqual(0, message.dequeue_count)
             self.assertNotEqual('', message.insertion_time)
             self.assertNotEqual('', message.expiration_time)
             self.assertIsNone(message.time_next_visible)
@@ -412,7 +412,7 @@ class StorageQueueTest(StorageTestCase):
         self.assertIsNotNone(message)
         self.assertEqual(list_result1[0].id, message.id)
         self.assertEqual(u'message1', message.content)
-        self.assertEqual('2', message.dequeue_count)
+        self.assertEqual(2, message.dequeue_count)
         self.assertIsNotNone(message.pop_receipt)
         self.assertIsNotNone(message.insertion_time)
         self.assertIsNotNone(message.expiration_time)
@@ -444,7 +444,7 @@ class StorageQueueTest(StorageTestCase):
         self.assertIsNotNone(message)
         self.assertEqual(list_result1[0].id, message.id)
         self.assertEqual(u'new text', message.content)
-        self.assertEqual('2', message.dequeue_count)
+        self.assertEqual(2, message.dequeue_count)
         self.assertIsNotNone(message.pop_receipt)
         self.assertIsNotNone(message.insertion_time)
         self.assertIsNotNone(message.expiration_time)
@@ -452,7 +452,7 @@ class StorageQueueTest(StorageTestCase):
 
     def test_account_sas(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -483,7 +483,7 @@ class StorageQueueTest(StorageTestCase):
 
     def test_sas_read(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -514,7 +514,7 @@ class StorageQueueTest(StorageTestCase):
 
     def test_sas_add(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -539,7 +539,7 @@ class StorageQueueTest(StorageTestCase):
 
     def test_sas_update(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -572,7 +572,7 @@ class StorageQueueTest(StorageTestCase):
 
     def test_sas_process(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -602,7 +602,7 @@ class StorageQueueTest(StorageTestCase):
 
     def test_sas_signed_identifier(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
@@ -790,7 +790,7 @@ class StorageQueueTest(StorageTestCase):
         self.assertNotEqual('', message.id)
         self.assertEqual(u'message1㚈', message.content)
         self.assertNotEqual('', message.pop_receipt)
-        self.assertEqual('1', message.dequeue_count)
+        self.assertEqual(1, message.dequeue_count)
         self.assertNotEqual('', message.insertion_time)
         self.assertNotEqual('', message.expiration_time)
         self.assertNotEqual('', message.time_next_visible)
@@ -815,7 +815,7 @@ class StorageQueueTest(StorageTestCase):
         self.assertNotEqual('', message.id)
         self.assertEqual(u'啊齄丂狛狜', message.content)
         self.assertNotEqual('', message.pop_receipt)
-        self.assertEqual('2', message.dequeue_count)
+        self.assertEqual(2, message.dequeue_count)
         self.assertNotEqual('', message.insertion_time)
         self.assertNotEqual('', message.expiration_time)
         self.assertNotEqual('', message.time_next_visible)

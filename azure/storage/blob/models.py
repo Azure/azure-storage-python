@@ -106,7 +106,7 @@ class BlobProperties(object):
         Stores all the copy properties for the blob.
     :ivar ~azure.storage.blob.models.ContentSettings content_settings:
         Stores all the content settings for the blob.
-    :ivar LeaseProperties lease:
+    :ivar ~azure.storage.blob.models.LeaseProperties lease:
         Stores all the lease information for the blob.
     '''
 
@@ -319,11 +319,15 @@ class PageRange(object):
         Start of page range in bytes.
     :ivar int end:
         End of page range in bytes.
+    :ivar bool is_cleared:
+        Indicates if a page range is cleared or not. Only applicable
+        for get_page_range_diff API.
     '''
 
-    def __init__(self, start=None, end=None):
+    def __init__(self, start=None, end=None, is_cleared=False):
         self.start = start
         self.end = end
+        self.is_cleared = is_cleared
 
 class ResourceProperties(object):
 

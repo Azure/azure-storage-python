@@ -22,6 +22,7 @@ from azure.storage.blob import (
     Blob,
     PageBlobService,
     SequenceNumberAction,
+    PageRange,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -296,6 +297,42 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertEqual(ranges[1].start, 1024)
         self.assertEqual(ranges[1].end, 1535)
 
+
+    @record
+    def test_get_page_ranges_diff(self):
+        # Arrange
+        blob_name = self._create_blob(2048)
+        data = self.get_random_bytes(1536)
+        snapshot1 = self.bs.snapshot_blob(self.container_name, blob_name)
+        self.bs.update_page(self.container_name, blob_name, data, 0, 1535)
+        snapshot2 = self.bs.snapshot_blob(self.container_name, blob_name)
+        self.bs.clear_page(self.container_name, blob_name, 512, 1023)
+
+        # Act
+        ranges1 = self.bs.get_page_ranges_diff(self.container_name, blob_name, snapshot1.snapshot)
+        ranges2 = self.bs.get_page_ranges_diff(self.container_name, blob_name, snapshot2.snapshot)
+
+        # Assert
+        self.assertIsNotNone(ranges1)
+        self.assertIsInstance(ranges1, list)
+        self.assertEqual(len(ranges1), 3)
+        self.assertEqual(ranges1[0].is_cleared, False)
+        self.assertEqual(ranges1[0].start, 0)
+        self.assertEqual(ranges1[0].end, 511)
+        self.assertEqual(ranges1[1].is_cleared, True)
+        self.assertEqual(ranges1[1].start, 512)
+        self.assertEqual(ranges1[1].end, 1023)
+        self.assertEqual(ranges1[2].is_cleared, False)
+        self.assertEqual(ranges1[2].start, 1024)
+        self.assertEqual(ranges1[2].end, 1535)
+
+        self.assertIsNotNone(ranges2)
+        self.assertIsInstance(ranges2, list)
+        self.assertEqual(len(ranges2), 1)
+        self.assertEqual(ranges2[0].is_cleared, True)
+        self.assertEqual(ranges2[0].start, 512)
+        self.assertEqual(ranges2[0].end, 1023)
+
     @record    
     def test_update_page_fail(self):
         # Arrange
@@ -416,7 +453,7 @@ class StoragePageBlobTest(StorageTestCase):
 
     def test_create_blob_from_bytes_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange      
@@ -445,7 +482,7 @@ class StoragePageBlobTest(StorageTestCase):
 
     def test_create_blob_from_bytes_chunked_upload_with_index_and_count_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange      
@@ -477,7 +514,7 @@ class StoragePageBlobTest(StorageTestCase):
 
     def test_create_blob_from_path_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange      
@@ -532,7 +569,7 @@ class StoragePageBlobTest(StorageTestCase):
 
     def test_create_blob_from_stream_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange        
@@ -570,7 +607,7 @@ class StoragePageBlobTest(StorageTestCase):
 
     def test_create_blob_from_stream_non_seekable_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange        
@@ -616,7 +653,7 @@ class StoragePageBlobTest(StorageTestCase):
 
     def test_create_blob_from_stream_with_progress_chunked_upload_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange      
@@ -658,7 +695,7 @@ class StoragePageBlobTest(StorageTestCase):
 
     def test_create_blob_from_stream_chunked_upload_truncated_parallel(self):
         # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange        

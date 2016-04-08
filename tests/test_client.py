@@ -266,6 +266,20 @@ class StorageClientTest(StorageTestCase):
         self.assertEqual(service.primary_endpoint, 'www.mydomain.com')
         self.assertEqual(service.secondary_endpoint, self.account_name + '-secondary.blob.core.windows.net')
 
+    def test_create_service_with_connection_string_custom_domain_trailing_slash(self):
+        # Arrange
+        conn_string = 'AccountName={};AccountKey={};BlobEndpoint=www.mydomain.com/;'.format(self.account_name, self.account_key)
+
+        # Act
+        service = BlockBlobService(connection_string=conn_string)
+
+        # Assert
+        self.assertIsNotNone(service)
+        self.assertEqual(service.account_name, self.account_name)
+        self.assertEqual(service.account_key, self.account_key)
+        self.assertEqual(service.primary_endpoint, 'www.mydomain.com')
+        self.assertEqual(service.secondary_endpoint, self.account_name + '-secondary.blob.core.windows.net')
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

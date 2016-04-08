@@ -125,7 +125,7 @@ def _convert_xml_to_queue_messages(response, decode_function):
         message = QueueMessage()
 
         message.id = message_element.findtext('MessageId')
-        message.dequeue_count = message_element.findtext('DequeueCount')
+        message.dequeue_count = _int_to_str(message_element.findtext('DequeueCount'))
 
         message.content = decode_function(message_element.findtext('MessageText'))
 

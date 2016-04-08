@@ -808,7 +808,7 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'blob1', data,
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data,
                          metadata={'status': 'original'})
         sourceblob = 'https://{0}.blob.core.windows.net/{1}/{2}'.format(
             self.settings.STORAGE_ACCOUNT_NAME,
@@ -894,7 +894,7 @@ class StorageContainerTest(StorageTestCase):
     @record
     def test_shared_access_container(self):
         # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recordingfile(self.test_mode):
+        if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange

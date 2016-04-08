@@ -64,6 +64,7 @@ from .._deserialization import (
     _get_download_size,
     _parse_metadata,
     _parse_properties,
+    _convert_xml_to_service_stats,
 )
 from ._serialization import (
     _get_path,
@@ -806,8 +807,7 @@ class BaseBlobService(StorageClient):
         lease_break_period, proposed_lease_id, if_modified_since,
         if_unmodified_since, timeout):
         '''
-        Establishes and manages a lock on a container for delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Establishes and manages a lease on a container.
         The Lease Container operation can be called in one of five modes
             Acquire, to request a new lease
             Renew, to renew an existing lease
@@ -888,8 +888,9 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_duration=-1, proposed_lease_id=None,
         if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
-        Acquires a lock on a container for delete operations.
-        The lock duration can be 15 to 60 seconds or infinite.
+        Requests a new lease. If the container does not have an active lease,
+        the Blob service creates a lease on the container and returns a new
+        lease ID.
 
         :param str container_name:
             Name of existing container.
@@ -938,9 +939,12 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_id, if_modified_since=None,
         if_unmodified_since=None, timeout=None):
         '''
-        Renews a lock on a container for delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
-
+        Renews the lease. The lease can be renewed if the lease ID specified
+        matches that associated with the container. Note that
+        the lease may be renewed even if it has expired as long as the container
+        has not been leased again since the expiration of that lease. When you
+        renew a lease, the lease duration clock resets.
+        
         :param str container_name:
             Name of existing container.
         :param str lease_id:
@@ -979,10 +983,9 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_id, if_modified_since=None,
         if_unmodified_since=None, timeout=None):
         '''
-        Releases a lock on a container for delete operations, to free the
-        lease if it is no longer needed so that another client may
-        immediately acquire a lease against the container. The lock duration
-        can be 15 to 60 seconds, or can be infinite.
+        Release the lease. The lease may be released if the lease_id specified matches
+        that associated with the container. Releasing the lease allows another client
+        to immediately acquire the lease for the container as soon as the release is complete. 
 
         :param str container_name:
             Name of existing container.
@@ -1019,10 +1022,13 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_break_period=None,
         if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
-        Breaks a lock on a container for delete operations.
-        Use to end the lease but ensure that another client cannot
-        acquire a new lease until the current lease period has expired.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Break the lease, if the container has an active lease. Once a lease is
+        broken, it cannot be renewed. Any authorized request can break the lease;
+        the request is not required to specify a matching lease ID. When a lease
+        is broken, the lease break period is allowed to elapse, during which time
+        no lease operation except break and release can be performed on the container.
+        When a lease is successfully broken, the response indicates the interval
+        in seconds until a new lease can be acquired. 
 
         :param str container_name:
             Name of existing container.
@@ -1071,8 +1077,8 @@ class BaseBlobService(StorageClient):
         self, container_name, lease_id, proposed_lease_id,
         if_modified_since=None, if_unmodified_since=None, timeout=None):
         '''
-        Changes the lease ID for a lock on a container for delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Change the lease ID of an active lease. A change must include the current
+        lease ID and a new lease ID.
 
         :param str container_name:
             Name of existing container.
@@ -1223,6 +1229,43 @@ class BaseBlobService(StorageClient):
 
         response = self._perform_request(request)
         return _convert_xml_to_blob_list(response)
+
+    def get_blob_service_stats(self, timeout=None):
+        '''
+        Retrieves statistics related to replication for the Blob service. It is 
+        only available when read-access geo-redundant replication is enabled for 
+        the storage account.
+
+        With geo-redundant replication, Azure Storage maintains your data durable 
+        in two locations. In both locations, Azure Storage constantly maintains 
+        multiple healthy replicas of your data. The location where you read, 
+        create, update, or delete data is the primary storage account location. 
+        The primary location exists in the region you choose at the time you 
+        create an account via the Azure Management Azure classic portal, for 
+        example, North Central US. The location to which your data is replicated 
+        is the secondary location. The secondary location is automatically 
+        determined based on the location of the primary; it is in a second data 
+        center that resides in the same region as the primary location. Read-only 
+        access is available from the secondary location, if read-access geo-redundant 
+        replication is enabled for your storage account.
+
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: The blob service stats.
+        :rtype: :class:`~azure.storage.models.ServiceStats`
+        '''
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host = self.secondary_endpoint
+        request.path = _get_path()
+        request.query = [
+            ('restype', 'service'),
+            ('comp', 'stats'),
+            ('timeout', _int_to_str(timeout)),
+        ]
+
+        response = self._perform_request(request)
+        return _convert_xml_to_service_stats(response.body)
 
     def set_blob_service_properties(
         self, logging=None, hour_metrics=None, minute_metrics=None,
@@ -2128,8 +2171,15 @@ class BaseBlobService(StorageClient):
                          proposed_lease_id, if_modified_since,
                          if_unmodified_since, if_match, if_none_match, timeout=None):
         '''
-        Establishes and manages a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Establishes and manages a lease on a blob for write and delete operations.
+        The Lease Blob operation can be called in one of five modes:
+            Acquire, to request a new lease.
+            Renew, to renew an existing lease.
+            Change, to change the ID of an existing lease.
+            Release, to free the lease if it is no longer needed so that another
+                client may immediately acquire a lease against the blob.
+            Break, to end the lease but ensure that another client cannot acquire
+                a new lease until the current lease period has expired.
 
         :param str container_name:
             Name of existing container.
@@ -2218,9 +2268,9 @@ class BaseBlobService(StorageClient):
                            if_match=None,
                            if_none_match=None, timeout=None):
         '''
-        Acquires a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
-
+        Requests a new lease. If the blob does not have an active lease, the Blob
+        service creates a lease on the blob and returns a new lease ID.
+        
         :param str container_name:
             Name of existing container.
         :param str blob_name:
@@ -2284,9 +2334,12 @@ class BaseBlobService(StorageClient):
                          if_unmodified_since=None, if_match=None,
                          if_none_match=None, timeout=None):
         '''
-        Renews a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
-
+        Renews the lease. The lease can be renewed if the lease ID specified on
+        the request matches that associated with the blob. Note that the lease may
+        be renewed even if it has expired as long as the blob has not been modified
+        or leased again since the expiration of that lease. When you renew a lease,
+        the lease duration clock resets. 
+        
         :param str container_name:
             Name of existing container.
         :param str blob_name:
@@ -2340,9 +2393,10 @@ class BaseBlobService(StorageClient):
                            if_unmodified_since=None, if_match=None,
                            if_none_match=None, timeout=None):
         '''
-        Releases a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
-
+        Releases the lease. The lease may be released if the lease ID specified on the
+        request matches that associated with the blob. Releasing the lease allows another
+        client to immediately acquire the lease for the blob as soon as the release is complete. 
+        
         :param str container_name:
             Name of existing container.
         :param str blob_name:
@@ -2395,8 +2449,15 @@ class BaseBlobService(StorageClient):
                          if_match=None,
                          if_none_match=None, timeout=None):
         '''
-        Breaks a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Breaks the lease, if the blob has an active lease. Once a lease is broken,
+        it cannot be renewed. Any authorized request can break the lease; the request
+        is not required to specify a matching lease ID. When a lease is broken,
+        the lease break period is allowed to elapse, during which time no lease operation
+        except break and release can be performed on the blob. When a lease is successfully
+        broken, the response indicates the interval in seconds until a new lease can be acquired. 
+
+        A lease that has been broken can also be released, in which case another client may
+        immediately acquire the lease on the blob.
 
         :param str container_name:
             Name of existing container.
@@ -2463,8 +2524,8 @@ class BaseBlobService(StorageClient):
                          if_match=None,
                          if_none_match=None, timeout=None):
         '''
-        Changes a lock on a blob for write and delete operations.
-        The lock duration can be 15 to 60 seconds, or can be infinite.
+        Changes the lease ID of an active lease. A change must include the current
+        lease ID and a new lease ID.
 
         :param str container_name:
             Name of existing container.
@@ -2592,23 +2653,55 @@ class BaseBlobService(StorageClient):
                   destination_lease_id=None,
                   source_lease_id=None, timeout=None):
         '''
-        Copies a blob to a destination within the storage account.
-        The source for a Copy Blob operation can be a committed blob 
-        or an Azure file in any Azure storage account.
+        Copies a blob asynchronously. This operation returns a copy operation 
+        properties object, including a copy ID you can use to check or abort the 
+        copy operation. The Blob service copies blobs on a best-effort basis.
+
+        The source blob for a copy operation may be a block blob, an append blob, 
+        or a page blob. If the destination blob already exists, it must be of the 
+        same blob type as the source blob. Any existing destination blob will be 
+        overwritten. The destination blob cannot be modified while a copy operation 
+        is in progress.
+
+        When copying from a page blob, the Blob service creates a destination page 
+        blob of the source blob’s length, initially containing all zeroes. Then 
+        the source page ranges are enumerated, and non-empty ranges are copied. 
+
+        For a block blob or an append blob, the Blob service creates a committed 
+        blob of zero length before returning from this operation. When copying 
+        from a block blob, all committed blocks and their block IDs are copied. 
+        Uncommitted blocks are not copied. At the end of the copy operation, the 
+        destination blob will have the same committed block count as the source.
+
+        When copying from an append blob, all committed blocks are copied. At the 
+        end of the copy operation, the destination blob will have the same committed 
+        block count as the source.
+
+        For all blob types, you can call get_blob_properties on the destination 
+        blob to check the status of the copy operation. The final blob will be 
+        committed when the copy completes.
 
         :param str container_name:
-            Name of existing container.
+            Name of the destination container. The container must exist.
         :param str blob_name:
-            Name of existing blob.
+            Name of the destination blob. If the destination blob exists, it will 
+            be overwritten. Otherwise, it will be created.
         :param str copy_source:
-            URL up to 2 KB in length that specifies a blob. A source blob in
-            the same account can be private, but a blob in another account
-            must be public or accept credentials included in this URL, such as
-            a Shared Access Signature. Examples:
+            A URL of up to 2 KB in length that specifies an Azure file or blob. 
+            The value should be URL-encoded as it would appear in a request URI. 
+            If the source is in another account, the source must either be public 
+            or must be authenticated via a shared access signature. If the source 
+            is public, no authentication is required.
+            Examples:
             https://myaccount.blob.core.windows.net/mycontainer/myblob
             https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
+            https://otheraccount.blob.core.windows.net/mycontainer/myblob?sastoken
         :param metadata:
-            Dict containing name and value pairs.
+            Name-value pairs associated with the blob as metadata. If no name-value 
+            pairs are specified, the operation will copy the metadata from the 
+            source blob or file to the destination blob. If one or more name-value 
+            pairs are specified, the destination blob is created with the specified 
+            metadata, and metadata is not copied from the source blob or file. 
         :type metadata: A dict mapping str to str.
         :param datetime source_if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
