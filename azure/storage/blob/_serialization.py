@@ -56,17 +56,27 @@ def _get_path(container_name=None, blob_name=None):
         return '/'
 
 def _validate_and_format_range_headers(request, start_range, end_range, start_range_required=True, end_range_required=True, check_content_md5=False, align_to_page=False):
-    request.headers = request.headers or []
-    if start_range_required == True:
+    # If end range is provided, start range must be provided
+    if start_range_required == True or end_range is not None:
         _validate_not_none('start_range', start_range)
     if end_range_required == True:
         _validate_not_none('end_range', end_range)
-    _validate_page_ranges(start_range, end_range, align_to_page)
+
+    # Page ranges must be 512 aligned
+    if align_to_page == True:
+        if start_range is not None and start_range % 512 != 0:
+            raise ValueError(_ERROR_PAGE_BLOB_START_ALIGNMENT)
+        if end_range is not None and end_range % 512 != 511:
+            raise ValueError(_ERROR_PAGE_BLOB_END_ALIGNMENT)
+
+    # Format based on whether end_range is present
+    request.headers = request.headers or []
     if end_range is not None:
         request.headers.append(('x-ms-range', "bytes={0}-{1}".format(start_range, end_range)))
-    else:
+    elif start_range is not None:
         request.headers.append(('x-ms-range', "bytes={0}-".format(start_range)))
 
+    # Content MD5 can only be provided for a complete range less than 4MB in size
     if check_content_md5 == True:
         if start_range is None or end_range is None:
             raise ValueError(_ERROR_START_END_NEEDED_FOR_MD5)
@@ -74,13 +84,6 @@ def _validate_and_format_range_headers(request, start_range, end_range, start_ra
             raise ValueError(_ERROR_RANGE_TOO_LARGE_FOR_MD5)
 
         request.headers.append(('x-ms-range-get-content-md5', 'true'))
-
-def _validate_page_ranges(start_range, end_range, align_to_page):
-    if align_to_page == True:
-        if start_range is not None and start_range % 512 != 0:
-            raise ValueError(_ERROR_PAGE_BLOB_START_ALIGNMENT)
-        if end_range is not None and end_range % 512 != 511:
-            raise ValueError(_ERROR_PAGE_BLOB_END_ALIGNMENT)
 
 def _convert_block_list_to_xml(block_id_list):
     '''
