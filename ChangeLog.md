@@ -2,6 +2,14 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.32.0:
+
+### Blob:
+- Get requests taking the start_range parameter incorrectly sent an x-ms-range header when start_range was not specified.
+
+### File:
+- Get requests taking the start_range parameter incorrectly sent an x-ms-range header when start_range was not specified.
+
 ## Version 0.31.0:
 
 ### All:
