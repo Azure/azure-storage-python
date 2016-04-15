@@ -25,29 +25,24 @@ from .models import BlobBlock
 
 
 class _BlobChunkDownloader(object):
-    def __init__(self, blob_service, container_name, blob_name, blob_size,
-                 chunk_size, start_range, end_range, stream, max_retries,
+    def __init__(self, blob_service, container_name, blob_name, download_size,
+                 chunk_size, progress, start_range, end_range, stream, max_retries,
                  retry_wait, progress_callback, if_modified_since, 
                  if_unmodified_since, if_match, if_none_match, timeout):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
         self.chunk_size = chunk_size
-        if start_range is not None:
-            end_range = end_range or blob_size
-            self.blob_size = end_range - start_range
-            self.blob_end = end_range
-            self.start_index = start_range
-        else:
-            self.blob_size = blob_size
-            self.blob_end = blob_size
-            self.start_index = 0
+
+        self.download_size = download_size
+        self.start_index = start_range    
+        self.blob_end = end_range
 
         self.stream = stream
         self.stream_start = stream.tell()
         self.stream_lock = threading.Lock()
         self.progress_callback = progress_callback
-        self.progress_total = 0
+        self.progress_total = progress
         self.progress_lock = threading.Lock()
         self.max_retries = max_retries
         self.retry_wait = retry_wait
@@ -81,11 +76,11 @@ class _BlobChunkDownloader(object):
             with self.progress_lock:
                 self.progress_total += length
                 total = self.progress_total
-                self.progress_callback(total, self.blob_size)
+                self.progress_callback(total, self.download_size)
 
     def _write_to_stream(self, chunk_data, chunk_start):
         with self.stream_lock:
-            self.stream.seek(self.stream_start + chunk_start)
+            self.stream.seek(self.stream_start + (chunk_start - self.start_index))
             self.stream.write(chunk_data)
 
     def _download_chunk_with_retries(self, chunk_start, chunk_end):
@@ -267,7 +262,7 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
 
 
 def _download_blob_chunks(blob_service, container_name, blob_name,
-                          blob_size, block_size, start_range, end_range, stream,
+                          download_size, block_size, progress, start_range, end_range, stream,
                           max_connections, max_retries, retry_wait, progress_callback,
                           if_modified_since, if_unmodified_since, if_match, if_none_match, 
                           timeout):
@@ -278,8 +273,9 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
         blob_service,
         container_name,
         blob_name,
-        blob_size,
+        download_size,
         block_size,
+        progress,
         start_range,
         end_range,
         stream,
@@ -292,9 +288,6 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
         if_none_match,
         timeout
     )
-
-    if progress_callback is not None:
-        progress_callback(0, blob_size)
 
     import concurrent.futures
     executor = concurrent.futures.ThreadPoolExecutor(max_connections)

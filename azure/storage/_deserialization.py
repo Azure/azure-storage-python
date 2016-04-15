@@ -49,6 +49,7 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'etag': (None, 'etag', _to_str),
     'x-ms-blob-type': (None, 'blob_type', _to_str),
     'content-length': (None, 'content_length', _int_to_str),
+    'content-range': (None, 'content_range', _to_str),
     'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_to_str),
     'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_to_str),
     'x-ms-share-quota': (None, 'quota', _int_to_str),
@@ -104,6 +105,18 @@ def _parse_properties(response, result_class):
                 setattr(attr, info[1], info[2](value))
 
     return props
+
+def _parse_length_from_content_range(content_range):
+    '''
+    Parses the blob length from the content range header: bytes 1-3/65537
+    '''   
+    if content_range is None:
+        return None
+
+    # First, split in space and take the second half: '1-3/65537'
+    # Next, split on slash and take the second half: '65537'
+    # Finally, convert to an int: 65537
+    return int(content_range.split(' ', 1)[1].split('/', 1)[1])
 
 def _parse_response_for_dict(response):
     ''' Extracts name-values from response header. Filter out the standard

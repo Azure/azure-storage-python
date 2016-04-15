@@ -39,6 +39,7 @@ from .._deserialization import (
     _get_download_size,
     _parse_metadata,
     _parse_properties,
+    _parse_length_from_content_range,
 )
 from ..models import (
     Services,
@@ -99,8 +100,8 @@ class FileService(StorageClient):
     Direct Attached Storage (DAS) and Storage Area Network (SAN) solutions, which
     are often complex and expensive to install, configure, and operate. 
     '''
-    MAX_SINGLE_GET_SIZE = 64 * 1024 * 1024
-    MAX_CHUNK_GET_SIZE = 4 * 1024 * 1024
+    MAX_SINGLE_GET_SIZE = 32 * 1024 * 1024
+    MAX_CHUNK_GET_SIZE = 8 * 1024 * 1024
     MAX_RANGE_SIZE = 4 * 1024 * 1024
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
@@ -1337,7 +1338,6 @@ class FileService(StorageClient):
             is public, no authentication is required.
             Examples:
             https://myaccount.file.core.windows.net/myshare/mydir/myfile
-            https://myaccount.file.core.windows.net/myshare/my/dir/myfile?snapshot=<DateTime>
             https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken
         :param metadata:
             Name-value pairs associated with the file as metadata. If no name-value 
@@ -1765,7 +1765,7 @@ class FileService(StorageClient):
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
                          open_mode='wb', start_range=None, end_range=None,
                          range_get_content_md5=None, progress_callback=None,
-                         max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
+                         max_connections=2, max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Downloads a file to a file path, with automatic chunking and progress
         notifications. Returns an instance of File with properties and metadata.
@@ -1779,7 +1779,9 @@ class FileService(StorageClient):
         :param str file_path:
             Path of file to write to.
         :param str open_mode:
-            Mode to use when opening the file.
+            Mode to use when opening the file. Note that specifying append only 
+            open_mode prevents parallel download. So, max_connections must be set 
+            to 1 if this open_mode is used.
         :param int start_range:
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
@@ -1800,9 +1802,18 @@ class FileService(StorageClient):
             the size of the file if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the file sequentially.
-            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
-            If the file size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be valuable if the file is 
+            being concurrently modified to enforce atomicity or if many files are 
+            expected to be empty as an extra request is required for empty files 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of file chunk if an error occurs.
         :param int retry_wait:
@@ -1819,6 +1830,9 @@ class FileService(StorageClient):
         _validate_not_none('file_path', file_path)
         _validate_not_none('open_mode', open_mode)
 
+        if max_connections > 1 and 'a' in open_mode:
+            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+
         with open(file_path, open_mode) as stream:
             file = self.get_file_to_stream(
                 share_name, directory_name, file_name, stream,
@@ -1831,7 +1845,7 @@ class FileService(StorageClient):
     def get_file_to_stream(
         self, share_name, directory_name, file_name, stream,
         start_range=None, end_range=None, range_get_content_md5=None,
-        progress_callback=None, max_connections=1, max_retries=5,
+        progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
         Downloads a file to a stream, with automatic chunking and progress
@@ -1866,9 +1880,18 @@ class FileService(StorageClient):
             the size of the file if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the file sequentially.
-            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
-            If the file size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be valuable if the file is 
+            being concurrently modified to enforce atomicity or if many files are 
+            expected to be empty as an extra request is required for empty files 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of file chunk if an error occurs.
         :param int retry_wait:
@@ -1884,63 +1907,120 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         _validate_not_none('stream', stream)
 
-        if sys.version_info >= (3,) and max_connections > 1 and not stream.seekable():
-            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+        # If the user explicitly sets max_connections to 1, do a single shot download
+        if max_connections == 1:
+            file = self._get_file(share_name,
+                                  directory_name,
+                                  file_name,
+                                  start_range=start_range,
+                                  end_range=end_range,
+                                  range_get_content_md5=range_get_content_md5,
+                                  timeout=timeout)
 
-        # Only get properties if parallelism will actually be used
-        file_size = None
-        if max_connections > 1 and range_get_content_md5 is None:
-            file = self.get_file_properties(share_name, directory_name, 
-                                            file_name, timeout=timeout)
-            file_size = file.properties.content_length
+            # Set the download size
+            download_size = file.properties.content_length
 
-            # If file size is large, use parallel download
-            if file_size >= self.MAX_SINGLE_GET_SIZE:
-                _download_file_chunks(
-                    self,
-                    share_name,
-                    directory_name,
-                    file_name,
-                    file_size,
-                    self.MAX_CHUNK_GET_SIZE,
-                    start_range,
-                    end_range,
-                    stream,
-                    max_connections,
-                    max_retries,
-                    retry_wait,
-                    progress_callback, 
-                    timeout
-                )
-                return file
+        # If max_connections is greater than 1, do the first get to establish the 
+        # size of the file and get the first segment of data
+        else:       
+            if sys.version_info >= (3,) and not stream.seekable():
+                raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+                
+            initial_request_start = start_range if start_range else 0
 
-        # If parallelism is off or the file is small, do a single download
-        download_size = _get_download_size(start_range, end_range, file_size)
+            if end_range and end_range - start_range < self.MAX_SINGLE_GET_SIZE:
+                initial_request_end = end_range
+            else:
+                initial_request_end = initial_request_start + self.MAX_SINGLE_GET_SIZE - 1
+
+            try:
+                file = self._get_file(share_name,
+                                      directory_name,
+                                      file_name,
+                                      start_range=initial_request_start,
+                                      end_range=initial_request_end,
+                                      range_get_content_md5=range_get_content_md5,
+                                      timeout=timeout)
+
+                # Parse the total file size and adjust the download size if ranges 
+                # were specified
+                file_size = _parse_length_from_content_range(file.properties.content_range)
+                if end_range:
+                    # Use the end_range unless it is over the end of the file
+                    download_size = min(file_size, end_range - start_range + 1)
+                elif start_range:
+                    download_size = file_size - start_range
+                else:
+                    download_size = file_size
+            except AzureHttpError as ex:
+                if not start_range and ex.status_code == 416:
+                    # Get range will fail on an empty file. If the user did not 
+                    # request a range, do a regular get request in order to get 
+                    # any properties.
+                    file = self._get_file(share_name,
+                                          directory_name,
+                                          file_name,
+                                          range_get_content_md5=range_get_content_md5,
+                                          timeout=timeout)
+
+                    # Set the download size to empty
+                    download_size = 0
+                else:
+                    raise ex
+
+        # Mark the first progress chunk. If the file is small or this is a single 
+        # shot download, this is the only call
         if progress_callback:
-            progress_callback(0, download_size)
+            progress_callback(file.properties.content_length, download_size)
 
-        file = self._get_file(
-            share_name,
-            directory_name,
-            file_name,
-            start_range=start_range,
-            end_range=end_range,
-            range_get_content_md5=range_get_content_md5,
-            timeout=timeout)
-
+        # Write the content to the user stream  
+        # Clear file content since output has been written to user stream   
         if file.content is not None:
             stream.write(file.content)
+            file.content = None
 
-        if progress_callback:
-            download_size = len(file.content)
-            progress_callback(download_size, download_size)
+        # If the file is small or single shot download was used, the download is 
+        # complete at this point. If file size is large, use parallel download.
+        if file.properties.content_length != download_size:       
+            # At this point would like to lock on something like the etag so that 
+            # if the file is modified, we dont get a corrupted download. However, 
+            # this feature is not yet available on the file service.
+            
+            end_file = file_size
+            if end_range:
+                # Use the end_range unless it is over the end of the file
+                end_file = min(file_size, end_range + 1)
+               
+            _download_file_chunks(
+                self,
+                share_name,
+                directory_name,
+                file_name,
+                download_size,
+                self.MAX_CHUNK_GET_SIZE,
+                self.MAX_SINGLE_GET_SIZE,
+                initial_request_end + 1, # start where the first download ended
+                end_file,
+                stream,
+                max_connections,
+                max_retries,
+                retry_wait,
+                progress_callback,
+                timeout,
+            )
 
-        file.content = None # Clear file content since output has been written to user stream
+            # Set the content length to the download size instead of the size of 
+            # the last range
+            file.properties.content_length = download_size
+
+            # Overwrite the content range to the user requested range
+            file.properties.content_range = 'bytes {0}-{1}/{2}'.format(start_range, end_range, file_size)
+
         return file
 
     def get_file_to_bytes(self, share_name, directory_name, file_name, 
                           start_range=None, end_range=None, range_get_content_md5=None,
-                          progress_callback=None, max_connections=1, max_retries=5,
+                          progress_callback=None, max_connections=2, max_retries=5,
                           retry_wait=1.0, timeout=None):
         '''
         Downloads a file as an array of bytes, with automatic chunking and
@@ -1973,9 +2053,18 @@ class FileService(StorageClient):
             the size of the file if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the file sequentially.
-            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
-            If the file size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be valuable if the file is 
+            being concurrently modified to enforce atomicity or if many files are 
+            expected to be empty as an extra request is required for empty files 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of file chunk if an error occurs.
         :param int retry_wait:
@@ -2011,7 +2100,7 @@ class FileService(StorageClient):
     def get_file_to_text(
         self, share_name, directory_name, file_name, encoding='utf-8',
         start_range=None, end_range=None, range_get_content_md5=None,
-        progress_callback=None, max_connections=1, max_retries=5,
+        progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
         Downloads a file as unicode text, with automatic chunking and progress
@@ -2046,9 +2135,18 @@ class FileService(StorageClient):
             the size of the file if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the file sequentially.
-            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
-            If the file size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be valuable if the file is 
+            being concurrently modified to enforce atomicity or if many files are 
+            expected to be empty as an extra request is required for empty files 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of file chunk if an error occurs.
         :param int retry_wait:

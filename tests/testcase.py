@@ -303,16 +303,19 @@ class StorageTestCase(unittest.TestCase):
             self.assertTrue(i[0] % max_chunk_size == 0 or i[0] % max_chunk_size == small_chunk_size)
             self.assertEqual(i[1], total)
 
-    def assert_download_progress(self, size, max_chunk_size, progress, single_download=True):
+    def assert_download_progress(self, size, max_chunk_size, max_get_size, progress, single_download=False):
         '''Validates that the progress chunks align with our chunking procedure.'''
-        if single_download:
-            self.assertEqual(len(progress), 2)
-            self.assertEqual((0, None), progress[0])
-            self.assertEqual((size, size), progress[1])
+        if size <= max_get_size or single_download:
+            self.assertEqual(len(progress), 1)
+            self.assertTrue(progress[0][0], size)
+            self.assertTrue(progress[0][1], size)
         else:
-            small_chunk_size = size % max_chunk_size
-            self.assertEqual(len(progress), 1 + math.ceil(size / max_chunk_size))
-            for i in progress:
+            small_chunk_size = (size - max_get_size) % max_chunk_size
+            self.assertEqual(len(progress), 1 + math.ceil((size - max_get_size) / max_chunk_size))
+
+            self.assertTrue(progress[0][0], max_get_size)
+            self.assertTrue(progress[0][1], size)
+            for i in progress[1:]:
                 self.assertTrue(i[0] % max_chunk_size == 0 or i[0] % max_chunk_size == small_chunk_size)
                 self.assertEqual(i[1], size)
 
