@@ -52,20 +52,34 @@ class StorageClient(object):
         self.account_key = connection_params.account_key
         self.sas_token = connection_params.sas_token
 
-        self.protocol = connection_params.protocol
         self.primary_endpoint = connection_params.primary_endpoint
         self.secondary_endpoint = connection_params.secondary_endpoint
 
-        self.request_session = connection_params.request_session
-
+        protocol = connection_params.protocol
+        request_session = connection_params.request_session or requests.Session()
         self._httpclient = _HTTPClient(
-            service_instance=self,
-            protocol=self.protocol,
-            request_session=connection_params.request_session or requests.Session(),
-            user_agent=_USER_AGENT_STRING,
+            protocol=protocol,
+            session=request_session,
             timeout=_SOCKET_TIMEOUT,
         )
+
         self._filter = self._perform_request_worker
+
+    @property
+    def protocol(self):
+        return self._httpclient.protocol
+
+    @protocol.setter
+    def protocol(self, value):
+        self._httpclient.protocol = value
+
+    @property
+    def request_session(self):
+        return self._httpclient.session
+
+    @request_session.setter
+    def request_session(self, value):
+        self._httpclient.session = value
 
     def with_filter(self, filter):
         '''

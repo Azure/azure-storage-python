@@ -36,6 +36,7 @@ from ._error import (
 )
 from ._constants import (
     X_MS_VERSION,
+    _USER_AGENT_STRING,
 )
 from .models import (
     _unicode_type,
@@ -65,7 +66,7 @@ def _update_request(request):
     current_time = format_date_time(time())
     request.headers.append(('x-ms-date', current_time))
     request.headers.append(('x-ms-version', X_MS_VERSION))
-    request.headers.append(('Accept-Encoding', 'identity'))
+    request.headers.append(('User-Agent', _USER_AGENT_STRING))
 
     # append x-ms-meta name, values to header
     for name, value in request.headers:
@@ -83,15 +84,6 @@ def _update_request(request):
 
     # Encode and optionally add local storage prefix to path
     request.path = url_quote(request.path, '/()$=\',~')
-
-    # Add query params to path
-    if request.query:
-        request.path += '?'
-        for name, value in request.query:
-            if value is not None:
-                request.path += name + '=' + url_quote(value, '~') + '&'
-        request.path = request.path[:-1]
-
 
 def _get_request_body_bytes_only(param_name, param_value):
     '''Validates the request body passed in and converts it to bytes
