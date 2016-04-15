@@ -20,22 +20,15 @@ if sys.version_info < (3,):
         HTTP_PORT,
         HTTPS_PORT,
         )
-    from urlparse import urlparse
     from urllib2 import quote as url_quote
 else:
     from http.client import (
         HTTP_PORT,
         HTTPS_PORT,
         )
-    from urllib.parse import urlparse
     from urllib.parse import quote as url_quote
 
 from . import HTTPError, HTTPResponse
-from .requestsclient import _RequestsConnection
-
-
-DEBUG_REQUESTS = False
-DEBUG_RESPONSES = False
 
 class _HTTPClient(object):
 
@@ -43,184 +36,105 @@ class _HTTPClient(object):
     Takes the request and sends it to cloud service and returns the response.
     '''
 
-    def __init__(self, service_instance, cert_file=None, protocol='https',
-                 request_session=None, timeout=None, user_agent=''):
+    def __init__(self, protocol=None, session=None, timeout=None):
         '''
-        service_instance:
-            service client instance.
-        cert_file:
-            certificate file name/location. This is only used in hosted
-            service management.
-        protocol:
+        :param str protocol:
             http or https.
-        request_session:
+        :param requests.Session request_session:
             session object created with requests library (or compatible).
-        timeout:
+        :param int timeout:
             timeout for the http request, in seconds.
-        user_agent:
-            user agent string to set in http header.
         '''
-        self.service_instance = service_instance
-        self.cert_file = cert_file
         self.protocol = protocol
-        self.proxy_host = None
-        self.proxy_port = None
-        self.proxy_user = None
-        self.proxy_password = None
-        self.request_session = request_session
+        self.session = session
         self.timeout = timeout
-        self.user_agent = user_agent
+
+        # By default, requests adds an Accept:*/* and Accept-Encoding to the session, 
+        # which causes issues with some Azure REST APIs. Removing these here gives us 
+        # the flexibility to add it back on a case by case basis.
+        if 'Accept' in self.session.headers:
+            del self.session.headers['Accept']
+
+        if 'Accept-Encoding' in self.session.headers:
+            del self.session.headers['Accept-Encoding']
+
+        self.proxies = None
 
     def set_proxy(self, host, port, user, password):
         '''
         Sets the proxy server host and port for the HTTP CONNECT Tunnelling.
 
-        host:
+        Note that we set the proxies directly on the request later on rather than 
+        using the session object as requests has a bug where session proxy is ignored 
+        in favor of environment proxy. So, auth will not work unless it is passed 
+        directly when making the request as this overrides both.
+
+        :param str host:
             Address of the proxy. Ex: '192.168.0.100'
-        port:
+        :param int port:
             Port of the proxy. Ex: 6000
-        user:
+        :param str user:
             User for proxy authorization.
-        password:
+        :param str password:
             Password for proxy authorization.
         '''
-        self.proxy_host = host
-        self.proxy_port = port
-        self.proxy_user = user
-        self.proxy_password = password
-
-    def get_uri(self, request):
-        ''' Return the target uri for the request.'''
-        protocol = request.protocol_override \
-            if request.protocol_override else self.protocol
-        protocol = protocol.lower()
-        port = HTTP_PORT if protocol == 'http' else HTTPS_PORT
-        return protocol + '://' + request.host + ':' + str(port) + request.path
-
-    def get_connection(self, request):
-        ''' Create connection for the request. '''
-        protocol = request.protocol_override \
-            if request.protocol_override else self.protocol
-        protocol = protocol.lower()
-        target_host = request.host
-        target_port = HTTP_PORT if protocol == 'http' else HTTPS_PORT
-
-        connection = _RequestsConnection(
-            target_host, protocol, self.request_session, self.timeout)
-        proxy_host = self.proxy_host
-        proxy_port = self.proxy_port
-
-        if self.proxy_host:
-            headers = None
-            if self.proxy_user and self.proxy_password:
-                auth = base64.encodestring(
-                    "{0}:{1}".format(self.proxy_user, self.proxy_password).encode()).rstrip()
-                headers = {'Proxy-Authorization': 'Basic {0}'.format(auth.decode())}
-            connection.set_tunnel(proxy_host, int(proxy_port), headers)
-
-        return connection
-
-    def send_request_headers(self, connection, request_headers):
-        if self.proxy_host and self.request_session is None:
-            for i in connection._buffer:
-                if i.startswith(b"Host: "):
-                    connection._buffer.remove(i)
-            connection.putheader(
-                'Host', "{0}:{1}".format(connection._tunnel_host,
-                                            connection._tunnel_port))
-
-        for name, value in request_headers:
-            if value:
-                connection.putheader(name, value)
-
-        connection.putheader('User-Agent', self.user_agent)
-        connection.endheaders()
-
-    def send_request_body(self, connection, request_body):
-        if request_body:
-            assert isinstance(request_body, bytes)
-            connection.send(request_body)
+        if user and password:
+            proxy_string = '{}:{}@{}:{}'.format(user, password, host, port) 
         else:
-            connection.send(None)
+            proxy_string = '{}:{}'.format(host, port) 
 
-    def _update_request_uri_query(self, request):
-        '''pulls the query string out of the URI and moves it into
-        the query portion of the request object.  If there are already
-        query parameters on the request the parameters in the URI will
-        appear after the existing parameters'''
-
-        if '?' in request.path:
-            request.path, _, query_string = request.path.partition('?')
-            if query_string:
-                query_params = query_string.split('&')
-                for query in query_params:
-                    if '=' in query:
-                        name, _, value = query.partition('=')
-                        request.query.append((name, value))
-
-        request.path = url_quote(request.path, '/()$=\',')
-
-        # add encoded queries to request.path.
-        if request.query:
-            request.path += '?'
-            for name, value in request.query:
-                if value is not None:
-                    request.path += name + '=' + url_quote(value, '/()$=\',') + '&'
-            request.path = request.path[:-1]
-
-        return request.path, request.query
+        self.proxies = {}
+        self.proxies['http'] = 'http://{}'.format(proxy_string)
+        self.proxies['https'] = 'https://{}'.format(proxy_string)
 
     def perform_request(self, request):
-        ''' Sends request to cloud service server and return the response. '''
-        connection = self.get_connection(request)
-        try:
-            connection.putrequest(request.method, request.path)
+        '''
+        Sends an HTTPRequest to Azure Storage and returns an HTTPResponse. If 
+        the response code indicates an error, raise an HTTPError.    
+        
+        :param HTTPRequest request:
+            The request to serialize and send.
+        :return: An HTTPResponse containing the parsed HTTP response.
+        :rtype: :class:`~azure.storage._http.HTTPResponse`             
+        '''
+        # Verify the body is in bytes
+        if request.body:
+            assert isinstance(request.body, bytes)
 
-            self.send_request_headers(connection, request.headers)
-            self.send_request_body(connection, request.body)
+        # Construct the URI
+        uri = self.protocol.lower() + '://' + request.host + request.path
+        
+        # Serialize the queries
+        queries = {}
+        for name, value in request.query:
+            if value:
+                queries[name] = value
 
-            if DEBUG_REQUESTS and request.body:
-                print('request:')
-                try:
-                    print(request.body)
-                except:
-                    pass
+        # Serialize headers
+        headers = {}
+        for name, value in request.headers:
+            if value:
+                headers[name] = value
 
-            resp = connection.getresponse()
-            status = int(resp.status)
-            message = resp.reason
-            respheaders = resp.getheaders()
+        # Send the request
+        response = self.session.request(request.method, 
+                                        uri,
+                                        params=queries,
+                                        headers=headers, 
+                                        data=request.body or None,
+                                        timeout=self.timeout,
+                                        proxies=self.proxies)
 
-            # for consistency across platforms, make header names lowercase
-            for i, value in enumerate(respheaders):
-                respheaders[i] = (value[0].lower(), value[1])
+        # Parse the response
+        status = int(response.status_code)
+        respheaders = []
+        for key, name in response.headers.items():
+            respheaders.append((key.lower(), name))
 
-            respbody = None
-            if resp.length is None:
-                respbody = resp.read()
-            elif resp.length > 0:
-                respbody = resp.read(resp.length)
-
-            if DEBUG_RESPONSES and respbody:
-                print('response:')
-                try:
-                    print(respbody)
-                except:
-                    pass
-
-            response = HTTPResponse(
-                status, resp.reason, respheaders, respbody)
-            if status == 307:
-                new_url = urlparse(dict(headers)['location'])
-                request.host = new_url.hostname
-                request.path = new_url.path
-                request.path, request.query = self._update_request_uri_query(request)
-                return self.perform_request(request)
-            if status >= 300:
-                # This exception will be caught by the general error handler
-                # and raised as an azure http exception
-                raise HTTPError(status, message, respheaders, respbody)
-
-            return response
-        finally:
-            connection.close()
+        # Construct an error or a response based on status code
+        if status >= 300:
+            # This exception will be caught by the general error handler
+            # and raised as an azure http exception
+            raise HTTPError(status, response.reason, respheaders, response.content)
+        else:
+            return HTTPResponse(status, response.reason, respheaders, response.content)
