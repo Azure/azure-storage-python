@@ -6,9 +6,11 @@
 
 ### Blob:
 - Get requests taking the start_range parameter incorrectly sent an x-ms-range header when start_range was not specified.
+- get_blob_to_* will do an initial get request of size 32 MB. If it then finds the blob is larger than this size, it will parallelize by default.
 
 ### File:
 - Get requests taking the start_range parameter incorrectly sent an x-ms-range header when start_range was not specified.
+- get_file_to_* will do an initial get request of size 32 MB. If it then finds the file is larger than this size, it will parallelize by default.
 
 ## Version 0.31.0:
 

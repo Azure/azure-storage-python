@@ -46,7 +46,7 @@ class StorageGetBlobTest(StorageTestCase):
             self.bs.create_container(self.container_name)
 
         self.byte_blob = self.get_resource_name('byteblob')
-        self.byte_data = self.get_random_bytes(64 * 1024 + 1)
+        self.byte_data = self.get_random_bytes(64 * 1024 + 5)
 
         if not self.is_playback():
             self.bs.create_blob_from_bytes(self.container_name, self.byte_blob, self.byte_data)
@@ -54,7 +54,7 @@ class StorageGetBlobTest(StorageTestCase):
         # test chunking functionality by reducing the threshold
         # for chunking and the size of each chunk, otherwise
         # the tests would take too long to execute
-        self.bs.MAX_SINGLE_GET_SIZE = 64 * 1024
+        self.bs.MAX_SINGLE_GET_SIZE = 32 * 1024
         self.bs.MAX_CHUNK_GET_SIZE = 4 * 1024
 
     def tearDown(self):
@@ -120,7 +120,24 @@ class StorageGetBlobTest(StorageTestCase):
         self.assertEqual(blob.content, binary_data)
 
     @record
+    def test_get_blob_no_content(self):
+        # Arrange
+        blob_data = b''
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+
+        # Assert
+        self.assertEqual(blob_data, blob.content)
+        self.assertEqual(0, blob.properties.content_length)
+
     def test_get_blob_to_bytes(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
 
         # Act
@@ -129,133 +146,83 @@ class StorageGetBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(self.byte_data, blob.content)
 
-    def test_get_blob_to_bytes_parallel(self):
+    def test_get_blob_to_bytes_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
-
-        # Act
-        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, max_connections=2)
-
-        # Assert
-        self.assertEqual(self.byte_data, blob.content)
-
-    @record
-    def test_get_blob_to_bytes_with_progress(self):
-        # Arrange
-
-        # Act
         progress = []
-
         def callback(current, total):
             progress.append((current, total))
 
+        # Act
         blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, progress_callback=callback)
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
 
     @record
-    def test_get_blob_to_bytes_with_progress_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
+    def test_get_blob_to_bytes_non_parallel(self):
         # Arrange
-
-        # Act
         progress = []
-
         def callback(current, total):
             progress.append((current, total))
 
-        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, progress_callback=callback, max_connections=2)
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, max_connections=1, progress_callback=callback)
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress, single_download=False)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
 
     @record
-    def test_get_blob_to_stream(self):
+    def test_get_blob_to_bytes_small(self):
         # Arrange
+        blob_data = self.get_random_bytes(1024)
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
 
-        # Act
-        with open(FILE_PATH, 'wb') as stream:
-            blob = self.bs.get_blob_to_stream(
-                self.container_name, self.byte_blob, stream)
-
-        # Assert
-        self.assertIsInstance(blob, Blob)
-        with open(FILE_PATH, 'rb') as stream:
-            actual = stream.read()
-            self.assertEqual(self.byte_data, actual)
-
-    def test_get_blob_to_stream_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
-        # Arrange
-
-        # Act
-        with open(FILE_PATH, 'wb') as stream:
-            blob = self.bs.get_blob_to_stream(
-                self.container_name, self.byte_blob, stream, max_connections=2)
-
-        # Assert
-        self.assertIsInstance(blob, Blob)
-        with open(FILE_PATH, 'rb') as stream:
-            actual = stream.read()
-            self.assertEqual(self.byte_data, actual)
-
-    def test_get_blob_to_stream_non_seekable(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
-        # Arrange
-
-        # Act
-        with open(FILE_PATH, 'wb') as stream:
-            non_seekable_stream = StorageGetBlobTest.NonSeekableFile(stream)
-            blob = self.bs.get_blob_to_stream(self.container_name, self.byte_blob, non_seekable_stream)
-
-        # Assert
-        self.assertIsInstance(blob, Blob)
-        with open(FILE_PATH, 'rb') as stream:
-            actual = stream.read()
-            self.assertEqual(self.byte_data, actual)
-
-    def test_get_blob_to_stream_non_seekable_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
-        # Arrange
-
-        # Act
-        with open(FILE_PATH, 'wb') as stream:
-            non_seekable_stream = StorageGetBlobTest.NonSeekableFile(stream)
-
-            with self.assertRaises(BaseException):
-                blob = self.bs.get_blob_to_stream(
-                    self.container_name, self.byte_blob, non_seekable_stream, max_connections=2)
-
-        # Assert
-
-    @record
-    def test_get_blob_to_stream_with_progress(self):
-        # Arrange
-
-        # Act
         progress = []
-
         def callback(current, total):
             progress.append((current, total))
 
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name, progress_callback=callback)
+
+        # Assert
+        self.assertEqual(blob_data, blob.content)
+        self.assert_download_progress(len(blob_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+
+    def test_get_blob_to_stream(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            blob = self.bs.get_blob_to_stream(self.container_name, self.byte_blob, stream)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data, actual)
+
+    def test_get_blob_to_stream_with_progress(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
         with open(FILE_PATH, 'wb') as stream:
             blob = self.bs.get_blob_to_stream(
                 self.container_name, self.byte_blob, stream, progress_callback=callback)
@@ -265,36 +232,54 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
 
-    def test_get_blob_to_stream_with_progress_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
+    def test_get_blob_to_stream_non_parallel(self):
         # Arrange
-
-        # Act
         progress = []
-
         def callback(current, total):
             progress.append((current, total))
 
+        # Act
         with open(FILE_PATH, 'wb') as stream:
             blob = self.bs.get_blob_to_stream(
-                self.container_name, self.byte_blob, stream,
-                progress_callback=callback,
-                max_connections=5)
+                self.container_name, self.byte_blob, stream, max_connections=1, progress_callback=callback)
 
         # Assert
         self.assertIsInstance(blob, Blob)
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress, single_download=False)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
 
     @record
+    def test_get_blob_to_stream_small(self):
+        # Arrange
+        blob_data = self.get_random_bytes(1024)
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
+
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            blob = self.bs.get_blob_to_stream(self.container_name, blob_name, stream, 
+                                              progress_callback=callback)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(blob_data, actual)
+        self.assert_download_progress(len(blob_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+
     def test_get_blob_to_path(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
 
         # Act
@@ -306,22 +291,67 @@ class StorageGetBlobTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
 
-    def test_get_blob_to_path_parallel(self):
+    def test_get_blob_to_path_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
 
         # Act
         blob = self.bs.get_blob_to_path(
-            self.container_name, self.byte_blob, FILE_PATH, max_connections=5)
+            self.container_name, self.byte_blob, FILE_PATH, progress_callback=callback)
 
         # Assert
         self.assertIsInstance(blob, Blob)
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+
+    @record
+    def test_get_blob_to_path_non_parallel(self):
+        # Arrange
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        blob = self.bs.get_blob_to_path(
+            self.container_name, self.byte_blob, FILE_PATH,
+            progress_callback=callback, max_connections=1)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data, actual)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+
+    @record
+    def test_get_blob_to_path_small(self):
+        # Arrange
+        blob_data = self.get_random_bytes(1024)
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
+
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH, 
+                                        progress_callback=callback)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(blob_data, actual)
+        self.assert_download_progress(len(blob_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
 
     def test_ranged_get_blob_to_path(self):
         # parallel tests introduce random order of requests, can only run live
@@ -331,9 +361,61 @@ class StorageGetBlobTest(StorageTestCase):
         # Arrange
 
         # Act
-        blob = self.bs.get_blob_to_path(
-            self.container_name, self.byte_blob, FILE_PATH, start_range=1, end_range=3,
-            range_get_content_md5=True, max_connections=5)
+        end_range = self.bs.MAX_SINGLE_GET_SIZE + 1024
+        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 
+                                        start_range=1, end_range=end_range)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data[1:end_range+1], actual)
+
+    def test_ranged_get_blob_to_path_with_progress(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        start_range = 3
+        end_range = self.bs.MAX_SINGLE_GET_SIZE + 1024
+        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 
+                                        start_range=start_range, end_range=end_range,
+                                        progress_callback=callback)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data[start_range:end_range+1], actual)
+        self.assert_download_progress(end_range-start_range + 1, self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+
+    @record
+    def test_ranged_get_blob_to_path_small(self):
+        # Arrange
+
+        # Act
+        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 
+                                        start_range=1, end_range=4)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data[1:5], actual)
+
+    @record
+    def test_ranged_get_blob_to_path_non_parallel(self):
+        # Arrange
+
+        # Act
+        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 
+                                        start_range=1, end_range=3, max_connections=1)
 
         # Assert
         self.assertIsInstance(blob, Blob)
@@ -341,23 +423,51 @@ class StorageGetBlobTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(self.byte_data[1:4], actual)
 
-    def test_ranged_get_blob_to_path_parallel(self):
+    @record
+    def test_ranged_get_blob_to_path_invalid_range_parallel(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
+        blob_size = self.bs.MAX_SINGLE_GET_SIZE + 1
+        blob_data = self.get_random_bytes(blob_size)
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
 
         # Act
-        blob = self.bs.get_blob_to_path(
-            self.container_name, self.byte_blob, FILE_PATH, start_range=0,
-            max_connections=5)
+        end_range = 2 * self.bs.MAX_SINGLE_GET_SIZE
+        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH, 
+                                        start_range=1, end_range=end_range)
 
         # Assert
         self.assertIsInstance(blob, Blob)
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
-            self.assertEqual(self.byte_data, actual)
+            self.assertEqual(blob_data[1:blob_size], actual)
+
+    @record
+    def test_ranged_get_blob_to_path_invalid_range_non_parallel(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_size = 1024
+        blob_data = self.get_random_bytes(blob_size)
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
+
+        # Act
+        end_range = 2 * self.bs.MAX_SINGLE_GET_SIZE
+        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH, 
+                                        start_range=1, end_range=end_range)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(blob_data[1:blob_size], actual)
 
     def test_ranged_get_blob_to_path_md5_without_end_range_fail(self):
         # parallel tests introduce random order of requests, can only run live
@@ -370,64 +480,37 @@ class StorageGetBlobTest(StorageTestCase):
         with self.assertRaises(ValueError):
             blob = self.bs.get_blob_to_path(
                 self.container_name, self.byte_blob, FILE_PATH, start_range=1,
-                range_get_content_md5=True, max_connections=5)
+                range_get_content_md5=True, max_connections=1)
 
         # Assert
 
-    @record
-    def test_get_blob_to_path_with_progress(self):
-        # Arrange
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        blob = self.bs.get_blob_to_path(
-            self.container_name, self.byte_blob, FILE_PATH, progress_callback=callback)
-
-        # Assert
-        self.assertIsInstance(blob, Blob)
-        with open(FILE_PATH, 'rb') as stream:
-            actual = stream.read()
-            self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress)
-
-    @record
-    def test_get_blob_to_path_with_progress_parallel(self):
+    def test_get_blob_to_path_with_mode(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
         # Arrange
+        with open(FILE_PATH, 'wb') as stream:
+            stream.write(b'abcdef')
 
         # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        blob = self.bs.get_blob_to_path(
-            self.container_name, self.byte_blob, FILE_PATH,
-            progress_callback=callback, max_connections=2)
 
         # Assert
-        self.assertIsInstance(blob, Blob)
-        with open(FILE_PATH, 'rb') as stream:
-            actual = stream.read()
-            self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, progress, single_download=False)
+        with self.assertRaises(BaseException):
+            blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 'a+b')
 
-    @record
-    def test_get_blob_to_path_with_mode(self):
+    def test_get_blob_to_path_with_mode_non_parallel(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         with open(FILE_PATH, 'wb') as stream:
             stream.write(b'abcdef')
 
         # Act
         blob = self.bs.get_blob_to_path(
-            self.container_name, self.byte_blob, FILE_PATH, 'a+b')
+            self.container_name, self.byte_blob, FILE_PATH, 'a+b', max_connections=1)
 
         # Assert
         self.assertIsInstance(blob, Blob)
@@ -435,24 +518,11 @@ class StorageGetBlobTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(b'abcdef' + self.byte_data, actual)
 
-    @record
-    def test_get_blob_to_path_with_mode_parallel(self):
-        # Arrange
-        with open(FILE_PATH, 'wb') as stream:
-            stream.write(b'abcdef')
-
-        # Act
-        blob = self.bs.get_blob_to_path(
-            self.container_name, self.byte_blob, FILE_PATH, 'a+b')
-
-        # Assert
-        self.assertIsInstance(blob, Blob)
-        with open(FILE_PATH, 'rb') as stream:
-            actual = stream.read()
-            self.assertEqual(b'abcdef' + self.byte_data, actual)
-
-    @record
     def test_get_blob_to_text(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         text_blob = self.get_resource_name('textblob')
         text_data = self.get_random_text_data(self.bs.MAX_SINGLE_GET_SIZE + 1)
@@ -464,7 +534,7 @@ class StorageGetBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(text_data, blob.content)
 
-    def test_get_blob_to_text_parallel(self):
+    def test_get_blob_to_text_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
@@ -474,31 +544,52 @@ class StorageGetBlobTest(StorageTestCase):
         text_data = self.get_random_text_data(self.bs.MAX_SINGLE_GET_SIZE + 1)
         self.bs.create_blob_from_text(self.container_name, text_blob, text_data)
 
-        # Act
-        blob = self.bs.get_blob_to_text(self.container_name, text_blob, max_connections=5)
-
-        # Assert
-        self.assertEqual(text_data, blob.content)
-
-    @record
-    def test_get_blob_to_text_with_progress(self):
-        # Arrange
-        text_blob = self.get_resource_name('textblob')
-        text_data = self.get_random_text_data(self.bs.MAX_SINGLE_GET_SIZE + 1)
-        self.bs.create_blob_from_text(self.container_name, text_blob, text_data)
-
-        # Act
         progress = []
-
         def callback(current, total):
             progress.append((current, total))
 
-        blob = self.bs.get_blob_to_text(
-            self.container_name, text_blob, progress_callback=callback)
+        # Act
+        blob = self.bs.get_blob_to_text(self.container_name, text_blob, progress_callback=callback)
 
         # Assert
         self.assertEqual(text_data, blob.content)
-        self.assert_download_progress(len(text_data.encode('utf-8')), self.bs.MAX_CHUNK_GET_SIZE, progress)
+        self.assert_download_progress(len(text_data.encode('utf-8')), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+
+    @record
+    def test_get_blob_to_text_non_parallel(self):
+        # Arrange
+        text_blob = self._get_blob_reference()
+        text_data = self.get_random_text_data(self.bs.MAX_SINGLE_GET_SIZE + 1)
+        self.bs.create_blob_from_text(self.container_name, text_blob, text_data)
+
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        blob = self.bs.get_blob_to_text(self.container_name, text_blob, max_connections=1, progress_callback=callback)
+
+        # Assert
+        self.assertEqual(text_data, blob.content)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+
+    @record
+    def test_get_blob_to_text_small(self):
+        # Arrange
+        blob_data = self.get_random_text_data(1024)
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_text(self.container_name, blob_name, blob_data)
+
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        blob = self.bs.get_blob_to_text(self.container_name, blob_name, progress_callback=callback)
+
+        # Assert
+        self.assertEqual(blob_data, blob.content)
+        self.assert_download_progress(len(blob_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
 
     @record
     def test_get_blob_to_text_with_encoding(self):
@@ -524,7 +615,6 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Act
         progress = []
-
         def callback(current, total):
             progress.append((current, total))
 
@@ -533,7 +623,81 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text, blob.content)
-        self.assert_download_progress(len(data), self.bs.MAX_CHUNK_GET_SIZE, progress)
+        self.assert_download_progress(len(data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+
+    def test_get_blob_non_seekable(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            non_seekable_stream = StorageGetBlobTest.NonSeekableFile(stream)
+            blob = self.bs.get_blob_to_stream(self.container_name, self.byte_blob, non_seekable_stream, max_connections=1)
+
+        # Assert
+        self.assertIsInstance(blob, Blob)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data, actual)
+
+    def test_get_blob_non_seekable_parallel(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            non_seekable_stream = StorageGetBlobTest.NonSeekableFile(stream)
+
+            with self.assertRaises(BaseException):
+                blob = self.bs.get_blob_to_stream(
+                    self.container_name, self.byte_blob, non_seekable_stream)
+
+        # Assert
+
+    @record
+    def test_get_blob_exact_get_size(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        byte_data = self.get_random_bytes(self.bs.MAX_SINGLE_GET_SIZE)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, byte_data)
+
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name, progress_callback=callback)
+
+        # Assert
+        self.assertEqual(byte_data, blob.content)
+        self.assert_download_progress(len(byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+
+    def test_get_blob_exact_chunk_size(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        byte_data = self.get_random_bytes(self.bs.MAX_SINGLE_GET_SIZE + self.bs.MAX_CHUNK_GET_SIZE)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, byte_data)
+
+        progress = []
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name, progress_callback=callback)
+
+        # Assert
+        self.assertEqual(byte_data, blob.content)
+        self.assert_download_progress(len(byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

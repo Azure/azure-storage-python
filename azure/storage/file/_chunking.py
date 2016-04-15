@@ -19,28 +19,23 @@ from .._error import _ERROR_NO_SINGLE_THREAD_CHUNKING
 
 class _FileChunkDownloader(object):
     def __init__(self, file_service, share_name, directory_name, file_name, 
-                 file_size, chunk_size, start_range, end_range, stream,
-                 max_retries, retry_wait, progress_callback, timeout):
+                 download_size, chunk_size, progress, start_range, end_range, 
+                 stream, max_retries, retry_wait, progress_callback, timeout):
         self.file_service = file_service
         self.share_name = share_name
         self.directory_name = directory_name
         self.file_name = file_name
         self.chunk_size = chunk_size
-        if start_range is not None:
-            end_range = end_range or file_size
-            self.file_size = end_range - start_range
-            self.file_end = end_range
-            self.start_index = start_range
-        else:
-            self.file_size = file_size
-            self.file_end = file_size
-            self.start_index = 0
+
+        self.download_size = download_size
+        self.start_index = start_range    
+        self.file_end = end_range
 
         self.stream = stream
         self.stream_start = stream.tell()
         self.stream_lock = threading.Lock()
         self.progress_callback = progress_callback
-        self.progress_total = 0
+        self.progress_total = progress
         self.progress_lock = threading.Lock()
         self.max_retries = max_retries
         self.retry_wait = retry_wait
@@ -69,11 +64,11 @@ class _FileChunkDownloader(object):
             with self.progress_lock:
                 self.progress_total += length
                 total = self.progress_total
-                self.progress_callback(total, self.file_size)
+                self.progress_callback(total, self.download_size)
 
     def _write_to_stream(self, chunk_data, chunk_start):
         with self.stream_lock:
-            self.stream.seek(self.stream_start + chunk_start)
+            self.stream.seek(self.stream_start + (chunk_start - self.start_index))
             self.stream.write(chunk_data)
 
     def _download_chunk_with_retries(self, chunk_start, chunk_end):
@@ -203,8 +198,8 @@ class _FileChunkUploader(object):
 
 
 def _download_file_chunks(file_service, share_name, directory_name, file_name,
-                          file_size, block_size, start_range, end_range, stream,
-                          max_connections, max_retries, retry_wait, progress_callback,
+                          download_size, block_size, progress, start_range, end_range, 
+                          stream, max_connections, max_retries, retry_wait, progress_callback,
                           timeout):
     if max_connections <= 1:
         raise ValueError(_ERROR_NO_SINGLE_THREAD_CHUNKING.format('file'))
@@ -214,8 +209,9 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
         share_name,
         directory_name, 
         file_name,
-        file_size,
+        download_size,
         block_size,
+        progress,
         start_range,
         end_range,
         stream,
@@ -224,9 +220,6 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
         progress_callback,
         timeout
     )
-
-    if progress_callback is not None:
-        progress_callback(0, file_size)
 
     import concurrent.futures
     executor = concurrent.futures.ThreadPoolExecutor(max_connections)

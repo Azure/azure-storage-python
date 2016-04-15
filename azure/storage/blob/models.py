@@ -96,7 +96,12 @@ class BlobProperties(object):
         The ETag contains a value that you can use to perform operations
         conditionally.
     :ivar int content_length:
-        Length of blob in bytes.
+        The length of the content returned. If the entire blob was requested, 
+        the length of blob in bytes. If a subset of the blob was requested, the 
+        length of the returned subset.
+    :ivar str content_range:
+        Indicates the range of bytes returned in the event that the client 
+        requested a subset of the blob.
     :ivar int append_blob_committed_block_count:
         (For Append Blobs) Number of committed blocks in the blob.
     :ivar int page_blob_sequence_number:
@@ -115,6 +120,7 @@ class BlobProperties(object):
         self.last_modified = None
         self.etag = None
         self.content_length = None
+        self.content_range = None
         self.append_blob_committed_block_count = None
         self.page_blob_sequence_number = None
         self.copy = CopyProperties()

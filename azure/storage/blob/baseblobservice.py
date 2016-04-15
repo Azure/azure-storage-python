@@ -65,6 +65,7 @@ from .._deserialization import (
     _parse_metadata,
     _parse_properties,
     _convert_xml_to_service_stats,
+    _parse_length_from_content_range,
 )
 from ._serialization import (
     _get_path,
@@ -104,8 +105,8 @@ class BaseBlobService(StorageClient):
     '''
 
     __metaclass__ = ABCMeta
-    MAX_SINGLE_GET_SIZE = 64 * 1024 * 1024
-    MAX_CHUNK_GET_SIZE = 4 * 1024 * 1024
+    MAX_SINGLE_GET_SIZE = 32 * 1024 * 1024
+    MAX_CHUNK_GET_SIZE = 8 * 1024 * 1024
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
@@ -1585,7 +1586,7 @@ class BaseBlobService(StorageClient):
         self, container_name, blob_name, file_path, open_mode='wb',
         snapshot=None, start_range=None, end_range=None,
         range_get_content_md5=None, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0, lease_id=None,
+        max_connections=2, max_retries=5, retry_wait=1.0, lease_id=None,
         if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
@@ -1600,7 +1601,9 @@ class BaseBlobService(StorageClient):
         :param str file_path:
             Path of file to write out to.
         :param str open_mode:
-            Mode to use when opening the file.
+            Mode to use when opening the file. Note that specifying append only 
+            open_mode prevents parallel download. So, max_connections must be set 
+            to 1 if this open_mode is used.
         :param str snapshot:
             The snapshot parameter is an opaque DateTime value that,
             when present, specifies the blob snapshot to retrieve.
@@ -1624,9 +1627,17 @@ class BaseBlobService(StorageClient):
             the size of the blob if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the blob sequentially.
-            Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
-            If the blob size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be useful if many blobs are 
+            expected to be empty as an extra request is required for empty blobs 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of blob chunk if an error occurs.
         :param int retry_wait:
@@ -1666,6 +1677,9 @@ class BaseBlobService(StorageClient):
         _validate_not_none('file_path', file_path)
         _validate_not_none('open_mode', open_mode)
 
+        if max_connections > 1 and 'a' in open_mode:
+            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+
         with open(file_path, open_mode) as stream:
             blob = self.get_blob_to_stream(
                 container_name,
@@ -1691,7 +1705,7 @@ class BaseBlobService(StorageClient):
     def get_blob_to_stream(
         self, container_name, blob_name, stream, snapshot=None,
         start_range=None, end_range=None, range_get_content_md5=None,
-        progress_callback=None, max_connections=1, max_retries=5,
+        progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
 
@@ -1729,9 +1743,17 @@ class BaseBlobService(StorageClient):
             the size of the blob if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the blob sequentially.
-            Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
-            If the blob size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be useful if many blobs are 
+            expected to be empty as an extra request is required for empty blobs 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of blob chunk if an error occurs.
         :param int retry_wait:
@@ -1770,70 +1792,138 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
 
-        if sys.version_info >= (3,) and max_connections > 1 and not stream.seekable():
-            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+        # If the user explicitly sets max_connections to 1, do a single shot download
+        if max_connections == 1:
+            blob = self._get_blob(container_name,
+                                  blob_name,
+                                  snapshot,
+                                  start_range=start_range,
+                                  end_range=end_range,
+                                  range_get_content_md5=range_get_content_md5,
+                                  lease_id=lease_id,
+                                  if_modified_since=if_modified_since,
+                                  if_unmodified_since=if_unmodified_since,
+                                  if_match=if_match,
+                                  if_none_match=if_none_match,
+                                  timeout=timeout)
 
-        # Only get properties if parallelism will actually be used
-        blob_size = None
-        if max_connections > 1 and range_get_content_md5 is None:
-            blob = self.get_blob_properties(container_name, blob_name, timeout=timeout)
-            blob_size = blob.properties.content_length
+            # Set the download size
+            download_size = blob.properties.content_length
 
-            # If blob size is large, use parallel download
-            if blob_size >= self.MAX_SINGLE_GET_SIZE:
-                _download_blob_chunks(
-                    self,
-                    container_name,
-                    blob_name,
-                    blob_size,
-                    self.MAX_CHUNK_GET_SIZE,
-                    start_range,
-                    end_range,
-                    stream,
-                    max_connections,
-                    max_retries,
-                    retry_wait,
-                    progress_callback,
-                    if_modified_since,
-                    if_unmodified_since,
-                    if_match,
-                    if_none_match,
-                    timeout,
-                )
-                return blob
+        # If max_connections is greater than 1, do the first get to establish the 
+        # size of the blob and get the first segment of data
+        else:       
+            if sys.version_info >= (3,) and not stream.seekable():
+                raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+                
+            initial_request_start = start_range if start_range else 0
 
-        # If parallelism is off or the blob is small, do a single download
-        download_size = _get_download_size(start_range, end_range, blob_size)
+            if end_range and end_range - start_range < self.MAX_SINGLE_GET_SIZE:
+                initial_request_end = end_range
+            else:
+                initial_request_end = initial_request_start + self.MAX_SINGLE_GET_SIZE - 1
+
+            try:
+                blob = self._get_blob(container_name,
+                                      blob_name,
+                                      snapshot,
+                                      start_range=initial_request_start,
+                                      end_range=initial_request_end,
+                                      range_get_content_md5=range_get_content_md5,
+                                      lease_id=lease_id,
+                                      if_modified_since=if_modified_since,
+                                      if_unmodified_since=if_unmodified_since,
+                                      if_match=if_match,
+                                      if_none_match=if_none_match,
+                                      timeout=timeout)
+
+                # Parse the total blob size and adjust the download size if ranges 
+                # were specified
+                blob_size = _parse_length_from_content_range(blob.properties.content_range)
+                if end_range:
+                    # Use the end_range unless it is over the end of the blob
+                    download_size = min(blob_size, end_range - start_range + 1)
+                elif start_range:
+                    download_size = blob_size - start_range
+                else:
+                    download_size = blob_size
+            except AzureHttpError as ex:
+                if not start_range and ex.status_code == 416:
+                    # Get range will fail on an empty blob. If the user did not 
+                    # request a range, do a regular get request in order to get 
+                    # any properties.
+                    blob = self._get_blob(container_name,
+                                          blob_name,
+                                          snapshot,
+                                          range_get_content_md5=range_get_content_md5,
+                                          lease_id=lease_id,
+                                          if_modified_since=if_modified_since,
+                                          if_unmodified_since=if_unmodified_since,
+                                          if_match=if_match,
+                                          if_none_match=if_none_match,
+                                          timeout=timeout)
+
+                    # Set the download size to empty
+                    download_size = 0
+                else:
+                    raise ex
+
+        # Mark the first progress chunk. If the blob is small or this is a single 
+        # shot download, this is the only call
         if progress_callback:
-            progress_callback(0, download_size)
+            progress_callback(blob.properties.content_length, download_size)
 
-        blob = self._get_blob(container_name,
-                              blob_name,
-                              snapshot,
-                              start_range=start_range,
-                              end_range=end_range,
-                              range_get_content_md5=range_get_content_md5,
-                              lease_id=lease_id,
-                              if_modified_since=if_modified_since,
-                              if_unmodified_since=if_unmodified_since,
-                              if_match=if_match,
-                              if_none_match=if_none_match,
-                              timeout=timeout)
-
+        # Write the content to the user stream  
+        # Clear blob content since output has been written to user stream   
         if blob.content is not None:
             stream.write(blob.content)
-    
-        if progress_callback:
-            download_size = len(blob.content)
-            progress_callback(download_size, download_size)
+            blob.content = None
 
-        blob.content = None # Clear blob content since output has been written to user stream
+        # If the blob is small or single shot download was used, the download is 
+        # complete at this point. If blob size is large, use parallel download.
+        if blob.properties.content_length != download_size:       
+            # Lock on the etag. This can be overriden by the user by specifying '*'
+            if_match = if_match if if_match is not None else blob.properties.etag    
+            
+            end_blob = blob_size
+            if end_range:
+                # Use the end_range unless it is over the end of the blob
+                end_blob = min(blob_size, end_range + 1)
+               
+            _download_blob_chunks(
+                self,
+                container_name,
+                blob_name,
+                download_size,
+                self.MAX_CHUNK_GET_SIZE,
+                self.MAX_SINGLE_GET_SIZE,
+                initial_request_end + 1, # start where the first download ended
+                end_blob,
+                stream,
+                max_connections,
+                max_retries,
+                retry_wait,
+                progress_callback,
+                if_modified_since,
+                if_unmodified_since,
+                if_match,
+                if_none_match,
+                timeout,
+            )
+
+            # Set the content length to the download size instead of the size of 
+            # the last range
+            blob.properties.content_length = download_size
+
+            # Overwrite the content range to the user requested range
+            blob.properties.content_range = 'bytes {0}-{1}/{2}'.format(start_range, end_range, blob_size)
+
         return blob
         
     def get_blob_to_bytes(
         self, container_name, blob_name, snapshot=None,
         start_range=None, end_range=None, range_get_content_md5=None,
-        progress_callback=None, max_connections=1, max_retries=5,
+        progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None,
         timeout=None):
@@ -1869,9 +1959,17 @@ class BaseBlobService(StorageClient):
             the size of the blob if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the blob sequentially.
-            Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
-            If the blob size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be useful if many blobs are 
+            expected to be empty as an extra request is required for empty blobs 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of blob chunk if an error occurs.
         :param int retry_wait:
@@ -1935,7 +2033,7 @@ class BaseBlobService(StorageClient):
     def get_blob_to_text(
         self, container_name, blob_name, encoding='utf-8', snapshot=None,
         start_range=None, end_range=None, range_get_content_md5=None,
-        progress_callback=None, max_connections=1, max_retries=5,
+        progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None,
         timeout=None):
@@ -1973,9 +2071,17 @@ class BaseBlobService(StorageClient):
             the size of the blob if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the blob sequentially.
-            Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
-            If the blob size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be useful if many blobs are 
+            expected to be empty as an extra request is required for empty blobs 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of blob chunk if an error occurs.
         :param int retry_wait:
