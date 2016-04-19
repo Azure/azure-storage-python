@@ -21,13 +21,15 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="azure\storage\blob\_upload_chunking.py" />
+    <Compile Include="azure\storage\file\_upload_chunking.py" />
     <Compile Include="azure\storage\_auth.py" />
     <Compile Include="azure\storage\blob\appendblobservice.py" />
     <Compile Include="azure\storage\blob\blockblobservice.py" />
     <Compile Include="azure\storage\blob\models.py" />
     <Compile Include="azure\storage\blob\pageblobservice.py" />
     <Compile Include="azure\storage\blob\baseblobservice.py" />
-    <Compile Include="azure\storage\blob\_chunking.py" />
+    <Compile Include="azure\storage\blob\_download_chunking.py" />
     <Compile Include="azure\storage\blob\_deserialization.py" />
     <Compile Include="azure\storage\blob\_error.py" />
     <Compile Include="azure\storage\blob\_serialization.py" />
@@ -37,7 +39,7 @@
     <Compile Include="azure\storage\_constants.py" />
     <Compile Include="azure\storage\file\fileservice.py" />
     <Compile Include="azure\storage\file\models.py" />
-    <Compile Include="azure\storage\file\_chunking.py" />
+    <Compile Include="azure\storage\file\_download_chunking.py" />
     <Compile Include="azure\storage\file\_deserialization.py" />
     <Compile Include="azure\storage\file\_serialization.py" />
     <Compile Include="azure\storage\file\__init__.py" />
