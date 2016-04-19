@@ -35,7 +35,7 @@ from .._serialization import (
     _convert_service_properties_to_xml,
 )
 from .._http import HTTPRequest
-from ._chunking import _download_blob_chunks
+from ._download_chunking import _download_blob_chunks
 from ..models import (
     Services,
     ListGenerator,

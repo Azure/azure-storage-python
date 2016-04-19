@@ -26,7 +26,7 @@ from .._serialization import (
     _get_request_body_bytes_only,
 )
 from .._http import HTTPRequest
-from ._chunking import (
+from ._upload_chunking import (
     _AppendBlobChunkUploader,
     _upload_blob_chunks,
 )

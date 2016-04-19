@@ -50,10 +50,8 @@ from .models import (
     FileProperties,
 )
 from .._http import HTTPRequest
-from ._chunking import (
-    _download_file_chunks,
-    _upload_file_chunks,
-)
+from ._upload_chunking import _upload_file_chunks
+from ._download_chunking import _download_file_chunks
 from .._auth import (
     _StorageSharedKeyAuthentication,
     _StorageSASAuthentication,

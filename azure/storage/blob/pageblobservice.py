@@ -29,7 +29,7 @@ from .._http import HTTPRequest
 from ._error import (
     _ERROR_PAGE_BLOB_SIZE_ALIGNMENT,
 )
-from ._chunking import (
+from ._upload_chunking import (
     _PageBlobChunkUploader,
     _upload_blob_chunks,
 )
