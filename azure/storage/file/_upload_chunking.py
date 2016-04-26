@@ -18,7 +18,8 @@ from time import sleep
 
 def _upload_file_chunks(file_service, share_name, directory_name, file_name,
                         file_size, block_size, stream, max_connections,
-                        max_retries, retry_wait, progress_callback, timeout):
+                        max_retries, retry_wait, progress_callback, validate_content, 
+                        timeout):
     uploader = _FileChunkUploader(
         file_service,
         share_name,
@@ -31,6 +32,7 @@ def _upload_file_chunks(file_service, share_name, directory_name, file_name,
         max_retries,
         retry_wait,
         progress_callback,
+        validate_content,
         timeout
     )
 
@@ -52,7 +54,7 @@ def _upload_file_chunks(file_service, share_name, directory_name, file_name,
 class _FileChunkUploader(object):
     def __init__(self, file_service, share_name, directory_name, file_name, 
                  file_size, chunk_size, stream, parallel, max_retries, retry_wait,
-                 progress_callback, timeout):
+                 progress_callback, validate_content, timeout):
         self.file_service = file_service
         self.share_name = share_name
         self.directory_name = directory_name
@@ -67,6 +69,7 @@ class _FileChunkUploader(object):
         self.progress_lock = threading.Lock() if parallel else None
         self.max_retries = max_retries
         self.retry_wait = retry_wait
+        self.validate_content = validate_content
         self.timeout = timeout
 
     def get_chunk_offsets(self):
@@ -150,6 +153,7 @@ class _FileChunkUploader(object):
             chunk_data,
             chunk_start,
             chunk_end,
+            self.validate_content,
             timeout=self.timeout
         )
         return 'bytes={0}-{1}'.format(chunk_start, chunk_end)

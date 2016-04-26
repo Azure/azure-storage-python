@@ -20,7 +20,7 @@ from .._error import _ERROR_NO_SINGLE_THREAD_CHUNKING
 def _download_file_chunks(file_service, share_name, directory_name, file_name,
                           download_size, block_size, progress, start_range, end_range, 
                           stream, max_connections, max_retries, retry_wait, progress_callback,
-                          timeout):
+                          validate_content, timeout):
     if max_connections <= 1:
         raise ValueError(_ERROR_NO_SINGLE_THREAD_CHUNKING.format('file'))
 
@@ -38,6 +38,7 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
         max_retries,
         retry_wait,
         progress_callback,
+        validate_content,
         timeout
     )
 
@@ -48,7 +49,8 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
 class _FileChunkDownloader(object):
     def __init__(self, file_service, share_name, directory_name, file_name, 
                  download_size, chunk_size, progress, start_range, end_range, 
-                 stream, max_retries, retry_wait, progress_callback, timeout):
+                 stream, max_retries, retry_wait, progress_callback, validate_content, 
+                 timeout):
         self.file_service = file_service
         self.share_name = share_name
         self.directory_name = directory_name
@@ -67,6 +69,7 @@ class _FileChunkDownloader(object):
         self.progress_lock = threading.Lock()
         self.max_retries = max_retries
         self.retry_wait = retry_wait
+        self.validate_content = validate_content
         self.timeout = timeout
 
     def get_chunk_offsets(self):
@@ -109,6 +112,7 @@ class _FileChunkDownloader(object):
                     self.file_name,
                     start_range=chunk_start,
                     end_range=chunk_end - 1,
+                    validate_content=self.validate_content,
                     timeout=self.timeout
                 )
             except Exception:

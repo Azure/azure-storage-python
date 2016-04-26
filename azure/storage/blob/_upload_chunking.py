@@ -25,8 +25,8 @@ from .models import BlobBlock
 def _upload_blob_chunks(blob_service, container_name, blob_name,
                         blob_size, block_size, stream, max_connections,
                         max_retries, retry_wait, progress_callback,
-                        lease_id, uploader_class, maxsize_condition=None, 
-                        if_match=None, timeout=None):
+                        validate_content, lease_id, uploader_class, 
+                        maxsize_condition=None, if_match=None, timeout=None):
     uploader = uploader_class(
         blob_service,
         container_name,
@@ -38,6 +38,7 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
         max_retries,
         retry_wait,
         progress_callback,
+        validate_content,
         lease_id,
         timeout
     )
@@ -66,7 +67,7 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
 class _BlobChunkUploader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
                  chunk_size, stream, parallel, max_retries, retry_wait,
-                 progress_callback, lease_id, timeout):
+                 progress_callback, validate_content, lease_id, timeout):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
@@ -81,6 +82,7 @@ class _BlobChunkUploader(object):
         self.progress_lock = threading.Lock() if parallel else None
         self.max_retries = max_retries
         self.retry_wait = retry_wait
+        self.validate_content = validate_content
         self.lease_id = lease_id
         self.timeout = timeout
 
@@ -165,6 +167,7 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
             self.blob_name,
             chunk_data,
             block_id,
+            validate_content=self.validate_content,
             lease_id=self.lease_id,
             timeout=self.timeout,
         )
@@ -180,6 +183,7 @@ class _PageBlobChunkUploader(_BlobChunkUploader):
             chunk_data,
             chunk_start,
             chunk_end,
+            validate_content=self.validate_content,
             lease_id=self.lease_id,
             if_match=self.if_match,
             timeout=self.timeout,
@@ -195,6 +199,7 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 self.container_name,
                 self.blob_name,
                 chunk_data,
+                validate_content=self.validate_content,
                 lease_id=self.lease_id,
                 maxsize_condition=self.maxsize_condition,
                 timeout=self.timeout,
@@ -206,6 +211,7 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 self.container_name,
                 self.blob_name,
                 chunk_data,
+                validate_content=self.validate_content,
                 lease_id=self.lease_id,
                 maxsize_condition=self.maxsize_condition,
                 appendpos_condition=self.current_length + chunk_offset,

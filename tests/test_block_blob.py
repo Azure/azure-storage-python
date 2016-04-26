@@ -33,7 +33,7 @@ from tests.testcase import (
 #------------------------------------------------------------------------------
 TEST_BLOB_PREFIX = 'blob'
 FILE_PATH = 'blob_input.temp.dat'
-LARGE_BLOB_SIZE = 64 * 1024 + 1
+LARGE_BLOB_SIZE = 68 * 1024 + 5
 #------------------------------------------------------------------------------
 
 class StorageBlockBlobTest(StorageTestCase):
@@ -121,6 +121,20 @@ class StorageBlockBlobTest(StorageTestCase):
         # Assert
 
     @record
+    def test_put_block_with_md5(self):
+        # Arrange
+        blob_name = self._create_blob()
+
+        # Act
+        self.bs.put_block(self.container_name,
+                            blob_name,
+                            b'block',
+                            1,
+                            validate_content=True)
+
+        # Assert
+
+    @record
     def test_put_block_list(self):
         # Arrange
         blob_name = self._get_blob_reference()
@@ -151,6 +165,20 @@ class StorageBlockBlobTest(StorageTestCase):
             self.fail()
         except AzureHttpError as e:
             self.assertGreaterEqual(str(e).find('specified block list is invalid'), 0)
+
+        # Assert
+
+    @record
+    def test_put_block_list_with_md5(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        self.bs.put_block(self.container_name, blob_name, b'AAA', '1')
+        self.bs.put_block(self.container_name, blob_name, b'BBB', '2')
+        self.bs.put_block(self.container_name, blob_name, b'CCC', '3')
+
+        # Act
+        block_list = [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')]
+        self.bs.put_block_list(self.container_name, blob_name, block_list, validate_content=True)
 
         # Assert
 
@@ -771,6 +799,32 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, encoded_data)
+
+    def test_create_blob_with_md5(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = b'hello world'
+
+        # Act
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+                                       validate_content=True)
+
+        # Assert
+
+    def test_create_blob_in_parallel_with_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
+
+        # Act
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+                                       validate_content=True, max_connections=5)
+
+        # Assert
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

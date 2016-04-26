@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-
+from ._common_conversion import _to_str
 from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
     AzureMissingResourceHttpError,
+    AzureException,
 )
 
 _ERROR_CONFLICT = 'Conflict ({0})'
@@ -44,6 +45,8 @@ _ERROR_START_END_NEEDED_FOR_MD5 = \
 _ERROR_RANGE_TOO_LARGE_FOR_MD5 = \
     'Getting content MD5 for a range greater than 4MB ' + \
     'is not supported.'
+_ERROR_MD5_MISMATCH = \
+    'MD5 mismatch. Expected value is \'{0}\', computed value is \'{1}\'.'
 
 def _dont_fail_on_exist(error):
     ''' don't throw exception if the resource exists.
@@ -79,3 +82,7 @@ def _validate_type_bytes(param_name, param):
 def _validate_not_none(param_name, param):
     if param is None:
         raise ValueError(_ERROR_VALUE_NONE.format(param_name))
+
+def _validate_content_match(server_md5, computed_md5):
+    if server_md5 != computed_md5:
+        raise AzureException(_ERROR_MD5_MISMATCH.format(server_md5, computed_md5))

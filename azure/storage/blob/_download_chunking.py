@@ -21,10 +21,10 @@ from azure.common import (
 from .._error import _ERROR_NO_SINGLE_THREAD_CHUNKING
 
 def _download_blob_chunks(blob_service, container_name, blob_name,
-                          download_size, block_size, progress, start_range, end_range, stream,
-                          max_connections, max_retries, retry_wait, progress_callback,
-                          if_modified_since, if_unmodified_since, if_match, if_none_match, 
-                          timeout):
+                          download_size, block_size, progress, start_range, end_range, 
+                          stream, max_connections, max_retries, retry_wait, 
+                          progress_callback, validate_content, lease_id, if_modified_since, 
+                          if_unmodified_since, if_match, if_none_match, timeout):
     if max_connections <= 1:
         raise ValueError(_ERROR_NO_SINGLE_THREAD_CHUNKING.format('blob'))
 
@@ -36,11 +36,13 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
         block_size,
         progress,
         start_range,
-        end_range,
+        end_range,       
         stream,
         max_retries,
         retry_wait,
         progress_callback,
+        validate_content,
+        lease_id,
         if_modified_since,
         if_unmodified_since,
         if_match,
@@ -55,7 +57,7 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
 class _BlobChunkDownloader(object):
     def __init__(self, blob_service, container_name, blob_name, download_size,
                  chunk_size, progress, start_range, end_range, stream, max_retries,
-                 retry_wait, progress_callback, if_modified_since, 
+                 retry_wait, progress_callback, validate_content, lease_id, if_modified_since, 
                  if_unmodified_since, if_match, if_none_match, timeout):
         self.blob_service = blob_service
         self.container_name = container_name
@@ -76,6 +78,8 @@ class _BlobChunkDownloader(object):
         self.retry_wait = retry_wait
         self.timeout = timeout
 
+        self.validate_content = validate_content
+        self.lease_id = lease_id
         self.if_modified_since=if_modified_since
         self.if_unmodified_since=if_unmodified_since
         self.if_match=if_match
@@ -120,6 +124,8 @@ class _BlobChunkDownloader(object):
                     self.blob_name,
                     start_range=chunk_start,
                     end_range=chunk_end - 1,
+                    validate_content=self.validate_content,
+                    lease_id=self.lease_id,
                     if_modified_since=self.if_modified_since,
                     if_unmodified_since=self.if_unmodified_since,
                     if_match=self.if_match,

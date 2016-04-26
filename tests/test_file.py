@@ -353,7 +353,7 @@ class StorageFileTest(StorageTestCase):
         # Assert
 
     @record
-    def test_update_file(self):
+    def test_update_range(self):
         # Arrange
         file_name = self._create_file()
 
@@ -367,7 +367,18 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(self.short_byte_data[512:], file.content[512:])
 
     @record
-    def test_clear_file(self):
+    def test_update_range_with_md5(self):
+        # Arrange
+        file_name = self._create_file()
+
+        # Act
+        data = b'abcdefghijklmnop' * 32
+        self.fs.update_range(self.share_name, None, file_name, data, 0, 511, validate_content=True)
+
+        # Assert
+
+    @record
+    def test_clear_range(self):
         # Arrange
         file_name = self._create_file()
 
@@ -1027,6 +1038,32 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFileEqual(self.share_name, None, file_name, encoded_data)
+
+    def test_create_file_with_md5(self):
+        # Arrange
+        file_name = self._get_file_reference()
+        data = self.get_random_bytes(512)
+
+        # Act
+        self.fs.create_file_from_bytes(self.share_name, None, file_name, data, 
+                                       validate_content=True)
+
+        # Assert
+
+    def test_create_file_in_parallel_with_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        file_name = self._get_file_reference()
+        data = self.get_random_bytes(LARGE_FILE_SIZE)
+
+        # Act
+        self.fs.create_file_from_bytes(self.share_name, None, file_name, data, 
+                                       validate_content=True, max_connections=5)
+
+        # Assert
 
 
     #--Test cases for sas & acl ------------------------------------------------

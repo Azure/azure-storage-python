@@ -152,6 +152,18 @@ class StorageAppendBlobTest(StorageTestCase):
         # Assert
 
     @record
+    def test_append_block_with_md5(self):
+        # Arrange
+        blob_name = self._create_blob()
+
+        # Act
+        resp = self.bs.append_block(self.container_name, blob_name, 
+                                    b'block',
+                                    validate_content=True)
+
+        # Assert
+
+    @record
     def test_append_blob_from_bytes(self):
         # Arrange
         blob_name = self._create_blob()
@@ -444,6 +456,17 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, encoded_data)
+
+    def test_append_blob_with_md5(self):
+        # Arrange
+        blob_name = self._create_blob()
+        data = b'hello world'
+
+        # Act
+        self.bs.append_blob_from_bytes(self.container_name, blob_name, data, 
+                                       validate_content=True)
+
+        # Assert
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
