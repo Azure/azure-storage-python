@@ -6,6 +6,7 @@
 
 ### All:
 - request_callback and response_callback functions may be set on the service clients. These callbacks will be run before the request is executed and after the response is received, respectively. They maybe used to add custom headers to the request and for logging, among other purposes.
+- A client request id is added to requests by default.
 
 ### Blob:
 - Get requests taking the start_range parameter incorrectly sent an x-ms-range header when start_range was not specified.

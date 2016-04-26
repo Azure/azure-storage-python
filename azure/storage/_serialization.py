@@ -13,6 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import sys
+import uuid
 from datetime import date
 from dateutil.tz import tzutc
 from time import time
@@ -65,6 +66,7 @@ def _update_request(request):
     # append addtional headers based on the service
     request.headers.append(('x-ms-version', X_MS_VERSION))
     request.headers.append(('User-Agent', _USER_AGENT_STRING))
+    request.headers.append(('x-ms-client-request-id', str(uuid.uuid1())))
 
     # If the host has a path component (ex local storage), move it
     path = request.host.split('/', 1)
