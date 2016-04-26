@@ -280,6 +280,43 @@ class StorageClientTest(StorageTestCase):
         self.assertEqual(service.primary_endpoint, 'www.mydomain.com')
         self.assertEqual(service.secondary_endpoint, self.account_name + '-secondary.blob.core.windows.net')
 
+    def test_request_callback_signed_header(self):
+        # Arrange
+        service = BlockBlobService(self.account_name, self.account_key)
+        name = self.get_resource_name('cont')
+
+        # Act
+        def callback(request):
+            if request.method == 'PUT':
+                request.headers.append(('x-ms-meta-hello', 'world'))
+
+        service.request_callback = callback
+
+        # Assert
+        try:
+            service.create_container(name)
+            metadata = service.get_container_metadata(name)
+            self.assertEqual(metadata, {'hello': 'world'})
+        finally:
+            service.delete_container(name)
+
+    def test_response_callback(self):
+        # Arrange
+        service = BlockBlobService(self.account_name, self.account_key)
+        name = self.get_resource_name('cont')
+
+        # Act
+        def callback(response):
+            response.status = 200
+            response.headers.clear()
+
+        # Force an exists call to succeed by resetting the status
+        service.response_callback = callback
+
+        # Assert
+        exists = service.exists(name)
+        self.assertTrue(exists)
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

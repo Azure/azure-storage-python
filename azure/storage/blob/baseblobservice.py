@@ -35,6 +35,7 @@ from .._serialization import (
     _get_request_body,
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
+    _add_metadata_headers,
 )
 from .._http import HTTPRequest
 from ._download_chunking import _download_blob_chunks
@@ -550,9 +551,9 @@ class BaseBlobService(StorageClient):
             ('restype', 'container'),
             ('timeout', _int_to_str(timeout)),]
         request.headers = [
-            ('x-ms-meta-name-values', metadata),
             ('x-ms-blob-public-access', _to_str(public_access))
         ]
+        _add_metadata_headers(metadata, request)
 
         if not fail_on_exist:
             try:
@@ -663,10 +664,10 @@ class BaseBlobService(StorageClient):
             ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-meta-name-values', metadata),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('x-ms-lease-id', _to_str(lease_id)),
         ]
+        _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -2333,13 +2334,13 @@ class BaseBlobService(StorageClient):
             ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-meta-name-values', metadata),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _to_str(if_match)),
             ('If-None-Match', _to_str(if_none_match)),
             ('x-ms-lease-id', _to_str(lease_id)),
         ]
+        _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -2809,13 +2810,13 @@ class BaseBlobService(StorageClient):
             ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-meta-name-values', metadata),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _to_str(if_match)),
             ('If-None-Match', _to_str(if_none_match)),
             ('x-ms-lease-id', _to_str(lease_id))
         ]
+        _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
         return _parse_snapshot_blob(blob_name, response)
@@ -2974,7 +2975,6 @@ class BaseBlobService(StorageClient):
         request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
             ('x-ms-copy-source', _to_str(copy_source)),
-            ('x-ms-meta-name-values', metadata),
             ('x-ms-source-if-modified-since',
              _to_str(source_if_modified_since)),
             ('x-ms-source-if-unmodified-since',
@@ -2989,6 +2989,7 @@ class BaseBlobService(StorageClient):
             ('x-ms-lease-id', _to_str(destination_lease_id)),
             ('x-ms-source-lease-id', _to_str(source_lease_id))
         ]
+        _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
         props = _parse_properties(response, BlobProperties)

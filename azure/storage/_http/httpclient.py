@@ -131,10 +131,4 @@ class _HTTPClient(object):
         for key, name in response.headers.items():
             respheaders.append((key.lower(), name))
 
-        # Construct an error or a response based on status code
-        if status >= 300:
-            # This exception will be caught by the general error handler
-            # and raised as an azure http exception
-            raise HTTPError(status, response.reason, respheaders, response.content)
-        else:
-            return HTTPResponse(status, response.reason, respheaders, response.content)
+        return HTTPResponse(status, response.reason, respheaders, response.content)
