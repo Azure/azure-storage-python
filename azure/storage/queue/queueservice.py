@@ -29,6 +29,7 @@ from .._error import (
 )
 from .._serialization import (
     _get_request_body,
+    _add_metadata_headers,
 )
 from .._common_conversion import (
     _int_to_str,
@@ -484,7 +485,8 @@ class QueueService(StorageClient):
         request.host = self._get_host()
         request.path = _get_path(queue_name)
         request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        _add_metadata_headers(metadata, request)
+
         if not fail_on_exist:
             try:
                 response = self._perform_request(request)
@@ -591,7 +593,8 @@ class QueueService(StorageClient):
             ('comp', 'metadata'),
             ('timeout', _int_to_str(timeout)),
         ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        _add_metadata_headers(metadata, request)
+
         self._perform_request(request)
 
     def exists(self, queue_name, timeout=None):

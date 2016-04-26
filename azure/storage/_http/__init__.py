@@ -22,6 +22,8 @@ class HTTPError(Exception):
         the status code of the response
     :ivar str message:
         the message
+    :ivar list headers:
+        the returned headers, as a list of (name, value) pairs
     :ivar bytes body:
         the body of the response
     '''

@@ -63,18 +63,8 @@ def _update_request(request):
         request.headers.append(('Content-Length', str(len(request.body))))
 
     # append addtional headers based on the service
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
     request.headers.append(('x-ms-version', X_MS_VERSION))
     request.headers.append(('User-Agent', _USER_AGENT_STRING))
-
-    # append x-ms-meta name, values to header
-    for name, value in request.headers:
-        if 'x-ms-meta-name-values' in name and value:
-            for meta_name, meta_value in value.items():
-                request.headers.append(('x-ms-meta-' + meta_name, meta_value))
-            request.headers.remove((name, value))
-            break
 
     # If the host has a path component (ex local storage), move it
     path = request.host.split('/', 1)
@@ -84,6 +74,17 @@ def _update_request(request):
 
     # Encode and optionally add local storage prefix to path
     request.path = url_quote(request.path, '/()$=\',~')
+
+def _add_metadata_headers(metadata, request):
+    if metadata:
+        if not request.headers:
+            request.headers = []
+        for name, value in metadata.items():
+            request.headers.append(('x-ms-meta-' + name, value))
+
+def _add_date_header(request):
+    current_time = format_date_time(time())
+    request.headers.append(('x-ms-date', current_time))
 
 def _get_request_body_bytes_only(param_name, param_value):
     '''Validates the request body passed in and converts it to bytes

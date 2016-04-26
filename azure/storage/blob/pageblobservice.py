@@ -192,7 +192,6 @@ class PageBlobService(BaseBlobService):
         request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
             ('x-ms-blob-type', _to_str(self.blob_type)),
-            ('x-ms-meta-name-values', metadata),
             ('x-ms-blob-content-length', _to_str(content_length)),
             ('x-ms-lease-id', _to_str(lease_id)),
             ('x-ms-blob-sequence-number', _to_str(sequence_number)),
@@ -201,6 +200,7 @@ class PageBlobService(BaseBlobService):
             ('If-Match', _to_str(if_match)),
             ('If-None-Match', _to_str(if_none_match))
         ]
+        _metadata_to_headers(metadata, request)
         if content_settings is not None:
             request.headers += content_settings._to_headers()
 

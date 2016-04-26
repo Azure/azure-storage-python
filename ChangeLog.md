@@ -4,6 +4,9 @@
 
 ## Version 0.32.0:
 
+### All:
+- request_callback and response_callback functions may be set on the service clients. These callbacks will be run before the request is executed and after the response is received, respectively. They maybe used to add custom headers to the request and for logging, among other purposes.
+
 ### Blob:
 - Get requests taking the start_range parameter incorrectly sent an x-ms-range header when start_range was not specified.
 - get_blob_to_* will do an initial get request of size 32 MB. If it then finds the blob is larger than this size, it will parallelize by default.

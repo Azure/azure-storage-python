@@ -34,6 +34,7 @@ from .._serialization import (
     _get_request_body_bytes_only,
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
+    _add_metadata_headers,
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
@@ -630,8 +631,8 @@ class FileService(StorageClient):
             ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-meta-name-values', metadata),
             ('x-ms-share-quota', _int_to_str(quota))]
+        _add_metadata_headers(metadata, request)
 
         if not fail_on_exist:
             try:
@@ -749,7 +750,7 @@ class FileService(StorageClient):
             ('comp', 'metadata'),
             ('timeout', _int_to_str(timeout)),
         ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
 
@@ -910,7 +911,7 @@ class FileService(StorageClient):
             ('restype', 'directory'),
             ('timeout', _int_to_str(timeout)),
         ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        _add_metadata_headers(metadata, request)
 
         if not fail_on_exist:
             try:
@@ -1056,7 +1057,7 @@ class FileService(StorageClient):
             ('comp', 'metadata'),
             ('timeout', _int_to_str(timeout)),
         ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
 
@@ -1325,7 +1326,7 @@ class FileService(StorageClient):
             ('comp', 'metadata'),
             ('timeout', _int_to_str(timeout)),
         ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
 
@@ -1378,8 +1379,8 @@ class FileService(StorageClient):
         request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
             ('x-ms-copy-source', _to_str(copy_source)),
-            ('x-ms-meta-name-values', metadata),
         ]
+        _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
         props = _parse_properties(response, FileProperties)
@@ -1479,10 +1480,10 @@ class FileService(StorageClient):
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
-            ('x-ms-meta-name-values', metadata),
             ('x-ms-content-length', _to_str(content_length)),
             ('x-ms-type', 'file')
         ]
+        _add_metadata_headers(metadata, request)
         if content_settings is not None:
             request.headers += content_settings._to_headers()
 

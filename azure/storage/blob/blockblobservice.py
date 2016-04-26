@@ -191,13 +191,13 @@ class BlockBlobService(BaseBlobService):
         request.query = [('timeout', _int_to_str(timeout))]
         request.headers = [
             ('x-ms-blob-type', _to_str(self.blob_type)),
-            ('x-ms-meta-name-values', metadata),
             ('x-ms-lease-id', _to_str(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _to_str(if_match)),
             ('If-None-Match', _to_str(if_none_match))
         ]
+        _metadata_to_headers(metadata, request)
         if content_settings is not None:
             request.headers += content_settings._to_headers()
         request.body = _get_request_body_bytes_only('blob', blob)
@@ -338,13 +338,13 @@ class BlockBlobService(BaseBlobService):
             ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('x-ms-meta-name-values', metadata),
             ('x-ms-lease-id', _to_str(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
             ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
             ('If-Match', _to_str(if_match)),
             ('If-None-Match', _to_str(if_none_match)),
         ]
+        _metadata_to_headers(metadata, request)
         if content_settings is not None:
             request.headers += content_settings._to_headers()
         request.body = _get_request_body(
