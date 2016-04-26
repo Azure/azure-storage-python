@@ -469,19 +469,6 @@ class StorageGetBlobTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(blob_data[1:blob_size], actual)
 
-    def test_ranged_get_blob_to_path_md5_without_end_range_fail(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
-        # Arrange
-
-        # Act
-        with self.assertRaises(ValueError):
-            blob = self.bs.get_blob_to_path(
-                self.container_name, self.byte_blob, FILE_PATH, start_range=1,
-                range_get_content_md5=True, max_connections=1)
-
         # Assert
 
     def test_get_blob_to_path_with_mode(self):
@@ -698,6 +685,19 @@ class StorageGetBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(byte_data, blob.content)
         self.assert_download_progress(len(byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+
+    def test_get_blob_with_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, validate_content=True)
+
+        # Assert
+        self.assertEqual(self.byte_data, blob.content)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

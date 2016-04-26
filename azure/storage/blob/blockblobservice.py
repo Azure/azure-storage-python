@@ -22,6 +22,7 @@ from .._common_conversion import (
     _to_str,
     _int_to_str,
     _datetime_to_utc_string,
+    _get_content_md5,
 )
 from .._serialization import (
     _get_request_body,
@@ -66,6 +67,15 @@ class BlockBlobService(BaseBlobService):
     slightly more than 195 GB (4 MB X 50,000 blocks). If you are writing a block
     blob that is no more than 64 MB in size, you can upload it in its entirety with
     a single write operation; see create_blob_from_bytes. 
+
+    :ivar int MAX_SINGLE_PUT_SIZE: 
+        The largest size upload supported in a single put call. This is used by 
+        the create_blob_from_* methods if the content length is known and is less 
+        than this value.
+    :ivar int MAX_BLOCK_SIZE: 
+        The size of the blocks put by create_blob_from_* methods if the content 
+        length is unknown or is larger than MAX_SINGLE_PUT_SIZE. Smaller blocks 
+        may be put. The maximum block size the service supports is 4MB.
     '''
 
     MAX_SINGLE_PUT_SIZE = 64 * 1024 * 1024
@@ -116,9 +126,9 @@ class BlockBlobService(BaseBlobService):
             custom_domain, request_session, connection_string)
 
     def _put_blob(self, container_name, blob_name, blob, content_settings=None,
-                  metadata=None, lease_id=None, if_modified_since=None,
-                  if_unmodified_since=None, if_match=None,
-                  if_none_match=None, timeout=None):
+                  metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
+                  if_unmodified_since=None, if_match=None,  if_none_match=None, 
+                  timeout=None):
         '''
         Creates a blob or updates an existing blob.
 
@@ -137,6 +147,13 @@ class BlockBlobService(BaseBlobService):
             ContentSettings object used to set properties on the blob.
         :param metadata:
             Name-value pairs associated with the blob as metadata.
+        :param bool validate_content:
+            If true, calculates an MD5 hash of the blob content. The storage 
+            service checks the hash of the content that has arrived
+            with the hash that was sent. This is primarily valuable for detecting 
+            bitflips on the wire if using http instead of https as https (the default) 
+            will already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -185,11 +202,15 @@ class BlockBlobService(BaseBlobService):
             request.headers += content_settings._to_headers()
         request.body = _get_request_body_bytes_only('blob', blob)
 
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers.append(('Content-MD5', _to_str(computed_md5)))
+
         response = self._perform_request(request)
         return _parse_base_properties(response)
 
     def put_block(self, container_name, blob_name, block, block_id,
-                  content_md5=None, lease_id=None, timeout=None):
+                  validate_content=False, lease_id=None, timeout=None):
         '''
         Creates a new block to be committed as part of a blob.
 
@@ -205,11 +226,13 @@ class BlockBlobService(BaseBlobService):
             For a given blob, the length of the value specified for the blockid
             parameter must be the same size for each block. Note that the Base64
             string must be URL-encoded.
-        :param int content_md5:
-            An MD5 hash of the block content. This hash is used to
-            verify the integrity of the blob during transport. When this
-            header is specified, the storage service checks the hash that has
-            arrived with the one that was sent.
+        :param bool validate_content:
+            If true, calculates an MD5 hash of the block content. The storage 
+            service checks the hash of the content that has arrived
+            with the hash that was sent. This is primarily valuable for detecting 
+            bitflips on the wire if using http instead of https as https (the default) 
+            will already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -229,17 +252,19 @@ class BlockBlobService(BaseBlobService):
             ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('Content-MD5', _to_str(content_md5)),
             ('x-ms-lease-id', _to_str(lease_id))
         ]
         request.body = _get_request_body_bytes_only('block', block)
 
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers.append(('Content-MD5', _to_str(computed_md5)))
+
         self._perform_request(request)
 
     def put_block_list(
-        self, container_name, blob_name, block_list,
-        transactional_content_md5=None, content_settings=None,
-        metadata=None, lease_id=None, if_modified_since=None,
+        self, container_name, blob_name, block_list, content_settings=None, 
+        metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, 
         timeout=None):
         '''
@@ -261,16 +286,18 @@ class BlockBlobService(BaseBlobService):
         :param block_list:
             A list of :class:`~azure.storeage.blob.models.BlobBlock` containing the block ids and block state.
         :type block_list: list of :class:`~azure.storage.blob.models.BlobBlock`
-        :param str transactional_content_md5:
-            An MD5 hash of the block content. This hash is used to
-            verify the integrity of the blob during transport. When this header
-            is specified, the storage service checks the hash that has arrived
-            with the one that was sent.
         :param ~azure.storage.blob.models.ContentSettings content_settings:
             ContentSettings object used to set properties on the blob.
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash of the block list content. The storage 
+            service checks the hash of the block list content that has arrived
+            with the hash that was sent. This is primarily valuable for detecting 
+            bitflips on the wire if using http instead of https as https (the default) 
+            will already validate. Note that this check is associated with 
+            the block list content, and not with the content of the blob itself.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -311,7 +338,6 @@ class BlockBlobService(BaseBlobService):
             ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('Content-MD5', _to_str(transactional_content_md5)),
             ('x-ms-meta-name-values', metadata),
             ('x-ms-lease-id', _to_str(lease_id)),
             ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
@@ -323,6 +349,10 @@ class BlockBlobService(BaseBlobService):
             request.headers += content_settings._to_headers()
         request.body = _get_request_body(
             _convert_block_list_to_xml(block_list))
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers.append(('Content-MD5', _to_str(computed_md5)))
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -379,7 +409,7 @@ class BlockBlobService(BaseBlobService):
 
     def create_blob_from_path(
         self, container_name, blob_name, file_path, content_settings=None,
-        metadata=None, progress_callback=None,
+        metadata=None, validate_content=False, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
@@ -398,6 +428,13 @@ class BlockBlobService(BaseBlobService):
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each chunk of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -454,6 +491,7 @@ class BlockBlobService(BaseBlobService):
                 count=count,
                 content_settings=content_settings,
                 metadata=metadata,
+                validate_content=validate_content,
                 lease_id=lease_id,
                 progress_callback=progress_callback,
                 max_connections=max_connections,
@@ -467,8 +505,8 @@ class BlockBlobService(BaseBlobService):
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
-        content_settings=None, metadata=None, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0,
+        content_settings=None, metadata=None, validate_content=False, 
+        progress_callback=None, max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
@@ -490,6 +528,13 @@ class BlockBlobService(BaseBlobService):
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each chunk of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -549,6 +594,7 @@ class BlockBlobService(BaseBlobService):
                 blob=data,
                 content_settings=content_settings,
                 metadata=metadata,
+                validate_content=validate_content,
                 lease_id=lease_id,
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
@@ -570,6 +616,7 @@ class BlockBlobService(BaseBlobService):
                 max_retries=max_retries,
                 retry_wait=retry_wait,
                 progress_callback=progress_callback,
+                validate_content=validate_content,
                 lease_id=lease_id,
                 uploader_class=_BlockBlobChunkUploader,
                 timeout=timeout
@@ -581,6 +628,7 @@ class BlockBlobService(BaseBlobService):
                 block_list=block_ids,
                 content_settings=content_settings,
                 metadata=metadata,
+                validate_content=validate_content,
                 lease_id=lease_id,
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
@@ -591,7 +639,7 @@ class BlockBlobService(BaseBlobService):
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        content_settings=None, metadata=None, progress_callback=None,
+        content_settings=None, metadata=None, validate_content=False, progress_callback=None,
         max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
@@ -616,6 +664,13 @@ class BlockBlobService(BaseBlobService):
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each chunk of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -681,6 +736,7 @@ class BlockBlobService(BaseBlobService):
             count=count,
             content_settings=content_settings,
             metadata=metadata,
+            validate_content=validate_content,
             progress_callback=progress_callback,
             max_connections=max_connections,
             max_retries=max_retries,
@@ -694,8 +750,8 @@ class BlockBlobService(BaseBlobService):
 
     def create_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
-        content_settings=None, metadata=None, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0,
+        content_settings=None, metadata=None, validate_content=False, 
+        progress_callback=None, max_connections=1, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
@@ -715,6 +771,13 @@ class BlockBlobService(BaseBlobService):
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each chunk of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -774,6 +837,7 @@ class BlockBlobService(BaseBlobService):
             count=len(text),
             content_settings=content_settings,
             metadata=metadata,
+            validate_content=validate_content,
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_connections=max_connections,

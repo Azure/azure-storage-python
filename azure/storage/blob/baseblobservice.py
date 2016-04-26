@@ -17,7 +17,8 @@ from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
-    _ERROR_PARALLEL_NOT_SEEKABLE
+    _ERROR_PARALLEL_NOT_SEEKABLE,
+    _validate_content_match,
 )
 from ._error import (
     _ERROR_INVALID_LEASE_DURATION,
@@ -27,6 +28,7 @@ from .._common_conversion import (
     _int_to_str,
     _to_str,
     _datetime_to_utc_string,
+    _get_content_md5,
 )
 from abc import ABCMeta
 from .._serialization import (
@@ -102,11 +104,23 @@ class BaseBlobService(StorageClient):
     containers, and blobs. Within your storage account, containers provide a
     way to organize sets of blobs. For more information please see:
     https://msdn.microsoft.com/en-us/library/azure/ee691964.aspx
+
+    :ivar int MAX_SINGLE_GET_SIZE: 
+        The size of the first range get performed by get_blob_to_* methods if 
+        max_connections is greater than 1. Less data will be returned if the 
+        blob is smaller than this.
+    :ivar int MAX_CHUNK_GET_SIZE: 
+        The size of subsequent range gets performed by get_blob_to_* methods if 
+        max_connections is greater than 1 and the blob is larger than MAX_SINGLE_GET_SIZE. 
+        Less data will be returned if the remainder of the blob is smaller than 
+        this. If this is set to larger than 4MB, content_validation will throw an 
+        error if enabled. However, if content_validation is not desired a size 
+        greater than 4MB may be optimal. Setting this below 4MB is not recommended.
     '''
 
     __metaclass__ = ABCMeta
     MAX_SINGLE_GET_SIZE = 32 * 1024 * 1024
-    MAX_CHUNK_GET_SIZE = 8 * 1024 * 1024
+    MAX_CHUNK_GET_SIZE = 4 * 1024 * 1024
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
@@ -1494,7 +1508,7 @@ class BaseBlobService(StorageClient):
 
     def _get_blob(
         self, container_name, blob_name, snapshot=None, start_range=None,
-        end_range=None, range_get_content_md5=None, lease_id=None, if_modified_since=None,
+        end_range=None, validate_content=False, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Downloads a blob's content, metadata, and properties. You can also
@@ -1522,10 +1536,10 @@ class BaseBlobService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            When this is set to True and specified together with the Range header, 
+            the service returns the MD5 hash for the range, as long as the range 
+            is less than or equal to 4 MB in size.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -1556,6 +1570,7 @@ class BaseBlobService(StorageClient):
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
+
         request = HTTPRequest()
         request.method = 'GET'
         request.host = self._get_host()
@@ -1577,15 +1592,21 @@ class BaseBlobService(StorageClient):
             end_range,
             start_range_required=False,
             end_range_required=False,
-            check_content_md5=range_get_content_md5)
+            check_content_md5=validate_content)
 
         response = self._perform_request(request, None)
-        return _parse_blob(blob_name, snapshot, response)
+        blob = _parse_blob(blob_name, snapshot, response)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(blob.content)
+            _validate_content_match(blob.properties.content_settings.content_md5, computed_md5)
+
+        return blob
 
     def get_blob_to_path(
         self, container_name, blob_name, file_path, open_mode='wb',
         snapshot=None, start_range=None, end_range=None,
-        range_get_content_md5=None, progress_callback=None,
+        validate_content=False, progress_callback=None,
         max_connections=2, max_retries=5, retry_wait=1.0, lease_id=None,
         if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
@@ -1617,10 +1638,17 @@ class BaseBlobService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the blob. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1669,7 +1697,10 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
-        :return: A Blob with properties and metadata.
+        :return: A Blob with properties and metadata. If max_connections is greater 
+            than 1, the content_md5 (if set on the blob) will not be returned. If you 
+            require this value, either use get_blob_properties or set max_connections 
+            to 1.
         :rtype: :class:`~azure.storage.blob.models.Blob`
         '''
         _validate_not_none('container_name', container_name)
@@ -1688,7 +1719,7 @@ class BaseBlobService(StorageClient):
                 snapshot,
                 start_range,
                 end_range,
-                range_get_content_md5,
+                validate_content,
                 progress_callback,
                 max_connections,
                 max_retries,
@@ -1704,7 +1735,7 @@ class BaseBlobService(StorageClient):
 
     def get_blob_to_stream(
         self, container_name, blob_name, stream, snapshot=None,
-        start_range=None, end_range=None, range_get_content_md5=None,
+        start_range=None, end_range=None, validate_content=False,
         progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
@@ -1733,10 +1764,17 @@ class BaseBlobService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the blob. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1785,7 +1823,10 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
-        :return: A Blob with properties and metadata.
+        :return: A Blob with properties and metadata. If max_connections is greater 
+            than 1, the content_md5 (if set on the blob) will not be returned. If you 
+            require this value, either use get_blob_properties or set max_connections 
+            to 1.
         :rtype: :class:`~azure.storage.blob.models.Blob`
         '''
         _validate_not_none('container_name', container_name)
@@ -1799,7 +1840,7 @@ class BaseBlobService(StorageClient):
                                   snapshot,
                                   start_range=start_range,
                                   end_range=end_range,
-                                  range_get_content_md5=range_get_content_md5,
+                                  validate_content=validate_content,
                                   lease_id=lease_id,
                                   if_modified_since=if_modified_since,
                                   if_unmodified_since=if_unmodified_since,
@@ -1815,13 +1856,18 @@ class BaseBlobService(StorageClient):
         else:       
             if sys.version_info >= (3,) and not stream.seekable():
                 raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
-                
+
+            # The service only provides transactional MD5s for chunks under 4MB.           
+            # If validate_content is on, get only self.MAX_CHUNK_GET_SIZE for the first 
+            # chunk so a transactional MD5 can be retrieved.
+            first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
+
             initial_request_start = start_range if start_range else 0
 
-            if end_range and end_range - start_range < self.MAX_SINGLE_GET_SIZE:
+            if end_range and end_range - start_range < first_get_size:
                 initial_request_end = end_range
             else:
-                initial_request_end = initial_request_start + self.MAX_SINGLE_GET_SIZE - 1
+                initial_request_end = initial_request_start + first_get_size - 1
 
             try:
                 blob = self._get_blob(container_name,
@@ -1829,7 +1875,7 @@ class BaseBlobService(StorageClient):
                                       snapshot,
                                       start_range=initial_request_start,
                                       end_range=initial_request_end,
-                                      range_get_content_md5=range_get_content_md5,
+                                      validate_content=validate_content,
                                       lease_id=lease_id,
                                       if_modified_since=if_modified_since,
                                       if_unmodified_since=if_unmodified_since,
@@ -1855,7 +1901,7 @@ class BaseBlobService(StorageClient):
                     blob = self._get_blob(container_name,
                                           blob_name,
                                           snapshot,
-                                          range_get_content_md5=range_get_content_md5,
+                                          validate_content=validate_content,
                                           lease_id=lease_id,
                                           if_modified_since=if_modified_since,
                                           if_unmodified_since=if_unmodified_since,
@@ -1896,7 +1942,7 @@ class BaseBlobService(StorageClient):
                 blob_name,
                 download_size,
                 self.MAX_CHUNK_GET_SIZE,
-                self.MAX_SINGLE_GET_SIZE,
+                first_get_size,
                 initial_request_end + 1, # start where the first download ended
                 end_blob,
                 stream,
@@ -1904,6 +1950,8 @@ class BaseBlobService(StorageClient):
                 max_retries,
                 retry_wait,
                 progress_callback,
+                validate_content,
+                lease_id,
                 if_modified_since,
                 if_unmodified_since,
                 if_match,
@@ -1918,11 +1966,16 @@ class BaseBlobService(StorageClient):
             # Overwrite the content range to the user requested range
             blob.properties.content_range = 'bytes {0}-{1}/{2}'.format(start_range, end_range, blob_size)
 
+            # Overwrite the content MD5 as it is the MD5 for the last range instead 
+            # of the stored MD5
+            # TODO: Set to the stored MD5 when the service returns this
+            blob.properties.content_md5 = None
+
         return blob
         
     def get_blob_to_bytes(
         self, container_name, blob_name, snapshot=None,
-        start_range=None, end_range=None, range_get_content_md5=None,
+        start_range=None, end_range=None, validate_content=False,
         progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None,
@@ -1949,10 +2002,17 @@ class BaseBlobService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the blob. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -2001,7 +2061,10 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
-        :return: A Blob with content, properties, and metadata.
+        :return: A Blob with properties and metadata. If max_connections is greater 
+            than 1, the content_md5 (if set on the blob) will not be returned. If you 
+            require this value, either use get_blob_properties or set max_connections 
+            to 1.
         :rtype: :class:`~azure.storage.blob.models.Blob`
         '''
         _validate_not_none('container_name', container_name)
@@ -2015,7 +2078,7 @@ class BaseBlobService(StorageClient):
             snapshot,
             start_range,
             end_range,
-            range_get_content_md5,
+            validate_content,
             progress_callback,
             max_connections,
             max_retries,
@@ -2032,7 +2095,7 @@ class BaseBlobService(StorageClient):
 
     def get_blob_to_text(
         self, container_name, blob_name, encoding='utf-8', snapshot=None,
-        start_range=None, end_range=None, range_get_content_md5=None,
+        start_range=None, end_range=None, validate_content=False,
         progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None,
@@ -2061,10 +2124,17 @@ class BaseBlobService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of blob.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the blob. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -2113,7 +2183,10 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
-        :return: A Blob with content, properties, and metadata.
+        :return: A Blob with properties and metadata. If max_connections is greater 
+            than 1, the content_md5 (if set on the blob) will not be returned. If you 
+            require this value, either use get_blob_properties or set max_connections 
+            to 1.
         :rtype: :class:`~azure.storage.blob.models.Blob`
         '''
         _validate_not_none('container_name', container_name)
@@ -2125,7 +2198,7 @@ class BaseBlobService(StorageClient):
                                         snapshot,
                                         start_range,
                                         end_range,
-                                        range_get_content_md5,
+                                        validate_content,
                                         progress_callback,
                                         max_connections,
                                         max_retries,

@@ -147,6 +147,18 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobEqual(self.container_name, blob_name, data)
 
     @record
+    def test_update_page_with_md5(self):
+        # Arrange
+        blob_name = self._create_blob()
+
+        # Act
+        data = self.get_random_bytes(512)
+        resp = self.bs.update_page(self.container_name, blob_name, data, 0, 511, 
+                                   validate_content=True)
+
+        # Assert
+
+    @record
     def test_clear_page(self):
         # Arrange
         blob_name = self._create_blob()
@@ -735,6 +747,32 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
         self.assert_upload_progress(blob_size, self.bs.MAX_PAGE_SIZE, progress)
+
+    def test_create_blob_with_md5(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(512)
+
+        # Act
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+                                       validate_content=True)
+
+        # Assert
+
+    def test_create_blob_in_parallel_with_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
+
+        # Act
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+                                       validate_content=True, max_connections=5)
+
+        # Assert
 
 
 #------------------------------------------------------------------------------

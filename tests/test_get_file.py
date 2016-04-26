@@ -472,21 +472,6 @@ class StorageGetFileTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(file_data[1:file_size], actual)
 
-    def test_ranged_get_file_to_path_md5_without_end_range_fail(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
-        # Arrange
-
-        # Act
-        with self.assertRaises(ValueError):
-            file = self.fs.get_file_to_path(
-                self.share_name, self.directory_name, self.byte_file, FILE_PATH, start_range=1,
-                range_get_content_md5=True, max_connections=1)
-
-        # Assert
-
     def test_get_file_to_path_with_mode(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
@@ -701,6 +686,19 @@ class StorageGetFileTest(StorageTestCase):
         # Assert
         self.assertEqual(byte_data, file.content)
         self.assert_download_progress(len(byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress)
+
+    def test_get_file_with_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+
+        # Act
+        file = self.fs.get_file_to_bytes(self.share_name, self.directory_name, self.byte_file, validate_content=True)
+
+        # Assert
+        self.assertEqual(self.byte_data, file.content)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

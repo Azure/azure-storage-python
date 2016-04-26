@@ -22,10 +22,12 @@ from .._error import (
     _ERROR_STORAGE_MISSING_INFO,
     _ERROR_EMULATOR_DOES_NOT_SUPPORT_FILES,
     _ERROR_PARALLEL_NOT_SEEKABLE,
+    _validate_content_match,
 )
 from .._common_conversion import (
     _int_to_str,
     _to_str,
+    _get_content_md5,
 )
 from .._serialization import (
     _get_request_body,
@@ -97,6 +99,22 @@ class FileService(StorageClient):
     The Azure File service also offers a compelling alternative to traditional
     Direct Attached Storage (DAS) and Storage Area Network (SAN) solutions, which
     are often complex and expensive to install, configure, and operate. 
+
+    :ivar int MAX_SINGLE_GET_SIZE: 
+        The size of the first range get performed by get_file_to_* methods if 
+        max_connections is greater than 1. Less data will be returned if the 
+        file is smaller than this.
+    :ivar int MAX_CHUNK_GET_SIZE: 
+        The size of subsequent range gets performed by get_file_to_* methods if 
+        max_connections is greater than 1 and the file is larger than MAX_SINGLE_GET_SIZE. 
+        Less data will be returned if the remainder of the file is smaller than 
+        this. If this is set to larger than 4MB, content_validation will throw an 
+        error if enabled. However, if content_validation is not desired a size 
+        greater than 4MB may be optimal. Setting this below 4MB is not recommended.
+    :ivar int MAX_RANGE_SIZE: 
+        The size of the ranges put by create_file_from_* methods. Smaller ranges 
+        may be put if there is less data provided. The maximum range size the service 
+        supports is 4MB.
     '''
     MAX_SINGLE_GET_SIZE = 32 * 1024 * 1024
     MAX_CHUNK_GET_SIZE = 8 * 1024 * 1024
@@ -1472,7 +1490,7 @@ class FileService(StorageClient):
 
     def create_file_from_path(self, share_name, directory_name, file_name, 
                            local_file_path, content_settings=None,
-                           metadata=None, progress_callback=None,
+                           metadata=None, validate_content=False, progress_callback=None,
                            max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Creates a new azure file from a local file path, or updates the content of an
@@ -1491,6 +1509,13 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each range of the file. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
@@ -1519,12 +1544,12 @@ class FileService(StorageClient):
         with open(local_file_path, 'rb') as stream:
             self.create_file_from_stream(
                 share_name, directory_name, file_name, stream,
-                count, content_settings, metadata, progress_callback,
+                count, content_settings, metadata, validate_content, progress_callback,
                 max_connections, max_retries, retry_wait, timeout)
 
     def create_file_from_text(self, share_name, directory_name, file_name, 
                            text, encoding='utf-8', content_settings=None,
-                           metadata=None, timeout=None):
+                           metadata=None, validate_content=False, timeout=None):
         '''
         Creates a new file from str/unicode, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1544,6 +1569,13 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each range of the file. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1559,13 +1591,13 @@ class FileService(StorageClient):
 
         self.create_file_from_bytes(
             share_name, directory_name, file_name, text, 0,
-            len(text), content_settings, metadata, timeout)
+            len(text), content_settings, metadata, validate_content, timeout)
 
     def create_file_from_bytes(
         self, share_name, directory_name, file_name, file,
-        index=0, count=None, content_settings=None, metadata=None,
-        progress_callback=None, max_connections=1, max_retries=5,
-        retry_wait=1.0, timeout=None):
+        index=0, count=None, content_settings=None, metadata=None, 
+        validate_content=False, progress_callback=None, max_connections=1, 
+        max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Creates a new file from an array of bytes, or updates the content
         of an existing file, with automatic chunking and progress
@@ -1589,6 +1621,13 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each range of the file. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
@@ -1625,13 +1664,14 @@ class FileService(StorageClient):
 
         self.create_file_from_stream(
             share_name, directory_name, file_name, stream, count,
-            content_settings, metadata, progress_callback,
+            content_settings, metadata, validate_content, progress_callback,
             max_connections, max_retries, retry_wait, timeout)
 
     def create_file_from_stream(
         self, share_name, directory_name, file_name, stream, count,
-        content_settings=None, metadata=None, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
+        content_settings=None, metadata=None, validate_content=False, 
+        progress_callback=None, max_connections=1, max_retries=5, retry_wait=1.0, 
+        timeout=None):
         '''
         Creates a new file from a file/stream, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1652,6 +1692,13 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each range of the file. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
@@ -1703,12 +1750,13 @@ class FileService(StorageClient):
             max_retries,
             retry_wait,
             progress_callback,
+            validate_content,
             timeout
         )
 
     def _get_file(self, share_name, directory_name, file_name,
                  start_range=None, end_range=None,
-                 range_get_content_md5=None, timeout=None):
+                 validate_content=False, timeout=None):
         '''
         Downloads a file's content, metadata, and properties. You can specify a
         range if you don't need to download the file in its entirety. If no range
@@ -1733,10 +1781,10 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            When this is set to True and specified together with the Range header, 
+            the service returns the MD5 hash for the range, as long as the range 
+            is less than or equal to 4 MB in size.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A File with content, properties, and metadata.
@@ -1755,14 +1803,20 @@ class FileService(StorageClient):
             end_range,
             start_range_required=False,
             end_range_required=False,
-            check_content_md5=range_get_content_md5)
+            check_content_md5=validate_content)
 
         response = self._perform_request(request, None)
-        return _parse_file(file_name, response)
+        file = _parse_file(file_name, response)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(file.content)
+            _validate_content_match(file.properties.content_settings.content_md5, computed_md5)
+
+        return file
 
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
                          open_mode='wb', start_range=None, end_range=None,
-                         range_get_content_md5=None, progress_callback=None,
+                         validate_content=False, progress_callback=None,
                          max_connections=2, max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Downloads a file to a file path, with automatic chunking and progress
@@ -1790,10 +1844,17 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the file. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1834,7 +1895,7 @@ class FileService(StorageClient):
         with open(file_path, open_mode) as stream:
             file = self.get_file_to_stream(
                 share_name, directory_name, file_name, stream,
-                start_range, end_range, range_get_content_md5,
+                start_range, end_range, validate_content,
                 progress_callback, max_connections, max_retries,
                 retry_wait, timeout)
 
@@ -1842,7 +1903,7 @@ class FileService(StorageClient):
 
     def get_file_to_stream(
         self, share_name, directory_name, file_name, stream,
-        start_range=None, end_range=None, range_get_content_md5=None,
+        start_range=None, end_range=None, validate_content=False,
         progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
@@ -1868,10 +1929,17 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the file. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -1912,7 +1980,7 @@ class FileService(StorageClient):
                                   file_name,
                                   start_range=start_range,
                                   end_range=end_range,
-                                  range_get_content_md5=range_get_content_md5,
+                                  validate_content=validate_content,
                                   timeout=timeout)
 
             # Set the download size
@@ -1924,12 +1992,17 @@ class FileService(StorageClient):
             if sys.version_info >= (3,) and not stream.seekable():
                 raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
                 
+            # The service only provides transactional MD5s for chunks under 4MB.           
+            # If validate_content is on, get only self.MAX_CHUNK_GET_SIZE for the first 
+            # chunk so a transactional MD5 can be retrieved.
+            first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
+
             initial_request_start = start_range if start_range else 0
 
-            if end_range and end_range - start_range < self.MAX_SINGLE_GET_SIZE:
+            if end_range and end_range - start_range < first_get_size:
                 initial_request_end = end_range
             else:
-                initial_request_end = initial_request_start + self.MAX_SINGLE_GET_SIZE - 1
+                initial_request_end = initial_request_start + first_get_size - 1
 
             try:
                 file = self._get_file(share_name,
@@ -1937,7 +2010,7 @@ class FileService(StorageClient):
                                       file_name,
                                       start_range=initial_request_start,
                                       end_range=initial_request_end,
-                                      range_get_content_md5=range_get_content_md5,
+                                      validate_content=validate_content,
                                       timeout=timeout)
 
                 # Parse the total file size and adjust the download size if ranges 
@@ -1958,7 +2031,7 @@ class FileService(StorageClient):
                     file = self._get_file(share_name,
                                           directory_name,
                                           file_name,
-                                          range_get_content_md5=range_get_content_md5,
+                                          validate_content=validate_content,
                                           timeout=timeout)
 
                     # Set the download size to empty
@@ -1996,7 +2069,7 @@ class FileService(StorageClient):
                 file_name,
                 download_size,
                 self.MAX_CHUNK_GET_SIZE,
-                self.MAX_SINGLE_GET_SIZE,
+                first_get_size,
                 initial_request_end + 1, # start where the first download ended
                 end_file,
                 stream,
@@ -2004,6 +2077,7 @@ class FileService(StorageClient):
                 max_retries,
                 retry_wait,
                 progress_callback,
+                validate_content,
                 timeout,
             )
 
@@ -2014,10 +2088,15 @@ class FileService(StorageClient):
             # Overwrite the content range to the user requested range
             file.properties.content_range = 'bytes {0}-{1}/{2}'.format(start_range, end_range, file_size)
 
+            # Overwrite the content MD5 as it is the MD5 for the last range instead 
+            # of the stored MD5
+            # TODO: Set to the stored MD5 when the service returns this
+            file.properties.content_md5 = None
+
         return file
 
     def get_file_to_bytes(self, share_name, directory_name, file_name, 
-                          start_range=None, end_range=None, range_get_content_md5=None,
+                          start_range=None, end_range=None, validate_content=False,
                           progress_callback=None, max_connections=2, max_retries=5,
                           retry_wait=1.0, timeout=None):
         '''
@@ -2041,10 +2120,17 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the file. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -2085,7 +2171,7 @@ class FileService(StorageClient):
             stream,
             start_range,
             end_range,
-            range_get_content_md5,
+            validate_content,
             progress_callback,
             max_connections,
             max_retries,
@@ -2097,7 +2183,7 @@ class FileService(StorageClient):
 
     def get_file_to_text(
         self, share_name, directory_name, file_name, encoding='utf-8',
-        start_range=None, end_range=None, range_get_content_md5=None,
+        start_range=None, end_range=None, validate_content=False,
         progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
@@ -2123,10 +2209,17 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the file. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
@@ -2166,7 +2259,7 @@ class FileService(StorageClient):
             file_name,
             start_range,
             end_range,
-            range_get_content_md5,
+            validate_content,
             progress_callback,
             max_connections,
             max_retries,
@@ -2177,7 +2270,7 @@ class FileService(StorageClient):
         return file
 
     def update_range(self, share_name, directory_name, file_name, data, 
-                     start_range, end_range, content_md5=None, timeout=None):
+                     start_range, end_range, validate_content=False, timeout=None):
         '''
         Writes the bytes specified by the request body into the specified range.
          
@@ -2199,13 +2292,13 @@ class FileService(StorageClient):
             The range can be up to 4 MB in size.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param str content_md5:
-            An MD5 hash of the range content. This hash is used to
-            verify the integrity of the range during transport. When this header
-            is specified, the storage service compares the hash of the content
-            that has arrived with the header value that was sent. If the two
-            hashes do not match, the operation will fail with error code 400
-            (Bad Request).
+        :param bool validate_content:
+            If true, calculates an MD5 hash of the page content. The storage 
+            service checks the hash of the content that has arrived
+            with the hash that was sent. This is primarily valuable for detecting 
+            bitflips on the wire if using http instead of https as https (the default) 
+            will already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -2221,12 +2314,15 @@ class FileService(StorageClient):
             ('timeout', _int_to_str(timeout)),
         ]
         request.headers = [
-            ('Content-MD5', _to_str(content_md5)),
             ('x-ms-write', 'update'),
         ]
         _validate_and_format_range_headers(
             request, start_range, end_range)
         request.body = _get_request_body_bytes_only('data', data)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers.append(('Content-MD5', _to_str(computed_md5)))
 
         self._perform_request(request)
 
