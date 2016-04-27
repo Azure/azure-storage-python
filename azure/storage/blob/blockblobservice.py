@@ -411,7 +411,7 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_path(
         self, container_name, blob_name, file_path, content_settings=None,
         metadata=None, validate_content=False, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0,
+        max_connections=2, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
@@ -442,11 +442,8 @@ class BlockBlobService(BaseBlobService):
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use when the blob size exceeds 
+            64MB.
         :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
         :param int retry_wait:
@@ -507,7 +504,7 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=1, max_retries=5, retry_wait=1.0,
+        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
@@ -542,12 +539,8 @@ class BlockBlobService(BaseBlobService):
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
-            Note that parallel upload requires the stream to be seekable.
+            Maximum number of parallel connections to use when the blob size exceeds 
+            64MB. Note that parallel upload requires the stream to be seekable.
         :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
         :param int retry_wait:
@@ -641,7 +634,7 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
         content_settings=None, metadata=None, validate_content=False, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0,
+        max_connections=2, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
@@ -678,11 +671,8 @@ class BlockBlobService(BaseBlobService):
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use when the blob size exceeds 
+            64MB.
         :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
         :param int retry_wait:
@@ -752,7 +742,7 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=1, max_retries=5, retry_wait=1.0,
+        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
@@ -785,11 +775,8 @@ class BlockBlobService(BaseBlobService):
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use when the blob size exceeds 
+            64MB.
         :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
         :param int retry_wait:
