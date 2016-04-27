@@ -189,23 +189,23 @@ class BlockBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-blob-type', _to_str(self.blob_type)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match))
-        ]
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {
+            'x-ms-blob-type': _to_str(self.blob_type),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
-            request.headers += content_settings._to_headers()
+            request.headers.update(content_settings._to_headers())
         request.body = _get_request_body_bytes_only('blob', blob)
 
         if validate_content:
             computed_md5 = _get_content_md5(request.body)
-            request.headers.append(('Content-MD5', _to_str(computed_md5)))
+            request.headers['Content-MD5'] = _to_str(computed_md5)
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -247,19 +247,19 @@ class BlockBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'block'),
-            ('blockid', _encode_base64(_to_str(block_id))),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id))
-        ]
+        request.query = {
+            'comp': 'block',
+            'blockid': _encode_base64(_to_str(block_id)),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id)
+        }
         request.body = _get_request_body_bytes_only('block', block)
 
         if validate_content:
             computed_md5 = _get_content_md5(request.body)
-            request.headers.append(('Content-MD5', _to_str(computed_md5)))
+            request.headers['Content-MD5'] = _to_str(computed_md5)
 
         self._perform_request(request)
 
@@ -334,26 +334,26 @@ class BlockBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'blocklist'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
+        request.query = {
+            'comp': 'blocklist',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
-            request.headers += content_settings._to_headers()
+            request.headers.update(content_settings._to_headers())
         request.body = _get_request_body(
             _convert_block_list_to_xml(block_list))
 
         if validate_content:
             computed_md5 = _get_content_md5(request.body)
-            request.headers.append(('Content-MD5', _to_str(computed_md5)))
+            request.headers['Content-MD5'] = _to_str(computed_md5)
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -395,13 +395,13 @@ class BlockBlobService(BaseBlobService):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'blocklist'),
-            ('snapshot', _to_str(snapshot)),
-            ('blocklisttype', _to_str(block_list_type)),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-lease-id', _to_str(lease_id))]
+        request.query = {
+            'comp': 'blocklist',
+            'snapshot': _to_str(snapshot),
+            'blocklisttype': _to_str(block_list_type),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
         response = self._perform_request(request)
         return _convert_xml_to_block_list(response)

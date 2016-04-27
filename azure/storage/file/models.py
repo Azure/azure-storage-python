@@ -193,17 +193,14 @@ class ContentSettings(object):
         self.content_md5 = content_md5
 
     def _to_headers(self):
-        return [
-            ('x-ms-cache-control', _to_str(self.cache_control)),
-            ('x-ms-content-type', _to_str(self.content_type)),
-            ('x-ms-content-disposition',
-                _to_str(self.content_disposition)),
-            ('x-ms-content-md5', _to_str(self.content_md5)),
-            ('x-ms-content-encoding',
-                _to_str(self.content_encoding)),
-            ('x-ms-content-language',
-                _to_str(self.content_language)),
-        ]
+        return {
+            'x-ms-cache-control': _to_str(self.cache_control),
+            'x-ms-content-type': _to_str(self.content_type),
+            'x-ms-content-disposition': _to_str(self.content_disposition),
+            'x-ms-content-md5': _to_str(self.content_md5),
+            'x-ms-content-encoding': _to_str(self.content_encoding),
+            'x-ms-content-language': _to_str(self.content_language),
+        }
 
 
 class CopyProperties(object):

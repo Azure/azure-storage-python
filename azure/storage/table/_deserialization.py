@@ -47,7 +47,7 @@ from ..models import (
 
 def _get_continuation_from_response_headers(response):
     marker = {}
-    for name, value in response.headers:
+    for name, value in response.headers.items():
         if name.startswith('x-ms-continuation'):
             marker[name[len('x-ms-continuation') + 1:]] = value
     return marker
@@ -236,9 +236,7 @@ def _convert_json_response_to_entities(response, property_resolver):
 def _extract_etag(response):
     ''' Extracts the etag from the response headers. '''
     if response and response.headers:
-        for name, value in response.headers:
-            if name.lower() == 'etag':
-                return value
+        return response.headers.get('etag')
 
     return None
 
@@ -263,7 +261,7 @@ def _parse_batch_response_part(part):
     status, _, reason = lines[0].partition(b' ')[2].partition(b' ')
 
     # Followed by headers and body
-    headers = []
+    headers = {}
     body = b''
     isBody = False
     for line in lines[1:]:
@@ -273,7 +271,7 @@ def _parse_batch_response_part(part):
             body += line
         else:
             headerName, _, headerVal = line.partition(b': ')
-            headers.append((headerName.lower().decode("utf-8"), headerVal.decode("utf-8")))
+            headers[headerName.lower().decode("utf-8")] = headerVal.decode("utf-8")
 
     return HTTPResponse(int(status), reason.strip(), headers, body)
 

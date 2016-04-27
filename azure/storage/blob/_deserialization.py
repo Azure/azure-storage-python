@@ -25,7 +25,6 @@ from .._deserialization import (
     _parse_properties,
     _int_to_str,
     _parse_metadata,
-    _parse_response_for_dict,
     _convert_xml_to_signed_identifiers,
 )
 from .models import (
@@ -48,11 +47,9 @@ def _parse_base_properties(response):
     '''
     Extracts basic response headers.
     '''   
-    raw_headers = _parse_response_for_dict(response)
-
     resource_properties = ResourceProperties()
-    resource_properties.last_modified = parser.parse(raw_headers.get('last-modified'))
-    resource_properties.etag = raw_headers.get('etag')
+    resource_properties.last_modified = parser.parse(response.headers.get('last-modified'))
+    resource_properties.etag = response.headers.get('etag')
 
     return resource_properties
 
@@ -60,12 +57,10 @@ def _parse_page_properties(response):
     '''
     Extracts page response headers.
     '''   
-    raw_headers = _parse_response_for_dict(response)
-
     put_page = PageBlobProperties()
-    put_page.last_modified = parser.parse(raw_headers.get('last-modified'))
-    put_page.etag = raw_headers.get('etag')
-    put_page.sequence_number = _int_to_str(raw_headers.get('x-ms-blob-sequence-number'))
+    put_page.last_modified = parser.parse(response.headers.get('last-modified'))
+    put_page.etag = response.headers.get('etag')
+    put_page.sequence_number = _int_to_str(response.headers.get('x-ms-blob-sequence-number'))
 
     return put_page
 
@@ -73,13 +68,11 @@ def _parse_append_block(response):
     '''
     Extracts append block response headers.
     '''   
-    raw_headers = _parse_response_for_dict(response)
-
     append_block = AppendBlockProperties()
-    append_block.last_modified = parser.parse(raw_headers.get('last-modified'))
-    append_block.etag = raw_headers.get('etag')
-    append_block.append_offset = _int_to_str(raw_headers.get('x-ms-blob-append-offset'))
-    append_block.committed_block_count = _int_to_str(raw_headers.get('x-ms-blob-committed-block-count'))
+    append_block.last_modified = parser.parse(response.headers.get('last-modified'))
+    append_block.etag = response.headers.get('etag')
+    append_block.append_offset = _int_to_str(response.headers.get('x-ms-blob-append-offset'))
+    append_block.committed_block_count = _int_to_str(response.headers.get('x-ms-blob-committed-block-count'))
 
     return append_block
 
@@ -87,8 +80,7 @@ def _parse_snapshot_blob(name, response):
     '''
     Extracts snapshot return header.
     '''   
-    raw_headers = _parse_response_for_dict(response)
-    snapshot = raw_headers.get('x-ms-snapshot')
+    snapshot = response.headers.get('x-ms-snapshot')
 
     return _parse_blob(name, snapshot, response)
 
@@ -96,8 +88,7 @@ def _parse_lease_time(response):
     '''
     Extracts lease time return header.
     '''   
-    raw_headers = _parse_response_for_dict(response)
-    lease_time = raw_headers.get('x-ms-lease-time')
+    lease_time = response.headers.get('x-ms-lease-time')
     if lease_time:
         lease_time = _int_to_str(lease_time)
 
@@ -106,11 +97,8 @@ def _parse_lease_time(response):
 def _parse_lease_id(response):
     '''
     Extracts lease ID return header.
-    '''   
-    raw_headers = _parse_response_for_dict(response)
-    lease_id = raw_headers.get('x-ms-lease-id')
-
-    return lease_id
+    '''
+    return response.headers.get('x-ms-lease-id')
 
 def _parse_blob(name, snapshot, response):
     if response is None:
@@ -130,9 +118,7 @@ def _parse_container(name, response):
 
 def _convert_xml_to_signed_identifiers_and_access(response):
     acl = _convert_xml_to_signed_identifiers(response.body)
-
-    raw_headers = _parse_response_for_dict(response)
-    acl.public_access = raw_headers.get('x-ms-blob-public-access')
+    acl.public_access = response.headers.get('x-ms-blob-public-access')
 
     return acl
 

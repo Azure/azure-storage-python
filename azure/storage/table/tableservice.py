@@ -315,11 +315,11 @@ class TableService(StorageClient):
         request.method = 'GET'
         request.host = self.secondary_endpoint
         request.path = '/'
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'stats'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'restype': 'service',
+            'comp': 'stats',
+            'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_service_stats(response.body)
@@ -338,11 +338,11 @@ class TableService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/'
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'restype': 'service',
+            'comp': 'properties',
+            'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_service_properties(response.body)
@@ -378,11 +378,11 @@ class TableService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/'
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'restype': 'service',
+            'comp': 'properties',
+            'timeout': _int_to_str(timeout),
+        }
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors))
 
@@ -446,12 +446,12 @@ class TableService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/Tables'
-        request.headers = [('Accept', TablePayloadFormat.JSON_NO_METADATA)]
-        request.query = [
-            ('$top', _int_to_str(max_results)),
-            ('NextTableName', _to_str(marker)),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.headers = {'Accept': TablePayloadFormat.JSON_NO_METADATA}
+        request.query = {
+            '$top': _int_to_str(max_results),
+            'NextTableName': _to_str(marker),
+            'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_json_response_to_tables(response)
@@ -478,10 +478,12 @@ class TableService(StorageClient):
         request.method = 'POST'
         request.host = self._get_host()
         request.path = '/Tables'
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                           _DEFAULT_PREFER_HEADER,
-                           _DEFAULT_ACCEPT_HEADER]
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {
+            _DEFAULT_CONTENT_TYPE_HEADER[0]: _DEFAULT_CONTENT_TYPE_HEADER[1],
+            _DEFAULT_PREFER_HEADER[0]: _DEFAULT_PREFER_HEADER[1],
+            _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1]
+        }
         request.body = _get_request_body(_convert_table_to_json(table_name))
 
         if not fail_on_exist:
@@ -511,8 +513,8 @@ class TableService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/Tables' + "('" + table_name + "')"
-        request.headers = [('Accept', TablePayloadFormat.JSON_NO_METADATA)]
-        request.query = [('timeout', _int_to_str(timeout))]
+        request.headers = {'Accept': TablePayloadFormat.JSON_NO_METADATA}
+        request.query = {'timeout': _int_to_str(timeout)}
 
         try:
             self._perform_request(request)
@@ -549,8 +551,8 @@ class TableService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = '/Tables(\'' + _to_str(table_name) + '\')'
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [_DEFAULT_ACCEPT_HEADER]
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {_DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1]}
 
         if not fail_not_exist:
             try:
@@ -580,10 +582,10 @@ class TableService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/' + _to_str(table_name)
-        request.query = [
-            ('comp', 'acl'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'comp': 'acl',
+            'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_signed_identifiers(response.body)
@@ -619,10 +621,10 @@ class TableService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = '/' + _to_str(table_name)
-        request.query = [
-            ('comp', 'acl'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'comp': 'acl',
+            'timeout': _int_to_str(timeout),
+        }
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
 
@@ -734,15 +736,15 @@ class TableService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = '/' + _to_str(table_name) + '()'
-        request.headers = [('Accept', _to_str(accept))]
-        request.query = [
-            ('$filter', _to_str(filter)),
-            ('$select', _to_str(select)),
-            ('$top', _int_to_str(max_results)),
-            ('NextPartitionKey', _to_str(next_partition_key)),
-            ('NextRowKey', _to_str(next_row_key)),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.headers = {'Accept': _to_str(accept)}
+        request.query = {
+            '$filter': _to_str(filter),
+            '$select': _to_str(select),
+            '$top': _int_to_str(max_results),
+            'NextPartitionKey': _to_str(next_partition_key),
+            'NextRowKey': _to_str(next_row_key),
+            'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_json_response_to_entities(response, property_resolver)
@@ -767,7 +769,7 @@ class TableService(StorageClient):
         request.method = 'POST'
         request.host = self._get_host()
         request.path = '/' + '$batch'
-        request.query = [('timeout', _int_to_str(timeout))]
+        request.query = {'timeout': _int_to_str(timeout)}
 
         # Update the batch operation requests with table and client specific info
         for row_key, batch_request in batch._requests:
@@ -780,7 +782,7 @@ class TableService(StorageClient):
 
         # Construct the batch body
         request.body, boundary = _convert_batch_to_json(batch._requests)
-        request.headers = [('Content-Type', boundary)]
+        request.headers = {'Content-Type': boundary}
 
         # Perform the batch request and return the response
         response = self._perform_request(request)
@@ -834,7 +836,7 @@ class TableService(StorageClient):
         request = _get_entity(partition_key, row_key, select, accept)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, partition_key, row_key)
-        request.query += [('timeout', _int_to_str(timeout))]
+        request.query['timeout'] = _int_to_str(timeout)
 
         response = self._perform_request(request)
         return _convert_json_response_to_entity(response, property_resolver)
@@ -868,7 +870,7 @@ class TableService(StorageClient):
         request = _insert_entity(entity)
         request.host = self._get_host()
         request.path = '/' + _to_str(table_name)
-        request.query += [('timeout', _int_to_str(timeout))]
+        request.query['timeout'] = _int_to_str(timeout)
 
         response = self._perform_request(request)
         return _extract_etag(response)
@@ -902,7 +904,7 @@ class TableService(StorageClient):
         request = _update_entity(entity, if_match)
         request.host = self._get_host()
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
-        request.query += [('timeout', _int_to_str(timeout))]
+        request.query['timeout'] = _int_to_str(timeout)
 
         response = self._perform_request(request)
         return _extract_etag(response)
@@ -940,7 +942,7 @@ class TableService(StorageClient):
         _validate_not_none('table_name', table_name)
         request = _merge_entity(entity, if_match)
         request.host = self._get_host()
-        request.query += [('timeout', _int_to_str(timeout))]
+        request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
 
         response = self._perform_request(request)
@@ -975,7 +977,7 @@ class TableService(StorageClient):
         _validate_not_none('table_name', table_name)
         request = _delete_entity(partition_key, row_key, if_match)
         request.host = self._get_host()
-        request.query += [('timeout', _int_to_str(timeout))]
+        request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, partition_key, row_key)
 
         self._perform_request(request)
@@ -1004,7 +1006,7 @@ class TableService(StorageClient):
         _validate_not_none('table_name', table_name)
         request = _insert_or_replace_entity(entity)
         request.host = self._get_host()
-        request.query += [('timeout', _int_to_str(timeout))]
+        request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
 
         response = self._perform_request(request)
@@ -1033,7 +1035,7 @@ class TableService(StorageClient):
         _validate_not_none('table_name', table_name)
         request = _insert_or_merge_entity(entity)
         request.host = self._get_host()
-        request.query += [('timeout', _int_to_str(timeout))]
+        request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
 
         response = self._perform_request(request)

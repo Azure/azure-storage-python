@@ -484,11 +484,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path()
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),         
-        ]
+        request.query = {
+             'restype': 'service',
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),         
+        }
         request.body = _get_request_body(
             _convert_service_properties_to_xml(None, hour_metrics, minute_metrics, cors))
 
@@ -509,11 +509,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path()
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),         
-        ]
+        request.query = {
+             'restype': 'service',
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),         
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_service_properties(response.body)
@@ -584,14 +584,14 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path()
-        request.query = [
-            ('comp', 'list'),
-            ('prefix', _to_str(prefix)),
-            ('marker', _to_str(marker)),
-            ('maxresults', _int_to_str(max_results)),
-            ('include', _to_str(include)),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'comp': 'list',
+             'prefix': _to_str(prefix),
+             'marker': _to_str(marker),
+             'maxresults': _int_to_str(max_results),
+             'include': _to_str(include),
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_shares(response)
@@ -626,12 +626,13 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-share-quota', _int_to_str(quota))]
+        request.query = {
+             'restype': 'share',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-share-quota': _int_to_str(quota)
+        }
         _add_metadata_headers(metadata, request)
 
         if not fail_on_exist:
@@ -663,10 +664,10 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_share(share_name, response)
@@ -689,12 +690,14 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-share-quota', _int_to_str(quota))]
+        request.query = {
+             'restype': 'share',
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = { 
+            'x-ms-share-quota': _int_to_str(quota)
+        }
 
         self._perform_request(request)
 
@@ -715,11 +718,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_metadata(response)
@@ -745,11 +748,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
         _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
@@ -770,11 +773,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'acl'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'acl',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_signed_identifiers(response.body)
@@ -799,11 +802,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'acl'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'acl',
+             'timeout': _int_to_str(timeout),
+        }
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
 
@@ -829,11 +832,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'stats'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'stats',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_share_stats(response)
@@ -860,10 +863,10 @@ class FileService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'timeout': _int_to_str(timeout),
+        }
 
         if not fail_not_exist:
             try:
@@ -907,10 +910,10 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'timeout': _int_to_str(timeout),
+        }
         _add_metadata_headers(metadata, request)
 
         if not fail_on_exist:
@@ -954,10 +957,10 @@ class FileService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'timeout': _int_to_str(timeout),
+        }
 
         if not fail_not_exist:
             try:
@@ -991,10 +994,10 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_directory(directory_name, response)
@@ -1019,11 +1022,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_metadata(response)
@@ -1052,11 +1055,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
         _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
@@ -1129,13 +1132,13 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('comp', 'list'),
-            ('marker', _to_str(marker)),
-            ('maxresults', _int_to_str(max_results)),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'comp': 'list',
+             'marker': _to_str(marker),
+             'maxresults': _int_to_str(max_results),
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_directories_and_files(response)
@@ -1163,7 +1166,7 @@ class FileService(StorageClient):
         request.method = 'HEAD'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
+        request.query = { 'timeout': _int_to_str(timeout)}
 
         response = self._perform_request(request)
         return _parse_file(file_name, response)
@@ -1224,12 +1227,13 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-content-length', _to_str(content_length))]
+        request.query = {
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+             'x-ms-content-length': _to_str(content_length)
+        }
 
         self._perform_request(request)
 
@@ -1257,11 +1261,10 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = None
+        request.query = {
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),
+        }
         request.headers = content_settings._to_headers()
 
         self._perform_request(request)
@@ -1288,10 +1291,10 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_metadata(response)
@@ -1322,10 +1325,10 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
         _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
@@ -1376,10 +1379,10 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-copy-source', _to_str(copy_source)),
-        ]
+        request.query = { 'timeout': _int_to_str(timeout)}
+        request.headers = {
+             'x-ms-copy-source': _to_str(copy_source),
+        }
         _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
@@ -1410,14 +1413,14 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'copy'),
-            ('copyid', _to_str(copy_id)),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-copy-action', 'abort'),
-        ]
+        request.query = {
+             'comp': 'copy',
+             'copyid': _to_str(copy_id),
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+             'x-ms-copy-action': 'abort',
+        }
 
         self._perform_request(request)
 
@@ -1441,7 +1444,7 @@ class FileService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
+        request.query = { 'timeout': _int_to_str(timeout)}
 
         self._perform_request(request)
 
@@ -1478,14 +1481,14 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-content-length', _to_str(content_length)),
-            ('x-ms-type', 'file')
-        ]
+        request.query = { 'timeout': _int_to_str(timeout)}
+        request.headers = {
+             'x-ms-content-length': _to_str(content_length),
+             'x-ms-type': 'file'
+        }
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
-            request.headers += content_settings._to_headers()
+            request.headers.update(content_settings._to_headers())
 
         self._perform_request(request)
 
@@ -1797,7 +1800,7 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
+        request.query = { 'timeout': _int_to_str(timeout)}
         _validate_and_format_range_headers(
             request,
             start_range,
@@ -2310,20 +2313,20 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'range'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-write', 'update'),
-        ]
+        request.query = {
+             'comp': 'range',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+             'x-ms-write': 'update',
+        }
         _validate_and_format_range_headers(
             request, start_range, end_range)
         request.body = _get_request_body_bytes_only('data', data)
 
         if validate_content:
             computed_md5 = _get_content_md5(request.body)
-            request.headers.append(('Content-MD5', _to_str(computed_md5)))
+            request.headers['Content-MD5'] = _to_str(computed_md5)
 
         self._perform_request(request)
 
@@ -2358,14 +2361,14 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'range'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('Content-Length', '0'),
-            ('x-ms-write', 'clear'),
-        ]
+        request.query = {
+             'comp': 'range',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+             'Content-Length': '0',
+             'x-ms-write': 'clear',
+        }
         _validate_and_format_range_headers(
             request, start_range, end_range)
 
@@ -2401,10 +2404,10 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'rangelist'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'comp': 'rangelist',
+             'timeout': _int_to_str(timeout),
+        }
         if start_range is not None:
             _validate_and_format_range_headers(
                 request,
