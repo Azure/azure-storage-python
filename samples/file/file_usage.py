@@ -273,13 +273,6 @@ class FileSamples():
         file = self.service.get_file_to_bytes(share_name, directory_name, file_name, 
                                          progress_callback=download_callback)
 
-        # Parallelism
-        file_name = self._get_file_reference()
-        self.service.create_file_from_bytes(share_name, directory_name, file_name, data,
-                                       max_connections=2)
-        file = self.service.get_file_to_bytes(share_name, directory_name, file_name,
-                                         max_connections=2)
-
         self.service.delete_share(share_name)
 
     def file_with_stream(self):

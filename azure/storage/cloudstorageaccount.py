@@ -40,7 +40,7 @@ class CloudStorageAccount(object):
         :param str account_name:
             The storage account name. This is used to authenticate requests 
             signed with an account key and to construct the storage endpoint. It 
-            is required unless a connection string is given.
+            is required unless is_emulated is used.
         :param str account_key:
             The storage account key. This is used for shared key authentication. 
         :param str sas_token:
@@ -49,8 +49,7 @@ class CloudStorageAccount(object):
              specified, account key will be used to sign.
         :param bool is_emulated:
             Whether to use the emulator. Defaults to False. If specified, will 
-            override all other parameters besides connection string and request 
-            session.
+            override all other parameters.
         '''
         self.account_name = account_name
         self.account_key = account_key
