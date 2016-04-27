@@ -304,13 +304,6 @@ class PageBlobSamples():
         blob = self.service.get_blob_to_bytes(container_name, blob_name, 
                                          progress_callback=download_callback)
 
-        # Parallelism
-        blob_name = self._get_blob_reference()
-        self.service.create_blob_from_bytes(container_name, blob_name, data,
-                                       max_connections=2)
-        blob = self.service.get_blob_to_bytes(container_name, blob_name,
-                                         max_connections=2)
-
         self.service.delete_container(container_name)
 
     def blob_with_stream(self):

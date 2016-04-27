@@ -36,6 +36,10 @@ from .file import (
     DirectorySamples,
     FileSamples,
 )
+from .advanced import(
+    AuthenticationSamples,
+    ClientSamples,
+)
 
 @unittest.skip('Skip sample tests.')
 class SampleTest(unittest.TestCase):
@@ -110,3 +114,11 @@ class SampleTest(unittest.TestCase):
     def test_file_sas_samples(self):
         sas = FileSasSamples(self.account)
         sas.run_all_samples()
+
+    def test_authentication_samples(self):
+        auth = AuthenticationSamples()
+        auth.run_all_samples()
+
+    def test_client_samples(self):
+        client = ClientSamples()
+        client.run_all_samples()
