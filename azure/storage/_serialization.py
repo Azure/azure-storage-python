@@ -61,12 +61,12 @@ def _update_request(request):
 
     # if it is PUT, POST, MERGE, DELETE, need to add content-length to header.
     if request.method in ['PUT', 'POST', 'MERGE', 'DELETE']:
-        request.headers.append(('Content-Length', str(len(request.body))))
+        request.headers['Content-Length'] = str(len(request.body))
 
     # append addtional headers based on the service
-    request.headers.append(('x-ms-version', X_MS_VERSION))
-    request.headers.append(('User-Agent', _USER_AGENT_STRING))
-    request.headers.append(('x-ms-client-request-id', str(uuid.uuid1())))
+    request.headers['x-ms-version'] = X_MS_VERSION
+    request.headers['User-Agent'] = _USER_AGENT_STRING
+    request.headers['x-ms-client-request-id'] = str(uuid.uuid1())
 
     # If the host has a path component (ex local storage), move it
     path = request.host.split('/', 1)
@@ -80,13 +80,13 @@ def _update_request(request):
 def _add_metadata_headers(metadata, request):
     if metadata:
         if not request.headers:
-            request.headers = []
+            request.headers = {}
         for name, value in metadata.items():
-            request.headers.append(('x-ms-meta-' + name, value))
+            request.headers['x-ms-meta-' + name] = value
 
 def _add_date_header(request):
     current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
+    request.headers['x-ms-date'] = current_time
 
 def _get_request_body_bytes_only(param_name, param_value):
     '''Validates the request body passed in and converts it to bytes

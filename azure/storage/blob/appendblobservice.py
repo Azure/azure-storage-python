@@ -170,18 +170,18 @@ class AppendBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-blob-type', _to_str(self.blob_type)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match))
-        ]
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {
+            'x-ms-blob-type': _to_str(self.blob_type),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
-            request.headers += content_settings._to_headers()
+            request.headers.update(content_settings._to_headers())
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -258,24 +258,24 @@ class AppendBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'appendblock'),
-            ('timeout', _int_to_str(timeout)),
-         ]
-        request.headers = [
-            ('x-ms-blob-condition-maxsize', _to_str(maxsize_condition)),
-            ('x-ms-blob-condition-appendpos', _to_str(appendpos_condition)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match))
-        ]
+        request.query = {
+            'comp': 'appendblock',
+            'timeout': _int_to_str(timeout),
+         }
+        request.headers = {
+            'x-ms-blob-condition-maxsize': _to_str(maxsize_condition),
+            'x-ms-blob-condition-appendpos': _to_str(appendpos_condition),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
         request.body = _get_request_body_bytes_only('block', block)
 
         if validate_content:
             computed_md5 = _get_content_md5(request.body)
-            request.headers.append(('Content-MD5', _to_str(computed_md5)))
+            request.headers['Content-MD5'] = _to_str(computed_md5)
 
         response = self._perform_request(request)
         return _parse_append_block(response)

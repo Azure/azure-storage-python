@@ -44,8 +44,8 @@ class HTTPResponse(object):
         the status code of the response
     :ivar str message:
         the message
-    :ivar list headers:
-        the returned headers, as a list of (name, value) pairs
+    :ivar dict headers:
+        the returned headers
     :ivar bytes body:
         the body of the response
     '''
@@ -68,10 +68,10 @@ class HTTPRequest(object):
         the method to use to connect (string such as GET, POST, PUT, etc.)
     :ivar str path:
         the uri fragment
-    :ivar list query:
-        query parameters specified as a list of (name, value) pairs
-    :ivar list headers:
-        header values specified as (name, value) pairs
+    :ivar dict query:
+        query parameters
+    :ivar dict headers:
+        header values
     :ivar bytes body:
         the body of the request.
     '''
@@ -80,6 +80,6 @@ class HTTPRequest(object):
         self.host = ''
         self.method = ''
         self.path = ''
-        self.query = []      # list of (name, value)
-        self.headers = []    # list of (header name, header value)
+        self.query = {}      # list of (name, value)
+        self.headers = {}    # list of (header name, header value)
         self.body = ''

@@ -41,8 +41,8 @@ def _get_entity(partition_key, row_key, select, accept):
     _validate_not_none('accept', accept)
     request = HTTPRequest()
     request.method = 'GET'
-    request.headers = [('Accept', _to_str(accept))]
-    request.query = [('$select', _to_str(select))]
+    request.headers = {'Accept': _to_str(accept)}
+    request.query = {'$select': _to_str(select)}
 
     return request
 
@@ -54,9 +54,11 @@ def _insert_entity(entity):
 
     request = HTTPRequest()
     request.method = 'POST'
-    request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                        _DEFAULT_PREFER_HEADER,
-                        _DEFAULT_ACCEPT_HEADER]
+    request.headers = {
+        _DEFAULT_CONTENT_TYPE_HEADER[0]: _DEFAULT_CONTENT_TYPE_HEADER[1],
+        _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
+        _DEFAULT_PREFER_HEADER[0]: _DEFAULT_PREFER_HEADER[1]
+    }
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
@@ -70,9 +72,11 @@ def _update_entity(entity, if_match):
 
     request = HTTPRequest()
     request.method = 'PUT'
-    request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                        _DEFAULT_ACCEPT_HEADER,
-                        ('If-Match', _to_str(if_match)),]
+    request.headers = {
+        _DEFAULT_CONTENT_TYPE_HEADER[0]: _DEFAULT_CONTENT_TYPE_HEADER[1],
+        _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
+        'If-Match': _to_str(if_match),
+    }
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
@@ -86,9 +90,11 @@ def _merge_entity(entity, if_match):
 
     request = HTTPRequest()
     request.method = 'MERGE'
-    request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                        _DEFAULT_ACCEPT_HEADER,
-                        ('If-Match', _to_str(if_match))]
+    request.headers = {
+        _DEFAULT_CONTENT_TYPE_HEADER[0]: _DEFAULT_CONTENT_TYPE_HEADER[1],
+        _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
+        'If-Match': _to_str(if_match)
+    }
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
@@ -102,8 +108,10 @@ def _delete_entity(partition_key, row_key, if_match):
     _validate_not_none('row_key', row_key)
     request = HTTPRequest()
     request.method = 'DELETE'
-    request.headers = [_DEFAULT_ACCEPT_HEADER,
-                        ('If-Match', _to_str(if_match))]
+    request.headers = {
+        _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
+        'If-Match': _to_str(if_match)
+    }
 
     return request
 
@@ -115,8 +123,10 @@ def _insert_or_replace_entity(entity):
 
     request = HTTPRequest()
     request.method = 'PUT'
-    request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                        _DEFAULT_ACCEPT_HEADER]
+    request.headers = {
+        _DEFAULT_CONTENT_TYPE_HEADER[0]: _DEFAULT_CONTENT_TYPE_HEADER[1],
+        _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
+    }
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
@@ -129,8 +139,10 @@ def _insert_or_merge_entity(entity):
 
     request = HTTPRequest()
     request.method = 'MERGE'
-    request.headers = [_DEFAULT_CONTENT_TYPE_HEADER,
-                        _DEFAULT_ACCEPT_HEADER]
+    request.headers = {
+        _DEFAULT_CONTENT_TYPE_HEADER[0]: _DEFAULT_CONTENT_TYPE_HEADER[1],
+        _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
+    }
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request

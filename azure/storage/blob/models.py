@@ -169,17 +169,14 @@ class ContentSettings(object):
         self.content_md5 = content_md5
 
     def _to_headers(self):
-        return [
-            ('x-ms-blob-cache-control', _to_str(self.cache_control)),
-            ('x-ms-blob-content-type', _to_str(self.content_type)),
-            ('x-ms-blob-content-disposition',
-                _to_str(self.content_disposition)),
-            ('x-ms-blob-content-md5', _to_str(self.content_md5)),
-            ('x-ms-blob-content-encoding',
-                _to_str(self.content_encoding)),
-            ('x-ms-blob-content-language',
-                _to_str(self.content_language)),
-        ]
+        return {
+            'x-ms-blob-cache-control': _to_str(self.cache_control),
+            'x-ms-blob-content-type': _to_str(self.content_type),
+            'x-ms-blob-content-disposition': _to_str(self.content_disposition),
+            'x-ms-blob-content-md5': _to_str(self.content_md5),
+            'x-ms-blob-content-encoding': _to_str(self.content_encoding),
+            'x-ms-blob-content-language': _to_str(self.content_language),
+        }
 
 
 class CopyProperties(object):

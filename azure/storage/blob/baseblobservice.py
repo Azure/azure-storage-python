@@ -506,14 +506,14 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path() 
-        request.query = [
-            ('comp', 'list'),
-            ('prefix', _to_str(prefix)),
-            ('marker', _to_str(marker)),
-            ('maxresults', _int_to_str(max_results)),
-            ('include', _to_str(include)),
-            ('timeout', _int_to_str(timeout))
-        ]
+        request.query = {
+            'comp': 'list',
+            'prefix': _to_str(prefix),
+            'marker': _to_str(marker),
+            'maxresults': _int_to_str(max_results),
+            'include': _to_str(include),
+            'timeout': _int_to_str(timeout)
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_containers(response)
@@ -547,12 +547,13 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('timeout', _int_to_str(timeout)),]
-        request.headers = [
-            ('x-ms-blob-public-access', _to_str(public_access))
-        ]
+        request.query = {
+            'restype': 'container',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-blob-public-access': _to_str(public_access)
+        }
         _add_metadata_headers(metadata, request)
 
         if not fail_on_exist:
@@ -586,11 +587,11 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-lease-id', _to_str(lease_id))]
+        request.query = {
+            'restype': 'container',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
         response = self._perform_request(request)
         return _parse_container(container_name, response)
@@ -615,12 +616,12 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-lease-id', _to_str(lease_id))]
+        request.query = {
+            'restype': 'container',
+            'comp': 'metadata',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
         response = self._perform_request(request)
         return _parse_metadata(response)
@@ -658,15 +659,15 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-        ]
+        request.query = {
+            'restype': 'container',
+            'comp': 'metadata',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'x-ms-lease-id': _to_str(lease_id),
+        }
         _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
@@ -694,12 +695,12 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('comp', 'acl'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-lease-id', _to_str(lease_id))]
+        request.query = {
+            'restype': 'container',
+            'comp': 'acl',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
         response = self._perform_request(request)
         return _convert_xml_to_signed_identifiers_and_access(response)
@@ -742,17 +743,17 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('comp', 'acl'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-blob-public-access', _to_str(public_access)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-        ]
+        request.query = {
+            'restype': 'container',
+            'comp': 'acl',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-blob-public-access': _to_str(public_access),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'x-ms-lease-id': _to_str(lease_id),
+        }
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
 
@@ -797,15 +798,15 @@ class BaseBlobService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),          
-        ]
+        request.query = {
+            'restype': 'container',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),          
+        }
 
         if not fail_not_exist:
             try:
@@ -883,20 +884,20 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('comp', 'lease'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('x-ms-lease-action', _to_str(lease_action)),
-            ('x-ms-lease-duration', _to_str(lease_duration)),
-            ('x-ms-lease-break-period', _to_str(lease_break_period)),
-            ('x-ms-proposed-lease-id', _to_str(proposed_lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-        ]
+        request.query = {
+            'restype': 'container',
+            'comp': 'lease',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-lease-action': _to_str(lease_action),
+            'x-ms-lease-duration': _to_str(lease_duration),
+            'x-ms-lease-break-period': _to_str(lease_break_period),
+            'x-ms-proposed-lease-id': _to_str(proposed_lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+        }
 
         return self._perform_request(request)
 
@@ -1232,16 +1233,16 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name)
-        request.query = [
-            ('restype', 'container'),
-            ('comp', 'list'),
-            ('prefix', _to_str(prefix)),
-            ('delimiter', _to_str(delimiter)),
-            ('marker', _to_str(marker)),
-            ('maxresults', _int_to_str(max_results)),
-            ('include', _to_str(include)),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'restype': 'container',
+            'comp': 'list',
+            'prefix': _to_str(prefix),
+            'delimiter': _to_str(delimiter),
+            'marker': _to_str(marker),
+            'maxresults': _int_to_str(max_results),
+            'include': _to_str(include),
+            'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_blob_list(response)
@@ -1274,11 +1275,11 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self.secondary_endpoint
         request.path = _get_path()
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'stats'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'restype': 'service',
+            'comp': 'stats',
+            'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_service_stats(response.body)
@@ -1314,11 +1315,11 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path() 
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'restype': 'service',
+            'comp': 'properties',
+            'timeout': _int_to_str(timeout),
+        }
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors, target_version))
 
@@ -1340,11 +1341,11 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path() 
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+            'restype': 'service',
+            'comp': 'properties',
+            'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_service_properties(response.body)
@@ -1399,17 +1400,17 @@ class BaseBlobService(StorageClient):
         request.method = 'HEAD'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('snapshot', _to_str(snapshot)),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
+        request.query = {
+            'snapshot': _to_str(snapshot),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
 
         response = self._perform_request(request)
         return _parse_blob(blob_name, snapshot, response)
@@ -1462,19 +1463,19 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers += [
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-            ('x-ms-lease-id', _to_str(lease_id))
-        ]
+        request.query = {
+            'comp': 'properties',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+            'x-ms-lease-id': _to_str(lease_id)
+        }
         if content_settings is not None:
-            request.headers += content_settings._to_headers()
+            request.headers.update(content_settings._to_headers())
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
@@ -1576,17 +1577,17 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('snapshot', _to_str(snapshot)),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
+        request.query = {
+            'snapshot': _to_str(snapshot),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
         _validate_and_format_range_headers(
             request,
             start_range,
@@ -2262,18 +2263,18 @@ class BaseBlobService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('snapshot', _to_str(snapshot)),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]     
+        request.query = {
+            'snapshot': _to_str(snapshot),
+            'comp': 'metadata',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }     
 
         response = self._perform_request(request)
         return _parse_metadata(response)
@@ -2329,17 +2330,17 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-        ]
+        request.query = {
+            'comp': 'metadata',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+            'x-ms-lease-id': _to_str(lease_id),
+        }
         _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
@@ -2422,21 +2423,21 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'lease'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('x-ms-lease-action', _to_str(lease_action)),
-            ('x-ms-lease-duration', _to_str(lease_duration)),
-            ('x-ms-lease-break-period', _to_str(lease_break_period)),
-            ('x-ms-proposed-lease-id', _to_str(proposed_lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
+        request.query = {
+            'comp': 'lease',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-lease-action': _to_str(lease_action),
+            'x-ms-lease-duration': _to_str(lease_duration),
+            'x-ms-lease-break-period': _to_str(lease_break_period),
+            'x-ms-proposed-lease-id': _to_str(proposed_lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
 
         return self._perform_request(request)
 
@@ -2805,17 +2806,17 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'snapshot'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-            ('x-ms-lease-id', _to_str(lease_id))
-        ]
+        request.query = {
+            'comp': 'snapshot',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+            'x-ms-lease-id': _to_str(lease_id)
+        }
         _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
@@ -2972,23 +2973,20 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-copy-source', _to_str(copy_source)),
-            ('x-ms-source-if-modified-since',
-             _to_str(source_if_modified_since)),
-            ('x-ms-source-if-unmodified-since',
-             _to_str(source_if_unmodified_since)),
-            ('x-ms-source-if-match', _to_str(source_if_match)),
-            ('x-ms-source-if-none-match',
-             _to_str(source_if_none_match)),
-            ('If-Modified-Since', _datetime_to_utc_string(destination_if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(destination_if_unmodified_since)),
-            ('If-Match', _to_str(destination_if_match)),
-            ('If-None-Match', _to_str(destination_if_none_match)),
-            ('x-ms-lease-id', _to_str(destination_lease_id)),
-            ('x-ms-source-lease-id', _to_str(source_lease_id))
-        ]
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {
+            'x-ms-copy-source': _to_str(copy_source),
+            'x-ms-source-if-modified-since': _to_str(source_if_modified_since),
+            'x-ms-source-if-unmodified-since': _to_str(source_if_unmodified_since),
+            'x-ms-source-if-match': _to_str(source_if_match),
+            'x-ms-source-if-none-match': _to_str(source_if_none_match),
+            'If-Modified-Since': _datetime_to_utc_string(destination_if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(destination_if_unmodified_since),
+            'If-Match': _to_str(destination_if_match),
+            'If-None-Match': _to_str(destination_if_none_match),
+            'x-ms-lease-id': _to_str(destination_lease_id),
+            'x-ms-source-lease-id': _to_str(source_lease_id)
+        }
         _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
@@ -3020,15 +3018,15 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'copy'),
-            ('copyid', _to_str(copy_id)),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('x-ms-copy-action', 'abort'),
-        ]
+        request.query = {
+            'comp': 'copy',
+            'copyid': _to_str(copy_id),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-copy-action': 'abort',
+        }
 
         self._perform_request(request)
 
@@ -3087,17 +3085,17 @@ class BaseBlobService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('x-ms-delete-snapshots', _to_str(delete_snapshots)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
-        request.query = [
-            ('snapshot', _to_str(snapshot)),
-            ('timeout', _int_to_str(timeout))
-        ]
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-delete-snapshots': _to_str(delete_snapshots),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
+        request.query = {
+            'snapshot': _to_str(snapshot),
+            'timeout': _int_to_str(timeout)
+        }
 
         self._perform_request(request)

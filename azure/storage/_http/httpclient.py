@@ -103,32 +103,20 @@ class _HTTPClient(object):
 
         # Construct the URI
         uri = self.protocol.lower() + '://' + request.host + request.path
-        
-        # Serialize the queries
-        queries = {}
-        for name, value in request.query:
-            if value:
-                queries[name] = value
-
-        # Serialize headers
-        headers = {}
-        for name, value in request.headers:
-            if value:
-                headers[name] = value
 
         # Send the request
         response = self.session.request(request.method, 
                                         uri,
-                                        params=queries,
-                                        headers=headers, 
+                                        params=request.query,
+                                        headers=request.headers, 
                                         data=request.body or None,
                                         timeout=self.timeout,
                                         proxies=self.proxies)
 
         # Parse the response
         status = int(response.status_code)
-        respheaders = []
+        respheaders = {}
         for key, name in response.headers.items():
-            respheaders.append((key.lower(), name))
+            respheaders[key.lower()] = name
 
         return HTTPResponse(status, response.reason, respheaders, response.content)

@@ -288,7 +288,7 @@ class StorageClientTest(StorageTestCase):
         # Act
         def callback(request):
             if request.method == 'PUT':
-                request.headers.append(('x-ms-meta-hello', 'world'))
+                request.headers['x-ms-meta-hello'] = 'world'
 
         service.request_callback = callback
 

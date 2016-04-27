@@ -79,7 +79,7 @@ def _parse_metadata(response):
         return None
 
     metadata = _dict()
-    for key, value in response.headers:
+    for key, value in response.headers.items():
         if key.startswith('x-ms-meta-'):
             metadata[key[10:]] = _to_str(value)
 
@@ -95,7 +95,7 @@ def _parse_properties(response, result_class):
         return None
 
     props = result_class()
-    for key, value in response.headers:
+    for key, value in response.headers.items():
         info = GET_PROPERTIES_ATTRIBUTE_MAP.get(key)
         if info:
             if info[0] is None:
@@ -117,22 +117,6 @@ def _parse_length_from_content_range(content_range):
     # Next, split on slash and take the second half: '65537'
     # Finally, convert to an int: 65537
     return int(content_range.split(' ', 1)[1].split('/', 1)[1])
-
-def _parse_response_for_dict(response):
-    ''' Extracts name-values from response header. Filter out the standard
-    http headers.'''
-
-    if response is None:
-        return None
-    http_headers = ['server', 'date', 'location', 'host',
-                    'via', 'proxy-connection', 'connection']
-    return_dict = _HeaderDict()
-    if response.headers:
-        for name, value in response.headers:
-            if not name.lower() in http_headers:
-                return_dict[name] = value
-
-    return return_dict
 
 def _convert_xml_to_signed_identifiers(xml):
     '''
