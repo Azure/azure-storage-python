@@ -27,6 +27,7 @@ from .._common_conversion import (
 from .._serialization import (
     _get_request_body,
     _get_request_body_bytes_only,
+    _add_metadata_headers,
 )
 from .._http import HTTPRequest
 from ._upload_chunking import (
@@ -197,7 +198,7 @@ class BlockBlobService(BaseBlobService):
             ('If-Match', _to_str(if_match)),
             ('If-None-Match', _to_str(if_none_match))
         ]
-        _metadata_to_headers(metadata, request)
+        _add_metadata_headers(metadata, request)
         if content_settings is not None:
             request.headers += content_settings._to_headers()
         request.body = _get_request_body_bytes_only('blob', blob)
@@ -344,7 +345,7 @@ class BlockBlobService(BaseBlobService):
             ('If-Match', _to_str(if_match)),
             ('If-None-Match', _to_str(if_none_match)),
         ]
-        _metadata_to_headers(metadata, request)
+        _add_metadata_headers(metadata, request)
         if content_settings is not None:
             request.headers += content_settings._to_headers()
         request.body = _get_request_body(

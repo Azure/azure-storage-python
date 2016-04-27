@@ -305,21 +305,6 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blob.content, self.byte_data[:6])
 
     @record
-    def test_get_blob_with_range_and_get_content_md5(self):
-        # Arrange
-        blob_name = self._create_block_blob()
-
-        # Act
-        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name,
-                                start_range=0, end_range=5,
-                                range_get_content_md5=True)
-
-        # Assert
-        self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob.content, self.byte_data[:6])
-        self.assertIsNotNone(blob.properties.content_settings.content_md5)
-
-    @record
     def test_get_blob_with_lease(self):
         # Arrange
         blob_name = self._create_block_blob()
