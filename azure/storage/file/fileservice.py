@@ -1495,7 +1495,7 @@ class FileService(StorageClient):
     def create_file_from_path(self, share_name, directory_name, file_name, 
                            local_file_path, content_settings=None,
                            metadata=None, validate_content=False, progress_callback=None,
-                           max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
+                           max_connections=2, max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Creates a new azure file from a local file path, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1526,11 +1526,7 @@ class FileService(StorageClient):
             size of the file, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to upload the file chunks sequentially.
-            Set to 2 or more to upload the file chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use.
         :param int max_retries:
             Number of times to retry upload of file chunk if an error occurs.
         :param int retry_wait:
@@ -1594,13 +1590,14 @@ class FileService(StorageClient):
             text = text.encode(encoding)
 
         self.create_file_from_bytes(
-            share_name, directory_name, file_name, text, 0,
-            len(text), content_settings, metadata, validate_content, timeout)
+            share_name, directory_name, file_name, text, count=len(text), 
+            content_settings=content_settings, metadata=metadata, 
+            validate_content=validate_content, timeout=timeout)
 
     def create_file_from_bytes(
         self, share_name, directory_name, file_name, file,
         index=0, count=None, content_settings=None, metadata=None, 
-        validate_content=False, progress_callback=None, max_connections=1, 
+        validate_content=False, progress_callback=None, max_connections=2, 
         max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Creates a new file from an array of bytes, or updates the content
@@ -1638,11 +1635,7 @@ class FileService(StorageClient):
             size of the file, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to upload the file chunks sequentially.
-            Set to 2 or more to upload the file chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use.
         :param int max_retries:
             Number of times to retry upload of file chunk if an error occurs.
         :param int retry_wait:
@@ -1674,7 +1667,7 @@ class FileService(StorageClient):
     def create_file_from_stream(
         self, share_name, directory_name, file_name, stream, count,
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=1, max_retries=5, retry_wait=1.0, 
+        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0, 
         timeout=None):
         '''
         Creates a new file from a file/stream, or updates the content of an
@@ -1709,12 +1702,8 @@ class FileService(StorageClient):
             size of the file, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to upload the file chunks sequentially.
-            Set to 2 or more to upload the file chunks in parallel. This uses
-            more system resources but will upload faster.
-            Note that parallel upload requires the stream to be seekable.
+            Maximum number of parallel connections to use. Note that parallel upload 
+            requires the stream to be seekable.
         :param int max_retries:
             Number of times to retry upload of file chunk if an error occurs.
         :param int retry_wait:
