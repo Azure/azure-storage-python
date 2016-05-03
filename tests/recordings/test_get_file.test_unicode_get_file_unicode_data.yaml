@@ -1,0 +1,78 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-client-request-id: [93daeba6-116a-11e6-9120-8851fb5f57fc]
+      x-ms-content-length: ['26']
+      x-ms-date: ['Tue, 03 May 2016 20:06:52 GMT']
+      x-ms-type: [file]
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharede221370/utdirde221370/filede221370
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Tue, 03 May 2016 20:06:52 GMT']
+      ETag: ['"0x8D3738E7808394C"']
+      Last-Modified: ['Tue, 03 May 2016 20:06:52 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [b95e59a0-001a-006c-4777-a554d9000000]
+      x-ms-version: ['2015-07-08']
+    status: {code: 201, message: Created}
+- request:
+    body: !!binary |
+      aGVsbG8gd29ybGTllYrpvYTkuILni5vni5w=
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['26']
+      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-client-request-id: [93f409da-116a-11e6-896a-8851fb5f57fc]
+      x-ms-date: ['Tue, 03 May 2016 20:06:52 GMT']
+      x-ms-range: [bytes=0-25]
+      x-ms-version: ['2015-07-08']
+      x-ms-write: [update]
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharede221370/utdirde221370/filede221370?comp=range
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [aFkhSeVIRnJoB2MmKjC25w==]
+      Date: ['Tue, 03 May 2016 20:06:52 GMT']
+      ETag: ['"0x8D3738E780EC912"']
+      Last-Modified: ['Tue, 03 May 2016 20:06:52 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [b95e59a2-001a-006c-4877-a554d9000000]
+      x-ms-version: ['2015-07-08']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-client-request-id: [93fa5680-116a-11e6-a81f-8851fb5f57fc]
+      x-ms-date: ['Tue, 03 May 2016 20:06:52 GMT']
+      x-ms-range: [bytes=0-32767]
+      x-ms-version: ['2015-07-08']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utsharede221370/utdirde221370/filede221370
+  response:
+    body: {string: "hello world\u554A\u9F44\u4E02\u72DB\u72DC"}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['26']
+      Content-Range: [bytes 0-25/26]
+      Content-Type: [application/octet-stream]
+      Date: ['Tue, 03 May 2016 20:06:52 GMT']
+      ETag: ['"0x8D3738E780EC912"']
+      Last-Modified: ['Tue, 03 May 2016 20:06:52 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [b95e59a4-001a-006c-4977-a554d9000000]
+      x-ms-type: [File]
+      x-ms-version: ['2015-07-08']
+    status: {code: 206, message: Partial Content}
+version: 1
