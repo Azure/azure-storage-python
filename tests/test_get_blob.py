@@ -234,6 +234,7 @@ class StorageGetBlobTest(StorageTestCase):
             self.assertEqual(self.byte_data, actual)
         self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
 
+    @record
     def test_get_blob_to_stream_non_parallel(self):
         # Arrange
         progress = []

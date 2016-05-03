@@ -2,46 +2,46 @@ interactions:
 - request:
     body: null
     headers:
-      Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
-      x-ms-date: ['Thu, 07 Apr 2016 21:07:54 GMT']
+      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-client-request-id: [b89c82e2-116a-11e6-a83c-8851fb5f57fc]
+      x-ms-date: ['Tue, 03 May 2016 20:07:54 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.file.core.windows.net/share41961029?restype=share
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 07 Apr 2016 21:07:53 GMT']
-      ETag: ['"0x8D35F28B01070F6"']
-      Last-Modified: ['Thu, 07 Apr 2016 21:07:54 GMT']
+      Date: ['Tue, 03 May 2016 20:07:53 GMT']
+      ETag: ['"0x8D3738E9D0E7556"']
+      Last-Modified: ['Tue, 03 May 2016 20:07:54 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [45c6229e-001a-0002-1611-91fdf0000000]
+      x-ms-request-id: [585d8939-001a-0057-7677-a51687000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
-      Accept-Encoding: [identity]
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
-      x-ms-date: ['Thu, 07 Apr 2016 21:07:55 GMT']
+      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-client-request-id: [b8e6f0d4-116a-11e6-becc-8851fb5f57fc]
+      x-ms-date: ['Tue, 03 May 2016 20:07:54 GMT']
       x-ms-version: ['2015-07-08']
     method: GET
-    uri: https://storagename.file.core.windows.net/?comp=list&prefix=share41961029
+    uri: https://storagename.file.core.windows.net/?prefix=share41961029&comp=list
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
-        \ ServiceEndpoint=\"https://storagename.file.core.windows.net/\"><Prefix>share41961029</Prefix><Shares><Share><Name>share41961029</Name><Properties><Last-Modified>Thu,\
-        \ 07 Apr 2016 21:07:54 GMT</Last-Modified><Etag>\"0x8D35F28B01070F6\"</Etag><Quota>5120</Quota></Properties></Share></Shares><NextMarker\
+        \ ServiceEndpoint=\"https://storagename.file.core.windows.net/\"><Prefix>share41961029</Prefix><Shares><Share><Name>share41961029</Name><Properties><Last-Modified>Tue,\
+        \ 03 May 2016 20:07:54 GMT</Last-Modified><Etag>\"0x8D3738E9D0E7556\"</Etag><Quota>5120</Quota></Properties></Share></Shares><NextMarker\
         \ /></EnumerationResults>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Thu, 07 Apr 2016 21:07:54 GMT']
+      Date: ['Tue, 03 May 2016 20:07:54 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [45c622a0-001a-0002-1711-91fdf0000000]
+      x-ms-request-id: [585d893c-001a-0057-7777-a51687000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1
