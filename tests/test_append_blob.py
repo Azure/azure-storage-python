@@ -457,6 +457,7 @@ class StorageAppendBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, encoded_data)
 
+    @record
     def test_append_blob_with_md5(self):
         # Arrange
         blob_name = self._create_blob()

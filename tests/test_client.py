@@ -21,7 +21,10 @@ from azure.storage.blob import (
 from azure.storage.queue import QueueService
 from azure.storage.table import TableService
 from azure.storage.file import FileService
-from tests.testcase import StorageTestCase
+from tests.testcase import (
+    StorageTestCase,
+    record,
+)
 
 #------------------------------------------------------------------------------
 SERVICES = {
@@ -280,6 +283,7 @@ class StorageClientTest(StorageTestCase):
         self.assertEqual(service.primary_endpoint, 'www.mydomain.com')
         self.assertEqual(service.secondary_endpoint, self.account_name + '-secondary.blob.core.windows.net')
 
+    @record
     def test_request_callback_signed_header(self):
         # Arrange
         service = BlockBlobService(self.account_name, self.account_key)
@@ -300,6 +304,7 @@ class StorageClientTest(StorageTestCase):
         finally:
             service.delete_container(name)
 
+    @record
     def test_response_callback(self):
         # Arrange
         service = BlockBlobService(self.account_name, self.account_key)
