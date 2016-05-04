@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.cloudstorageaccount module &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
+    <title>azure.storage.cloudstorageaccount module &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.31.0',
+        VERSION:     '0.32.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage package" href="azure.storage.html" />
     <link rel="next" title="azure.storage.models module" href="azure.storage.models.html" />
     <link rel="prev" title="azure.storage.table.tableservice module" href="azure.storage.table.tableservice.html" />
@@ -55,14 +55,13 @@ use the factory or can construct the appropriate service directly.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>account_name</strong> (<em>str</em>) &#8211; The storage account name. This is used to authenticate requests 
 signed with an account key and to construct the storage endpoint. It 
-is required unless a connection string is given.</li>
+is required unless is_emulated is used.</li>
 <li><strong>account_key</strong> (<em>str</em>) &#8211; The storage account key. This is used for shared key authentication.</li>
 <li><strong>sas_token</strong> (<em>str</em>) &#8211; A shared access signature token to use to authenticate requests 
 instead of the account key. If account key and sas token are both 
 specified, account key will be used to sign.</li>
 <li><strong>is_emulated</strong> (<em>bool</em>) &#8211; Whether to use the emulator. Defaults to False. If specified, will 
-override all other parameters besides connection string and request 
-session.</li>
+override all other parameters.</li>
 </ul>
 </td>
 </tr>
@@ -268,7 +267,7 @@ is https,http. Note that HTTP only is not a permitted value.</li>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |

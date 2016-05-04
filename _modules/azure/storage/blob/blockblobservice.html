@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.blockblobservice &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
+    <title>azure.storage.blob.blockblobservice &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.31.0',
+        VERSION:     '0.32.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
   
@@ -38,7 +38,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.blob.blockblobservice</h1><div class="highlight"><pre>
-<span></span><span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -62,13 +62,15 @@
     <span class="n">_to_str</span><span class="p">,</span>
     <span class="n">_int_to_str</span><span class="p">,</span>
     <span class="n">_datetime_to_utc_string</span><span class="p">,</span>
+    <span class="n">_get_content_md5</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.._serialization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_get_request_body</span><span class="p">,</span>
     <span class="n">_get_request_body_bytes_only</span><span class="p">,</span>
+    <span class="n">_add_metadata_headers</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.._http</span> <span class="kn">import</span> <span class="n">HTTPRequest</span>
-<span class="kn">from</span> <span class="nn">._chunking</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._upload_chunking</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_BlockBlobChunkUploader</span><span class="p">,</span>
     <span class="n">_upload_blob_chunks</span><span class="p">,</span>
 <span class="p">)</span>
@@ -106,6 +108,15 @@
 <span class="sd">    slightly more than 195 GB (4 MB X 50,000 blocks). If you are writing a block</span>
 <span class="sd">    blob that is no more than 64 MB in size, you can upload it in its entirety with</span>
 <span class="sd">    a single write operation; see create_blob_from_bytes. </span>
+
+<span class="sd">    :ivar int MAX_SINGLE_PUT_SIZE: </span>
+<span class="sd">        The largest size upload supported in a single put call. This is used by </span>
+<span class="sd">        the create_blob_from_* methods if the content length is known and is less </span>
+<span class="sd">        than this value.</span>
+<span class="sd">    :ivar int MAX_BLOCK_SIZE: </span>
+<span class="sd">        The size of the blocks put by create_blob_from_* methods if the content </span>
+<span class="sd">        length is unknown or is larger than MAX_SINGLE_PUT_SIZE. Smaller blocks </span>
+<span class="sd">        may be put. The maximum block size the service supports is 4MB.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">MAX_SINGLE_PUT_SIZE</span> <span class="o">=</span> <span class="mi">64</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
@@ -156,9 +167,9 @@
             <span class="n">custom_domain</span><span class="p">,</span> <span class="n">request_session</span><span class="p">,</span> <span class="n">connection_string</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_put_blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                  <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                  <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                  <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                  <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                  <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a blob or updates an existing blob.</span>
 
@@ -177,6 +188,13 @@
 <span class="sd">            ContentSettings object used to set properties on the blob.</span>
 <span class="sd">        :param metadata:</span>
 <span class="sd">            Name-value pairs associated with the blob as metadata.</span>
+<span class="sd">        :param bool validate_content:</span>
+<span class="sd">            If true, calculates an MD5 hash of the blob content. The storage </span>
+<span class="sd">            service checks the hash of the content that has arrived</span>
+<span class="sd">            with the hash that was sent. This is primarily valuable for detecting </span>
+<span class="sd">            bitflips on the wire if using http instead of https as https (the default) </span>
+<span class="sd">            will already validate. Note that this MD5 hash is not stored with the </span>
+<span class="sd">            blob.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param datetime if_modified_since:</span>
@@ -211,25 +229,29 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;x-ms-blob-type&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blob_type</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;x-ms-meta-name-values&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">))</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x-ms-blob-type&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blob_type</span><span class="p">),</span>
+            <span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">),</span>
+            <span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">),</span>
+            <span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">),</span>
+            <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
+            <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">_add_metadata_headers</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">content_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">+=</span> <span class="n">content_settings</span><span class="o">.</span><span class="n">_to_headers</span><span class="p">()</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">content_settings</span><span class="o">.</span><span class="n">_to_headers</span><span class="p">())</span>
         <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body_bytes_only</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="n">blob</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">validate_content</span><span class="p">:</span>
+            <span class="n">computed_md5</span> <span class="o">=</span> <span class="n">_get_content_md5</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">computed_md5</span><span class="p">)</span>
 
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_parse_base_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BlockBlobService.put_block"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.blockblobservice.html#azure.storage.blob.blockblobservice.BlockBlobService.put_block">[docs]</a>    <span class="k">def</span> <span class="nf">put_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">block_id</span><span class="p">,</span>
-                  <span class="n">content_md5</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                  <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new block to be committed as part of a blob.</span>
 
@@ -245,11 +267,13 @@
 <span class="sd">            For a given blob, the length of the value specified for the blockid</span>
 <span class="sd">            parameter must be the same size for each block. Note that the Base64</span>
 <span class="sd">            string must be URL-encoded.</span>
-<span class="sd">        :param int content_md5:</span>
-<span class="sd">            An MD5 hash of the block content. This hash is used to</span>
-<span class="sd">            verify the integrity of the blob during transport. When this</span>
-<span class="sd">            header is specified, the storage service checks the hash that has</span>
-<span class="sd">            arrived with the one that was sent.</span>
+<span class="sd">        :param bool validate_content:</span>
+<span class="sd">            If true, calculates an MD5 hash of the block content. The storage </span>
+<span class="sd">            service checks the hash of the content that has arrived</span>
+<span class="sd">            with the hash that was sent. This is primarily valuable for detecting </span>
+<span class="sd">            bitflips on the wire if using http instead of https as https (the default) </span>
+<span class="sd">            will already validate. Note that this MD5 hash is not stored with the </span>
+<span class="sd">            blob.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param int timeout:</span>
@@ -263,23 +287,25 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;block&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;blockid&#39;</span><span class="p">,</span> <span class="n">_encode_base64</span><span class="p">(</span><span class="n">_to_str</span><span class="p">(</span><span class="n">block_id</span><span class="p">))),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">content_md5</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">))</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;block&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;blockid&#39;</span><span class="p">:</span> <span class="n">_encode_base64</span><span class="p">(</span><span class="n">_to_str</span><span class="p">(</span><span class="n">block_id</span><span class="p">)),</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)</span>
+        <span class="p">}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body_bytes_only</span><span class="p">(</span><span class="s1">&#39;block&#39;</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">validate_content</span><span class="p">:</span>
+            <span class="n">computed_md5</span> <span class="o">=</span> <span class="n">_get_content_md5</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">computed_md5</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BlockBlobService.put_block_list"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.blockblobservice.html#azure.storage.blob.blockblobservice.BlockBlobService.put_block_list">[docs]</a>    <span class="k">def</span> <span class="nf">put_block_list</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">block_list</span><span class="p">,</span>
-        <span class="n">transactional_content_md5</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">block_list</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+        <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
         <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -301,16 +327,18 @@
 <span class="sd">        :param block_list:</span>
 <span class="sd">            A list of :class:`~azure.storeage.blob.models.BlobBlock` containing the block ids and block state.</span>
 <span class="sd">        :type block_list: list of :class:`~azure.storage.blob.models.BlobBlock`</span>
-<span class="sd">        :param str transactional_content_md5:</span>
-<span class="sd">            An MD5 hash of the block content. This hash is used to</span>
-<span class="sd">            verify the integrity of the blob during transport. When this header</span>
-<span class="sd">            is specified, the storage service checks the hash that has arrived</span>
-<span class="sd">            with the one that was sent.</span>
 <span class="sd">        :param ~azure.storage.blob.models.ContentSettings content_settings:</span>
 <span class="sd">            ContentSettings object used to set properties on the blob.</span>
 <span class="sd">        :param metadata:</span>
 <span class="sd">            Name-value pairs associated with the blob as metadata.</span>
 <span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param bool validate_content:</span>
+<span class="sd">            If true, calculates an MD5 hash of the block list content. The storage </span>
+<span class="sd">            service checks the hash of the block list content that has arrived</span>
+<span class="sd">            with the hash that was sent. This is primarily valuable for detecting </span>
+<span class="sd">            bitflips on the wire if using http instead of https as https (the default) </span>
+<span class="sd">            will already validate. Note that this check is associated with </span>
+<span class="sd">            the block list content, and not with the content of the blob itself.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param datetime if_modified_since:</span>
@@ -346,23 +374,26 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;blocklist&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">transactional_content_md5</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;x-ms-meta-name-values&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">,</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;If-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;If-None-Match&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)),</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;blocklist&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">),</span>
+            <span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">),</span>
+            <span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">),</span>
+            <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
+            <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">_add_metadata_headers</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">content_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">+=</span> <span class="n">content_settings</span><span class="o">.</span><span class="n">_to_headers</span><span class="p">()</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">content_settings</span><span class="o">.</span><span class="n">_to_headers</span><span class="p">())</span>
         <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span>
             <span class="n">_convert_block_list_to_xml</span><span class="p">(</span><span class="n">block_list</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">validate_content</span><span class="p">:</span>
+            <span class="n">computed_md5</span> <span class="o">=</span> <span class="n">_get_content_md5</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">computed_md5</span><span class="p">)</span>
 
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_parse_base_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
@@ -404,13 +435,13 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;blocklist&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;snapshot&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;blocklisttype&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">block_list_type</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">))]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;blocklist&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;snapshot&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">snapshot</span><span class="p">),</span>
+            <span class="s1">&#39;blocklisttype&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">block_list_type</span><span class="p">),</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">)}</span>
 
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_convert_xml_to_block_list</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
@@ -419,8 +450,8 @@
 
 <div class="viewcode-block" id="BlockBlobService.create_blob_from_path"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.blockblobservice.html#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_path">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_path</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">max_connections</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -438,17 +469,21 @@
 <span class="sd">        :param metadata:</span>
 <span class="sd">            Name-value pairs associated with the blob as metadata.</span>
 <span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param bool validate_content:</span>
+<span class="sd">            If true, calculates an MD5 hash for each chunk of the blob. The storage </span>
+<span class="sd">            service checks the hash of the content that has arrived with the hash </span>
+<span class="sd">            that was sent. This is primarily valuable for detecting bitflips on </span>
+<span class="sd">            the wire if using http instead of https as https (the default) will </span>
+<span class="sd">            already validate. Note that this MD5 hash is not stored with the </span>
+<span class="sd">            blob.</span>
 <span class="sd">        :param progress_callback:</span>
 <span class="sd">            Callback for progress with signature function(current, total) where</span>
 <span class="sd">            current is the number of bytes transfered so far, and total is the</span>
 <span class="sd">            size of the blob, or None if the total size is unknown.</span>
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
 <span class="sd">        :param int max_connections:</span>
-<span class="sd">            Maximum number of parallel connections to use when the blob size</span>
-<span class="sd">            exceeds 64MB.</span>
-<span class="sd">            Set to 1 to upload the blob chunks sequentially.</span>
-<span class="sd">            Set to 2 or more to upload the blob chunks in parallel. This uses</span>
-<span class="sd">            more system resources but will upload faster.</span>
+<span class="sd">            Maximum number of parallel connections to use when the blob size exceeds </span>
+<span class="sd">            64MB.</span>
 <span class="sd">        :param int max_retries:</span>
 <span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
 <span class="sd">        :param int retry_wait:</span>
@@ -494,6 +529,7 @@
                 <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
                 <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
                 <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
                 <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
                 <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
                 <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
@@ -507,8 +543,8 @@
 
 <div class="viewcode-block" id="BlockBlobService.create_blob_from_stream"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.blockblobservice.html#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_stream">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_stream</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">max_connections</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+        <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -530,18 +566,21 @@
 <span class="sd">        :param metadata:</span>
 <span class="sd">            Name-value pairs associated with the blob as metadata.</span>
 <span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param bool validate_content:</span>
+<span class="sd">            If true, calculates an MD5 hash for each chunk of the blob. The storage </span>
+<span class="sd">            service checks the hash of the content that has arrived with the hash </span>
+<span class="sd">            that was sent. This is primarily valuable for detecting bitflips on </span>
+<span class="sd">            the wire if using http instead of https as https (the default) will </span>
+<span class="sd">            already validate. Note that this MD5 hash is not stored with the </span>
+<span class="sd">            blob.</span>
 <span class="sd">        :param progress_callback:</span>
 <span class="sd">            Callback for progress with signature function(current, total) where</span>
 <span class="sd">            current is the number of bytes transfered so far, and total is the</span>
 <span class="sd">            size of the blob, or None if the total size is unknown.</span>
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
 <span class="sd">        :param int max_connections:</span>
-<span class="sd">            Maximum number of parallel connections to use when the blob size</span>
-<span class="sd">            exceeds 64MB.</span>
-<span class="sd">            Set to 1 to upload the blob chunks sequentially.</span>
-<span class="sd">            Set to 2 or more to upload the blob chunks in parallel. This uses</span>
-<span class="sd">            more system resources but will upload faster.</span>
-<span class="sd">            Note that parallel upload requires the stream to be seekable.</span>
+<span class="sd">            Maximum number of parallel connections to use when the blob size exceeds </span>
+<span class="sd">            64MB. Note that parallel upload requires the stream to be seekable.</span>
 <span class="sd">        :param int max_retries:</span>
 <span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
 <span class="sd">        :param int retry_wait:</span>
@@ -589,6 +628,7 @@
                 <span class="n">blob</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
                 <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
                 <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
                 <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
                 <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
                 <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
@@ -610,6 +650,7 @@
                 <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
                 <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
                 <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
+                <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
                 <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
                 <span class="n">uploader_class</span><span class="o">=</span><span class="n">_BlockBlobChunkUploader</span><span class="p">,</span>
                 <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
@@ -621,6 +662,7 @@
                 <span class="n">block_list</span><span class="o">=</span><span class="n">block_ids</span><span class="p">,</span>
                 <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
                 <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
                 <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
                 <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
                 <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
@@ -631,8 +673,8 @@
 
 <div class="viewcode-block" id="BlockBlobService.create_blob_from_bytes"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.blockblobservice.html#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_bytes</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">max_connections</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -656,17 +698,21 @@
 <span class="sd">        :param metadata:</span>
 <span class="sd">            Name-value pairs associated with the blob as metadata.</span>
 <span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param bool validate_content:</span>
+<span class="sd">            If true, calculates an MD5 hash for each chunk of the blob. The storage </span>
+<span class="sd">            service checks the hash of the content that has arrived with the hash </span>
+<span class="sd">            that was sent. This is primarily valuable for detecting bitflips on </span>
+<span class="sd">            the wire if using http instead of https as https (the default) will </span>
+<span class="sd">            already validate. Note that this MD5 hash is not stored with the </span>
+<span class="sd">            blob.</span>
 <span class="sd">        :param progress_callback:</span>
 <span class="sd">            Callback for progress with signature function(current, total) where</span>
 <span class="sd">            current is the number of bytes transfered so far, and total is the</span>
 <span class="sd">            size of the blob, or None if the total size is unknown.</span>
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
 <span class="sd">        :param int max_connections:</span>
-<span class="sd">            Maximum number of parallel connections to use when the blob size</span>
-<span class="sd">            exceeds 64MB.</span>
-<span class="sd">            Set to 1 to upload the blob chunks sequentially.</span>
-<span class="sd">            Set to 2 or more to upload the blob chunks in parallel. This uses</span>
-<span class="sd">            more system resources but will upload faster.</span>
+<span class="sd">            Maximum number of parallel connections to use when the blob size exceeds </span>
+<span class="sd">            64MB.</span>
 <span class="sd">        :param int max_retries:</span>
 <span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
 <span class="sd">        :param int retry_wait:</span>
@@ -721,6 +767,7 @@
             <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
             <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
             <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
             <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
             <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
@@ -734,8 +781,8 @@
 
 <div class="viewcode-block" id="BlockBlobService.create_blob_from_text"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.blockblobservice.html#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_text">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_text</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
-        <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">max_connections</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+        <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
         <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -755,17 +802,21 @@
 <span class="sd">        :param metadata:</span>
 <span class="sd">            Name-value pairs associated with the blob as metadata.</span>
 <span class="sd">        :type metadata: a dict mapping str to str</span>
+<span class="sd">        :param bool validate_content:</span>
+<span class="sd">            If true, calculates an MD5 hash for each chunk of the blob. The storage </span>
+<span class="sd">            service checks the hash of the content that has arrived with the hash </span>
+<span class="sd">            that was sent. This is primarily valuable for detecting bitflips on </span>
+<span class="sd">            the wire if using http instead of https as https (the default) will </span>
+<span class="sd">            already validate. Note that this MD5 hash is not stored with the </span>
+<span class="sd">            blob.</span>
 <span class="sd">        :param progress_callback:</span>
 <span class="sd">            Callback for progress with signature function(current, total) where</span>
 <span class="sd">            current is the number of bytes transfered so far, and total is the</span>
 <span class="sd">            size of the blob, or None if the total size is unknown.</span>
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
 <span class="sd">        :param int max_connections:</span>
-<span class="sd">            Maximum number of parallel connections to use when the blob size</span>
-<span class="sd">            exceeds 64MB.</span>
-<span class="sd">            Set to 1 to upload the blob chunks sequentially.</span>
-<span class="sd">            Set to 2 or more to upload the blob chunks in parallel. This uses</span>
-<span class="sd">            more system resources but will upload faster.</span>
+<span class="sd">            Maximum number of parallel connections to use when the blob size exceeds </span>
+<span class="sd">            64MB.</span>
 <span class="sd">        :param int max_retries:</span>
 <span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
 <span class="sd">        :param int retry_wait:</span>
@@ -814,6 +865,7 @@
             <span class="n">count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">),</span>
             <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
             <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
             <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
             <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
@@ -860,7 +912,7 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
     </div>

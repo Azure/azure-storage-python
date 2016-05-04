@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.storageclient module &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
+    <title>azure.storage.storageclient module &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.31.0',
+        VERSION:     '0.32.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage package" href="azure.storage.html" />
     <link rel="next" title="azure" href="modules.html" />
     <link rel="prev" title="azure.storage.sharedaccesssignature module" href="azure.storage.sharedaccesssignature.html" />
@@ -51,13 +51,53 @@ all requests to Storage. This class cannot be instantiated directly.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection_params</strong> (<em>obj</em>) &#8211; The parameters to use to construct the client.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><strong>account_name</strong> (<em>str</em>) &#8211; The storage account name. This is used to authenticate requests 
+signed with an account key and to construct the storage endpoint. It 
+is required unless a connection string is given, or if a custom 
+domain is used with anonymous authentication.</li>
+<li><strong>account_key</strong> (<em>str</em>) &#8211; The storage account key. This is used for shared key authentication. 
+If neither account key or sas token is specified, anonymous access 
+will be used.</li>
+<li><strong>sas_token</strong> (<em>str</em>) &#8211; A shared access signature token to use to authenticate requests 
+instead of the account key. If account key and sas token are both 
+specified, account key will be used to sign. If neither are 
+specified, anonymous access will be used.</li>
+<li><strong>primary_endpoint</strong> (<em>str</em>) &#8211; The endpoint to send storage requests to.</li>
+<li><strong>secondary_endpoint</strong> (<em>str</em>) &#8211; The secondary endpoint to read storage data from. This will only be a 
+valid endpoint if the storage account used is RA-GRS and thus allows 
+reading from secondary.</li>
+<li><strong>request_callback</strong> (<em>function(request)</em>) &#8211; A function called immediately before each request is sent. This function 
+takes as a parameter the request object and returns nothing. It may be 
+used to added custom headers or log request data.</li>
+<li><strong>response_callback</strong> (<em>function()</em>) &#8211; A function called immediately after each response is received. This 
+function takes as a parameter the response object and returns nothing. 
+It may be used to log response data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>protocol</strong> (<em>str</em>) &#8211; The protocol to use for requests. Defaults to https.</li>
+<li><strong>request_session</strong> (<em>requests.Session</em>) &#8211; The session object to use for http requests.</li>
+<li><strong>connection_params</strong> (<em>obj</em>) &#8211; The parameters to use to construct the client.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
+<dl class="attribute">
+<dt id="azure.storage.storageclient.StorageClient.protocol">
+<code class="descname">protocol</code><a class="headerlink" href="#azure.storage.storageclient.StorageClient.protocol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="azure.storage.storageclient.StorageClient.request_session">
+<code class="descname">request_session</code><a class="headerlink" href="#azure.storage.storageclient.StorageClient.request_session" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="azure.storage.storageclient.StorageClient.set_proxy">
-<code class="descname">set_proxy</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>user=None</em>, <em>password=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/storageclient.html#StorageClient.set_proxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.storageclient.StorageClient.set_proxy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_proxy</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>user=None</em>, <em>password=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.storageclient.StorageClient.set_proxy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the proxy server host and port for the HTTP CONNECT Tunnelling.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -77,7 +117,7 @@ all requests to Storage. This class cannot be instantiated directly.</p>
 
 <dl class="method">
 <dt id="azure.storage.storageclient.StorageClient.with_filter">
-<code class="descname">with_filter</code><span class="sig-paren">(</span><em>filter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/storageclient.html#StorageClient.with_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.storageclient.StorageClient.with_filter" title="Permalink to this definition">¶</a></dt>
+<code class="descname">with_filter</code><span class="sig-paren">(</span><em>filter</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.storageclient.StorageClient.with_filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new service which will process requests with the specified
 filter. Filtering operations can include logging, automatic retrying,
 etc... The filter is a lambda which receives the HTTPRequest and
@@ -148,7 +188,7 @@ post-processing on the response.</p>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.table.tableservice module &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
+    <title>azure.storage.table.tableservice module &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.31.0',
+        VERSION:     '0.32.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage.table package" href="azure.storage.table.html" />
     <link rel="next" title="azure.storage.cloudstorageaccount module" href="azure.storage.cloudstorageaccount.html" />
     <link rel="prev" title="azure.storage.table.tablebatch module" href="azure.storage.table.tablebatch.html" />
@@ -84,7 +84,7 @@ for the connection string format.</li>
 </table>
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.batch">
-<code class="descname">batch</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.batch" title="Permalink to this definition">¶</a></dt>
+<code class="descname">batch</code><span class="sig-paren">(</span><em>table_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.batch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a batch object which can be used as a context manager. Commits the batch on exit.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -102,7 +102,7 @@ for the connection string format.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.commit_batch">
-<code class="descname">commit_batch</code><span class="sig-paren">(</span><em>table_name</em>, <em>batch</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.commit_batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.commit_batch" title="Permalink to this definition">¶</a></dt>
+<code class="descname">commit_batch</code><span class="sig-paren">(</span><em>table_name</em>, <em>batch</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.commit_batch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Commits a <code class="xref py py-class docutils literal"><span class="pre">TableBatch</span></code> request.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -127,7 +127,7 @@ for the connection string format.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.create_table">
-<code class="descname">create_table</code><span class="sig-paren">(</span><em>table_name</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.create_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.create_table" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_table</code><span class="sig-paren">(</span><em>table_name</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.create_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new table in the storage account.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -155,7 +155,7 @@ was set to True, this will throw instead of returning false.</p>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.delete_entity">
-<code class="descname">delete_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>partition_key</em>, <em>row_key</em>, <em>if_match='*'</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.delete_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.delete_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>partition_key</em>, <em>row_key</em>, <em>if_match='*'</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.delete_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes an existing entity in a table. Throws if the entity does not exist.</p>
 <p>When an entity is successfully deleted, the entity is immediately marked 
 for deletion and is no longer accessible to clients. The entity is later 
@@ -185,7 +185,7 @@ an unconditional delete, set If-Match to the wildcard character (*).</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.delete_table">
-<code class="descname">delete_table</code><span class="sig-paren">(</span><em>table_name</em>, <em>fail_not_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.delete_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.delete_table" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_table</code><span class="sig-paren">(</span><em>table_name</em>, <em>fail_not_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.delete_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes the specified table and any data it contains.</p>
 <p>When a table is successfully deleted, it is immediately marked for deletion 
 and is no longer accessible to clients. The table is later removed from 
@@ -217,7 +217,7 @@ was set to True, this will throw instead of returning false.</p>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.exists">
-<code class="descname">exists</code><span class="sig-paren">(</span><em>table_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.exists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">exists</code><span class="sig-paren">(</span><em>table_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.exists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean indicating whether the table exists.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -241,7 +241,7 @@ was set to True, this will throw instead of returning false.</p>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.generate_account_shared_access_signature">
-<code class="descname">generate_account_shared_access_signature</code><span class="sig-paren">(</span><em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.generate_account_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.generate_account_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_account_shared_access_signature</code><span class="sig-paren">(</span><em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.generate_account_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the table service.
 Use the returned signature with the sas_token parameter of TableService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -288,7 +288,7 @@ is https,http. See <a class="reference internal" href="azure.storage.models.html
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.generate_table_shared_access_signature">
-<code class="descname">generate_table_shared_access_signature</code><span class="sig-paren">(</span><em>table_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>start_pk=None</em>, <em>start_rk=None</em>, <em>end_pk=None</em>, <em>end_rk=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.generate_table_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.generate_table_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_table_shared_access_signature</code><span class="sig-paren">(</span><em>table_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>start_pk=None</em>, <em>start_rk=None</em>, <em>end_pk=None</em>, <em>end_rk=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.generate_table_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the table.
 Use the returned signature with the sas_token parameter of TableService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -352,7 +352,7 @@ there is no upper bound on the table entities that can be accessed.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.get_entity">
-<code class="descname">get_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>partition_key</em>, <em>row_key</em>, <em>select=None</em>, <em>accept='application/json;odata=minimalmetadata'</em>, <em>property_resolver=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.get_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.get_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>partition_key</em>, <em>row_key</em>, <em>select=None</em>, <em>accept='application/json;odata=minimalmetadata'</em>, <em>property_resolver=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.get_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an entity from the specified table. Throws if the entity does not exist.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -386,7 +386,7 @@ to JSON_NO_METADATA.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.get_table_acl">
-<code class="descname">get_table_acl</code><span class="sig-paren">(</span><em>table_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.get_table_acl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.get_table_acl" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_table_acl</code><span class="sig-paren">(</span><em>table_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.get_table_acl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns details about any stored access policies specified on the
 table that may be used with Shared Access Signatures.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -411,7 +411,7 @@ table that may be used with Shared Access Signatures.</p>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.get_table_service_properties">
-<code class="descname">get_table_service_properties</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.get_table_service_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.get_table_service_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_table_service_properties</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.get_table_service_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the properties of a storage account&#8217;s Table service, including
 logging, analytics and CORS rules.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -430,7 +430,7 @@ logging, analytics and CORS rules.</p>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.get_table_service_stats">
-<code class="descname">get_table_service_stats</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.get_table_service_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.get_table_service_stats" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_table_service_stats</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.get_table_service_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves statistics related to replication for the Table service. It is 
 only available when read-access geo-redundant replication is enabled for 
 the storage account.</p>
@@ -462,7 +462,7 @@ replication is enabled for your storage account.</p>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.insert_entity">
-<code class="descname">insert_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.insert_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.insert_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">insert_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.insert_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Inserts a new entity into the table. Throws if an entity with the same 
 PartitionKey and RowKey already exists.</p>
 <p>When inserting an entity into a table, you must specify values for the 
@@ -497,7 +497,7 @@ Must contain a PartitionKey and a RowKey.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.insert_or_merge_entity">
-<code class="descname">insert_or_merge_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.insert_or_merge_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.insert_or_merge_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">insert_or_merge_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.insert_or_merge_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges an existing entity or inserts a new entity if it does not exist
 in the table.</p>
 <p>If insert_or_merge_entity is used to merge an entity, any properties from 
@@ -527,7 +527,7 @@ Must contain a PartitionKey and a RowKey.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.insert_or_replace_entity">
-<code class="descname">insert_or_replace_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.insert_or_replace_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.insert_or_replace_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">insert_or_replace_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.insert_or_replace_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replaces an existing entity or inserts a new entity if it does not
 exist in the table. Because this operation can insert or update an
 entity, it is also known as an &#8220;upsert&#8221; operation.</p>
@@ -558,7 +558,7 @@ Must contain a PartitionKey and a RowKey.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.list_tables">
-<code class="descname">list_tables</code><span class="sig-paren">(</span><em>num_results=None</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.list_tables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.list_tables" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_tables</code><span class="sig-paren">(</span><em>num_results=None</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.list_tables" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator to list the tables. The generator will lazily follow 
 the continuation tokens returned by the service and stop when all tables 
 have been returned or num_results is reached.</p>
@@ -595,7 +595,7 @@ applied to each individual call.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.merge_entity">
-<code class="descname">merge_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>if_match='*'</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.merge_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.merge_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">merge_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>if_match='*'</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.merge_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates an existing entity by merging the entity&#8217;s properties. Throws 
 if the entity does not exist.</p>
 <p>This operation does not replace the existing entity as the update_entity
@@ -633,7 +633,7 @@ an unconditional merge, set If-Match to the wildcard character (*).</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.query_entities">
-<code class="descname">query_entities</code><span class="sig-paren">(</span><em>table_name</em>, <em>filter=None</em>, <em>select=None</em>, <em>num_results=None</em>, <em>marker=None</em>, <em>accept='application/json;odata=minimalmetadata'</em>, <em>property_resolver=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.query_entities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.query_entities" title="Permalink to this definition">¶</a></dt>
+<code class="descname">query_entities</code><span class="sig-paren">(</span><em>table_name</em>, <em>filter=None</em>, <em>select=None</em>, <em>num_results=None</em>, <em>marker=None</em>, <em>accept='application/json;odata=minimalmetadata'</em>, <em>property_resolver=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.query_entities" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator to list the entities in the table specified. The 
 generator will lazily follow the continuation tokens returned by the 
 service and stop when all entities have been returned or max_results is 
@@ -684,7 +684,7 @@ applied to each individual call.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.set_table_acl">
-<code class="descname">set_table_acl</code><span class="sig-paren">(</span><em>table_name</em>, <em>signed_identifiers=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.set_table_acl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.set_table_acl" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_table_acl</code><span class="sig-paren">(</span><em>table_name</em>, <em>signed_identifiers=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.set_table_acl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets stored access policies for the table that may be used with Shared 
 Access Signatures.</p>
 <p>When you set permissions for a table, the existing permissions are replaced. 
@@ -715,7 +715,7 @@ will clear the access policies set on the service.</li>
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.set_table_service_properties">
-<code class="descname">set_table_service_properties</code><span class="sig-paren">(</span><em>logging=None</em>, <em>hour_metrics=None</em>, <em>minute_metrics=None</em>, <em>cors=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.set_table_service_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.set_table_service_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_table_service_properties</code><span class="sig-paren">(</span><em>logging=None</em>, <em>hour_metrics=None</em>, <em>minute_metrics=None</em>, <em>cors=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.set_table_service_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the properties of a storage account&#8217;s Table service, including
 Azure Storage Analytics. If an element (ex Logging) is left as None, the 
 existing settings on the service for that functionality are preserved. 
@@ -746,7 +746,7 @@ about CORS rules and evaluation logic, see
 
 <dl class="method">
 <dt id="azure.storage.table.tableservice.TableService.update_entity">
-<code class="descname">update_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>if_match='*'</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/table/tableservice.html#TableService.update_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.table.tableservice.TableService.update_entity" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update_entity</code><span class="sig-paren">(</span><em>table_name</em>, <em>entity</em>, <em>if_match='*'</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.table.tableservice.TableService.update_entity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates an existing entity in a table. Throws if the entity does not exist. 
 The update_entity operation replaces the entire entity and can be used to 
 remove properties.</p>
@@ -831,7 +831,7 @@ an unconditional update, set If-Match to the wildcard character (*).</li>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |

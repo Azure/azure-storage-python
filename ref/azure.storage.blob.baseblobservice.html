@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.baseblobservice module &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
+    <title>azure.storage.blob.baseblobservice module &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.31.0',
+        VERSION:     '0.32.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage.blob package" href="azure.storage.blob.html" />
     <link rel="next" title="azure.storage.blob.blockblobservice module" href="azure.storage.blob.blockblobservice.html" />
     <link rel="prev" title="azure.storage.blob.appendblobservice module" href="azure.storage.blob.appendblobservice.html" />
@@ -55,7 +55,20 @@ way to organize sets of blobs. For more information please see:
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first simple">
+<li><a class="reference internal" href="azure.storage.file.fileservice.html#azure.storage.file.fileservice.FileService.MAX_SINGLE_GET_SIZE" title="azure.storage.file.fileservice.FileService.MAX_SINGLE_GET_SIZE"><strong>MAX_SINGLE_GET_SIZE</strong></a> (<em>int</em>) &#8211; The size of the first range get performed by get_blob_to_* methods if 
+max_connections is greater than 1. Less data will be returned if the 
+blob is smaller than this.</li>
+<li><a class="reference internal" href="azure.storage.file.fileservice.html#azure.storage.file.fileservice.FileService.MAX_CHUNK_GET_SIZE" title="azure.storage.file.fileservice.FileService.MAX_CHUNK_GET_SIZE"><strong>MAX_CHUNK_GET_SIZE</strong></a> (<em>int</em>) &#8211; The size of subsequent range gets performed by get_blob_to_* methods if 
+max_connections is greater than 1 and the blob is larger than MAX_SINGLE_GET_SIZE. 
+Less data will be returned if the remainder of the blob is smaller than 
+this. If this is set to larger than 4MB, content_validation will throw an 
+error if enabled. However, if content_validation is not desired a size 
+greater than 4MB may be optimal. Setting this below 4MB is not recommended.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>account_name</strong> (<em>str</em>) &#8211; The storage account name. This is used to authenticate requests 
 signed with an account key and to construct the storage endpoint. It 
 is required unless a connection string is given, or if a custom 
@@ -93,12 +106,12 @@ for the connection string format.</li>
 
 <dl class="attribute">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.MAX_SINGLE_GET_SIZE">
-<code class="descname">MAX_SINGLE_GET_SIZE</code><em class="property"> = 67108864</em><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.MAX_SINGLE_GET_SIZE" title="Permalink to this definition">¶</a></dt>
+<code class="descname">MAX_SINGLE_GET_SIZE</code><em class="property"> = 33554432</em><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.MAX_SINGLE_GET_SIZE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.abort_copy_blob">
-<code class="descname">abort_copy_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>copy_id</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.abort_copy_blob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.abort_copy_blob" title="Permalink to this definition">¶</a></dt>
+<code class="descname">abort_copy_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>copy_id</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.abort_copy_blob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aborts a pending copy_blob operation, and leaves a destination blob
 with zero length and full metadata.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -121,7 +134,7 @@ copy_blob operation.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.acquire_blob_lease">
-<code class="descname">acquire_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_duration=-1</em>, <em>proposed_lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.acquire_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.acquire_blob_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">acquire_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_duration=-1</em>, <em>proposed_lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.acquire_blob_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Requests a new lease. If the blob does not have an active lease, the Blob
 service creates a lease on the blob and returns a new lease ID.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -171,7 +184,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.acquire_container_lease">
-<code class="descname">acquire_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_duration=-1</em>, <em>proposed_lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.acquire_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.acquire_container_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">acquire_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_duration=-1</em>, <em>proposed_lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.acquire_container_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Requests a new lease. If the container does not have an active lease,
 the Blob service creates a lease on the container and returns a new
 lease ID.</p>
@@ -213,7 +226,7 @@ the resource has not been modified since the specified date/time.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.break_blob_lease">
-<code class="descname">break_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_break_period=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.break_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.break_blob_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">break_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_break_period=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.break_blob_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Breaks the lease, if the blob has an active lease. Once a lease is broken,
 it cannot be renewed. Any authorized request can break the lease; the request
 is not required to specify a matching lease ID. When a lease is broken,
@@ -271,7 +284,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.break_container_lease">
-<code class="descname">break_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_break_period=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.break_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.break_container_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">break_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_break_period=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.break_container_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Break the lease, if the container has an active lease. Once a lease is
 broken, it cannot be renewed. Any authorized request can break the lease;
 the request is not required to specify a matching lease ID. When a lease
@@ -320,7 +333,7 @@ the resource has not been modified since the specified date/time.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.change_blob_lease">
-<code class="descname">change_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>proposed_lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.change_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.change_blob_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">change_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>proposed_lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.change_blob_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Changes the lease ID of an active lease. A change must include the current
 lease ID and a new lease ID.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -360,7 +373,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.change_container_lease">
-<code class="descname">change_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>proposed_lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.change_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.change_container_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">change_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>proposed_lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.change_container_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the lease ID of an active lease. A change must include the current
 lease ID and a new lease ID.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -392,7 +405,7 @@ the resource has not been modified since the specified date/time.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.copy_blob">
-<code class="descname">copy_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>copy_source</em>, <em>metadata=None</em>, <em>source_if_modified_since=None</em>, <em>source_if_unmodified_since=None</em>, <em>source_if_match=None</em>, <em>source_if_none_match=None</em>, <em>destination_if_modified_since=None</em>, <em>destination_if_unmodified_since=None</em>, <em>destination_if_match=None</em>, <em>destination_if_none_match=None</em>, <em>destination_lease_id=None</em>, <em>source_lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.copy_blob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.copy_blob" title="Permalink to this definition">¶</a></dt>
+<code class="descname">copy_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>copy_source</em>, <em>metadata=None</em>, <em>source_if_modified_since=None</em>, <em>source_if_unmodified_since=None</em>, <em>source_if_match=None</em>, <em>source_if_none_match=None</em>, <em>destination_if_modified_since=None</em>, <em>destination_if_unmodified_since=None</em>, <em>destination_if_match=None</em>, <em>destination_if_none_match=None</em>, <em>destination_lease_id=None</em>, <em>source_lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.copy_blob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies a blob asynchronously. This operation returns a copy operation 
 properties object, including a copy ID you can use to check or abort the 
 copy operation. The Blob service copies blobs on a best-effort basis.</p>
@@ -503,7 +516,7 @@ the lease ID given matches the active lease ID of the source blob.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.create_container">
-<code class="descname">create_container</code><span class="sig-paren">(</span><em>container_name</em>, <em>metadata=None</em>, <em>public_access=None</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.create_container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.create_container" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_container</code><span class="sig-paren">(</span><em>container_name</em>, <em>metadata=None</em>, <em>public_access=None</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.create_container" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new container under the specified account. If the container
 with the same name already exists, the operation fails if
 fail_on_exist is True.</p>
@@ -533,7 +546,7 @@ container as metadata. Example:{&#8216;Category&#8217;:&#8217;test&#8217;}</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.delete_blob">
-<code class="descname">delete_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>lease_id=None</em>, <em>delete_snapshots=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.delete_blob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.delete_blob" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>lease_id=None</em>, <em>delete_snapshots=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.delete_blob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Marks the specified blob or snapshot for deletion.
 The blob is later deleted during garbage collection.</p>
 <p>Note that in order to delete a blob, you must delete all of its
@@ -577,7 +590,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.delete_container">
-<code class="descname">delete_container</code><span class="sig-paren">(</span><em>container_name</em>, <em>fail_not_exist=False</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.delete_container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.delete_container" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_container</code><span class="sig-paren">(</span><em>container_name</em>, <em>fail_not_exist=False</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.delete_container" title="Permalink to this definition">¶</a></dt>
 <dd><p>Marks the specified container for deletion. The container and any blobs
 contained within it are later deleted during garbage collection.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -617,7 +630,7 @@ the resource has not been modified since the specified date/time.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.exists">
-<code class="descname">exists</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name=None</em>, <em>snapshot=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.exists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">exists</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name=None</em>, <em>snapshot=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.exists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean indicating whether the container exists (if blob_name 
 is None), or otherwise a boolean indicating whether the blob exists.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -645,7 +658,7 @@ when present, specifies the snapshot.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.generate_account_shared_access_signature">
-<code class="descname">generate_account_shared_access_signature</code><span class="sig-paren">(</span><em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.generate_account_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.generate_account_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_account_shared_access_signature</code><span class="sig-paren">(</span><em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.generate_account_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the blob service.
 Use the returned signature with the sas_token parameter of any BlobService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -692,7 +705,7 @@ is https,http. See <a class="reference internal" href="azure.storage.models.html
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.generate_blob_shared_access_signature">
-<code class="descname">generate_blob_shared_access_signature</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>cache_control=None</em>, <em>content_disposition=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.generate_blob_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.generate_blob_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_blob_shared_access_signature</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>cache_control=None</em>, <em>content_disposition=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.generate_blob_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the blob.
 Use the returned signature with the sas_token parameter of any BlobService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -754,7 +767,7 @@ using this shared access signature.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.generate_container_shared_access_signature">
-<code class="descname">generate_container_shared_access_signature</code><span class="sig-paren">(</span><em>container_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>cache_control=None</em>, <em>content_disposition=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.generate_container_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.generate_container_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_container_shared_access_signature</code><span class="sig-paren">(</span><em>container_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>cache_control=None</em>, <em>content_disposition=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.generate_container_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the container.
 Use the returned signature with the sas_token parameter of any BlobService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -815,7 +828,7 @@ using this shared access signature.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_metadata">
-<code class="descname">get_blob_metadata</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_blob_metadata</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata for the specified blob or snapshot.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -860,7 +873,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_properties">
-<code class="descname">get_blob_properties</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_blob_properties</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata, standard HTTP properties, and
 system properties for the blob. It does not return the content of the blob.
 Returns <a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.Blob" title="azure.storage.blob.models.Blob"><code class="xref py py-class docutils literal"><span class="pre">Blob</span></code></a> with <a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.BlobProperties" title="azure.storage.blob.models.BlobProperties"><code class="xref py py-class docutils literal"><span class="pre">BlobProperties</span></code></a> and a metadata dict.</p>
@@ -907,7 +920,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_properties">
-<code class="descname">get_blob_service_properties</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_service_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_blob_service_properties</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the properties of a storage account&#8217;s Blob service, including
 Azure Storage Analytics.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -927,7 +940,7 @@ target_version property</td>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_stats">
-<code class="descname">get_blob_service_stats</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_service_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_stats" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_blob_service_stats</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_service_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves statistics related to replication for the Blob service. It is 
 only available when read-access geo-redundant replication is enabled for 
 the storage account.</p>
@@ -959,7 +972,7 @@ replication is enabled for your storage account.</p>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_bytes">
-<code class="descname">get_blob_to_bytes</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>range_get_content_md5=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_bytes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_blob_to_bytes</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a blob as an array of bytes, with automatic chunking and
 progress notifications. Returns an instance of <code class="xref py py-class docutils literal"><span class="pre">Blob</span></code> with
 properties, metadata, and content.</p>
@@ -980,15 +993,30 @@ Ex: start_range=0, end_range=511 will download first 512 bytes of blob.</li>
 If end_range is given, start_range must be provided.
 The start_range and end_range params are inclusive.
 Ex: start_range=0, end_range=511 will download first 512 bytes of blob.</li>
-<li><strong>range_get_content_md5</strong> (<em>bool</em>) &#8211; When this header is set to True and specified together
-with the Range header, the service returns the MD5 hash for the
-range, as long as the range is less than or equal to 4 MB in size.</li>
+<li><strong>validate_content</strong> (<em>bool</em>) &#8211; If set to true, validates an MD5 hash for each retrieved portion of 
+the blob. This is primarily valuable for detecting bitflips on the wire 
+if using http instead of https as https (the default) will already 
+validate. Note that the service will only return transactional MD5s 
+for chunks 4MB or less so the first get request will be of size 
+self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+thrown. As computing the MD5 takes processing time and more requests 
+will need to be done due to the reduced chunk size there may be some 
+increase in latency.</li>
 <li><strong>progress_callback</strong> (<em>callback function in format of func(current, total)</em>) &#8211; Callback for progress with signature function(current, total) 
 where current is the number of bytes transfered so far, and total is 
 the size of the blob if known.</li>
-<li><strong>max_connections</strong> (<em>int</em>) &#8211; Set to 1 to download the blob sequentially.
-Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
-If the blob size does not exceed 64MB it will be downloaded in one chunk.</li>
+<li><strong>max_connections</strong> (<em>int</em>) &#8211; If set to 2 or greater, an initial get will be done for the first 
+self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
+the method returns at this point. If it is not, it will download the 
+remaining data parallel using the number of threads equal to 
+max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+If set to 1, a single large get request will be done. This is not 
+generally recommended but available if very few threads should be 
+used, network requests are very expensive, or a non-seekable stream 
+prevents parallel download. This may also be useful if many blobs are 
+expected to be empty as an extra request is required for empty blobs 
+if max_connections is greater than 1.</li>
 <li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry download of blob chunk if an error occurs.</li>
 <li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
@@ -1015,7 +1043,10 @@ each call individually.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Blob with content, properties, and metadata.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Blob with properties and metadata. If max_connections is greater 
+than 1, the content_md5 (if set on the blob) will not be returned. If you 
+require this value, either use get_blob_properties or set max_connections 
+to 1.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.Blob" title="azure.storage.blob.models.Blob"><code class="xref py py-class docutils literal"><span class="pre">Blob</span></code></a></p>
@@ -1027,7 +1058,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_path">
-<code class="descname">get_blob_to_path</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>file_path</em>, <em>open_mode='wb'</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>range_get_content_md5=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_to_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_path" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_blob_to_path</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>file_path</em>, <em>open_mode='wb'</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a blob to a file path, with automatic chunking and progress
 notifications. Returns an instance of <code class="xref py py-class docutils literal"><span class="pre">Blob</span></code> with 
 properties and metadata.</p>
@@ -1039,7 +1070,9 @@ properties and metadata.</p>
 <li><strong>container_name</strong> (<em>str</em>) &#8211; Name of existing container.</li>
 <li><strong>blob_name</strong> (<em>str</em>) &#8211; Name of existing blob.</li>
 <li><strong>file_path</strong> (<em>str</em>) &#8211; Path of file to write out to.</li>
-<li><strong>open_mode</strong> (<em>str</em>) &#8211; Mode to use when opening the file.</li>
+<li><strong>open_mode</strong> (<em>str</em>) &#8211; Mode to use when opening the file. Note that specifying append only 
+open_mode prevents parallel download. So, max_connections must be set 
+to 1 if this open_mode is used.</li>
 <li><strong>snapshot</strong> (<em>str</em>) &#8211; The snapshot parameter is an opaque DateTime value that,
 when present, specifies the blob snapshot to retrieve.</li>
 <li><strong>start_range</strong> (<em>int</em>) &#8211; Start of byte range to use for downloading a section of the blob.
@@ -1050,15 +1083,30 @@ Ex: start_range=0, end_range=511 will download first 512 bytes of blob.</li>
 If end_range is given, start_range must be provided.
 The start_range and end_range params are inclusive.
 Ex: start_range=0, end_range=511 will download first 512 bytes of blob.</li>
-<li><strong>range_get_content_md5</strong> (<em>bool</em>) &#8211; When this header is set to True and specified together
-with the Range header, the service returns the MD5 hash for the
-range, as long as the range is less than or equal to 4 MB in size.</li>
+<li><strong>validate_content</strong> (<em>bool</em>) &#8211; If set to true, validates an MD5 hash for each retrieved portion of 
+the blob. This is primarily valuable for detecting bitflips on the wire 
+if using http instead of https as https (the default) will already 
+validate. Note that the service will only return transactional MD5s 
+for chunks 4MB or less so the first get request will be of size 
+self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+thrown. As computing the MD5 takes processing time and more requests 
+will need to be done due to the reduced chunk size there may be some 
+increase in latency.</li>
 <li><strong>progress_callback</strong> (<em>callback function in format of func(current, total)</em>) &#8211; Callback for progress with signature function(current, total) 
 where current is the number of bytes transfered so far, and total is 
 the size of the blob if known.</li>
-<li><strong>max_connections</strong> (<em>int</em>) &#8211; Set to 1 to download the blob sequentially.
-Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
-If the blob size does not exceed 64MB it will be downloaded in one chunk.</li>
+<li><strong>max_connections</strong> (<em>int</em>) &#8211; If set to 2 or greater, an initial get will be done for the first 
+self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
+the method returns at this point. If it is not, it will download the 
+remaining data parallel using the number of threads equal to 
+max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+If set to 1, a single large get request will be done. This is not 
+generally recommended but available if very few threads should be 
+used, network requests are very expensive, or a non-seekable stream 
+prevents parallel download. This may also be useful if many blobs are 
+expected to be empty as an extra request is required for empty blobs 
+if max_connections is greater than 1.</li>
 <li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry download of blob chunk if an error occurs.</li>
 <li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
@@ -1085,7 +1133,10 @@ each call individually.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Blob with properties and metadata.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Blob with properties and metadata. If max_connections is greater 
+than 1, the content_md5 (if set on the blob) will not be returned. If you 
+require this value, either use get_blob_properties or set max_connections 
+to 1.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.Blob" title="azure.storage.blob.models.Blob"><code class="xref py py-class docutils literal"><span class="pre">Blob</span></code></a></p>
@@ -1097,7 +1148,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_stream">
-<code class="descname">get_blob_to_stream</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>stream</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>range_get_content_md5=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_to_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_stream" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_blob_to_stream</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>stream</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a blob to a stream, with automatic chunking and progress
 notifications. Returns an instance of <code class="xref py py-class docutils literal"><span class="pre">Blob</span></code> with
 properties and metadata.</p>
@@ -1119,15 +1170,30 @@ Ex: start_range=0, end_range=511 will download first 512 bytes of blob.</li>
 If end_range is given, start_range must be provided.
 The start_range and end_range params are inclusive.
 Ex: start_range=0, end_range=511 will download first 512 bytes of blob.</li>
-<li><strong>range_get_content_md5</strong> (<em>bool</em>) &#8211; When this header is set to True and specified together
-with the Range header, the service returns the MD5 hash for the
-range, as long as the range is less than or equal to 4 MB in size.</li>
+<li><strong>validate_content</strong> (<em>bool</em>) &#8211; If set to true, validates an MD5 hash for each retrieved portion of 
+the blob. This is primarily valuable for detecting bitflips on the wire 
+if using http instead of https as https (the default) will already 
+validate. Note that the service will only return transactional MD5s 
+for chunks 4MB or less so the first get request will be of size 
+self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+thrown. As computing the MD5 takes processing time and more requests 
+will need to be done due to the reduced chunk size there may be some 
+increase in latency.</li>
 <li><strong>progress_callback</strong> (<em>callback function in format of func(current, total)</em>) &#8211; Callback for progress with signature function(current, total) 
 where current is the number of bytes transfered so far, and total is 
 the size of the blob if known.</li>
-<li><strong>max_connections</strong> (<em>int</em>) &#8211; Set to 1 to download the blob sequentially.
-Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
-If the blob size does not exceed 64MB it will be downloaded in one chunk.</li>
+<li><strong>max_connections</strong> (<em>int</em>) &#8211; If set to 2 or greater, an initial get will be done for the first 
+self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
+the method returns at this point. If it is not, it will download the 
+remaining data parallel using the number of threads equal to 
+max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+If set to 1, a single large get request will be done. This is not 
+generally recommended but available if very few threads should be 
+used, network requests are very expensive, or a non-seekable stream 
+prevents parallel download. This may also be useful if many blobs are 
+expected to be empty as an extra request is required for empty blobs 
+if max_connections is greater than 1.</li>
 <li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry download of blob chunk if an error occurs.</li>
 <li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
@@ -1154,7 +1220,10 @@ each call individually.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Blob with properties and metadata.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Blob with properties and metadata. If max_connections is greater 
+than 1, the content_md5 (if set on the blob) will not be returned. If you 
+require this value, either use get_blob_properties or set max_connections 
+to 1.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.Blob" title="azure.storage.blob.models.Blob"><code class="xref py py-class docutils literal"><span class="pre">Blob</span></code></a></p>
@@ -1166,7 +1235,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_text">
-<code class="descname">get_blob_to_text</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>encoding='utf-8'</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>range_get_content_md5=None</em>, <em>progress_callback=None</em>, <em>max_connections=1</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_blob_to_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_text" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_blob_to_text</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>encoding='utf-8'</em>, <em>snapshot=None</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_blob_to_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a blob as unicode text, with automatic chunking and progress
 notifications. Returns an instance of <code class="xref py py-class docutils literal"><span class="pre">Blob</span></code> with
 properties, metadata, and content.</p>
@@ -1188,15 +1257,30 @@ Ex: start_range=0, end_range=511 will download first 512 bytes of blob.</li>
 If end_range is given, start_range must be provided.
 The start_range and end_range params are inclusive.
 Ex: start_range=0, end_range=511 will download first 512 bytes of blob.</li>
-<li><strong>range_get_content_md5</strong> (<em>bool</em>) &#8211; When this header is set to True and specified together
-with the Range header, the service returns the MD5 hash for the
-range, as long as the range is less than or equal to 4 MB in size.</li>
+<li><strong>validate_content</strong> (<em>bool</em>) &#8211; If set to true, validates an MD5 hash for each retrieved portion of 
+the blob. This is primarily valuable for detecting bitflips on the wire 
+if using http instead of https as https (the default) will already 
+validate. Note that the service will only return transactional MD5s 
+for chunks 4MB or less so the first get request will be of size 
+self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+thrown. As computing the MD5 takes processing time and more requests 
+will need to be done due to the reduced chunk size there may be some 
+increase in latency.</li>
 <li><strong>progress_callback</strong> (<em>callback function in format of func(current, total)</em>) &#8211; Callback for progress with signature function(current, total) 
 where current is the number of bytes transfered so far, and total is 
 the size of the blob if known.</li>
-<li><strong>max_connections</strong> (<em>int</em>) &#8211; Set to 1 to download the blob sequentially.
-Set to 2 or greater if you want to download a blob larger than 64MB in chunks.
-If the blob size does not exceed 64MB it will be downloaded in one chunk.</li>
+<li><strong>max_connections</strong> (<em>int</em>) &#8211; If set to 2 or greater, an initial get will be done for the first 
+self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
+the method returns at this point. If it is not, it will download the 
+remaining data parallel using the number of threads equal to 
+max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+If set to 1, a single large get request will be done. This is not 
+generally recommended but available if very few threads should be 
+used, network requests are very expensive, or a non-seekable stream 
+prevents parallel download. This may also be useful if many blobs are 
+expected to be empty as an extra request is required for empty blobs 
+if max_connections is greater than 1.</li>
 <li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry download of blob chunk if an error occurs.</li>
 <li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
@@ -1223,7 +1307,10 @@ each call individually.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Blob with content, properties, and metadata.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A Blob with properties and metadata. If max_connections is greater 
+than 1, the content_md5 (if set on the blob) will not be returned. If you 
+require this value, either use get_blob_properties or set max_connections 
+to 1.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="azure.storage.blob.models.html#azure.storage.blob.models.Blob" title="azure.storage.blob.models.Blob"><code class="xref py py-class docutils literal"><span class="pre">Blob</span></code></a></p>
@@ -1235,7 +1322,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_container_acl">
-<code class="descname">get_container_acl</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_container_acl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_container_acl" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_container_acl</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_container_acl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the permissions for the specified container.
 The permissions indicate whether container data may be accessed publicly.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1263,7 +1350,7 @@ if public access is turned on</p>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_container_metadata">
-<code class="descname">get_container_metadata</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_container_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_container_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_container_metadata</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_container_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata for the specified container.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1289,7 +1376,7 @@ container&#8217;s lease is active and matches this ID.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.get_container_properties">
-<code class="descname">get_container_properties</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.get_container_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_container_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_container_properties</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.get_container_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata and system properties for the specified
 container. The data returned does not include the container&#8217;s list of blobs.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1316,7 +1403,7 @@ container&#8217;s lease is active and matches this ID.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.list_blobs">
-<code class="descname">list_blobs</code><span class="sig-paren">(</span><em>container_name</em>, <em>prefix=None</em>, <em>num_results=None</em>, <em>include=None</em>, <em>delimiter=None</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.list_blobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.list_blobs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_blobs</code><span class="sig-paren">(</span><em>container_name</em>, <em>prefix=None</em>, <em>num_results=None</em>, <em>include=None</em>, <em>delimiter=None</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.list_blobs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator to list the blobs under the specified container.
 The generator will lazily follow the continuation tokens returned by
 the service and stop when all blobs have been returned or num_results is reached.</p>
@@ -1358,7 +1445,7 @@ where the previous generator stopped.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.list_containers">
-<code class="descname">list_containers</code><span class="sig-paren">(</span><em>prefix=None</em>, <em>num_results=None</em>, <em>include_metadata=False</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.list_containers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.list_containers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_containers</code><span class="sig-paren">(</span><em>prefix=None</em>, <em>num_results=None</em>, <em>include_metadata=False</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.list_containers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator to list the containers under the specified account.
 The generator will lazily follow the continuation tokens returned by
 the service and stop when all containers have been returned or num_results is reached.</p>
@@ -1392,7 +1479,7 @@ where the previous generator stopped.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.make_blob_url">
-<code class="descname">make_blob_url</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>protocol=None</em>, <em>sas_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.make_blob_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.make_blob_url" title="Permalink to this definition">¶</a></dt>
+<code class="descname">make_blob_url</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>protocol=None</em>, <em>sas_token=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.make_blob_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates the url to access a blob.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1420,7 +1507,7 @@ generate_shared_access_signature.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.release_blob_lease">
-<code class="descname">release_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.release_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.release_blob_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">release_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.release_blob_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Releases the lease. The lease may be released if the lease ID specified on the
 request matches that associated with the blob. Releasing the lease allows another
 client to immediately acquire the lease for the blob as soon as the release is complete.</p>
@@ -1459,7 +1546,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.release_container_lease">
-<code class="descname">release_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.release_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.release_container_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">release_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.release_container_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Release the lease. The lease may be released if the lease_id specified matches
 that associated with the container. Releasing the lease allows another client
 to immediately acquire the lease for the container as soon as the release is complete.</p>
@@ -1490,7 +1577,7 @@ the resource has not been modified since the specified date/time.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.renew_blob_lease">
-<code class="descname">renew_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.renew_blob_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.renew_blob_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">renew_blob_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.renew_blob_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Renews the lease. The lease can be renewed if the lease ID specified on
 the request matches that associated with the blob. Note that the lease may
 be renewed even if it has expired as long as the blob has not been modified
@@ -1537,7 +1624,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.renew_container_lease">
-<code class="descname">renew_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.renew_container_lease"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.renew_container_lease" title="Permalink to this definition">¶</a></dt>
+<code class="descname">renew_container_lease</code><span class="sig-paren">(</span><em>container_name</em>, <em>lease_id</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.renew_container_lease" title="Permalink to this definition">¶</a></dt>
 <dd><p>Renews the lease. The lease can be renewed if the lease ID specified
 matches that associated with the container. Note that
 the lease may be renewed even if it has expired as long as the container
@@ -1576,7 +1663,7 @@ the resource has not been modified since the specified date/time.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.set_blob_metadata">
-<code class="descname">set_blob_metadata</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>metadata=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.set_blob_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_blob_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_blob_metadata</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>metadata=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_blob_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets user-defined metadata for the specified blob as one or more
 name-value pairs.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1623,7 +1710,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.set_blob_properties">
-<code class="descname">set_blob_properties</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>content_settings=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.set_blob_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_blob_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_blob_properties</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>content_settings=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_blob_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets system properties on the blob. If one property is set for the
 content_settings, all properties will be overriden.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1668,7 +1755,7 @@ operation if it does exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.set_blob_service_properties">
-<code class="descname">set_blob_service_properties</code><span class="sig-paren">(</span><em>logging=None</em>, <em>hour_metrics=None</em>, <em>minute_metrics=None</em>, <em>cors=None</em>, <em>target_version=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.set_blob_service_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_blob_service_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_blob_service_properties</code><span class="sig-paren">(</span><em>logging=None</em>, <em>hour_metrics=None</em>, <em>minute_metrics=None</em>, <em>cors=None</em>, <em>target_version=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_blob_service_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the properties of a storage account&#8217;s Blob service, including
 Azure Storage Analytics. If an element (ex Logging) is left as None, the 
 existing settings on the service for that functionality are preserved.</p>
@@ -1697,7 +1784,7 @@ request&#8217;s version is not specified.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.set_container_acl">
-<code class="descname">set_container_acl</code><span class="sig-paren">(</span><em>container_name</em>, <em>signed_identifiers=None</em>, <em>public_access=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.set_container_acl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_container_acl" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_container_acl</code><span class="sig-paren">(</span><em>container_name</em>, <em>signed_identifiers=None</em>, <em>public_access=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_container_acl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the permissions for the specified container or stored access 
 policies that may be used with Shared Access Signatures. The permissions
 indicate whether blobs in a container may be accessed publicly.</p>
@@ -1734,7 +1821,7 @@ if the resource has been modified since the specified time.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.set_container_metadata">
-<code class="descname">set_container_metadata</code><span class="sig-paren">(</span><em>container_name</em>, <em>metadata=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.set_container_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_container_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_container_metadata</code><span class="sig-paren">(</span><em>container_name</em>, <em>metadata=None</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.set_container_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets one or more user-defined name-value pairs for the specified
 container. Each call to this operation replaces all existing metadata
 attached to the container. To remove all metadata from the container,
@@ -1770,7 +1857,7 @@ if the resource has been modified since the specified time.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.baseblobservice.BaseBlobService.snapshot_blob">
-<code class="descname">snapshot_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>metadata=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/baseblobservice.html#BaseBlobService.snapshot_blob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.snapshot_blob" title="Permalink to this definition">¶</a></dt>
+<code class="descname">snapshot_blob</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>metadata=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>lease_id=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.blob.baseblobservice.BaseBlobService.snapshot_blob" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a read-only snapshot of a blob.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1868,7 +1955,7 @@ operation if it does exist.</li>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
       |
