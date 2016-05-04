@@ -13,6 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import sys
+import uuid
 from datetime import date
 from dateutil.tz import tzutc
 from time import time
@@ -36,6 +37,7 @@ from ._error import (
 )
 from ._constants import (
     X_MS_VERSION,
+    _USER_AGENT_STRING,
 )
 from .models import (
     _unicode_type,
@@ -59,21 +61,12 @@ def _update_request(request):
 
     # if it is PUT, POST, MERGE, DELETE, need to add content-length to header.
     if request.method in ['PUT', 'POST', 'MERGE', 'DELETE']:
-        request.headers.append(('Content-Length', str(len(request.body))))
+        request.headers['Content-Length'] = str(len(request.body))
 
     # append addtional headers based on the service
-    current_time = format_date_time(time())
-    request.headers.append(('x-ms-date', current_time))
-    request.headers.append(('x-ms-version', X_MS_VERSION))
-    request.headers.append(('Accept-Encoding', 'identity'))
-
-    # append x-ms-meta name, values to header
-    for name, value in request.headers:
-        if 'x-ms-meta-name-values' in name and value:
-            for meta_name, meta_value in value.items():
-                request.headers.append(('x-ms-meta-' + meta_name, meta_value))
-            request.headers.remove((name, value))
-            break
+    request.headers['x-ms-version'] = X_MS_VERSION
+    request.headers['User-Agent'] = _USER_AGENT_STRING
+    request.headers['x-ms-client-request-id'] = str(uuid.uuid1())
 
     # If the host has a path component (ex local storage), move it
     path = request.host.split('/', 1)
@@ -84,14 +77,16 @@ def _update_request(request):
     # Encode and optionally add local storage prefix to path
     request.path = url_quote(request.path, '/()$=\',~')
 
-    # Add query params to path
-    if request.query:
-        request.path += '?'
-        for name, value in request.query:
-            if value is not None:
-                request.path += name + '=' + url_quote(value, '~') + '&'
-        request.path = request.path[:-1]
+def _add_metadata_headers(metadata, request):
+    if metadata:
+        if not request.headers:
+            request.headers = {}
+        for name, value in metadata.items():
+            request.headers['x-ms-meta-' + name] = value
 
+def _add_date_header(request):
+    current_time = format_date_time(time())
+    request.headers['x-ms-date'] = current_time
 
 def _get_request_body_bytes_only(param_name, param_value):
     '''Validates the request body passed in and converts it to bytes

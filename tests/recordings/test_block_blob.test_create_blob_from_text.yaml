@@ -3,12 +3,12 @@ interactions:
     body: !!binary |
       aGVsbG8g5ZWK6b2E5LiC54ub54ucIHdvcmxk
     headers:
-      Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['27']
-      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
+      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-date: ['Thu, 07 Apr 2016 21:17:55 GMT']
+      x-ms-client-request-id: [244cf408-116c-11e6-b604-8851fb5f57fc]
+      x-ms-date: ['Tue, 03 May 2016 20:18:04 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer6e12111f/blob6e12111f
@@ -16,22 +16,22 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [1dmqejQJFCXZC/Jqkmc1Lw==]
-      Date: ['Thu, 07 Apr 2016 21:17:54 GMT']
-      ETag: ['"0x8D35F2A166E523F"']
-      Last-Modified: ['Thu, 07 Apr 2016 21:17:55 GMT']
+      Date: ['Tue, 03 May 2016 20:18:03 GMT']
+      ETag: ['"0x8D373900891DE04"']
+      Last-Modified: ['Tue, 03 May 2016 20:18:04 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [fda6b429-0001-006f-3112-9157de000000]
+      x-ms-request-id: [c44865f6-0001-0009-6c78-a5e584000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
-      Accept-Encoding: [identity]
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
-      x-ms-date: ['Thu, 07 Apr 2016 21:17:55 GMT']
-      x-ms-range: [bytes=None-]
+      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-client-request-id: [24613f80-116c-11e6-8825-8851fb5f57fc]
+      x-ms-date: ['Tue, 03 May 2016 20:18:04 GMT']
+      x-ms-range: [bytes=0-33554431]
       x-ms-version: ['2015-07-08']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainer6e12111f/blob6e12111f
@@ -40,16 +40,17 @@ interactions:
     headers:
       Accept-Ranges: [bytes]
       Content-Length: ['27']
-      Content-MD5: [1dmqejQJFCXZC/Jqkmc1Lw==]
+      Content-Range: [bytes 0-26/27]
       Content-Type: [application/octet-stream]
-      Date: ['Thu, 07 Apr 2016 21:17:54 GMT']
-      ETag: ['"0x8D35F2A166E523F"']
-      Last-Modified: ['Thu, 07 Apr 2016 21:17:55 GMT']
+      Date: ['Tue, 03 May 2016 20:18:03 GMT']
+      ETag: ['"0x8D373900891DE04"']
+      Last-Modified: ['Tue, 03 May 2016 20:18:04 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
-      x-ms-request-id: [fda6b446-0001-006f-4c12-9157de000000]
+      x-ms-request-id: [c4486611-0001-0009-0678-a5e584000000]
       x-ms-version: ['2015-07-08']
-    status: {code: 200, message: OK}
+      x-ms-write-protection: ['false']
+    status: {code: 206, message: Partial Content}
 version: 1

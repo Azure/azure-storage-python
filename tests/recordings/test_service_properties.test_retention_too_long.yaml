@@ -7,25 +7,25 @@ interactions:
       eT48RW5hYmxlZD5UcnVlPC9FbmFibGVkPjxEYXlzPjM2NjwvRGF5cz48L1JldGVudGlvblBvbGlj
       eT48L01pbnV0ZU1ldHJpY3M+PC9TdG9yYWdlU2VydmljZVByb3BlcnRpZXM+
     headers:
-      Accept-Encoding: [identity]
       Connection: [keep-alive]
       Content-Length: ['273']
-      User-Agent: [Azure-Storage/0.31.0 (Python CPython 3.4.2; Windows 8)]
-      x-ms-date: ['Thu, 07 Apr 2016 21:11:01 GMT']
+      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      x-ms-client-request-id: [2b1ecc62-116b-11e6-885a-8851fb5f57fc]
+      x-ms-date: ['Tue, 03 May 2016 20:11:06 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
-    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+    uri: https://storagename.blob.core.windows.net/?comp=properties&restype=service
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML\
-        \ specified is not syntactically valid.\nRequestId:7e5d1184-0001-0015-4c11-913d93000000\n\
-        Time:2016-04-07T21:11:01.6244799Z</Message><LineNumber>2</LineNumber><LinePosition>176</LinePosition><Reason>Retention\
+        \ specified is not syntactically valid.\nRequestId:9d4b8ea7-0001-0069-4677-a5a0a6000000\n\
+        Time:2016-05-03T20:11:06.6132059Z</Message><LineNumber>2</LineNumber><LinePosition>176</LinePosition><Reason>Retention\
         \ days must be greater than 0 and less than or equal to 365 days.</Reason></Error>"}
     headers:
       Content-Length: ['376']
       Content-Type: [application/xml]
-      Date: ['Thu, 07 Apr 2016 21:11:00 GMT']
+      Date: ['Tue, 03 May 2016 20:11:05 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [7e5d1184-0001-0015-4c11-913d93000000]
+      x-ms-request-id: [9d4b8ea7-0001-0069-4677-a5a0a6000000]
       x-ms-version: ['2015-07-08']
     status: {code: 400, message: XML specified is not syntactically valid.}
 version: 1

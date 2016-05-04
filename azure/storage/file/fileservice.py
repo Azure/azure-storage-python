@@ -22,16 +22,19 @@ from .._error import (
     _ERROR_STORAGE_MISSING_INFO,
     _ERROR_EMULATOR_DOES_NOT_SUPPORT_FILES,
     _ERROR_PARALLEL_NOT_SEEKABLE,
+    _validate_content_match,
 )
 from .._common_conversion import (
     _int_to_str,
     _to_str,
+    _get_content_md5,
 )
 from .._serialization import (
     _get_request_body,
     _get_request_body_bytes_only,
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
+    _add_metadata_headers,
 )
 from .._deserialization import (
     _convert_xml_to_service_properties,
@@ -39,6 +42,7 @@ from .._deserialization import (
     _get_download_size,
     _parse_metadata,
     _parse_properties,
+    _parse_length_from_content_range,
 )
 from ..models import (
     Services,
@@ -49,10 +53,8 @@ from .models import (
     FileProperties,
 )
 from .._http import HTTPRequest
-from ._chunking import (
-    _download_file_chunks,
-    _upload_file_chunks,
-)
+from ._upload_chunking import _upload_file_chunks
+from ._download_chunking import _download_file_chunks
 from .._auth import (
     _StorageSharedKeyAuthentication,
     _StorageSASAuthentication,
@@ -98,9 +100,25 @@ class FileService(StorageClient):
     The Azure File service also offers a compelling alternative to traditional
     Direct Attached Storage (DAS) and Storage Area Network (SAN) solutions, which
     are often complex and expensive to install, configure, and operate. 
+
+    :ivar int MAX_SINGLE_GET_SIZE: 
+        The size of the first range get performed by get_file_to_* methods if 
+        max_connections is greater than 1. Less data will be returned if the 
+        file is smaller than this.
+    :ivar int MAX_CHUNK_GET_SIZE: 
+        The size of subsequent range gets performed by get_file_to_* methods if 
+        max_connections is greater than 1 and the file is larger than MAX_SINGLE_GET_SIZE. 
+        Less data will be returned if the remainder of the file is smaller than 
+        this. If this is set to larger than 4MB, content_validation will throw an 
+        error if enabled. However, if content_validation is not desired a size 
+        greater than 4MB may be optimal. Setting this below 4MB is not recommended.
+    :ivar int MAX_RANGE_SIZE: 
+        The size of the ranges put by create_file_from_* methods. Smaller ranges 
+        may be put if there is less data provided. The maximum range size the service 
+        supports is 4MB.
     '''
-    MAX_SINGLE_GET_SIZE = 64 * 1024 * 1024
-    MAX_CHUNK_GET_SIZE = 4 * 1024 * 1024
+    MAX_SINGLE_GET_SIZE = 32 * 1024 * 1024
+    MAX_CHUNK_GET_SIZE = 8 * 1024 * 1024
     MAX_RANGE_SIZE = 4 * 1024 * 1024
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
@@ -466,11 +484,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path()
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),         
-        ]
+        request.query = {
+             'restype': 'service',
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),         
+        }
         request.body = _get_request_body(
             _convert_service_properties_to_xml(None, hour_metrics, minute_metrics, cors))
 
@@ -491,11 +509,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path()
-        request.query = [
-            ('restype', 'service'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),         
-        ]
+        request.query = {
+             'restype': 'service',
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),         
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_service_properties(response.body)
@@ -566,14 +584,14 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path()
-        request.query = [
-            ('comp', 'list'),
-            ('prefix', _to_str(prefix)),
-            ('marker', _to_str(marker)),
-            ('maxresults', _int_to_str(max_results)),
-            ('include', _to_str(include)),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'comp': 'list',
+             'prefix': _to_str(prefix),
+             'marker': _to_str(marker),
+             'maxresults': _int_to_str(max_results),
+             'include': _to_str(include),
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_shares(response)
@@ -608,13 +626,14 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-meta-name-values', metadata),
-            ('x-ms-share-quota', _int_to_str(quota))]
+        request.query = {
+             'restype': 'share',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-share-quota': _int_to_str(quota)
+        }
+        _add_metadata_headers(metadata, request)
 
         if not fail_on_exist:
             try:
@@ -645,10 +664,10 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_share(share_name, response)
@@ -671,12 +690,14 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-share-quota', _int_to_str(quota))]
+        request.query = {
+             'restype': 'share',
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = { 
+            'x-ms-share-quota': _int_to_str(quota)
+        }
 
         self._perform_request(request)
 
@@ -697,11 +718,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_metadata(response)
@@ -727,12 +748,12 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        request.query = {
+             'restype': 'share',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
+        _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
 
@@ -752,11 +773,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'acl'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'acl',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_signed_identifiers(response.body)
@@ -781,11 +802,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'acl'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'acl',
+             'timeout': _int_to_str(timeout),
+        }
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
 
@@ -811,11 +832,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('comp', 'stats'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'comp': 'stats',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_share_stats(response)
@@ -842,10 +863,10 @@ class FileService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(share_name)
-        request.query = [
-            ('restype', 'share'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'share',
+             'timeout': _int_to_str(timeout),
+        }
 
         if not fail_not_exist:
             try:
@@ -889,11 +910,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        request.query = {
+             'restype': 'directory',
+             'timeout': _int_to_str(timeout),
+        }
+        _add_metadata_headers(metadata, request)
 
         if not fail_on_exist:
             try:
@@ -936,10 +957,10 @@ class FileService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'timeout': _int_to_str(timeout),
+        }
 
         if not fail_not_exist:
             try:
@@ -973,10 +994,10 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_directory(directory_name, response)
@@ -1001,11 +1022,11 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_metadata(response)
@@ -1034,12 +1055,12 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        request.query = {
+             'restype': 'directory',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
+        _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
 
@@ -1111,13 +1132,13 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name)
-        request.query = [
-            ('restype', 'directory'),
-            ('comp', 'list'),
-            ('marker', _to_str(marker)),
-            ('maxresults', _int_to_str(max_results)),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'restype': 'directory',
+             'comp': 'list',
+             'marker': _to_str(marker),
+             'maxresults': _int_to_str(max_results),
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _convert_xml_to_directories_and_files(response)
@@ -1145,7 +1166,7 @@ class FileService(StorageClient):
         request.method = 'HEAD'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
+        request.query = { 'timeout': _int_to_str(timeout)}
 
         response = self._perform_request(request)
         return _parse_file(file_name, response)
@@ -1206,12 +1227,13 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-content-length', _to_str(content_length))]
+        request.query = {
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+             'x-ms-content-length': _to_str(content_length)
+        }
 
         self._perform_request(request)
 
@@ -1239,11 +1261,10 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = None
+        request.query = {
+             'comp': 'properties',
+             'timeout': _int_to_str(timeout),
+        }
         request.headers = content_settings._to_headers()
 
         self._perform_request(request)
@@ -1270,10 +1291,10 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
 
         response = self._perform_request(request)
         return _parse_metadata(response)
@@ -1304,11 +1325,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'metadata'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [('x-ms-meta-name-values', metadata)]
+        request.query = {
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+        }
+        _add_metadata_headers(metadata, request)
 
         self._perform_request(request)
 
@@ -1337,7 +1358,6 @@ class FileService(StorageClient):
             is public, no authentication is required.
             Examples:
             https://myaccount.file.core.windows.net/myshare/mydir/myfile
-            https://myaccount.file.core.windows.net/myshare/my/dir/myfile?snapshot=<DateTime>
             https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken
         :param metadata:
             Name-value pairs associated with the file as metadata. If no name-value 
@@ -1359,11 +1379,11 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-copy-source', _to_str(copy_source)),
-            ('x-ms-meta-name-values', metadata),
-        ]
+        request.query = { 'timeout': _int_to_str(timeout)}
+        request.headers = {
+             'x-ms-copy-source': _to_str(copy_source),
+        }
+        _add_metadata_headers(metadata, request)
 
         response = self._perform_request(request)
         props = _parse_properties(response, FileProperties)
@@ -1393,14 +1413,14 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'copy'),
-            ('copyid', _to_str(copy_id)),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-copy-action', 'abort'),
-        ]
+        request.query = {
+             'comp': 'copy',
+             'copyid': _to_str(copy_id),
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+             'x-ms-copy-action': 'abort',
+        }
 
         self._perform_request(request)
 
@@ -1424,7 +1444,7 @@ class FileService(StorageClient):
         request.method = 'DELETE'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
+        request.query = { 'timeout': _int_to_str(timeout)}
 
         self._perform_request(request)
 
@@ -1461,21 +1481,21 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-meta-name-values', metadata),
-            ('x-ms-content-length', _to_str(content_length)),
-            ('x-ms-type', 'file')
-        ]
+        request.query = { 'timeout': _int_to_str(timeout)}
+        request.headers = {
+             'x-ms-content-length': _to_str(content_length),
+             'x-ms-type': 'file'
+        }
+        _add_metadata_headers(metadata, request)
         if content_settings is not None:
-            request.headers += content_settings._to_headers()
+            request.headers.update(content_settings._to_headers())
 
         self._perform_request(request)
 
     def create_file_from_path(self, share_name, directory_name, file_name, 
                            local_file_path, content_settings=None,
-                           metadata=None, progress_callback=None,
-                           max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
+                           metadata=None, validate_content=False, progress_callback=None,
+                           max_connections=2, max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Creates a new azure file from a local file path, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1493,17 +1513,20 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each range of the file. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to upload the file chunks sequentially.
-            Set to 2 or more to upload the file chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use.
         :param int max_retries:
             Number of times to retry upload of file chunk if an error occurs.
         :param int retry_wait:
@@ -1521,12 +1544,12 @@ class FileService(StorageClient):
         with open(local_file_path, 'rb') as stream:
             self.create_file_from_stream(
                 share_name, directory_name, file_name, stream,
-                count, content_settings, metadata, progress_callback,
+                count, content_settings, metadata, validate_content, progress_callback,
                 max_connections, max_retries, retry_wait, timeout)
 
     def create_file_from_text(self, share_name, directory_name, file_name, 
                            text, encoding='utf-8', content_settings=None,
-                           metadata=None, timeout=None):
+                           metadata=None, validate_content=False, timeout=None):
         '''
         Creates a new file from str/unicode, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1546,6 +1569,13 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each range of the file. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1560,14 +1590,15 @@ class FileService(StorageClient):
             text = text.encode(encoding)
 
         self.create_file_from_bytes(
-            share_name, directory_name, file_name, text, 0,
-            len(text), content_settings, metadata, timeout)
+            share_name, directory_name, file_name, text, count=len(text), 
+            content_settings=content_settings, metadata=metadata, 
+            validate_content=validate_content, timeout=timeout)
 
     def create_file_from_bytes(
         self, share_name, directory_name, file_name, file,
-        index=0, count=None, content_settings=None, metadata=None,
-        progress_callback=None, max_connections=1, max_retries=5,
-        retry_wait=1.0, timeout=None):
+        index=0, count=None, content_settings=None, metadata=None, 
+        validate_content=False, progress_callback=None, max_connections=2, 
+        max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Creates a new file from an array of bytes, or updates the content
         of an existing file, with automatic chunking and progress
@@ -1591,17 +1622,20 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each range of the file. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to upload the file chunks sequentially.
-            Set to 2 or more to upload the file chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use.
         :param int max_retries:
             Number of times to retry upload of file chunk if an error occurs.
         :param int retry_wait:
@@ -1627,13 +1661,14 @@ class FileService(StorageClient):
 
         self.create_file_from_stream(
             share_name, directory_name, file_name, stream, count,
-            content_settings, metadata, progress_callback,
+            content_settings, metadata, validate_content, progress_callback,
             max_connections, max_retries, retry_wait, timeout)
 
     def create_file_from_stream(
         self, share_name, directory_name, file_name, stream, count,
-        content_settings=None, metadata=None, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
+        content_settings=None, metadata=None, validate_content=False, 
+        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0, 
+        timeout=None):
         '''
         Creates a new file from a file/stream, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1654,18 +1689,21 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each range of the file. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the file size
-            exceeds 64MB.
-            Set to 1 to upload the file chunks sequentially.
-            Set to 2 or more to upload the file chunks in parallel. This uses
-            more system resources but will upload faster.
-            Note that parallel upload requires the stream to be seekable.
+            Maximum number of parallel connections to use. Note that parallel upload 
+            requires the stream to be seekable.
         :param int max_retries:
             Number of times to retry upload of file chunk if an error occurs.
         :param int retry_wait:
@@ -1705,12 +1743,13 @@ class FileService(StorageClient):
             max_retries,
             retry_wait,
             progress_callback,
+            validate_content,
             timeout
         )
 
     def _get_file(self, share_name, directory_name, file_name,
                  start_range=None, end_range=None,
-                 range_get_content_md5=None, timeout=None):
+                 validate_content=False, timeout=None):
         '''
         Downloads a file's content, metadata, and properties. You can specify a
         range if you don't need to download the file in its entirety. If no range
@@ -1735,10 +1774,10 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            When this is set to True and specified together with the Range header, 
+            the service returns the MD5 hash for the range, as long as the range 
+            is less than or equal to 4 MB in size.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A File with content, properties, and metadata.
@@ -1750,22 +1789,28 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [('timeout', _int_to_str(timeout))]
+        request.query = { 'timeout': _int_to_str(timeout)}
         _validate_and_format_range_headers(
             request,
             start_range,
             end_range,
             start_range_required=False,
             end_range_required=False,
-            check_content_md5=range_get_content_md5)
+            check_content_md5=validate_content)
 
         response = self._perform_request(request, None)
-        return _parse_file(file_name, response)
+        file = _parse_file(file_name, response)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(file.content)
+            _validate_content_match(file.properties.content_settings.content_md5, computed_md5)
+
+        return file
 
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
                          open_mode='wb', start_range=None, end_range=None,
-                         range_get_content_md5=None, progress_callback=None,
-                         max_connections=1, max_retries=5, retry_wait=1.0, timeout=None):
+                         validate_content=False, progress_callback=None,
+                         max_connections=2, max_retries=5, retry_wait=1.0, timeout=None):
         '''
         Downloads a file to a file path, with automatic chunking and progress
         notifications. Returns an instance of File with properties and metadata.
@@ -1779,7 +1824,9 @@ class FileService(StorageClient):
         :param str file_path:
             Path of file to write to.
         :param str open_mode:
-            Mode to use when opening the file.
+            Mode to use when opening the file. Note that specifying append only 
+            open_mode prevents parallel download. So, max_connections must be set 
+            to 1 if this open_mode is used.
         :param int start_range:
             Start of byte range to use for downloading a section of the file.
             If no end_range is given, all bytes after the start_range will be downloaded.
@@ -1790,19 +1837,35 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the file. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the file if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the file sequentially.
-            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
-            If the file size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be valuable if the file is 
+            being concurrently modified to enforce atomicity or if many files are 
+            expected to be empty as an extra request is required for empty files 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of file chunk if an error occurs.
         :param int retry_wait:
@@ -1819,10 +1882,13 @@ class FileService(StorageClient):
         _validate_not_none('file_path', file_path)
         _validate_not_none('open_mode', open_mode)
 
+        if max_connections > 1 and 'a' in open_mode:
+            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+
         with open(file_path, open_mode) as stream:
             file = self.get_file_to_stream(
                 share_name, directory_name, file_name, stream,
-                start_range, end_range, range_get_content_md5,
+                start_range, end_range, validate_content,
                 progress_callback, max_connections, max_retries,
                 retry_wait, timeout)
 
@@ -1830,8 +1896,8 @@ class FileService(StorageClient):
 
     def get_file_to_stream(
         self, share_name, directory_name, file_name, stream,
-        start_range=None, end_range=None, range_get_content_md5=None,
-        progress_callback=None, max_connections=1, max_retries=5,
+        start_range=None, end_range=None, validate_content=False,
+        progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
         Downloads a file to a stream, with automatic chunking and progress
@@ -1856,19 +1922,35 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the file. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the file if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the file sequentially.
-            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
-            If the file size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be valuable if the file is 
+            being concurrently modified to enforce atomicity or if many files are 
+            expected to be empty as an extra request is required for empty files 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of file chunk if an error occurs.
         :param int retry_wait:
@@ -1884,63 +1966,131 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         _validate_not_none('stream', stream)
 
-        if sys.version_info >= (3,) and max_connections > 1 and not stream.seekable():
-            raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+        # If the user explicitly sets max_connections to 1, do a single shot download
+        if max_connections == 1:
+            file = self._get_file(share_name,
+                                  directory_name,
+                                  file_name,
+                                  start_range=start_range,
+                                  end_range=end_range,
+                                  validate_content=validate_content,
+                                  timeout=timeout)
 
-        # Only get properties if parallelism will actually be used
-        file_size = None
-        if max_connections > 1 and range_get_content_md5 is None:
-            file = self.get_file_properties(share_name, directory_name, 
-                                            file_name, timeout=timeout)
-            file_size = file.properties.content_length
+            # Set the download size
+            download_size = file.properties.content_length
 
-            # If file size is large, use parallel download
-            if file_size >= self.MAX_SINGLE_GET_SIZE:
-                _download_file_chunks(
-                    self,
-                    share_name,
-                    directory_name,
-                    file_name,
-                    file_size,
-                    self.MAX_CHUNK_GET_SIZE,
-                    start_range,
-                    end_range,
-                    stream,
-                    max_connections,
-                    max_retries,
-                    retry_wait,
-                    progress_callback, 
-                    timeout
-                )
-                return file
+        # If max_connections is greater than 1, do the first get to establish the 
+        # size of the file and get the first segment of data
+        else:       
+            if sys.version_info >= (3,) and not stream.seekable():
+                raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+                
+            # The service only provides transactional MD5s for chunks under 4MB.           
+            # If validate_content is on, get only self.MAX_CHUNK_GET_SIZE for the first 
+            # chunk so a transactional MD5 can be retrieved.
+            first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
 
-        # If parallelism is off or the file is small, do a single download
-        download_size = _get_download_size(start_range, end_range, file_size)
+            initial_request_start = start_range if start_range else 0
+
+            if end_range and end_range - start_range < first_get_size:
+                initial_request_end = end_range
+            else:
+                initial_request_end = initial_request_start + first_get_size - 1
+
+            try:
+                file = self._get_file(share_name,
+                                      directory_name,
+                                      file_name,
+                                      start_range=initial_request_start,
+                                      end_range=initial_request_end,
+                                      validate_content=validate_content,
+                                      timeout=timeout)
+
+                # Parse the total file size and adjust the download size if ranges 
+                # were specified
+                file_size = _parse_length_from_content_range(file.properties.content_range)
+                if end_range:
+                    # Use the end_range unless it is over the end of the file
+                    download_size = min(file_size, end_range - start_range + 1)
+                elif start_range:
+                    download_size = file_size - start_range
+                else:
+                    download_size = file_size
+            except AzureHttpError as ex:
+                if not start_range and ex.status_code == 416:
+                    # Get range will fail on an empty file. If the user did not 
+                    # request a range, do a regular get request in order to get 
+                    # any properties.
+                    file = self._get_file(share_name,
+                                          directory_name,
+                                          file_name,
+                                          validate_content=validate_content,
+                                          timeout=timeout)
+
+                    # Set the download size to empty
+                    download_size = 0
+                else:
+                    raise ex
+
+        # Mark the first progress chunk. If the file is small or this is a single 
+        # shot download, this is the only call
         if progress_callback:
-            progress_callback(0, download_size)
+            progress_callback(file.properties.content_length, download_size)
 
-        file = self._get_file(
-            share_name,
-            directory_name,
-            file_name,
-            start_range=start_range,
-            end_range=end_range,
-            range_get_content_md5=range_get_content_md5,
-            timeout=timeout)
-
+        # Write the content to the user stream  
+        # Clear file content since output has been written to user stream   
         if file.content is not None:
             stream.write(file.content)
+            file.content = None
 
-        if progress_callback:
-            download_size = len(file.content)
-            progress_callback(download_size, download_size)
+        # If the file is small or single shot download was used, the download is 
+        # complete at this point. If file size is large, use parallel download.
+        if file.properties.content_length != download_size:       
+            # At this point would like to lock on something like the etag so that 
+            # if the file is modified, we dont get a corrupted download. However, 
+            # this feature is not yet available on the file service.
+            
+            end_file = file_size
+            if end_range:
+                # Use the end_range unless it is over the end of the file
+                end_file = min(file_size, end_range + 1)
+               
+            _download_file_chunks(
+                self,
+                share_name,
+                directory_name,
+                file_name,
+                download_size,
+                self.MAX_CHUNK_GET_SIZE,
+                first_get_size,
+                initial_request_end + 1, # start where the first download ended
+                end_file,
+                stream,
+                max_connections,
+                max_retries,
+                retry_wait,
+                progress_callback,
+                validate_content,
+                timeout,
+            )
 
-        file.content = None # Clear file content since output has been written to user stream
+            # Set the content length to the download size instead of the size of 
+            # the last range
+            file.properties.content_length = download_size
+
+            # Overwrite the content range to the user requested range
+            file.properties.content_range = 'bytes {0}-{1}/{2}'.format(start_range, end_range, file_size)
+
+            # Overwrite the content MD5 as it is the MD5 for the last range instead 
+            # of the stored MD5
+            # TODO: Set to the stored MD5 when the service returns this
+            file.properties.content_md5 = None
+
         return file
 
     def get_file_to_bytes(self, share_name, directory_name, file_name, 
-                          start_range=None, end_range=None, range_get_content_md5=None,
-                          progress_callback=None, max_connections=1, max_retries=5,
+                          start_range=None, end_range=None, validate_content=False,
+                          progress_callback=None, max_connections=2, max_retries=5,
                           retry_wait=1.0, timeout=None):
         '''
         Downloads a file as an array of bytes, with automatic chunking and
@@ -1963,19 +2113,35 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the file. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the file if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the file sequentially.
-            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
-            If the file size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be valuable if the file is 
+            being concurrently modified to enforce atomicity or if many files are 
+            expected to be empty as an extra request is required for empty files 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of file chunk if an error occurs.
         :param int retry_wait:
@@ -1998,7 +2164,7 @@ class FileService(StorageClient):
             stream,
             start_range,
             end_range,
-            range_get_content_md5,
+            validate_content,
             progress_callback,
             max_connections,
             max_retries,
@@ -2010,8 +2176,8 @@ class FileService(StorageClient):
 
     def get_file_to_text(
         self, share_name, directory_name, file_name, encoding='utf-8',
-        start_range=None, end_range=None, range_get_content_md5=None,
-        progress_callback=None, max_connections=1, max_retries=5,
+        start_range=None, end_range=None, validate_content=False,
+        progress_callback=None, max_connections=2, max_retries=5,
         retry_wait=1.0, timeout=None):
         '''
         Downloads a file as unicode text, with automatic chunking and progress
@@ -2036,19 +2202,35 @@ class FileService(StorageClient):
             If end_range is given, start_range must be provided.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param bool range_get_content_md5:
-            When this header is set to True and specified together
-            with the Range header, the service returns the MD5 hash for the
-            range, as long as the range is less than or equal to 4 MB in size.
+        :param bool validate_content:
+            If set to true, validates an MD5 hash for each retrieved portion of 
+            the file. This is primarily valuable for detecting bitflips on the wire 
+            if using http instead of https as https (the default) will already 
+            validate. Note that the service will only return transactional MD5s 
+            for chunks 4MB or less so the first get request will be of size 
+            self.MAX_CHUNK_GET_SIZE instead of self.MAX_SINGLE_GET_SIZE. If 
+            self.MAX_CHUNK_GET_SIZE was set to greater than 4MB an error will be 
+            thrown. As computing the MD5 takes processing time and more requests 
+            will need to be done due to the reduced chunk size there may be some 
+            increase in latency.
         :param progress_callback:
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the file if known.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Set to 1 to download the file sequentially.
-            Set to 2 or greater if you want to download a file larger than 64MB in chunks.
-            If the file size does not exceed 64MB it will be downloaded in one chunk.
+            If set to 2 or greater, an initial get will be done for the first 
+            self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
+            the method returns at this point. If it is not, it will download the 
+            remaining data parallel using the number of threads equal to 
+            max_connections. Each chunk will be of size self.MAX_CHUNK_GET_SIZE.
+            If set to 1, a single large get request will be done. This is not 
+            generally recommended but available if very few threads should be 
+            used, network requests are very expensive, or a non-seekable stream 
+            prevents parallel download. This may also be valuable if the file is 
+            being concurrently modified to enforce atomicity or if many files are 
+            expected to be empty as an extra request is required for empty files 
+            if max_connections is greater than 1.
         :param int max_retries:
             Number of times to retry download of file chunk if an error occurs.
         :param int retry_wait:
@@ -2070,7 +2252,7 @@ class FileService(StorageClient):
             file_name,
             start_range,
             end_range,
-            range_get_content_md5,
+            validate_content,
             progress_callback,
             max_connections,
             max_retries,
@@ -2081,7 +2263,7 @@ class FileService(StorageClient):
         return file
 
     def update_range(self, share_name, directory_name, file_name, data, 
-                     start_range, end_range, content_md5=None, timeout=None):
+                     start_range, end_range, validate_content=False, timeout=None):
         '''
         Writes the bytes specified by the request body into the specified range.
          
@@ -2103,13 +2285,13 @@ class FileService(StorageClient):
             The range can be up to 4 MB in size.
             The start_range and end_range params are inclusive.
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
-        :param str content_md5:
-            An MD5 hash of the range content. This hash is used to
-            verify the integrity of the range during transport. When this header
-            is specified, the storage service compares the hash of the content
-            that has arrived with the header value that was sent. If the two
-            hashes do not match, the operation will fail with error code 400
-            (Bad Request).
+        :param bool validate_content:
+            If true, calculates an MD5 hash of the page content. The storage 
+            service checks the hash of the content that has arrived
+            with the hash that was sent. This is primarily valuable for detecting 
+            bitflips on the wire if using http instead of https as https (the default) 
+            will already validate. Note that this MD5 hash is not stored with the 
+            file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -2120,17 +2302,20 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'range'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('Content-MD5', _to_str(content_md5)),
-            ('x-ms-write', 'update'),
-        ]
+        request.query = {
+             'comp': 'range',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+             'x-ms-write': 'update',
+        }
         _validate_and_format_range_headers(
             request, start_range, end_range)
         request.body = _get_request_body_bytes_only('data', data)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
 
         self._perform_request(request)
 
@@ -2165,14 +2350,14 @@ class FileService(StorageClient):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'range'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('Content-Length', '0'),
-            ('x-ms-write', 'clear'),
-        ]
+        request.query = {
+             'comp': 'range',
+             'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+             'Content-Length': '0',
+             'x-ms-write': 'clear',
+        }
         _validate_and_format_range_headers(
             request, start_range, end_range)
 
@@ -2208,10 +2393,10 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = [
-            ('comp', 'rangelist'),
-            ('timeout', _int_to_str(timeout)),
-        ]
+        request.query = {
+             'comp': 'rangelist',
+             'timeout': _int_to_str(timeout),
+        }
         if start_range is not None:
             _validate_and_format_range_headers(
                 request,

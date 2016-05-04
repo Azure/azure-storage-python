@@ -33,7 +33,7 @@ from tests.testcase import (
 #------------------------------------------------------------------------------
 TEST_BLOB_PREFIX = 'blob'
 FILE_PATH = 'blob_input.temp.dat'
-LARGE_BLOB_SIZE = 64 * 1024
+LARGE_BLOB_SIZE = 64 * 1024 + 512
 #------------------------------------------------------------------------------s
 
 class StoragePageBlobTest(StorageTestCase): 
@@ -145,6 +145,18 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertIsNotNone(resp.last_modified)
         self.assertIsNotNone(resp.sequence_number)
         self.assertBlobEqual(self.container_name, blob_name, data)
+
+    @record
+    def test_update_page_with_md5(self):
+        # Arrange
+        blob_name = self._create_blob()
+
+        # Act
+        data = self.get_random_bytes(512)
+        resp = self.bs.update_page(self.container_name, blob_name, data, 0, 511, 
+                                   validate_content=True)
+
+        # Assert
 
     @record
     def test_clear_page(self):
@@ -383,11 +395,14 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertIsInstance(blob, Blob)
         self.assertEqual(blob.properties.page_blob_sequence_number, 6)
 
-    @record
     def test_create_blob_from_bytes(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(2048)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
@@ -395,11 +410,14 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
 
-    @record
     def test_create_blob_from_bytes_with_progress(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(2048)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
         progress = []
@@ -412,11 +430,14 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
 
-    @record
     def test_create_blob_from_bytes_with_index(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(2048)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         index = 1024
 
         # Act
@@ -429,7 +450,7 @@ class StoragePageBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_index_and_count(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(2048)
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
         index = 512
         count = 1024
 
@@ -439,66 +460,11 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[index:index + count])
 
-    @record
-    def test_create_blob_from_bytes_chunked_upload(self):
-        # Arrange      
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-
-        # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    def test_create_blob_from_bytes_chunked_upload_parallel(self):
+    def test_create_blob_from_path(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
-        # Arrange      
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-
-        # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, max_connections=5)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_create_blob_from_bytes_chunked_upload_with_index_and_count(self):
-        # Arrange      
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-        index = 512
-        count = len(data) - 1024
-
-        # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, index, count)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, blob_name, data[index:index + count])
-
-    def test_create_blob_from_bytes_chunked_upload_with_index_and_count_parallel(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
-        # Arrange      
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-        index = 512
-        count = len(data) - 1024
-
-        # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, index, count, max_connections=5)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, blob_name, data[index:index + count])
-
-    @record
-    def test_create_blob_from_path_chunked_upload(self):
         # Arrange        
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
@@ -512,25 +478,11 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
 
-    def test_create_blob_from_path_chunked_upload_parallel(self):
+    def test_create_blob_from_path_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
-        # Arrange      
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-        with open(FILE_PATH, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        resp = self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, max_connections=5)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, blob_name, data)
-
-    @record
-    def test_create_blob_from_path_with_progress_chunked_upload(self):
         # Arrange        
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
@@ -550,10 +502,12 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobEqual(self.container_name, blob_name, data)
         self.assert_upload_progress(len(data), self.bs.MAX_PAGE_SIZE, progress)
 
-    @record
-    def test_create_blob_from_stream_chunked_upload(self):
-        # Arrange
-        
+    def test_create_blob_from_stream(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange        
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
         with open(FILE_PATH, 'wb') as stream:
@@ -567,28 +521,11 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
-    def test_create_blob_from_stream_chunked_upload_parallel(self):
+    def test_create_blob_from_stream_non_seekable(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
-        # Arrange        
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-        with open(FILE_PATH, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data)
-        with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, 
-                                            blob_size, max_connections=5)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    @record
-    def test_create_blob_from_stream_non_seekable_chunked_upload(self):
         # Arrange      
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
@@ -600,36 +537,17 @@ class StoragePageBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StoragePageBlobTest.NonSeekableFile(stream)
             self.bs.create_blob_from_stream(self.container_name, blob_name, 
-                                            non_seekable_file, blob_size)
+                                            non_seekable_file, blob_size, 
+                                            max_connections=1)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
-    def test_create_blob_from_stream_non_seekable_chunked_upload_parallel(self):
+    def test_create_blob_from_stream_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
-        # Arrange        
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-        with open(FILE_PATH, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data)
-        with open(FILE_PATH, 'rb') as stream:
-            non_seekable_file = StoragePageBlobTest.NonSeekableFile(stream)
-
-            # Parallel uploads require that the file be seekable
-            with self.assertRaises(AttributeError):
-                self.bs.create_blob_from_stream(self.container_name, blob_name, 
-                                                non_seekable_file, blob_size, max_connections=5)
-
-        # Assert
-
-    @record
-    def test_create_blob_from_stream_with_progress_chunked_upload(self):
         # Arrange      
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
@@ -651,34 +569,11 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
         self.assert_upload_progress(len(data), self.bs.MAX_PAGE_SIZE, progress)
 
-    def test_create_blob_from_stream_with_progress_chunked_upload_parallel(self):
+    def test_create_blob_from_stream_truncated(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
-        # Arrange      
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-        with open(FILE_PATH, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        progress = []
-
-        def callback(current, total):
-            progress.append((current, total))
-
-        blob_size = len(data)
-        with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, 
-                                            blob_size, progress_callback=callback, max_connections=5)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-        self.assert_upload_progress(len(data), self.bs.MAX_PAGE_SIZE, progress)
-
-    @record
-    def test_create_blob_from_stream_chunked_upload_truncated(self):
         # Arrange       
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
@@ -693,28 +588,11 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
-    def test_create_blob_from_stream_chunked_upload_truncated_parallel(self):
+    def test_create_blob_from_stream_with_progress_truncated(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
-        # Arrange        
-        blob_name = self._get_blob_reference()
-        data = self.get_random_bytes(LARGE_BLOB_SIZE)
-        with open(FILE_PATH, 'wb') as stream:
-            stream.write(data)
-
-        # Act
-        blob_size = len(data) - 512
-        with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, 
-                                            blob_size, max_connections=5)
-
-        # Assert
-        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
-
-    @record
-    def test_create_blob_from_stream_with_progress_chunked_upload_truncated(self):
         # Arrange       
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
@@ -735,6 +613,33 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
         self.assert_upload_progress(blob_size, self.bs.MAX_PAGE_SIZE, progress)
+
+    @record
+    def test_create_blob_with_md5_small(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(512)
+
+        # Act
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+                                       validate_content=True)
+
+        # Assert
+
+    def test_create_blob_with_md5_large(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
+
+        # Act
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+                                       validate_content=True)
+
+        # Assert
 
 
 #------------------------------------------------------------------------------

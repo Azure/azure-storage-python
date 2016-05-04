@@ -63,8 +63,8 @@ def _update_storage_table_header(request):
     ''' add additional headers for storage table request. '''
 
     # set service version
-    request.headers.append(('DataServiceVersion', '3.0;NetFx'))
-    request.headers.append(('MaxDataServiceVersion', '3.0'))
+    request.headers['DataServiceVersion'] = '3.0;NetFx'
+    request.headers['MaxDataServiceVersion'] = '3.0'
 
 def _to_entity_binary(value):
    return EdmType.BINARY, _encode_base64(value)
@@ -235,7 +235,7 @@ def _convert_batch_to_json(batch_requests):
         body.append(str(content_id).encode('utf-8') + b'\n')
         content_id += 1
 
-        for name, value in request.headers:
+        for name, value in request.headers.items():
             if name in _SUB_HEADERS:
                 body.append(name.encode('utf-8') + b': ')
                 body.append(value.encode('utf-8') + b'\n')

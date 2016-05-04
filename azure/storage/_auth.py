@@ -23,7 +23,7 @@ class _StorageSharedKeyAuthentication(object):
         self.account_key = account_key
 
     def _get_headers(self, request, headers_to_sign):
-        headers = dict((name.lower(), value) for name, value in request.headers if value)
+        headers = dict((name.lower(), value) for name, value in request.headers.items() if value)
         if 'content-length' in headers and headers['content-length'] == '0':
             del headers['content-length']
         return '\n'.join(headers.get(x, '') for x in headers_to_sign) + '\n'
@@ -38,7 +38,7 @@ class _StorageSharedKeyAuthentication(object):
     def _get_canonicalized_headers(self, request):
         string_to_sign = ''
         x_ms_headers = []
-        for name, value in request.headers:
+        for name, value in request.headers.items():
             if name.startswith('x-ms-'):
                 x_ms_headers.append((name.lower(), value))
         x_ms_headers.sort()
@@ -50,7 +50,7 @@ class _StorageSharedKeyAuthentication(object):
     def _add_authorization_header(self, request, string_to_sign):
         signature = _sign_string(self.account_key, string_to_sign)
         auth_string = 'SharedKey ' + self.account_name + ':' + signature
-        request.headers.append(('Authorization', auth_string))
+        request.headers['Authorization'] = auth_string
 
 
 class _StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
@@ -72,10 +72,11 @@ class _StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
         self._add_authorization_header(request, string_to_sign)
 
     def _get_canonicalized_resource_query(self, request):
-        request.query.sort()
+        sorted_queries = [(name, value) for name, value in request.query.items()]
+        sorted_queries.sort()
 
         string_to_sign = ''
-        for name, value in request.query:
+        for name, value in sorted_queries:
             if value:
                 string_to_sign += '\n' + name.lower() + ':' + value
 
@@ -96,7 +97,7 @@ class _StorageTableSharedKeyAuthentication(_StorageSharedKeyAuthentication):
         self._add_authorization_header(request, string_to_sign)
 
     def _get_canonicalized_resource_query(self, request):
-        for name, value in request.query:
+        for name, value in request.query.items():
             if name == 'comp':
                 return '?comp=' + value
         return ''

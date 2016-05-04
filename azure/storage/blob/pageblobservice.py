@@ -21,15 +21,17 @@ from .._common_conversion import (
     _int_to_str,
     _to_str,
     _datetime_to_utc_string,
+    _get_content_md5,
 )
 from .._serialization import (
     _get_request_body_bytes_only,
+    _add_metadata_headers,
 )
 from .._http import HTTPRequest
 from ._error import (
     _ERROR_PAGE_BLOB_SIZE_ALIGNMENT,
 )
-from ._chunking import (
+from ._upload_chunking import (
     _PageBlobChunkUploader,
     _upload_blob_chunks,
 )
@@ -72,6 +74,11 @@ class PageBlobService(BaseBlobService):
     can overwrite just one page, some pages, or up to 4 MB of the page blob.
     Writes to page blobs happen in-place and are immediately committed to the
     blob. The maximum size for a page blob is 1 TB.
+
+    :ivar int MAX_PAGE_SIZE: 
+        The size of the pages put by create_blob_from_* methods. Smaller pages 
+        may be put if there is less data provided. The maximum page size the service 
+        supports is 4MB.
     '''
 
     MAX_PAGE_SIZE = 4 * 1024 * 1024
@@ -183,27 +190,27 @@ class PageBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-blob-type', _to_str(self.blob_type)),
-            ('x-ms-meta-name-values', metadata),
-            ('x-ms-blob-content-length', _to_str(content_length)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('x-ms-blob-sequence-number', _to_str(sequence_number)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match))
-        ]
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {
+            'x-ms-blob-type': _to_str(self.blob_type),
+            'x-ms-blob-content-length': _to_str(content_length),
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-blob-sequence-number': _to_str(sequence_number),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
+        _add_metadata_headers(metadata, request)
         if content_settings is not None:
-            request.headers += content_settings._to_headers()
+            request.headers.update(content_settings._to_headers())
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
 
     def update_page(
         self, container_name, blob_name, page, start_range, end_range,
-        content_md5=None, lease_id=None, if_sequence_number_lte=None,
+        validate_content=False, lease_id=None, if_sequence_number_lte=None,
         if_sequence_number_lt=None, if_sequence_number_eq=None,
         if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
@@ -226,13 +233,13 @@ class PageBlobService(BaseBlobService):
             Pages must be aligned with 512-byte boundaries, the start offset
             must be a modulus of 512 and the end offset must be a modulus of
             512-1. Examples of valid byte ranges are 0-511, 512-1023, etc.
-        :param int content_md5:
-            An MD5 hash of the page content. This hash is used to
-            verify the integrity of the page during transport. When this header
-            is specified, the storage service compares the hash of the content
-            that has arrived with the header value that was sent. If the two
-            hashes do not match, the operation will fail with error code 400
-            (Bad Request).
+        :param bool validate_content:
+            If true, calculates an MD5 hash of the page content. The storage 
+            service checks the hash of the content that has arrived
+            with the hash that was sent. This is primarily valuable for detecting 
+            bitflips on the wire if using http instead of https as https (the default) 
+            will already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int if_sequence_number_lte:
@@ -278,31 +285,31 @@ class PageBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'page'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('Content-MD5', _to_str(content_md5)),
-            ('x-ms-page-write', 'update'),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('x-ms-if-sequence-number-le',
-             _to_str(if_sequence_number_lte)),
-            ('x-ms-if-sequence-number-lt',
-             _to_str(if_sequence_number_lt)),
-            ('x-ms-if-sequence-number-eq',
-             _to_str(if_sequence_number_eq)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match))
-        ]
+        request.query = {
+            'comp': 'page',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-page-write': 'update',
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-if-sequence-number-le': _to_str(if_sequence_number_lte),
+            'x-ms-if-sequence-number-lt': _to_str(if_sequence_number_lt),
+            'x-ms-if-sequence-number-eq': _to_str(if_sequence_number_eq),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
         _validate_and_format_range_headers(
             request,
             start_range,
             end_range,
             align_to_page=True)
         request.body = _get_request_body_bytes_only('page', page)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
 
         response = self._perform_request(request)
         return _parse_page_properties(response)
@@ -374,24 +381,21 @@ class PageBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'page'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-page-write', 'clear'),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('x-ms-if-sequence-number-le',
-             _to_str(if_sequence_number_lte)),
-            ('x-ms-if-sequence-number-lt',
-             _to_str(if_sequence_number_lt)),
-            ('x-ms-if-sequence-number-eq',
-             _to_str(if_sequence_number_eq)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match))
-        ]
+        request.query = {
+            'comp': 'page',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-page-write': 'clear',
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-if-sequence-number-le': _to_str(if_sequence_number_lte),
+            'x-ms-if-sequence-number-lt': _to_str(if_sequence_number_lt),
+            'x-ms-if-sequence-number-eq': _to_str(if_sequence_number_eq),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
         _validate_and_format_range_headers(
             request,
             start_range,
@@ -465,18 +469,18 @@ class PageBlobService(BaseBlobService):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'pagelist'),
-            ('snapshot', _to_str(snapshot)),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
+        request.query = {
+            'comp': 'pagelist',
+            'snapshot': _to_str(snapshot),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
         if start_range is not None:
             _validate_and_format_range_headers(
                 request,
@@ -559,19 +563,19 @@ class PageBlobService(BaseBlobService):
         request.method = 'GET'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'pagelist'),
-            ('snapshot', _to_str(snapshot)),
-            ('prevsnapshot', _to_str(previous_snapshot)),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
+        request.query = {
+            'comp': 'pagelist',
+            'snapshot': _to_str(snapshot),
+            'prevsnapshot': _to_str(previous_snapshot),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
         if start_range is not None:
             _validate_and_format_range_headers(
                 request,
@@ -638,19 +642,19 @@ class PageBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-blob-sequence-number', _to_str(sequence_number)),
-            ('x-ms-sequence-number-action', _to_str(sequence_number_action)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
+        request.query = {
+            'comp': 'properties',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-blob-sequence-number': _to_str(sequence_number),
+            'x-ms-sequence-number-action': _to_str(sequence_number_action),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
 
         response = self._perform_request(request)
         return _parse_page_properties(response)
@@ -706,18 +710,18 @@ class PageBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'properties'),
-            ('timeout', _int_to_str(timeout)),
-        ]
-        request.headers = [
-            ('x-ms-blob-content-length', _to_str(content_length)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match)),
-        ]
+        request.query = {
+            'comp': 'properties',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-blob-content-length': _to_str(content_length),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
 
         response = self._perform_request(request)
         return _parse_page_properties(response)
@@ -726,7 +730,7 @@ class PageBlobService(BaseBlobService):
 
     def create_blob_from_path(
         self, container_name, blob_name, file_path, content_settings=None,
-        metadata=None, progress_callback=None, max_connections=1,
+        metadata=None, validate_content=False, progress_callback=None, max_connections=2,
         max_retries=5, retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
@@ -744,17 +748,20 @@ class PageBlobService(BaseBlobService):
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each page of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use.
         :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
         :param int retry_wait:
@@ -800,6 +807,7 @@ class PageBlobService(BaseBlobService):
                 count=count,
                 content_settings=content_settings,
                 metadata=metadata,
+                validate_content=validate_content,
                 progress_callback=progress_callback,
                 max_connections=max_connections,
                 max_retries=max_retries,
@@ -814,7 +822,7 @@ class PageBlobService(BaseBlobService):
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count, content_settings=None,
-        metadata=None, progress_callback=None, max_connections=1,
+        metadata=None, validate_content=False, progress_callback=None, max_connections=2,
         max_retries=5, retry_wait=1.0, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
@@ -835,18 +843,21 @@ class PageBlobService(BaseBlobService):
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each page of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
-            Note that parallel upload requires the stream to be seekable.
+            Maximum number of parallel connections to use. Note that parallel upload 
+            requires the stream to be seekable.
         :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
         :param int retry_wait:
@@ -915,6 +926,7 @@ class PageBlobService(BaseBlobService):
             max_retries=max_retries,
             retry_wait=retry_wait,
             progress_callback=progress_callback,
+            validate_content=validate_content,
             lease_id=lease_id,
             uploader_class=_PageBlobChunkUploader,
             if_match=response.etag,
@@ -923,8 +935,8 @@ class PageBlobService(BaseBlobService):
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        content_settings=None, metadata=None, progress_callback=None,
-        max_connections=1, max_retries=5, retry_wait=1.0,
+        content_settings=None, metadata=None, validate_content=False, 
+        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0,
         lease_id=None, if_modified_since=None, if_unmodified_since=None,
         if_match=None, if_none_match=None, timeout=None):
         '''
@@ -948,17 +960,20 @@ class PageBlobService(BaseBlobService):
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each page of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size
-            exceeds 64MB.
-            Set to 1 to upload the blob chunks sequentially.
-            Set to 2 or more to upload the blob chunks in parallel. This uses
-            more system resources but will upload faster.
+            Maximum number of parallel connections to use.
         :param int max_retries:
             Number of times to retry upload of blob chunk if an error occurs.
         :param int retry_wait:
@@ -1012,6 +1027,7 @@ class PageBlobService(BaseBlobService):
             count=count,
             content_settings=content_settings,
             metadata=metadata,
+            validate_content=validate_content,
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_connections=max_connections,

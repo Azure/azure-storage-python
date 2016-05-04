@@ -2,6 +2,16 @@
 
 > See the [Change Log](ChangeLog.md) for a summary of storage library changes.
 
+## Version 0.32.0:
+
+### Blob:
+- get_blob_to_* will do an initial get request of size 32 MB. If it then finds the blob is larger than this size, it will parallelize by default.
+- Block blob and page blob create_blob_from_* methods will parallelize by default.
+
+### File:
+- get_file_to_* will do an initial get request of size 32 MB. If it then finds the file is larger than this size, it will parallelize by default.
+- create_file_from_* methods will parallelize by default.
+
 ## Version 0.30.0
 
 ### All:

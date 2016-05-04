@@ -131,7 +131,12 @@ class FileProperties(object):
         The ETag contains a value that you can use to perform operations
         conditionally.
     :ivar int content_length:
-        The size of the file in bytes.
+        The length of the content returned. If the entire blob was requested, 
+        the length of blob in bytes. If a subset of the blob was requested, the 
+        length of the returned subset.
+    :ivar str content_range:
+        Indicates the range of bytes returned in the event that the client 
+        requested a subset of the blob.
     :ivar ~azure.storage.file.models.ContentSettings content_settings:
         Stores all the content settings for the file.
     :ivar ~azure.storage.file.models.CopyProperties copy:
@@ -142,6 +147,7 @@ class FileProperties(object):
         self.last_modified = None
         self.etag = None
         self.content_length = None
+        self.content_range = None
         self.content_settings = ContentSettings()
         self.copy = CopyProperties()
 
@@ -187,17 +193,14 @@ class ContentSettings(object):
         self.content_md5 = content_md5
 
     def _to_headers(self):
-        return [
-            ('x-ms-cache-control', _to_str(self.cache_control)),
-            ('x-ms-content-type', _to_str(self.content_type)),
-            ('x-ms-content-disposition',
-                _to_str(self.content_disposition)),
-            ('x-ms-content-md5', _to_str(self.content_md5)),
-            ('x-ms-content-encoding',
-                _to_str(self.content_encoding)),
-            ('x-ms-content-language',
-                _to_str(self.content_language)),
-        ]
+        return {
+            'x-ms-cache-control': _to_str(self.cache_control),
+            'x-ms-content-type': _to_str(self.content_type),
+            'x-ms-content-disposition': _to_str(self.content_disposition),
+            'x-ms-content-md5': _to_str(self.content_md5),
+            'x-ms-content-encoding': _to_str(self.content_encoding),
+            'x-ms-content-language': _to_str(self.content_language),
+        }
 
 
 class CopyProperties(object):

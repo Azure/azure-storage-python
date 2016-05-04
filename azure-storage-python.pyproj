@@ -21,13 +21,15 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="azure\storage\blob\_upload_chunking.py" />
+    <Compile Include="azure\storage\file\_upload_chunking.py" />
     <Compile Include="azure\storage\_auth.py" />
     <Compile Include="azure\storage\blob\appendblobservice.py" />
     <Compile Include="azure\storage\blob\blockblobservice.py" />
     <Compile Include="azure\storage\blob\models.py" />
     <Compile Include="azure\storage\blob\pageblobservice.py" />
     <Compile Include="azure\storage\blob\baseblobservice.py" />
-    <Compile Include="azure\storage\blob\_chunking.py" />
+    <Compile Include="azure\storage\blob\_download_chunking.py" />
     <Compile Include="azure\storage\blob\_deserialization.py" />
     <Compile Include="azure\storage\blob\_error.py" />
     <Compile Include="azure\storage\blob\_serialization.py" />
@@ -37,7 +39,7 @@
     <Compile Include="azure\storage\_constants.py" />
     <Compile Include="azure\storage\file\fileservice.py" />
     <Compile Include="azure\storage\file\models.py" />
-    <Compile Include="azure\storage\file\_chunking.py" />
+    <Compile Include="azure\storage\file\_download_chunking.py" />
     <Compile Include="azure\storage\file\_deserialization.py" />
     <Compile Include="azure\storage\file\_serialization.py" />
     <Compile Include="azure\storage\file\__init__.py" />
@@ -62,13 +64,15 @@
     <Compile Include="azure\storage\_error.py" />
     <Compile Include="azure\storage\_deserialization.py" />
     <Compile Include="azure\storage\_http\httpclient.py" />
-    <Compile Include="azure\storage\_http\requestsclient.py" />
     <Compile Include="azure\storage\_http\__init__.py" />
     <Compile Include="azure\storage\_serialization.py" />
     <Compile Include="azure\storage\__init__.py" />
     <Compile Include="azure\__init__.py" />
     <Compile Include="doc\conf.py" />
     <Compile Include="doc\__init__.py" />
+    <Compile Include="samples\advanced\client.py" />
+    <Compile Include="samples\advanced\authentication.py" />
+    <Compile Include="samples\advanced\__init__.py" />
     <Compile Include="samples\blob\append_blob_usage.py" />
     <Compile Include="samples\blob\block_blob_usage.py" />
     <Compile Include="samples\blob\page_blob_usage.py" />
@@ -97,6 +101,7 @@
     <Compile Include="tests\test_client.py" />
     <Compile Include="tests\test_account.py" />
     <Compile Include="tests\test_directory.py" />
+    <Compile Include="tests\test_get_file.py" />
     <Compile Include="tests\test_service_stats.py" />
     <Compile Include="tests\test_share.py" />
     <Compile Include="tests\test_get_blob.py" />
@@ -128,6 +133,7 @@
     <Folder Include="samples\" />
     <Folder Include="samples\file\" />
     <Folder Include="samples\blob\" />
+    <Folder Include="samples\advanced\" />
     <Folder Include="samples\table\" />
     <Folder Include="samples\queue\" />
     <Folder Include="tests" />

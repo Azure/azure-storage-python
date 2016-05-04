@@ -305,21 +305,6 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blob.content, self.byte_data[:6])
 
     @record
-    def test_get_blob_with_range_and_get_content_md5(self):
-        # Arrange
-        blob_name = self._create_block_blob()
-
-        # Act
-        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name,
-                                start_range=0, end_range=5,
-                                range_get_content_md5=True)
-
-        # Assert
-        self.assertIsInstance(blob, Blob)
-        self.assertEqual(blob.content, self.byte_data[:6])
-        self.assertIsNotNone(blob.properties.content_settings.content_md5)
-
-    @record
     def test_get_blob_with_lease(self):
         # Arrange
         blob_name = self._create_block_blob()
@@ -771,20 +756,21 @@ class StorageCommonBlobTest(StorageTestCase):
 
         def my_filter(request, next):
             called.append(True)
-            for header in request.headers:
+            self.assertIsInstance(request.headers, dict)
+            for header in request.headers.items():
                 self.assertIsInstance(header, tuple)
                 for item in header:
                     self.assertIsInstance(item, strornonetype)
             self.assertIsInstance(request.host, strtype)
             self.assertIsInstance(request.method, strtype)
             self.assertIsInstance(request.path, strtype)
-            self.assertIsInstance(request.query, list)
+            self.assertIsInstance(request.query, dict)
             self.assertIsInstance(request.body, strtype)
             response = next(request)
 
             self.assertIsInstance(response.body, (bytes, type(None)))
-            self.assertIsInstance(response.headers, list)
-            for header in response.headers:
+            self.assertIsInstance(response.headers, dict)
+            for header in response.headers.items():
                 self.assertIsInstance(header, tuple)
                 for item in header:
                     self.assertIsInstance(item, strtype)
@@ -792,7 +778,7 @@ class StorageCommonBlobTest(StorageTestCase):
             return response
 
         bc = self.bs.with_filter(my_filter)
-        bc.create_container(self.container_name + '0', None, None, False)
+        bc.create_container(self.container_name + '0')
 
         self.assertTrue(called)
 

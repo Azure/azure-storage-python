@@ -21,12 +21,14 @@ from .._common_conversion import (
     _to_str,
     _int_to_str,
     _datetime_to_utc_string,
+    _get_content_md5,
 )
 from .._serialization import (
     _get_request_body_bytes_only,
+    _add_metadata_headers,
 )
 from .._http import HTTPRequest
-from ._chunking import (
+from ._upload_chunking import (
     _AppendBlobChunkUploader,
     _upload_blob_chunks,
 )
@@ -61,6 +63,11 @@ class AppendBlobService(BaseBlobService):
     Each block in an append blob can be a different size, up to a maximum of 4 MB,
     and an append blob can include up to 50,000 blocks. The maximum size of an
     append blob is therefore slightly more than 195 GB (4 MB X 50,000 blocks).
+
+    :ivar int MAX_BLOCK_SIZE: 
+        The size of the blocks put by append_blob_from_* methods. Smaller blocks 
+        may be put if there is less data provided. The maximum block size the service 
+        supports is 4MB.
     '''
     MAX_BLOCK_SIZE = 4 * 1024 * 1024
 
@@ -163,24 +170,24 @@ class AppendBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [('timeout', _int_to_str(timeout))]
-        request.headers = [
-            ('x-ms-blob-type', _to_str(self.blob_type)),
-            ('x-ms-meta-name-values', metadata),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match))
-        ]
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {
+            'x-ms-blob-type': _to_str(self.blob_type),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
+        _add_metadata_headers(metadata, request)
         if content_settings is not None:
-            request.headers += content_settings._to_headers()
+            request.headers.update(content_settings._to_headers())
 
         response = self._perform_request(request)
         return _parse_base_properties(response)
 
     def append_block(self, container_name, blob_name, block,
-                     content_md5=None, maxsize_condition=None,
+                     validate_content=False, maxsize_condition=None,
                      appendpos_condition=None,
                      lease_id=None, if_modified_since=None,
                      if_unmodified_since=None, if_match=None,
@@ -194,11 +201,13 @@ class AppendBlobService(BaseBlobService):
             Name of existing blob.
         :param bytes block:
             Content of the block in bytes.
-        :param int content_md5:
-            An MD5 hash of the block content. This hash is used to
-            verify the integrity of the blob during transport. When this
-            header is specified, the storage service checks the hash that has
-            arrived with the one that was sent.
+        :param bool validate_content:
+            If true, calculates an MD5 hash of the block content. The storage 
+            service checks the hash of the content that has arrived
+            with the hash that was sent. This is primarily valuable for detecting 
+            bitflips on the wire if using http instead of https as https (the default) 
+            will already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param int maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -249,21 +258,24 @@ class AppendBlobService(BaseBlobService):
         request.method = 'PUT'
         request.host = self._get_host()
         request.path = _get_path(container_name, blob_name)
-        request.query = [
-            ('comp', 'appendblock'),
-            ('timeout', _int_to_str(timeout)),
-         ]
-        request.headers = [
-            ('Content-MD5', _to_str(content_md5)),
-            ('x-ms-blob-condition-maxsize', _to_str(maxsize_condition)),
-            ('x-ms-blob-condition-appendpos', _to_str(appendpos_condition)),
-            ('x-ms-lease-id', _to_str(lease_id)),
-            ('If-Modified-Since', _datetime_to_utc_string(if_modified_since)),
-            ('If-Unmodified-Since', _datetime_to_utc_string(if_unmodified_since)),
-            ('If-Match', _to_str(if_match)),
-            ('If-None-Match', _to_str(if_none_match))
-        ]
+        request.query = {
+            'comp': 'appendblock',
+            'timeout': _int_to_str(timeout),
+         }
+        request.headers = {
+            'x-ms-blob-condition-maxsize': _to_str(maxsize_condition),
+            'x-ms-blob-condition-appendpos': _to_str(appendpos_condition),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
         request.body = _get_request_body_bytes_only('block', block)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
 
         response = self._perform_request(request)
         return _parse_append_block(response)
@@ -271,7 +283,7 @@ class AppendBlobService(BaseBlobService):
     #----Convenience APIs----------------------------------------------
 
     def append_blob_from_path(
-        self, container_name, blob_name, file_path,
+        self, container_name, blob_name, file_path, validate_content=False,
         maxsize_condition=None, progress_callback=None,
         max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
         '''
@@ -284,6 +296,13 @@ class AppendBlobService(BaseBlobService):
             Name of blob to create or update.
         :param str file_path:
             Path of the file to upload as the blob content.
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each chunk of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param int maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -317,6 +336,7 @@ class AppendBlobService(BaseBlobService):
                 blob_name,
                 stream,
                 count=count,
+                validate_content=validate_content,
                 maxsize_condition=maxsize_condition,
                 progress_callback=progress_callback,
                 max_retries=max_retries,
@@ -326,7 +346,7 @@ class AppendBlobService(BaseBlobService):
 
     def append_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        maxsize_condition=None, progress_callback=None,
+        validate_content=False, maxsize_condition=None, progress_callback=None,
         max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from an array of bytes, with
@@ -343,6 +363,13 @@ class AppendBlobService(BaseBlobService):
         :param int count:
             Number of bytes to upload. Set to None or negative value to upload
             all bytes starting from index.
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each chunk of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param int maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -385,6 +412,7 @@ class AppendBlobService(BaseBlobService):
             blob_name,
             stream,
             count=count,
+            validate_content=validate_content,
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
@@ -394,7 +422,7 @@ class AppendBlobService(BaseBlobService):
 
     def append_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
-        maxsize_condition=None, progress_callback=None,
+        validate_content=False, maxsize_condition=None, progress_callback=None,
         max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from str/unicode, with
@@ -408,6 +436,13 @@ class AppendBlobService(BaseBlobService):
             Text to upload to the blob.
         :param str encoding:
             Python encoding to use to convert the text to bytes.
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each chunk of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param int maxsize_condition:
             Optional conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -444,6 +479,7 @@ class AppendBlobService(BaseBlobService):
             text,
             index=0,
             count=len(text),
+            validate_content=validate_content,
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
@@ -453,7 +489,7 @@ class AppendBlobService(BaseBlobService):
 
     def append_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
-        maxsize_condition=None, progress_callback=None, 
+        validate_content=False, maxsize_condition=None, progress_callback=None, 
         max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from a file/stream, with
@@ -468,6 +504,13 @@ class AppendBlobService(BaseBlobService):
         :param int count:
             Number of bytes to read from the stream. This is optional, but
             should be supplied for optimal performance.
+        :param bool validate_content:
+            If true, calculates an MD5 hash for each chunk of the blob. The storage 
+            service checks the hash of the content that has arrived with the hash 
+            that was sent. This is primarily valuable for detecting bitflips on 
+            the wire if using http instead of https as https (the default) will 
+            already validate. Note that this MD5 hash is not stored with the 
+            blob.
         :param int maxsize_condition:
             Conditional header. The max length in bytes permitted for
             the append blob. If the Append Block operation would cause the blob
@@ -505,6 +548,7 @@ class AppendBlobService(BaseBlobService):
             max_retries=max_retries,
             retry_wait=retry_wait,
             progress_callback=progress_callback,
+            validate_content=validate_content,
             lease_id=lease_id,
             uploader_class=_AppendBlobChunkUploader,
             maxsize_condition=maxsize_condition,

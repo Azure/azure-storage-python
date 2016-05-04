@@ -35,7 +35,7 @@ except ImportError:
 
 setup(
     name='azure-storage',
-    version='0.31.0',
+    version='0.32.0',
     description='Microsoft Azure Storage Client Library for Python',
     long_description=open('README.rst', 'r').read(),
     license='Apache License 2.0',
@@ -50,6 +50,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'License :: OSI Approved :: Apache Software License',
     ],
     zip_safe=False,

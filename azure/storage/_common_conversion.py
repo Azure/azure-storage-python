@@ -98,6 +98,10 @@ def _sign_string(key, string_to_sign, key_is_base64=True):
     encoded_digest = _encode_base64(digest)
     return encoded_digest
 
+def _get_content_md5(data):
+    md5 = hashlib.md5()
+    md5.update(data)
+    return base64.b64encode(md5.digest()).decode('utf-8') 
 
 def _lower(text):
     return text.lower()

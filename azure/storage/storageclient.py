@@ -30,6 +30,7 @@ from ._http.httpclient import _HTTPClient
 from ._serialization import (
     _storage_error_handler,
     _update_request,
+    _add_date_header,
 )
 from ._error import (
     _ERROR_STORAGE_MISSING_INFO,
@@ -40,6 +41,39 @@ class StorageClient(object):
     '''
     This is the base class for service objects. Service objects are used to do 
     all requests to Storage. This class cannot be instantiated directly.
+
+    :ivar str account_name:
+        The storage account name. This is used to authenticate requests 
+        signed with an account key and to construct the storage endpoint. It 
+        is required unless a connection string is given, or if a custom 
+        domain is used with anonymous authentication.
+    :ivar str account_key:
+        The storage account key. This is used for shared key authentication. 
+        If neither account key or sas token is specified, anonymous access 
+        will be used.
+    :ivar str sas_token:
+        A shared access signature token to use to authenticate requests 
+        instead of the account key. If account key and sas token are both 
+        specified, account key will be used to sign. If neither are 
+        specified, anonymous access will be used.
+    :ivar str primary_endpoint:
+        The endpoint to send storage requests to.
+    :ivar str secondary_endpoint:
+        The secondary endpoint to read storage data from. This will only be a 
+        valid endpoint if the storage account used is RA-GRS and thus allows 
+        reading from secondary.
+    :ivar function(request) request_callback:
+        A function called immediately before each request is sent. This function 
+        takes as a parameter the request object and returns nothing. It may be 
+        used to added custom headers or log request data.
+    :ivar function() response_callback:
+        A function called immediately after each response is received. This 
+        function takes as a parameter the response object and returns nothing. 
+        It may be used to log response data.
+    :param str protocol:
+        The protocol to use for requests. Defaults to https.
+    :param requests.Session request_session:
+        The session object to use for http requests.
     '''
 
     __metaclass__ = ABCMeta
@@ -52,20 +86,37 @@ class StorageClient(object):
         self.account_key = connection_params.account_key
         self.sas_token = connection_params.sas_token
 
-        self.protocol = connection_params.protocol
         self.primary_endpoint = connection_params.primary_endpoint
         self.secondary_endpoint = connection_params.secondary_endpoint
 
-        self.request_session = connection_params.request_session
-
+        protocol = connection_params.protocol
+        request_session = connection_params.request_session or requests.Session()
         self._httpclient = _HTTPClient(
-            service_instance=self,
-            protocol=self.protocol,
-            request_session=connection_params.request_session or requests.Session(),
-            user_agent=_USER_AGENT_STRING,
+            protocol=protocol,
+            session=request_session,
             timeout=_SOCKET_TIMEOUT,
         )
+
         self._filter = self._perform_request_worker
+
+        self.request_callback = None
+        self.response_callback = None
+
+    @property
+    def protocol(self):
+        return self._httpclient.protocol
+
+    @protocol.setter
+    def protocol(self, value):
+        self._httpclient.protocol = value
+
+    @property
+    def request_session(self):
+        return self._httpclient.session
+
+    @request_session.setter
+    def request_session(self, value):
+        self._httpclient.session = value
 
     def with_filter(self, filter):
         '''
@@ -105,6 +156,14 @@ class StorageClient(object):
 
     def _perform_request_worker(self, request):
         _update_request(request)
+
+        if self.request_callback:
+            self.request_callback(request)
+
+        # Add date and auth after the callback so date doesn't get too old and 
+        # authentication is still correct if signed headers are added in the request 
+        # callback
+        _add_date_header(request)
         self.authentication.sign_request(request)
         return self._httpclient.perform_request(request)
 
@@ -114,17 +173,7 @@ class StorageClient(object):
         to error handler
         '''
         try:
-            resp = self._filter(request)
-
-            if sys.version_info >= (3,) and isinstance(resp, bytes) and \
-                encoding:
-                resp = resp.decode(encoding)
-
-        # Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException
-        except HTTPError as ex:
-            _storage_error_handler(ex)
-
-        # Wrap all other exceptions as AzureExceptions to ease exception handling code
+            response = self._filter(request)
         except Exception as ex:
             if sys.version_info >= (3,):
                 # Automatic chaining in Python 3 means we keep the trace
@@ -136,4 +185,13 @@ class StorageClient(object):
                 # TODO: In the future we will log the trace
                 raise AzureException('{}: {}'.format(ex.__class__.__name__, ex.args[0]))
 
-        return resp
+        if self.response_callback:
+            self.response_callback(response)
+
+        # Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException
+        if response.status >= 300:
+            # This exception will be caught by the general error handler
+            # and raised as an azure http exception
+            _storage_error_handler(HTTPError(response.status, response.message, response.headers, response.body))
+
+        return response
