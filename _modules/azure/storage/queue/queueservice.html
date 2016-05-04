@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.queue.queueservice &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
+    <title>azure.storage.queue.queueservice &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.31.0',
+        VERSION:     '0.32.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
   
@@ -38,7 +38,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.queue.queueservice</h1><div class="highlight"><pre>
-<span></span><span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -69,6 +69,7 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.._serialization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_get_request_body</span><span class="p">,</span>
+    <span class="n">_add_metadata_headers</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_int_to_str</span><span class="p">,</span>
@@ -116,7 +117,7 @@
 
 <span class="n">_HTTP_RESPONSE_NO_CONTENT</span> <span class="o">=</span> <span class="mi">204</span>
 
-<div class="viewcode-block" id="QueueService"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService">[docs]</a><span class="k">class</span> <span class="nc">QueueService</span><span class="p">(</span><span class="n">StorageClient</span><span class="p">):</span>
+<div class="viewcode-block" id="QueueService"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService">[docs]</a><span class="k">class</span> <span class="nc">QueueService</span><span class="p">(</span><span class="n">StorageClient</span><span class="p">):</span></div>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This is the main class managing queue resources.</span>
@@ -202,7 +203,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">encode_function</span> <span class="o">=</span> <span class="n">QueueMessageFormat</span><span class="o">.</span><span class="n">text_xmlencode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decode_function</span> <span class="o">=</span> <span class="n">QueueMessageFormat</span><span class="o">.</span><span class="n">text_xmldecode</span>
 
-<div class="viewcode-block" id="QueueService.generate_account_shared_access_signature"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.generate_account_shared_access_signature">[docs]</a>    <span class="k">def</span> <span class="nf">generate_account_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">generate_account_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
                                         <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the queue service.</span>
@@ -248,9 +249,9 @@
 
         <span class="n">sas</span> <span class="o">=</span> <span class="n">SharedAccessSignature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">generate_account</span><span class="p">(</span><span class="n">Services</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
-                                    <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">)</span></div>
+                                    <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.generate_queue_shared_access_signature"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.generate_queue_shared_access_signature">[docs]</a>    <span class="k">def</span> <span class="nf">generate_queue_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">generate_queue_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span>
                                          <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
                                          <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>                                       
                                          <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -312,9 +313,9 @@
             <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
             <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.get_queue_service_stats"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.get_queue_service_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_queue_service_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_queue_service_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Retrieves statistics related to replication for the Queue service. It is </span>
 <span class="sd">        only available when read-access geo-redundant replication is enabled for </span>
@@ -342,16 +343,16 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondary_endpoint</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;restype&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;stats&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;restype&#39;</span><span class="p">:</span> <span class="s1">&#39;service&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;stats&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
 
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_xml_to_service_stats</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_convert_xml_to_service_stats</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.get_queue_service_properties"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.get_queue_service_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_queue_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_queue_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Gets the properties of a storage account&#39;s Queue service, including</span>
 <span class="sd">        logging, analytics and CORS rules.</span>
@@ -365,16 +366,16 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;restype&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;restype&#39;</span><span class="p">:</span> <span class="s1">&#39;service&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;properties&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">_convert_xml_to_service_properties</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_convert_xml_to_service_properties</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.set_queue_service_properties"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.set_queue_service_properties">[docs]</a>    <span class="k">def</span> <span class="nf">set_queue_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logging</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">set_queue_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logging</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
                                     <span class="n">minute_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets the properties of a storage account&#39;s Queue service, including</span>
@@ -405,16 +406,16 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;restype&#39;</span><span class="p">,</span> <span class="s1">&#39;service&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;properties&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;restype&#39;</span><span class="p">:</span> <span class="s1">&#39;service&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;properties&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span>
             <span class="n">_convert_service_properties_to_xml</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="p">,</span> <span class="n">minute_metrics</span><span class="p">,</span> <span class="n">cors</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.list_queues"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.list_queues">[docs]</a>    <span class="k">def</span> <span class="nf">list_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">include_metadata</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">list_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">include_metadata</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
                     <span class="n">marker</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a generator to list the queues. The generator will lazily follow </span>
@@ -449,7 +450,7 @@
                   <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="n">marker</span><span class="p">,</span> <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">}</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_queues</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ListGenerator</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_queues</span><span class="p">,</span> <span class="p">(),</span> <span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">ListGenerator</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_queues</span><span class="p">,</span> <span class="p">(),</span> <span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_list_queues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                     <span class="n">include</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -481,19 +482,19 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">()</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;prefix&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">prefix</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">marker</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;maxresults&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">max_results</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;include&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">include</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;prefix&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">prefix</span><span class="p">),</span>
+            <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">marker</span><span class="p">),</span>
+            <span class="s1">&#39;maxresults&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">max_results</span><span class="p">),</span>
+            <span class="s1">&#39;include&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">include</span><span class="p">),</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="p">}</span>
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">_convert_xml_to_queues</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.create_queue"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.create_queue">[docs]</a>    <span class="k">def</span> <span class="nf">create_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fail_on_exist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fail_on_exist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a queue under the given account.</span>
 
@@ -523,8 +524,9 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;x-ms-meta-name-values&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
+        <span class="n">_add_metadata_headers</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fail_on_exist</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -539,9 +541,9 @@
             <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">_HTTP_RESPONSE_NO_CONTENT</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">AzureConflictHttpError</span><span class="p">(</span>
                     <span class="n">_ERROR_CONFLICT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">True</span></div>
+            <span class="k">return</span> <span class="bp">True</span>
 
-<div class="viewcode-block" id="QueueService.delete_queue"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.delete_queue">[docs]</a>    <span class="k">def</span> <span class="nf">delete_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">fail_not_exist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">delete_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">fail_not_exist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Deletes the specified queue and any messages it contains.</span>
 
@@ -569,7 +571,7 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;DELETE&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fail_not_exist</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -579,9 +581,9 @@
                 <span class="k">return</span> <span class="bp">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">True</span></div>
+            <span class="k">return</span> <span class="bp">True</span>
 
-<div class="viewcode-block" id="QueueService.get_queue_metadata"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.get_queue_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_queue_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_queue_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Retrieves user-defined metadata and queue properties on the specified</span>
 <span class="sd">        queue. Metadata is associated with the queue as name-value pairs.</span>
@@ -601,15 +603,15 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;metadata&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">_parse_metadata_and_message_count</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_parse_metadata_and_message_count</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.set_queue_metadata"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.set_queue_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">set_queue_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_queue_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets user-defined metadata on the specified queue. Metadata is</span>
 <span class="sd">        associated with the queue as name-value pairs.</span>
@@ -627,14 +629,15 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;x-ms-meta-name-values&#39;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;metadata&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">_add_metadata_headers</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.exists"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.exists">[docs]</a>    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a boolean indicating whether the queue exists.</span>
 
@@ -650,9 +653,9 @@
             <span class="k">return</span> <span class="bp">True</span>
         <span class="k">except</span> <span class="n">AzureHttpError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
             <span class="n">_dont_fail_not_exist</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">False</span></div>
+            <span class="k">return</span> <span class="bp">False</span>
 
-<div class="viewcode-block" id="QueueService.get_queue_acl"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.get_queue_acl">[docs]</a>    <span class="k">def</span> <span class="nf">get_queue_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_queue_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns details about any stored access policies specified on the</span>
 <span class="sd">        queue that may be used with Shared Access Signatures.</span>
@@ -669,15 +672,15 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;acl&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;acl&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">_convert_xml_to_signed_identifiers</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_convert_xml_to_signed_identifiers</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.set_queue_acl"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.set_queue_acl">[docs]</a>    <span class="k">def</span> <span class="nf">set_queue_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">signed_identifiers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_queue_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">signed_identifiers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets stored access policies for the queue that may be used with Shared </span>
 <span class="sd">        Access Signatures. </span>
@@ -708,15 +711,15 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;comp&#39;</span><span class="p">,</span> <span class="s1">&#39;acl&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)),</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;acl&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span>
             <span class="n">_convert_signed_identifiers_to_xml</span><span class="p">(</span><span class="n">signed_identifiers</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.put_message"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.put_message">[docs]</a>    <span class="k">def</span> <span class="nf">put_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">visibility_timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">put_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">visibility_timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                     <span class="n">time_to_live</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Adds a new message to the back of the message queue. </span>
@@ -755,15 +758,15 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;POST&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;messagettl&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">time_to_live</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">),</span>
+            <span class="s1">&#39;messagettl&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">time_to_live</span><span class="p">),</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="p">}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span><span class="n">_convert_queue_message_xml</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode_function</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.get_messages"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.get_messages">[docs]</a>    <span class="k">def</span> <span class="nf">get_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">num_messages</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">get_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">num_messages</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">visibility_timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Retrieves one or more messages from the front of the queue.</span>
@@ -796,16 +799,16 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;numofmessages&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">num_messages</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;numofmessages&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">num_messages</span><span class="p">),</span>
+            <span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">),</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="p">}</span>
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">_convert_xml_to_queue_messages</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_function</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_convert_xml_to_queue_messages</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_function</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.peek_messages"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.peek_messages">[docs]</a>    <span class="k">def</span> <span class="nf">peek_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">num_messages</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">peek_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">num_messages</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Retrieves one or more messages from the front of the queue, but does</span>
 <span class="sd">        not alter the visibility of the message.</span>
@@ -837,15 +840,16 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;peekonly&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">),</span>
-            <span class="p">(</span><span class="s1">&#39;numofmessages&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">num_messages</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;peekonly&#39;</span><span class="p">:</span> <span class="s1">&#39;true&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;numofmessages&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">num_messages</span><span class="p">),</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="p">}</span>
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">_convert_xml_to_queue_messages</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_function</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_convert_xml_to_queue_messages</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode_function</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.delete_message"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.delete_message">[docs]</a>    <span class="k">def</span> <span class="nf">delete_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">message_id</span><span class="p">,</span> <span class="n">pop_receipt</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">delete_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">message_id</span><span class="p">,</span> <span class="n">pop_receipt</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Deletes the specified message.</span>
 
@@ -876,12 +880,13 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;DELETE&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">message_id</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;popreceipt&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">pop_receipt</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;popreceipt&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">pop_receipt</span><span class="p">),</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.clear_messages"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.clear_messages">[docs]</a>    <span class="k">def</span> <span class="nf">clear_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clear_messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Deletes all messages from the specified queue.</span>
 
@@ -895,10 +900,10 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;DELETE&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QueueService.update_message"><a class="viewcode-back" href="../../../../ref/azure.storage.queue.queueservice.html#azure.storage.queue.queueservice.QueueService.update_message">[docs]</a>    <span class="k">def</span> <span class="nf">update_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">message_id</span><span class="p">,</span> <span class="n">pop_receipt</span><span class="p">,</span> <span class="n">visibility_timeout</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">update_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">message_id</span><span class="p">,</span> <span class="n">pop_receipt</span><span class="p">,</span> <span class="n">visibility_timeout</span><span class="p">,</span> 
                        <span class="n">content</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Updates the visibility timeout of a message. You can also use this</span>
@@ -943,17 +948,17 @@
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">queue_name</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">message_id</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s1">&#39;popreceipt&#39;</span><span class="p">,</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">pop_receipt</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
-        <span class="p">]</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;popreceipt&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">pop_receipt</span><span class="p">),</span>
+            <span class="s1">&#39;visibilitytimeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">visibility_timeout</span><span class="p">),</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span><span class="n">_convert_queue_message_xml</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encode_function</span><span class="p">))</span>
 
         <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_parse_queue_message_from_headers</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">_parse_queue_message_from_headers</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -990,7 +995,7 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
     </div>

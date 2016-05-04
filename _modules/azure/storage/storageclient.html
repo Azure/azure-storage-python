@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.storageclient &mdash; Azure Storage SDK for Python 0.31.0 documentation</title>
+    <title>azure.storage.storageclient &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.31.0',
+        VERSION:     '0.32.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.31.0 documentation" href="../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -38,7 +38,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.storageclient</h1><div class="highlight"><pre>
-<span></span><span class="c1">#-------------------------------------------------------------------------</span>
+<span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -70,16 +70,50 @@
 <span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_storage_error_handler</span><span class="p">,</span>
     <span class="n">_update_request</span><span class="p">,</span>
+    <span class="n">_add_date_header</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_ERROR_STORAGE_MISSING_INFO</span><span class="p">,</span>
 <span class="p">)</span>
 
-<div class="viewcode-block" id="StorageClient"><a class="viewcode-back" href="../../../ref/azure.storage.storageclient.html#azure.storage.storageclient.StorageClient">[docs]</a><span class="k">class</span> <span class="nc">StorageClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="StorageClient"><a class="viewcode-back" href="../../../ref/azure.storage.storageclient.html#azure.storage.storageclient.StorageClient">[docs]</a><span class="k">class</span> <span class="nc">StorageClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This is the base class for service objects. Service objects are used to do </span>
 <span class="sd">    all requests to Storage. This class cannot be instantiated directly.</span>
+
+<span class="sd">    :ivar str account_name:</span>
+<span class="sd">        The storage account name. This is used to authenticate requests </span>
+<span class="sd">        signed with an account key and to construct the storage endpoint. It </span>
+<span class="sd">        is required unless a connection string is given, or if a custom </span>
+<span class="sd">        domain is used with anonymous authentication.</span>
+<span class="sd">    :ivar str account_key:</span>
+<span class="sd">        The storage account key. This is used for shared key authentication. </span>
+<span class="sd">        If neither account key or sas token is specified, anonymous access </span>
+<span class="sd">        will be used.</span>
+<span class="sd">    :ivar str sas_token:</span>
+<span class="sd">        A shared access signature token to use to authenticate requests </span>
+<span class="sd">        instead of the account key. If account key and sas token are both </span>
+<span class="sd">        specified, account key will be used to sign. If neither are </span>
+<span class="sd">        specified, anonymous access will be used.</span>
+<span class="sd">    :ivar str primary_endpoint:</span>
+<span class="sd">        The endpoint to send storage requests to.</span>
+<span class="sd">    :ivar str secondary_endpoint:</span>
+<span class="sd">        The secondary endpoint to read storage data from. This will only be a </span>
+<span class="sd">        valid endpoint if the storage account used is RA-GRS and thus allows </span>
+<span class="sd">        reading from secondary.</span>
+<span class="sd">    :ivar function(request) request_callback:</span>
+<span class="sd">        A function called immediately before each request is sent. This function </span>
+<span class="sd">        takes as a parameter the request object and returns nothing. It may be </span>
+<span class="sd">        used to added custom headers or log request data.</span>
+<span class="sd">    :ivar function() response_callback:</span>
+<span class="sd">        A function called immediately after each response is received. This </span>
+<span class="sd">        function takes as a parameter the response object and returns nothing. </span>
+<span class="sd">        It may be used to log response data.</span>
+<span class="sd">    :param str protocol:</span>
+<span class="sd">        The protocol to use for requests. Defaults to https.</span>
+<span class="sd">    :param requests.Session request_session:</span>
+<span class="sd">        The session object to use for http requests.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
@@ -92,22 +126,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span> <span class="o">=</span> <span class="n">connection_params</span><span class="o">.</span><span class="n">account_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sas_token</span> <span class="o">=</span> <span class="n">connection_params</span><span class="o">.</span><span class="n">sas_token</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">connection_params</span><span class="o">.</span><span class="n">protocol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">primary_endpoint</span> <span class="o">=</span> <span class="n">connection_params</span><span class="o">.</span><span class="n">primary_endpoint</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">secondary_endpoint</span> <span class="o">=</span> <span class="n">connection_params</span><span class="o">.</span><span class="n">secondary_endpoint</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">request_session</span> <span class="o">=</span> <span class="n">connection_params</span><span class="o">.</span><span class="n">request_session</span>
-
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">connection_params</span><span class="o">.</span><span class="n">protocol</span>
+        <span class="n">request_session</span> <span class="o">=</span> <span class="n">connection_params</span><span class="o">.</span><span class="n">request_session</span> <span class="ow">or</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span> <span class="o">=</span> <span class="n">_HTTPClient</span><span class="p">(</span>
-            <span class="n">service_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
-            <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
-            <span class="n">request_session</span><span class="o">=</span><span class="n">connection_params</span><span class="o">.</span><span class="n">request_session</span> <span class="ow">or</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">(),</span>
-            <span class="n">user_agent</span><span class="o">=</span><span class="n">_USER_AGENT_STRING</span><span class="p">,</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
+            <span class="n">session</span><span class="o">=</span><span class="n">request_session</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="n">_SOCKET_TIMEOUT</span><span class="p">,</span>
         <span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request_worker</span>
 
-<div class="viewcode-block" id="StorageClient.with_filter"><a class="viewcode-back" href="../../../ref/azure.storage.storageclient.html#azure.storage.storageclient.StorageClient.with_filter">[docs]</a>    <span class="k">def</span> <span class="nf">with_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">filter</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request_callback</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response_callback</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">protocol</span>
+
+    <span class="nd">@protocol.setter</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">request_session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">session</span>
+
+    <span class="nd">@request_session.setter</span>
+    <span class="k">def</span> <span class="nf">request_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">with_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">filter</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a new service which will process requests with the specified</span>
 <span class="sd">        filter. Filtering operations can include logging, automatic retrying,</span>
@@ -127,9 +178,9 @@
             <span class="k">return</span> <span class="nb">filter</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">old_filter</span><span class="p">)</span>
 
         <span class="n">res</span><span class="o">.</span><span class="n">_filter</span> <span class="o">=</span> <span class="n">new_filter</span>
-        <span class="k">return</span> <span class="n">res</span></div>
+        <span class="k">return</span> <span class="n">res</span>
 
-<div class="viewcode-block" id="StorageClient.set_proxy"><a class="viewcode-back" href="../../../ref/azure.storage.storageclient.html#azure.storage.storageclient.StorageClient.set_proxy">[docs]</a>    <span class="k">def</span> <span class="nf">set_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets the proxy server host and port for the HTTP CONNECT Tunnelling.</span>
 
@@ -138,13 +189,21 @@
 <span class="sd">        :param str user: User for proxy authorization.</span>
 <span class="sd">        :param str password: Password for proxy authorization.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">set_proxy</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">set_proxy</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_host</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary_endpoint</span>
 
     <span class="k">def</span> <span class="nf">_perform_request_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
         <span class="n">_update_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_callback</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">request_callback</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="c1"># Add date and auth after the callback so date doesn&#39;t get too old and </span>
+        <span class="c1"># authentication is still correct if signed headers are added in the request </span>
+        <span class="c1"># callback</span>
+        <span class="n">_add_date_header</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">authentication</span><span class="o">.</span><span class="n">sign_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_httpclient</span><span class="o">.</span><span class="n">perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
@@ -154,17 +213,7 @@
 <span class="sd">        to error handler</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> \
-                <span class="n">encoding</span><span class="p">:</span>
-                <span class="n">resp</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
-
-        <span class="c1"># Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException</span>
-        <span class="k">except</span> <span class="n">HTTPError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
-            <span class="n">_storage_error_handler</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
-
-        <span class="c1"># Wrap all other exceptions as AzureExceptions to ease exception handling code</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
                 <span class="c1"># Automatic chaining in Python 3 means we keep the trace</span>
@@ -176,7 +225,16 @@
                 <span class="c1"># TODO: In the future we will log the trace</span>
                 <span class="k">raise</span> <span class="n">AzureException</span><span class="p">(</span><span class="s1">&#39;{}: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ex</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">ex</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-        <span class="k">return</span> <span class="n">resp</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_callback</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">response_callback</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+        <span class="c1"># Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span> <span class="o">&gt;=</span> <span class="mi">300</span><span class="p">:</span>
+            <span class="c1"># This exception will be caught by the general error handler</span>
+            <span class="c1"># and raised as an azure http exception</span>
+            <span class="n">_storage_error_handler</span><span class="p">(</span><span class="n">HTTPError</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">response</span>
 </pre></div>
 
           </div>
@@ -213,7 +271,7 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
       
     </div>
