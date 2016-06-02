@@ -118,28 +118,6 @@ class StorageClient(object):
     def request_session(self, value):
         self._httpclient.session = value
 
-    def with_filter(self, filter):
-        '''
-        Returns a new service which will process requests with the specified
-        filter. Filtering operations can include logging, automatic retrying,
-        etc... The filter is a lambda which receives the HTTPRequest and
-        another lambda. The filter can perform any pre-processing on the
-        request, pass it off to the next lambda, and then perform any
-        post-processing on the response.
-
-        :param function(request) filter: A filter function.
-        :return: A new service using the specified filter.
-        :rtype: a subclass of :class:`StorageClient`
-        '''
-        res = copy.deepcopy(self)
-        old_filter = self._filter
-
-        def new_filter(request):
-            return filter(request, old_filter)
-
-        res._filter = new_filter
-        return res
-
     def set_proxy(self, host, port, user=None, password=None):
         '''
         Sets the proxy server host and port for the HTTP CONNECT Tunnelling.
