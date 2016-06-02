@@ -126,7 +126,7 @@ class StorageTestCase(unittest.TestCase):
         return text
 
     @staticmethod
-    def _set_service_options(service, settings):
+    def _set_test_proxy(service, settings):
         if settings.USE_PROXY:
             service.set_proxy(
                 settings.PROXY_HOST,
@@ -135,21 +135,30 @@ class StorageTestCase(unittest.TestCase):
                 settings.PROXY_PASSWORD,
             )
 
-    def _create_storage_service(self, service_class, settings, account_name=None, account_key=None):
-        if settings.IS_EMULATED:
+    def _create_storage_service(self, service_class, settings):
+        if settings.CONNECTION_STRING:
+            service = service_class(connection_string=settings.CONNECTION_STRING)
+        elif settings.IS_EMULATED:
+            service = service_class(is_emulated=True)
+        else:
             service = service_class(
-                is_emulated=True
+                settings.STORAGE_ACCOUNT_NAME,
+                settings.STORAGE_ACCOUNT_KEY,
+                protocol=settings.PROTOCOL,
+            )
+        self._set_test_proxy(service, settings)
+        return service
+
+    def _create_remote_storage_service(self, service_class, settings):
+        if settings.REMOTE_STORAGE_ACCOUNT_NAME and settings.REMOTE_STORAGE_ACCOUNT_KEY:
+            service = service_class(
+                settings.REMOTE_STORAGE_ACCOUNT_NAME,
+                settings.REMOTE_STORAGE_ACCOUNT_KEY,
+                protocol=settings.PROTOCOL,
             )
         else:
-            account_name = account_name or settings.STORAGE_ACCOUNT_NAME
-            account_key = account_key or settings.STORAGE_ACCOUNT_KEY
-            protocol = settings.PROTOCOL or 'https'
-            service = service_class(
-                account_name,
-                account_key,
-                protocol=protocol,
-            )
-        self._set_service_options(service, settings)
+            print("REMOTE_STORAGE_ACCOUNT_NAME and REMOTE_STORAGE_ACCOUNT_KEY not set in test settings file.")
+        self._set_test_proxy(service, settings)
         return service
 
     def assertNamedItemInContainer(self, container, item_name, msg=None):

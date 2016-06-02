@@ -1034,7 +1034,7 @@ class StorageTableEntityTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         entities = list(service.query_entities(self.table_name, 
                                                filter="PartitionKey eq '{}'".format(entity['PartitionKey'])))
 
@@ -1061,7 +1061,7 @@ class StorageTableEntityTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
 
         entity = self._create_random_entity_dict()
         service.insert_entity(self.table_name, entity)
@@ -1091,7 +1091,7 @@ class StorageTableEntityTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         entity = self._create_random_entity_dict('test', 'test1')
         service.insert_entity(self.table_name, entity)
 
@@ -1120,7 +1120,7 @@ class StorageTableEntityTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         with self.assertRaises(AzureHttpError):
             entity = self._create_random_entity_dict()
             service.insert_entity(self.table_name, entity)
@@ -1146,7 +1146,7 @@ class StorageTableEntityTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         updated_entity = self._create_updated_entity_dict(entity.PartitionKey, entity.RowKey)
         resp = service.update_entity(self.table_name, updated_entity)
 
@@ -1173,7 +1173,7 @@ class StorageTableEntityTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         service.delete_entity(self.table_name, entity.PartitionKey, entity.RowKey)
 
         # Assert
@@ -1202,7 +1202,7 @@ class StorageTableEntityTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         entities = list(service.query_entities(self.table_name, 
                                                filter="PartitionKey eq '{}'".format(entity['PartitionKey'])))
 
@@ -1237,7 +1237,7 @@ class StorageTableEntityTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         entities = list(self.ts.query_entities(self.table_name, filter="PartitionKey eq '{}'".format(entity.PartitionKey)))
 
         # Assert

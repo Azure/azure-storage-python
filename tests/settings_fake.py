@@ -21,6 +21,9 @@ STORAGE_ACCOUNT_KEY = "NzhL3hKZbJBuJ2484dPTR+xF30kYaWSSCbs2BzLgVVI1woqeST/1IgqaL
 REMOTE_STORAGE_ACCOUNT_NAME = "remotestoragename"
 REMOTE_STORAGE_ACCOUNT_KEY = "3pJwX7wjxoQEW2nKAhJZARpQWpKvPOUN9JwoV/HhlMmJlS1pORhzzHpPfQqgFcwGsriu6dwYqnugWOjGShC5VQ=="
 
+# Use instead of STORAGE_ACCOUNT_NAME and STORAGE_ACCOUNT_KEY if custom settings are needed
+CONNECTION_STRING = ""
+
 # Use 'https' or 'http' protocol for sending requests, 'https' highly recommended
 PROTOCOL = "https"
 

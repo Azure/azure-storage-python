@@ -70,16 +70,8 @@ class StorageFileTest(StorageTestCase):
 
         self.short_byte_data = self.get_random_bytes(1024)
 
-        if self.settings.REMOTE_STORAGE_ACCOUNT_NAME and self.settings.REMOTE_STORAGE_ACCOUNT_KEY:
-            self.fs2 = self._create_storage_service(
-                FileService,
-                self.settings,
-                self.settings.REMOTE_STORAGE_ACCOUNT_NAME,
-                self.settings.REMOTE_STORAGE_ACCOUNT_KEY,
-            )
-            self.remote_share_name = None
-        else:
-            print("REMOTE_STORAGE_ACCOUNT_NAME and REMOTE_STORAGE_ACCOUNT_KEY not set in test settings file.")
+        self.fs2 = self._create_remote_storage_service(FileService, self.settings)
+        self.remote_share_name = None
 
     def tearDown(self):
         if not self.is_playback():
@@ -959,7 +951,7 @@ class StorageFileTest(StorageTestCase):
             sas_token=token,
             request_session=requests.Session(),
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_file_to_bytes(self.share_name, None, file_name)
 
         # Assert
@@ -995,7 +987,7 @@ class StorageFileTest(StorageTestCase):
             sas_token=token,
             request_session=requests.Session(),
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_file_to_bytes(self.share_name, None, file_name)
 
         # Assert

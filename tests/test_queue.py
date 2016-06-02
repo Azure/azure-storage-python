@@ -470,7 +470,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.peek_messages(queue_name)
 
         # Assert
@@ -501,7 +501,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.peek_messages(queue_name)
 
         # Assert
@@ -530,7 +530,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.put_message(queue_name, u'addedmessage')
 
         # Assert
@@ -557,7 +557,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         service.update_message(
             queue_name,
             result[0].id,
@@ -589,7 +589,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_messages(queue_name)
 
         # Assert
@@ -628,7 +628,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.peek_messages(queue_name)
 
         # Assert

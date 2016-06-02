@@ -58,16 +58,8 @@ class StorageCommonBlobTest(StorageTestCase):
 
         self.byte_data = self.get_random_bytes(1024)
 
-        if self.settings.REMOTE_STORAGE_ACCOUNT_NAME and self.settings.REMOTE_STORAGE_ACCOUNT_KEY:
-            self.bs2 = self._create_storage_service(
-                BlockBlobService,
-                self.settings,
-                self.settings.REMOTE_STORAGE_ACCOUNT_NAME,
-                self.settings.REMOTE_STORAGE_ACCOUNT_KEY,
-            )
-            self.remote_container_name = None
-        else:
-            print("REMOTE_STORAGE_ACCOUNT_NAME and REMOTE_STORAGE_ACCOUNT_KEY not set in test settings file.")
+        self.bs2 = self._create_remote_storage_service(BlockBlobService, self.settings)
+        self.remote_container_name = None
 
     def tearDown(self):
         if not self.is_playback():
@@ -877,7 +869,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.settings.STORAGE_ACCOUNT_NAME,
             request_session=requests.Session(),
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_blob_to_bytes(container_name, blob_name)
 
         # Assert
@@ -905,7 +897,7 @@ class StorageCommonBlobTest(StorageTestCase):
             sas_token=token,
             request_session=requests.Session(),
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert
@@ -940,7 +932,7 @@ class StorageCommonBlobTest(StorageTestCase):
             sas_token=token,
             request_session=requests.Session(),
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert

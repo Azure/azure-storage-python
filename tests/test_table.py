@@ -338,7 +338,7 @@ class StorageTableTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         entities = list(service.query_entities(table_name))
 
         # Assert
