@@ -26,6 +26,7 @@ from .._deserialization import (
     _int_to_str,
     _parse_metadata,
     _convert_xml_to_signed_identifiers,
+    _bool,
 )
 from .models import (
     Container,
@@ -189,6 +190,7 @@ LIST_BLOBS_ATTRIBUTE_MAP = {
     'x-ms-blob-sequence-number': (None, 'sequence_number', _int_to_str),
     'BlobType': (None, 'blob_type', _to_str),
     'Content-Length': (None, 'content_length', _int_to_str),
+    'ServerEncrypted': (None, 'server_encrypted', _bool),
     'Content-Type': ('content_settings', 'content_type', _to_str),
     'Content-Encoding': ('content_settings', 'content_encoding', _to_str),
     'Content-Disposition': ('content_settings', 'content_disposition', _to_str),

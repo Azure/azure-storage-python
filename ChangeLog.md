@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.33.0:
+
+### Blob:
+- Added support for server-side encryption headers.
+
 ## Version 0.32.0:
 
 ### All:
