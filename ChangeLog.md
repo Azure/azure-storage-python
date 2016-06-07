@@ -7,6 +7,7 @@
 ### All:
 - Remove with_filter from service client in favor of the newer callback functions.
 - Fixed a bug where empty signed identifiers could not be parsed.
+- Improved the error message returned when too many signed identifers are provided.
 
 ## Version 0.32.0:
 

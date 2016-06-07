@@ -25,6 +25,7 @@ from .._error import (
     _dont_fail_on_exist,
     _validate_not_none,
     _ERROR_STORAGE_MISSING_INFO,
+    _validate_access_policies,
 )
 from .._serialization import (
     _get_request_body,
@@ -617,6 +618,7 @@ class TableService(StorageClient):
             The server timeout, expressed in seconds.
         '''
         _validate_not_none('table_name', table_name)
+        _validate_access_policies(signed_identifiers)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
