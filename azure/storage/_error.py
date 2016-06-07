@@ -90,5 +90,5 @@ def _validate_content_match(server_md5, computed_md5):
         raise AzureException(_ERROR_MD5_MISMATCH.format(server_md5, computed_md5))
 
 def _validate_access_policies(identifiers):
-    if len(identifiers) > 5:
+    if identifiers and len(identifiers) > 5:
         raise AzureException(_ERROR_TOO_MANY_ACCESS_POLICIES)
