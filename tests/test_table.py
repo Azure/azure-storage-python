@@ -347,50 +347,6 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(entities[1].text, 'hello')
 
     @record
-    def test_with_filter_single(self):
-        called = []
-
-        def my_filter(request, next):
-            called.append(True)
-            return next(request)
-
-        tc = self.ts.with_filter(my_filter)
-
-        table_name = 'tctable'
-        tc.create_table(table_name)
-
-        self.assertTrue(called)
-
-        del called[:]
-
-        tc.delete_table(table_name)
-
-        self.assertTrue(called)
-        del called[:]
-
-    @record
-    def test_with_filter_chained(self):
-        called = []
-
-        def filter_a(request, next):
-            called.append('a')
-            return next(request)
-
-        def filter_b(request, next):
-            called.append('b')
-            return next(request)
-
-        tc = self.ts.with_filter(filter_a).with_filter(filter_b)
-
-        table_name = 'tctable'
-        tc.create_table(table_name)
-
-        self.assertEqual(called, ['b', 'a'])
-
-        tc.delete_table(table_name)
-
-
-    @record
     def test_locale(self):
         # Arrange
         culture = 'es_ES.utf8' if not os.name is "nt" else "Spanish_Spain"

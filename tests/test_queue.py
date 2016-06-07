@@ -735,36 +735,6 @@ class StorageQueueTest(StorageTestCase):
         # Assert
 
     @record
-    def test_with_filter(self):
-        # Single filter
-        called = []
-
-        def my_filter(request, next):
-            called.append(True)
-            return next(request)
-        qc = self.qs.with_filter(my_filter)
-        queue_name = self._create_queue()
-        qc.put_message(queue_name, u'message1')
-
-        self.assertTrue(called)
-
-        del called[:]
-
-        # Chained filters
-        def filter_a(request, next):
-            called.append('a')
-            return next(request)
-
-        def filter_b(request, next):
-            called.append('b')
-            return next(request)
-
-        qc = self.qs.with_filter(filter_a).with_filter(filter_b)
-        qc.put_message(queue_name, u'message1')
-
-        self.assertEqual(called, ['b', 'a'])
-
-    @record
     def test_unicode_create_queue_unicode_name(self):
         # Action
         queue_name = u'啊齄丂狛狜'

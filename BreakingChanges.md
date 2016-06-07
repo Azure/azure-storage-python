@@ -2,6 +2,9 @@
 
 > See the [Change Log](ChangeLog.md) for a summary of storage library changes.
 
+## Version 0.33.0:
+- Remove with_filter from service client in favor of the newer callback functions.
+
 ## Version 0.32.0:
 
 ### Blob:

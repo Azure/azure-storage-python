@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.33.0:
+- Remove with_filter from service client in favor of the newer callback functions.
+
 ## Version 0.32.0:
 
 ### All:
