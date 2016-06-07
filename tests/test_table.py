@@ -25,6 +25,7 @@ from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
     AzureMissingResourceHttpError,
+    AzureException,
 )
 from azure.storage import (
     AccessPolicy,
@@ -324,6 +325,20 @@ class StorageTableTest(StorageTestCase):
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 1)
         self.assertTrue('testid' in acl)
+
+    @record
+    def test_set_table_acl_too_many_ids(self):
+        # Arrange
+        table_name = self._create_table()
+
+        # Act
+        identifiers = dict()
+        for i in range(0, 6):
+            identifiers['id{}'.format(i)] = AccessPolicy()
+
+        # Assert
+        with self.assertRaisesRegexp(AzureException, 'Too many access policies provided. The server does not support setting more than 5 access policies on a single resource.'):
+            self.ts.set_table_acl(table_name, identifiers)
 
     @record
     def test_account_sas(self):

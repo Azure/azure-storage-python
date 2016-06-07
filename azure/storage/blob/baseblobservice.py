@@ -19,6 +19,7 @@ from .._error import (
     _validate_not_none,
     _ERROR_PARALLEL_NOT_SEEKABLE,
     _validate_content_match,
+    _validate_access_policies,
 )
 from ._error import (
     _ERROR_INVALID_LEASE_DURATION,
@@ -739,6 +740,7 @@ class BaseBlobService(StorageClient):
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
+        _validate_access_policies(signed_identifiers)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()

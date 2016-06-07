@@ -26,6 +26,7 @@ from .._error import (
     _validate_not_none,
     _ERROR_CONFLICT,
     _ERROR_STORAGE_MISSING_INFO,
+    _validate_access_policies,
 )
 from .._serialization import (
     _get_request_body,
@@ -667,6 +668,7 @@ class QueueService(StorageClient):
             The server timeout, expressed in seconds.
         '''
         _validate_not_none('queue_name', queue_name)
+        _validate_access_policies(signed_identifiers)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()

@@ -47,6 +47,8 @@ _ERROR_RANGE_TOO_LARGE_FOR_MD5 = \
     'is not supported.'
 _ERROR_MD5_MISMATCH = \
     'MD5 mismatch. Expected value is \'{0}\', computed value is \'{1}\'.'
+_ERROR_TOO_MANY_ACCESS_POLICIES = \
+    'Too many access policies provided. The server does not support setting more than 5 access policies on a single resource.'
 
 def _dont_fail_on_exist(error):
     ''' don't throw exception if the resource exists.
@@ -86,3 +88,7 @@ def _validate_not_none(param_name, param):
 def _validate_content_match(server_md5, computed_md5):
     if server_md5 != computed_md5:
         raise AzureException(_ERROR_MD5_MISMATCH.format(server_md5, computed_md5))
+
+def _validate_access_policies(identifiers):
+    if len(identifiers) > 5:
+        raise AzureException(_ERROR_TOO_MANY_ACCESS_POLICIES)

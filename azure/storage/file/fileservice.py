@@ -23,6 +23,7 @@ from .._error import (
     _ERROR_EMULATOR_DOES_NOT_SUPPORT_FILES,
     _ERROR_PARALLEL_NOT_SEEKABLE,
     _validate_content_match,
+    _validate_access_policies,
 )
 from .._common_conversion import (
     _int_to_str,
@@ -798,6 +799,7 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('share_name', share_name)
+        _validate_access_policies(signed_identifiers)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host = self._get_host()
