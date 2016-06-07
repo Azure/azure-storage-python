@@ -3,7 +3,10 @@
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
 ## Version 0.33.0:
+
+### All:
 - Remove with_filter from service client in favor of the newer callback functions.
+- Fixed a bug where empty signed identifiers could not be parsed.
 
 ## Version 0.32.0:
 

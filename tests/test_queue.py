@@ -695,13 +695,29 @@ class StorageQueueTest(StorageTestCase):
         queue_name = self._create_queue()
 
         # Act
-        resp = self.qs.set_queue_acl(queue_name, dict())
+        self.qs.set_queue_acl(queue_name, dict())
 
         # Assert
-        self.assertIsNone(resp)
         acl = self.qs.get_queue_acl(queue_name)
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 0)
+
+    @record
+    def test_set_queue_acl_with_empty_signed_identifier(self):
+        # Arrange
+        queue_name = self._create_queue()
+
+        # Act
+        self.qs.set_queue_acl(queue_name, {'empty': AccessPolicy()})
+
+        # Assert
+        acl = self.qs.get_queue_acl(queue_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 1)
+        self.assertIsNotNone(acl['empty'])
+        self.assertIsNone(acl['empty'].permission)
+        self.assertIsNone(acl['empty'].expiry)
+        self.assertIsNone(acl['empty'].start)
 
     @record
     def test_set_queue_acl_with_signed_identifiers(self):

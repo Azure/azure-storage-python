@@ -470,6 +470,23 @@ class StorageContainerTest(StorageTestCase):
         self.assertEqual(len(acl), 0)
         self.assertIsNone(acl.public_access)
 
+    @record
+    def test_set_container_acl_with_empty_signed_identifier(self):
+        # Arrange
+        container_name = self._create_container()
+
+        # Act
+        self.bs.set_container_acl(container_name, {'empty': AccessPolicy()})
+
+        # Assert
+        acl = self.bs.get_container_acl(container_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 1)
+        self.assertIsNotNone(acl['empty'])
+        self.assertIsNone(acl['empty'].permission)
+        self.assertIsNone(acl['empty'].expiry)
+        self.assertIsNone(acl['empty'].start)
+        self.assertIsNone(acl.public_access)
 
     @record
     def test_set_container_acl_with_signed_identifiers(self):

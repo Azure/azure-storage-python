@@ -290,6 +290,23 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(len(acl), 0)
 
     @record
+    def test_set_table_acl_with_empty_signed_identifier(self):
+        # Arrange
+        table_name = self._create_table()
+
+        # Act
+        self.ts.set_table_acl(table_name, {'empty': AccessPolicy()})
+
+        # Assert
+        acl = self.ts.get_table_acl(table_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 1)
+        self.assertIsNotNone(acl['empty'])
+        self.assertIsNone(acl['empty'].permission)
+        self.assertIsNone(acl['empty'].expiry)
+        self.assertIsNone(acl['empty'].start)
+
+    @record
     def test_set_table_acl_with_signed_identifiers(self):
         # Arrange
         table_name = self._create_table()
