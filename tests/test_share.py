@@ -388,13 +388,29 @@ class StorageShareTest(StorageTestCase):
         share_name = self._create_share()
 
         # Act
-        resp = self.fs.set_share_acl(share_name, dict())
+        self.fs.set_share_acl(share_name, dict())
 
         # Assert
-        self.assertIsNone(resp)
         acl = self.fs.get_share_acl(share_name)
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 0)
+
+    @record
+    def test_set_share_acl_with_empty_signed_identifier(self):
+        # Arrange
+        share_name = self._create_share()
+
+        # Act
+        self.fs.set_share_acl(share_name, {'empty': AccessPolicy()})
+
+        # Assert
+        acl = self.fs.get_share_acl(share_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 1)
+        self.assertIsNotNone(acl['empty'])
+        self.assertIsNone(acl['empty'].permission)
+        self.assertIsNone(acl['empty'].expiry)
+        self.assertIsNone(acl['empty'].start)
 
     @record
     def test_set_share_acl_with_signed_identifiers(self):

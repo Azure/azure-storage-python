@@ -142,16 +142,16 @@ def _convert_xml_to_signed_identifiers(xml):
         # Access policy element
         access_policy = AccessPolicy()
         access_policy_element = signed_identifier_element.find('AccessPolicy')
+        if access_policy_element is not None:
+            start_element = access_policy_element.find('Start')
+            if start_element is not None:
+                access_policy.start = parser.parse(start_element.text)
 
-        start_element = access_policy_element.find('Start')
-        if start_element is not None:
-            access_policy.start = parser.parse(start_element.text)
+            expiry_element = access_policy_element.find('Expiry')
+            if expiry_element is not None:
+                access_policy.expiry = parser.parse(expiry_element.text)
 
-        expiry_element = access_policy_element.find('Expiry')
-        if expiry_element is not None:
-            access_policy.expiry = parser.parse(expiry_element.text)
-
-        access_policy.permission = access_policy_element.findtext('Permission')
+            access_policy.permission = access_policy_element.findtext('Permission')
 
         signed_identifiers[id] = access_policy
 
