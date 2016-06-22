@@ -421,7 +421,6 @@ class Protocol(object):
     HTTPS_HTTP = 'https,http'
     ''' Allow HTTP and HTTPS requests. '''
 
-
 class ResourceTypes(object):
 
     '''

@@ -66,6 +66,7 @@ setup(
     install_requires=[
         'azure-nspkg',
         'azure-common',
+        'cryptography',
         'python-dateutil',
         'requests',
     ] + (['futures'] if sys.version_info < (3,0) else []),

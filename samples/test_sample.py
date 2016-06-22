@@ -25,6 +25,7 @@ from .blob import (
 from .queue import (
     QueueSasSamples,
     QueueSamples,
+    QueueEncryptionSamples,
 )
 from .table import (
     TableSasSamples,
@@ -122,3 +123,7 @@ class SampleTest(unittest.TestCase):
     def test_client_samples(self):
         client = ClientSamples()
         client.run_all_samples()
+
+    def test_queue_encryption_samples(self):
+        encryption = QueueEncryptionSamples()
+        encryption.run_all_samples()

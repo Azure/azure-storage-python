@@ -30,6 +30,9 @@ from xml.sax.saxutils import escape as xml_escape
 from .._common_conversion import (
     _str,
 )
+from ._encryption import (
+    _encrypt_queue_message,
+)
 
 def _get_path(queue_name=None, include_messages=None, message_id=None):
     '''
@@ -52,7 +55,7 @@ def _get_path(queue_name=None, include_messages=None, message_id=None):
         return '/'
 
 
-def _convert_queue_message_xml(message_text, encode_function):
+def _convert_queue_message_xml(message_text, encode_function, key_encryption_key):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <QueueMessage>
@@ -63,6 +66,8 @@ def _convert_queue_message_xml(message_text, encode_function):
 
     # Enabled
     message_text = encode_function(message_text)
+    if key_encryption_key is not None:
+            message_text = _encrypt_queue_message(message_text, key_encryption_key)
     ETree.SubElement(queue_message_element, 'MessageText').text = message_text
 
     # Add xml declaration and serialize
