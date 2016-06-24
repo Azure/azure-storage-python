@@ -21,7 +21,9 @@ from azure.storage.queue import (
 )
 from azure.common import (
     AzureHttpError,
+    AzureException,
 )
+from azure.storage.retry import no_retry
 from tests.testcase import (
     StorageTestCase,
     record,
@@ -167,10 +169,10 @@ class StorageQueueEncodingTest(StorageTestCase):
 
         # Action.
         try:
-            qs2.get_messages(queue_name)
+            qs2.peek_messages(queue_name)
             self.fail('Decoding unicode string as base64 should fail.')
-        except ValueError as e:
-            self.assertEqual(str(e), 'message is not a valid base64 value.')
+        except AzureException as e:
+            self.assertNotEqual(-1, str(e).find('message is not a valid base64 value.'))
 
         # Asserts
 

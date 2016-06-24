@@ -32,12 +32,11 @@ except ImportError:
     from xml.etree import ElementTree as ETree
 
 from ._error import (
-    _general_error_handler,
     _ERROR_VALUE_SHOULD_BE_BYTES,
 )
 from ._constants import (
     X_MS_VERSION,
-    _USER_AGENT_STRING,
+    USER_AGENT_STRING,
 )
 from .models import (
     _unicode_type,
@@ -65,7 +64,7 @@ def _update_request(request):
 
     # append addtional headers based on the service
     request.headers['x-ms-version'] = X_MS_VERSION
-    request.headers['User-Agent'] = _USER_AGENT_STRING
+    request.headers['User-Agent'] = USER_AGENT_STRING
     request.headers['x-ms-client-request-id'] = str(uuid.uuid1())
 
     # If the host has a path component (ex local storage), move it
@@ -119,11 +118,6 @@ def _get_request_body(request_body):
         return request_body.encode('utf-8')
 
     return request_body
-
-def _storage_error_handler(http_error):
-    ''' Simple error handler for storage service. '''
-    return _general_error_handler(http_error)
-
 
 def _convert_signed_identifiers_to_xml(signed_identifiers):
     if signed_identifiers is None:

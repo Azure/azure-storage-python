@@ -4,6 +4,7 @@
 
 ## Version 0.33.0:
 - Remove with_filter from service client in favor of the newer callback functions.
+- Remove max_retries and retry_wait from the blob and file create and get functions in favor of the new client-level retry policies.
 
 ## Version 0.32.0:
 

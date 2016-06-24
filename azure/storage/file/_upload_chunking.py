@@ -18,8 +18,7 @@ from time import sleep
 
 def _upload_file_chunks(file_service, share_name, directory_name, file_name,
                         file_size, block_size, stream, max_connections,
-                        max_retries, retry_wait, progress_callback, validate_content, 
-                        timeout):
+                        progress_callback, validate_content, timeout):
     uploader = _FileChunkUploader(
         file_service,
         share_name,
@@ -29,8 +28,6 @@ def _upload_file_chunks(file_service, share_name, directory_name, file_name,
         block_size,
         stream,
         max_connections > 1,
-        max_retries,
-        retry_wait,
         progress_callback,
         validate_content,
         timeout
@@ -53,8 +50,8 @@ def _upload_file_chunks(file_service, share_name, directory_name, file_name,
 
 class _FileChunkUploader(object):
     def __init__(self, file_service, share_name, directory_name, file_name, 
-                 file_size, chunk_size, stream, parallel, max_retries, retry_wait,
-                 progress_callback, validate_content, timeout):
+                 file_size, chunk_size, stream, parallel, progress_callback, 
+                 validate_content, timeout):
         self.file_service = file_service
         self.share_name = share_name
         self.directory_name = directory_name
@@ -67,8 +64,6 @@ class _FileChunkUploader(object):
         self.progress_callback = progress_callback
         self.progress_total = 0
         self.progress_lock = threading.Lock() if parallel else None
-        self.max_retries = max_retries
-        self.retry_wait = retry_wait
         self.validate_content = validate_content
         self.timeout = timeout
 
@@ -93,7 +88,7 @@ class _FileChunkUploader(object):
         if self.file_size is not None:
             size = min(size, self.file_size - chunk_offset)
         chunk_data = self._read_from_stream(chunk_offset, size)
-        return self._upload_chunk_with_retries(chunk_offset, chunk_data)
+        return self._upload_chunk_with_progress(chunk_offset, chunk_data)
 
     def process_all_unknown_size(self):
         assert self.stream_lock is None
@@ -103,7 +98,7 @@ class _FileChunkUploader(object):
             data = self._read_from_stream(None, self.chunk_size)
             if data:
                 index += len(data)
-                range_id = self._upload_chunk_with_retries(index, data)
+                range_id = self._upload_chunk_with_progress(index, data)
                 range_ids.append(range_id)
             else:
                 break
@@ -130,21 +125,7 @@ class _FileChunkUploader(object):
                 total = self.progress_total
             self.progress_callback(total, self.file_size)
 
-    def _upload_chunk_with_retries(self, chunk_start, chunk_data):
-        retries = self.max_retries
-        while True:
-            try:
-                range_id = self._upload_chunk(chunk_start, chunk_data) 
-                self._update_progress(len(chunk_data))
-                return range_id
-            except Exception:
-                if retries > 0:
-                    retries -= 1
-                    sleep(self.retry_wait)
-                else:
-                    raise
-
-    def _upload_chunk(self, chunk_start, chunk_data):
+    def _upload_chunk_with_progress(self, chunk_start, chunk_data):
         chunk_end = chunk_start + len(chunk_data) - 1
         self.file_service.update_range(
             self.share_name,
@@ -156,4 +137,6 @@ class _FileChunkUploader(object):
             self.validate_content,
             timeout=self.timeout
         )
-        return 'bytes={0}-{1}'.format(chunk_start, chunk_end)
+        range_id = 'bytes={0}-{1}'.format(chunk_start, chunk_end)
+        self._update_progress(len(chunk_data))
+        return range_id

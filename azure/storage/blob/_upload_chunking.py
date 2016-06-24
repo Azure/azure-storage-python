@@ -24,8 +24,7 @@ from .models import BlobBlock
 
 def _upload_blob_chunks(blob_service, container_name, blob_name,
                         blob_size, block_size, stream, max_connections,
-                        max_retries, retry_wait, progress_callback,
-                        validate_content, lease_id, uploader_class, 
+                        progress_callback, validate_content, lease_id, uploader_class, 
                         maxsize_condition=None, if_match=None, timeout=None):
     uploader = uploader_class(
         blob_service,
@@ -35,8 +34,6 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
         block_size,
         stream,
         max_connections > 1,
-        max_retries,
-        retry_wait,
         progress_callback,
         validate_content,
         lease_id,
@@ -66,8 +63,8 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
 
 class _BlobChunkUploader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
-                 chunk_size, stream, parallel, max_retries, retry_wait,
-                 progress_callback, validate_content, lease_id, timeout):
+                 chunk_size, stream, parallel, progress_callback, 
+                 validate_content, lease_id, timeout):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
@@ -80,8 +77,6 @@ class _BlobChunkUploader(object):
         self.progress_callback = progress_callback
         self.progress_total = 0
         self.progress_lock = threading.Lock() if parallel else None
-        self.max_retries = max_retries
-        self.retry_wait = retry_wait
         self.validate_content = validate_content
         self.lease_id = lease_id
         self.timeout = timeout
@@ -107,7 +102,7 @@ class _BlobChunkUploader(object):
         if self.blob_size is not None:
             size = min(size, self.blob_size - chunk_offset)
         chunk_data = self._read_from_stream(chunk_offset, size)
-        return self._upload_chunk_with_retries(chunk_offset, chunk_data)
+        return self._upload_chunk_with_progress(chunk_offset, chunk_data)
 
     def process_all_unknown_size(self):
         assert self.stream_lock is None
@@ -116,7 +111,7 @@ class _BlobChunkUploader(object):
         while True:
             data = self._read_from_stream(None, self.chunk_size)
             if data:
-                range_id = self._upload_chunk_with_retries(index, data)
+                range_id = self._upload_chunk_with_progress(index, data)
                 index += len(data)
                 range_ids.append(range_id)
             else:
@@ -144,19 +139,10 @@ class _BlobChunkUploader(object):
                 total = self.progress_total
             self.progress_callback(total, self.blob_size)
 
-    def _upload_chunk_with_retries(self, chunk_offset, chunk_data):
-        retries = self.max_retries
-        while True:
-            try:
-                range_id = self._upload_chunk(chunk_offset, chunk_data) 
-                self._update_progress(len(chunk_data))
-                return range_id
-            except AzureHttpError:
-                if retries > 0:
-                    retries -= 1
-                    sleep(self.retry_wait)
-                else:
-                    raise
+    def _upload_chunk_with_progress(self, chunk_offset, chunk_data):
+        range_id = self._upload_chunk(chunk_offset, chunk_data) 
+        self._update_progress(len(chunk_data))
+        return range_id
 
 
 class _BlockBlobChunkUploader(_BlobChunkUploader):

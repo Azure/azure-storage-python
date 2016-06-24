@@ -37,6 +37,7 @@ from .._http import HTTPRequest
 from ..models import (
     Services,
     ListGenerator,
+    _OperationContext,
 )
 from .models import TablePayloadFormat
 from .._auth import (
@@ -314,7 +315,7 @@ class TableService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self.secondary_endpoint
+        request.host_locations = self._get_host_locations(primary=False, secondary=True)
         request.path = '/'
         request.query = {
             'restype': 'service',
@@ -322,8 +323,7 @@ class TableService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_service_stats(response.body)
+        return self._perform_request(request, _convert_xml_to_service_stats)
 
     def get_table_service_properties(self, timeout=None):
         '''
@@ -337,7 +337,7 @@ class TableService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = '/'
         request.query = {
             'restype': 'service',
@@ -345,8 +345,7 @@ class TableService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_service_properties(response.body)
+        return self._perform_request(request, _convert_xml_to_service_properties)
 
     def set_table_service_properties(self, logging=None, hour_metrics=None, 
                                     minute_metrics=None, cors=None, timeout=None):
@@ -377,7 +376,7 @@ class TableService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = '/'
         request.query = {
             'restype': 'service',
@@ -416,12 +415,14 @@ class TableService(StorageClient):
         :return: A generator which produces :class:`~azure.storage.models.table.Table` objects.
         :rtype: :class:`~azure.storage.models.ListGenerator`:
         '''
-        kwargs = {'max_results': num_results, 'marker': marker, 'timeout': timeout}
+        operation_context = _OperationContext(location_lock=True)
+        kwargs = {'max_results': num_results, 'marker': marker, 'timeout': timeout, 
+                  '_context': operation_context}
         resp = self._list_tables(**kwargs)
 
         return ListGenerator(resp, self._list_tables, (), kwargs)
 
-    def _list_tables(self, max_results=None, marker=None, timeout=None):
+    def _list_tables(self, max_results=None, marker=None, timeout=None, _context=None):
         '''
         Returns a list of tables under the specified account. Makes a single list 
         request to the service. Used internally by the list_tables method.
@@ -445,7 +446,7 @@ class TableService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = '/Tables'
         request.headers = {'Accept': TablePayloadFormat.JSON_NO_METADATA}
         request.query = {
@@ -454,8 +455,8 @@ class TableService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_json_response_to_tables(response)
+        return self._perform_request(request, _convert_json_response_to_tables, 
+                                     operation_context=_context)
 
     def create_table(self, table_name, fail_on_exist=False, timeout=None):
         '''
@@ -477,7 +478,7 @@ class TableService(StorageClient):
         _validate_not_none('table', table_name)
         request = HTTPRequest()
         request.method = 'POST'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = '/Tables'
         request.query = {'timeout': _int_to_str(timeout)}
         request.headers = {
@@ -512,7 +513,7 @@ class TableService(StorageClient):
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = '/Tables' + "('" + table_name + "')"
         request.headers = {'Accept': TablePayloadFormat.JSON_NO_METADATA}
         request.query = {'timeout': _int_to_str(timeout)}
@@ -550,7 +551,7 @@ class TableService(StorageClient):
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = '/Tables(\'' + _to_str(table_name) + '\')'
         request.query = {'timeout': _int_to_str(timeout)}
         request.headers = {_DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1]}
@@ -581,15 +582,14 @@ class TableService(StorageClient):
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = '/' + _to_str(table_name)
         request.query = {
             'comp': 'acl',
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_signed_identifiers(response.body)
+        return self._perform_request(request, _convert_xml_to_signed_identifiers)
 
     def set_table_acl(self, table_name, signed_identifiers=None, timeout=None):
         '''
@@ -621,7 +621,7 @@ class TableService(StorageClient):
         _validate_access_policies(signed_identifiers)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = '/' + _to_str(table_name)
         request.query = {
             'comp': 'acl',
@@ -681,16 +681,18 @@ class TableService(StorageClient):
         :return: A generator which produces :class:`~azure.storage.table.models.Entity` objects.
         :rtype: :class:`~azure.storage.models.ListGenerator`
         '''
+        operation_context = _OperationContext(location_lock=True)
         args = (table_name,)
         kwargs = {'filter': filter, 'select': select, 'max_results': num_results, 'marker': marker, 
-                  'accept': accept, 'property_resolver': property_resolver, 'timeout': timeout}
+                  'accept': accept, 'property_resolver': property_resolver, 'timeout': timeout, 
+                  '_context': operation_context}
         resp = self._query_entities(*args, **kwargs)
 
         return ListGenerator(resp, self._query_entities, args, kwargs)
 
     def _query_entities(self, table_name, filter=None, select=None, max_results=None,
                        marker=None, accept=TablePayloadFormat.JSON_MINIMAL_METADATA,
-                       property_resolver=None, timeout=None):
+                       property_resolver=None, timeout=None, _context=None):
         '''
         Returns a list of entities under the specified table. Makes a single list 
         request to the service. Used internally by the query_entities method.
@@ -736,7 +738,7 @@ class TableService(StorageClient):
 
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = '/' + _to_str(table_name) + '()'
         request.headers = {'Accept': _to_str(accept)}
         request.query = {
@@ -748,8 +750,8 @@ class TableService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_json_response_to_entities(response, property_resolver)
+        return self._perform_request(request, _convert_json_response_to_entities, 
+                                     [property_resolver], operation_context=_context)
 
     def commit_batch(self, table_name, batch, timeout=None):
         '''
@@ -769,13 +771,12 @@ class TableService(StorageClient):
         # Construct the batch request
         request = HTTPRequest()
         request.method = 'POST'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = '/' + '$batch'
         request.query = {'timeout': _int_to_str(timeout)}
 
         # Update the batch operation requests with table and client specific info
         for row_key, batch_request in batch._requests:
-            batch_request.host = self._get_host()
             if batch_request.method == 'POST':
                 batch_request.path = '/' + _to_str(table_name)
             else:
@@ -787,9 +788,7 @@ class TableService(StorageClient):
         request.headers = {'Content-Type': boundary}
 
         # Perform the batch request and return the response
-        response = self._perform_request(request)
-        responses = _parse_batch_response(response.body)
-        return responses
+        return self._perform_request(request, _parse_batch_response)
 
     @contextmanager
     def batch(self, table_name, timeout=None):
@@ -836,12 +835,11 @@ class TableService(StorageClient):
         '''
         _validate_not_none('table_name', table_name)
         request = _get_entity(partition_key, row_key, select, accept)
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_entity_path(table_name, partition_key, row_key)
         request.query['timeout'] = _int_to_str(timeout)
 
-        response = self._perform_request(request)
-        return _convert_json_response_to_entity(response, property_resolver)
+        return self._perform_request(request, _convert_json_response_to_entity, [property_resolver])
 
     def insert_entity(self, table_name, entity, timeout=None):
         '''
@@ -870,12 +868,11 @@ class TableService(StorageClient):
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_entity(entity)
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = '/' + _to_str(table_name)
         request.query['timeout'] = _int_to_str(timeout)
 
-        response = self._perform_request(request)
-        return _extract_etag(response)
+        return self._perform_request(request, _extract_etag)
 
     def update_entity(self, table_name, entity, if_match='*', timeout=None):
         '''
@@ -904,12 +901,11 @@ class TableService(StorageClient):
         '''
         _validate_not_none('table_name', table_name)
         request = _update_entity(entity, if_match)
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
         request.query['timeout'] = _int_to_str(timeout)
 
-        response = self._perform_request(request)
-        return _extract_etag(response)
+        return self._perform_request(request, _extract_etag)
 
     def merge_entity(self, table_name, entity, if_match='*', timeout=None):
         '''
@@ -943,12 +939,11 @@ class TableService(StorageClient):
         '''
         _validate_not_none('table_name', table_name)
         request = _merge_entity(entity, if_match)
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
 
-        response = self._perform_request(request)
-        return _extract_etag(response)
+        return self._perform_request(request, _extract_etag)
 
     def delete_entity(self, table_name, partition_key, row_key,
                       if_match='*', timeout=None):
@@ -978,7 +973,7 @@ class TableService(StorageClient):
         '''
         _validate_not_none('table_name', table_name)
         request = _delete_entity(partition_key, row_key, if_match)
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, partition_key, row_key)
 
@@ -1007,12 +1002,11 @@ class TableService(StorageClient):
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_or_replace_entity(entity)
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
 
-        response = self._perform_request(request)
-        return _extract_etag(response)
+        return self._perform_request(request, _extract_etag)
 
     def insert_or_merge_entity(self, table_name, entity, timeout=None):
         '''
@@ -1036,13 +1030,12 @@ class TableService(StorageClient):
         '''
         _validate_not_none('table_name', table_name)
         request = _insert_or_merge_entity(entity)
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
 
-        response = self._perform_request(request)
-        return _extract_etag(response)
+        return self._perform_request(request, _extract_etag)
 
-    def _perform_request_worker(self, request):
+    def _perform_request(self, request, parser=None, parser_args=None, operation_context=None):
         _update_storage_table_header(request)
-        return super(TableService, self)._perform_request_worker(request)
+        return super(TableService, self)._perform_request(request, parser, parser_args, operation_context)
