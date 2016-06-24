@@ -187,7 +187,7 @@ class BlockBlobService(BaseBlobService):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {'timeout': _int_to_str(timeout)}
         request.headers = {
@@ -207,8 +207,7 @@ class BlockBlobService(BaseBlobService):
             computed_md5 = _get_content_md5(request.body)
             request.headers['Content-MD5'] = _to_str(computed_md5)
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def put_block(self, container_name, blob_name, block, block_id,
                   validate_content=False, lease_id=None, timeout=None):
@@ -245,7 +244,7 @@ class BlockBlobService(BaseBlobService):
         _validate_not_none('block_id', block_id)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'block',
@@ -332,7 +331,7 @@ class BlockBlobService(BaseBlobService):
         _validate_not_none('block_list', block_list)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'blocklist',
@@ -355,8 +354,7 @@ class BlockBlobService(BaseBlobService):
             computed_md5 = _get_content_md5(request.body)
             request.headers['Content-MD5'] = _to_str(computed_md5)
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def get_block_list(self, container_name, blob_name, snapshot=None,
                        block_list_type=None, lease_id=None, timeout=None):
@@ -393,7 +391,7 @@ class BlockBlobService(BaseBlobService):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'blocklist',
@@ -403,17 +401,15 @@ class BlockBlobService(BaseBlobService):
         }
         request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
-        response = self._perform_request(request)
-        return _convert_xml_to_block_list(response)
+        return self._perform_request(request, _convert_xml_to_block_list)
 
     #----Convenience APIs-----------------------------------------------------
 
     def create_blob_from_path(
         self, container_name, blob_name, file_path, content_settings=None,
         metadata=None, validate_content=False, progress_callback=None,
-        max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        max_connections=2, lease_id=None, if_modified_since=None, 
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -444,10 +440,6 @@ class BlockBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use when the blob size exceeds 
             64MB.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -493,8 +485,6 @@ class BlockBlobService(BaseBlobService):
                 lease_id=lease_id,
                 progress_callback=progress_callback,
                 max_connections=max_connections,
-                max_retries=max_retries,
-                retry_wait=retry_wait,
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
@@ -504,9 +494,9 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file/stream, or updates the content of
         an existing blob, with automatic chunking and progress
@@ -541,10 +531,6 @@ class BlockBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use when the blob size exceeds 
             64MB. Note that parallel upload requires the stream to be seekable.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -607,8 +593,6 @@ class BlockBlobService(BaseBlobService):
                 block_size=self.MAX_BLOCK_SIZE,
                 stream=stream,
                 max_connections=max_connections,
-                max_retries=max_retries,
-                retry_wait=retry_wait,
                 progress_callback=progress_callback,
                 validate_content=validate_content,
                 lease_id=lease_id,
@@ -633,10 +617,10 @@ class BlockBlobService(BaseBlobService):
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        content_settings=None, metadata=None, validate_content=False, progress_callback=None,
-        max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        content_settings=None, metadata=None, validate_content=False, 
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -673,10 +657,6 @@ class BlockBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use when the blob size exceeds 
             64MB.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -730,8 +710,6 @@ class BlockBlobService(BaseBlobService):
             validate_content=validate_content,
             progress_callback=progress_callback,
             max_connections=max_connections,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             lease_id=lease_id,
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
@@ -742,9 +720,9 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Creates a new blob from str/unicode, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -777,10 +755,6 @@ class BlockBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use when the blob size exceeds 
             64MB.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -829,8 +803,6 @@ class BlockBlobService(BaseBlobService):
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_connections=max_connections,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,

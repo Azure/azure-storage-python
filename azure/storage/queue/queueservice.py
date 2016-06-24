@@ -42,6 +42,7 @@ from .._http import (
 from ..models import (
     Services,
     ListGenerator,
+    _OperationContext,
 )
 from .models import (
     QueueMessageFormat,
@@ -302,7 +303,7 @@ class QueueService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self.secondary_endpoint
+        request.host_locations = self._get_host_locations(primary=False, secondary=True)
         request.path = _get_path()
         request.query = {
             'restype': 'service',
@@ -310,8 +311,7 @@ class QueueService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_service_stats(response.body)
+        return self._perform_request(request, _convert_xml_to_service_stats)
 
     def get_queue_service_properties(self, timeout=None):
         '''
@@ -325,16 +325,15 @@ class QueueService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path()
         request.query = {
             'restype': 'service',
             'comp': 'properties',
             'timeout': _int_to_str(timeout),
         }
-        response = self._perform_request(request)
 
-        return _convert_xml_to_service_properties(response.body)
+        return self._perform_request(request, _convert_xml_to_service_properties)
 
     def set_queue_service_properties(self, logging=None, hour_metrics=None, 
                                     minute_metrics=None, cors=None, timeout=None):
@@ -365,7 +364,7 @@ class QueueService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path()
         request.query = {
             'restype': 'service',
@@ -407,14 +406,15 @@ class QueueService(StorageClient):
             applied to each individual call.
         '''
         include = 'metadata' if include_metadata else None
+        operation_context = _OperationContext(location_lock=True)
         kwargs = {'prefix': prefix, 'max_results': num_results, 'include': include, 
-                  'marker': marker, 'timeout': timeout}
+                  'marker': marker, 'timeout': timeout, '_context': operation_context}
         resp = self._list_queues(**kwargs)
 
         return ListGenerator(resp, self._list_queues, (), kwargs)
 
     def _list_queues(self, prefix=None, marker=None, max_results=None,
-                    include=None, timeout=None):
+                    include=None, timeout=None, _context=None):
         '''
         Returns a list of queues under the specified account. Makes a single list 
         request to the service. Used internally by the list_queues method.
@@ -441,7 +441,7 @@ class QueueService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path()
         request.query = {
             'comp': 'list',
@@ -451,9 +451,8 @@ class QueueService(StorageClient):
             'include': _to_str(include),
             'timeout': _int_to_str(timeout)
         }
-        response = self._perform_request(request)
 
-        return _convert_xml_to_queues(response)
+        return self._perform_request(request, _convert_xml_to_queues, operation_context=_context)
 
     def create_queue(self, queue_name, metadata=None, fail_on_exist=False, timeout=None):
         '''
@@ -483,14 +482,17 @@ class QueueService(StorageClient):
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name)
         request.query = {'timeout': _int_to_str(timeout)}
         _add_metadata_headers(metadata, request)
 
+        def _return_request(request):
+            return request
+
         if not fail_on_exist:
             try:
-                response = self._perform_request(request)
+                response = self._perform_request(request, parser=_return_request)
                 if response.status == _HTTP_RESPONSE_NO_CONTENT:
                     return False
                 return True
@@ -498,7 +500,7 @@ class QueueService(StorageClient):
                 _dont_fail_on_exist(ex)
                 return False
         else:
-            response = self._perform_request(request)
+            response = self._perform_request(request, parser=_return_request)
             if response.status == _HTTP_RESPONSE_NO_CONTENT:
                 raise AzureConflictHttpError(
                     _ERROR_CONFLICT.format(response.message), response.status)
@@ -530,7 +532,7 @@ class QueueService(StorageClient):
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name)
         request.query = {'timeout': _int_to_str(timeout)}
         if not fail_not_exist:
@@ -562,15 +564,14 @@ class QueueService(StorageClient):
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(queue_name)
         request.query = {
             'comp': 'metadata',
             'timeout': _int_to_str(timeout),
         }
-        response = self._perform_request(request)
 
-        return _parse_metadata_and_message_count(response)
+        return self._perform_request(request, _parse_metadata_and_message_count)
 
     def set_queue_metadata(self, queue_name, metadata=None, timeout=None):
         '''
@@ -588,7 +589,7 @@ class QueueService(StorageClient):
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name)
         request.query = {
             'comp': 'metadata',
@@ -631,15 +632,14 @@ class QueueService(StorageClient):
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(queue_name)
         request.query = {
             'comp': 'acl',
             'timeout': _int_to_str(timeout),
         }
-        response = self._perform_request(request)
 
-        return _convert_xml_to_signed_identifiers(response.body)
+        return self._perform_request(request, _convert_xml_to_signed_identifiers)
 
     def set_queue_acl(self, queue_name, signed_identifiers=None, timeout=None):
         '''
@@ -671,7 +671,7 @@ class QueueService(StorageClient):
         _validate_access_policies(signed_identifiers)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name)
         request.query = {
             'comp': 'acl',
@@ -718,7 +718,7 @@ class QueueService(StorageClient):
         _validate_not_none('content', content)
         request = HTTPRequest()
         request.method = 'POST'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name, True)
         request.query = {
             'visibilitytimeout': _to_str(visibility_timeout),
@@ -759,16 +759,15 @@ class QueueService(StorageClient):
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name, True)
         request.query = {
             'numofmessages': _to_str(num_messages),
             'visibilitytimeout': _to_str(visibility_timeout),
             'timeout': _int_to_str(timeout)
         }
-        response = self._perform_request(request)
 
-        return _convert_xml_to_queue_messages(response, self.decode_function)
+        return self._perform_request(request, _convert_xml_to_queue_messages, [self.decode_function])
 
     def peek_messages(self, queue_name, num_messages=None, timeout=None):
         '''
@@ -800,16 +799,15 @@ class QueueService(StorageClient):
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(queue_name, True)
         request.query = {
             'peekonly': 'true',
             'numofmessages': _to_str(num_messages),
             'timeout': _int_to_str(timeout)
         }
-        response = self._perform_request(request)
 
-        return _convert_xml_to_queue_messages(response, self.decode_function)
+        return self._perform_request(request, _convert_xml_to_queue_messages, [self.decode_function])
 
     def delete_message(self, queue_name, message_id, pop_receipt, timeout=None):
         '''
@@ -840,7 +838,7 @@ class QueueService(StorageClient):
         _validate_not_none('pop_receipt', pop_receipt)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name, True, message_id)
         request.query = {
             'popreceipt': _to_str(pop_receipt),
@@ -860,7 +858,7 @@ class QueueService(StorageClient):
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name, True)
         request.query = {'timeout': _int_to_str(timeout)}
         self._perform_request(request)
@@ -908,7 +906,7 @@ class QueueService(StorageClient):
         _validate_not_none('visibility_timeout', visibility_timeout)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(queue_name, True, message_id)
         request.query = {
             'popreceipt': _to_str(pop_receipt),
@@ -919,5 +917,4 @@ class QueueService(StorageClient):
         if content is not None:
             request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
 
-        response = self._perform_request(request)
-        return _parse_queue_message_from_headers(response)
+        return self._perform_request(request, _parse_queue_message_from_headers)

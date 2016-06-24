@@ -84,8 +84,8 @@ _ENTITY_TO_PYTHON_CONVERSIONS = {
 
 
 def _convert_json_response_to_entity(response, property_resolver):
-    if response is None:
-        return response
+    if response is None or response.body is None:
+        return None
 
     root = loads(response.body.decode('utf-8'))
 
@@ -188,8 +188,8 @@ def _convert_json_to_entity(entry_element, property_resolver):
 def _convert_json_response_to_tables(response):
     ''' Converts the response to tables class.
     '''
-    if response is None:
-        return response
+    if response is None or response.body is None:
+        return None
 
     tables = _list()
 
@@ -214,8 +214,8 @@ def _convert_json_response_to_tables(response):
 def _convert_json_response_to_entities(response, property_resolver):
     ''' Converts the response to tables class.
     '''
-    if response is None:
-        return response
+    if response is None or response.body is None:
+        return None
 
     entities = _list()
 
@@ -240,17 +240,20 @@ def _extract_etag(response):
 
     return None
 
-def _parse_batch_response(body):
-    parts = body.split(b'--changesetresponse_')
+def _parse_batch_response(response):
+    if response is None or response.body is None:
+        return None
+
+    parts = response.body.split(b'--changesetresponse_')
 
     responses = []
     for part in parts:
         httpLocation = part.find(b'HTTP/')
         if httpLocation > 0:
-            response = _parse_batch_response_part(part[httpLocation:])
-            if response.status >= 300:
-                _parse_batch_error(response)
-            responses.append(_extract_etag(response))
+            response_part = _parse_batch_response_part(part[httpLocation:])
+            if response_part.status >= 300:
+                _parse_batch_error(response_part)
+            responses.append(_extract_etag(response_part))
 
     return responses
 
@@ -275,8 +278,8 @@ def _parse_batch_response_part(part):
 
     return HTTPResponse(int(status), reason.strip(), headers, body)
 
-def _parse_batch_error(response):
-    doc = loads(response.body.decode('utf-8'))
+def _parse_batch_error(part):
+    doc = loads(part.body.decode('utf-8'))
 
     code = ''
     message = ''
@@ -286,4 +289,4 @@ def _parse_batch_error(response):
         if error.get('message'):
             message = error.get('message').get('value')
 
-    raise AzureBatchOperationError(message, response.status, code)
+    raise AzureBatchOperationError(message, part.status, code)

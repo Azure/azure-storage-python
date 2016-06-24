@@ -31,6 +31,14 @@ from .models import (
     Protocol,
     ServiceStats,
     GeoReplication,
+    LocationMode,
+    RetryContext,
+)
+
+from .retry import (
+    ExponentialRetry,
+    LinearRetry,
+    no_retry,
 )
 
 from .cloudstorageaccount import CloudStorageAccount

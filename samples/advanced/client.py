@@ -18,6 +18,12 @@ import requests
 
 from azure.storage import CloudStorageAccount
 from azure.storage.blob import BlockBlobService
+from azure.storage.retry import (
+    ExponentialRetry,
+    LinearRetry,
+    no_retry,
+)
+from azure.storage.models import LocationMode
 
 class ClientSamples():  
 
@@ -25,12 +31,55 @@ class ClientSamples():
         pass
 
     def run_all_samples(self):
+        self.retries()
+        self.read_from_secondary()
         self.custom_endpoint()
         self.custom_domain()
         self.protocol()
         self.request_session()
         self.proxy()
         self.callbacks()
+
+    def retries(self):
+        # By default, retries are performed with an exponential backoff.
+        # Any custom retry logic may be used by simply defining a retry function, 
+        # but several easy pre-written options are available with modifiable settings.
+        client = BlockBlobService(account_name='<account_name>', account_key='<account_key>')       
+
+        # Use an exponential retry, but modify the backoff settings
+        # Here, we increase the initial back off, increase the number of retry attempts
+        # and decrease the base of the exponential backoff.
+        client.retry = ExponentialRetry(initial_backoff=30, increment_power=2, max_attempts=5).retry
+
+        # Use a default linear retry policy instead
+        client.retry = LinearRetry().retry
+
+        # Turn off retries
+        client.retry = no_retry
+
+    def read_from_secondary(self):
+        # If you are using RA-GRS accounts, you may want to enable reading from the 
+        # secondary endpoint. Note that your application will have to handle this 
+        # data potentially being out of date as the secondary may be behind the 
+        # primary. 
+        client = BlockBlobService(account_name='<account_name>', account_key='<account_key>')    
+
+        # The location mode is set to primary by default meaning that all requests 
+        # are sent to the primary endpoint. If you'd like to instead read from the 
+        # secondary endpoint by default, set location mode to secondary. Note that 
+        # writes will continue to go to primary as they are not allowed on secondary.
+        client.location_mode = LocationMode.SECONDARY
+
+        # You may also decide you want to retry to secondary. This is useful if 
+        # you'd like to automatically handle the primary being temporarily down. 
+        # Again, your application will have to handle data being potentially out 
+        # of date. Retry to secondary logic may be built into a custom retry policy, 
+        # but our retry policies have a flag to enable it. Here we use the same 
+        # exponential retry as by default, but allow it to retry to secondary if 
+        # the initial request to primary fails.
+        client.location_mode = LocationMode.PRIMARY # Reset the location_mode to start with primary
+        client.retry = ExponentialRetry(retry_to_secondary=True).retry
+        
 
     def custom_endpoint(self):
         # Custom endpoints are necessary for certain regions.

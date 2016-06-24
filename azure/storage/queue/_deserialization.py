@@ -67,7 +67,7 @@ def _convert_xml_to_queues(response):
     </EnumerationResults>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     queues = _list()
     list_element = ETree.fromstring(response.body)
@@ -111,7 +111,7 @@ def _convert_xml_to_queue_messages(response, decode_function):
     </QueueMessagesList>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     messages = list()
     list_element = ETree.fromstring(response.body)

@@ -86,7 +86,7 @@ class StorageTestCase(unittest.TestCase):
     def is_playback(self):
         return self.test_mode == TestMode.playback
 
-    def get_resource_name(self, prefix):
+    def get_resource_name(self, prefix=''):
         # Append a suffix to the name, based on the fully qualified test name
         # We use a checksum of the test name so that each test gets different
         # resource names, but each test will get the same name on repeat runs,

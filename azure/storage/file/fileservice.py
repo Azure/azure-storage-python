@@ -22,7 +22,6 @@ from .._error import (
     _ERROR_STORAGE_MISSING_INFO,
     _ERROR_EMULATOR_DOES_NOT_SUPPORT_FILES,
     _ERROR_PARALLEL_NOT_SEEKABLE,
-    _validate_content_match,
     _validate_access_policies,
 )
 from .._common_conversion import (
@@ -48,6 +47,7 @@ from .._deserialization import (
 from ..models import (
     Services,
     ListGenerator,
+    _OperationContext,
 )
 from .models import (
     File,
@@ -483,7 +483,7 @@ class FileService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path()
         request.query = {
              'restype': 'service',
@@ -508,7 +508,7 @@ class FileService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path()
         request.query = {
              'restype': 'service',
@@ -516,8 +516,7 @@ class FileService(StorageClient):
              'timeout': _int_to_str(timeout),         
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_service_properties(response.body)
+        return self._perform_request(request, _convert_xml_to_service_properties)
 
     def list_shares(self, prefix=None, marker=None, num_results=None, 
                     include_metadata=False, timeout=None):
@@ -549,14 +548,15 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds.
         '''
         include = 'metadata' if include_metadata else None
+        operation_context = _OperationContext(location_lock=True)
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results, 
-                'include': include, 'timeout': timeout}
+                'include': include, 'timeout': timeout, '_context': operation_context}
         resp = self._list_shares(**kwargs)
 
         return ListGenerator(resp, self._list_shares, (), kwargs)
 
     def _list_shares(self, prefix=None, marker=None, max_results=None, 
-                     include=None, timeout=None):
+                     include=None, timeout=None, _context=None):
         '''
         Returns a list of the shares under the specified account.
 
@@ -583,7 +583,7 @@ class FileService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path()
         request.query = {
              'comp': 'list',
@@ -594,8 +594,7 @@ class FileService(StorageClient):
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_shares(response)
+        return self._perform_request(request, _convert_xml_to_shares, operation_context=_context)
 
     def create_share(self, share_name, metadata=None, quota=None,
                      fail_on_exist=False, timeout=None):
@@ -625,7 +624,7 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
@@ -663,15 +662,14 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _parse_share(share_name, response)
+        return self._perform_request(request, _parse_share, [share_name])
 
     def set_share_properties(self, share_name, quota, timeout=None):
         '''
@@ -689,7 +687,7 @@ class FileService(StorageClient):
         _validate_not_none('quota', quota)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
@@ -717,7 +715,7 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
@@ -725,8 +723,7 @@ class FileService(StorageClient):
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _parse_metadata(response)
+        return self._perform_request(request, _parse_metadata)
 
     def set_share_metadata(self, share_name, metadata=None, timeout=None):
         '''
@@ -747,7 +744,7 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
@@ -772,7 +769,7 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
@@ -780,8 +777,7 @@ class FileService(StorageClient):
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_signed_identifiers(response.body)
+        return self._perform_request(request, _convert_xml_to_signed_identifiers)
 
     def set_share_acl(self, share_name, signed_identifiers=None, timeout=None):
         '''
@@ -802,7 +798,7 @@ class FileService(StorageClient):
         _validate_access_policies(signed_identifiers)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
@@ -832,7 +828,7 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
@@ -840,8 +836,7 @@ class FileService(StorageClient):
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_share_stats(response)
+        return self._perform_request(request, _convert_xml_to_share_stats)
 
     def delete_share(self, share_name, fail_not_exist=False, timeout=None):
         '''
@@ -863,7 +858,7 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
              'restype': 'share',
@@ -910,7 +905,7 @@ class FileService(StorageClient):
         _validate_not_none('directory_name', directory_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
              'restype': 'directory',
@@ -957,7 +952,7 @@ class FileService(StorageClient):
         _validate_not_none('directory_name', directory_name)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
              'restype': 'directory',
@@ -994,15 +989,14 @@ class FileService(StorageClient):
         _validate_not_none('directory_name', directory_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
              'restype': 'directory',
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _parse_directory(directory_name, response)
+        return self._perform_request(request, _parse_directory, [directory_name])
 
     def get_directory_metadata(self, share_name, directory_name, timeout=None):
         '''
@@ -1022,7 +1016,7 @@ class FileService(StorageClient):
         _validate_not_none('directory_name', directory_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
              'restype': 'directory',
@@ -1030,8 +1024,7 @@ class FileService(StorageClient):
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _parse_metadata(response)
+        return self._perform_request(request, _parse_metadata)
 
     def set_directory_metadata(self, share_name, directory_name, metadata=None, timeout=None):
         '''
@@ -1055,7 +1048,7 @@ class FileService(StorageClient):
         _validate_not_none('directory_name', directory_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
              'restype': 'directory',
@@ -1067,7 +1060,8 @@ class FileService(StorageClient):
         self._perform_request(request)
 
     def list_directories_and_files(self, share_name, directory_name=None, 
-                                   num_results=None, marker=None, timeout=None):
+                                   num_results=None, marker=None, timeout=None,
+                                   _context=None):
         '''
         Returns a generator to list the directories and files under the specified share.
         The generator will lazily follow the continuation tokens returned by
@@ -1098,14 +1092,17 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
+        operation_context = _OperationContext(location_lock=True)
         args = (share_name, directory_name)
-        kwargs = {'marker': marker, 'max_results': num_results, 'timeout': timeout}
+        kwargs = {'marker': marker, 'max_results': num_results, 'timeout': timeout,
+                  '_context': operation_context}
         resp = self._list_directories_and_files(*args, **kwargs)
 
         return ListGenerator(resp, self._list_directories_and_files, args, kwargs)
 
     def _list_directories_and_files(self, share_name, directory_name=None, 
-                                   marker=None, max_results=None, timeout=None):
+                                   marker=None, max_results=None, timeout=None,
+                                   _context=None):
         '''
         Returns a list of the directories and files under the specified share.
 
@@ -1132,7 +1129,7 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
              'restype': 'directory',
@@ -1142,8 +1139,8 @@ class FileService(StorageClient):
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_directories_and_files(response)
+        return self._perform_request(request, _convert_xml_to_directories_and_files, 
+                                     operation_context=_context)
 
     def get_file_properties(self, share_name, directory_name, file_name, timeout=None):
         '''
@@ -1166,12 +1163,11 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         request = HTTPRequest()
         request.method = 'HEAD'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = { 'timeout': _int_to_str(timeout)}
 
-        response = self._perform_request(request)
-        return _parse_file(file_name, response)
+        return self._perform_request(request, _parse_file, [file_name])
 
     def exists(self, share_name, directory_name=None, file_name=None, timeout=None):
         '''
@@ -1227,7 +1223,7 @@ class FileService(StorageClient):
         _validate_not_none('content_length', content_length)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
              'comp': 'properties',
@@ -1261,7 +1257,7 @@ class FileService(StorageClient):
         _validate_not_none('content_settings', content_settings)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
              'comp': 'properties',
@@ -1291,15 +1287,14 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
              'comp': 'metadata',
              'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _parse_metadata(response)
+        return self._perform_request(request, _parse_metadata)
 
     def set_file_metadata(self, share_name, directory_name, 
                           file_name, metadata=None, timeout=None):
@@ -1325,7 +1320,7 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
              'comp': 'metadata',
@@ -1379,7 +1374,7 @@ class FileService(StorageClient):
 
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = { 'timeout': _int_to_str(timeout)}
         request.headers = {
@@ -1387,9 +1382,7 @@ class FileService(StorageClient):
         }
         _add_metadata_headers(metadata, request)
 
-        response = self._perform_request(request)
-        props = _parse_properties(response, FileProperties)
-        return props.copy
+        return self._perform_request(request, _parse_properties, [FileProperties]).copy
 
     def abort_copy_file(self, share_name, directory_name, file_name, copy_id, timeout=None):
         '''
@@ -1413,7 +1406,7 @@ class FileService(StorageClient):
         _validate_not_none('copy_id', copy_id)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
              'comp': 'copy',
@@ -1444,7 +1437,7 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = { 'timeout': _int_to_str(timeout)}
 
@@ -1481,7 +1474,7 @@ class FileService(StorageClient):
         _validate_not_none('content_length', content_length)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = { 'timeout': _int_to_str(timeout)}
         request.headers = {
@@ -1497,7 +1490,7 @@ class FileService(StorageClient):
     def create_file_from_path(self, share_name, directory_name, file_name, 
                            local_file_path, content_settings=None,
                            metadata=None, validate_content=False, progress_callback=None,
-                           max_connections=2, max_retries=5, retry_wait=1.0, timeout=None):
+                           max_connections=2, timeout=None):
         '''
         Creates a new azure file from a local file path, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1529,10 +1522,6 @@ class FileService(StorageClient):
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
-        :param int max_retries:
-            Number of times to retry upload of file chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1547,7 +1536,7 @@ class FileService(StorageClient):
             self.create_file_from_stream(
                 share_name, directory_name, file_name, stream,
                 count, content_settings, metadata, validate_content, progress_callback,
-                max_connections, max_retries, retry_wait, timeout)
+                max_connections, timeout)
 
     def create_file_from_text(self, share_name, directory_name, file_name, 
                            text, encoding='utf-8', content_settings=None,
@@ -1600,7 +1589,7 @@ class FileService(StorageClient):
         self, share_name, directory_name, file_name, file,
         index=0, count=None, content_settings=None, metadata=None, 
         validate_content=False, progress_callback=None, max_connections=2, 
-        max_retries=5, retry_wait=1.0, timeout=None):
+        timeout=None):
         '''
         Creates a new file from an array of bytes, or updates the content
         of an existing file, with automatic chunking and progress
@@ -1638,10 +1627,6 @@ class FileService(StorageClient):
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
-        :param int max_retries:
-            Number of times to retry upload of file chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1664,13 +1649,12 @@ class FileService(StorageClient):
         self.create_file_from_stream(
             share_name, directory_name, file_name, stream, count,
             content_settings, metadata, validate_content, progress_callback,
-            max_connections, max_retries, retry_wait, timeout)
+            max_connections, timeout)
 
     def create_file_from_stream(
         self, share_name, directory_name, file_name, stream, count,
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0, 
-        timeout=None):
+        progress_callback=None, max_connections=2, timeout=None):
         '''
         Creates a new file from a file/stream, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1706,10 +1690,6 @@ class FileService(StorageClient):
         :param int max_connections:
             Maximum number of parallel connections to use. Note that parallel upload 
             requires the stream to be seekable.
-        :param int max_retries:
-            Number of times to retry upload of file chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1742,16 +1722,14 @@ class FileService(StorageClient):
             self.MAX_RANGE_SIZE,
             stream,
             max_connections,
-            max_retries,
-            retry_wait,
             progress_callback,
             validate_content,
             timeout
         )
 
     def _get_file(self, share_name, directory_name, file_name,
-                 start_range=None, end_range=None,
-                 validate_content=False, timeout=None):
+                 start_range=None, end_range=None, validate_content=False, 
+                 timeout=None, _context=None):
         '''
         Downloads a file's content, metadata, and properties. You can specify a
         range if you don't need to download the file in its entirety. If no range
@@ -1789,7 +1767,7 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = { 'timeout': _int_to_str(timeout)}
         _validate_and_format_range_headers(
@@ -1800,19 +1778,14 @@ class FileService(StorageClient):
             end_range_required=False,
             check_content_md5=validate_content)
 
-        response = self._perform_request(request, None)
-        file = _parse_file(file_name, response)
-
-        if validate_content:
-            computed_md5 = _get_content_md5(file.content)
-            _validate_content_match(file.properties.content_settings.content_md5, computed_md5)
-
-        return file
+        return self._perform_request(request, _parse_file, 
+                                     [file_name, validate_content],
+                                     operation_context=_context)
 
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
                          open_mode='wb', start_range=None, end_range=None,
                          validate_content=False, progress_callback=None,
-                         max_connections=2, max_retries=5, retry_wait=1.0, timeout=None):
+                         max_connections=2, timeout=None):
         '''
         Downloads a file to a file path, with automatic chunking and progress
         notifications. Returns an instance of File with properties and metadata.
@@ -1868,10 +1841,6 @@ class FileService(StorageClient):
             being concurrently modified to enforce atomicity or if many files are 
             expected to be empty as an extra request is required for empty files 
             if max_connections is greater than 1.
-        :param int max_retries:
-            Number of times to retry download of file chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1891,16 +1860,14 @@ class FileService(StorageClient):
             file = self.get_file_to_stream(
                 share_name, directory_name, file_name, stream,
                 start_range, end_range, validate_content,
-                progress_callback, max_connections, max_retries,
-                retry_wait, timeout)
+                progress_callback, max_connections, timeout)
 
         return file
 
     def get_file_to_stream(
         self, share_name, directory_name, file_name, stream,
         start_range=None, end_range=None, validate_content=False,
-        progress_callback=None, max_connections=2, max_retries=5,
-        retry_wait=1.0, timeout=None):
+        progress_callback=None, max_connections=2, timeout=None):
         '''
         Downloads a file to a stream, with automatic chunking and progress
         notifications. Returns an instance of :class:`File` with properties
@@ -1953,10 +1920,6 @@ class FileService(StorageClient):
             being concurrently modified to enforce atomicity or if many files are 
             expected to be empty as an extra request is required for empty files 
             if max_connections is greater than 1.
-        :param int max_retries:
-            Number of times to retry download of file chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1999,6 +1962,8 @@ class FileService(StorageClient):
             else:
                 initial_request_end = initial_request_start + first_get_size - 1
 
+            # Send a context object to make sure we always retry to the initial location
+            operation_context = _OperationContext(location_lock=True)
             try:
                 file = self._get_file(share_name,
                                       directory_name,
@@ -2006,7 +1971,8 @@ class FileService(StorageClient):
                                       start_range=initial_request_start,
                                       end_range=initial_request_end,
                                       validate_content=validate_content,
-                                      timeout=timeout)
+                                      timeout=timeout,
+                                      _context=operation_context)
 
                 # Parse the total file size and adjust the download size if ranges 
                 # were specified
@@ -2027,7 +1993,8 @@ class FileService(StorageClient):
                                           directory_name,
                                           file_name,
                                           validate_content=validate_content,
-                                          timeout=timeout)
+                                          timeout=timeout,
+                                          _context=operation_context)
 
                     # Set the download size to empty
                     download_size = 0
@@ -2069,11 +2036,10 @@ class FileService(StorageClient):
                 end_file,
                 stream,
                 max_connections,
-                max_retries,
-                retry_wait,
                 progress_callback,
                 validate_content,
                 timeout,
+                operation_context,
             )
 
             # Set the content length to the download size instead of the size of 
@@ -2092,8 +2058,7 @@ class FileService(StorageClient):
 
     def get_file_to_bytes(self, share_name, directory_name, file_name, 
                           start_range=None, end_range=None, validate_content=False,
-                          progress_callback=None, max_connections=2, max_retries=5,
-                          retry_wait=1.0, timeout=None):
+                          progress_callback=None, max_connections=2, timeout=None):
         '''
         Downloads a file as an array of bytes, with automatic chunking and
         progress notifications. Returns an instance of :class:`File` with
@@ -2144,10 +2109,6 @@ class FileService(StorageClient):
             being concurrently modified to enforce atomicity or if many files are 
             expected to be empty as an extra request is required for empty files 
             if max_connections is greater than 1.
-        :param int max_retries:
-            Number of times to retry download of file chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2169,8 +2130,6 @@ class FileService(StorageClient):
             validate_content,
             progress_callback,
             max_connections,
-            max_retries,
-            retry_wait,
             timeout)
 
         file.content = stream.getvalue()
@@ -2179,8 +2138,7 @@ class FileService(StorageClient):
     def get_file_to_text(
         self, share_name, directory_name, file_name, encoding='utf-8',
         start_range=None, end_range=None, validate_content=False,
-        progress_callback=None, max_connections=2, max_retries=5,
-        retry_wait=1.0, timeout=None):
+        progress_callback=None, max_connections=2, timeout=None):
         '''
         Downloads a file as unicode text, with automatic chunking and progress
         notifications. Returns an instance of :class:`File` with properties,
@@ -2233,10 +2191,6 @@ class FileService(StorageClient):
             being concurrently modified to enforce atomicity or if many files are 
             expected to be empty as an extra request is required for empty files 
             if max_connections is greater than 1.
-        :param int max_retries:
-            Number of times to retry download of file chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2257,8 +2211,6 @@ class FileService(StorageClient):
             validate_content,
             progress_callback,
             max_connections,
-            max_retries,
-            retry_wait,
             timeout)
 
         file.content = file.content.decode(encoding)
@@ -2302,7 +2254,7 @@ class FileService(StorageClient):
         _validate_not_none('data', data)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
              'comp': 'range',
@@ -2350,7 +2302,7 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
              'comp': 'range',
@@ -2393,7 +2345,7 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
              'comp': 'rangelist',
@@ -2407,5 +2359,4 @@ class FileService(StorageClient):
                 start_range_required=False,
                 end_range_required=False)
 
-        response = self._perform_request(request)
-        return _convert_xml_to_ranges(response)
+        return self._perform_request(request, _convert_xml_to_ranges)

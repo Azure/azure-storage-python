@@ -8,6 +8,8 @@
 - Remove with_filter from service client in favor of the newer callback functions.
 - Fixed a bug where empty signed identifiers could not be parsed.
 - Improved the error message returned when too many signed identifers are provided.
+- Added support for automatic retries. A retry function taking a RetryContext object and returning a retry wait time (or None for no retry) may be set on the service client. The default retry has an exponential back-off and is defined in the retry class.
+- Added support for reading from secondary. Note that this only applies for RA-GRS accounts. If the client location_mode is set to LocationMode.SECONDARY, read requests which may be sent to secondary will be.
 
 ## Version 0.32.0:
 

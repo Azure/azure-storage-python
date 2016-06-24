@@ -68,7 +68,7 @@ def _dont_fail_not_exist(error):
         raise error
 
 
-def _general_error_handler(http_error):
+def _http_error_handler(http_error):
     ''' Simple error handler for azure.'''
     message = str(http_error)
     if http_error.respbody is not None:

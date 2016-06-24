@@ -188,7 +188,7 @@ class PageBlobService(BaseBlobService):
         _validate_not_none('content_length', content_length)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {'timeout': _int_to_str(timeout)}
         request.headers = {
@@ -205,8 +205,7 @@ class PageBlobService(BaseBlobService):
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def update_page(
         self, container_name, blob_name, page, start_range, end_range,
@@ -283,7 +282,7 @@ class PageBlobService(BaseBlobService):
 
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'page',
@@ -311,8 +310,7 @@ class PageBlobService(BaseBlobService):
             computed_md5 = _get_content_md5(request.body)
             request.headers['Content-MD5'] = _to_str(computed_md5)
 
-        response = self._perform_request(request)
-        return _parse_page_properties(response)
+        return self._perform_request(request, _parse_page_properties)
 
     def clear_page(
         self, container_name, blob_name, start_range, end_range,
@@ -379,7 +377,7 @@ class PageBlobService(BaseBlobService):
 
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'page',
@@ -402,8 +400,7 @@ class PageBlobService(BaseBlobService):
             end_range,
             align_to_page=True)
 
-        response = self._perform_request(request)
-        return _parse_page_properties(response)
+        return self._perform_request(request, _parse_page_properties)
 
     def get_page_ranges(
         self, container_name, blob_name, snapshot=None, start_range=None,
@@ -467,7 +464,7 @@ class PageBlobService(BaseBlobService):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'pagelist',
@@ -490,8 +487,7 @@ class PageBlobService(BaseBlobService):
                 end_range_required=False,
                 align_to_page=True)
 
-        response = self._perform_request(request)
-        return _convert_xml_to_page_ranges(response)
+        return self._perform_request(request, _convert_xml_to_page_ranges)
 
     def get_page_ranges_diff(
         self, container_name, blob_name, previous_snapshot, snapshot=None,
@@ -561,7 +557,7 @@ class PageBlobService(BaseBlobService):
         _validate_not_none('previous_snapshot', previous_snapshot)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'pagelist',
@@ -585,8 +581,7 @@ class PageBlobService(BaseBlobService):
                 end_range_required=False,
                 align_to_page=True)
 
-        response = self._perform_request(request)
-        return _convert_xml_to_page_ranges(response)
+        return self._perform_request(request, _convert_xml_to_page_ranges)
 
     def set_sequence_number(
         self, container_name, blob_name, sequence_number_action, sequence_number=None,
@@ -640,7 +635,7 @@ class PageBlobService(BaseBlobService):
         _validate_not_none('sequence_number_action', sequence_number_action)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'properties',
@@ -656,8 +651,7 @@ class PageBlobService(BaseBlobService):
             'If-None-Match': _to_str(if_none_match),
         }
 
-        response = self._perform_request(request)
-        return _parse_page_properties(response)
+        return self._perform_request(request, _parse_page_properties)
 
     def resize_blob(
         self, container_name, blob_name, content_length,
@@ -708,7 +702,7 @@ class PageBlobService(BaseBlobService):
         _validate_not_none('content_length', content_length)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'properties',
@@ -723,16 +717,15 @@ class PageBlobService(BaseBlobService):
             'If-None-Match': _to_str(if_none_match),
         }
 
-        response = self._perform_request(request)
-        return _parse_page_properties(response)
+        return self._perform_request(request, _parse_page_properties)
 
     #----Convenience APIs-----------------------------------------------------
 
     def create_blob_from_path(
         self, container_name, blob_name, file_path, content_settings=None,
         metadata=None, validate_content=False, progress_callback=None, max_connections=2,
-        max_retries=5, retry_wait=1.0, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+        lease_id=None, if_modified_since=None, if_unmodified_since=None, 
+        if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -762,10 +755,6 @@ class PageBlobService(BaseBlobService):
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -810,8 +799,6 @@ class PageBlobService(BaseBlobService):
                 validate_content=validate_content,
                 progress_callback=progress_callback,
                 max_connections=max_connections,
-                max_retries=max_retries,
-                retry_wait=retry_wait,
                 lease_id=lease_id,
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
@@ -822,8 +809,8 @@ class PageBlobService(BaseBlobService):
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count, content_settings=None,
-        metadata=None, validate_content=False, progress_callback=None, max_connections=2,
-        max_retries=5, retry_wait=1.0, lease_id=None, if_modified_since=None,
+        metadata=None, validate_content=False, progress_callback=None,
+        max_connections=2, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file/stream, or updates the content of an
@@ -858,10 +845,6 @@ class PageBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use. Note that parallel upload 
             requires the stream to be seekable.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -923,8 +906,6 @@ class PageBlobService(BaseBlobService):
             block_size=self.MAX_PAGE_SIZE,
             stream=stream,
             max_connections=max_connections,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             progress_callback=progress_callback,
             validate_content=validate_content,
             lease_id=lease_id,
@@ -936,9 +917,9 @@ class PageBlobService(BaseBlobService):
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -974,10 +955,6 @@ class PageBlobService(BaseBlobService):
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -1031,8 +1008,6 @@ class PageBlobService(BaseBlobService):
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_connections=max_connections,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,

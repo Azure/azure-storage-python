@@ -168,7 +168,7 @@ class AppendBlobService(BaseBlobService):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {'timeout': _int_to_str(timeout)}
         request.headers = {
@@ -183,8 +183,7 @@ class AppendBlobService(BaseBlobService):
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def append_block(self, container_name, blob_name, block,
                      validate_content=False, maxsize_condition=None,
@@ -256,7 +255,7 @@ class AppendBlobService(BaseBlobService):
         _validate_not_none('block', block)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'appendblock',
@@ -277,15 +276,13 @@ class AppendBlobService(BaseBlobService):
             computed_md5 = _get_content_md5(request.body)
             request.headers['Content-MD5'] = _to_str(computed_md5)
 
-        response = self._perform_request(request)
-        return _parse_append_block(response)
+        return self._perform_request(request, _parse_append_block)
 
     #----Convenience APIs----------------------------------------------
 
     def append_blob_from_path(
         self, container_name, blob_name, file_path, validate_content=False,
-        maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
+        maxsize_condition=None, progress_callback=None, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from a file path, with automatic
         chunking and progress notifications.
@@ -314,10 +311,6 @@ class AppendBlobService(BaseBlobService):
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -339,15 +332,13 @@ class AppendBlobService(BaseBlobService):
                 validate_content=validate_content,
                 maxsize_condition=maxsize_condition,
                 progress_callback=progress_callback,
-                max_retries=max_retries,
-                retry_wait=retry_wait,
                 lease_id=lease_id,
                 timeout=timeout)
 
     def append_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
         validate_content=False, maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
+        lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from an array of bytes, with
         automatic chunking and progress notifications.
@@ -381,10 +372,6 @@ class AppendBlobService(BaseBlobService):
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -416,14 +403,12 @@ class AppendBlobService(BaseBlobService):
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             timeout=timeout)
 
     def append_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
         validate_content=False, maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
+        lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from str/unicode, with
         automatic chunking and progress notifications.
@@ -454,10 +439,6 @@ class AppendBlobService(BaseBlobService):
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -483,14 +464,12 @@ class AppendBlobService(BaseBlobService):
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             timeout=timeout)
 
     def append_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
         validate_content=False, maxsize_condition=None, progress_callback=None, 
-        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
+        lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from a file/stream, with
         automatic chunking and progress notifications.
@@ -522,10 +501,6 @@ class AppendBlobService(BaseBlobService):
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -545,8 +520,6 @@ class AppendBlobService(BaseBlobService):
             block_size=self.MAX_BLOCK_SIZE,
             stream=stream,
             max_connections=1, # upload not easily parallelizable
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             progress_callback=progress_callback,
             validate_content=validate_content,
             lease_id=lease_id,
