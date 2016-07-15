@@ -2,6 +2,17 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.34.0:
+
+### Queue:
+- Client-side encryption. Allows a user to encrypt queue messages before uploading them by specifying fields on the queueservice. See ~samples.queue.encryption_usuage.py for samples.
+
+### Table: 
+- Client-side encryption. Allows a user to encrypt specified properties on an entity before uploading them by providing an encryption policy. See ~samples.table.encryption_usage.py for samples.
+
+### Blob:
+- Client-side encryption. Allows a user to encrypt entire blobs (not individual blocks) before uploading them by providing an encryption policy. See ~samples.blob.encryption_usage.py for samples.
+
 ## Version 0.33.0:
 
 ### All:
@@ -20,19 +31,12 @@
 - request_callback and response_callback functions may be set on the service clients. These callbacks will be run before the request is executed and after the response is received, respectively. They maybe used to add custom headers to the request and for logging, among other purposes.
 - A client request id is added to requests by default.
 
-### Queue:
-- Client-side encryption. Allows a user to encrypt queue messages before uploading them by specifying fields on the queueservice. See ~samples.queue.encryption_usuage.py for samples
-
-### Table: 
-- Client-side encryption
-
 ### Blob:
 - Get requests taking the start_range parameter incorrectly sent an x-ms-range header when start_range was not specified.
 - get_blob_to_* will do an initial get request of size 32 MB. If it then finds the blob is larger than this size, it will parallelize by default.
 - Block blob and page blob create_blob_from_* methods will parallelize by default.
 - The validate_content option on get_blob_to_* and on methods which put blob data will compute and validate an md5 hash of the content if set to True. This is primarily valuable for detecting bitflips on the wire if using http instead of https as https (the default) will already validate.
 - Fixed a bug where lease_id was not specified if given by the user for each chunk on parallel get requests.
-- Client-side encryption
 
 ### File:
 - Get requests taking the start_range parameter incorrectly sent an x-ms-range header when start_range was not specified.

@@ -14,3 +14,4 @@
 #--------------------------------------------------------------------------
 from .sas_usage import TableSasSamples
 from .table_usage import TableSamples
+from .encryption_usage import TableEncryptionSamples

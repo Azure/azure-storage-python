@@ -29,7 +29,9 @@ from tests.testcase import (
     StorageTestCase,
     record,
 )
-
+from azure.storage._common_conversion import(
+    _encode_base64,
+)
 #------------------------------------------------------------------------------
 TEST_TABLE_PREFIX = 'table'
 #------------------------------------------------------------------------------
@@ -82,6 +84,7 @@ class StorageTableBatchTest(StorageTestCase):
                 'large': 933311100,
                 'Birthday': datetime(1973, 10, 4),
                 'birthday': datetime(1970, 10, 4),
+                'binary':EntityProperty(EdmType.BINARY, b'binary'),
                 'other': EntityProperty(EdmType.INT32, 20),
                 'clsid': EntityProperty(
                     EdmType.GUID,
@@ -116,6 +119,9 @@ class StorageTableBatchTest(StorageTestCase):
         self.assertEqual(entity.large, 933311100)
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1970, 10, 4, tzinfo=tzutc()))
+        self.assertIsInstance(entity.binary, EntityProperty)
+        self.assertEqual(entity.binary.type, EdmType.BINARY)
+        self.assertEqual(entity.binary.value, b'binary')
         self.assertIsInstance(entity.other, EntityProperty)
         self.assertEqual(entity.other.type, EdmType.INT32)
         self.assertEqual(entity.other.value, 20)

@@ -18,18 +18,23 @@ from .._common_conversion import (
 )
 from .._error import (
     _validate_not_none,
+    _validate_encryption_required,
 )
 from .._serialization import (
     _get_request_body,
 )
 from ._error import (
     _validate_entity,
+    _ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION,
 )
 from ._serialization import (
     _convert_entity_to_json,
     _DEFAULT_ACCEPT_HEADER,
     _DEFAULT_CONTENT_TYPE_HEADER,
     _DEFAULT_PREFER_HEADER,
+)
+from ._encryption import (
+    _encrypt_entity,
 )
 
 def _get_entity(partition_key, row_key, select, accept):
@@ -46,11 +51,23 @@ def _get_entity(partition_key, row_key, select, accept):
 
     return request
 
-def _insert_entity(entity):
+def _insert_entity(entity, encryption_required=False,
+                   key_encryption_key=None, encryption_resolver=None):
     '''
     Constructs an insert entity request.
+    :param entity:
+        The entity to insert. Could be a dict or an entity object.
+    :param object key_encryption_key:
+        The user-provided key-encryption-key. Must implement the following methods:
+        wrap_key(key)--wraps the specified key using an algorithm of the user's choice.
+        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
+        get_kid()--returns a string key id for this key-encryption-key.
+    :param function(partition_key, row_key, property_name) encryption_resolver:
+        A function that takes in an entities partition key, row key, and property name and returns 
+        a boolean that indicates whether that property should be encrypted.
     '''
-    _validate_entity(entity)
+    _validate_entity(entity, key_encryption_key is not None)
+    _validate_encryption_required(encryption_required, key_encryption_key)
 
     request = HTTPRequest()
     request.method = 'POST'
@@ -59,16 +76,30 @@ def _insert_entity(entity):
         _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
         _DEFAULT_PREFER_HEADER[0]: _DEFAULT_PREFER_HEADER[1]
     }
+    if(key_encryption_key):
+        entity = _encrypt_entity(entity, key_encryption_key, encryption_resolver)
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
 
-def _update_entity(entity, if_match):
+def _update_entity(entity, if_match, encryption_required=False,
+                   key_encryption_key=None, encryption_resolver=None):
     '''
     Constructs an update entity request.
+    :param entity:
+        The entity to insert. Could be a dict or an entity object.
+    :param object key_encryption_key:
+        The user-provided key-encryption-key. Must implement the following methods:
+        wrap_key(key)--wraps the specified key using an algorithm of the user's choice.
+        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
+        get_kid()--returns a string key id for this key-encryption-key.
+    :param function(partition_key, row_key, property_name) encryption_resolver:
+        A function that takes in an entities partition key, row key, and property name and returns 
+        a boolean that indicates whether that property should be encrypted.
     '''
     _validate_not_none('if_match', if_match)
-    _validate_entity(entity)
+    _validate_entity(entity, key_encryption_key is not None)
+    _validate_encryption_required(encryption_required, key_encryption_key)
 
     request = HTTPRequest()
     request.method = 'PUT'
@@ -77,16 +108,20 @@ def _update_entity(entity, if_match):
         _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
         'If-Match': _to_str(if_match),
     }
+    if(key_encryption_key):
+        entity = _encrypt_entity(entity, key_encryption_key, encryption_resolver)
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
 
-def _merge_entity(entity, if_match):
+def _merge_entity(entity, if_match, require_encryption=False, key_encryption_key=None):
     '''
     Constructs a merge entity request.
     '''
     _validate_not_none('if_match', if_match)
     _validate_entity(entity)
+    if require_encryption or (key_encryption_key is not None):
+        raise ValueError(_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION)
 
     request = HTTPRequest()
     request.method = 'MERGE'
@@ -115,11 +150,13 @@ def _delete_entity(partition_key, row_key, if_match):
 
     return request
 
-def _insert_or_replace_entity(entity):
+def _insert_or_replace_entity(entity, require_encryption=False,
+                              key_encryption_key=None, encryption_resolver=None):
     '''
     Constructs an insert or replace entity request.
     '''
-    _validate_entity(entity)
+    _validate_entity(entity, key_encryption_key is not None)
+    _validate_encryption_required(require_encryption, key_encryption_key)
 
     request = HTTPRequest()
     request.method = 'PUT'
@@ -127,15 +164,30 @@ def _insert_or_replace_entity(entity):
         _DEFAULT_CONTENT_TYPE_HEADER[0]: _DEFAULT_CONTENT_TYPE_HEADER[1],
         _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
     }
+
+    if(key_encryption_key):
+        entity = _encrypt_entity(entity, key_encryption_key, encryption_resolver)
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
     return request
 
-def _insert_or_merge_entity(entity):
+def _insert_or_merge_entity(entity, require_encryption=False, key_encryption_key=None):
     '''
     Constructs an insert or merge entity request.
+    :param entity:
+        The entity to insert. Could be a dict or an entity object.
+    :param object key_encryption_key:
+        The user-provided key-encryption-key. Must implement the following methods:
+        wrap_key(key)--wraps the specified key using an algorithm of the user's choice.
+        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
+        get_kid()--returns a string key id for this key-encryption-key.
+    :param function(partition_key, row_key, property_name) encryption_resolver:
+        A function that takes in an entities partition key, row key, and property name and returns 
+        a boolean that indicates whether that property should be encrypted.
     '''
     _validate_entity(entity)
+    if require_encryption or (key_encryption_key is not None):
+        raise ValueError(_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION)
 
     request = HTTPRequest()
     request.method = 'MERGE'

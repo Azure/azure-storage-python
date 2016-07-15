@@ -24,6 +24,7 @@ from cryptography.hazmat.primitives.asymmetric.padding import (
 )
 from cryptography.hazmat.primitives.hashes import SHA1
 from os import urandom
+import uuid
 
 class KeyWrapper:
     def __init__(self, kid='key1'):
@@ -110,47 +111,29 @@ class QueueEncryptionSamples():
 
     def peek_get_update_encrypted(self):
         queue_name = self._create_queue()
+
+        # The KeyWrapper is still needed for encryption
         self.service.key_encryption_key = KeyWrapper()
         self.service.put_message(queue_name, 'message1')
 
-        #The KeyWrapper object also defines methods necessary for
-        #decryption as defined in the get/peek messages documentation. 
-        #Since the key_encryption_key property is still set, messages
-        #will be decrypted automatically.
+        # KeyResolver is used to resolve a key from its id.
+        # Its interface is defined in the get/peek messages documentation.
+        self.service.key_resolver = KeyResolver()
+        self.service.key_resolver.put_key(self.service.key_encryption_key)
         self.service.peek_messages(queue_name)
         messages = self.service.get_messages(queue_name)
         self.service.update_message(queue_name,
                                     messages[0].id,
-                                    messages.pop_receipt,
+                                    messages[0].pop_receipt,
                                     0,
                                     content='encrypted_message2')
-
-        self.service.delete_queue(queue_name)
-
-    def decrypt_with_resolver(self):
-        queue_name = self._create_queue()
-
-        #KeyWrapper is still needed for encryption.
-        kek = KeyWrapper()
-        self.service.key_encryption_key = kek
-        self.service.put_message(queue_name, 'message1')
-
-        #KeyResolver is used to resolve a key from its id.
-        #Its interface is defined in the get/peek messages documentation.
-        resolver = KeyResolver()
-        resolver.put_key(kek)
-        self.service.resolver = resolver.resolve_key
-
-        #When decrypting, if both a kek and resolver are set,
-        #the resolver will take precedence.
-        messages = self.service.peek_messages(queue_name)
 
         self.service.delete_queue(queue_name)
 
     def require_encryption(self):
         queue_name = self._create_queue()
         
-        self.service.put_message('Not encrypted')
+        self.service.put_message(queue_name,'Not encrypted')
         #Set the require_encryption property on the service to 
         #ensure all messages sent/received are encrypted.
         self.service.require_encryption = True
@@ -163,6 +146,8 @@ class QueueEncryptionSamples():
             pass
 
         self.service.key_encryption_key = KeyWrapper()
+        self.service.key_resolver = KeyResolver()
+        self.service.key_resolver.put_key(self.service.key_encryption_key)
 
         #If encryption is required, but a retrieved message is not
         #encrypted, the method will throw.
@@ -179,8 +164,30 @@ class QueueEncryptionSamples():
         #To use an alternate method of key wrapping, simply set the 
         #key_encryption_key property to a wrapper that uses a different algorithm.
         self.service.key_encryption_key = RSAKeyWrapper()
+        self.service.key_resolver = None
 
         self.service.put_message(queue_name, 'message')
+
+        self.service.key_resolver = KeyResolver()
+        self.service.key_resolver.put_key(self.service.key_encryption_key)
         message = self.service.peek_messages(queue_name)
+
+        self.service.delete_queue(queue_name)
+
+    def decrypt_with_key_encryption_key(self):
+        queue_name = self._create_queue()
+
+        # The KeyWrapper object also defines methods necessary for
+        # decryption as defined in the get/peek messages documentation. 
+        # Since the key_encryption_key property is still set, messages
+        # will be decrypted automatically.
+        kek = KeyWrapper()
+        self.service.key_encryption_key = kek
+        self.service.put_message(queue_name, 'message1')
+
+        #When decrypting, if both a kek and resolver are set,
+        #the resolver will take precedence. Remove the resolver to just use the kek.
+        self.service.key_resolver = None
+        messages = self.service.peek_messages(queue_name)
 
         self.service.delete_queue(queue_name)

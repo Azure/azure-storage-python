@@ -40,13 +40,18 @@ _ERROR_TOO_MANY_ENTITIES_IN_BATCH = \
 _ERROR_TOO_MANY_PROPERTIES = 'The entity contains more properties than allowed.'
 _ERROR_TYPE_NOT_SUPPORTED = 'Type not supported when sending data to the service: {0}.'
 _ERROR_VALUE_TOO_LARGE = '{0} is too large to be cast to type {1}.'
+_ERROR_UNSUPPORTED_TYPE_FOR_ENCRYPTION = 'Encryption is only supported for not None strings.'
+_ERROR_ENTITY_NOT_ENCRYPTED = 'Encryption required, but received entity does not contain appropriate metatadata.' + \
+    'Entity was either not encrypted or metadata has been lost.'
+_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION = 'The require_encryption flag is set, but encryption is not supported' + \
+    ' for this method.'
 
 
 def _validate_object_has_param(param_name, object):
     if not object.get(param_name):
         raise ValueError(_ERROR_VALUE_NONE_OR_EMPTY.format(param_name))
 
-def _validate_entity(entity):
+def _validate_entity(entity, encrypt=None):
     # Validate entity exists
     _validate_not_none('entity', entity)
 
@@ -58,8 +63,13 @@ def _validate_entity(entity):
     _validate_object_has_param('PartitionKey', entity)
     _validate_object_has_param('RowKey', entity)
 
+    # Two properties are added during encryption. Validate sufficient space
+    max_properties = 255
+    if(encrypt):
+        max_properties = max_properties - 2
+
     # Validate there are not more than 255 properties including Timestamp
-    if (len(entity) > 255) or (len(entity) > 254 and not 'Timestamp' in entity):
+    if (len(entity) > max_properties) or (len(entity) > (max_properties - 1) and not 'Timestamp' in entity):
         raise ValueError(_ERROR_TOO_MANY_PROPERTIES)
 
     # Validate the property names are not too long

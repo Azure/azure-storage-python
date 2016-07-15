@@ -52,7 +52,7 @@ _ERROR_MD5_MISMATCH = \
 _ERROR_TOO_MANY_ACCESS_POLICIES = \
     'Too many access policies provided. The server does not support setting more than 5 access policies on a single resource.'
 _ERROR_OBJECT_INVALID = \
-    '{0} does not define a complete interface. It is missing the value {1}.'
+    '{0} does not define a complete interface. Value of {1} is either missing or invalid.'
 _ERROR_UNSUPPORTED_ENCRYPTION_VERSION = \
     'Encryption version is not supported.'
 _ERROR_DECRYPTION_FAILURE = \
@@ -112,23 +112,19 @@ def _validate_access_policies(identifiers):
     if identifiers and len(identifiers) > 5:
         raise AzureException(_ERROR_TOO_MANY_ACCESS_POLICIES)
 def _validate_key_encryption_key_wrap(kek):
-    if not hasattr(kek, 'wrap_key'):
+    # Note that None is not callable and so will fail the second clause of each check.
+    if not hasattr(kek, 'wrap_key') or not callable(kek.wrap_key):
         raise AttributeError(_ERROR_OBJECT_INVALID.format('key encryption key', 'wrap_key'))
-    if not hasattr(kek, 'get_kid'):
+    if not hasattr(kek, 'get_kid') or not callable(kek.get_kid):
         raise AttributeError(_ERROR_OBJECT_INVALID.format('key encryption key', 'get_kid'))
-    if not hasattr(kek, 'get_key_wrap_algorithm'):
+    if not hasattr(kek, 'get_key_wrap_algorithm') or not callable(kek.get_key_wrap_algorithm):
         raise AttributeError(_ERROR_OBJECT_INVALID.format('key encryption key', 'get_key_wrap_algorithm'))
-    _validate_not_none('wrap_key', kek.wrap_key)
-    _validate_not_none('get_kid', kek.get_kid)
-    _validate_not_none('get_key_wrap_algorithm', kek.get_key_wrap_algorithm)
 
 def _validate_key_encryption_key_unwrap(kek):
-    if not hasattr(kek, 'get_kid'):
+    if not hasattr(kek, 'get_kid') or not callable(kek.get_kid):
         raise AttributeError(_ERROR_OBJECT_INVALID.format('key encryption key', 'get_kid'))
-    if not hasattr(kek, 'unwrap_key'):
+    if not hasattr(kek, 'unwrap_key') or not callable(kek.unwrap_key):
         raise AttributeError(_ERROR_OBJECT_INVALID.format('key encryption key', 'unwrap_key'))
-    _validate_not_none('get_kid', kek.get_kid)
-    _validate_not_none('unwrap_key', kek.unwrap_key)
 
 def _validate_encryption_required(require_encryption, kek):
      if require_encryption and (kek is None):

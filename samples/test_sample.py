@@ -13,7 +13,6 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import unittest
-
 from azure.storage import CloudStorageAccount
 from .blob import (
     BlobSasSamples,
@@ -29,6 +28,7 @@ from .queue import (
 )
 from .table import (
     TableSasSamples,
+    TableEncryptionSamples,
     TableSamples,
 )
 from .file import (
@@ -125,5 +125,13 @@ class SampleTest(unittest.TestCase):
         client.run_all_samples()
 
     def test_queue_encryption_samples(self):
-        encryption = QueueEncryptionSamples()
+        encryption = QueueEncryptionSamples(self.account)
         encryption.run_all_samples()
+
+    def test_table_encryption_samples(self):
+        encryption = TableEncryptionSamples(self.account)
+        encryption.run_all_samples()
+
+#------------------------------------------------------------------------------
+if __name__ == '__main__':
+    unittest.main()

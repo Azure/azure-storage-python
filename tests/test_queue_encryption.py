@@ -114,7 +114,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
         self.qs.put_message(queue_name, u'encrypted_message_2')
         key_resolver = KeyResolver()
         key_resolver.put_key(self.qs.key_encryption_key)
-        self.qs.resolver = key_resolver.resolve_key
+        self.qs.key_resolver = key_resolver.resolve_key
         self.qs.key_encryption_key = None #Ensure that the resolver is used
 
         # Act
@@ -266,23 +266,23 @@ class StorageQueueEncryptionTest(StorageTestCase):
         queue_name = self._create_queue()
         self.qs.key_encryption_key = KeyWrapper()
 
-        self.qs.key_encryption_key.get_key_wrap_algorithm = None
+        self.qs.key_encryption_key.get_kid = None
         try:
             self.qs.put_message(queue_name, u'message')
             self.fail()
-        except ValueError as e:
-            self.assertEqual(str(e), _ERROR_VALUE_NONE.format('get_key_wrap_algorithm'))
+        except AttributeError as e:
+            self.assertEqual(str(e), _ERROR_OBJECT_INVALID.format('key encryption key', 'get_kid'))
 
         self.qs.key_encryption_key = KeyWrapper()
 
         self.qs.key_encryption_key.get_kid = None
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AttributeError):
             self.qs.put_message(queue_name, u'message')
 
         self.qs.key_encryption_key = KeyWrapper()
 
         self.qs.key_encryption_key.wrap_key = None
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AttributeError):
             self.qs.put_message(queue_name, u'message')
 
     @record

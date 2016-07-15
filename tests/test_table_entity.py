@@ -41,7 +41,9 @@ from tests.testcase import (
     TestMode,
     record,
 )
-
+from azure.storage._common_conversion import(
+    _encode_base64,
+)
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -87,12 +89,11 @@ class StorageTableEntityTest(StorageTestCase):
         self.ts.create_table(table_name, True)
         self.query_tables.append(table_name)
 
-        entities = []
         entity = self._create_random_entity_dict()
         with self.ts.batch(table_name) as batch:
             for i in range(1, entity_count + 1):
                 entity['RowKey'] = entity['RowKey'] + str(i)
-                entities.append(batch.insert_entity(entity))
+                batch.insert_entity(entity)
         return table_name
 
     def _create_random_base_entity_class(self):
@@ -136,7 +137,7 @@ class StorageTableEntityTest(StorageTestCase):
         entity.large = 933311100
         entity.Birthday = datetime(1973, 10, 4)
         entity.birthday = datetime(1970, 10, 4)
-        entity.binary = None
+        entity.binary = EntityProperty(EdmType.BINARY, b'binary')
         entity.other = EntityProperty(EdmType.INT32, 20)
         entity.clsid = EntityProperty(
             EdmType.GUID, 'c9da6455-213d-42c9-9a79-3e9149a57833')
@@ -161,6 +162,7 @@ class StorageTableEntityTest(StorageTestCase):
                 'large': 933311100,
                 'Birthday': datetime(1973, 10, 4),
                 'birthday': datetime(1970, 10, 4),
+                'binary':EntityProperty(EdmType.BINARY, b'binary'),
                 'other': EntityProperty(EdmType.INT32, 20),
                 'clsid': EntityProperty(
                     EdmType.GUID,
@@ -201,6 +203,9 @@ class StorageTableEntityTest(StorageTestCase):
         self.assertEqual(entity.large, 933311100)
         self.assertEqual(entity.Birthday, datetime(1973, 10, 4, tzinfo=tzutc()))
         self.assertEqual(entity.birthday, datetime(1970, 10, 4, tzinfo=tzutc()))
+        self.assertIsInstance(entity.binary, EntityProperty)
+        self.assertEqual(entity.binary.type, EdmType.BINARY)
+        self.assertEqual(entity.binary.value, b'binary')
         self.assertIsInstance(entity.other, EntityProperty)
         self.assertEqual(entity.other.type, EdmType.INT32)
         self.assertEqual(entity.other.value, 20)
@@ -227,6 +232,7 @@ class StorageTableEntityTest(StorageTestCase):
         self.assertEqual(entity.large, '933311100')
         self.assertEqual(entity.Birthday, '1973-10-04T00:00:00Z')
         self.assertEqual(entity.birthday, '1970-10-04T00:00:00Z')
+        self.assertEqual(entity.binary, _encode_base64(b'binary'))
         self.assertIsInstance(entity.other, EntityProperty)
         self.assertEqual(entity.other.type, EdmType.INT32)
         self.assertEqual(entity.other.value, 20)
@@ -293,6 +299,8 @@ class StorageTableEntityTest(StorageTestCase):
             return EdmType.DATETIME
         if name == 'clsid':
             return EdmType.GUID     
+        if name == 'binary':
+            return EdmType.BINARY
 
     #--Test cases for entities ------------------------------------------
     @record

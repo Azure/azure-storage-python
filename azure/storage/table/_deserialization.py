@@ -29,6 +29,10 @@ from azure.common import (
 from .._common_conversion import (
     _decode_base64_to_bytes,
 )
+from .._error import (
+    _ERROR_DECRYPTION_FAILURE,
+    _validate_decryption_required,
+)
 from ._error import (
     _ERROR_TYPE_NOT_SUPPORTED,
     _ERROR_INVALID_PROPERTY_RESOLVER,
@@ -43,6 +47,10 @@ from .models import (
 from ..models import (
     _list,
     _HeaderDict,
+)
+from ._encryption import (
+    _decrypt_entity,
+    _extract_encryption_metadata,
 )
 
 def _get_continuation_from_response_headers(response):
@@ -82,17 +90,29 @@ _ENTITY_TO_PYTHON_CONVERSIONS = {
     EdmType.DATETIME: _from_entity_datetime,
 }
 
-
-def _convert_json_response_to_entity(response, property_resolver):
+def _convert_json_response_to_entity(response, property_resolver, require_encryption,
+                                     key_encryption_key, key_resolver):
+    '''
+    :param bool require_encryption:
+        If set, will enforce that the retrieved entity is encrypted and decrypt it.
+    :param object key_encryption_key:
+        The user-provided key-encryption-key. Must implement the following methods:
+        unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the 
+        string-specified algorithm.
+        get_kid()--returns a string key id for this key-encryption-key.
+     :param function key_resolver(kid):
+        The user-provided key resolver. Uses the kid string to return a key-encryption-key implementing
+        the interface defined above.
+    '''
     if response is None or response.body is None:
         return None
 
     root = loads(response.body.decode('utf-8'))
+    return _decrypt_and_deserialize_entity(root, property_resolver, require_encryption, 
+                                           key_encryption_key, key_resolver)
 
-    return _convert_json_to_entity(root, property_resolver)
 
-
-def _convert_json_to_entity(entry_element, property_resolver):
+def _convert_json_to_entity(entry_element, property_resolver, encrypted_properties):
     ''' Convert json response to entity.
 
     The entity format is:
@@ -145,12 +165,21 @@ def _convert_json_to_entity(entry_element, property_resolver):
 
         # use the property resolver if present
         if property_resolver:
-            mtype = property_resolver(partition_key, row_key, 
-                                      name, value, mtype)
+            # Clients are not expected to resolve these interal fields.
+            # This check avoids unexpected behavior from the user-defined 
+            # property resolver.
+            if not (name == '_ClientEncryptionMetadata1' or \
+                name == '_ClientEncryptionMetadata2'):
+                mtype = property_resolver(partition_key, row_key, 
+                                            name, value, mtype)
 
-            # throw if the type returned is not a valid edm type
-            if mtype and mtype not in _EDM_TYPES:
-                raise AzureException(_ERROR_TYPE_NOT_SUPPORTED.format(mtype))
+                # throw if the type returned is not a valid edm type
+                if mtype and mtype not in _EDM_TYPES:
+                    raise AzureException(_ERROR_TYPE_NOT_SUPPORTED.format(mtype))
+
+        # If the property was encrypted, supercede the results of the resolver and set as binary
+        if encrypted_properties is not None and name in encrypted_properties:
+            mtype = EdmType.BINARY
 
         # Add type for Int32
         if type(value) is int:
@@ -211,7 +240,8 @@ def _convert_json_response_to_tables(response):
     return tables
 
 
-def _convert_json_response_to_entities(response, property_resolver):
+def _convert_json_response_to_entities(response, property_resolver, require_encryption,
+                                       key_encryption_key, key_resolver):
     ''' Converts the response to tables class.
     '''
     if response is None or response.body is None:
@@ -225,13 +255,39 @@ def _convert_json_response_to_entities(response, property_resolver):
 
     if 'value' in root:
         for entity in root['value']:
-            entities.append(_convert_json_to_entity(entity, 
-                                                 property_resolver))
+            entity = _decrypt_and_deserialize_entity(entity, property_resolver, require_encryption, 
+                                           key_encryption_key, key_resolver)
+            entities.append(entity)
+
     else:
         entities.append(_convert_json_to_entity(entity, 
                                              property_resolver))
 
     return entities
+
+def _decrypt_and_deserialize_entity(entity, property_resolver, require_encryption, 
+                                    key_encryption_key, key_resolver):
+    _validate_decryption_required(require_encryption, key_encryption_key,
+                                          key_resolver)
+    entity_iv, encrypted_properties, content_encryption_key = None, None, None
+    try:
+        if (key_encryption_key is not None) or (key_resolver is not None):
+            entity_iv, encrypted_properties, content_encryption_key = \
+                _extract_encryption_metadata(entity, require_encryption, key_encryption_key, key_resolver)
+    except:
+        raise AzureException(_ERROR_DECRYPTION_FAILURE)
+
+    entity = _convert_json_to_entity(entity, property_resolver, encrypted_properties)
+            
+    if entity_iv is not None and encrypted_properties is not None and \
+        content_encryption_key is not None:
+        try:
+            entity = _decrypt_entity(entity, encrypted_properties, content_encryption_key,
+                            entity_iv)
+        except:
+            raise AzureException(_ERROR_DECRYPTION_FAILURE)
+
+    return entity
 
 def _extract_etag(response):
     ''' Extracts the etag from the response headers. '''

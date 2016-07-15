@@ -97,6 +97,31 @@ class TableService(StorageClient):
     so two entities in the same table may have different sets of properties. Developers 
     may choose to enforce a schema on the client side. A table may contain any number 
     of entities.
+
+    :ivar object key_encryption_key:
+        The key-encryption-key optionally provided by the user. If provided, will be used to
+        encrypt/decrypt in supported methods.
+        For methods requiring decryption, either the key_encryption_key OR the resolver must be provided.
+        If both are provided, the resolver will take precedence.
+        Must implement the following methods for APIs requiring encryption:
+        wrap_key(key)--wraps the specified key using an algorithm of the user's choice.
+        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
+        get_kid()--returns a string key id for this key-encryption-key.
+        Must implement the following methods for APIs requiring decryption:
+        unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the string-specified algorithm.
+        get_kid()--returns a string key id for this key-encryption-key.
+    :ivar function key_resolver(kid):
+        A function to resolve keys optionally provided by the user. If provided, will be used to decrypt in supported methods.
+        For methods requiring decryption, either the key_encryption_key OR
+        the resolver must be provided. If both are provided, the resolver will take precedence.
+        It uses the kid string to return a key-encryption-key implementing the interface defined above.
+    :ivar function(partition_key, row_key, property_name) encryption_resolver:
+        A function that takes in an entity's partition key, row key, and property name and returns 
+        a boolean that indicates whether that property should be encrypted.
+    :ivar bool require_encryption:
+        A flag that may be set to ensure that all messages successfully uploaded to the queue and all those downloaded and
+        successfully read from the queue are/were encrypted while on the server. If this flag is set, all required 
+        parameters for encryption/decryption must be provided. See the above comments on the key_encryption_key and resolver.
     '''
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
@@ -154,6 +179,10 @@ class TableService(StorageClient):
         else:
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
 
+        self.require_encryption = False
+        self.key_encryption_key = None
+        self.key_resolver = None
+        self.encryption_resolver = None
 
     def generate_account_shared_access_signature(self, resource_types, permission, 
                                         expiry, start=None, ip=None, protocol=None):
@@ -681,7 +710,13 @@ class TableService(StorageClient):
         :return: A generator which produces :class:`~azure.storage.table.models.Entity` objects.
         :rtype: :class:`~azure.storage.models.ListGenerator`
         '''
+
         operation_context = _OperationContext(location_lock=True)
+        if self.key_encryption_key is not None or self.key_resolver is not None:
+            # If query already requests all properties, no need to add the metadata columns
+            if select is not None and select != '*':
+                select += ',_ClientEncryptionMetadata1,_ClientEncryptionMetadata2'
+
         args = (table_name,)
         kwargs = {'filter': filter, 'select': select, 'max_results': num_results, 'marker': marker, 
                   'accept': accept, 'property_resolver': property_resolver, 'timeout': timeout, 
@@ -751,7 +786,9 @@ class TableService(StorageClient):
         }
 
         return self._perform_request(request, _convert_json_response_to_entities, 
-                                     [property_resolver], operation_context=_context)
+                                     [property_resolver, self.require_encryption,
+                                      self.key_encryption_key, self.key_resolver], 
+                                      operation_context=_context)
 
     def commit_batch(self, table_name, batch, timeout=None):
         '''
@@ -800,7 +837,7 @@ class TableService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         '''
-        batch = TableBatch()
+        batch = TableBatch(self.require_encryption, self.key_encryption_key, self.encryption_resolver)
         yield batch
         self.commit_batch(table_name, batch, timeout=timeout)
 
@@ -839,7 +876,9 @@ class TableService(StorageClient):
         request.path = _get_entity_path(table_name, partition_key, row_key)
         request.query['timeout'] = _int_to_str(timeout)
 
-        return self._perform_request(request, _convert_json_response_to_entity, [property_resolver])
+        return self._perform_request(request, _convert_json_response_to_entity,
+                                     [property_resolver, self.require_encryption,
+                                      self.key_encryption_key, self.key_resolver])
 
     def insert_entity(self, table_name, entity, timeout=None):
         '''
@@ -867,7 +906,9 @@ class TableService(StorageClient):
         :rtype: str
         '''
         _validate_not_none('table_name', table_name)
-        request = _insert_entity(entity)
+
+        request = _insert_entity(entity, self.require_encryption, self.key_encryption_key,
+                                 self.encryption_resolver)
         request.host_locations = self._get_host_locations()
         request.path = '/' + _to_str(table_name)
         request.query['timeout'] = _int_to_str(timeout)
@@ -900,8 +941,10 @@ class TableService(StorageClient):
         :rtype: str
         '''
         _validate_not_none('table_name', table_name)
-        request = _update_entity(entity, if_match)
+        request = _update_entity(entity, if_match, self.require_encryption, self.key_encryption_key,
+                                 self.encryption_resolver)        
         request.host_locations = self._get_host_locations()
+
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
         request.query['timeout'] = _int_to_str(timeout)
 
@@ -937,8 +980,11 @@ class TableService(StorageClient):
         :return: The etag of the entity.
         :rtype: str
         '''
+
         _validate_not_none('table_name', table_name)
-        request = _merge_entity(entity, if_match)
+
+        request = _merge_entity(entity, if_match, self.require_encryption,
+                                self.key_encryption_key)
         request.host_locations = self._get_host_locations()
         request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
@@ -1001,7 +1047,8 @@ class TableService(StorageClient):
         :rtype: str
         '''
         _validate_not_none('table_name', table_name)
-        request = _insert_or_replace_entity(entity)
+        request = _insert_or_replace_entity(entity, self.require_encryption, self.key_encryption_key,
+                                 self.encryption_resolver)
         request.host_locations = self._get_host_locations()
         request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])
@@ -1028,8 +1075,10 @@ class TableService(StorageClient):
         :return: The etag of the entity.
         :rtype: str
         '''
+
         _validate_not_none('table_name', table_name)
-        request = _insert_or_merge_entity(entity)
+        request = _insert_or_merge_entity(entity, self.require_encryption,
+                                          self.key_encryption_key)
         request.host_locations = self._get_host_locations()
         request.query['timeout'] = _int_to_str(timeout)
         request.path = _get_entity_path(table_name, entity['PartitionKey'], entity['RowKey'])

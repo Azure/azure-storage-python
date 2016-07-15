@@ -12,28 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-
-from cryptography.hazmat import backends
-from cryptography.hazmat.primitives.ciphers.algorithms import AES
-from cryptography.hazmat.primitives.ciphers.modes import CBC
-from cryptography.hazmat.primitives.padding import PKCS7
-from cryptography.hazmat.primitives.ciphers import Cipher
-import os
-from ._error import (
-    _validate_not_none,
-    _validate_key_encryption_key_wrap,
-    _validate_key_encryption_key_unwrap,
-    _validate_encryption_protocol_version,
-    _validate_kek_id,
-    _ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM
-)
-from ._constants import (
-    _ENCRYPTION_PROTOCOL_V1,
-)
-from ._common_conversion import (
+from ._common_conversion import(
     _encode_base64,
     _decode_base64_to_bytes,
 )
+from ._constants import(
+    _ENCRYPTION_PROTOCOL_V1,
+)
+from ._error import(
+    _ERROR_UNSUPPORTED_ENCRYPTION_VERSION,
+    _validate_not_none,
+    _validate_encryption_protocol_version,
+    _validate_key_encryption_key_unwrap,
+    _validate_kek_id,
+)
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers.algorithms import AES
+from cryptography.hazmat.primitives.ciphers.modes import CBC
+from cryptography.hazmat.primitives.ciphers import Cipher
 
 class _EncryptionAlgorithm(object):
     '''
@@ -108,112 +104,111 @@ class _EncryptionData:
         self.encryption_agent = encryption_agent
         self.wrapped_content_key = wrapped_content_key
 
-def _encrypt(message, key_encryption_key):
+def _encryption_data_to_dict(encryption_data):
     '''
-    Encrypts the given plain text message using AES256 in CBC mode with 128 bit padding.
-    Wraps the generated content-encryption-key using the user-provided key-encryption-key (kek). Returns
-    related encryption metadata along with the encrypted message.
+    Converts the specified EncryptionData object to a dictionary
+    for eventual serialization.
 
-    :param obj message:
-        The plaintext to be encrypted.
-    :param object key_encryption_key:
-        The user-provided key-encryption-key. Must implement the following methods:
-        wrap_key(key)--wraps the specified key using an algorithm of the user's choice.
-        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
-        get_kid()--returns a string key id for this key-encryption-key.
-    :return: A dictionary containing the encrypted message contents in an 'EncryptedMessageContents'
-        field and the encryption data in an 'EncryptionData' field.
+    :param _EncryptionData encryption_data:
+        The encryption data to be serialized.
+    :return: a dictionary equivalent of the encryption_data.
     :rtype: dict
     '''
 
-    _validate_not_none('message', message)
-    _validate_not_none('key_encryption_key', key_encryption_key)
-    _validate_key_encryption_key_wrap(key_encryption_key)
+    wrapped_content_key = {}
+    wrapped_content_key['KeyId'] = encryption_data.wrapped_content_key.key_id
+    wrapped_content_key['EncryptedKey'] = _encode_base64(encryption_data.wrapped_content_key.encrypted_key)
+    wrapped_content_key['Algorithm'] = encryption_data.wrapped_content_key.algorithm
 
-    content_encryption_key = os.urandom(32)
-    initialization_vector = os.urandom(16)
+    encryption_agent = {}
+    encryption_agent['Protocol'] = encryption_data.encryption_agent.protocol
+    encryption_agent['EncryptionAlgorithm'] = encryption_data.encryption_agent.encryption_algorithm
 
-    #Create AES cipher in CBC mode
-    backend = backends.default_backend()
-    algorithm = AES(content_encryption_key)
-    mode = CBC(initialization_vector)
-    cipher = Cipher(algorithm, mode, backend)
+    encryption_data_dict = {}
+    encryption_data_dict['WrappedContentKey'] = wrapped_content_key
+    encryption_data_dict['EncryptionAgent'] = encryption_agent
+    encryption_data_dict['ContentEncryptionIV'] = _encode_base64(encryption_data.content_encryption_IV)
+    
+    return encryption_data_dict
 
-    #PKCS7 with 16 byte blocks ensures compatibility with AES
-    padder = PKCS7(128).padder()
-    padded_data = padder.update(message) + padder.finalize() #encode converts the string to bytes
-
-    #encrypt the data
-    encryptor = cipher.encryptor()
-    encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
-
-    #encrypt the cek
-    wrapped_cek = key_encryption_key.wrap_key(content_encryption_key)
-
-    #build and return the resultant dictionary
-    wrapped_content_key = _WrappedContentKey(key_encryption_key.get_key_wrap_algorithm(), wrapped_cek, key_encryption_key.get_kid())
-    encryption_agent = _EncryptionAgent(_EncryptionAlgorithm.AES_CBC_256, _ENCRYPTION_PROTOCOL_V1)
-    encryption_data = _EncryptionData(initialization_vector, encryption_agent, wrapped_content_key)
-
-    return {'EncryptedMessageContents':encrypted_data, 'EncryptionData':encryption_data}
-
-def _decrypt(message, encryption_data, key_encryption_key=None, resolver=None):
+def _dict_to_encryption_data(encryption_data_dict):
     '''
-    Decrypts the given ciphertext using AES256 in CBC mode with 128 bit padding.
-    Unwraps the content-encryption-key using the user-provided or resolved key-encryption-key (kek). Returns the original plaintex.
+    Converts the specified dictionary to an EncryptionData object for
+    eventual use in decryption.
+    
+    :param dict encryption_data_dict:
+        The dictionary containing the encryption data.
+    :return: an _EncryptionData object built from the dictionary.
+    :rtype: _EncryptionData
+    '''
+    try:
+        if encryption_data_dict['EncryptionAgent']['Protocol'] != _ENCRYPTION_PROTOCOL_V1:
+            raise ValueError(_ERROR_UNSUPPORTED_ENCRYPTION_VERSION)
+    except KeyError:
+        raise ValueError(_ERROR_UNSUPPORTED_ENCRYPTION_VERSION)
+    wrapped_content_key = encryption_data_dict['WrappedContentKey']
+    wrapped_content_key = _WrappedContentKey(wrapped_content_key['Algorithm'],
+                                                _decode_base64_to_bytes(wrapped_content_key['EncryptedKey']),
+                                                wrapped_content_key['KeyId'])
 
-    :param str message:
-        The ciphertext to be decrypted.
+    encryption_agent = encryption_data_dict['EncryptionAgent']
+    encryption_agent = _EncryptionAgent(encryption_agent['EncryptionAlgorithm'],
+                                        encryption_agent['Protocol'])
+
+    encryption_data = _EncryptionData(_decode_base64_to_bytes(encryption_data_dict['ContentEncryptionIV']),
+                                        encryption_agent,
+                                        wrapped_content_key)
+    return encryption_data
+
+def _generate_AES_CBC_cipher(cek, iv):
+    '''
+    Generates and returns an encryption cipher for AES CBC using the given cek and iv.
+
+    :param bytes[] cek: The content encryption key for the cipher.
+    :param bytes[] iv: The initialization vector for the cipher.
+    :return: A cipher for encrypting in AES256 CBC.
+    :rtype: ~cryptography.hazmat.primitives.ciphers.Cipher
+    '''
+    
+    backend = default_backend()
+    algorithm = AES(cek)
+    mode = CBC(iv)
+    return Cipher(algorithm, mode, backend)
+
+def _validate_and_unwrap_cek(encryption_data, key_encryption_key=None, key_resolver=None):
+    '''
+    Extracts and returns the content_encryption_key stored in the encryption_data object
+    and performs necessary validation on all parameters.
     :param _EncryptionData encryption_data:
-        The metadata associated with this ciphertext.
-    :param object key_encryption_key:
-        The user-provided key-encryption-key. Must implement the following methods:
-        unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the string-specified algorithm.
-        get_kid()--returns a string key id for this key-encryption-key.
-    :param function resolver(kid):
-        The user-provided key resolver. Uses the kid string to return a key-encryption-key implementing the interface defined above.
-    :return: The decrypted plaintext.
-    :rtype: str
+        The encryption metadata of the retrieved value.
+    :param obj key_encryption_key:
+        The key_encryption_key used to unwrap the cek. Please refer to high-level service object
+        (i.e. TableService) instance variables for more details.
+    :param func key_resolver:
+        A function used that, given a key_id, will return a key_encryption_key. Please refer 
+        to high service object (i.e. TableService) instance variables for more details.
+    :return: the content_encryption_key stored in the encryption_data object
+    :rtype: bytes[]
     '''
 
     _validate_not_none('content_encryption_IV', encryption_data.content_encryption_IV)
     _validate_not_none('encrypted_key', encryption_data.wrapped_content_key.encrypted_key)
-    _validate_not_none('message', message)
     
     _validate_encryption_protocol_version(encryption_data.encryption_agent.protocol)
 
     content_encryption_key = None
 
-    #if the resolver exists, give priority to the key it finds
-    if resolver is not None:
-        key_encryption_key = resolver(encryption_data.wrapped_content_key.key_id)
+    # If the resolver exists, give priority to the key it finds.
+    if key_resolver is not None:
+        key_encryption_key = key_resolver(encryption_data.wrapped_content_key.key_id)
 
     _validate_not_none('key_encryption_key', key_encryption_key)
     _validate_key_encryption_key_unwrap(key_encryption_key)
     _validate_kek_id(encryption_data.wrapped_content_key.key_id, key_encryption_key.get_kid())
 
-    #Will throw an exception if the specified algorithm is not supported
+    # Will throw an exception if the specified algorithm is not supported.
     content_encryption_key = key_encryption_key.unwrap_key(encryption_data.wrapped_content_key.encrypted_key,
                                                            encryption_data.wrapped_content_key.algorithm)
     _validate_not_none('content_encryption_key', content_encryption_key)
 
-    if not ( _EncryptionAlgorithm.AES_CBC_256 == encryption_data.encryption_agent.encryption_algorithm):
-        raise ValueError(_ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM)
-
-    #Create decryption cipher
-    backend = backends.default_backend()
-    algorithm = AES(content_encryption_key)
-    mode = CBC(encryption_data.content_encryption_IV)
-    cipher = Cipher(algorithm, mode, backend)
-
-    #decrypt data
-    decrypted_data = message
-    decryptor = cipher.decryptor()
-    decrypted_data = (decryptor.update(decrypted_data) + decryptor.finalize())
-
-    #unpad data
-    unpadder = PKCS7(128).unpadder()
-    decrypted_data = (unpadder.update(decrypted_data) + unpadder.finalize())
-
-    return decrypted_data
-    
+    return content_encryption_key

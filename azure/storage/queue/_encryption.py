@@ -20,16 +20,18 @@ from .._constants import (
     _ENCRYPTION_PROTOCOL_V1,
 )
 from .._encryption import (
-    _encrypt,
-    _decrypt,
+    _encryption_data_to_dict,
+    _dict_to_encryption_data,
+    _generate_AES_CBC_cipher,
+    _validate_and_unwrap_cek,
     _EncryptionData,
     _EncryptionAgent,
     _WrappedContentKey,
+    _EncryptionAlgorithm
 )
 from json import (
     dumps,
     loads,
-    JSONDecodeError,
 )
 from base64 import(
     b64encode,
@@ -38,17 +40,31 @@ from base64 import(
 from .._error import(
     _ERROR_UNSUPPORTED_ENCRYPTION_VERSION,
     _ERROR_DECRYPTION_FAILURE,
-    _ERROR_MESSAGE_NOT_ENCRYPTED
+    _ERROR_MESSAGE_NOT_ENCRYPTED,
+    _ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM,
+    _validate_not_none,
+    _validate_key_encryption_key_wrap,
+    _validate_key_encryption_key_unwrap,
+    _validate_encryption_protocol_version,
+    _validate_kek_id,
 )
 from .._common_conversion import (
     _encode_base64,
     _decode_base64_to_bytes
 )
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers.algorithms import AES
+from cryptography.hazmat.primitives.ciphers.modes import CBC
+from cryptography.hazmat.primitives.padding import PKCS7
+from cryptography.hazmat.primitives.ciphers import Cipher
+import os
 
 def _encrypt_queue_message(message, key_encryption_key):
     '''
-    Accepts a plain text message and returns a json-formatted string
-    containing the encrypted message and the encryption metadata.
+    Encrypts the given plain text message using AES256 in CBC mode with 128 bit padding.
+    Wraps the generated content-encryption-key using the user-provided key-encryption-key (kek). 
+    Returns a json-formatted string containing the encrypted message and the encryption metadata.
+
     :param object message:
         The plain text messge to be encrypted.
     :param object key_encryption_key:
@@ -59,32 +75,42 @@ def _encrypt_queue_message(message, key_encryption_key):
     :return: A json-formatted string containing the encrypted message and the encryption metadata.
     :rtype: str
     '''
-    
-    #Queue encoding functions all return unicode strings, and encryption should operate on binary strings
-    encryption_result = _encrypt(message.encode('utf-8'), key_encryption_key)
 
-    #Build the dictionary structure
+    _validate_not_none('message', message)
+    _validate_not_none('key_encryption_key', key_encryption_key)
+    _validate_key_encryption_key_wrap(key_encryption_key)
+
+    # AES256 uses 256 bit (32 byte) keys and always with 16 byte blocks
+    content_encryption_key = os.urandom(32)
+    initialization_vector = os.urandom(16)
+
+    # Queue encoding functions all return unicode strings, and encryption should 
+    # operate on binary strings.
+    message = message.encode('utf-8')
+
+    # Create AES cipher in CBC mode.
+    cipher = _generate_AES_CBC_cipher(content_encryption_key, initialization_vector)
+
+    # PKCS7 with 16 byte blocks ensures compatibility with AES.
+    padder = PKCS7(128).padder()
+    padded_data = padder.update(message) + padder.finalize()
+
+    # Encrypt the data.
+    encryptor = cipher.encryptor()
+    encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
+
+    # Encrypt the cek.
+    wrapped_cek = key_encryption_key.wrap_key(content_encryption_key)
+
+    # Build the _EncryptionData structure.
+    wrapped_content_key = _WrappedContentKey(key_encryption_key.get_key_wrap_algorithm(), wrapped_cek, key_encryption_key.get_kid())
+    encryption_agent = _EncryptionAgent(_EncryptionAlgorithm.AES_CBC_256, _ENCRYPTION_PROTOCOL_V1)
+    encryption_data = _EncryptionData(initialization_vector, encryption_agent, wrapped_content_key)
+
+    # Build the dictionary structure.
     queue_message = {}
-    #Base64 encode the result before casting to a string
-    queue_message['EncryptedMessageContents'] = _encode_base64(encryption_result['EncryptedMessageContents'])
-    
-    wrapped_content_key = {}
-    wrapped_content_key['KeyId'] = encryption_result['EncryptionData'].wrapped_content_key.key_id
-    wrapped_content_key['EncryptedKey'] = b64encode(encryption_result['EncryptionData']
-                                                                .wrapped_content_key.encrypted_key).decode(encoding='utf-8')
-    wrapped_content_key['Algorithm'] = encryption_result['EncryptionData'].wrapped_content_key.algorithm
-
-    encryption_agent = {}
-    encryption_agent['Protocol'] = encryption_result['EncryptionData'].encryption_agent.protocol
-    encryption_agent['EncryptionAlgorithm'] = encryption_result['EncryptionData'].encryption_agent.encryption_algorithm
-
-    encryption_data = {}
-    encryption_data['WrappedContentKey'] = wrapped_content_key
-    encryption_data['EncryptionAgent'] = encryption_agent
-    encryption_data['ContentEncryptionIV'] = b64encode(encryption_result['EncryptionData']
-                                                                    .content_encryption_IV).decode(encoding='utf-8')
-
-    queue_message['EncryptionData'] = encryption_data
+    queue_message['EncryptedMessageContents'] = _encode_base64(encrypted_data)
+    queue_message['EncryptionData'] = _encryption_data_to_dict(encryption_data)
 
     return dumps(queue_message)
 
@@ -109,32 +135,53 @@ def _decrypt_queue_message(message, require_encryption, key_encryption_key, reso
     try:
         message = loads(message)
 
-        if message['EncryptionData']['EncryptionAgent']['Protocol'] == _ENCRYPTION_PROTOCOL_V1:
-            #Build data structures from dictionary
-            encryption_data = message['EncryptionData']
-
-            wrapped_content_key = encryption_data['WrappedContentKey']
-            wrapped_content_key = _WrappedContentKey(wrapped_content_key['Algorithm'],
-                                                        b64decode(wrapped_content_key['EncryptedKey'].encode(encoding='utf-8')),
-                                                        wrapped_content_key['KeyId'])
-
-            encryption_agent = encryption_data['EncryptionAgent']
-            encryption_agent = _EncryptionAgent(encryption_agent['EncryptionAlgorithm'],
-                                                encryption_agent['Protocol'])
-
-            encryption_data = _EncryptionData(b64decode(encryption_data['ContentEncryptionIV'].encode(encoding='utf-8')),
-                                                encryption_agent,
-                                                wrapped_content_key)
-            decoded_data = _decode_base64_to_bytes(message['EncryptedMessageContents'])
-            return _decrypt(decoded_data, encryption_data, key_encryption_key, resolver).decode('utf-8')
-        else:
-            raise ValueError(_ERROR_UNSUPPORTED_ENCRYPTION_VERSION)
-    except (KeyError, JSONDecodeError) as e:
-        #Message was not json formatted and so was not encrypted
-        #Or the user provided a json formatted message
+        encryption_data = _dict_to_encryption_data(message['EncryptionData'])
+        decoded_data = _decode_base64_to_bytes(message['EncryptedMessageContents'])
+    except (KeyError, ValueError) as e:
+        # Message was not json formatted and so was not encrypted
+        # or the user provided a json formatted message.
         if require_encryption:
             raise ValueError(_ERROR_MESSAGE_NOT_ENCRYPTED)
         else:
             return message
-    except:
+    try:
+        return _decrypt(decoded_data, encryption_data, key_encryption_key, resolver).decode('utf-8')
+    except Exception as e:
         raise AzureException(_ERROR_DECRYPTION_FAILURE)
+
+def _decrypt(message, encryption_data, key_encryption_key=None, resolver=None):
+    '''
+    Decrypts the given ciphertext using AES256 in CBC mode with 128 bit padding.
+    Unwraps the content-encryption-key using the user-provided or resolved key-encryption-key (kek). Returns the original plaintex.
+
+    :param str message:
+        The ciphertext to be decrypted.
+    :param _EncryptionData encryption_data:
+        The metadata associated with this ciphertext.
+    :param object key_encryption_key:
+        The user-provided key-encryption-key. Must implement the following methods:
+        unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the string-specified algorithm.
+        get_kid()--returns a string key id for this key-encryption-key.
+    :param function resolver(kid):
+        The user-provided key resolver. Uses the kid string to return a key-encryption-key implementing the interface defined above.
+    :return: The decrypted plaintext.
+    :rtype: str
+    '''
+    _validate_not_none('message', message)
+    content_encryption_key = _validate_and_unwrap_cek(encryption_data, key_encryption_key, resolver)
+
+    if not ( _EncryptionAlgorithm.AES_CBC_256 == encryption_data.encryption_agent.encryption_algorithm):
+        raise ValueError(_ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM)
+
+    cipher = _generate_AES_CBC_cipher(content_encryption_key, encryption_data.content_encryption_IV)
+
+    #decrypt data
+    decrypted_data = message
+    decryptor = cipher.decryptor()
+    decrypted_data = (decryptor.update(decrypted_data) + decryptor.finalize())
+
+    #unpad data
+    unpadder = PKCS7(128).unpadder()
+    decrypted_data = (unpadder.update(decrypted_data) + unpadder.finalize())
+
+    return decrypted_data
