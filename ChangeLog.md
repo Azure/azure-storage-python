@@ -11,6 +11,9 @@
 - Added support for automatic retries. A retry function taking a RetryContext object and returning a retry wait time (or None for no retry) may be set on the service client. The default retry has an exponential back-off and is defined in the retry class.
 - Added support for reading from secondary. Note that this only applies for RA-GRS accounts. If the client location_mode is set to LocationMode.SECONDARY, read requests which may be sent to secondary will be.
 
+### Table:
+- Fixed a bug with Table Entity where EDM bound checks would not allow for full resolution of 32/64-bit values.
+
 ## Version 0.32.0:
 
 ### All:

@@ -92,7 +92,7 @@ def _to_entity_int32(value):
         value = long(value)
     else:
         value = int(value)
-    if value >= 2**15 or value < -(2**15):
+    if value >= 2**31 or value < -(2**31):
         raise TypeError(_ERROR_VALUE_TOO_LARGE.format(str(value), EdmType.INT32))       
     return None, value
 
@@ -101,7 +101,7 @@ def _to_entity_int64(value):
         ivalue = long(value)
     else:
         ivalue = int(value)
-    if ivalue >= 2**31 or ivalue < -(2**31):
+    if ivalue >= 2**63 or ivalue < -(2**63):
         raise TypeError(_ERROR_VALUE_TOO_LARGE.format(str(value), EdmType.INT64))       
     return EdmType.INT64, str(value)
 
