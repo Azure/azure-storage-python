@@ -124,7 +124,7 @@ Contribute Code or Provide Feedback
 
 If you would like to become an active contributor to this project, please
 follow the instructions provided in `Azure Projects Contribution
-Guidelines`_. You can find more details for contributing in the [CONTRIBUTING.md doc](CONTRIBUTING.md).
+Guidelines`_. You can find more details for contributing in the `CONTRIBUTING.md doc`_.
 
 If you encounter any bugs with the library, please file an issue in the
 `Issues`_ section of the project.
@@ -147,3 +147,4 @@ Learn More
 .. _Issues: https://github.com/Azure/azure-storage-python/issues
 .. _Azure Storage Service: http://azure.microsoft.com/en-us/documentation/services/storage/
 .. _Azure Storage Team Blog: http://blogs.msdn.com/b/windowsazurestorage/
+.. _CONTRIBUTING.md doc: CONTRIBUTING.md
