@@ -334,11 +334,16 @@ class StorageTableEntityTest(StorageTestCase):
 
         # Act
         dict32 = self._create_random_base_entity_dict()
-        dict32['large'] = EntityProperty(EdmType.INT32, 2**15)
+        dict32['large'] = EntityProperty(EdmType.INT32, 2**31)
 
         # Assert
-        with self.assertRaisesRegexp(TypeError, 
-                               '{0} is too large to be cast to type Edm.Int32.'.format(2**15)):
+        with self.assertRaisesRegexp(TypeError,
+                               '{0} is too large to be cast to type Edm.Int32.'.format(2**31)):
+            self.ts.insert_entity(self.table_name, dict32)
+
+        dict32['large'] = EntityProperty(EdmType.INT32, -(2**31 + 1))
+        with self.assertRaisesRegexp(TypeError,
+                                '{0} is too large to be cast to type Edm.Int32.'.format(-(2**31 + 1))):
             self.ts.insert_entity(self.table_name, dict32)
 
     @record
@@ -347,11 +352,16 @@ class StorageTableEntityTest(StorageTestCase):
 
         # Act
         dict64 = self._create_random_base_entity_dict()
-        dict64['large'] = 2**31
+        dict64['large'] = EntityProperty(EdmType.INT64, 2**63)
 
         # Assert
-        with self.assertRaisesRegexp(TypeError, 
-                               '{0} is too large to be cast to type Edm.Int64.'.format(2**31)):
+        with self.assertRaisesRegexp(TypeError,
+                               '{0} is too large to be cast to type Edm.Int64.'.format(2**63)):
+            self.ts.insert_entity(self.table_name, dict64)
+
+        dict64['large'] = EntityProperty(EdmType.INT64, -(2**63 + 1))
+        with self.assertRaisesRegexp(TypeError,
+                                '{0} is too large to be cast to type Edm.Int64.'.format(-(2**63 + 1))):
             self.ts.insert_entity(self.table_name, dict64)
 
     def test_insert_entity_missing_pk(self):
