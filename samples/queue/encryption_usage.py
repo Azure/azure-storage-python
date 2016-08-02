@@ -26,15 +26,22 @@ from cryptography.hazmat.primitives.hashes import SHA1
 from os import urandom
 import uuid
 
+# Sample implementations of the encryption-related interfaces.
 class KeyWrapper:
-    def __init__(self, kid='key1'):
+    def __init__(self, kid):
         self.kek = urandom(32) 
         self.backend = default_backend()
-        self.kid = kid
-    def wrap_key(self, key):
-        return aes_key_wrap(self.kek, key, self.backend)
+        self.kid = 'local:' + kid
+    def wrap_key(self, key, algorithm='A256KW'):
+        if algorithm == 'A256KW':
+            return aes_key_wrap(self.kek, key, self.backend)
+        else:
+            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
     def unwrap_key(self, key, algorithm):
-        return aes_key_unwrap(self.kek, key, self.backend)
+        if algorithm == 'A256KW':
+            return aes_key_unwrap(self.kek, key, self.backend)
+        else:
+            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
     def get_key_wrap_algorithm(self):
         return 'A256KW'
     def get_kid(self):
@@ -49,26 +56,32 @@ class KeyResolver:
         return self.keys[kid]
 
 class RSAKeyWrapper:
-    def __init__(self, kid='key2'):
+    def __init__(self, kid):
         self.private_key = generate_private_key(public_exponent = 65537,
                                                 key_size = 2048,
                                                 backend = default_backend())
         self.public_key = self.private_key.public_key()
-        self.kid = kid
-    def wrap_key(self, key):
-        return self.public_key.encrypt(key,
-                                 OAEP(
-                                     mgf = MGF1(algorithm=SHA1()),
-                                     algorithm=SHA1(),
-                                     label=None)
-                                 )
+        self.kid = 'local:' + kid
+    def wrap_key(self, key, algorithm='RSA'):
+        if algorithm == 'RSA':
+            return self.public_key.encrypt(key,
+                                     OAEP(
+                                         mgf = MGF1(algorithm=SHA1()),
+                                         algorithm=SHA1(),
+                                         label=None)
+                                     )
+        else:
+            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
     def unwrap_key(self, key, algorithm):
-        return self.private_key.decrypt(key,
-                                    OAEP(
-                                        mgf=MGF1(algorithm=SHA1()),
-                                        algorithm=SHA1(),
-                                        label=None)
-                                    )
+        if algorithm == 'RSA':
+            return self.private_key.decrypt(key,
+                                        OAEP(
+                                            mgf=MGF1(algorithm=SHA1()),
+                                            algorithm=SHA1(),
+                                            label=None)
+                                        )
+        else:
+            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
     def get_key_wrap_algorithm(self):
         return 'RSA'
     def get_kid(self):
@@ -84,7 +97,7 @@ class QueueEncryptionSamples():
 
         self.put_encrypted_message()
         self.peek_get_update_encrypted()
-        self.decrypt_with_resolver()
+        self.decrypt_with_key_encryption_key()
         self.require_encryption()
         self.alternate_key_algorithms()
 
@@ -104,7 +117,7 @@ class QueueEncryptionSamples():
         #outlined in the get/update message documentation.
         #Setting the key_encryption_key property will tell these
         #APIs to encrypt messages.
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
         self.service.put_message(queue_name, 'message1')
 
         self.service.delete_queue(queue_name)
@@ -113,13 +126,14 @@ class QueueEncryptionSamples():
         queue_name = self._create_queue()
 
         # The KeyWrapper is still needed for encryption
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
         self.service.put_message(queue_name, 'message1')
 
         # KeyResolver is used to resolve a key from its id.
         # Its interface is defined in the get/peek messages documentation.
-        self.service.key_resolver = KeyResolver()
-        self.service.key_resolver.put_key(self.service.key_encryption_key)
+        key_resolver = KeyResolver()
+        key_resolver.put_key(self.service.key_encryption_key)
+        self.service.key_resolver_function = key_resolver.resolve_key
         self.service.peek_messages(queue_name)
         messages = self.service.get_messages(queue_name)
         self.service.update_message(queue_name,
@@ -145,9 +159,9 @@ class QueueEncryptionSamples():
         except:
             pass
 
-        self.service.key_encryption_key = KeyWrapper()
-        self.service.key_resolver = KeyResolver()
-        self.service.key_resolver.put_key(self.service.key_encryption_key)
+        self.service.key_encryption_key = KeyWrapper('key1')
+        self.service.key_resolver_function = KeyResolver()
+        self.service.key_resolver_function.put_key(self.service.key_encryption_key)
 
         #If encryption is required, but a retrieved message is not
         #encrypted, the method will throw.
@@ -163,13 +177,14 @@ class QueueEncryptionSamples():
 
         #To use an alternate method of key wrapping, simply set the 
         #key_encryption_key property to a wrapper that uses a different algorithm.
-        self.service.key_encryption_key = RSAKeyWrapper()
-        self.service.key_resolver = None
+        self.service.key_encryption_key = RSAKeyWrapper('key2')
+        self.service.key_resolver_function = None
 
         self.service.put_message(queue_name, 'message')
 
-        self.service.key_resolver = KeyResolver()
-        self.service.key_resolver.put_key(self.service.key_encryption_key)
+        key_resolver = KeyResolver()
+        key_resolver.put_key(self.service.key_encryption_key)
+        self.service.key_resolver_function = key_resolver.resolve_key
         message = self.service.peek_messages(queue_name)
 
         self.service.delete_queue(queue_name)
@@ -181,13 +196,13 @@ class QueueEncryptionSamples():
         # decryption as defined in the get/peek messages documentation. 
         # Since the key_encryption_key property is still set, messages
         # will be decrypted automatically.
-        kek = KeyWrapper()
+        kek = KeyWrapper('key1')
         self.service.key_encryption_key = kek
         self.service.put_message(queue_name, 'message1')
 
         #When decrypting, if both a kek and resolver are set,
         #the resolver will take precedence. Remove the resolver to just use the kek.
-        self.service.key_resolver = None
+        self.service.key_resolver_function = None
         messages = self.service.peek_messages(queue_name)
 
         self.service.delete_queue(queue_name)

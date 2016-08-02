@@ -39,6 +39,7 @@ from ._serialization import (
 )
 from ._error import (
     _ERROR_STORAGE_MISSING_INFO,
+    _ERROR_DECRYPTION_FAILURE,
     _http_error_handler,
 )
 
@@ -247,6 +248,10 @@ class StorageClient(object):
                         raise AzureException('{}: {}'.format(ex.__class__.__name__, ex.args[0]))
 
             except AzureException as ex:
+                # Decryption failures (invalid objects, invalid algorithms, data unencrypted in strict mode, etc)
+                # will not be resolved with retries.
+                if str(ex) == _ERROR_DECRYPTION_FAILURE:
+                    raise ex
                 # Determine whether a retry should be performed and if so, how 
                 # long to wait before performing retry.
                 retry_interval = self.retry(retry_context)

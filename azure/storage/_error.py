@@ -66,8 +66,11 @@ _ERROR_INVALID_KID = \
     'Provided or resolved key-encryption-key does not match the id of key used to encrypt.'
 _ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM = \
     'Specified encryption algorithm is not supported.'
-_ERROR_MESSAGE_NOT_ENCRYPTED = \
-    'Encryption required, but retrived message is not encrypted.'
+_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION = 'The require_encryption flag is set, but encryption is not supported' + \
+    ' for this method.'
+_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM = 'Unknown key wrap algorithm.'
+_ERROR_DATA_NOT_ENCRYPTED = 'Encryption required, but received data does not contain appropriate metatadata.' + \
+    'Data was either not encrypted or metadata has been lost.'
 
 def _dont_fail_on_exist(error):
     ''' don't throw exception if the resource exists.
@@ -98,7 +101,6 @@ def _http_error_handler(http_error):
 def _validate_type_bytes(param_name, param):
     if not isinstance(param, bytes):
         raise TypeError(_ERROR_VALUE_SHOULD_BE_BYTES.format(param_name))
-
 
 def _validate_not_none(param_name, param):
     if param is None:
@@ -142,3 +144,7 @@ def _validate_encryption_protocol_version(encryption_protocol):
 def _validate_kek_id(kid, resolved_id):
     if not (kid == resolved_id):
         raise ValueError(_ERROR_INVALID_KID)
+
+def _validate_encryption_unsupported(require_encryption, key_encryption_key):
+    if require_encryption or (key_encryption_key is not None):
+        raise ValueError(_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION)

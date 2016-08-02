@@ -17,6 +17,7 @@ from .._error import(
     _ERROR_UNSUPPORTED_ENCRYPTION_VERSION,
     _ERROR_DECRYPTION_FAILURE,
     _ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM,
+    _ERROR_DATA_NOT_ENCRYPTED,
     _validate_not_none,
     _validate_key_encryption_key_wrap,
     _validate_key_encryption_key_unwrap,
@@ -29,7 +30,7 @@ from .._common_conversion import(
     _decode_base64_to_bytes,
 )
 from .._encryption import(
-    _encryption_data_to_dict,
+    _generate_encryption_data_dict,
     _dict_to_encryption_data,
     _generate_AES_CBC_cipher,
     _validate_and_unwrap_cek,
@@ -40,7 +41,6 @@ from .._encryption import(
 )
 from ._error import(
     _ERROR_UNSUPPORTED_TYPE_FOR_ENCRYPTION,
-    _ERROR_ENTITY_NOT_ENCRYPTED,
 )
 from .models import(
     Entity,
@@ -54,10 +54,7 @@ from json import(
 import os
 from copy import deepcopy
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers.algorithms import AES
-from cryptography.hazmat.primitives.ciphers.modes import CBC
 from cryptography.hazmat.primitives.padding import PKCS7
-from cryptography.hazmat.primitives.ciphers import Cipher
 from cryptography.hazmat.primitives.hashes import(
     Hash,
     SHA256,
@@ -119,7 +116,7 @@ def _encrypt_entity(entity, key_encryption_key, encryption_resolver):
 
             propertyIV = _generate_property_iv(entity_initialization_vector,
                                                entity['PartitionKey'], entity['RowKey'],
-                                               key)
+                                               key, False)
 
             # Encode the strings for encryption.
             value = value.encode('utf-8')
@@ -139,12 +136,12 @@ def _encrypt_entity(entity, key_encryption_key, encryption_resolver):
 
         encrypted_entity[key] = value
 
-    encrypted_properties = '[' + ', '.join(encrypted_properties) + ']'
+    encrypted_properties = dumps(encrypted_properties)
     
     # Generate the metadata iv.
     metadataIV = _generate_property_iv(entity_initialization_vector, 
                           entity['PartitionKey'], entity['RowKey'],
-                          '_ClientEncryptionMetadata2')
+                          '_ClientEncryptionMetadata2', False)
 
     encrypted_properties = encrypted_properties.encode('utf-8')
 
@@ -158,18 +155,13 @@ def _encrypt_entity(entity, key_encryption_key, encryption_resolver):
 
     encrypted_entity['_ClientEncryptionMetadata2'] = EntityProperty(EdmType.BINARY, encrypted_data)
 
-    # Encrypt the cek.
-    wrapped_cek = key_encryption_key.wrap_key(content_encryption_key)
+    encryption_data = _generate_encryption_data_dict(key_encryption_key, content_encryption_key,
+                                                     entity_initialization_vector)
 
-    # Build the _EncryptionData structure.
-    wrapped_content_key = _WrappedContentKey(key_encryption_key.get_key_wrap_algorithm(), wrapped_cek, key_encryption_key.get_kid())
-    encryption_agent = _EncryptionAgent(_EncryptionAlgorithm.AES_CBC_256, _ENCRYPTION_PROTOCOL_V1)
-    encryption_data = _EncryptionData(entity_initialization_vector, encryption_agent, wrapped_content_key)
-
-    encrypted_entity['_ClientEncryptionMetadata1'] = dumps(_encryption_data_to_dict(encryption_data))
+    encrypted_entity['_ClientEncryptionMetadata1'] = dumps(encryption_data)
     return encrypted_entity
 
-def _decrypt_entity(entity, encrypted_properties_list, content_encryption_key, entityIV):
+def _decrypt_entity(entity, encrypted_properties_list, content_encryption_key, entityIV, isJavaV1):
     '''
     Decrypts the specified entity using AES256 in CBC mode with 128 bit padding. Unwraps the CEK 
     using either the specified KEK or the key returned by the key_resolver. Properties 
@@ -198,7 +190,7 @@ def _decrypt_entity(entity, encrypted_properties_list, content_encryption_key, e
 
                 propertyIV = _generate_property_iv(entityIV,
                                                    entity['PartitionKey'], entity['RowKey'],
-                                                   property)
+                                                   property, isJavaV1)
                 cipher = _generate_AES_CBC_cipher(content_encryption_key,
                                                   propertyIV)
 
@@ -238,8 +230,9 @@ def _extract_encryption_metadata(entity, require_encryption, key_encryption_key,
     :param function key_resolver(kid):
         The user-provided key resolver. Uses the kid string to return a key-encryption-key implementing
         the interface defined above.
-    :returns: a tuple containing the entity iv, the list of encrypted properties, and the entity cek.
-    :rtype: tuple (bytes[], list, bytes[])
+    :returns: a tuple containing the entity iv, the list of encrypted properties, the entity cek,
+        and whether the entity was encrypted using JavaV1.
+    :rtype: tuple (bytes[], list, bytes[], bool)
     '''
     _validate_not_none('entity', entity)
     
@@ -252,16 +245,22 @@ def _extract_encryption_metadata(entity, require_encryption, key_encryption_key,
         if require_encryption:
             raise ValueError(_ERROR_ENTITY_NOT_ENCRYPTED)
         else:
-            return (None,None,None)
+            return (None,None,None,None)
 
     if not(encryption_data.encryption_agent.encryption_algorithm == _EncryptionAlgorithm.AES_CBC_256):
         raise ValueError(_ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM)
 
     content_encryption_key = _validate_and_unwrap_cek(encryption_data, key_encryption_key, key_resolver)
 
+    # Special check for compatibility with Java V1 encryption protocol.
+    isJavaV1 = (encryption_data.key_wrapping_metadata is None) or \
+        ((encryption_data.encryption_agent.protocol == _ENCRYPTION_PROTOCOL_V1) and \
+        'EncryptionLibrary' in encryption_data.key_wrapping_metadata and \
+        'Java' in encryption_data.key_wrapping_metadata['EncryptionLibrary'])
+
     metadataIV = _generate_property_iv(encryption_data.content_encryption_IV,
                                       entity['PartitionKey'], entity['RowKey'],
-                                      '_ClientEncryptionMetadata2')
+                                      '_ClientEncryptionMetadata2', isJavaV1)
 
     cipher = _generate_AES_CBC_cipher(content_encryption_key, metadataIV)
 
@@ -275,19 +274,26 @@ def _extract_encryption_metadata(entity, require_encryption, key_encryption_key,
 
     encrypted_properties_list = encrypted_properties_list.decode('utf-8')
 
-    # Strip the square braces from the ends and split string into list.
-    encrypted_properties_list = encrypted_properties_list[1:-1]
-    encrypted_properties_list = encrypted_properties_list.split(', ')
+    if isJavaV1:
+        # Strip the square braces from the ends and split string into list.
+        encrypted_properties_list = encrypted_properties_list[1:-1]
+        encrypted_properties_list = encrypted_properties_list.split(', ')
+    else:
+        encrypted_properties_list = loads(encrypted_properties_list)
 
-    return (encryption_data.content_encryption_IV, encrypted_properties_list, content_encryption_key)
+    return (encryption_data.content_encryption_IV, encrypted_properties_list, content_encryption_key, isJavaV1)
 
-def _generate_property_iv(entity_iv, pk, rk, property_name):
+def _generate_property_iv(entity_iv, pk, rk, property_name, isJavaV1):
     '''
     Uses the entity_iv, partition key, and row key to generate and return
     the iv for the specified property.
     '''
     digest = Hash(SHA256(), default_backend())
-    digest.update(entity_iv +
-                    (pk + rk + property_name).encode('utf-8'))
+    if not isJavaV1:
+        digest.update(entity_iv +
+                      (rk + pk + property_name).encode('utf-8'))
+    else:
+        digest.update(entity_iv + 
+                      (pk + rk + property_name).encode('utf-8'))
     propertyIV = digest.finalize()
     return propertyIV[:16]

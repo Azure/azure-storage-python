@@ -19,13 +19,13 @@ from .._common_conversion import (
 from .._error import (
     _validate_not_none,
     _validate_encryption_required,
+    _validate_encryption_unsupported,
 )
 from .._serialization import (
     _get_request_body,
 )
 from ._error import (
     _validate_entity,
-    _ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION,
 )
 from ._serialization import (
     _convert_entity_to_json,
@@ -120,8 +120,7 @@ def _merge_entity(entity, if_match, require_encryption=False, key_encryption_key
     '''
     _validate_not_none('if_match', if_match)
     _validate_entity(entity)
-    if require_encryption or (key_encryption_key is not None):
-        raise ValueError(_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION)
+    _validate_encryption_unsupported(require_encryption, key_encryption_key)
 
     request = HTTPRequest()
     request.method = 'MERGE'
@@ -186,8 +185,7 @@ def _insert_or_merge_entity(entity, require_encryption=False, key_encryption_key
         a boolean that indicates whether that property should be encrypted.
     '''
     _validate_entity(entity)
-    if require_encryption or (key_encryption_key is not None):
-        raise ValueError(_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION)
+    _validate_encryption_unsupported(require_encryption, key_encryption_key)
 
     request = HTTPRequest()
     request.method = 'MERGE'

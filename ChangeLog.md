@@ -2,17 +2,6 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version 0.34.0:
-
-### Queue:
-- Client-side encryption. Allows a user to encrypt queue messages before uploading them by specifying fields on the queueservice. See ~samples.queue.encryption_usuage.py for samples.
-
-### Table: 
-- Client-side encryption. Allows a user to encrypt specified properties on an entity before uploading them by providing an encryption policy. See ~samples.table.encryption_usage.py for samples.
-
-### Blob:
-- Client-side encryption. Allows a user to encrypt entire blobs (not individual blocks) before uploading them by providing an encryption policy. See ~samples.blob.encryption_usage.py for samples.
-
 ## Version 0.33.0:
 
 ### All:
@@ -22,8 +11,15 @@
 - Added support for automatic retries. A retry function taking a RetryContext object and returning a retry wait time (or None for no retry) may be set on the service client. The default retry has an exponential back-off and is defined in the retry class.
 - Added support for reading from secondary. Note that this only applies for RA-GRS accounts. If the client location_mode is set to LocationMode.SECONDARY, read requests which may be sent to secondary will be.
 
+### Blob:
+- Client-side encryption. Allows a user to encrypt entire blobs (not individual blocks) before uploading them by providing an encryption policy. See ~samples.blob.encryption_usage.py for samples.
+
 ### Table:
 - Fixed a bug with Table Entity where EDM bound checks would not allow for full resolution of 32/64-bit values.
+- Client-side encryption. Allows a user to encrypt specified properties on an entity before uploading them by providing an encryption policy. See ~samples.table.encryption_usage.py for samples.
+
+### Queue:
+- Client-side encryption. Allows a user to encrypt queue messages before uploading them by specifying fields on the queueservice. See ~samples.queue.encryption_usuage.py for samples.
 
 ## Version 0.32.0:
 

@@ -31,7 +31,7 @@ from .._common_conversion import (
 )
 from .._serialization import (
     _get_request_body,
-    _get_request_body_bytes_only,
+    _get_data_bytes_only,
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
     _add_metadata_headers,
@@ -2265,7 +2265,7 @@ class FileService(StorageClient):
         }
         _validate_and_format_range_headers(
             request, start_range, end_range)
-        request.body = _get_request_body_bytes_only('data', data)
+        request.body = _get_data_bytes_only('data', data)
 
         if validate_content:
             computed_md5 = _get_content_md5(request.body)

@@ -343,7 +343,9 @@ class BlockBlobSamples():
 
         # Open mode
         # Append to the blob instead of starting from the beginning
-        blob = self.service.get_blob_to_path(container_name, blob_name, OUTPUT_FILE_PATH, open_mode='ab')
+        # Append streams are not seekable and so must be downloaded serially by setting max_connections=1.
+        blob = self.service.get_blob_to_path(container_name, blob_name, OUTPUT_FILE_PATH, open_mode='ab',
+                                             max_connections=1)
         content_length = blob.properties.content_length # will be the same, but local blob length will be longer
 
         # Download range

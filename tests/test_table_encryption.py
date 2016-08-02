@@ -25,11 +25,6 @@ from dateutil.tz import tzutc
 from os import urandom
 from json import loads
 from copy import deepcopy
-from tests.test_encryption_helper import (
-    KeyWrapper,
-    KeyResolver,
-    RSAKeyWrapper,
-)
 from azure.storage.table import (
     Entity,
     EntityProperty,
@@ -37,7 +32,14 @@ from azure.storage.table import (
     EdmType,
     TableBatch,
 )
-from azure.storage.models import AccessPolicy
+from azure.storage.models import(
+    AccessPolicy,
+)
+from .test_encryption_helper import(
+    KeyWrapper,
+    KeyResolver,
+    RSAKeyWrapper,
+)
 from azure.storage.table.models import(
     TablePayloadFormat,
     TablePermissions,
@@ -262,7 +264,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         self.ts.require_encryption = True
         entity = self._create_default_entity_dict()
         entity['sex'] = EntityProperty(EdmType.STRING, entity['sex'], True)
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -278,7 +280,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         entity = self._create_default_entity_for_encryption()
         # Only want to encrypt one property in this test
         entity['name'] = 'John Doe' 
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -293,7 +295,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -308,10 +310,10 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         key_resolver = KeyResolver()
         key_resolver.put_key(self.ts.key_encryption_key)
-        self.ts.key_resolver = key_resolver.resolve_key
+        self.ts.key_resolver_function = key_resolver.resolve_key
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -327,8 +329,8 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_random_entity_class()
-        self.ts.encryption_resolver = self._default_encryption_resolver
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.encryption_resolver_function = self._default_encryption_resolver
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -349,8 +351,8 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        self.ts.encryption_resolver = self._default_encryption_resolver
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.encryption_resolver_function = self._default_encryption_resolver
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -363,7 +365,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -387,7 +389,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = RSAKeyWrapper()
+        self.ts.key_encryption_key = RSAKeyWrapper('key2')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -401,8 +403,8 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_random_entity_class()
-        self.ts.encryption_resolver = self._default_encryption_resolver
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.encryption_resolver_function = self._default_encryption_resolver
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -420,7 +422,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
 
         self.ts.key_encryption_key.get_key_wrap_algorithm = None
         try:
@@ -429,13 +431,13 @@ class StorageTableEncryptionTest(StorageTestCase):
         except AttributeError as e:
             self.assertEqual(str(e), _ERROR_OBJECT_INVALID.format('key encryption key', 'get_key_wrap_algorithm'))
 
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
 
         self.ts.key_encryption_key.get_kid = None
         with self.assertRaises(AttributeError):
             self.ts.insert_entity(self.table_name, entity)
 
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
 
         self.ts.key_encryption_key.wrap_key = None
         with self.assertRaises(AttributeError):
@@ -446,7 +448,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         self.ts.key_encryption_key.unwrap_key = None
@@ -456,7 +458,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         except AzureException as e:
             self.assertEqual(str(e), _ERROR_DECRYPTION_FAILURE)
 
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
 
         self.ts.key_encryption_key.get_kid = None
         with self.assertRaises(AzureException):
@@ -467,7 +469,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        valid_key = KeyWrapper()
+        valid_key = KeyWrapper('key1')
 
         # Act
         invalid_key_1 = lambda: None #functions are objects, so this effectively creates an empty object
@@ -499,7 +501,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        valid_key = KeyWrapper()
+        valid_key = KeyWrapper('key1')
         self.ts.key_encryption_key = valid_key
         self.ts.insert_entity(self.table_name, entity)
 
@@ -522,7 +524,7 @@ class StorageTableEncryptionTest(StorageTestCase):
     def test_get_entity_no_decryption(self):
         # Arrange
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -544,7 +546,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         entity = self._create_random_entity_class()
         self.ts.insert_entity(self.table_name, entity)
         entity['sex'] = EntityProperty(EdmType.STRING, 'female', True)
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
 
         # Act
         self.ts.require_encryption = True
@@ -569,7 +571,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         entity = self._create_random_entity_class()
         self.ts.require_encryption = True
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
 
         # Act
         # Even when require encryption is true, it should be possilbe to insert
@@ -584,7 +586,7 @@ class StorageTableEncryptionTest(StorageTestCase):
     def test_get_strict_mode_no_key(self):
         # Arrange
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -592,7 +594,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         self.ts.require_encryption = True
 
         # Assert
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AzureException):
             self.ts.get_entity(self.table_name, entity['PartitionKey'], entity['RowKey'])
 
     @record
@@ -603,7 +605,7 @@ class StorageTableEncryptionTest(StorageTestCase):
 
         # Act
         self.ts.require_encryption = True
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
 
         # Assert
         with self.assertRaises(AzureException):
@@ -618,9 +620,9 @@ class StorageTableEncryptionTest(StorageTestCase):
         entity3 = self._create_random_entity_class()
         entity2['PartitionKey'] = entity1['PartitionKey']
         entity3['PartitionKey'] = entity1['PartitionKey']
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.require_encryption = True
-        self.ts.encryption_resolver = self._default_encryption_resolver
+        self.ts.encryption_resolver_function = self._default_encryption_resolver
         self.ts.insert_entity(self.table_name, entity3)
         entity3['sex'] = 'female'
 
@@ -661,7 +663,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         property_resolver = lambda x,y,name,a,b:EdmType.STRING if name=='sex' else None
@@ -680,7 +682,7 @@ class StorageTableEncryptionTest(StorageTestCase):
     def test_validate_encryption(self):
         # Arrange 
         entity = self._create_default_entity_for_encryption()
-        key_encryption_key = KeyWrapper()
+        key_encryption_key = KeyWrapper('key1')
         self.ts.key_encryption_key = key_encryption_key
         self.ts.insert_entity(self.table_name, entity)
 
@@ -700,7 +702,7 @@ class StorageTableEncryptionTest(StorageTestCase):
 
         digest = Hash(SHA256(), default_backend())
         digest.update(encryption_data.content_encryption_IV +
-                        (entity['PartitionKey'] + entity['RowKey'] + '_ClientEncryptionMetadata2').encode('utf-8'))
+                        (entity['RowKey'] + entity['PartitionKey'] + '_ClientEncryptionMetadata2').encode('utf-8'))
         metadataIV = digest.finalize()
         metadataIV = metadataIV[:16]
 
@@ -717,8 +719,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         encrypted_properties_list = encrypted_properties_list.decode('utf-8')
 
         # Strip the square braces from the ends and split string into list.
-        encrypted_properties_list = encrypted_properties_list[1:-1]
-        encrypted_properties_list = encrypted_properties_list.split(', ')
+        encrypted_properties_list = loads(encrypted_properties_list)
 
         entity_iv, encrypted_properties, content_encryption_key = \
             (encryption_data.content_encryption_IV, encrypted_properties_list, content_encryption_key)
@@ -730,7 +731,7 @@ class StorageTableEncryptionTest(StorageTestCase):
 
             digest = Hash(SHA256(), default_backend())
             digest.update(entity_iv +
-                            (entity['PartitionKey'] + entity['RowKey'] + property).encode('utf-8'))
+                            (entity['RowKey'] + entity['PartitionKey'] + property).encode('utf-8'))
             propertyIV = digest.finalize()
             propertyIV = propertyIV[:16]
 
@@ -774,7 +775,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         entity_int32['other'].encrypt = True
         entity_int64 = self._create_random_entity_class()
         entity_int64['large'] = EntityProperty(EdmType.INT64, entity_int64['large'], True)
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         entity_none_str = self._create_random_entity_class()
         entity_none_str['none_str'] = EntityProperty(EdmType.STRING, None, True)
 
@@ -805,7 +806,7 @@ class StorageTableEncryptionTest(StorageTestCase):
     def test_invalid_encryption_operations_fail(self):
         # Arrange
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Assert
@@ -828,7 +829,7 @@ class StorageTableEncryptionTest(StorageTestCase):
     def test_invalid_encryption_operations_fail_batch(self):
         # Arrange
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -846,7 +847,7 @@ class StorageTableEncryptionTest(StorageTestCase):
     def test_query_entities_all_properties(self):
         # Arrange
         self.ts.require_encryption = True
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         table_name = self._create_query_table_encrypted(5)
         default_entity = self._create_random_entity_class()
         
@@ -862,7 +863,7 @@ class StorageTableEncryptionTest(StorageTestCase):
     def test_query_entities_projection(self):
         # Arrange
         self.ts.require_encryption = True
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         table_name = self._create_query_table_encrypted(5)
         default_entity = self._create_random_entity_class()
         
@@ -881,7 +882,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         entity = self._create_random_entity_class()
         self.ts.insert_entity(self.table_name, entity)
         entity = self._create_default_entity_for_encryption()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
         # Act
@@ -901,7 +902,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_random_base_entity_dict()
-        self.ts.key_encryption_key = KeyWrapper()
+        self.ts.key_encryption_key = KeyWrapper('key1')
         for i in range(251):
             entity['key{0}'.format(i)] = 'value{0}'.format(i)
 
@@ -914,9 +915,9 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         entity1 = self._create_random_entity_class()
         entity2 = self._create_random_entity_class()
-        kek = KeyWrapper()
+        kek = KeyWrapper('key1')
         self.ts.key_encryption_key = kek
-        self.ts.encryption_resolver = self._default_encryption_resolver
+        self.ts.encryption_resolver_function = self._default_encryption_resolver
         self.ts.insert_entity(self.table_name, entity1)
         self.ts.insert_entity(self.table_name, entity2)
 
@@ -939,7 +940,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         try:
             # Arrange
             self.ts.require_encryption = True
-            self.ts.key_encryption_key = KeyWrapper()
+            self.ts.key_encryption_key = KeyWrapper('key1')
 
             # Act
             self.assertTrue(self.ts.create_table(table_name))
@@ -967,3 +968,7 @@ class StorageTableEncryptionTest(StorageTestCase):
             self.assertFalse(self.ts.exists(table_name))
         finally:
             self.ts.delete_table(table_name)
+
+#------------------------------------------------------------------------------
+if __name__ == '__main__':
+    unittest.main()

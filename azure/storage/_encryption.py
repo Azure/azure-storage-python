@@ -18,6 +18,7 @@ from ._common_conversion import(
 )
 from ._constants import(
     _ENCRYPTION_PROTOCOL_V1,
+    __version__,
 )
 from ._error import(
     _ERROR_UNSUPPORTED_ENCRYPTION_VERSION,
@@ -30,6 +31,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers.algorithms import AES
 from cryptography.hazmat.primitives.ciphers.modes import CBC
 from cryptography.hazmat.primitives.ciphers import Cipher
+from collections import OrderedDict
 
 class _EncryptionAlgorithm(object):
     '''
@@ -85,7 +87,8 @@ class _EncryptionData:
     Represents the encryption data that is stored on the service.
     '''
 
-    def __init__(self, content_encryption_IV, encryption_agent, wrapped_content_key):
+    def __init__(self, content_encryption_IV, encryption_agent, wrapped_content_key,
+                 key_wrapping_metadata):
         '''
         :param bytes content_encryption_IV:
             The content encryption initialization vector.
@@ -94,6 +97,8 @@ class _EncryptionData:
         :param _WrappedContentKey wrapped_content_key:
             An object that stores the wrapping algorithm, the key identifier, 
             and the encrypted key bytes.
+        :param dict key_wrapping_metadata:
+            A dict containing metadata related to the key wrapping.
         '''
 
         _validate_not_none('content_encryption_IV', content_encryption_IV)
@@ -103,31 +108,37 @@ class _EncryptionData:
         self.content_encryption_IV = content_encryption_IV
         self.encryption_agent = encryption_agent
         self.wrapped_content_key = wrapped_content_key
+        self.key_wrapping_metadata = key_wrapping_metadata
 
-def _encryption_data_to_dict(encryption_data):
+def _generate_encryption_data_dict(kek, cek, iv):
     '''
-    Converts the specified EncryptionData object to a dictionary
-    for eventual serialization.
+    Generates and returns the encryption metadata as a dict.
 
-    :param _EncryptionData encryption_data:
-        The encryption data to be serialized.
-    :return: a dictionary equivalent of the encryption_data.
+    :param object kek: The key encryption key. See calling functions for more information.
+    :param bytes cek: The conetent encryption key.
+    :param bytes iv: The initialization vector.
+    :return: A dict containing all the encryption metadata.
     :rtype: dict
     '''
+    # Encrypt the cek.
+    wrapped_cek = kek.wrap_key(cek)
 
-    wrapped_content_key = {}
-    wrapped_content_key['KeyId'] = encryption_data.wrapped_content_key.key_id
-    wrapped_content_key['EncryptedKey'] = _encode_base64(encryption_data.wrapped_content_key.encrypted_key)
-    wrapped_content_key['Algorithm'] = encryption_data.wrapped_content_key.algorithm
+    # Build the encryption_data dict.
+    # Use OrderedDict to comply with Java's ordering requirement.
+    wrapped_content_key = OrderedDict()
+    wrapped_content_key['KeyId'] = kek.get_kid()
+    wrapped_content_key['EncryptedKey'] = _encode_base64(wrapped_cek)
+    wrapped_content_key['Algorithm'] = kek.get_key_wrap_algorithm()
 
-    encryption_agent = {}
-    encryption_agent['Protocol'] = encryption_data.encryption_agent.protocol
-    encryption_agent['EncryptionAlgorithm'] = encryption_data.encryption_agent.encryption_algorithm
+    encryption_agent = OrderedDict()
+    encryption_agent['Protocol'] = _ENCRYPTION_PROTOCOL_V1
+    encryption_agent['EncryptionAlgorithm'] = _EncryptionAlgorithm.AES_CBC_256
 
-    encryption_data_dict = {}
+    encryption_data_dict = OrderedDict()
     encryption_data_dict['WrappedContentKey'] = wrapped_content_key
     encryption_data_dict['EncryptionAgent'] = encryption_agent
-    encryption_data_dict['ContentEncryptionIV'] = _encode_base64(encryption_data.content_encryption_IV)
+    encryption_data_dict['ContentEncryptionIV'] = _encode_base64(iv)
+    encryption_data_dict['KeyWrappingMetadata'] = {'EncryptionLibrary':'Python ' + __version__}
     
     return encryption_data_dict
 
@@ -155,9 +166,16 @@ def _dict_to_encryption_data(encryption_data_dict):
     encryption_agent = _EncryptionAgent(encryption_agent['EncryptionAlgorithm'],
                                         encryption_agent['Protocol'])
 
+    if 'KeyWrappingMetadata' in encryption_data_dict:
+        key_wrapping_metadata = encryption_data_dict['KeyWrappingMetadata']
+    else:
+        key_wrapping_metadata = None
+    
     encryption_data = _EncryptionData(_decode_base64_to_bytes(encryption_data_dict['ContentEncryptionIV']),
                                         encryption_agent,
-                                        wrapped_content_key)
+                                        wrapped_content_key,
+                                        key_wrapping_metadata)
+
     return encryption_data
 
 def _generate_AES_CBC_cipher(cek, iv):
@@ -187,7 +205,7 @@ def _validate_and_unwrap_cek(encryption_data, key_encryption_key=None, key_resol
     :param func key_resolver:
         A function used that, given a key_id, will return a key_encryption_key. Please refer 
         to high service object (i.e. TableService) instance variables for more details.
-    :return: the content_encryption_key stored in the encryption_data object
+    :return: the content_encryption_key stored in the encryption_data object.
     :rtype: bytes[]
     '''
 

@@ -33,16 +33,24 @@ from azure.storage.table import (
     EntityProperty,
     TablePayloadFormat,
 )
+from azure.common import AzureException
 
+# Sample implementations of the encryption-related interfaces.
 class KeyWrapper:
-    def __init__(self, kid='key1'):
+    def __init__(self, kid):
         self.kek = urandom(32) 
         self.backend = default_backend()
-        self.kid = kid
-    def wrap_key(self, key):
-        return aes_key_wrap(self.kek, key, self.backend)
+        self.kid = 'local:' + kid
+    def wrap_key(self, key, algorithm='A256KW'):
+        if algorithm == 'A256KW':
+            return aes_key_wrap(self.kek, key, self.backend)
+        else:
+            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
     def unwrap_key(self, key, algorithm):
-        return aes_key_unwrap(self.kek, key, self.backend)
+        if algorithm == 'A256KW':
+            return aes_key_unwrap(self.kek, key, self.backend)
+        else:
+            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
     def get_key_wrap_algorithm(self):
         return 'A256KW'
     def get_kid(self):
@@ -57,26 +65,32 @@ class KeyResolver:
         return self.keys[kid]
 
 class RSAKeyWrapper:
-    def __init__(self, kid='key2'):
+    def __init__(self, kid):
         self.private_key = generate_private_key(public_exponent = 65537,
                                                 key_size = 2048,
                                                 backend = default_backend())
         self.public_key = self.private_key.public_key()
-        self.kid = kid
-    def wrap_key(self, key):
-        return self.public_key.encrypt(key,
-                                 OAEP(
-                                     mgf = MGF1(algorithm=SHA1()),
-                                     algorithm=SHA1(),
-                                     label=None)
-                                 )
+        self.kid = 'local:' + kid
+    def wrap_key(self, key, algorithm='RSA'):
+        if algorithm == 'RSA':
+            return self.public_key.encrypt(key,
+                                     OAEP(
+                                         mgf = MGF1(algorithm=SHA1()),
+                                         algorithm=SHA1(),
+                                         label=None)
+                                     )
+        else:
+            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
     def unwrap_key(self, key, algorithm):
-        return self.private_key.decrypt(key,
-                                    OAEP(
-                                        mgf=MGF1(algorithm=SHA1()),
-                                        algorithm=SHA1(),
-                                        label=None)
-                                    )
+        if algorithm == 'RSA':
+            return self.private_key.decrypt(key,
+                                        OAEP(
+                                            mgf=MGF1(algorithm=SHA1()),
+                                            algorithm=SHA1(),
+                                            label=None)
+                                        )
+        else:
+            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
     def get_key_wrap_algorithm(self):
         return 'RSA'
     def get_kid(self):
@@ -93,7 +107,7 @@ class TableEncryptionSamples():
         self.put_encrypted_entity_properties()
         self.put_encrypted_entity_encryption_resolver()
         self.get_encrypted_entity()
-        self.get_encrypted_entity_key_resolver()
+        self.get_encrypted_entity_key_encryption_key()
         self.replace_encrypted_entity()
         self.query_encrypted_entities()
         self.batch_encrypted_entities()
@@ -149,7 +163,7 @@ class TableEncryptionSamples():
     # A sample encryption resolver. This resolver is a simple case that will mark
     # any property named 'foo' for encryption, regardless of the partition or row 
     # it is in.
-    def encryption_resolver(pk, rk, property):
+    def encryption_resolver(self, pk, rk, property):
        return property == 'foo'
 
     def put_encrypted_entity_properties(self):
@@ -169,20 +183,14 @@ class TableEncryptionSamples():
         # KeyWrapper implements the key encryption key interface outlined
         # in the insert/get entity documentation.
         # Setting this property will tell these APIs to encrypt the entity.
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
         self.service.insert_entity(table_name, entity1)
         self.service.insert_entity(table_name, entity2)
 
-        # str is the only type valid for encryption. Trying to encrypt other
-        # properties will throw.
-        try:
-            self.service.insert_entity(table_name, entity3)
-            raise Exception
-        except ValueError:
-            pass
-
         # Note: The internal encryption process requires two properties, so there
         # are only 250 custom properties available when encrypting.
+        # Note: str is the only type valid for encryption. Trying to encrypt other
+        # properties will throw.
         
         self.service.delete_table(table_name)
 
@@ -191,13 +199,13 @@ class TableEncryptionSamples():
 
         entity = self._create_base_entity_class()
         entity['foo'] = 'bar'
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
 
         # An encryption resolver is a function that takes in the Partition Key,
         # Row Key, and property name and returns true if the property should be 
         # encrypted and false otherwise. This can be used in place of explictly
         # setting each property to be encrypted through the EntityProperty class.
-        self.service.encryption_resolver = encryption_resolver
+        self.service.encryption_resolver_function = self.encryption_resolver
 
         self.service.insert_entity(table_name, entity)
 
@@ -206,7 +214,7 @@ class TableEncryptionSamples():
     def get_encrypted_entity(self):
         table_name = self._create_table()
         entity = self._create_entity_for_encryption()
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
         self.service.insert_entity(table_name, entity)
 
         # Entities can be decrypted by setting a key_resolver function on the service
@@ -215,41 +223,34 @@ class TableEncryptionSamples():
         # corresponding key_encryption_key. 
         key_resolver = KeyResolver()
         key_resolver.put_key(self.service.key_encryption_key)
-        self.service.key_resolver = key_resolver.resolve_key
+        self.service.key_resolver_function = key_resolver.resolve_key
         self.service.key_encryption_key = None
 
         # Decrypted entities are stored in their raw string form, regardless of whether
         # they were stored in an EntityProperty when encrypted.
-        entity = self.service.get_entity(table_name, entity['PartitionKey'], entity['RowKey'])
-        if entity['foo'] != 'bar':
-            raise Exception
 
         # Retrieving and decrypting an encrypted entity works regardless of the accepted
         # payload format.
-        self.service.key_encryption_key = kek
         entity_full = self.service.get_entity(table_name, entity['PartitionKey'], entity['RowKey'],
                                               accept=TablePayloadFormat.JSON_FULL_METADATA)
         entity_none = self.service.get_entity(table_name, entity['PartitionKey'], entity['RowKey'],
                                         accept=TablePayloadFormat.JSON_NO_METADATA)
-        if entity_full['foo'] != 'bar':
-            raise Exception
-        if entity_none['foo'] != 'bar':
-            raise Exception
-
         
         # Note: Properties that are encrypted on upload but not decrypted on download due to lack
         # of an encryption policy are stored in an EntityProperty with as an EdmBinary type.
         # Note: The encryption metadata headers are preserved on the entity if 
         # it is not decrypted when downloaded.
+        # Note: Decrypted entities are stored in their raw string form, regardless of whether
+        # they were stored in an EntityProperty when encrypted.
 
-        self.service.key_resolver = None
+        self.service.key_resolver_function = None
         self.service.delete_table(table_name)
 
     def query_encrypted_entities(self):
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
         key_resolver = KeyResolver()
         key_resolver.put_key(self.service.key_encryption_key)
-        self.service.key_resolver = key_resolver
+        self.service.key_resolver_function = key_resolver.resolve_key
         table_name = self._create_query_table_encrypted(5)
 
         # Querying for entire entities will transparently decrypt retrieved entities.
@@ -271,7 +272,7 @@ class TableEncryptionSamples():
         # Batches will encrypt the entities at the time of inserting into the batch, not
         # committing the batch to the service, so the encryption policy must be 
         # passed in at the time of batch creation.
-        kek = KeyWrapper()
+        kek = KeyWrapper('key1')
         batch = TableBatch(require_encryption=True, key_encryption_key=kek)
         batch.insert_entity(entity1)
         batch.insert_entity(entity2)
@@ -282,7 +283,7 @@ class TableEncryptionSamples():
         entity3 = self._create_entity_for_encryption()
         entity4 = self._create_entity_for_encryption()
         entity4['PartitionKey'] = entity3['PartitionKey']
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
         with self.service.batch(table_name) as batch:
             batch.insert_entity(entity3)
             batch.insert_entity(entity4)
@@ -293,6 +294,9 @@ class TableEncryptionSamples():
         self.service.delete_table(table_name)
 
     def require_encryption(self):
+        self.service.key_encryption_key = None
+        self.service.key_resolver_function = None
+        self.service.require_encryption = False
         table_name = self._create_table()
         entity_unencrypted = self._create_base_entity_class()
         entity_unencrypted['foo'] = 'bar'
@@ -310,12 +314,18 @@ class TableEncryptionSamples():
 
         # If the require_encryption flag is set, the service object will throw if there
         # is no encryption policy set on download.
-        self.service.key_encryption_key = KeyWrapper()
-        self.service.key_resolver = KeyResolver()
-        self.service.key_resolver.put_key(self.service.key_encryption_key)
+        kek = KeyWrapper('key1')
+        self.service.key_encryption_key = kek
+
+        key_resolver = KeyResolver()
+        key_resolver.put_key(self.service.key_encryption_key)
+        self.service.key_resolver_function = key_resolver.resolve_key
+
         entity_encrypted = self._create_entity_for_encryption()
         self.service.insert_entity(table_name, entity_encrypted)
+
         self.service.key_encryption_key = None
+        self.service.key_resolver_function = None
         try:
             self.service.get_entity(table_name, entity_encrypted['PartitionKey'], 
                                     entity_encrypted['RowKey']) 
@@ -325,11 +335,12 @@ class TableEncryptionSamples():
 
         # If the require_encryption flag is set, but the retrieved object is not encrypted,
         # the service object will throw.
+        self.service.key_resolver_function = key_resolver.resolve_key
         try:
             self.service.get_entity(table_name, entity_unencrypted['PartitionKey'],
                                     entity_unencrypted['RowKey'])
             raise Exception
-        except ValueError:
+        except AzureException:
             pass
 
         self.service.delete_table(table_name)
@@ -340,21 +351,20 @@ class TableEncryptionSamples():
 
         # The key wrapping algorithm used by the key_encryption_key is entirely
         # up to the choice of the user. For instance, RSA may be used.
-        self.service.key_encryption_key = RSAKeyWrapper()
+        self.service.key_encryption_key = RSAKeyWrapper('key2')
         self.service.insert_entity(table_name, entity)
 
-        self.service.key_resolver = KeyResolver()
-        self.service.key_resolver.put_key(self.service.key_encryption_key)
+        key_resolver = KeyResolver()
+        key_resolver.put_key(self.service.key_encryption_key)
+        self.service.key_resolver_function = key_resolver.resolve_key
         entity = self.service.get_entity(table_name, entity['PartitionKey'], entity['RowKey'])
-        if entity['foo'] != 'bar':
-            raise Exception
 
         self.service.delete_table(table_name)
 
     def merge_not_supported(self):
         table_name = self._create_table()
         entity = self._create_entity_for_encryption()
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
         self.service.insert_entity(table_name, entity)
 
         # Merging encrypted entities is not supported. Calling merge with 
@@ -380,7 +390,7 @@ class TableEncryptionSamples():
     def get_encrypted_entity_key_encryption_key(self):
         table_name = self._create_table()
         entity = self._create_entity_for_encryption()
-        kek = KeyWrapper()
+        kek = KeyWrapper('key1')
         self.service.key_encryption_key = kek
         self.service.insert_entity(table_name, entity)
         
@@ -389,23 +399,17 @@ class TableEncryptionSamples():
         # properties are set, the result of the key_resolver will take precedence and the decryption
         # will fail if that key is not successful.
         entity = self.service.get_entity(table_name, entity['PartitionKey'], entity['RowKey'])
-        if entity['foo'] != 'bar':
-            raise Exception
 
         self.service.delete_table(table_name)
 
     def replace_encrypted_entity(self):
         table_name = self._create_table()
         entity = self._create_entity_for_encryption()
-        self.service.key_encryption_key = KeyWrapper()
+        self.service.key_encryption_key = KeyWrapper('key1')
         self.service.insert_entity(table_name, entity)
 
         # An entity, encrypted or decrypted, may be replaced by an encrypted entity.
         entity['foo'].value = 'updated'
         self.service.update_entity(table_name, entity)
-        
-        entity = self.service.get_entity(table_name, entity['PartitionKey'], entity['RowKey'])
-        if entity['foo'] != 'updated':
-            raise Exception
 
         self.service.delete_table(table_name)

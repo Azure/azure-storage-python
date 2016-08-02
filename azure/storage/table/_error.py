@@ -41,11 +41,6 @@ _ERROR_TOO_MANY_PROPERTIES = 'The entity contains more properties than allowed.'
 _ERROR_TYPE_NOT_SUPPORTED = 'Type not supported when sending data to the service: {0}.'
 _ERROR_VALUE_TOO_LARGE = '{0} is too large to be cast to type {1}.'
 _ERROR_UNSUPPORTED_TYPE_FOR_ENCRYPTION = 'Encryption is only supported for not None strings.'
-_ERROR_ENTITY_NOT_ENCRYPTED = 'Encryption required, but received entity does not contain appropriate metatadata.' + \
-    'Entity was either not encrypted or metadata has been lost.'
-_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION = 'The require_encryption flag is set, but encryption is not supported' + \
-    ' for this method.'
-
 
 def _validate_object_has_param(param_name, object):
     if not object.get(param_name):

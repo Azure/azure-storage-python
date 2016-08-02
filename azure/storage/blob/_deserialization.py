@@ -13,6 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 from dateutil import parser
+from azure.storage._error import AzureException
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -41,8 +42,12 @@ from .models import (
     ResourceProperties,
     BlobPrefix,
 )
+from ._encryption import _decrypt_blob
 from ..models import _list
-from .._error import _validate_content_match
+from .._error import(
+    _validate_content_match,
+    _ERROR_DECRYPTION_FAILURE,
+)
 from .._common_conversion import _get_content_md5
 
 def _parse_base_properties(response):
@@ -99,7 +104,8 @@ def _parse_lease(response):
 
     return lease
 
-def _parse_blob(response, name, snapshot, validate_content=False):
+def _parse_blob(response, name, snapshot, validate_content=False, require_encryption=False,
+                key_encryption_key=None, key_resolver_function=None, start_offset=None, end_offset=None):
     if response is None:
         return None
 
@@ -109,6 +115,13 @@ def _parse_blob(response, name, snapshot, validate_content=False):
     if validate_content:
         computed_md5 = _get_content_md5(response.body)
         _validate_content_match(props.content_settings.content_md5, computed_md5)
+
+    if key_encryption_key is not None or key_resolver_function is not None:
+            try:
+                response.body = _decrypt_blob(require_encryption, key_encryption_key, key_resolver_function,
+                                              response, start_offset, end_offset)
+            except:
+                raise AzureException(_ERROR_DECRYPTION_FAILURE)
 
     return Blob(name, snapshot, response.body, props, metadata)
 

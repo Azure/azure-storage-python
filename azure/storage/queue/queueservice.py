@@ -113,13 +113,13 @@ class QueueService(StorageClient):
         For methods requiring decryption, either the key_encryption_key OR the resolver must be provided.
         If both are provided, the resolver will take precedence.
         Must implement the following methods for APIs requiring encryption:
-        wrap_key(key)--wraps the specified key using an algorithm of the user's choice.
+        wrap_key(key)--wraps the specified key (bytes) using an algorithm of the user's choice. Returns the encrypted key as bytes.
         get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
         get_kid()--returns a string key id for this key-encryption-key.
         Must implement the following methods for APIs requiring decryption:
         unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the string-specified algorithm.
         get_kid()--returns a string key id for this key-encryption-key.
-    :ivar function key_resolver(kid):
+    :ivar function key_resolver_function(kid):
         A function to resolve keys optionally provided by the user. If provided, will be used to decrypt in supported methods.
         For methods requiring decryption, either the key_encryption_key OR
         the resolver must be provided. If both are provided, the resolver will take precedence.
@@ -188,7 +188,7 @@ class QueueService(StorageClient):
         self.encode_function = QueueMessageFormat.text_xmlencode
         self.decode_function = QueueMessageFormat.text_xmldecode
         self.key_encryption_key = None
-        self.key_resolver = None
+        self.key_resolver_function = None
         self.require_encryption = False
 
     def generate_account_shared_access_signature(self, resource_types, permission, 
@@ -794,7 +794,7 @@ class QueueService(StorageClient):
         :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
         _validate_decryption_required(self.require_encryption, self.key_encryption_key,
-                                      self.key_resolver)
+                                      self.key_resolver_function)
 
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -809,7 +809,7 @@ class QueueService(StorageClient):
 
         return self._perform_request(request, _convert_xml_to_queue_messages,
                                      [self.decode_function, self.require_encryption,
-                                      self.key_encryption_key, self.resolver])
+                                      self.key_encryption_key, self.key_resolver_function])
 
     def peek_messages(self, queue_name, num_messages=None, timeout=None):
         '''
@@ -843,7 +843,7 @@ class QueueService(StorageClient):
         '''
 
         _validate_decryption_required(self.require_encryption, self.key_encryption_key,
-                                      self.key_resolver)
+                                      self.key_resolver_function)
 
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -858,7 +858,7 @@ class QueueService(StorageClient):
 
         return self._perform_request(request, _convert_xml_to_queue_messages,
                                      [self.decode_function, self.require_encryption,
-                                      self.key_encryption_key, self.resolver])
+                                      self.key_encryption_key, self.key_resolver_function])
 
     def delete_message(self, queue_name, message_id, pop_receipt, timeout=None):
         '''

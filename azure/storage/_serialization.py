@@ -87,7 +87,7 @@ def _add_date_header(request):
     current_time = format_date_time(time())
     request.headers['x-ms-date'] = current_time
 
-def _get_request_body_bytes_only(param_name, param_value):
+def _get_data_bytes_only(param_name, param_value):
     '''Validates the request body passed in and converts it to bytes
     if our policy allows it.'''
     if param_value is None:

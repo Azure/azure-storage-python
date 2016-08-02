@@ -24,7 +24,7 @@ from tests.testcase import (
 from azure.storage.queue import (
     QueueService,
 )
-from tests.test_encryption_helper import (
+from .test_encryption_helper import (
     KeyWrapper,
     KeyResolver,
     RSAKeyWrapper,
@@ -47,9 +47,10 @@ from azure.storage._error import(
     _ERROR_VALUE_NONE,
     _ERROR_OBJECT_INVALID,
     _ERROR_DECRYPTION_FAILURE,
-    _ERROR_MESSAGE_NOT_ENCRYPTED,
+    _ERROR_DATA_NOT_ENCRYPTED,
     _ERROR_ENCRYPTION_REQUIRED,
 )
+from azure.storage._constants import __version__
 from azure.storage.queue.models import QueueMessageFormat
 from cryptography.hazmat import backends
 from cryptography.hazmat.primitives.ciphers.algorithms import AES
@@ -96,7 +97,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     @record
     def test_get_messages_encrypted_kek(self):
         # Arrange
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, u'encrypted_message_2')
 
@@ -109,12 +110,12 @@ class StorageQueueEncryptionTest(StorageTestCase):
     @record
     def test_get_messages_encrypted_resolver(self):
         # Arrange
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, u'encrypted_message_2')
         key_resolver = KeyResolver()
         key_resolver.put_key(self.qs.key_encryption_key)
-        self.qs.key_resolver = key_resolver.resolve_key
+        self.qs.key_resolver_function = key_resolver.resolve_key
         self.qs.key_encryption_key = None #Ensure that the resolver is used
 
         # Act
@@ -126,7 +127,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     @record
     def test_peek_messages_encrypted_kek(self): 
         # Arrange
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, u'encrypted_message_3')
 
@@ -139,7 +140,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     @record
     def test_peek_messages_encrypted_resolver(self):
         # Arrange
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, u'encrypted_message_4')
         key_resolver = KeyResolver()
@@ -155,7 +156,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     @record
     def test_peek_messages_encrypted_kek_RSA(self):
         # Arrange
-        self.qs.key_encryption_key = RSAKeyWrapper()
+        self.qs.key_encryption_key = RSAKeyWrapper('key2')
         queue_name = self._create_queue()
         self.qs.put_message(queue_name, u'encrypted_message_3')
 
@@ -169,7 +170,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_update_encrypted_message(self):
         # Arrange
         queue_name = self._create_queue()
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         self.qs.put_message(queue_name, u'Update Me')
         list_result1 = self.qs.get_messages(queue_name)
 
@@ -189,7 +190,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_update_encrypted_binary_message(self):
         # Arrange
         queue_name = self._create_queue()
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         self.qs.encode_function = QueueMessageFormat.binary_base64encode
         self.qs.decode_function = QueueMessageFormat.binary_base64decode
         binary_message = urandom(100)
@@ -213,7 +214,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_update_encrypted_raw_text_message(self):
         # Arrange
         queue_name = self._create_queue()
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         self.qs.encode_function = QueueMessageFormat.noencode
         self.qs.decode_function = QueueMessageFormat.nodecode
         raw_text = u'Update Me'
@@ -237,7 +238,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_update_encrypted_json_message(self):
         # Arrange
         queue_name = self._create_queue()
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         self.qs.encode_function = QueueMessageFormat.noencode
         self.qs.decode_function = QueueMessageFormat.nodecode
         message_dict = {'val1': 1, 'val2':'2'}
@@ -264,7 +265,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_invalid_value_kek_wrap(self):
         # Arrange
         queue_name = self._create_queue()
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
 
         self.qs.key_encryption_key.get_kid = None
         try:
@@ -273,13 +274,13 @@ class StorageQueueEncryptionTest(StorageTestCase):
         except AttributeError as e:
             self.assertEqual(str(e), _ERROR_OBJECT_INVALID.format('key encryption key', 'get_kid'))
 
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
 
         self.qs.key_encryption_key.get_kid = None
         with self.assertRaises(AttributeError):
             self.qs.put_message(queue_name, u'message')
 
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
 
         self.qs.key_encryption_key.wrap_key = None
         with self.assertRaises(AttributeError):
@@ -290,7 +291,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
         # Arrange
         queue_name = self._create_queue()
 
-        valid_key = KeyWrapper()
+        valid_key = KeyWrapper('key1')
 
         # Act
         invalid_key_1 = lambda: None #functions are objects, so this effectively creates an empty object
@@ -321,7 +322,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_invalid_value_kek_unwrap(self):
         # Arrange
         queue_name = self._create_queue()
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         self.qs.put_message(queue_name, u'message')
 
         # Act
@@ -337,11 +338,11 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_missing_attribute_kek_unrwap(self):
         # Arrange
         queue_name = self._create_queue()
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         self.qs.put_message(queue_name, u'message')
 
         # Act
-        valid_key = KeyWrapper()
+        valid_key = KeyWrapper('key1')
         invalid_key_1 = lambda: None #functions are objects, so this effectively creates an empty object
         invalid_key_1.unwrap_key = valid_key.unwrap_key
         #No attribute get_kid
@@ -363,7 +364,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_validate_encryption(self):
         # Arrange
         queue_name = self._create_queue()
-        kek = KeyWrapper()
+        kek = KeyWrapper('key1')
         self.qs.key_encryption_key = kek
         self.qs.put_message(queue_name, u'message')
 
@@ -386,7 +387,8 @@ class StorageQueueEncryptionTest(StorageTestCase):
 
         encryption_data = _EncryptionData(b64decode(encryption_data['ContentEncryptionIV'].encode(encoding='utf-8')),
                                           encryption_agent,
-                                          wrapped_content_key)
+                                          wrapped_content_key,
+                                          {'EncryptionLibrary':__version__})
         message = message['EncryptedMessageContents']
         content_encryption_key = kek.unwrap_key(encryption_data.wrapped_content_key.encrypted_key,
                                                            encryption_data.wrapped_content_key.algorithm)
@@ -415,7 +417,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_put_with_strict_mode(self):
         # Arrange
         queue_name = self._create_queue()
-        kek = KeyWrapper()
+        kek = KeyWrapper('key1')
         self.qs.key_encryption_key = kek
         self.qs.require_encryption = True
 
@@ -436,7 +438,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
         self.qs.put_message(queue_name, u'message')
 
         self.qs.require_encryption = True
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         try:
             self.qs.get_messages(queue_name)
         except ValueError as e:
@@ -452,7 +454,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
         self.qs.put_message(queue_name, message)
 
         # Assert
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         with self.assertRaises(AzureHttpError):
             self.qs.put_message(queue_name, message)
 
@@ -460,7 +462,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
     def test_encryption_nonmatching_kid(self):
         # Arrange
         queue_name = self._create_queue()
-        self.qs.key_encryption_key = KeyWrapper()
+        self.qs.key_encryption_key = KeyWrapper('key1')
         self.qs.put_message(queue_name, u'message')
 
         # Act
@@ -472,6 +474,7 @@ class StorageQueueEncryptionTest(StorageTestCase):
             self.fail()
         except AzureException as e:
             self.assertEqual(str(e), _ERROR_DECRYPTION_FAILURE)
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

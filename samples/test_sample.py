@@ -20,6 +20,7 @@ from .blob import (
     BlockBlobSamples,
     AppendBlobSamples,
     PageBlobSamples,
+    BlobEncryptionSamples,
 )
 from .queue import (
     QueueSasSamples,
@@ -130,6 +131,10 @@ class SampleTest(unittest.TestCase):
 
     def test_table_encryption_samples(self):
         encryption = TableEncryptionSamples(self.account)
+        encryption.run_all_samples()
+
+    def test_blob_encryption_samples(self):
+        encryption = BlobEncryptionSamples(self.account)
         encryption.run_all_samples()
 
 #------------------------------------------------------------------------------

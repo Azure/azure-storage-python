@@ -13,12 +13,16 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 from azure.common import AzureHttpError
+from azure.storage._error import AzureException
 from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
-    _ERROR_PARALLEL_NOT_SEEKABLE,
+    _validate_decryption_required,
     _validate_access_policies,
+    _validate_content_match,
+    _ERROR_PARALLEL_NOT_SEEKABLE,
+    _ERROR_DECRYPTION_FAILURE,
 )
 from ._error import (
     _ERROR_INVALID_LEASE_DURATION,
@@ -117,6 +121,27 @@ class BaseBlobService(StorageClient):
         this. If this is set to larger than 4MB, content_validation will throw an 
         error if enabled. However, if content_validation is not desired a size 
         greater than 4MB may be optimal. Setting this below 4MB is not recommended.
+    :ivar object key_encryption_key:
+        The key-encryption-key optionally provided by the user. If provided, will be used to
+        encrypt/decrypt in supported methods.
+        For methods requiring decryption, either the key_encryption_key OR the resolver must be provided.
+        If both are provided, the resolver will take precedence.
+        Must implement the following methods for APIs requiring encryption:
+        wrap_key(key)--wraps the specified key (bytes) using an algorithm of the user's choice. Returns the encrypted key as bytes.
+        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
+        get_kid()--returns a string key id for this key-encryption-key.
+        Must implement the following methods for APIs requiring decryption:
+        unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the string-specified algorithm.
+        get_kid()--returns a string key id for this key-encryption-key.
+    :ivar function key_resolver_function(kid):
+        A function to resolve keys optionally provided by the user. If provided, will be used to decrypt in supported methods.
+        For methods requiring decryption, either the key_encryption_key OR
+        the resolver must be provided. If both are provided, the resolver will take precedence.
+        It uses the kid string to return a key-encryption-key implementing the interface defined above.
+    :ivar bool require_encryption:
+        A flag that may be set to ensure that all messages successfully uploaded to the queue and all those downloaded and
+        successfully read from the queue are/were encrypted while on the server. If this flag is set, all required 
+        parameters for encryption/decryption must be provided. See the above comments on the key_encryption_key and resolver.
     '''
 
     __metaclass__ = ABCMeta
@@ -160,7 +185,7 @@ class BaseBlobService(StorageClient):
             If specified, this will override all other parameters besides 
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
-            for the connection string format.
+            for the connection string format
         '''
         service_params = _ServiceParameters.get_service_parameters(
             'blob',
@@ -185,6 +210,10 @@ class BaseBlobService(StorageClient):
             self.authentication = _StorageSASAuthentication(self.sas_token)
         else:
             self.authentication = _StorageNoAuthentication()
+
+        self.require_encryption = False
+        self.key_encryption_key = None
+        self.key_resolver_function = None
 
     def make_blob_url(self, container_name, blob_name, protocol=None, sas_token=None):
         '''
@@ -1567,6 +1596,28 @@ class BaseBlobService(StorageClient):
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
+        _validate_decryption_required(self.require_encryption,
+                                      self.key_encryption_key,
+                                      self.key_resolver_function)
+
+        start_offset, end_offset = 0,0
+        if self.key_encryption_key is not None or self.key_resolver_function is not None:
+            if start_range is not None:
+                # Align the start of the range along a 16 byte block
+                start_offset = start_range % 16
+                start_range -= start_offset
+
+                # Include an extra 16 bytes for the IV if necessary
+                # Because of the previous offsetting, start_range will always
+                # be a multiple of 16.
+                if start_range > 0:
+                    start_offset += 16
+                    start_range -= 16
+
+            if end_range is not None:
+                # Align the end of the range along a 16 byte block
+                end_offset = 15 - (end_range % 16)
+                end_range += end_offset
 
         request = HTTPRequest()
         request.method = 'GET'
@@ -1592,7 +1643,9 @@ class BaseBlobService(StorageClient):
             check_content_md5=validate_content)
 
         return self._perform_request(request, _parse_blob, 
-                                     [blob_name, snapshot, validate_content],
+                                     [blob_name, snapshot, validate_content, self.require_encryption,
+                                      self.key_encryption_key, self.key_resolver_function,
+                                      start_offset, end_offset],
                                      operation_context=_context)
 
     def get_blob_to_path(

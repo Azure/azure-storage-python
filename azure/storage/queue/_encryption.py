@@ -20,14 +20,11 @@ from .._constants import (
     _ENCRYPTION_PROTOCOL_V1,
 )
 from .._encryption import (
-    _encryption_data_to_dict,
+    _generate_encryption_data_dict,
     _dict_to_encryption_data,
     _generate_AES_CBC_cipher,
     _validate_and_unwrap_cek,
-    _EncryptionData,
-    _EncryptionAgent,
-    _WrappedContentKey,
-    _EncryptionAlgorithm
+    _EncryptionAlgorithm,
 )
 from json import (
     dumps,
@@ -40,7 +37,7 @@ from base64 import(
 from .._error import(
     _ERROR_UNSUPPORTED_ENCRYPTION_VERSION,
     _ERROR_DECRYPTION_FAILURE,
-    _ERROR_MESSAGE_NOT_ENCRYPTED,
+    _ERROR_DATA_NOT_ENCRYPTED,
     _ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM,
     _validate_not_none,
     _validate_key_encryption_key_wrap,
@@ -52,11 +49,7 @@ from .._common_conversion import (
     _encode_base64,
     _decode_base64_to_bytes
 )
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers.algorithms import AES
-from cryptography.hazmat.primitives.ciphers.modes import CBC
 from cryptography.hazmat.primitives.padding import PKCS7
-from cryptography.hazmat.primitives.ciphers import Cipher
 import os
 
 def _encrypt_queue_message(message, key_encryption_key):
@@ -88,7 +81,6 @@ def _encrypt_queue_message(message, key_encryption_key):
     # operate on binary strings.
     message = message.encode('utf-8')
 
-    # Create AES cipher in CBC mode.
     cipher = _generate_AES_CBC_cipher(content_encryption_key, initialization_vector)
 
     # PKCS7 with 16 byte blocks ensures compatibility with AES.
@@ -99,18 +91,12 @@ def _encrypt_queue_message(message, key_encryption_key):
     encryptor = cipher.encryptor()
     encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
 
-    # Encrypt the cek.
-    wrapped_cek = key_encryption_key.wrap_key(content_encryption_key)
-
-    # Build the _EncryptionData structure.
-    wrapped_content_key = _WrappedContentKey(key_encryption_key.get_key_wrap_algorithm(), wrapped_cek, key_encryption_key.get_kid())
-    encryption_agent = _EncryptionAgent(_EncryptionAlgorithm.AES_CBC_256, _ENCRYPTION_PROTOCOL_V1)
-    encryption_data = _EncryptionData(initialization_vector, encryption_agent, wrapped_content_key)
-
     # Build the dictionary structure.
     queue_message = {}
     queue_message['EncryptedMessageContents'] = _encode_base64(encrypted_data)
-    queue_message['EncryptionData'] = _encryption_data_to_dict(encryption_data)
+    queue_message['EncryptionData'] = _generate_encryption_data_dict(key_encryption_key,
+                                                                     content_encryption_key,
+                                                                     initialization_vector)
 
     return dumps(queue_message)
 
