@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.file.fileservice module &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.file.fileservice module &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,16 +23,19 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage.file package" href="azure.storage.file.html" />
     <link rel="next" title="azure.storage.file.models module" href="azure.storage.file.models.html" />
     <link rel="prev" title="azure.storage.file package" href="azure.storage.file.html" />
    
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -111,7 +114,7 @@ for the connection string format.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.abort_copy_file">
-<code class="descname">abort_copy_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>copy_id</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.abort_copy_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">abort_copy_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>copy_id</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.abort_copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.abort_copy_file" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div>Aborts a pending copy_file operation, and leaves a destination file
 with zero length and full metadata.</div></blockquote>
@@ -135,7 +138,7 @@ copy_file operation.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.clear_range">
-<code class="descname">clear_range</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>start_range</em>, <em>end_range</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.clear_range" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clear_range</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>start_range</em>, <em>end_range</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.clear_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.clear_range" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clears the specified range and releases the space used in storage for 
 that range.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -164,7 +167,7 @@ Ex: start_range=0, end_range=511 will download first 512 bytes of file.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.copy_file">
-<code class="descname">copy_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>copy_source</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.copy_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">copy_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>copy_source</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.copy_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies a file asynchronously. This operation returns a copy operation 
 properties object, including a copy ID you can use to check or abort the 
 copy operation. The File service copies files on a best-effort basis.</p>
@@ -208,7 +211,7 @@ metadata, and the metadata is not copied from the source blob or file.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.create_directory">
-<code class="descname">create_directory</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>metadata=None</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_directory" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_directory</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>metadata=None</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.create_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_directory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new directory under the specified share or parent directory. 
 If the directory with the same name already exists, the operation fails
 on the service. By default, the exception is swallowed by the client.
@@ -241,7 +244,7 @@ False by default.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.create_file">
-<code class="descname">create_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>content_length</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>content_length</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.create_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new file.</p>
 <p>See create_file_from_* for high level functions that handle the
 creation and upload of large files with automatic chunking and
@@ -267,7 +270,7 @@ progress notifications.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.create_file_from_bytes">
-<code class="descname">create_file_from_bytes</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>file</em>, <em>index=0</em>, <em>count=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file_from_bytes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_file_from_bytes</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>file</em>, <em>index=0</em>, <em>count=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.create_file_from_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file_from_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new file from an array of bytes, or updates the content
 of an existing file, with automatic chunking and progress
 notifications.</p>
@@ -295,8 +298,6 @@ file.</li>
 current is the number of bytes transfered so far and total is the
 size of the file, or None if the total size is unknown.</li>
 <li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of file chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
 multiple calls to the Azure service and the timeout will apply to 
 each call individually.</li>
@@ -309,7 +310,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.create_file_from_path">
-<code class="descname">create_file_from_path</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>local_file_path</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file_from_path" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_file_from_path</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>local_file_path</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.create_file_from_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file_from_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new azure file from a local file path, or updates the content of an
 existing file, with automatic chunking and progress notifications.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -333,8 +334,6 @@ file.</li>
 current is the number of bytes transfered so far and total is the
 size of the file, or None if the total size is unknown.</li>
 <li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of file chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
 multiple calls to the Azure service and the timeout will apply to 
 each call individually.</li>
@@ -347,7 +346,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.create_file_from_stream">
-<code class="descname">create_file_from_stream</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>stream</em>, <em>count</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file_from_stream" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_file_from_stream</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>stream</em>, <em>count</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.create_file_from_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file_from_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new file from a file/stream, or updates the content of an
 existing file, with automatic chunking and progress notifications.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -374,8 +373,6 @@ current is the number of bytes transfered so far and total is the
 size of the file, or None if the total size is unknown.</li>
 <li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use. Note that parallel upload 
 requires the stream to be seekable.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of file chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
 multiple calls to the Azure service and the timeout will apply to 
 each call individually.</li>
@@ -388,7 +385,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.create_file_from_text">
-<code class="descname">create_file_from_text</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>text</em>, <em>encoding='utf-8'</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file_from_text" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_file_from_text</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>text</em>, <em>encoding='utf-8'</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.create_file_from_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_file_from_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new file from str/unicode, or updates the content of an
 existing file, with automatic chunking and progress notifications.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -421,7 +418,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.create_share">
-<code class="descname">create_share</code><span class="sig-paren">(</span><em>share_name</em>, <em>metadata=None</em>, <em>quota=None</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_share" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_share</code><span class="sig-paren">(</span><em>share_name</em>, <em>metadata=None</em>, <em>quota=None</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.create_share"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.create_share" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new share under the specified account. If the share
 with the same name already exists, the operation fails on the
 service. By default, the exception is swallowed by the client.
@@ -454,7 +451,7 @@ False by default.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.delete_directory">
-<code class="descname">delete_directory</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>fail_not_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.delete_directory" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_directory</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>fail_not_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.delete_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.delete_directory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes the specified empty directory. Note that the directory must
 be empty before it can be deleted. Attempting to delete directories 
 that are not empty will fail.</p>
@@ -487,7 +484,7 @@ exist.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.delete_file">
-<code class="descname">delete_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.delete_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.delete_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.delete_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Marks the specified file for deletion. The file is later
 deleted during garbage collection.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -508,7 +505,7 @@ deleted during garbage collection.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.delete_share">
-<code class="descname">delete_share</code><span class="sig-paren">(</span><em>share_name</em>, <em>fail_not_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.delete_share" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_share</code><span class="sig-paren">(</span><em>share_name</em>, <em>fail_not_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.delete_share"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.delete_share" title="Permalink to this definition">¶</a></dt>
 <dd><p>Marks the specified share for deletion. If the share
 does not exist, the operation fails on the service. By 
 default, the exception is swallowed by the client.
@@ -537,7 +534,7 @@ exist. False by default.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.exists">
-<code class="descname">exists</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name=None</em>, <em>file_name=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.exists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">exists</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name=None</em>, <em>file_name=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.exists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean indicating whether the share exists if only share name is
 given. If directory_name is specificed a boolean will be returned indicating
 if the directory exists. If file_name is specified as well, a boolean will be
@@ -566,7 +563,7 @@ returned indicating if the file exists.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.generate_account_shared_access_signature">
-<code class="descname">generate_account_shared_access_signature</code><span class="sig-paren">(</span><em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.generate_account_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_account_shared_access_signature</code><span class="sig-paren">(</span><em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.generate_account_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.generate_account_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the file service.
 Use the returned signature with the sas_token parameter of the FileService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -614,7 +611,7 @@ is https,http. Note that HTTP only is not a permitted value.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.generate_file_shared_access_signature">
-<code class="descname">generate_file_shared_access_signature</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name=None</em>, <em>file_name=None</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>cache_control=None</em>, <em>content_disposition=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.generate_file_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_file_shared_access_signature</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name=None</em>, <em>file_name=None</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>cache_control=None</em>, <em>content_disposition=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.generate_file_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.generate_file_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the file.
 Use the returned signature with the sas_token parameter of FileService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -679,7 +676,7 @@ using this shared access signature.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.generate_share_shared_access_signature">
-<code class="descname">generate_share_shared_access_signature</code><span class="sig-paren">(</span><em>share_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>cache_control=None</em>, <em>content_disposition=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.generate_share_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_share_shared_access_signature</code><span class="sig-paren">(</span><em>share_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em>, <em>cache_control=None</em>, <em>content_disposition=None</em>, <em>content_encoding=None</em>, <em>content_language=None</em>, <em>content_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.generate_share_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.generate_share_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the share.
 Use the returned signature with the sas_token parameter of FileService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -741,7 +738,7 @@ using this shared access signature.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_directory_metadata">
-<code class="descname">get_directory_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_directory_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_directory_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_directory_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_directory_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata for the specified directory.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -766,7 +763,7 @@ using this shared access signature.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_directory_properties">
-<code class="descname">get_directory_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_directory_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_directory_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_directory_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_directory_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata and system properties for the
 specified directory. The data returned does not include the directory&#8217;s
 list of files.</p>
@@ -793,7 +790,7 @@ list of files.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_file_metadata">
-<code class="descname">get_file_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_file_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_file_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata for the specified file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -819,7 +816,7 @@ list of files.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_file_properties">
-<code class="descname">get_file_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_file_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_file_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata, standard HTTP properties, and
 system properties for the file. Returns an instance of <a class="reference internal" href="azure.storage.file.models.html#azure.storage.file.models.File" title="azure.storage.file.models.File"><code class="xref py py-class docutils literal"><span class="pre">File</span></code></a> with
 <a class="reference internal" href="azure.storage.file.models.html#azure.storage.file.models.FileProperties" title="azure.storage.file.models.FileProperties"><code class="xref py py-class docutils literal"><span class="pre">FileProperties</span></code></a> and a metadata dict.</p>
@@ -847,7 +844,7 @@ system properties for the file. Returns an instance of <a class="reference inter
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_file_service_properties">
-<code class="descname">get_file_service_properties</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_service_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_file_service_properties</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_file_service_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_service_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the properties of a storage account&#8217;s File service, including
 Azure Storage Analytics.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -866,7 +863,7 @@ Azure Storage Analytics.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_file_to_bytes">
-<code class="descname">get_file_to_bytes</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_to_bytes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_file_to_bytes</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_file_to_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_to_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a file as an array of bytes, with automatic chunking and
 progress notifications. Returns an instance of <code class="xref py py-class docutils literal"><span class="pre">File</span></code> with
 properties, metadata, and content.</p>
@@ -911,8 +908,6 @@ prevents parallel download. This may also be valuable if the file is
 being concurrently modified to enforce atomicity or if many files are 
 expected to be empty as an extra request is required for empty files 
 if max_connections is greater than 1.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry download of file chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
 multiple calls to the Azure service and the timeout will apply to 
 each call individually.</li>
@@ -931,7 +926,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_file_to_path">
-<code class="descname">get_file_to_path</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>file_path</em>, <em>open_mode='wb'</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_to_path" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_file_to_path</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>file_path</em>, <em>open_mode='wb'</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_file_to_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_to_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a file to a file path, with automatic chunking and progress
 notifications. Returns an instance of File with properties and metadata.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -979,8 +974,6 @@ prevents parallel download. This may also be valuable if the file is
 being concurrently modified to enforce atomicity or if many files are 
 expected to be empty as an extra request is required for empty files 
 if max_connections is greater than 1.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry download of file chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
 multiple calls to the Azure service and the timeout will apply to 
 each call individually.</li>
@@ -999,7 +992,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_file_to_stream">
-<code class="descname">get_file_to_stream</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>stream</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_to_stream" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_file_to_stream</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>stream</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_file_to_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_to_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a file to a stream, with automatic chunking and progress
 notifications. Returns an instance of <code class="xref py py-class docutils literal"><span class="pre">File</span></code> with properties
 and metadata.</p>
@@ -1045,8 +1038,6 @@ prevents parallel download. This may also be valuable if the file is
 being concurrently modified to enforce atomicity or if many files are 
 expected to be empty as an extra request is required for empty files 
 if max_connections is greater than 1.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry download of file chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
 multiple calls to the Azure service and the timeout will apply to 
 each call individually.</li>
@@ -1065,7 +1056,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_file_to_text">
-<code class="descname">get_file_to_text</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>encoding='utf-8'</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_to_text" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_file_to_text</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>encoding='utf-8'</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_file_to_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_file_to_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>Downloads a file as unicode text, with automatic chunking and progress
 notifications. Returns an instance of <code class="xref py py-class docutils literal"><span class="pre">File</span></code> with properties,
 metadata, and content.</p>
@@ -1111,8 +1102,6 @@ prevents parallel download. This may also be valuable if the file is
 being concurrently modified to enforce atomicity or if many files are 
 expected to be empty as an extra request is required for empty files 
 if max_connections is greater than 1.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry download of file chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>timeout</strong> (<em>int</em>) &#8211; The timeout parameter is expressed in seconds. This method may make 
 multiple calls to the Azure service and the timeout will apply to 
 each call individually.</li>
@@ -1131,7 +1120,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_share_acl">
-<code class="descname">get_share_acl</code><span class="sig-paren">(</span><em>share_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_share_acl" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_share_acl</code><span class="sig-paren">(</span><em>share_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_share_acl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_share_acl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the permissions for the specified share.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1155,7 +1144,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_share_metadata">
-<code class="descname">get_share_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_share_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_share_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_share_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_share_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata for the specified share.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1179,7 +1168,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_share_properties">
-<code class="descname">get_share_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_share_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_share_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_share_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_share_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns all user-defined metadata and system properties for the
 specified share. The data returned does not include the shares&#8217;s
 list of files or directories.</p>
@@ -1205,7 +1194,7 @@ list of files or directories.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.get_share_stats">
-<code class="descname">get_share_stats</code><span class="sig-paren">(</span><em>share_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_share_stats" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_share_stats</code><span class="sig-paren">(</span><em>share_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.get_share_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.get_share_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the approximate size of the data stored on the share,
 rounded up to the nearest gigabyte.</p>
 <p>Note that this value may not include all recently created
@@ -1232,7 +1221,7 @@ or recently resized files.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.list_directories_and_files">
-<code class="descname">list_directories_and_files</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name=None</em>, <em>num_results=None</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.list_directories_and_files" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_directories_and_files</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name=None</em>, <em>num_results=None</em>, <em>marker=None</em>, <em>timeout=None</em>, <em>_context=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.list_directories_and_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.list_directories_and_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator to list the directories and files under the specified share.
 The generator will lazily follow the continuation tokens returned by
 the service and stop when all directories and files have been returned or
@@ -1268,7 +1257,7 @@ where the previous generator stopped.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.list_ranges">
-<code class="descname">list_ranges</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.list_ranges" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_ranges</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>start_range=None</em>, <em>end_range=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.list_ranges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.list_ranges" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves the valid ranges for a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1300,7 +1289,7 @@ Ex: start_range=0, end_range=511 will download first 512 bytes of file.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.list_shares">
-<code class="descname">list_shares</code><span class="sig-paren">(</span><em>prefix=None</em>, <em>marker=None</em>, <em>num_results=None</em>, <em>include_metadata=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.list_shares" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_shares</code><span class="sig-paren">(</span><em>prefix=None</em>, <em>marker=None</em>, <em>num_results=None</em>, <em>include_metadata=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.list_shares"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.list_shares" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator to list the shares under the specified account.
 The generator will lazily follow the continuation tokens returned by
 the service and stop when all shares have been returned or num_results 
@@ -1333,7 +1322,7 @@ where the previous generator stopped.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.make_file_url">
-<code class="descname">make_file_url</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>protocol=None</em>, <em>sas_token=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.make_file_url" title="Permalink to this definition">¶</a></dt>
+<code class="descname">make_file_url</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>protocol=None</em>, <em>sas_token=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.make_file_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.make_file_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates the url to access a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1362,7 +1351,7 @@ generate_shared_access_signature.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.resize_file">
-<code class="descname">resize_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>content_length</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.resize_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">resize_file</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>content_length</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.resize_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.resize_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resizes a file to the specified size. If the specified byte
 value is less than the current size of the file, then all
 ranges above the specified byte value are cleared.</p>
@@ -1385,7 +1374,7 @@ ranges above the specified byte value are cleared.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.set_directory_metadata">
-<code class="descname">set_directory_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_directory_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_directory_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.set_directory_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_directory_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets one or more user-defined name-value pairs for the specified
 directory. Each call to this operation replaces all existing metadata
 attached to the directory. To remove all metadata from the directory,
@@ -1409,7 +1398,7 @@ as metadata. Example: {&#8216;category&#8217;:&#8217;test&#8217;}</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.set_file_metadata">
-<code class="descname">set_file_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_file_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_file_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.set_file_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_file_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets user-defined metadata for the specified file as one or more
 name-value pairs.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1433,7 +1422,7 @@ metadata from the file, call this operation with no metadata headers.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.set_file_properties">
-<code class="descname">set_file_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>content_settings</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_file_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_file_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>content_settings</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.set_file_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_file_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets system properties on the file. If one property is set for the
 content_settings, all properties will be overriden.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1455,7 +1444,7 @@ content_settings, all properties will be overriden.</p>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.set_file_service_properties">
-<code class="descname">set_file_service_properties</code><span class="sig-paren">(</span><em>hour_metrics=None</em>, <em>minute_metrics=None</em>, <em>cors=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_file_service_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_file_service_properties</code><span class="sig-paren">(</span><em>hour_metrics=None</em>, <em>minute_metrics=None</em>, <em>cors=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.set_file_service_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_file_service_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the properties of a storage account&#8217;s File service, including
 Azure Storage Analytics. If an element (ex HourMetrics) is left as None, the 
 existing settings on the service for that functionality are preserved.</p>
@@ -1481,7 +1470,7 @@ and CORS will be disabled for the service.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.set_share_acl">
-<code class="descname">set_share_acl</code><span class="sig-paren">(</span><em>share_name</em>, <em>signed_identifiers=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_share_acl" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_share_acl</code><span class="sig-paren">(</span><em>share_name</em>, <em>signed_identifiers=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.set_share_acl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_share_acl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the permissions for the specified share or stored access 
 policies that may be used with Shared Access Signatures.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1503,7 +1492,7 @@ will clear the access policies set on the service.</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.set_share_metadata">
-<code class="descname">set_share_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_share_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_share_metadata</code><span class="sig-paren">(</span><em>share_name</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.set_share_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_share_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets one or more user-defined name-value pairs for the specified
 share. Each call to this operation replaces all existing metadata
 attached to the share. To remove all metadata from the share,
@@ -1526,7 +1515,7 @@ metadata. Example: {&#8216;category&#8217;:&#8217;test&#8217;}</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.set_share_properties">
-<code class="descname">set_share_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>quota</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_share_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_share_properties</code><span class="sig-paren">(</span><em>share_name</em>, <em>quota</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.set_share_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.set_share_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets service-defined properties for the specified share.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1546,7 +1535,7 @@ greater than 0, and less than or equal to 5 TB (5120 GB).</li>
 
 <dl class="method">
 <dt id="azure.storage.file.fileservice.FileService.update_range">
-<code class="descname">update_range</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>data</em>, <em>start_range</em>, <em>end_range</em>, <em>validate_content=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.file.fileservice.FileService.update_range" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update_range</code><span class="sig-paren">(</span><em>share_name</em>, <em>directory_name</em>, <em>file_name</em>, <em>data</em>, <em>start_range</em>, <em>end_range</em>, <em>validate_content=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/file/fileservice.html#FileService.update_range"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.file.fileservice.FileService.update_range" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the bytes specified by the request body into the specified range.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1613,14 +1602,11 @@ file.</li>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1631,8 +1617,8 @@ file.</li>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
       <a href="../_sources/ref/azure.storage.file.fileservice.txt"

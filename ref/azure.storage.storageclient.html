@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.storageclient module &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.storageclient module &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,16 +23,19 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage package" href="azure.storage.html" />
-    <link rel="next" title="azure" href="modules.html" />
+    <link rel="next" title="azure.storage.retry module" href="azure.storage.retry.html" />
     <link rel="prev" title="azure.storage.sharedaccesssignature module" href="azure.storage.sharedaccesssignature.html" />
    
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -67,20 +70,30 @@ specified, anonymous access will be used.</li>
 <li><strong>secondary_endpoint</strong> (<em>str</em>) &#8211; The secondary endpoint to read storage data from. This will only be a 
 valid endpoint if the storage account used is RA-GRS and thus allows 
 reading from secondary.</li>
+<li><a class="reference internal" href="azure.storage.retry.html#module-azure.storage.retry" title="azure.storage.retry"><strong>retry</strong></a> (<em>function(context)</em>) &#8211; A function which determines whether to retry. Takes as a parameter a 
+<a class="reference internal" href="azure.storage.models.html#azure.storage.models.RetryContext" title="azure.storage.models.RetryContext"><code class="xref py py-class docutils literal"><span class="pre">RetryContext</span></code></a> object. Returns the number 
+of seconds to wait before retrying the request, or None to indicate not 
+to retry.</li>
+<li><strong>location_mode</strong> (<a class="reference internal" href="azure.storage.models.html#azure.storage.models.LocationMode" title="azure.storage.models.LocationMode"><em>LocationMode</em></a>) &#8211; The host location to use to make requests. Defaults to LocationMode.PRIMARY.
+Note that this setting only applies to RA-GRS accounts as other account 
+types do not allow reading from secondary. If the location_mode is set to 
+LocationMode.SECONDARY, read requests will be sent to the secondary endpoint. 
+Write requests will continue to be sent to primary.</li>
+<li><a class="reference internal" href="#azure.storage.storageclient.StorageClient.protocol" title="azure.storage.storageclient.StorageClient.protocol"><strong>protocol</strong></a> (<em>str</em>) &#8211; The protocol to use for requests. Defaults to https.</li>
+<li><a class="reference internal" href="#azure.storage.storageclient.StorageClient.request_session" title="azure.storage.storageclient.StorageClient.request_session"><strong>request_session</strong></a> (<em>requests.Session</em>) &#8211; The session object to use for http requests.</li>
 <li><strong>request_callback</strong> (<em>function(request)</em>) &#8211; A function called immediately before each request is sent. This function 
 takes as a parameter the request object and returns nothing. It may be 
 used to added custom headers or log request data.</li>
 <li><strong>response_callback</strong> (<em>function()</em>) &#8211; A function called immediately after each response is received. This 
 function takes as a parameter the response object and returns nothing. 
 It may be used to log response data.</li>
+<li><strong>retry_callback</strong> (<em>function()</em>) &#8211; A function called immediately after retry evaluation is performed. This 
+function takes as a parameter the retry context object and returns nothing. 
+It may be used to detect retries and log context information.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>protocol</strong> (<em>str</em>) &#8211; The protocol to use for requests. Defaults to https.</li>
-<li><strong>request_session</strong> (<em>requests.Session</em>) &#8211; The session object to use for http requests.</li>
-<li><strong>connection_params</strong> (<em>obj</em>) &#8211; The parameters to use to construct the client.</li>
-</ul>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first last"><strong>connection_params</strong> (<em>obj</em>) &#8211; The parameters to use to construct the client.</p>
 </td>
 </tr>
 </tbody>
@@ -97,7 +110,7 @@ It may be used to log response data.</li>
 
 <dl class="method">
 <dt id="azure.storage.storageclient.StorageClient.set_proxy">
-<code class="descname">set_proxy</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>user=None</em>, <em>password=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.storageclient.StorageClient.set_proxy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_proxy</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>user=None</em>, <em>password=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/storageclient.html#StorageClient.set_proxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.storageclient.StorageClient.set_proxy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the proxy server host and port for the HTTP CONNECT Tunnelling.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -110,29 +123,6 @@ It may be used to log response data.</li>
 <li><strong>password</strong> (<em>str</em>) &#8211; Password for proxy authorization.</li>
 </ul>
 </td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="azure.storage.storageclient.StorageClient.with_filter">
-<code class="descname">with_filter</code><span class="sig-paren">(</span><em>filter</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.storageclient.StorageClient.with_filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a new service which will process requests with the specified
-filter. Filtering operations can include logging, automatic retrying,
-etc... The filter is a lambda which receives the HTTPRequest and
-another lambda. The filter can perform any pre-processing on the
-request, pass it off to the next lambda, and then perform any
-post-processing on the response.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filter</strong> (<em>function(request)</em>) &#8211; A filter function.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new service using the specified filter.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">a subclass of <a class="reference internal" href="#azure.storage.storageclient.StorageClient" title="azure.storage.storageclient.StorageClient"><code class="xref py py-class docutils literal"><span class="pre">StorageClient</span></code></a></td>
 </tr>
 </tbody>
 </table>
@@ -154,7 +144,7 @@ post-processing on the response.</p>
   <li><a href="azure.html">azure package</a><ul>
   <li><a href="azure.storage.html">azure.storage package</a><ul>
       <li>Previous: <a href="azure.storage.sharedaccesssignature.html" title="previous chapter">azure.storage.sharedaccesssignature module</a></li>
-      <li>Next: <a href="modules.html" title="next chapter">azure</a></li>
+      <li>Next: <a href="azure.storage.retry.html" title="next chapter">azure.storage.retry module</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -170,14 +160,11 @@ post-processing on the response.</p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -188,8 +175,8 @@ post-processing on the response.</p>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
       <a href="../_sources/ref/azure.storage.storageclient.txt"

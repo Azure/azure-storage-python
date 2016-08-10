@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Azure Storage SDK for Python. &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>Azure Storage SDK for Python. &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,14 +23,17 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="#" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="#" />
     <link rel="next" title="Upgrade Guide" href="upgrade.html" />
    
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -42,13 +45,13 @@
 <div class="section" id="installation">
 <h2>Installation:<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>You can use <code class="docutils literal"><span class="pre">pip</span></code> to install the latest released version of <code class="docutils literal"><span class="pre">azure-storage</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install azure-storage
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">azure</span><span class="o">-</span><span class="n">storage</span>
 </pre></div>
 </div>
 <p>If you want to install <code class="docutils literal"><span class="pre">azure-storage</span></code> from source:</p>
-<div class="highlight-python"><div class="highlight"><pre>git clone git://github.com/Azure/azure-storage-python.git
-cd azure-storage-python
-python setup.py install
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">Azure</span><span class="o">/</span><span class="n">azure</span><span class="o">-</span><span class="n">storage</span><span class="o">-</span><span class="n">python</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">azure</span><span class="o">-</span><span class="n">storage</span><span class="o">-</span><span class="n">python</span>
+<span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
 <p>If you are looking for Azure Service Bus or the Azure management libraries,
@@ -57,11 +60,11 @@ please visit <a class="reference external" href="https://github.com/Azure/azure-
 <div class="section" id="documentation">
 <h2>Documentation:<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><a class="reference external" href="https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-blob-storage/">Blob Getting Started Doc</a> &#8211; (<a class="reference internal" href="ref/azure.storage.blob.html"><em>API</em></a>)</li>
-<li><a class="reference external" href="https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-queue-storage/">Queue Getting Started Doc</a> &#8211; (<a class="reference internal" href="ref/azure.storage.queue.html"><em>API</em></a>)</li>
-<li><a class="reference external" href="https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-table-storage/">Table Getting Started Doc</a> &#8211; (<a class="reference internal" href="ref/azure.storage.table.html"><em>API</em></a>)</li>
-<li><a class="reference external" href="https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-file-storage/">File Getting Started Doc</a> &#8211; (<a class="reference internal" href="ref/azure.storage.file.html"><em>API</em></a>)</li>
-<li><a class="reference internal" href="py-modindex.html"><span>Reference Documentation - All Services</span></a></li>
+<li><a class="reference external" href="https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-blob-storage/">Blob Getting Started Doc</a> &#8211; (<a class="reference internal" href="ref/azure.storage.blob.html"><span class="doc">API</span></a>)</li>
+<li><a class="reference external" href="https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-queue-storage/">Queue Getting Started Doc</a> &#8211; (<a class="reference internal" href="ref/azure.storage.queue.html"><span class="doc">API</span></a>)</li>
+<li><a class="reference external" href="https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-table-storage/">Table Getting Started Doc</a> &#8211; (<a class="reference internal" href="ref/azure.storage.table.html"><span class="doc">API</span></a>)</li>
+<li><a class="reference external" href="https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-file-storage/">File Getting Started Doc</a> &#8211; (<a class="reference internal" href="ref/azure.storage.file.html"><span class="doc">API</span></a>)</li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Reference Documentation - All Services</span></a></li>
 </ul>
 </div>
 <div class="section" id="features">
@@ -130,9 +133,9 @@ Center</a></p>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
 </ul>
 <div class="toctree-wrapper compound">
 </div>
@@ -183,14 +186,11 @@ Center</a></p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -201,8 +201,8 @@ Center</a></p>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
       <a href="_sources/index.txt"

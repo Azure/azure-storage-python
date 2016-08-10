@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.blockblobservice module &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.blob.blockblobservice module &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,16 +23,19 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage.blob package" href="azure.storage.blob.html" />
     <link rel="next" title="azure.storage.blob.models module" href="azure.storage.blob.models.html" />
     <link rel="prev" title="azure.storage.blob.baseblobservice module" href="azure.storage.blob.baseblobservice.html" />
    
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -110,7 +113,7 @@ for the connection string format.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_bytes">
-<code class="descname">create_blob_from_bytes</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>blob</em>, <em>index=0</em>, <em>count=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_bytes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_blob_from_bytes</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>blob</em>, <em>index=0</em>, <em>count=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_bytes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new blob from an array of bytes, or updates the content
 of an existing blob, with automatic chunking and progress
 notifications.</p>
@@ -138,8 +141,6 @@ current is the number of bytes transfered so far, and total is the
 size of the blob, or None if the total size is unknown.</li>
 <li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use when the blob size exceeds 
 64MB.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of blob chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
 <li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
 If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -170,7 +171,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_path">
-<code class="descname">create_blob_from_path</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>file_path</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_path" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_blob_from_path</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>file_path</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new blob from a file path, or updates the content of an
 existing blob, with automatic chunking and progress notifications.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -194,8 +195,6 @@ current is the number of bytes transfered so far, and total is the
 size of the blob, or None if the total size is unknown.</li>
 <li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use when the blob size exceeds 
 64MB.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of blob chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
 <li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
 If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -226,7 +225,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_stream">
-<code class="descname">create_blob_from_stream</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>stream</em>, <em>count=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_stream" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_blob_from_stream</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>stream</em>, <em>count=None</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new blob from a file/stream, or updates the content of
 an existing blob, with automatic chunking and progress
 notifications.</p>
@@ -253,8 +252,6 @@ current is the number of bytes transfered so far, and total is the
 size of the blob, or None if the total size is unknown.</li>
 <li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use when the blob size exceeds 
 64MB. Note that parallel upload requires the stream to be seekable.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of blob chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
 <li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
 If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -285,7 +282,7 @@ each call individually.</li>
 
 <dl class="method">
 <dt id="azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_text">
-<code class="descname">create_blob_from_text</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>text</em>, <em>encoding='utf-8'</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>max_retries=5</em>, <em>retry_wait=1.0</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_text" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_blob_from_text</code><span class="sig-paren">(</span><em>container_name</em>, <em>blob_name</em>, <em>text</em>, <em>encoding='utf-8'</em>, <em>content_settings=None</em>, <em>metadata=None</em>, <em>validate_content=False</em>, <em>progress_callback=None</em>, <em>max_connections=2</em>, <em>lease_id=None</em>, <em>if_modified_since=None</em>, <em>if_unmodified_since=None</em>, <em>if_match=None</em>, <em>if_none_match=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/blob/blockblobservice.html#BlockBlobService.create_blob_from_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.blob.blockblobservice.BlockBlobService.create_blob_from_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new blob from str/unicode, or updates the content of an
 existing blob, with automatic chunking and progress notifications.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -310,8 +307,6 @@ current is the number of bytes transfered so far, and total is the
 size of the blob, or None if the total size is unknown.</li>
 <li><strong>max_connections</strong> (<em>int</em>) &#8211; Maximum number of parallel connections to use when the blob size exceeds 
 64MB.</li>
-<li><strong>max_retries</strong> (<em>int</em>) &#8211; Number of times to retry upload of blob chunk if an error occurs.</li>
-<li><strong>retry_wait</strong> (<em>int</em>) &#8211; Sleep time in secs between retries.</li>
 <li><strong>lease_id</strong> (<em>str</em>) &#8211; Required if the blob has an active lease.</li>
 <li><strong>if_modified_since</strong> (<em>datetime</em>) &#8211; A DateTime value. Azure expects the date value passed in to be UTC.
 If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -509,14 +504,11 @@ operation if it does exist.</li>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -527,8 +519,8 @@ operation if it does exist.</li>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
       <a href="../_sources/ref/azure.storage.blob.blockblobservice.txt"

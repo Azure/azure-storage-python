@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.table.models &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.table.models &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,14 +23,17 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -38,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.table.models</h1><div class="highlight"><pre>
-<span class="c1">#-------------------------------------------------------------------------</span>
+<span></span><span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -52,11 +55,11 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#--------------------------------------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">azure.common</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">azure.common</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">AzureException</span><span class="p">,</span>
     <span class="n">AzureHttpError</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._error</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_ERROR_ATTRIBUTE_MISSING</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -68,7 +71,7 @@
 <span class="sd">        A detailed error message indicating the reason for the failure. </span>
 <span class="sd">    &#39;&#39;&#39;</span></div>
 
-<div class="viewcode-block" id="AzureBatchOperationError"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.AzureBatchOperationError">[docs]</a><span class="k">class</span> <span class="nc">AzureBatchOperationError</span><span class="p">(</span><span class="n">AzureHttpError</span><span class="p">):</span></div>
+<div class="viewcode-block" id="AzureBatchOperationError"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.AzureBatchOperationError">[docs]</a><span class="k">class</span> <span class="nc">AzureBatchOperationError</span><span class="p">(</span><span class="n">AzureHttpError</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Indicates that a batch operation failed.</span>
@@ -86,7 +89,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">batch_code</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">AzureBatchOperationError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">status_code</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">batch_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">batch_code</span></div>
 
 <div class="viewcode-block" id="Entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.Entity">[docs]</a><span class="k">class</span> <span class="nc">Entity</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -128,15 +131,17 @@
 <span class="sd">        entity.x = EntityProperty(EdmType.STRING, &#39;y&#39;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encrypt</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Represents an Azure Table. Returned by list_tables.</span>
 
 <span class="sd">        :param str type: The type of the property.</span>
 <span class="sd">        :param EdmType value: The value of the property.</span>
+<span class="sd">        :param bool encrypt: Indicates whether or not the property should be encrypted.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encrypt</span> <span class="o">=</span> <span class="n">encrypt</span></div>
 
 
 <div class="viewcode-block" id="Table"><a class="viewcode-back" href="../../../../ref/azure.storage.table.models.html#azure.storage.table.models.Table">[docs]</a><span class="k">class</span> <span class="nc">Table</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -206,7 +211,7 @@
 <span class="sd">    :ivar TablePermissions TablePermissions.DELETE: Delete entities.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :param bool query:</span>
 <span class="sd">            Get entities and query entities.</span>
@@ -238,10 +243,10 @@
                 <span class="p">(</span><span class="s1">&#39;u&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
 
-<span class="n">TablePermissions</span><span class="o">.</span><span class="n">QUERY</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">TablePermissions</span><span class="o">.</span><span class="n">ADD</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">TablePermissions</span><span class="o">.</span><span class="n">UPDATE</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">TablePermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">TablePermissions</span><span class="o">.</span><span class="n">QUERY</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">TablePermissions</span><span class="o">.</span><span class="n">ADD</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">TablePermissions</span><span class="o">.</span><span class="n">UPDATE</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">TablePermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">TablePermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -260,14 +265,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -278,8 +280,8 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.pageblobservice &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.blob.pageblobservice &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,14 +23,17 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -38,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.blob.pageblobservice</h1><div class="highlight"><pre>
-<span class="c1">#-------------------------------------------------------------------------</span>
+<span></span><span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -52,53 +55,56 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#--------------------------------------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">.._error</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._error</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_validate_not_none</span><span class="p">,</span>
     <span class="n">_validate_type_bytes</span><span class="p">,</span>
+    <span class="n">_validate_encryption_required</span><span class="p">,</span>
+    <span class="n">_validate_encryption_unsupported</span><span class="p">,</span>
     <span class="n">_ERROR_VALUE_NEGATIVE</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_int_to_str</span><span class="p">,</span>
     <span class="n">_to_str</span><span class="p">,</span>
     <span class="n">_datetime_to_utc_string</span><span class="p">,</span>
     <span class="n">_get_content_md5</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_get_request_body_bytes_only</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">_get_data_bytes_only</span><span class="p">,</span>
     <span class="n">_add_metadata_headers</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._http</span> <span class="kn">import</span> <span class="n">HTTPRequest</span>
-<span class="kn">from</span> <span class="nn">._error</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._http</span> <span class="k">import</span> <span class="n">HTTPRequest</span>
+<span class="kn">from</span> <span class="nn">._error</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_ERROR_PAGE_BLOB_SIZE_ALIGNMENT</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._upload_chunking</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._upload_chunking</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_PageBlobChunkUploader</span><span class="p">,</span>
     <span class="n">_upload_blob_chunks</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_BlobTypes</span><span class="p">,</span>
     <span class="n">PageBlobProperties</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._constants</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._constants</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
     <span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._encryption</span> <span class="k">import</span> <span class="n">_generate_blob_encryption_data</span>
+<span class="kn">from</span> <span class="nn">._serialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_get_path</span><span class="p">,</span>
     <span class="n">_validate_and_format_range_headers</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._deserialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._deserialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_convert_xml_to_page_ranges</span><span class="p">,</span>
     <span class="n">_parse_page_properties</span><span class="p">,</span>
     <span class="n">_parse_base_properties</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.baseblobservice</span> <span class="kn">import</span> <span class="n">BaseBlobService</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">.baseblobservice</span> <span class="k">import</span> <span class="n">BaseBlobService</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
-    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">BytesIO</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="k">as</span> <span class="n">BytesIO</span>
+    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="k">import</span> <span class="n">StringIO</span> <span class="k">as</span> <span class="n">BytesIO</span>
 
 <span class="c1"># Keep this value sync with _ERROR_PAGE_BLOB_SIZE_ALIGNMENT</span>
 <span class="n">_PAGE_ALIGNMENT</span> <span class="o">=</span> <span class="mi">512</span>
@@ -123,9 +129,9 @@
 
     <span class="n">MAX_PAGE_SIZE</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                 <span class="n">is_emulated</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
-                 <span class="n">custom_domain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">request_session</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">connection_string</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">is_emulated</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
+                 <span class="n">custom_domain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">request_session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connection_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :param str account_name:</span>
 <span class="sd">            The storage account name. This is used to authenticate requests </span>
@@ -168,9 +174,9 @@
             <span class="n">custom_domain</span><span class="p">,</span> <span class="n">request_session</span><span class="p">,</span> <span class="n">connection_string</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PageBlobService.create_blob"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.create_blob">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">content_length</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">sequence_number</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">content_length</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sequence_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new Page Blob.</span>
 
@@ -223,37 +229,29 @@
 <span class="sd">        :return: ETag and last modified properties for the new Page Blob</span>
 <span class="sd">        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
-        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
-        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;content_length&#39;</span><span class="p">,</span> <span class="n">content_length</span><span class="p">)</span>
-        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;x-ms-blob-type&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blob_type</span><span class="p">),</span>
-            <span class="s1">&#39;x-ms-blob-content-length&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">content_length</span><span class="p">),</span>
-            <span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">),</span>
-            <span class="s1">&#39;x-ms-blob-sequence-number&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">sequence_number</span><span class="p">),</span>
-            <span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">),</span>
-            <span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">),</span>
-            <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
-            <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)</span>
-        <span class="p">}</span>
-        <span class="n">_add_metadata_headers</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">content_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">content_settings</span><span class="o">.</span><span class="n">_to_headers</span><span class="p">())</span>
+        <span class="n">_validate_encryption_unsupported</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>     
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_parse_base_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_blob</span><span class="p">(</span>
+                    <span class="n">container_name</span><span class="p">,</span>
+                    <span class="n">blob_name</span><span class="p">,</span>
+                    <span class="n">content_length</span><span class="p">,</span>
+                    <span class="n">content_settings</span><span class="o">=</span><span class="n">content_settings</span><span class="p">,</span>
+                    <span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">,</span>
+                    <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+                    <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
+                    <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
+                    <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
+                    <span class="n">if_match</span><span class="o">=</span><span class="n">if_match</span><span class="p">,</span>
+                    <span class="n">if_none_match</span><span class="o">=</span><span class="n">if_none_match</span><span class="p">,</span>
+                    <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+                <span class="p">)</span></div>
 
 <div class="viewcode-block" id="PageBlobService.update_page"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.update_page">[docs]</a>    <span class="k">def</span> <span class="nf">update_page</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">start_range</span><span class="p">,</span> <span class="n">end_range</span><span class="p">,</span>
-        <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_sequence_number_lte</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_sequence_number_lt</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_sequence_number_eq</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_sequence_number_lte</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_sequence_number_lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_sequence_number_eq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Updates a range of pages.</span>
 
@@ -317,49 +315,33 @@
 <span class="sd">        :return: ETag and last modified properties for the updated Page Blob</span>
 <span class="sd">        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
-        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
-        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="n">page</span><span class="p">)</span>
 
-        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;page&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
-        <span class="p">}</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;x-ms-page-write&#39;</span><span class="p">:</span> <span class="s1">&#39;update&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">),</span>
-            <span class="s1">&#39;x-ms-if-sequence-number-le&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_lte</span><span class="p">),</span>
-            <span class="s1">&#39;x-ms-if-sequence-number-lt&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_lt</span><span class="p">),</span>
-            <span class="s1">&#39;x-ms-if-sequence-number-eq&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_eq</span><span class="p">),</span>
-            <span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">),</span>
-            <span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">),</span>
-            <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
-            <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)</span>
-        <span class="p">}</span>
-        <span class="n">_validate_and_format_range_headers</span><span class="p">(</span>
-            <span class="n">request</span><span class="p">,</span>
-            <span class="n">start_range</span><span class="p">,</span>
-            <span class="n">end_range</span><span class="p">,</span>
-            <span class="n">align_to_page</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body_bytes_only</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="n">page</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">validate_content</span><span class="p">:</span>
-            <span class="n">computed_md5</span> <span class="o">=</span> <span class="n">_get_content_md5</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
-            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">computed_md5</span><span class="p">)</span>
-
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_parse_page_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="n">_validate_encryption_unsupported</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_page</span><span class="p">(</span>
+                    <span class="n">container_name</span><span class="p">,</span>
+                    <span class="n">blob_name</span><span class="p">,</span>
+                    <span class="n">page</span><span class="p">,</span>
+                    <span class="n">start_range</span><span class="p">,</span>
+                    <span class="n">end_range</span><span class="p">,</span>
+                    <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
+                    <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
+                    <span class="n">if_sequence_number_lte</span><span class="o">=</span><span class="n">if_sequence_number_lte</span><span class="p">,</span>
+                    <span class="n">if_sequence_number_lt</span><span class="o">=</span><span class="n">if_sequence_number_lt</span><span class="p">,</span>
+                    <span class="n">if_sequence_number_eq</span><span class="o">=</span><span class="n">if_sequence_number_eq</span><span class="p">,</span>
+                    <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
+                    <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
+                    <span class="n">if_match</span><span class="o">=</span><span class="n">if_match</span><span class="p">,</span>
+                    <span class="n">if_none_match</span><span class="o">=</span><span class="n">if_none_match</span><span class="p">,</span>
+                    <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+                <span class="p">)</span></div>
 
 <div class="viewcode-block" id="PageBlobService.clear_page"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.clear_page">[docs]</a>    <span class="k">def</span> <span class="nf">clear_page</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">start_range</span><span class="p">,</span> <span class="n">end_range</span><span class="p">,</span>
-        <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_sequence_number_lte</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_sequence_number_lt</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_sequence_number_eq</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_sequence_number_lte</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_sequence_number_lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_sequence_number_eq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Clears a range of pages.</span>
 
@@ -419,7 +401,7 @@
 
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;page&#39;</span><span class="p">,</span>
@@ -440,15 +422,14 @@
             <span class="n">request</span><span class="p">,</span>
             <span class="n">start_range</span><span class="p">,</span>
             <span class="n">end_range</span><span class="p">,</span>
-            <span class="n">align_to_page</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">align_to_page</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_parse_page_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_parse_page_properties</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PageBlobService.get_page_ranges"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.get_page_ranges">[docs]</a>    <span class="k">def</span> <span class="nf">get_page_ranges</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">end_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns the list of valid page ranges for a Page Blob or snapshot</span>
 <span class="sd">        of a page blob.</span>
@@ -507,7 +488,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;pagelist&#39;</span><span class="p">,</span>
@@ -521,22 +502,21 @@
             <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
             <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">),</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="n">start_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">start_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_validate_and_format_range_headers</span><span class="p">(</span>
                 <span class="n">request</span><span class="p">,</span>
                 <span class="n">start_range</span><span class="p">,</span>
                 <span class="n">end_range</span><span class="p">,</span>
-                <span class="n">start_range_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                <span class="n">end_range_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                <span class="n">align_to_page</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">start_range_required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">end_range_required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">align_to_page</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_xml_to_page_ranges</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_convert_xml_to_page_ranges</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PageBlobService.get_page_ranges_diff"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.get_page_ranges_diff">[docs]</a>    <span class="k">def</span> <span class="nf">get_page_ranges_diff</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">previous_snapshot</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">start_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">previous_snapshot</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        The response will include only the pages that are different between either a</span>
 <span class="sd">        recent snapshot or the current blob and a previous snapshot, including pages</span>
@@ -601,7 +581,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;previous_snapshot&#39;</span><span class="p">,</span> <span class="n">previous_snapshot</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;pagelist&#39;</span><span class="p">,</span>
@@ -616,22 +596,21 @@
             <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
             <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">),</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="n">start_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">start_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">_validate_and_format_range_headers</span><span class="p">(</span>
                 <span class="n">request</span><span class="p">,</span>
                 <span class="n">start_range</span><span class="p">,</span>
                 <span class="n">end_range</span><span class="p">,</span>
-                <span class="n">start_range_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                <span class="n">end_range_required</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                <span class="n">align_to_page</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">start_range_required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">end_range_required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">align_to_page</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_xml_to_page_ranges</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_convert_xml_to_page_ranges</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PageBlobService.set_sequence_number"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.set_sequence_number">[docs]</a>    <span class="k">def</span> <span class="nf">set_sequence_number</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">sequence_number_action</span><span class="p">,</span> <span class="n">sequence_number</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">sequence_number_action</span><span class="p">,</span> <span class="n">sequence_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets the blob sequence number.</span>
@@ -680,7 +659,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;sequence_number_action&#39;</span><span class="p">,</span> <span class="n">sequence_number_action</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;properties&#39;</span><span class="p">,</span>
@@ -696,13 +675,12 @@
             <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">),</span>
         <span class="p">}</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_parse_page_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_parse_page_properties</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PageBlobService.resize_blob"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.resize_blob">[docs]</a>    <span class="k">def</span> <span class="nf">resize_blob</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">content_length</span><span class="p">,</span>
-        <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></div>
+        <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Resizes a page blob to the specified size. If the specified value is less</span>
@@ -748,7 +726,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;content_length&#39;</span><span class="p">,</span> <span class="n">content_length</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;properties&#39;</span><span class="p">,</span>
@@ -763,16 +741,15 @@
             <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">),</span>
         <span class="p">}</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_parse_page_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_parse_page_properties</span><span class="p">)</span></div>
 
     <span class="c1">#----Convenience APIs-----------------------------------------------------</span>
 
 <div class="viewcode-block" id="PageBlobService.create_blob_from_path"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.create_blob_from_path">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_path</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new blob from a file path, or updates the content of an</span>
 <span class="sd">        existing blob, with automatic chunking and progress notifications.</span>
@@ -802,10 +779,6 @@
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
 <span class="sd">        :param int max_connections:</span>
 <span class="sd">            Maximum number of parallel connections to use.</span>
-<span class="sd">        :param int max_retries:</span>
-<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
-<span class="sd">        :param int retry_wait:</span>
-<span class="sd">            Sleep time in secs between retries.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param datetime if_modified_since:</span>
@@ -850,8 +823,6 @@
                 <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
                 <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
                 <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
-                <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
-                <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
                 <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
                 <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
                 <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
@@ -861,10 +832,10 @@
 
 
 <div class="viewcode-block" id="PageBlobService.create_blob_from_stream"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.create_blob_from_stream">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_stream</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new blob from a file/stream, or updates the content of an</span>
 <span class="sd">        existing blob, with automatic chunking and progress notifications.</span>
@@ -898,10 +869,6 @@
 <span class="sd">        :param int max_connections:</span>
 <span class="sd">            Maximum number of parallel connections to use. Note that parallel upload </span>
 <span class="sd">            requires the stream to be seekable.</span>
-<span class="sd">        :param int max_retries:</span>
-<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
-<span class="sd">        :param int retry_wait:</span>
-<span class="sd">            Sleep time in secs between retries.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param datetime if_modified_since:</span>
@@ -934,6 +901,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;stream&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+        <span class="n">_validate_encryption_required</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_ERROR_VALUE_NEGATIVE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">))</span>
@@ -941,7 +909,11 @@
         <span class="k">if</span> <span class="n">count</span> <span class="o">%</span> <span class="n">_PAGE_ALIGNMENT</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_ERROR_PAGE_BLOB_SIZE_ALIGNMENT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count</span><span class="p">))</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_blob</span><span class="p">(</span>
+        <span class="n">cek</span><span class="p">,</span> <span class="n">iv</span><span class="p">,</span> <span class="n">encryption_data</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cek</span><span class="p">,</span> <span class="n">iv</span><span class="p">,</span> <span class="n">encryption_data</span> <span class="o">=</span> <span class="n">_generate_blob_encryption_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_blob</span><span class="p">(</span>
             <span class="n">container_name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
             <span class="n">blob_name</span><span class="o">=</span><span class="n">blob_name</span><span class="p">,</span>
             <span class="n">content_length</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
@@ -952,7 +924,8 @@
             <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
             <span class="n">if_match</span><span class="o">=</span><span class="n">if_match</span><span class="p">,</span>
             <span class="n">if_none_match</span><span class="o">=</span><span class="n">if_none_match</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">encryption_data</span><span class="o">=</span><span class="n">encryption_data</span>
         <span class="p">)</span>
 
         <span class="n">_upload_blob_chunks</span><span class="p">(</span>
@@ -963,22 +936,22 @@
             <span class="n">block_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_PAGE_SIZE</span><span class="p">,</span>
             <span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span>
             <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
-            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
-            <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
             <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
             <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
             <span class="n">uploader_class</span><span class="o">=</span><span class="n">_PageBlobChunkUploader</span><span class="p">,</span>
             <span class="n">if_match</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">etag</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">content_encryption_key</span><span class="o">=</span><span class="n">cek</span><span class="p">,</span>
+            <span class="n">initialization_vector</span><span class="o">=</span><span class="n">iv</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="PageBlobService.create_blob_from_bytes"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.pageblobservice.html#azure.storage.blob.pageblobservice.PageBlobService.create_blob_from_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob_from_bytes</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
-        <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-        <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">content_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+        <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_connections</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new blob from an array of bytes, or updates the content</span>
 <span class="sd">        of an existing blob, with automatic chunking and progress</span>
@@ -1014,10 +987,6 @@
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
 <span class="sd">        :param int max_connections:</span>
 <span class="sd">            Maximum number of parallel connections to use.</span>
-<span class="sd">        :param int max_retries:</span>
-<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
-<span class="sd">        :param int retry_wait:</span>
-<span class="sd">            Sleep time in secs between retries.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param datetime if_modified_since:</span>
@@ -1054,7 +1023,7 @@
         <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">_ERROR_VALUE_NEGATIVE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span> <span class="o">-</span> <span class="n">index</span>
 
         <span class="n">stream</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
@@ -1071,13 +1040,101 @@
             <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
             <span class="n">max_connections</span><span class="o">=</span><span class="n">max_connections</span><span class="p">,</span>
-            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
-            <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
             <span class="n">if_modified_since</span><span class="o">=</span><span class="n">if_modified_since</span><span class="p">,</span>
             <span class="n">if_unmodified_since</span><span class="o">=</span><span class="n">if_unmodified_since</span><span class="p">,</span>
             <span class="n">if_match</span><span class="o">=</span><span class="n">if_match</span><span class="p">,</span>
             <span class="n">if_none_match</span><span class="o">=</span><span class="n">if_none_match</span><span class="p">,</span>
-            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div></div>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
+
+    <span class="c1">#-----Helper methods-----------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">_create_blob</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">content_length</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sequence_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">encryption_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        See create_blob for more details. This helper method</span>
+<span class="sd">        allows for encryption or other such special behavior because</span>
+<span class="sd">        it is safely handled by the library. These behaviors are</span>
+<span class="sd">        prohibited in the public version of this function.</span>
+<span class="sd">        :param str _encryption_data:</span>
+<span class="sd">            The JSON formatted encryption metadata to upload as a part of the blob.</span>
+<span class="sd">            This should only be passed internally from other methods and only applied</span>
+<span class="sd">            when uploading entire blob contents immediately follows creation of the blob.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;content_length&#39;</span><span class="p">,</span> <span class="n">content_length</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x-ms-blob-type&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blob_type</span><span class="p">),</span>
+            <span class="s1">&#39;x-ms-blob-content-length&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">content_length</span><span class="p">),</span>
+            <span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">),</span>
+            <span class="s1">&#39;x-ms-blob-sequence-number&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">sequence_number</span><span class="p">),</span>
+            <span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">),</span>
+            <span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">),</span>
+            <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
+            <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">_add_metadata_headers</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">content_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">content_settings</span><span class="o">.</span><span class="n">_to_headers</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">encryption_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;x-ms-meta-encryptiondata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encryption_data</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_parse_base_properties</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_page</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">start_range</span><span class="p">,</span> <span class="n">end_range</span><span class="p">,</span>
+        <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_sequence_number_lte</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_sequence_number_lt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_sequence_number_eq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        See update_page for more details. This helper method</span>
+<span class="sd">        allows for encryption or other such special behavior because</span>
+<span class="sd">        it is safely handled by the library. These behaviors are</span>
+<span class="sd">        prohibited in the public version of this function.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;page&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x-ms-page-write&#39;</span><span class="p">:</span> <span class="s1">&#39;update&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;x-ms-lease-id&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">lease_id</span><span class="p">),</span>
+            <span class="s1">&#39;x-ms-if-sequence-number-le&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_lte</span><span class="p">),</span>
+            <span class="s1">&#39;x-ms-if-sequence-number-lt&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_lt</span><span class="p">),</span>
+            <span class="s1">&#39;x-ms-if-sequence-number-eq&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_sequence_number_eq</span><span class="p">),</span>
+            <span class="s1">&#39;If-Modified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_modified_since</span><span class="p">),</span>
+            <span class="s1">&#39;If-Unmodified-Since&#39;</span><span class="p">:</span> <span class="n">_datetime_to_utc_string</span><span class="p">(</span><span class="n">if_unmodified_since</span><span class="p">),</span>
+            <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
+            <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="n">_validate_and_format_range_headers</span><span class="p">(</span>
+            <span class="n">request</span><span class="p">,</span>
+            <span class="n">start_range</span><span class="p">,</span>
+            <span class="n">end_range</span><span class="p">,</span>
+            <span class="n">align_to_page</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_data_bytes_only</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span> <span class="n">page</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">validate_content</span><span class="p">:</span>
+            <span class="n">computed_md5</span> <span class="o">=</span> <span class="n">_get_content_md5</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">computed_md5</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_parse_page_properties</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -1096,14 +1153,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1114,8 +1168,8 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 
