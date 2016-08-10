@@ -4,33 +4,32 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [dcb08e52-116b-11e6-822a-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:16:04 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [a9bad078-5f27-11e6-ac8c-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:24:23 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer18061d24?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 03 May 2016 20:16:03 GMT']
-      ETag: ['"0x8D3738FC1146A26"']
-      Last-Modified: ['Tue, 03 May 2016 20:16:04 GMT']
+      Date: ['Wed, 10 Aug 2016 18:24:21 GMT']
+      ETag: ['"0x8D3C14B8D246440"']
+      Last-Modified: ['Wed, 10 Aug 2016 18:24:22 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [9ede5ff7-0001-004c-1b78-a53815000000]
+      x-ms-request-id: [3e8c01c6-0001-0013-5e34-f3caeb000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
-    body: !!binary |
-      aGVsbG8gd29ybGQ=
+    body: hello world
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [dcfa94ac-116b-11e6-9cd2-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:16:04 GMT']
+      x-ms-client-request-id: [aa071bd0-5f27-11e6-b6db-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:24:24 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer18061d24/blob1
@@ -38,12 +37,12 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Tue, 03 May 2016 20:16:03 GMT']
-      ETag: ['"0x8D3738FC13073F4"']
-      Last-Modified: ['Tue, 03 May 2016 20:16:04 GMT']
+      Date: ['Wed, 10 Aug 2016 18:24:21 GMT']
+      ETag: ['"0x8D3C14B8D36FE62"']
+      Last-Modified: ['Wed, 10 Aug 2016 18:24:22 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [9ede6010-0001-004c-3278-a53815000000]
+      x-ms-request-id: [3e8c0203-0001-0013-0d34-f3caeb000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
@@ -51,9 +50,9 @@ interactions:
     headers:
       Connection: [keep-alive]
       If-None-Match: ['0x111111111111111']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [dd005b6c-116b-11e6-8df4-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:16:04 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [aa0be098-5f27-11e6-86b7-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:24:24 GMT']
       x-ms-version: ['2015-07-08']
     method: HEAD
     uri: https://storagename.blob.core.windows.net/utcontainer18061d24/blob1
@@ -64,14 +63,14 @@ interactions:
       Content-Length: ['11']
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
       Content-Type: [application/octet-stream]
-      Date: ['Tue, 03 May 2016 20:16:03 GMT']
-      ETag: ['"0x8D3738FC13073F4"']
-      Last-Modified: ['Tue, 03 May 2016 20:16:04 GMT']
+      Date: ['Wed, 10 Aug 2016 18:24:21 GMT']
+      ETag: ['"0x8D3C14B8D36FE62"']
+      Last-Modified: ['Wed, 10 Aug 2016 18:24:22 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
-      x-ms-request-id: [9ede601e-0001-004c-3e78-a53815000000]
+      x-ms-request-id: [3e8c020e-0001-0013-1734-f3caeb000000]
       x-ms-version: ['2015-07-08']
       x-ms-write-protection: ['false']
     status: {code: 200, message: OK}

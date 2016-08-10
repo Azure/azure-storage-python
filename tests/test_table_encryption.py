@@ -365,6 +365,7 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
+        entity['RowKey'] = entity['RowKey'] + format[len('application/json;odata='):]
         self.ts.key_encryption_key = KeyWrapper('key1')
         self.ts.insert_entity(self.table_name, entity)
 
@@ -384,8 +385,12 @@ class StorageTableEncryptionTest(StorageTestCase):
         self._get_with_payload_format(TablePayloadFormat.JSON_MINIMAL_METADATA)
         self._get_with_payload_format(TablePayloadFormat.JSON_NO_METADATA)
 
-    @record
     def test_get_entity_kek_RSA(self):
+        # We can only generate random RSA keys, so this must be run live or 
+        # the playback test will fail due to a change in kek values.
+        if TestMode.need_recording_file(self.test_mode):
+            return 
+
         # Arrange
         self.ts.require_encryption = True
         entity = self._create_default_entity_for_encryption()
@@ -616,8 +621,8 @@ class StorageTableEncryptionTest(StorageTestCase):
         # Arrange
         self.ts.require_encryption = True
         entity1 = self._create_random_entity_class()
-        entity2 = self._create_random_entity_class()
-        entity3 = self._create_random_entity_class()
+        entity2 = self._create_random_entity_class(rk='Entity2')
+        entity3 = self._create_random_entity_class(rk='Entity3')
         entity2['PartitionKey'] = entity1['PartitionKey']
         entity3['PartitionKey'] = entity1['PartitionKey']
         self.ts.key_encryption_key = KeyWrapper('key1')
@@ -879,7 +884,8 @@ class StorageTableEncryptionTest(StorageTestCase):
     @record
     def test_query_entities_mixed_mode(self):
         # Arrange
-        entity = self._create_random_entity_class()
+        entity = self._create_random_entity_class(rk='unencrypted')
+        entity['RowKey'] += 'unencrypted'
         self.ts.insert_entity(self.table_name, entity)
         entity = self._create_default_entity_for_encryption()
         self.ts.key_encryption_key = KeyWrapper('key1')
@@ -913,8 +919,8 @@ class StorageTableEncryptionTest(StorageTestCase):
     @record
     def test_validate_swapping_properties_fails(self):
         # Arrange
-        entity1 = self._create_random_entity_class()
-        entity2 = self._create_random_entity_class()
+        entity1 = self._create_random_entity_class(rk='entity1')
+        entity2 = self._create_random_entity_class(rk='entity2')
         kek = KeyWrapper('key1')
         self.ts.key_encryption_key = kek
         self.ts.encryption_resolver_function = self._default_encryption_resolver

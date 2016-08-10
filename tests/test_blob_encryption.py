@@ -234,9 +234,13 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Assert
         self.assertEqual(blob.content, self.bytes)
 
-    @record
     def test_get_blob_kek_RSA(self):
-                # Arrange
+        # We can only generate random RSA keys, so this must be run live or 
+        # the playback test will fail due to a change in kek values.
+        if TestMode.need_recording_file(self.test_mode):
+            return 
+
+        # Arrange
         self.bbs.require_encryption = True
         self.bbs.key_encryption_key = RSAKeyWrapper('key2')
         blob_name = self._create_small_blob('block_blob')
@@ -285,12 +289,15 @@ class StorageBlobEncryptionTest(StorageTestCase):
         with self.assertRaises(TypeError):
             self.bbs.create_blob_from_stream(self.container_name, blob_name, large_stream)
 
-    @record
     def test_put_blob_chunking_required_mult_of_block_size(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(self.bbs.MAX_SINGLE_PUT_SIZE + self.bbs.MAX_BLOCK_SIZE)
+        content = self.get_random_bytes(self.bbs.MAX_SINGLE_PUT_SIZE + self.bbs.MAX_BLOCK_SIZE)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
@@ -300,8 +307,11 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Assert
         self.assertEqual(content, blob.content)
 
-    @record
     def test_put_blob_chunking_required_non_mult_of_block_size(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
@@ -315,12 +325,15 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Assert
         self.assertEqual(content, blob.content)
 
-    @record
     def test_put_blob_chunking_required_range_specified(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(self.bbs.MAX_SINGLE_PUT_SIZE * 2)
+        content = self.get_random_bytes(self.bbs.MAX_SINGLE_PUT_SIZE * 2)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
@@ -351,7 +364,7 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Arrange
         self.bbs.require_encryption = True
         self.bbs.key_encryption_key = KeyWrapper('key1')
-        content = urandom(self.bbs.MAX_SINGLE_PUT_SIZE * 5)
+        content = b'Random repeats' * self.bbs.MAX_SINGLE_PUT_SIZE * 5
 
         # All page blob uploads call _upload_chunks, so this will test the ability
         # of that function to handle ranges even though it's a small blob
@@ -359,7 +372,8 @@ class StorageBlobEncryptionTest(StorageTestCase):
 
         # Act
         self.bbs.create_blob_from_bytes(self.container_name, blob_name, content, index=2,
-                                        count=self.bbs.MAX_SINGLE_PUT_SIZE + 5)
+                                        count=self.bbs.MAX_SINGLE_PUT_SIZE + 5,
+                                        max_connections=1)
         blob = self.bbs.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert
@@ -385,12 +399,12 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(self.bbs.MAX_SINGLE_PUT_SIZE + 1)
+        content = self.get_random_bytes(self.bbs.MAX_SINGLE_PUT_SIZE + 1)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
         self.bbs.create_blob_from_bytes(self.container_name, blob_name, content, max_connections=1)
-        blob = self.bbs.get_blob_to_bytes(self.container_name, blob_name)
+        blob = self.bbs.get_blob_to_bytes(self.container_name, blob_name, max_connections=1)
 
         # Assert
         self.assertEqual(content, blob.content)
@@ -400,7 +414,7 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(128)
+        content = self.get_random_bytes(128)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
@@ -415,7 +429,7 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(128)
+        content = self.get_random_bytes(128)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
@@ -432,7 +446,7 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(128)
+        content = self.get_random_bytes(128)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
@@ -447,12 +461,13 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(128)
+        content = self.get_random_bytes(128)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
         self.bbs.create_blob_from_bytes(self.container_name, blob_name, content)
-        blob = self.bbs.get_blob_to_bytes(self.container_name, blob_name, start_range=48, end_range=63)
+        blob = self.bbs.get_blob_to_bytes(self.container_name, blob_name, start_range=48, end_range=63,
+                                          max_connections=1)
 
         # Assert
         self.assertEqual(content[48:64], blob.content)
@@ -462,7 +477,7 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(128)
+        content = self.get_random_bytes(128)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
@@ -472,11 +487,12 @@ class StorageBlobEncryptionTest(StorageTestCase):
         # Assert
         self.assertEqual(content[5:51], blob.content)
 
+    @record
     def test_get_blob_range_expanded_to_beginning_iv(self):
         # Arrange
         self.bbs.key_encryption_key = KeyWrapper('key1')
         self.bbs.require_encryption = True
-        content = urandom(128)
+        content = self.get_random_bytes(128)
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
@@ -645,7 +661,7 @@ class StorageBlobEncryptionTest(StorageTestCase):
 
     @record
     def test_create_page_blob_from_star(self):
-        content = urandom(512)
+        content = self.get_random_bytes(512)
         self._create_blob_from_star('page_blob', content, self.pbs.create_blob_from_bytes, content)
 
         stream = BytesIO(content)

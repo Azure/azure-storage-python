@@ -1,0 +1,48 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [6990b01a-5f26-11e6-919b-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:15:26 GMT']
+      x-ms-version: ['2015-07-08']
+    method: PUT
+    uri: https://storagename.queue.core.windows.net/encryptionqueued9c213ac
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Wed, 10 Aug 2016 18:15:24 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [931098e7-0003-003d-0333-f34a2c000000]
+      x-ms-version: ['2015-07-08']
+    status: {code: 201, message: Created}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <QueueMessage><MessageText>{"EncryptedMessageContents": "3eWffnC1rH968x/taCZYIA==",
+      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "07Ckh9CJB26LCzK0KBEv7VBv8E2vZb8+scGC3rwCemIO3Sq61AMu2w==",
+      "Algorithm": "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
+      "AES_CBC_256"}, "ContentEncryptionIV": "X5lnsVE31Z4jLjLpDq8CEQ==", "KeyWrappingMetadata":
+      {"EncryptionLibrary": "Python 0.33.0"}}}</MessageText></QueueMessage>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['502']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [69e1bfe6-5f26-11e6-b070-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:15:27 GMT']
+      x-ms-version: ['2015-07-08']
+    method: POST
+    uri: https://storagename.queue.core.windows.net/encryptionqueued9c213ac/messages
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Wed, 10 Aug 2016 18:15:24 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [931098f0-0003-003d-0933-f34a2c000000]
+      x-ms-version: ['2015-07-08']
+    status: {code: 201, message: Created}
+version: 1

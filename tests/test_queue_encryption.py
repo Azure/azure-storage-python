@@ -19,7 +19,8 @@ from azure.common import (
 )
 from tests.testcase import (
     StorageTestCase,
-    record,
+    record, 
+    TestMode,
 )
 from azure.storage.queue import (
     QueueService,
@@ -153,8 +154,13 @@ class StorageQueueEncryptionTest(StorageTestCase):
         # Assert
         self.assertEqual(li[0].content, u'encrypted_message_4')
     
-    @record
     def test_peek_messages_encrypted_kek_RSA(self):
+
+        # We can only generate random RSA keys, so this must be run live or 
+        # the playback test will fail due to a change in kek values.
+        if TestMode.need_recording_file(self.test_mode):
+            return 
+
         # Arrange
         self.qs.key_encryption_key = RSAKeyWrapper('key2')
         queue_name = self._create_queue()
@@ -193,12 +199,12 @@ class StorageQueueEncryptionTest(StorageTestCase):
         self.qs.key_encryption_key = KeyWrapper('key1')
         self.qs.encode_function = QueueMessageFormat.binary_base64encode
         self.qs.decode_function = QueueMessageFormat.binary_base64decode
-        binary_message = urandom(100)
+        binary_message = self.get_random_bytes(100)
         self.qs.put_message(queue_name, binary_message)
         list_result1 = self.qs.get_messages(queue_name)
 
         # Act
-        binary_message = urandom(100)
+        binary_message = self.get_random_bytes(100)
         self.qs.update_message(queue_name,
                                list_result1[0].id,
                                list_result1[0].pop_receipt,

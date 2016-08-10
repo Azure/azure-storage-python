@@ -26,7 +26,8 @@ from cryptography.hazmat.primitives.hashes import SHA1
 from os import urandom
 class KeyWrapper:
     def __init__(self, kid='local:key1'):
-        self.kek = urandom(32) 
+        # Must have constant key value for recorded tests, otherwise we could use a random generator.
+        self.kek = b'\xbe\xa4\x11K\x9eJ\x07\xdafF\x83\xad+\xadvA C\xe8\xbc\x90\xa4\x11}G\xc3\x0f\xd4\xb4\x19m\x11' 
         self.backend = default_backend()
         self.kid = kid
     def wrap_key(self, key, algorithm='A256KW'):

@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: !!binary |
-      eyJUYWJsZU5hbWUiOiAidGFibGVkMWViMTgyZSJ9
+    body: '{"TableName": "tabled1eb182e"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -10,9 +9,9 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [f4bdc5de-116c-11e6-998f-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:23:54 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [72658d18-5f29-11e6-b7bb-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:37:09 GMT']
       x-ms-version: ['2015-07-08']
     method: POST
     uri: https://storagename.table.core.windows.net/Tables
@@ -22,26 +21,26 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/Tables(''tabled1eb182e'')']
-      Date: ['Tue, 03 May 2016 20:23:53 GMT']
+      Date: ['Wed, 10 Aug 2016 18:37:07 GMT']
       Location: ['https://storagename.table.core.windows.net/Tables(''tabled1eb182e'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [bfe2bbb5-0002-0083-3a79-a55fa7000000]
+      x-ms-request-id: [32da5135-0002-0032-6336-f3a7da000000]
       x-ms-version: ['2015-07-08']
     status: {code: 204, message: No Content}
 - request:
-    body: !!binary |
-      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFNpZ25lZElkZW50aWZpZXJz
-      IC8+
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers />'
     headers:
       Connection: [keep-alive]
       Content-Length: ['60']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [f50b0b5c-116c-11e6-8067-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:23:54 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [72ae7618-5f29-11e6-8343-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:37:10 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.table.core.windows.net/tabled1eb182e?comp=acl
@@ -49,9 +48,9 @@ interactions:
     body: {string: ''}
     headers:
       Content-Length: ['0']
-      Date: ['Tue, 03 May 2016 20:23:53 GMT']
+      Date: ['Wed, 10 Aug 2016 18:37:07 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [bfe2bbbc-0002-0083-3f79-a55fa7000000]
+      x-ms-request-id: [32da513b-0002-0032-6736-f3a7da000000]
       x-ms-version: ['2015-07-08']
     status: {code: 204, message: No Content}
 - request:
@@ -60,9 +59,9 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [f512d076-116c-11e6-bdb0-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:23:54 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [72b34574-5f29-11e6-8faa-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:37:10 GMT']
       x-ms-version: ['2015-07-08']
     method: GET
     uri: https://storagename.table.core.windows.net/tabled1eb182e?comp=acl
@@ -71,10 +70,10 @@ interactions:
         \ />"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Tue, 03 May 2016 20:23:53 GMT']
+      Date: ['Wed, 10 Aug 2016 18:37:08 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [bfe2bbc3-0002-0083-4579-a55fa7000000]
+      x-ms-request-id: [32da5145-0002-0032-7136-f3a7da000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1
