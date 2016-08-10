@@ -25,6 +25,7 @@ from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
     AzureMissingResourceHttpError,
+    AzureException,
 )
 from azure.storage import (
     AccessPolicy,
@@ -290,6 +291,23 @@ class StorageTableTest(StorageTestCase):
         self.assertEqual(len(acl), 0)
 
     @record
+    def test_set_table_acl_with_empty_signed_identifier(self):
+        # Arrange
+        table_name = self._create_table()
+
+        # Act
+        self.ts.set_table_acl(table_name, {'empty': AccessPolicy()})
+
+        # Assert
+        acl = self.ts.get_table_acl(table_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 1)
+        self.assertIsNotNone(acl['empty'])
+        self.assertIsNone(acl['empty'].permission)
+        self.assertIsNone(acl['empty'].expiry)
+        self.assertIsNone(acl['empty'].start)
+
+    @record
     def test_set_table_acl_with_signed_identifiers(self):
         # Arrange
         table_name = self._create_table()
@@ -307,6 +325,20 @@ class StorageTableTest(StorageTestCase):
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 1)
         self.assertTrue('testid' in acl)
+
+    @record
+    def test_set_table_acl_too_many_ids(self):
+        # Arrange
+        table_name = self._create_table()
+
+        # Act
+        identifiers = dict()
+        for i in range(0, 6):
+            identifiers['id{}'.format(i)] = AccessPolicy()
+
+        # Assert
+        with self.assertRaisesRegexp(AzureException, 'Too many access policies provided. The server does not support setting more than 5 access policies on a single resource.'):
+            self.ts.set_table_acl(table_name, identifiers)
 
     @record
     def test_account_sas(self):
@@ -338,57 +370,13 @@ class StorageTableTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         entities = list(service.query_entities(table_name))
 
         # Assert
         self.assertEqual(len(entities), 2)
         self.assertEqual(entities[0].text, 'hello')
         self.assertEqual(entities[1].text, 'hello')
-
-    @record
-    def test_with_filter_single(self):
-        called = []
-
-        def my_filter(request, next):
-            called.append(True)
-            return next(request)
-
-        tc = self.ts.with_filter(my_filter)
-
-        table_name = 'tctable'
-        tc.create_table(table_name)
-
-        self.assertTrue(called)
-
-        del called[:]
-
-        tc.delete_table(table_name)
-
-        self.assertTrue(called)
-        del called[:]
-
-    @record
-    def test_with_filter_chained(self):
-        called = []
-
-        def filter_a(request, next):
-            called.append('a')
-            return next(request)
-
-        def filter_b(request, next):
-            called.append('b')
-            return next(request)
-
-        tc = self.ts.with_filter(filter_a).with_filter(filter_b)
-
-        table_name = 'tctable'
-        tc.create_table(table_name)
-
-        self.assertEqual(called, ['b', 'a'])
-
-        tc.delete_table(table_name)
-
 
     @record
     def test_locale(self):

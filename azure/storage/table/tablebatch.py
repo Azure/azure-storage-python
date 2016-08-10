@@ -40,10 +40,14 @@ class TableBatch(object):
     entities, and its total payload may be no more than 4 MB in size.
     '''
 
-    def __init__(self):
+    def __init__(self, require_encryption=False, key_encryption_key=None,
+                 encryption_resolver=None):
         self._requests = []
         self._partition_key = None
         self._row_keys = []
+        self._require_encryption = require_encryption
+        self._key_encryption_key = key_encryption_key
+        self._encryption_resolver = encryption_resolver
 
     def insert_entity(self, entity):
         '''
@@ -58,7 +62,8 @@ class TableBatch(object):
             Must contain a PartitionKey and a RowKey.
         :type entity: a dict or :class:`azure.storage.table.models.Entity`
         '''
-        request = _insert_entity(entity)
+        request = _insert_entity(entity, self._require_encryption, self._key_encryption_key,
+                                 self._encryption_resolver)
         self._add_to_batch(entity['PartitionKey'], entity['RowKey'], request)
 
     def update_entity(self, entity, if_match='*'):
@@ -82,7 +87,8 @@ class TableBatch(object):
             not been modified since it was retrieved by the client. To force 
             an unconditional update, set If-Match to the wildcard character (*).
         '''
-        request = _update_entity(entity, if_match)
+        request = _update_entity(entity, if_match, self._require_encryption,
+                                 self._key_encryption_key, self._encryption_resolver)
         self._add_to_batch(entity['PartitionKey'], entity['RowKey'], request)
 
     def merge_entity(self, entity, if_match='*'):
@@ -106,7 +112,9 @@ class TableBatch(object):
             not been modified since it was retrieved by the client. To force 
             an unconditional merge, set If-Match to the wildcard character (*).
         '''
-        request = _merge_entity(entity, if_match)
+        
+        request = _merge_entity(entity, if_match, self._require_encryption,
+                                self._key_encryption_key)
         self._add_to_batch(entity['PartitionKey'], entity['RowKey'], request)
 
     def delete_entity(self, partition_key, row_key,
@@ -147,7 +155,8 @@ class TableBatch(object):
             Must contain a PartitionKey and a RowKey.
         :type entity: a dict or :class:`azure.storage.table.models.Entity`
        '''
-        request = _insert_or_replace_entity(entity)
+        request = _insert_or_replace_entity(entity, self._require_encryption, self._key_encryption_key,
+                                            self._encryption_resolver)
         self._add_to_batch(entity['PartitionKey'], entity['RowKey'], request)
 
     def insert_or_merge_entity(self, entity):
@@ -163,7 +172,9 @@ class TableBatch(object):
             Must contain a PartitionKey and a RowKey.
         :type entity: a dict or :class:`azure.storage.table.models.Entity`
         '''
-        request = _insert_or_merge_entity(entity)
+
+        request = _insert_or_merge_entity(entity, self._require_encryption,
+                                          self._key_encryption_key)
         self._add_to_batch(entity['PartitionKey'], entity['RowKey'], request)
 
     def _add_to_batch(self, partition_key, row_key, request):

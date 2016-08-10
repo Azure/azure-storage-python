@@ -4,31 +4,31 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [a608df98-116c-11e6-8b54-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:21:42 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [7401fd7a-5f28-11e6-ae83-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:30:03 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queuedc0a1868
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 03 May 2016 20:21:41 GMT']
+      Date: ['Wed, 10 Aug 2016 18:30:01 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [68656ec1-0003-003d-1279-a54a2c000000]
+      x-ms-request-id: [46ad41cb-0003-0082-6135-f35e5a000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
-    body: !!binary |
-      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFNpZ25lZElkZW50aWZpZXJz
-      IC8+
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers />'
     headers:
       Connection: [keep-alive]
       Content-Length: ['60']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [a6521dfa-116c-11e6-81bc-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:21:42 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [744c1fe2-5f28-11e6-97cf-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:30:03 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queuedc0a1868?comp=acl
@@ -36,18 +36,18 @@ interactions:
     body: {string: ''}
     headers:
       Content-Length: ['0']
-      Date: ['Tue, 03 May 2016 20:21:41 GMT']
+      Date: ['Wed, 10 Aug 2016 18:30:01 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [68656ec7-0003-003d-1679-a54a2c000000]
+      x-ms-request-id: [46ad41d1-0003-0082-6435-f35e5a000000]
       x-ms-version: ['2015-07-08']
     status: {code: 204, message: No Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [a656ffde-116c-11e6-9db8-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:21:42 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [7459419a-5f28-11e6-a037-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:30:03 GMT']
       x-ms-version: ['2015-07-08']
     method: GET
     uri: https://storagename.queue.core.windows.net/queuedc0a1868?comp=acl
@@ -57,10 +57,10 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/xml]
-      Date: ['Tue, 03 May 2016 20:21:41 GMT']
+      Date: ['Wed, 10 Aug 2016 18:30:01 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [68656ec9-0003-003d-1879-a54a2c000000]
+      x-ms-request-id: [46ad41d6-0003-0082-6935-f35e5a000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1

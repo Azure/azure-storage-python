@@ -19,8 +19,8 @@ from .._error import _ERROR_NO_SINGLE_THREAD_CHUNKING
 
 def _download_file_chunks(file_service, share_name, directory_name, file_name,
                           download_size, block_size, progress, start_range, end_range, 
-                          stream, max_connections, max_retries, retry_wait, progress_callback,
-                          validate_content, timeout):
+                          stream, max_connections, progress_callback, validate_content, 
+                          timeout, operation_context):
     if max_connections <= 1:
         raise ValueError(_ERROR_NO_SINGLE_THREAD_CHUNKING.format('file'))
 
@@ -35,11 +35,10 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
         start_range,
         end_range,
         stream,
-        max_retries,
-        retry_wait,
         progress_callback,
         validate_content,
-        timeout
+        timeout,
+        operation_context,
     )
 
     import concurrent.futures
@@ -49,8 +48,7 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
 class _FileChunkDownloader(object):
     def __init__(self, file_service, share_name, directory_name, file_name, 
                  download_size, chunk_size, progress, start_range, end_range, 
-                 stream, max_retries, retry_wait, progress_callback, validate_content, 
-                 timeout):
+                 stream, progress_callback, validate_content, timeout, operation_context):
         self.file_service = file_service
         self.share_name = share_name
         self.directory_name = directory_name
@@ -67,10 +65,9 @@ class _FileChunkDownloader(object):
         self.progress_callback = progress_callback
         self.progress_total = progress
         self.progress_lock = threading.Lock()
-        self.max_retries = max_retries
-        self.retry_wait = retry_wait
         self.validate_content = validate_content
         self.timeout = timeout
+        self.operation_context = operation_context
 
     def get_chunk_offsets(self):
         index = self.start_index
@@ -84,7 +81,7 @@ class _FileChunkDownloader(object):
         else:
             chunk_end = chunk_start + self.chunk_size
 
-        chunk_data = self._download_chunk_with_retries(chunk_start, chunk_end).content
+        chunk_data = self._download_chunk(chunk_start, chunk_end).content
         length = chunk_end - chunk_start
         if length > 0:
             self._write_to_stream(chunk_data, chunk_start)
@@ -102,22 +99,14 @@ class _FileChunkDownloader(object):
             self.stream.seek(self.stream_start + (chunk_start - self.start_index))
             self.stream.write(chunk_data)
 
-    def _download_chunk_with_retries(self, chunk_start, chunk_end):
-        retries = self.max_retries
-        while True:
-            try:
-                return self.file_service._get_file(
-                    self.share_name,
-                    self.directory_name,
-                    self.file_name,
-                    start_range=chunk_start,
-                    end_range=chunk_end - 1,
-                    validate_content=self.validate_content,
-                    timeout=self.timeout
-                )
-            except Exception:
-                if retries > 0:
-                    retries -= 1
-                    sleep(self.retry_wait)
-                else:
-                    raise
+    def _download_chunk(self, chunk_start, chunk_end):
+        return self.file_service._get_file(
+            self.share_name,
+            self.directory_name,
+            self.file_name,
+            start_range=chunk_start,
+            end_range=chunk_end - 1,
+            validate_content=self.validate_content,
+            timeout=self.timeout,
+            _context=self.operation_context
+        )

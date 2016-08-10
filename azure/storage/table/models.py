@@ -88,15 +88,17 @@ class EntityProperty(object):
         entity.x = EntityProperty(EdmType.STRING, 'y')
     '''
 
-    def __init__(self, type=None, value=None):
+    def __init__(self, type=None, value=None, encrypt=False):
         '''
         Represents an Azure Table. Returned by list_tables.
 
         :param str type: The type of the property.
         :param EdmType value: The value of the property.
+        :param bool encrypt: Indicates whether or not the property should be encrypted.
         '''
         self.type = type
         self.value = value
+        self.encrypt = encrypt
 
 
 class Table(object):

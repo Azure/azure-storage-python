@@ -4,68 +4,68 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [b7d5fc12-116a-11e6-bf37-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:07:52 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [7017897e-5f26-11e6-bd63-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:15:37 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.file.core.windows.net/shared5bc1844?restype=share
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 03 May 2016 20:07:53 GMT']
-      ETag: ['"0x8D3738E9C729DA4"']
-      Last-Modified: ['Tue, 03 May 2016 20:07:53 GMT']
+      Date: ['Wed, 10 Aug 2016 18:15:35 GMT']
+      ETag: ['"0x8D3C14A539C81DD"']
+      Last-Modified: ['Wed, 10 Aug 2016 18:15:36 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [7d37fbc4-001a-007f-7e77-a56138000000]
+      x-ms-request-id: [7c7be29e-001a-0028-4433-f388b5000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
-    body: !!binary |
-      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFNpZ25lZElkZW50aWZpZXJz
-      IC8+
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <SignedIdentifiers />'
     headers:
       Connection: [keep-alive]
       Content-Length: ['60']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [b82203be-116a-11e6-83f3-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:07:53 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [7057e940-5f26-11e6-ac7a-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:15:37 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
-    uri: https://storagename.file.core.windows.net/shared5bc1844?comp=acl&restype=share
+    uri: https://storagename.file.core.windows.net/shared5bc1844?restype=share&comp=acl
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 03 May 2016 20:07:53 GMT']
-      ETag: ['"0x8D3738E9C729DA5"']
-      Last-Modified: ['Tue, 03 May 2016 20:07:53 GMT']
+      Date: ['Wed, 10 Aug 2016 18:15:35 GMT']
+      ETag: ['"0x8D3C14A539C81DE"']
+      Last-Modified: ['Wed, 10 Aug 2016 18:15:36 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [7d37fbc7-001a-007f-7f77-a56138000000]
+      x-ms-request-id: [7c7be2a1-001a-0028-4533-f388b5000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [b84066cc-116a-11e6-b94d-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:07:53 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [705cadf4-5f26-11e6-9d40-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:15:37 GMT']
       x-ms-version: ['2015-07-08']
     method: GET
-    uri: https://storagename.file.core.windows.net/shared5bc1844?comp=acl&restype=share
+    uri: https://storagename.file.core.windows.net/shared5bc1844?restype=share&comp=acl
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers\
         \ />"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Tue, 03 May 2016 20:07:53 GMT']
-      ETag: ['"0x8D3738E9C729DA5"']
-      Last-Modified: ['Tue, 03 May 2016 20:07:53 GMT']
+      Date: ['Wed, 10 Aug 2016 18:15:35 GMT']
+      ETag: ['"0x8D3C14A539C81DE"']
+      Last-Modified: ['Wed, 10 Aug 2016 18:15:36 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [7d37fbc8-001a-007f-8077-a56138000000]
+      x-ms-request-id: [7c7be2a2-001a-0028-4633-f388b5000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1

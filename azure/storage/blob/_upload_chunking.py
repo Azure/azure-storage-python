@@ -13,20 +13,35 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 import threading
-
+import sys
 from time import sleep
+from cryptography.hazmat.primitives.padding import PKCS7
 from .._common_conversion import _encode_base64
-from .._serialization import url_quote
+from .._serialization import(
+    url_quote,
+    _get_data_bytes_only,
+)
+from ._encryption import(
+    _get_blob_encryptor_and_padder,
+)
 from azure.common import (
     AzureHttpError,
 )
 from .models import BlobBlock
+if sys.version_info >= (3,):
+    from io import BytesIO
+else:
+    from cStringIO import StringIO as BytesIO
 
 def _upload_blob_chunks(blob_service, container_name, blob_name,
                         blob_size, block_size, stream, max_connections,
-                        max_retries, retry_wait, progress_callback,
-                        validate_content, lease_id, uploader_class, 
-                        maxsize_condition=None, if_match=None, timeout=None):
+                        progress_callback, validate_content, lease_id, uploader_class, 
+                        maxsize_condition=None, if_match=None, timeout=None,
+                        content_encryption_key=None, initialization_vector=None):
+
+    encryptor, padder = _get_blob_encryptor_and_padder(content_encryption_key, initialization_vector,
+                                                       uploader_class is not _PageBlobChunkUploader)
+
     uploader = uploader_class(
         blob_service,
         container_name,
@@ -35,12 +50,12 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
         block_size,
         stream,
         max_connections > 1,
-        max_retries,
-        retry_wait,
         progress_callback,
         validate_content,
         lease_id,
-        timeout
+        timeout,
+        encryptor,
+        padder
     )
 
     uploader.maxsize_condition = maxsize_condition
@@ -55,19 +70,16 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
     if max_connections > 1:
         import concurrent.futures
         executor = concurrent.futures.ThreadPoolExecutor(max_connections)
-        range_ids = list(executor.map(uploader.process_chunk, uploader.get_chunk_offsets()))
+        range_ids = list(executor.map(uploader.process_chunk, uploader.get_chunk_streams()))
     else:
-        if blob_size is not None:
-            range_ids = [uploader.process_chunk(start) for start in uploader.get_chunk_offsets()]
-        else:
-            range_ids = uploader.process_all_unknown_size()
+        range_ids = [uploader.process_chunk(result) for result in uploader.get_chunk_streams()]
 
     return range_ids
 
 class _BlobChunkUploader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
-                 chunk_size, stream, parallel, max_retries, retry_wait,
-                 progress_callback, validate_content, lease_id, timeout):
+                 chunk_size, stream, parallel, progress_callback, 
+                 validate_content, lease_id, timeout, encryptor, padder):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
@@ -80,58 +92,52 @@ class _BlobChunkUploader(object):
         self.progress_callback = progress_callback
         self.progress_total = 0
         self.progress_lock = threading.Lock() if parallel else None
-        self.max_retries = max_retries
-        self.retry_wait = retry_wait
         self.validate_content = validate_content
         self.lease_id = lease_id
         self.timeout = timeout
+        self.encryptor = encryptor
+        self.padder = padder
 
-    def get_chunk_offsets(self):
-        index = 0
-        if self.blob_size is None:
-            # we don't know the size of the stream, so we have no
-            # choice but to seek
-            while True:
-                data = self._read_from_stream(index, 1)
-                if not data:
-                    break
-                yield index
-                index += self.chunk_size
-        else:
-            while index < self.blob_size:
-                yield index
-                index += self.chunk_size
-
-    def process_chunk(self, chunk_offset):
-        size = self.chunk_size
-        if self.blob_size is not None:
-            size = min(size, self.blob_size - chunk_offset)
-        chunk_data = self._read_from_stream(chunk_offset, size)
-        return self._upload_chunk_with_retries(chunk_offset, chunk_data)
-
-    def process_all_unknown_size(self):
-        assert self.stream_lock is None
-        range_ids = []
+    def get_chunk_streams(self):
         index = 0
         while True:
-            data = self._read_from_stream(None, self.chunk_size)
-            if data:
-                range_id = self._upload_chunk_with_retries(index, data)
-                index += len(data)
-                range_ids.append(range_id)
+            data = b''
+            read_size = self.chunk_size
+
+            # Buffer until we either reach the end of the stream or get a whole chunk.
+            while True:
+                if self.blob_size:
+                    read_size = min(self.chunk_size-len(data), self.blob_size - (index + len(data)))
+                temp = self.stream.read(read_size)
+                temp = _get_data_bytes_only('temp', temp)
+                data += temp
+
+                # We have read an empty string and so are at the end
+                # of the buffer or we have read a full chunk.
+                if temp == b'' or len(data) == self.chunk_size:
+                    break
+
+            if len(data) == self.chunk_size:
+                if self.padder:
+                    data = self.padder.update(data)
+                if self.encryptor:
+                    data = self.encryptor.update(data)
+                yield index, BytesIO(data)
             else:
+                if self.padder:
+                    data = self.padder.update(data) + self.padder.finalize()
+                if self.encryptor:
+                    data = self.encryptor.update(data) + self.encryptor.finalize()
+                if len(data) > 0:
+                    yield index, BytesIO(data)
                 break
+            
+            index += len(data)
 
-        return range_ids
-
-    def _read_from_stream(self, offset, count):
-        if self.stream_lock is not None:
-            with self.stream_lock:
-                self.stream.seek(self.stream_start + offset)
-                data = self.stream.read(count)
-        else:
-            data = self.stream.read(count)
-        return data
+    def process_chunk(self, chunk_data):
+        chunk_bytes = chunk_data[1].read()
+        chunk_offset = chunk_data[0]
+        return self._upload_chunk_with_progress(chunk_offset, chunk_bytes)
 
     def _update_progress(self, length):
         if self.progress_callback is not None:
@@ -144,25 +150,16 @@ class _BlobChunkUploader(object):
                 total = self.progress_total
             self.progress_callback(total, self.blob_size)
 
-    def _upload_chunk_with_retries(self, chunk_offset, chunk_data):
-        retries = self.max_retries
-        while True:
-            try:
-                range_id = self._upload_chunk(chunk_offset, chunk_data) 
-                self._update_progress(len(chunk_data))
-                return range_id
-            except AzureHttpError:
-                if retries > 0:
-                    retries -= 1
-                    sleep(self.retry_wait)
-                else:
-                    raise
+    def _upload_chunk_with_progress(self, chunk_offset, chunk_data):
+        range_id = self._upload_chunk(chunk_offset, chunk_data) 
+        self._update_progress(len(chunk_data))
+        return range_id
 
 
 class _BlockBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_offset, chunk_data):
         block_id=url_quote(_encode_base64('{0:032d}'.format(chunk_offset)))
-        self.blob_service.put_block(
+        self.blob_service._put_block(
             self.container_name,
             self.blob_name,
             chunk_data,
@@ -177,7 +174,7 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
 class _PageBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_start, chunk_data):
         chunk_end = chunk_start + len(chunk_data) - 1
-        resp = self.blob_service.update_page(
+        resp = self.blob_service._update_page(
             self.container_name,
             self.blob_name,
             chunk_data,

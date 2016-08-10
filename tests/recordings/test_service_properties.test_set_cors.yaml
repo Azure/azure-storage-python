@@ -1,56 +1,47 @@
 interactions:
 - request:
-    body: !!binary |
-      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFN0b3JhZ2VTZXJ2aWNlUHJv
-      cGVydGllcz48Q29ycz48Q29yc1J1bGU+PEFsbG93ZWRPcmlnaW5zPnd3dy54eXouY29tPC9BbGxv
-      d2VkT3JpZ2lucz48QWxsb3dlZE1ldGhvZHM+R0VUPC9BbGxvd2VkTWV0aG9kcz48TWF4QWdlSW5T
-      ZWNvbmRzPjA8L01heEFnZUluU2Vjb25kcz48RXhwb3NlZEhlYWRlcnMgLz48QWxsb3dlZEhlYWRl
-      cnMgLz48L0NvcnNSdWxlPjxDb3JzUnVsZT48QWxsb3dlZE9yaWdpbnM+d3d3Lnh5ei5jb20sd3d3
-      LmFiLmNvbSx3d3cuYmMuY29tPC9BbGxvd2VkT3JpZ2lucz48QWxsb3dlZE1ldGhvZHM+R0VULFBV
-      VDwvQWxsb3dlZE1ldGhvZHM+PE1heEFnZUluU2Vjb25kcz41MDA8L01heEFnZUluU2Vjb25kcz48
-      RXhwb3NlZEhlYWRlcnM+eC1tcy1tZXRhLWRhdGEqLHgtbXMtbWV0YS1zb3VyY2UqLHgtbXMtbWV0
-      YS1hYmMseC1tcy1tZXRhLWJjZDwvRXhwb3NlZEhlYWRlcnM+PEFsbG93ZWRIZWFkZXJzPngtbXMt
-      bWV0YS1kYXRhKix4LW1zLW1ldGEtdGFyZ2V0Kix4LW1zLW1ldGEteHl6LHgtbXMtbWV0YS1mb288
-      L0FsbG93ZWRIZWFkZXJzPjwvQ29yc1J1bGU+PC9Db3JzPjwvU3RvcmFnZVNlcnZpY2VQcm9wZXJ0
-      aWVzPg==
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Cors><CorsRule><AllowedOrigins>www.xyz.com</AllowedOrigins><AllowedMethods>GET</AllowedMethods><MaxAgeInSeconds>0</MaxAgeInSeconds><ExposedHeaders
+      /><AllowedHeaders /></CorsRule><CorsRule><AllowedOrigins>www.xyz.com,www.ab.com,www.bc.com</AllowedOrigins><AllowedMethods>GET,PUT</AllowedMethods><MaxAgeInSeconds>500</MaxAgeInSeconds><ExposedHeaders>x-ms-meta-data*,x-ms-meta-source*,x-ms-meta-abc,x-ms-meta-bcd</ExposedHeaders><AllowedHeaders>x-ms-meta-data*,x-ms-meta-target*,x-ms-meta-xyz,x-ms-meta-foo</AllowedHeaders></CorsRule></Cors></StorageServiceProperties>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['631']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [28b0d440-116b-11e6-b4be-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:11:02 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [1b7748ca-5f27-11e6-90cf-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:20:25 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
-    uri: https://storagename.blob.core.windows.net/?comp=properties&restype=service
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 03 May 2016 20:11:02 GMT']
+      Date: ['Wed, 10 Aug 2016 18:20:23 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [cb8c6659-0001-0055-7577-a5147d000000]
+      x-ms-request-id: [40a93edf-0001-002e-2f33-f37fcd000000]
       x-ms-version: ['2015-07-08']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [28fca648-116b-11e6-aef3-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:11:02 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [1bbc6d4c-5f27-11e6-8070-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:20:25 GMT']
       x-ms-version: ['2015-07-08']
     method: GET
-    uri: https://storagename.blob.core.windows.net/?comp=properties&restype=service
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>5</Days></RetentionPolicy></MinuteMetrics><Cors><CorsRule><AllowedMethods>GET</AllowedMethods><AllowedOrigins>www.xyz.com</AllowedOrigins><AllowedHeaders\
         \ /><ExposedHeaders /><MaxAgeInSeconds>0</MaxAgeInSeconds></CorsRule><CorsRule><AllowedMethods>GET,PUT</AllowedMethods><AllowedOrigins>www.xyz.com,www.ab.com,www.bc.com</AllowedOrigins><AllowedHeaders>x-ms-meta-xyz,x-ms-meta-foo,x-ms-meta-data*,x-ms-meta-target*</AllowedHeaders><ExposedHeaders>x-ms-meta-abc,x-ms-meta-bcd,x-ms-meta-data*,x-ms-meta-source*</ExposedHeaders><MaxAgeInSeconds>500</MaxAgeInSeconds></CorsRule></Cors><DefaultServiceVersion>2014-02-14</DefaultServiceVersion></StorageServiceProperties>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Tue, 03 May 2016 20:11:02 GMT']
+      Date: ['Wed, 10 Aug 2016 18:20:23 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       Vary: [Origin]
-      x-ms-request-id: [cb8c6682-0001-0055-1277-a5147d000000]
+      x-ms-request-id: [40a93efb-0001-002e-4233-f37fcd000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1

@@ -315,7 +315,9 @@ class FileSamples():
 
         # Open mode
         # Append to the file instead of starting from the beginning
-        file = self.service.get_file_to_path(share_name, directory_name, file_name, OUTPUT_FILE_PATH, open_mode='ab')
+        # Append streams are not seekable and so must be downloaded serially by setting max_connections=1.
+        file = self.service.get_file_to_path(share_name, directory_name, file_name, OUTPUT_FILE_PATH, open_mode='ab',
+                                             max_connections=1)
         content_length = file.properties.content_length # will be the same, but local file length will be longer
 
         # Download range

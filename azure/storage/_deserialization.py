@@ -118,7 +118,7 @@ def _parse_length_from_content_range(content_range):
     # Finally, convert to an int: 65537
     return int(content_range.split(' ', 1)[1].split('/', 1)[1])
 
-def _convert_xml_to_signed_identifiers(xml):
+def _convert_xml_to_signed_identifiers(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <SignedIdentifiers>
@@ -132,7 +132,10 @@ def _convert_xml_to_signed_identifiers(xml):
       </SignedIdentifier>
     </SignedIdentifiers>
     '''
-    list_element = ETree.fromstring(xml)
+    if response is None or response.body is None:
+        return None
+
+    list_element = ETree.fromstring(response.body)
     signed_identifiers = _dict()
 
     for signed_identifier_element in list_element.findall('SignedIdentifier'):
@@ -142,22 +145,22 @@ def _convert_xml_to_signed_identifiers(xml):
         # Access policy element
         access_policy = AccessPolicy()
         access_policy_element = signed_identifier_element.find('AccessPolicy')
+        if access_policy_element is not None:
+            start_element = access_policy_element.find('Start')
+            if start_element is not None:
+                access_policy.start = parser.parse(start_element.text)
 
-        start_element = access_policy_element.find('Start')
-        if start_element is not None:
-            access_policy.start = parser.parse(start_element.text)
+            expiry_element = access_policy_element.find('Expiry')
+            if expiry_element is not None:
+                access_policy.expiry = parser.parse(expiry_element.text)
 
-        expiry_element = access_policy_element.find('Expiry')
-        if expiry_element is not None:
-            access_policy.expiry = parser.parse(expiry_element.text)
-
-        access_policy.permission = access_policy_element.findtext('Permission')
+            access_policy.permission = access_policy_element.findtext('Permission')
 
         signed_identifiers[id] = access_policy
 
     return signed_identifiers
 
-def _convert_xml_to_service_stats(xml):
+def _convert_xml_to_service_stats(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <StorageServiceStats>
@@ -167,7 +170,10 @@ def _convert_xml_to_service_stats(xml):
       </GeoReplication>
     </StorageServiceStats>
     '''
-    service_stats_element = ETree.fromstring(xml)
+    if response is None or response.body is None:
+        return None
+
+    service_stats_element = ETree.fromstring(response.body)
 
     geo_replication_element = service_stats_element.find('GeoReplication')
 
@@ -179,7 +185,7 @@ def _convert_xml_to_service_stats(xml):
     service_stats.geo_replication = geo_replication
     return service_stats
 
-def _convert_xml_to_service_properties(xml):
+def _convert_xml_to_service_properties(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <StorageServiceProperties>
@@ -222,7 +228,10 @@ def _convert_xml_to_service_properties(xml):
         </Cors>
     </StorageServiceProperties>
     '''
-    service_properties_element = ETree.fromstring(xml)
+    if response is None or response.body is None:
+        return None
+
+    service_properties_element = ETree.fromstring(response.body)
     service_properties = ServiceProperties()
     
     # Logging

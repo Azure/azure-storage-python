@@ -13,12 +13,16 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 from azure.common import AzureHttpError
+from azure.storage._error import AzureException
 from .._error import (
     _dont_fail_not_exist,
     _dont_fail_on_exist,
     _validate_not_none,
-    _ERROR_PARALLEL_NOT_SEEKABLE,
+    _validate_decryption_required,
+    _validate_access_policies,
     _validate_content_match,
+    _ERROR_PARALLEL_NOT_SEEKABLE,
+    _ERROR_DECRYPTION_FAILURE,
 )
 from ._error import (
     _ERROR_INVALID_LEASE_DURATION,
@@ -42,6 +46,7 @@ from ._download_chunking import _download_blob_chunks
 from ..models import (
     Services,
     ListGenerator,
+    _OperationContext,
 )
 from .models import (
     Blob,
@@ -80,8 +85,7 @@ from ._deserialization import (
     _convert_xml_to_blob_list,
     _parse_container,
     _parse_snapshot_blob,
-    _parse_lease_time,
-    _parse_lease_id,
+    _parse_lease,
     _convert_xml_to_signed_identifiers_and_access,
     _parse_base_properties,
 )
@@ -117,6 +121,27 @@ class BaseBlobService(StorageClient):
         this. If this is set to larger than 4MB, content_validation will throw an 
         error if enabled. However, if content_validation is not desired a size 
         greater than 4MB may be optimal. Setting this below 4MB is not recommended.
+    :ivar object key_encryption_key:
+        The key-encryption-key optionally provided by the user. If provided, will be used to
+        encrypt/decrypt in supported methods.
+        For methods requiring decryption, either the key_encryption_key OR the resolver must be provided.
+        If both are provided, the resolver will take precedence.
+        Must implement the following methods for APIs requiring encryption:
+        wrap_key(key)--wraps the specified key (bytes) using an algorithm of the user's choice. Returns the encrypted key as bytes.
+        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
+        get_kid()--returns a string key id for this key-encryption-key.
+        Must implement the following methods for APIs requiring decryption:
+        unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the string-specified algorithm.
+        get_kid()--returns a string key id for this key-encryption-key.
+    :ivar function key_resolver_function(kid):
+        A function to resolve keys optionally provided by the user. If provided, will be used to decrypt in supported methods.
+        For methods requiring decryption, either the key_encryption_key OR
+        the resolver must be provided. If both are provided, the resolver will take precedence.
+        It uses the kid string to return a key-encryption-key implementing the interface defined above.
+    :ivar bool require_encryption:
+        A flag that may be set to ensure that all messages successfully uploaded to the queue and all those downloaded and
+        successfully read from the queue are/were encrypted while on the server. If this flag is set, all required 
+        parameters for encryption/decryption must be provided. See the above comments on the key_encryption_key and resolver.
     '''
 
     __metaclass__ = ABCMeta
@@ -160,7 +185,7 @@ class BaseBlobService(StorageClient):
             If specified, this will override all other parameters besides 
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
-            for the connection string format.
+            for the connection string format
         '''
         service_params = _ServiceParameters.get_service_parameters(
             'blob',
@@ -185,6 +210,10 @@ class BaseBlobService(StorageClient):
             self.authentication = _StorageSASAuthentication(self.sas_token)
         else:
             self.authentication = _StorageNoAuthentication()
+
+        self.require_encryption = False
+        self.key_encryption_key = None
+        self.key_resolver_function = None
 
     def make_blob_url(self, container_name, blob_name, protocol=None, sas_token=None):
         '''
@@ -469,15 +498,16 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds.
         '''
         include = 'metadata' if include_metadata else None
+        operation_context = _OperationContext(location_lock=True)
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results, 
-                'include': include, 'timeout': timeout}
+                'include': include, 'timeout': timeout, '_context': operation_context}
         resp = self._list_containers(**kwargs)
 
         return ListGenerator(resp, self._list_containers, (), kwargs)
 
 
     def _list_containers(self, prefix=None, marker=None, max_results=None, 
-                         include=None, timeout=None):
+                         include=None, timeout=None, _context=None):
         '''
         Returns a list of the containers under the specified account.
 
@@ -504,7 +534,7 @@ class BaseBlobService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path() 
         request.query = {
             'comp': 'list',
@@ -515,8 +545,7 @@ class BaseBlobService(StorageClient):
             'timeout': _int_to_str(timeout)
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_containers(response)
+        return self._perform_request(request, _convert_xml_to_containers, operation_context=_context)
 
     def create_container(self, container_name, metadata=None,
                          public_access=None, fail_on_exist=False, timeout=None):
@@ -545,7 +574,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -585,7 +614,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -593,8 +622,7 @@ class BaseBlobService(StorageClient):
         }
         request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
-        response = self._perform_request(request)
-        return _parse_container(container_name, response)
+        return self._perform_request(request, _parse_container, [container_name])
 
     def get_container_metadata(self, container_name, lease_id=None, timeout=None):
         '''
@@ -614,7 +642,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -623,8 +651,7 @@ class BaseBlobService(StorageClient):
         }
         request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
-        response = self._perform_request(request)
-        return _parse_metadata(response)
+        return self._perform_request(request, _parse_metadata)
 
     def set_container_metadata(self, container_name, metadata=None,
                                lease_id=None, if_modified_since=None, timeout=None):
@@ -657,7 +684,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -670,8 +697,7 @@ class BaseBlobService(StorageClient):
         }
         _add_metadata_headers(metadata, request)
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def get_container_acl(self, container_name, lease_id=None, timeout=None):
         '''
@@ -693,7 +719,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -702,8 +728,7 @@ class BaseBlobService(StorageClient):
         }
         request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
-        response = self._perform_request(request)
-        return _convert_xml_to_signed_identifiers_and_access(response)
+        return self._perform_request(request, _convert_xml_to_signed_identifiers_and_access)
 
     def set_container_acl(self, container_name, signed_identifiers=None,
                           public_access=None, lease_id=None,
@@ -739,9 +764,10 @@ class BaseBlobService(StorageClient):
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
+        _validate_access_policies(signed_identifiers)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -757,8 +783,7 @@ class BaseBlobService(StorageClient):
         request.body = _get_request_body(
             _convert_signed_identifiers_to_xml(signed_identifiers))
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def delete_container(self, container_name, fail_not_exist=False,
                          lease_id=None, if_modified_since=None,
@@ -796,7 +821,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -882,7 +907,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('lease_action', lease_action)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -899,7 +924,7 @@ class BaseBlobService(StorageClient):
             'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
         }
 
-        return self._perform_request(request)
+        return self._perform_request(request, _parse_lease)
 
     def acquire_container_lease(
         self, container_name, lease_duration=-1, proposed_lease_id=None,
@@ -941,16 +966,16 @@ class BaseBlobService(StorageClient):
            (lease_duration < 15 or lease_duration > 60):
             raise ValueError(_ERROR_INVALID_LEASE_DURATION)
 
-        response = self._lease_container_impl(container_name, 
-                                          _LeaseActions.Acquire,
-                                          None, # lease_id
-                                          lease_duration,
-                                          None, # lease_break_period
-                                          proposed_lease_id,
-                                          if_modified_since,
-                                          if_unmodified_since,
-                                          timeout)
-        return _parse_lease_id(response)
+        lease = self._lease_container_impl(container_name, 
+                                           _LeaseActions.Acquire,
+                                           None, # lease_id
+                                           lease_duration,
+                                           None, # lease_break_period
+                                           proposed_lease_id,
+                                           if_modified_since,
+                                           if_unmodified_since,
+                                           timeout)
+        return lease['id']
 
     def renew_container_lease(
         self, container_name, lease_id, if_modified_since=None,
@@ -985,16 +1010,16 @@ class BaseBlobService(StorageClient):
         '''
         _validate_not_none('lease_id', lease_id)
 
-        response =  self._lease_container_impl(container_name, 
-                                          _LeaseActions.Renew,
-                                          lease_id,
-                                          None, # lease_duration
-                                          None, # lease_break_period
-                                          None, # proposed_lease_id
-                                          if_modified_since,
-                                          if_unmodified_since,
-                                          timeout)
-        return _parse_lease_id(response)
+        lease = self._lease_container_impl(container_name, 
+                                           _LeaseActions.Renew,
+                                           lease_id,
+                                           None, # lease_duration
+                                           None, # lease_break_period
+                                           None, # proposed_lease_id
+                                           if_modified_since,
+                                           if_unmodified_since,
+                                           timeout)
+        return lease['id']
 
     def release_container_lease(
         self, container_name, lease_id, if_modified_since=None,
@@ -1079,16 +1104,16 @@ class BaseBlobService(StorageClient):
         if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
             raise ValueError(_ERROR_INVALID_LEASE_BREAK_PERIOD)
         
-        response = self._lease_container_impl(container_name, 
-                                          _LeaseActions.Break,
-                                          None, # lease_id
-                                          None, # lease_duration
-                                          lease_break_period,
-                                          None, # proposed_lease_id
-                                          if_modified_since,
-                                          if_unmodified_since,
-                                          timeout)
-        return _parse_lease_time(response)
+        lease = self._lease_container_impl(container_name, 
+                                           _LeaseActions.Break,
+                                           None, # lease_id
+                                           None, # lease_duration
+                                           lease_break_period,
+                                           None, # proposed_lease_id
+                                           if_modified_since,
+                                           if_unmodified_since,
+                                           timeout)
+        return lease['time']
 
     def change_container_lease(
         self, container_name, lease_id, proposed_lease_id,
@@ -1171,15 +1196,18 @@ class BaseBlobService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
+        operation_context = _OperationContext(location_lock=True)
         args = (container_name,)
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results, 
-                'include': include, 'delimiter': delimiter, 'timeout': timeout}
+                'include': include, 'delimiter': delimiter, 'timeout': timeout,
+                '_context': operation_context}
         resp = self._list_blobs(*args, **kwargs)
 
         return ListGenerator(resp, self._list_blobs, args, kwargs)
 
     def _list_blobs(self, container_name, prefix=None, marker=None,
-                   max_results=None, include=None, delimiter=None, timeout=None):
+                   max_results=None, include=None, delimiter=None, timeout=None,
+                   _context=None):
         '''
         Returns the list of blobs under the specified container.
 
@@ -1231,7 +1259,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name)
         request.query = {
             'restype': 'container',
@@ -1244,8 +1272,7 @@ class BaseBlobService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_blob_list(response)
+        return self._perform_request(request, _convert_xml_to_blob_list, operation_context=_context)
 
     def get_blob_service_stats(self, timeout=None):
         '''
@@ -1273,7 +1300,7 @@ class BaseBlobService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self.secondary_endpoint
+        request.host_locations = self._get_host_locations(primary=False, secondary=True)
         request.path = _get_path()
         request.query = {
             'restype': 'service',
@@ -1281,8 +1308,7 @@ class BaseBlobService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_service_stats(response.body)
+        return self._perform_request(request, _convert_xml_to_service_stats)
 
     def set_blob_service_properties(
         self, logging=None, hour_metrics=None, minute_metrics=None,
@@ -1313,7 +1339,7 @@ class BaseBlobService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path() 
         request.query = {
             'restype': 'service',
@@ -1339,7 +1365,7 @@ class BaseBlobService(StorageClient):
         '''
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path() 
         request.query = {
             'restype': 'service',
@@ -1347,8 +1373,7 @@ class BaseBlobService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        response = self._perform_request(request)
-        return _convert_xml_to_service_properties(response.body)
+        return self._perform_request(request, _convert_xml_to_service_properties)
 
     def get_blob_properties(
         self, container_name, blob_name, snapshot=None, lease_id=None,
@@ -1398,7 +1423,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'HEAD'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'snapshot': _to_str(snapshot),
@@ -1412,8 +1437,7 @@ class BaseBlobService(StorageClient):
             'If-None-Match': _to_str(if_none_match),
         }
 
-        response = self._perform_request(request)
-        return _parse_blob(blob_name, snapshot, response)
+        return self._perform_request(request, _parse_blob, [blob_name, snapshot])
 
     def set_blob_properties(
         self, container_name, blob_name, content_settings=None, lease_id=None,
@@ -1461,7 +1485,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'properties',
@@ -1477,8 +1501,7 @@ class BaseBlobService(StorageClient):
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def exists(self, container_name, blob_name=None, snapshot=None, timeout=None):
         '''
@@ -1511,7 +1534,8 @@ class BaseBlobService(StorageClient):
     def _get_blob(
         self, container_name, blob_name, snapshot=None, start_range=None,
         end_range=None, validate_content=False, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None, 
+        _context=None):
         '''
         Downloads a blob's content, metadata, and properties. You can also
         call this API to read a snapshot. You can specify a range if you don't
@@ -1572,10 +1596,32 @@ class BaseBlobService(StorageClient):
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
+        _validate_decryption_required(self.require_encryption,
+                                      self.key_encryption_key,
+                                      self.key_resolver_function)
+
+        start_offset, end_offset = 0,0
+        if self.key_encryption_key is not None or self.key_resolver_function is not None:
+            if start_range is not None:
+                # Align the start of the range along a 16 byte block
+                start_offset = start_range % 16
+                start_range -= start_offset
+
+                # Include an extra 16 bytes for the IV if necessary
+                # Because of the previous offsetting, start_range will always
+                # be a multiple of 16.
+                if start_range > 0:
+                    start_offset += 16
+                    start_range -= 16
+
+            if end_range is not None:
+                # Align the end of the range along a 16 byte block
+                end_offset = 15 - (end_range % 16)
+                end_range += end_offset
 
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'snapshot': _to_str(snapshot),
@@ -1596,22 +1642,19 @@ class BaseBlobService(StorageClient):
             end_range_required=False,
             check_content_md5=validate_content)
 
-        response = self._perform_request(request, None)
-        blob = _parse_blob(blob_name, snapshot, response)
-
-        if validate_content:
-            computed_md5 = _get_content_md5(blob.content)
-            _validate_content_match(blob.properties.content_settings.content_md5, computed_md5)
-
-        return blob
+        return self._perform_request(request, _parse_blob, 
+                                     [blob_name, snapshot, validate_content, self.require_encryption,
+                                      self.key_encryption_key, self.key_resolver_function,
+                                      start_offset, end_offset],
+                                     operation_context=_context)
 
     def get_blob_to_path(
         self, container_name, blob_name, file_path, open_mode='wb',
         snapshot=None, start_range=None, end_range=None,
         validate_content=False, progress_callback=None,
-        max_connections=2, max_retries=5, retry_wait=1.0, lease_id=None,
-        if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        max_connections=2, lease_id=None, if_modified_since=None, 
+        if_unmodified_since=None, if_match=None, if_none_match=None, 
+        timeout=None):
         '''
         Downloads a blob to a file path, with automatic chunking and progress
         notifications. Returns an instance of :class:`Blob` with 
@@ -1668,10 +1711,6 @@ class BaseBlobService(StorageClient):
             prevents parallel download. This may also be useful if many blobs are 
             expected to be empty as an extra request is required for empty blobs 
             if max_connections is greater than 1.
-        :param int max_retries:
-            Number of times to retry download of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -1724,8 +1763,6 @@ class BaseBlobService(StorageClient):
                 validate_content,
                 progress_callback,
                 max_connections,
-                max_retries,
-                retry_wait,
                 lease_id,
                 if_modified_since,
                 if_unmodified_since,
@@ -1738,9 +1775,9 @@ class BaseBlobService(StorageClient):
     def get_blob_to_stream(
         self, container_name, blob_name, stream, snapshot=None,
         start_range=None, end_range=None, validate_content=False,
-        progress_callback=None, max_connections=2, max_retries=5,
-        retry_wait=1.0, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
 
         '''
         Downloads a blob to a stream, with automatic chunking and progress
@@ -1794,10 +1831,6 @@ class BaseBlobService(StorageClient):
             prevents parallel download. This may also be useful if many blobs are 
             expected to be empty as an extra request is required for empty blobs 
             if max_connections is greater than 1.
-        :param int max_retries:
-            Number of times to retry download of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -1871,6 +1904,8 @@ class BaseBlobService(StorageClient):
             else:
                 initial_request_end = initial_request_start + first_get_size - 1
 
+            # Send a context object to make sure we always retry to the initial location
+            operation_context = _OperationContext(location_lock=True)
             try:
                 blob = self._get_blob(container_name,
                                       blob_name,
@@ -1883,7 +1918,8 @@ class BaseBlobService(StorageClient):
                                       if_unmodified_since=if_unmodified_since,
                                       if_match=if_match,
                                       if_none_match=if_none_match,
-                                      timeout=timeout)
+                                      timeout=timeout,
+                                      _context=operation_context)
 
                 # Parse the total blob size and adjust the download size if ranges 
                 # were specified
@@ -1909,7 +1945,8 @@ class BaseBlobService(StorageClient):
                                           if_unmodified_since=if_unmodified_since,
                                           if_match=if_match,
                                           if_none_match=if_none_match,
-                                          timeout=timeout)
+                                          timeout=timeout,
+                                          _context=operation_context)
 
                     # Set the download size to empty
                     download_size = 0
@@ -1949,8 +1986,6 @@ class BaseBlobService(StorageClient):
                 end_blob,
                 stream,
                 max_connections,
-                max_retries,
-                retry_wait,
                 progress_callback,
                 validate_content,
                 lease_id,
@@ -1959,6 +1994,7 @@ class BaseBlobService(StorageClient):
                 if_match,
                 if_none_match,
                 timeout,
+                operation_context
             )
 
             # Set the content length to the download size instead of the size of 
@@ -1978,10 +2014,9 @@ class BaseBlobService(StorageClient):
     def get_blob_to_bytes(
         self, container_name, blob_name, snapshot=None,
         start_range=None, end_range=None, validate_content=False,
-        progress_callback=None, max_connections=2, max_retries=5,
-        retry_wait=1.0, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None,
-        timeout=None):
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Downloads a blob as an array of bytes, with automatic chunking and
         progress notifications. Returns an instance of :class:`Blob` with
@@ -2032,10 +2067,6 @@ class BaseBlobService(StorageClient):
             prevents parallel download. This may also be useful if many blobs are 
             expected to be empty as an extra request is required for empty blobs 
             if max_connections is greater than 1.
-        :param int max_retries:
-            Number of times to retry download of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -2083,8 +2114,6 @@ class BaseBlobService(StorageClient):
             validate_content,
             progress_callback,
             max_connections,
-            max_retries,
-            retry_wait,
             lease_id,
             if_modified_since,
             if_unmodified_since,
@@ -2098,10 +2127,9 @@ class BaseBlobService(StorageClient):
     def get_blob_to_text(
         self, container_name, blob_name, encoding='utf-8', snapshot=None,
         start_range=None, end_range=None, validate_content=False,
-        progress_callback=None, max_connections=2, max_retries=5,
-        retry_wait=1.0, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None,
-        timeout=None):
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Downloads a blob as unicode text, with automatic chunking and progress
         notifications. Returns an instance of :class:`Blob` with
@@ -2154,10 +2182,6 @@ class BaseBlobService(StorageClient):
             prevents parallel download. This may also be useful if many blobs are 
             expected to be empty as an extra request is required for empty blobs 
             if max_connections is greater than 1.
-        :param int max_retries:
-            Number of times to retry download of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -2203,8 +2227,6 @@ class BaseBlobService(StorageClient):
                                         validate_content,
                                         progress_callback,
                                         max_connections,
-                                        max_retries,
-                                        retry_wait,
                                         lease_id,
                                         if_modified_since,
                                         if_unmodified_since,
@@ -2261,7 +2283,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'snapshot': _to_str(snapshot),
@@ -2276,8 +2298,7 @@ class BaseBlobService(StorageClient):
             'If-None-Match': _to_str(if_none_match),
         }     
 
-        response = self._perform_request(request)
-        return _parse_metadata(response)
+        return self._perform_request(request, _parse_metadata)
 
     def set_blob_metadata(self, container_name, blob_name,
                           metadata=None, lease_id=None,
@@ -2328,7 +2349,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'metadata',
@@ -2343,8 +2364,7 @@ class BaseBlobService(StorageClient):
         }
         _add_metadata_headers(metadata, request)
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def _lease_blob_impl(self, container_name, blob_name,
                          lease_action, lease_id,
@@ -2421,7 +2441,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('lease_action', lease_action)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'lease',
@@ -2439,7 +2459,7 @@ class BaseBlobService(StorageClient):
             'If-None-Match': _to_str(if_none_match),
         }
 
-        return self._perform_request(request)
+        return self._perform_request(request, _parse_lease)
 
     def acquire_blob_lease(self, container_name, blob_name,
                            lease_duration=-1,
@@ -2496,19 +2516,19 @@ class BaseBlobService(StorageClient):
         if lease_duration is not -1 and\
            (lease_duration < 15 or lease_duration > 60):
             raise ValueError(_ERROR_INVALID_LEASE_DURATION)
-        response = self._lease_blob_impl(container_name,
-                                     blob_name,
-                                     _LeaseActions.Acquire,
-                                     None, # lease_id
-                                     lease_duration,
-                                     None, # lease_break_period
-                                     proposed_lease_id,
-                                     if_modified_since,
-                                     if_unmodified_since,
-                                     if_match,
-                                     if_none_match,
-                                     timeout)
-        return _parse_lease_id(response)
+        lease = self._lease_blob_impl(container_name,
+                                      blob_name,
+                                      _LeaseActions.Acquire,
+                                      None, # lease_id
+                                      lease_duration,
+                                      None, # lease_break_period
+                                      proposed_lease_id,
+                                      if_modified_since,
+                                      if_unmodified_since,
+                                      if_match,
+                                      if_none_match,
+                                      timeout)
+        return lease['id']
 
     def renew_blob_lease(self, container_name, blob_name,
                          lease_id, if_modified_since=None,
@@ -2555,19 +2575,19 @@ class BaseBlobService(StorageClient):
         '''
         _validate_not_none('lease_id', lease_id)
 
-        response = self._lease_blob_impl(container_name,
-                                            blob_name,
-                                            _LeaseActions.Renew,
-                                            lease_id,
-                                            None, # lease_duration
-                                            None, # lease_break_period
-                                            None, # proposed_lease_id
-                                            if_modified_since,
-                                            if_unmodified_since,
-                                            if_match,
-                                            if_none_match,
-                                            timeout)
-        return _parse_lease_id(response)
+        lease = self._lease_blob_impl(container_name,
+                                      blob_name,
+                                      _LeaseActions.Renew,
+                                      lease_id,
+                                      None, # lease_duration
+                                      None, # lease_break_period
+                                      None, # proposed_lease_id
+                                      if_modified_since,
+                                      if_unmodified_since,
+                                      if_match,
+                                      if_none_match,
+                                      timeout)
+        return lease['id']
 
     def release_blob_lease(self, container_name, blob_name,
                            lease_id, if_modified_since=None,
@@ -2683,19 +2703,19 @@ class BaseBlobService(StorageClient):
         if (lease_break_period is not None) and (lease_break_period < 0 or lease_break_period > 60):
             raise ValueError(_ERROR_INVALID_LEASE_BREAK_PERIOD)
 
-        response = self._lease_blob_impl(container_name,
-                                     blob_name,
-                                     _LeaseActions.Break,
-                                     None, # lease_id
-                                     None, # lease_duration
-                                     lease_break_period,
-                                     None, # proposed_lease_id
-                                     if_modified_since,
-                                     if_unmodified_since,
-                                     if_match,
-                                     if_none_match,
-                                     timeout)
-        return _parse_lease_time(response)
+        lease = self._lease_blob_impl(container_name,
+                                      blob_name,
+                                      _LeaseActions.Break,
+                                      None, # lease_id
+                                      None, # lease_duration
+                                      lease_break_period,
+                                      None, # proposed_lease_id
+                                      if_modified_since,
+                                      if_unmodified_since,
+                                      if_match,
+                                      if_none_match,
+                                      timeout)
+        return lease['time']
 
     def change_blob_lease(self, container_name, blob_name,
                          lease_id,
@@ -2804,7 +2824,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'snapshot',
@@ -2819,8 +2839,7 @@ class BaseBlobService(StorageClient):
         }
         _add_metadata_headers(metadata, request)
 
-        response = self._perform_request(request)
-        return _parse_snapshot_blob(blob_name, response)
+        return self._perform_request(request, _parse_snapshot_blob, [blob_name])
 
     def copy_blob(self, container_name, blob_name, copy_source,
                   metadata=None,
@@ -2971,7 +2990,7 @@ class BaseBlobService(StorageClient):
 
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {'timeout': _int_to_str(timeout)}
         request.headers = {
@@ -2989,9 +3008,7 @@ class BaseBlobService(StorageClient):
         }
         _add_metadata_headers(metadata, request)
 
-        response = self._perform_request(request)
-        props = _parse_properties(response, BlobProperties)
-        return props.copy
+        return self._perform_request(request, _parse_properties, [BlobProperties]).copy
 
     def abort_copy_blob(self, container_name, blob_name, copy_id,
                         lease_id=None, timeout=None):
@@ -3016,7 +3033,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('copy_id', copy_id)
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'copy',
@@ -3083,7 +3100,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'DELETE'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.headers = {
             'x-ms-lease-id': _to_str(lease_id),

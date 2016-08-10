@@ -15,13 +15,13 @@
 import platform
 
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '0.32.0'
+__version__ = '0.33.0'
 
 # x-ms-version for storage service.
 X_MS_VERSION = '2015-07-08'
 
 # UserAgent string sample: 'Azure-Storage/0.32.0 (Python CPython 3.4.2; Windows 8)'
-_USER_AGENT_STRING = 'Azure-Storage/{} (Python {} {}; {} {})'.format(__version__, platform.python_implementation(), platform.python_version(), platform.system(), platform.release())
+USER_AGENT_STRING = 'Azure-Storage/{} (Python {} {}; {} {})'.format(__version__, platform.python_implementation(), platform.python_version(), platform.system(), platform.release())
 
 # Live ServiceClient URLs
 SERVICE_HOST_BASE = 'core.windows.net'
@@ -36,5 +36,8 @@ DEV_TABLE_HOST = '127.0.0.1:10002'
 DEV_ACCOUNT_NAME = 'devstoreaccount1'
 DEV_ACCOUNT_KEY = 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=='
 
-# Socket timeout in seconds is 5 min * 60 seconds
-_SOCKET_TIMEOUT = 5 * 60
+# Socket timeout in seconds is 11
+SOCKET_TIMEOUT = 11
+
+#Encryption constants
+_ENCRYPTION_PROTOCOL_V1 = '1.0'

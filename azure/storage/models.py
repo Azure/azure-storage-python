@@ -22,7 +22,20 @@ else:
 
 from ._error import (
     _validate_not_none,
+    _ERROR_UNKNOWN_KEY_WRAP_ALGORITHM
 )
+from cryptography.hazmat.primitives.keywrap import(
+    aes_key_wrap,
+    aes_key_unwrap,
+)
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
+from cryptography.hazmat.primitives.asymmetric.padding import (
+    OAEP,
+    MGF1,
+)
+from cryptography.hazmat.primitives.hashes import SHA1
+from os import urandom
 
 class _HeaderDict(dict):
 
@@ -36,6 +49,20 @@ class _list(list):
 class _dict(dict):
     '''Used so that additional properties can be set on the return dictionary'''
     pass
+
+class _OperationContext(object):
+    '''
+    Contains information that lasts the lifetime of an operation. This operation 
+    may span multiple calls to the Azure service.
+
+    :ivar bool location_lock: 
+        Whether the location should be locked for this operation.
+    :ivar str location: 
+        The location to lock to.
+    '''
+    def __init__(self, location_lock=False):
+        self.location_lock = location_lock
+        self.host_location = None
 
 class ListGenerator(Iterable):
     '''
@@ -89,6 +116,39 @@ class ListGenerator(Iterable):
             # return results
             for i in self.items:
                 yield i
+
+
+class RetryContext(object):
+    '''
+    Contains the request and response information that can be used to determine 
+    whether and how to retry. This context is stored across retries and may be 
+    used to store other information relevant to the retry strategy.
+
+    :ivar :class:`~azure.storage._http.HTTPRequest` request: 
+        The request sent to the storage service.
+    :ivar :class:`~azure.storage._http.HTTPResponse` response: 
+        The response returned by the storage service.
+    :ivar LocationMode location_mode: 
+        The location the request was sent to.
+    '''
+    def __init__(self):
+        self.request = None
+        self.response = None
+        self.location_mode = None
+
+class LocationMode(object):
+    '''
+    Specifies the location the request should be sent to. This mode only applies 
+    for RA-GRS accounts which allow secondary read access. All other account types 
+    must use PRIMARY.
+    '''
+
+    PRIMARY = 'primary'
+    ''' Requests should be sent to the primary location. '''
+
+    SECONDARY = 'secondary'
+    ''' Requests should be sent to the secondary location, if possible. '''
+
 
 class RetentionPolicy(object):
 
@@ -373,7 +433,6 @@ class Protocol(object):
 
     HTTPS_HTTP = 'https,http'
     ''' Allow HTTP and HTTPS requests. '''
-
 
 class ResourceTypes(object):
 

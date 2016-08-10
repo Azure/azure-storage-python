@@ -21,8 +21,12 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="azure\storage\blob\_encryption.py" />
     <Compile Include="azure\storage\blob\_upload_chunking.py" />
     <Compile Include="azure\storage\file\_upload_chunking.py" />
+    <Compile Include="azure\storage\retry.py" />
+    <Compile Include="azure\storage\queue\_encryption.py" />
+    <Compile Include="azure\storage\table\_encryption.py" />
     <Compile Include="azure\storage\_auth.py" />
     <Compile Include="azure\storage\blob\appendblobservice.py" />
     <Compile Include="azure\storage\blob\blockblobservice.py" />
@@ -61,6 +65,7 @@
     <Compile Include="azure\storage\table\_serialization.py" />
     <Compile Include="azure\storage\table\__init__.py" />
     <Compile Include="azure\storage\_common_conversion.py" />
+    <Compile Include="azure\storage\_encryption.py" />
     <Compile Include="azure\storage\_error.py" />
     <Compile Include="azure\storage\_deserialization.py" />
     <Compile Include="azure\storage\_http\httpclient.py" />
@@ -75,6 +80,7 @@
     <Compile Include="samples\advanced\__init__.py" />
     <Compile Include="samples\blob\append_blob_usage.py" />
     <Compile Include="samples\blob\block_blob_usage.py" />
+    <Compile Include="samples\blob\encryption_usage.py" />
     <Compile Include="samples\blob\page_blob_usage.py" />
     <Compile Include="samples\blob\sas_usage.py" />
     <Compile Include="samples\blob\container_usage.py" />
@@ -84,10 +90,12 @@
     <Compile Include="samples\file\file_usage.py" />
     <Compile Include="samples\file\sas_usage.py" />
     <Compile Include="samples\file\__init__.py" />
+    <Compile Include="samples\queue\encryption_usage.py" />
     <Compile Include="samples\queue\queue_usage.py" />
     <Compile Include="samples\queue\sas_usage.py" />
     <Compile Include="samples\queue\__init__.py" />
     <Compile Include="samples\config.py" />
+    <Compile Include="samples\table\encryption_usage.py" />
     <Compile Include="samples\table\sas_usage.py" />
     <Compile Include="samples\table\table_usage.py" />
     <Compile Include="samples\table\__init__.py" />
@@ -95,13 +103,17 @@
     <Compile Include="samples\__init__.py" />
     <Compile Include="setup.py" />
     <Compile Include="tests\blob_performance.py" />
+    <Compile Include="tests\test_blob_encryption.py" />
     <Compile Include="tests\settings_fake.py" />
     <Compile Include="tests\settings_real.py" />
     <Compile Include="tests\testcase.py" />
+    <Compile Include="tests\test_retry.py" />
     <Compile Include="tests\test_client.py" />
     <Compile Include="tests\test_account.py" />
     <Compile Include="tests\test_directory.py" />
+    <Compile Include="tests\test_encryption_helper.py" />
     <Compile Include="tests\test_get_file.py" />
+    <Compile Include="tests\test_queue_encryption.py" />
     <Compile Include="tests\test_service_stats.py" />
     <Compile Include="tests\test_share.py" />
     <Compile Include="tests\test_get_blob.py" />
@@ -115,6 +127,7 @@
     <Compile Include="tests\test_file.py" />
     <Compile Include="tests\test_page_blob.py" />
     <Compile Include="tests\test_queue.py" />
+    <Compile Include="tests\test_table_encryption.py" />
     <Compile Include="tests\test_table_entity.py" />
     <Compile Include="tests\test_table_batch.py" />
     <Compile Include="tests\test_table.py" />
@@ -154,7 +167,6 @@
     <Content Include="MANIFEST.in" />
     <Content Include="README.rst" />
     <Content Include="requirements.txt" />
-    <Content Include="setup.cfg" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\2.7" />

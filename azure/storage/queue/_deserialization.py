@@ -29,6 +29,9 @@ from .._deserialization import (
     _int_to_str,
     _parse_metadata,
 )
+from ._encryption import (
+    _decrypt_queue_message,
+)
 
 def _parse_metadata_and_message_count(response):
     '''
@@ -67,7 +70,7 @@ def _convert_xml_to_queues(response):
     </EnumerationResults>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     queues = _list()
     list_element = ETree.fromstring(response.body)
@@ -95,7 +98,7 @@ def _convert_xml_to_queues(response):
 
     return queues
 
-def _convert_xml_to_queue_messages(response, decode_function):
+def _convert_xml_to_queue_messages(response, decode_function, require_encryption, key_encryption_key, resolver):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <QueueMessagesList>
@@ -111,7 +114,7 @@ def _convert_xml_to_queue_messages(response, decode_function):
     </QueueMessagesList>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     messages = list()
     list_element = ETree.fromstring(response.body)
@@ -122,7 +125,11 @@ def _convert_xml_to_queue_messages(response, decode_function):
         message.id = message_element.findtext('MessageId')
         message.dequeue_count = _int_to_str(message_element.findtext('DequeueCount'))
 
-        message.content = decode_function(message_element.findtext('MessageText'))
+        message.content = message_element.findtext('MessageText')
+        if (key_encryption_key is not None) or (resolver is not None):
+            message.content = _decrypt_queue_message(message.content, require_encryption, 
+                                                        key_encryption_key, resolver)
+        message.content = decode_function(message.content)
 
         message.insertion_time = parser.parse(message_element.findtext('InsertionTime'))
         message.expiration_time = parser.parse(message_element.findtext('ExpirationTime'))

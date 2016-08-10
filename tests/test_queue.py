@@ -29,13 +29,13 @@ from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
     AzureMissingResourceHttpError,
+    AzureException,
 )
 from tests.testcase import (
     StorageTestCase,
     TestMode,
     record,
 )
-
 #------------------------------------------------------------------------------
 TEST_QUEUE_PREFIX = 'queue'
 #------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ class StorageQueueTest(StorageTestCase):
         self.qs.create_queue(queue_name)
         return queue_name
 
-    #--Test cases for containers ----------------------------------------------
+    #--Test cases for queues ----------------------------------------------
     @record
     def test_create_queue(self):
         # Action
@@ -259,7 +259,7 @@ class StorageQueueTest(StorageTestCase):
         self.qs.put_message(queue_name, u'message2')
         self.qs.put_message(queue_name, u'message3')
         self.qs.put_message(queue_name, u'message4')
-
+        
     @record
     def test_get_messages(self):
         # Action
@@ -470,7 +470,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.peek_messages(queue_name)
 
         # Assert
@@ -501,7 +501,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.peek_messages(queue_name)
 
         # Assert
@@ -530,7 +530,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.put_message(queue_name, u'addedmessage')
 
         # Assert
@@ -557,7 +557,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         service.update_message(
             queue_name,
             result[0].id,
@@ -589,7 +589,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_messages(queue_name)
 
         # Assert
@@ -628,7 +628,7 @@ class StorageQueueTest(StorageTestCase):
             account_name=self.settings.STORAGE_ACCOUNT_NAME,
             sas_token=token,
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.peek_messages(queue_name)
 
         # Assert
@@ -695,13 +695,29 @@ class StorageQueueTest(StorageTestCase):
         queue_name = self._create_queue()
 
         # Act
-        resp = self.qs.set_queue_acl(queue_name, dict())
+        self.qs.set_queue_acl(queue_name, dict())
 
         # Assert
-        self.assertIsNone(resp)
         acl = self.qs.get_queue_acl(queue_name)
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 0)
+
+    @record
+    def test_set_queue_acl_with_empty_signed_identifier(self):
+        # Arrange
+        queue_name = self._create_queue()
+
+        # Act
+        self.qs.set_queue_acl(queue_name, {'empty': AccessPolicy()})
+
+        # Assert
+        acl = self.qs.get_queue_acl(queue_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 1)
+        self.assertIsNotNone(acl['empty'])
+        self.assertIsNone(acl['empty'].permission)
+        self.assertIsNone(acl['empty'].expiry)
+        self.assertIsNone(acl['empty'].start)
 
     @record
     def test_set_queue_acl_with_signed_identifiers(self):
@@ -724,6 +740,20 @@ class StorageQueueTest(StorageTestCase):
         self.assertTrue('testid' in acl)
 
     @record
+    def test_set_queue_acl_too_many_ids(self):
+        # Arrange
+        queue_name = self._create_queue()
+
+        # Act
+        identifiers = dict()
+        for i in range(0, 6):
+            identifiers['id{}'.format(i)] = AccessPolicy()
+
+        # Assert
+        with self.assertRaisesRegexp(AzureException, 'Too many access policies provided. The server does not support setting more than 5 access policies on a single resource.'):
+            self.qs.set_queue_acl(queue_name, identifiers)
+
+    @record
     def test_set_queue_acl_with_non_existing_queue(self):
         # Arrange
         queue_name = self._get_queue_reference()
@@ -733,36 +763,6 @@ class StorageQueueTest(StorageTestCase):
             self.qs.set_queue_acl(queue_name)
 
         # Assert
-
-    @record
-    def test_with_filter(self):
-        # Single filter
-        called = []
-
-        def my_filter(request, next):
-            called.append(True)
-            return next(request)
-        qc = self.qs.with_filter(my_filter)
-        queue_name = self._create_queue()
-        qc.put_message(queue_name, u'message1')
-
-        self.assertTrue(called)
-
-        del called[:]
-
-        # Chained filters
-        def filter_a(request, next):
-            called.append('a')
-            return next(request)
-
-        def filter_b(request, next):
-            called.append('b')
-            return next(request)
-
-        qc = self.qs.with_filter(filter_a).with_filter(filter_b)
-        qc.put_message(queue_name, u'message1')
-
-        self.assertEqual(called, ['b', 'a'])
 
     @record
     def test_unicode_create_queue_unicode_name(self):
@@ -819,7 +819,6 @@ class StorageQueueTest(StorageTestCase):
         self.assertNotEqual('', message.insertion_time)
         self.assertNotEqual('', message.expiration_time)
         self.assertNotEqual('', message.time_next_visible)
-
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

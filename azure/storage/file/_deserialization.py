@@ -33,8 +33,10 @@ from .._deserialization import (
     _parse_properties,
     _parse_metadata,
 )
+from .._error import _validate_content_match
+from .._common_conversion import _get_content_md5
 
-def _parse_share(name, response):
+def _parse_share(response, name):
     if response is None:
         return None
 
@@ -42,7 +44,7 @@ def _parse_share(name, response):
     props = _parse_properties(response, ShareProperties)
     return Share(name, props, metadata)
 
-def _parse_directory(name, response):
+def _parse_directory(response, name):
     if response is None:
         return None
 
@@ -50,12 +52,17 @@ def _parse_directory(name, response):
     props = _parse_properties(response, DirectoryProperties)
     return Directory(name, props, metadata)
 
-def _parse_file(name, response):
+def _parse_file(response, name, validate_content=False):
     if response is None:
         return None
 
     metadata = _parse_metadata(response)
     props = _parse_properties(response, FileProperties)
+
+    if validate_content:
+        computed_md5 = _get_content_md5(response.body)
+        _validate_content_match(props.content_settings.content_md5, computed_md5)
+
     return File(name, response.body, props, metadata)
 
 def _convert_xml_to_shares(response):
@@ -82,7 +89,7 @@ def _convert_xml_to_shares(response):
     </EnumerationResults>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     shares = _list()
     list_element = ETree.fromstring(response.body)
@@ -137,7 +144,7 @@ def _convert_xml_to_directories_and_files(response):
     </EnumerationResults>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     entries = _list()
     list_element = ETree.fromstring(response.body)
@@ -185,7 +192,7 @@ def _convert_xml_to_ranges(response):
     </Ranges>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     ranges = list()
     ranges_element = ETree.fromstring(response.body)
@@ -207,7 +214,7 @@ def _convert_xml_to_share_stats(response):
     </ShareStats>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     share_stats_element = ETree.fromstring(response.body)
     return int(share_stats_element.findtext('ShareUsage'))

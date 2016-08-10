@@ -16,24 +16,31 @@ import os
 import sys
 import copy
 import requests
-
+from time import sleep
 from abc import ABCMeta
+
 from azure.common import (
     AzureException,
 )
+from .models import (
+    RetryContext,
+    LocationMode,
+    _OperationContext,
+)
+from .retry import ExponentialRetry
 from ._constants import (
-    _USER_AGENT_STRING,
-    _SOCKET_TIMEOUT
+    SOCKET_TIMEOUT
 )
 from ._http import HTTPError
 from ._http.httpclient import _HTTPClient
 from ._serialization import (
-    _storage_error_handler,
     _update_request,
     _add_date_header,
 )
 from ._error import (
     _ERROR_STORAGE_MISSING_INFO,
+    _ERROR_DECRYPTION_FAILURE,
+    _http_error_handler,
 )
 
 class StorageClient(object):
@@ -62,6 +69,21 @@ class StorageClient(object):
         The secondary endpoint to read storage data from. This will only be a 
         valid endpoint if the storage account used is RA-GRS and thus allows 
         reading from secondary.
+    :ivar function(context) retry:
+        A function which determines whether to retry. Takes as a parameter a 
+        :class:`~azure.storage.models.RetryContext` object. Returns the number 
+        of seconds to wait before retrying the request, or None to indicate not 
+        to retry.
+    :ivar LocationMode location_mode:
+        The host location to use to make requests. Defaults to LocationMode.PRIMARY.
+        Note that this setting only applies to RA-GRS accounts as other account 
+        types do not allow reading from secondary. If the location_mode is set to 
+        LocationMode.SECONDARY, read requests will be sent to the secondary endpoint. 
+        Write requests will continue to be sent to primary.
+    :ivar str protocol:
+        The protocol to use for requests. Defaults to https.
+    :ivar requests.Session request_session:
+        The session object to use for http requests.
     :ivar function(request) request_callback:
         A function called immediately before each request is sent. This function 
         takes as a parameter the request object and returns nothing. It may be 
@@ -70,10 +92,10 @@ class StorageClient(object):
         A function called immediately after each response is received. This 
         function takes as a parameter the response object and returns nothing. 
         It may be used to log response data.
-    :param str protocol:
-        The protocol to use for requests. Defaults to https.
-    :param requests.Session request_session:
-        The session object to use for http requests.
+    :ivar function() retry_callback:
+        A function called immediately after retry evaluation is performed. This 
+        function takes as a parameter the retry context object and returns nothing. 
+        It may be used to detect retries and log context information.
     '''
 
     __metaclass__ = ABCMeta
@@ -94,13 +116,15 @@ class StorageClient(object):
         self._httpclient = _HTTPClient(
             protocol=protocol,
             session=request_session,
-            timeout=_SOCKET_TIMEOUT,
+            timeout=SOCKET_TIMEOUT,
         )
 
-        self._filter = self._perform_request_worker
+        self.retry = ExponentialRetry().retry
+        self.location_mode = LocationMode.PRIMARY
 
         self.request_callback = None
         self.response_callback = None
+        self.retry_callback = None
 
     @property
     def protocol(self):
@@ -118,28 +142,6 @@ class StorageClient(object):
     def request_session(self, value):
         self._httpclient.session = value
 
-    def with_filter(self, filter):
-        '''
-        Returns a new service which will process requests with the specified
-        filter. Filtering operations can include logging, automatic retrying,
-        etc... The filter is a lambda which receives the HTTPRequest and
-        another lambda. The filter can perform any pre-processing on the
-        request, pass it off to the next lambda, and then perform any
-        post-processing on the response.
-
-        :param function(request) filter: A filter function.
-        :return: A new service using the specified filter.
-        :rtype: a subclass of :class:`StorageClient`
-        '''
-        res = copy.deepcopy(self)
-        old_filter = self._filter
-
-        def new_filter(request):
-            return filter(request, old_filter)
-
-        res._filter = new_filter
-        return res
-
     def set_proxy(self, host, port, user=None, password=None):
         '''
         Sets the proxy server host and port for the HTTP CONNECT Tunnelling.
@@ -151,47 +153,120 @@ class StorageClient(object):
         '''
         self._httpclient.set_proxy(host, port, user, password)
 
-    def _get_host(self):
-        return self.primary_endpoint
+    def _get_host_locations(self, primary=True, secondary=False):
+        locations = {}
+        if primary:
+            locations[LocationMode.PRIMARY] = self.primary_endpoint
+        if secondary:
+            locations[LocationMode.SECONDARY] = self.secondary_endpoint
+        return locations
 
-    def _perform_request_worker(self, request):
-        _update_request(request)
+    def _apply_host(self, request, operation_context, retry_context):
+        if operation_context.location_lock and operation_context.host_location:
+            # If this is a location locked operation and the location is set, 
+            # override the request location and host_location.
+            request.host_locations = operation_context.host_location
+            request.host = list(operation_context.host_location.values())[0]
+            retry_context.location_mode = list(operation_context.host_location.keys())[0]           
+        elif len(request.host_locations) == 1:
+            # If only one location is allowed, use that location.
+            request.host = list(request.host_locations.values())[0]
+            retry_context.location_mode = list(request.host_locations.keys())[0]
+        else:
+            # If multiple locations are possible, choose based on the location mode.
+            request.host = request.host_locations.get(self.location_mode)
+            retry_context.location_mode = self.location_mode
 
-        if self.request_callback:
-            self.request_callback(request)
-
-        # Add date and auth after the callback so date doesn't get too old and 
-        # authentication is still correct if signed headers are added in the request 
-        # callback
-        _add_date_header(request)
-        self.authentication.sign_request(request)
-        return self._httpclient.perform_request(request)
-
-    def _perform_request(self, request, encoding='utf-8'):
+    def _perform_request(self, request, parser=None, parser_args=None, operation_context=None):
         '''
         Sends the request and return response. Catches HTTPError and hands it
         to error handler
         '''
-        try:
-            response = self._filter(request)
-        except Exception as ex:
-            if sys.version_info >= (3,):
-                # Automatic chaining in Python 3 means we keep the trace
-                raise AzureException
-            else:
-                # There isn't a good solution in 2 for keeping the stack trace 
-                # in general, or that will not result in an error in 3
-                # However, we can keep the previous error type and message
-                # TODO: In the future we will log the trace
-                raise AzureException('{}: {}'.format(ex.__class__.__name__, ex.args[0]))
+        operation_context = operation_context or _OperationContext()
+        retry_context = RetryContext()
 
-        if self.response_callback:
-            self.response_callback(response)
+        # Apply the appropriate host based on the location mode
+        self._apply_host(request, operation_context, retry_context)
 
-        # Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException
-        if response.status >= 300:
-            # This exception will be caught by the general error handler
-            # and raised as an azure http exception
-            _storage_error_handler(HTTPError(response.status, response.message, response.headers, response.body))
+        # Apply common settings to the request
+        _update_request(request)
 
-        return response
+        while(True):
+            try:
+                try:
+                    # Execute the request callback 
+                    if self.request_callback:
+                        self.request_callback(request)
+
+                    # Add date and auth after the callback so date doesn't get too old and 
+                    # authentication is still correct if signed headers are added in the request 
+                    # callback. This also ensures retry policies with long back offs 
+                    # will work as it resets the time sensitive headers.
+                    _add_date_header(request)
+                    self.authentication.sign_request(request)
+
+                    # Set the request context
+                    retry_context.request = request
+
+                    # Perform the request
+                    response = self._httpclient.perform_request(request)
+
+                    # Execute the response callback
+                    if self.response_callback:
+                        self.response_callback(response)
+
+                    # Set the response context
+                    retry_context.response = response
+
+                    # Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException
+                    if response.status >= 300:
+                        # This exception will be caught by the general error handler
+                        # and raised as an azure http exception
+                        _http_error_handler(HTTPError(response.status, response.message, response.headers, response.body))
+
+                    # Parse the response
+                    if parser:
+                        if parser_args:
+                            args = [response]
+                            args.extend(parser_args)
+                            return parser(*args)
+                        else:
+                            return parser(response)
+                    else:
+                        return
+                except AzureException as ex:
+                    raise ex
+                except Exception as ex:
+                    if sys.version_info >= (3,):
+                        # Automatic chaining in Python 3 means we keep the trace
+                        raise AzureException(ex.args[0])
+                    else:
+                        # There isn't a good solution in 2 for keeping the stack trace 
+                        # in general, or that will not result in an error in 3
+                        # However, we can keep the previous error type and message
+                        # TODO: In the future we will log the trace
+                        raise AzureException('{}: {}'.format(ex.__class__.__name__, ex.args[0]))
+
+            except AzureException as ex:
+                # Decryption failures (invalid objects, invalid algorithms, data unencrypted in strict mode, etc)
+                # will not be resolved with retries.
+                if str(ex) == _ERROR_DECRYPTION_FAILURE:
+                    raise ex
+                # Determine whether a retry should be performed and if so, how 
+                # long to wait before performing retry.
+                retry_interval = self.retry(retry_context)
+                if retry_interval is not None:
+                    # Execute the callback
+                    if self.retry_callback:
+                        self.retry_callback(retry_context)
+
+                    # Sleep for the desired retry interval
+                    sleep(retry_interval)
+                else:
+                    raise ex
+            finally:
+                # If this is a location locked operation and the location is not set, 
+                # this is the first request of that operation. Set the location to 
+                # be used for subsequent requests in the operation.
+                if operation_context.location_lock and not operation_context.host_location:
+                    operation_context.host_location = {retry_context.location_mode: request.host}

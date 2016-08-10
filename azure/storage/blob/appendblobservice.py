@@ -15,6 +15,7 @@
 from .._error import (
     _validate_not_none,
     _validate_type_bytes,
+    _validate_encryption_unsupported,
     _ERROR_VALUE_NEGATIVE,
 )
 from .._common_conversion import (
@@ -24,7 +25,7 @@ from .._common_conversion import (
     _get_content_md5,
 )
 from .._serialization import (
-    _get_request_body_bytes_only,
+    _get_data_bytes_only,
     _add_metadata_headers,
 )
 from .._http import HTTPRequest
@@ -166,9 +167,11 @@ class AppendBlobService(BaseBlobService):
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
+
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {'timeout': _int_to_str(timeout)}
         request.headers = {
@@ -183,8 +186,7 @@ class AppendBlobService(BaseBlobService):
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._perform_request(request, _parse_base_properties)
 
     def append_block(self, container_name, blob_name, block,
                      validate_content=False, maxsize_condition=None,
@@ -254,9 +256,11 @@ class AppendBlobService(BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('block', block)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
+
         request = HTTPRequest()
         request.method = 'PUT'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'appendblock',
@@ -271,21 +275,19 @@ class AppendBlobService(BaseBlobService):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match)
         }
-        request.body = _get_request_body_bytes_only('block', block)
+        request.body = _get_data_bytes_only('block', block)
 
         if validate_content:
             computed_md5 = _get_content_md5(request.body)
             request.headers['Content-MD5'] = _to_str(computed_md5)
 
-        response = self._perform_request(request)
-        return _parse_append_block(response)
+        return self._perform_request(request, _parse_append_block)
 
     #----Convenience APIs----------------------------------------------
 
     def append_blob_from_path(
         self, container_name, blob_name, file_path, validate_content=False,
-        maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
+        maxsize_condition=None, progress_callback=None, lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from a file path, with automatic
         chunking and progress notifications.
@@ -314,10 +316,6 @@ class AppendBlobService(BaseBlobService):
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -328,6 +326,7 @@ class AppendBlobService(BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('file_path', file_path)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
         count = path.getsize(file_path)
         with open(file_path, 'rb') as stream:
@@ -339,15 +338,13 @@ class AppendBlobService(BaseBlobService):
                 validate_content=validate_content,
                 maxsize_condition=maxsize_condition,
                 progress_callback=progress_callback,
-                max_retries=max_retries,
-                retry_wait=retry_wait,
                 lease_id=lease_id,
                 timeout=timeout)
 
     def append_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
         validate_content=False, maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
+        lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from an array of bytes, with
         automatic chunking and progress notifications.
@@ -381,10 +378,6 @@ class AppendBlobService(BaseBlobService):
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -397,6 +390,7 @@ class AppendBlobService(BaseBlobService):
         _validate_not_none('blob', blob)
         _validate_not_none('index', index)
         _validate_type_bytes('blob', blob)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
         if index < 0:
             raise IndexError(_ERROR_VALUE_NEGATIVE.format('index'))
@@ -416,14 +410,12 @@ class AppendBlobService(BaseBlobService):
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             timeout=timeout)
 
     def append_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
         validate_content=False, maxsize_condition=None, progress_callback=None,
-        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
+        lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from str/unicode, with
         automatic chunking and progress notifications.
@@ -454,10 +446,6 @@ class AppendBlobService(BaseBlobService):
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -468,6 +456,7 @@ class AppendBlobService(BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('text', text)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
         if not isinstance(text, bytes):
             _validate_not_none('encoding', encoding)
@@ -483,14 +472,12 @@ class AppendBlobService(BaseBlobService):
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             timeout=timeout)
 
     def append_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
         validate_content=False, maxsize_condition=None, progress_callback=None, 
-        max_retries=5, retry_wait=1.0, lease_id=None, timeout=None):
+        lease_id=None, timeout=None):
         '''
         Appends to the content of an existing blob from a file/stream, with
         automatic chunking and progress notifications.
@@ -522,10 +509,6 @@ class AppendBlobService(BaseBlobService):
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -536,6 +519,7 @@ class AppendBlobService(BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
         _upload_blob_chunks(
             blob_service=self,
@@ -545,8 +529,6 @@ class AppendBlobService(BaseBlobService):
             block_size=self.MAX_BLOCK_SIZE,
             stream=stream,
             max_connections=1, # upload not easily parallelizable
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             progress_callback=progress_callback,
             validate_content=validate_content,
             lease_id=lease_id,

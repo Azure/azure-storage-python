@@ -13,6 +13,7 @@
 # limitations under the License.
 #--------------------------------------------------------------------------
 from dateutil import parser
+from azure.storage._error import AzureException
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -41,7 +42,13 @@ from .models import (
     ResourceProperties,
     BlobPrefix,
 )
+from ._encryption import _decrypt_blob
 from ..models import _list
+from .._error import(
+    _validate_content_match,
+    _ERROR_DECRYPTION_FAILURE,
+)
+from .._common_conversion import _get_content_md5
 
 def _parse_base_properties(response):
     '''
@@ -76,39 +83,49 @@ def _parse_append_block(response):
 
     return append_block
 
-def _parse_snapshot_blob(name, response):
+def _parse_snapshot_blob(response, name):
     '''
     Extracts snapshot return header.
     '''   
     snapshot = response.headers.get('x-ms-snapshot')
 
-    return _parse_blob(name, snapshot, response)
+    return _parse_blob(response, name, snapshot)
 
-def _parse_lease_time(response):
+def _parse_lease(response):
     '''
-    Extracts lease time return header.
-    '''   
-    lease_time = response.headers.get('x-ms-lease-time')
-    if lease_time:
-        lease_time = _int_to_str(lease_time)
-
-    return lease_time
-
-def _parse_lease_id(response):
+    Extracts lease time and ID return headers.
     '''
-    Extracts lease ID return header.
-    '''
-    return response.headers.get('x-ms-lease-id')
+    lease = {}
+    lease['time'] = response.headers.get('x-ms-lease-time')
+    if lease['time']:
+        lease['time'] = _int_to_str(lease['time'])
 
-def _parse_blob(name, snapshot, response):
+    lease['id'] = response.headers.get('x-ms-lease-id')
+
+    return lease
+
+def _parse_blob(response, name, snapshot, validate_content=False, require_encryption=False,
+                key_encryption_key=None, key_resolver_function=None, start_offset=None, end_offset=None):
     if response is None:
         return None
 
     metadata = _parse_metadata(response)
     props = _parse_properties(response, BlobProperties)
+
+    if validate_content:
+        computed_md5 = _get_content_md5(response.body)
+        _validate_content_match(props.content_settings.content_md5, computed_md5)
+
+    if key_encryption_key is not None or key_resolver_function is not None:
+            try:
+                response.body = _decrypt_blob(require_encryption, key_encryption_key, key_resolver_function,
+                                              response, start_offset, end_offset)
+            except:
+                raise AzureException(_ERROR_DECRYPTION_FAILURE)
+
     return Blob(name, snapshot, response.body, props, metadata)
 
-def _parse_container(name, response):
+def _parse_container(response, name):
     if response is None:
         return None
 
@@ -117,7 +134,7 @@ def _parse_container(name, response):
     return Container(name, props, metadata)
 
 def _convert_xml_to_signed_identifiers_and_access(response):
-    acl = _convert_xml_to_signed_identifiers(response.body)
+    acl = _convert_xml_to_signed_identifiers(response)
     acl.public_access = response.headers.get('x-ms-blob-public-access')
 
     return acl
@@ -148,7 +165,7 @@ def _convert_xml_to_containers(response):
     </EnumerationResults>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     containers = _list()
     list_element = ETree.fromstring(response.body)
@@ -251,7 +268,7 @@ def _convert_xml_to_blob_list(response):
     </EnumerationResults>
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     blob_list = _list()    
     list_element = ETree.fromstring(response.body)
@@ -318,7 +335,7 @@ def _convert_xml_to_block_list(response):
     Converts xml response to block list class.
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     block_list = BlobBlockList()
 
@@ -361,7 +378,7 @@ def _convert_xml_to_page_ranges(response):
     </PageList> 
     '''
     if response is None or response.body is None:
-        return response
+        return None
 
     page_list = list()
 

@@ -15,6 +15,8 @@
 from .._error import (
     _validate_not_none,
     _validate_type_bytes,
+    _validate_encryption_required,
+    _validate_encryption_unsupported,
     _ERROR_VALUE_NEGATIVE,
 )
 from .._common_conversion import (
@@ -26,7 +28,7 @@ from .._common_conversion import (
 )
 from .._serialization import (
     _get_request_body,
-    _get_request_body_bytes_only,
+    _get_data_bytes_only,
     _add_metadata_headers,
 )
 from .._http import HTTPRequest
@@ -49,8 +51,14 @@ from ._deserialization import (
     _convert_xml_to_block_list,
     _parse_base_properties,
 )
+from ._encryption import(
+    _encrypt_blob,
+    _generate_blob_encryption_data,
+)
 from .baseblobservice import BaseBlobService
-from os import path
+from os import(
+    path,
+)
 import sys
 if sys.version_info >= (3,):
     from io import BytesIO
@@ -126,90 +134,6 @@ class BlockBlobService(BaseBlobService):
             account_name, account_key, sas_token, is_emulated, protocol, endpoint_suffix, 
             custom_domain, request_session, connection_string)
 
-    def _put_blob(self, container_name, blob_name, blob, content_settings=None,
-                  metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
-                  if_unmodified_since=None, if_match=None,  if_none_match=None, 
-                  timeout=None):
-        '''
-        Creates a blob or updates an existing blob.
-
-        See create_blob_from_* for high level
-        functions that handle the creation and upload of large blobs with
-        automatic chunking and progress notifications.
-
-        :param str container_name:
-            Name of existing container.
-        :param str blob_name:
-            Name of blob to create or update.
-        :param bytes blob:
-            Content of blob as bytes (size < 64MB). For larger size, you
-            must call put_block and put_block_list to set content of blob.
-        :param ~azure.storage.blob.models.ContentSettings content_settings:
-            ContentSettings object used to set properties on the blob.
-        :param metadata:
-            Name-value pairs associated with the blob as metadata.
-        :param bool validate_content:
-            If true, calculates an MD5 hash of the blob content. The storage 
-            service checks the hash of the content that has arrived
-            with the hash that was sent. This is primarily valuable for detecting 
-            bitflips on the wire if using http instead of https as https (the default) 
-            will already validate. Note that this MD5 hash is not stored with the 
-            blob.
-        :param str lease_id:
-            Required if the blob has an active lease.
-        :param datetime if_modified_since:
-            A DateTime value. Azure expects the date value passed in to be UTC.
-            If timezone is included, any non-UTC datetimes will be converted to UTC.
-            If a date is passed in without timezone info, it is assumed to be UTC. 
-            Specify this header to perform the operation only
-            if the resource has been modified since the specified time.
-        :param datetime if_unmodified_since:
-            A DateTime value. Azure expects the date value passed in to be UTC.
-            If timezone is included, any non-UTC datetimes will be converted to UTC.
-            If a date is passed in without timezone info, it is assumed to be UTC.
-            Specify this header to perform the operation only if
-            the resource has not been modified since the specified date/time.
-        :param str if_match:
-            An ETag value, or the wildcard character (*). Specify this header to perform
-            the operation only if the resource's ETag matches the value specified.
-        :param str if_none_match:
-            An ETag value, or the wildcard character (*). Specify this header
-            to perform the operation only if the resource's ETag does not match
-            the value specified. Specify the wildcard character (*) to perform
-            the operation only if the resource does not exist, and fail the
-            operation if it does exist.
-        :param int timeout:
-            The timeout parameter is expressed in seconds.
-        :return: ETag and last modified properties for the new Block Blob
-        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
-        '''
-        _validate_not_none('container_name', container_name)
-        _validate_not_none('blob_name', blob_name)
-        request = HTTPRequest()
-        request.method = 'PUT'
-        request.host = self._get_host()
-        request.path = _get_path(container_name, blob_name)
-        request.query = {'timeout': _int_to_str(timeout)}
-        request.headers = {
-            'x-ms-blob-type': _to_str(self.blob_type),
-            'x-ms-lease-id': _to_str(lease_id),
-            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
-            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
-            'If-Match': _to_str(if_match),
-            'If-None-Match': _to_str(if_none_match)
-        }
-        _add_metadata_headers(metadata, request)
-        if content_settings is not None:
-            request.headers.update(content_settings._to_headers())
-        request.body = _get_request_body_bytes_only('blob', blob)
-
-        if validate_content:
-            computed_md5 = _get_content_md5(request.body)
-            request.headers['Content-MD5'] = _to_str(computed_md5)
-
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
-
     def put_block(self, container_name, blob_name, block, block_id,
                   validate_content=False, lease_id=None, timeout=None):
         '''
@@ -239,29 +163,17 @@ class BlockBlobService(BaseBlobService):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
-        _validate_not_none('container_name', container_name)
-        _validate_not_none('blob_name', blob_name)
-        _validate_not_none('block', block)
-        _validate_not_none('block_id', block_id)
-        request = HTTPRequest()
-        request.method = 'PUT'
-        request.host = self._get_host()
-        request.path = _get_path(container_name, blob_name)
-        request.query = {
-            'comp': 'block',
-            'blockid': _encode_base64(_to_str(block_id)),
-            'timeout': _int_to_str(timeout),
-        }
-        request.headers = {
-            'x-ms-lease-id': _to_str(lease_id)
-        }
-        request.body = _get_request_body_bytes_only('block', block)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
-        if validate_content:
-            computed_md5 = _get_content_md5(request.body)
-            request.headers['Content-MD5'] = _to_str(computed_md5)
-
-        self._perform_request(request)
+        self._put_block(
+            container_name,
+            blob_name,
+            block,
+            block_id,
+            validate_content=validate_content,
+            lease_id=lease_id,
+            timeout=timeout
+        )
 
     def put_block_list(
         self, container_name, blob_name, block_list, content_settings=None, 
@@ -327,36 +239,23 @@ class BlockBlobService(BaseBlobService):
         :return: ETag and last modified properties for the updated Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
-        _validate_not_none('container_name', container_name)
-        _validate_not_none('blob_name', blob_name)
-        _validate_not_none('block_list', block_list)
-        request = HTTPRequest()
-        request.method = 'PUT'
-        request.host = self._get_host()
-        request.path = _get_path(container_name, blob_name)
-        request.query = {
-            'comp': 'blocklist',
-            'timeout': _int_to_str(timeout),
-        }
-        request.headers = {
-            'x-ms-lease-id': _to_str(lease_id),
-            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
-            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
-            'If-Match': _to_str(if_match),
-            'If-None-Match': _to_str(if_none_match),
-        }
-        _add_metadata_headers(metadata, request)
-        if content_settings is not None:
-            request.headers.update(content_settings._to_headers())
-        request.body = _get_request_body(
-            _convert_block_list_to_xml(block_list))
 
-        if validate_content:
-            computed_md5 = _get_content_md5(request.body)
-            request.headers['Content-MD5'] = _to_str(computed_md5)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
-        response = self._perform_request(request)
-        return _parse_base_properties(response)
+        return self._put_block_list(
+                    container_name,
+                    blob_name,
+                    block_list,
+                    content_settings=content_settings,
+                    metadata=metadata,
+                    validate_content=validate_content,
+                    lease_id=lease_id,
+                    if_modified_since=if_modified_since,
+                    if_unmodified_since=if_unmodified_since,
+                    if_match=if_match,
+                    if_none_match=if_none_match,
+                    timeout=timeout
+                )
 
     def get_block_list(self, container_name, blob_name, snapshot=None,
                        block_list_type=None, lease_id=None, timeout=None):
@@ -393,7 +292,7 @@ class BlockBlobService(BaseBlobService):
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
         request.method = 'GET'
-        request.host = self._get_host()
+        request.host_locations = self._get_host_locations(secondary=True)
         request.path = _get_path(container_name, blob_name)
         request.query = {
             'comp': 'blocklist',
@@ -403,17 +302,15 @@ class BlockBlobService(BaseBlobService):
         }
         request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
-        response = self._perform_request(request)
-        return _convert_xml_to_block_list(response)
+        return self._perform_request(request, _convert_xml_to_block_list)
 
     #----Convenience APIs-----------------------------------------------------
 
     def create_blob_from_path(
         self, container_name, blob_name, file_path, content_settings=None,
         metadata=None, validate_content=False, progress_callback=None,
-        max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        max_connections=2, lease_id=None, if_modified_since=None, 
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -444,10 +341,6 @@ class BlockBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use when the blob size exceeds 
             64MB.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -493,8 +386,6 @@ class BlockBlobService(BaseBlobService):
                 lease_id=lease_id,
                 progress_callback=progress_callback,
                 max_connections=max_connections,
-                max_retries=max_retries,
-                retry_wait=retry_wait,
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
@@ -504,9 +395,9 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file/stream, or updates the content of
         an existing blob, with automatic chunking and progress
@@ -541,10 +432,6 @@ class BlockBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use when the blob size exceeds 
             64MB. Note that parallel upload requires the stream to be seekable.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -576,8 +463,14 @@ class BlockBlobService(BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
+        _validate_encryption_required(self.require_encryption, self.key_encryption_key)
 
-        if count and count < self.MAX_SINGLE_PUT_SIZE:
+        # Adjust count to include padding if we are expected to encrypt.
+        adjusted_count = count
+        if (self.key_encryption_key is not None) and (adjusted_count is not None):
+            adjusted_count += (16 - (count % 16))
+
+        if adjusted_count and adjusted_count < self.MAX_SINGLE_PUT_SIZE:
             if progress_callback:
                 progress_callback(0, count)
 
@@ -599,6 +492,10 @@ class BlockBlobService(BaseBlobService):
             if progress_callback:
                 progress_callback(count, count)
         else:
+            cek, iv, encryption_data = None, None, None
+            if self.key_encryption_key:
+                cek, iv, encryption_data = _generate_blob_encryption_data(self.key_encryption_key)
+
             block_ids = _upload_blob_chunks(
                 blob_service=self,
                 container_name=container_name,
@@ -607,16 +504,16 @@ class BlockBlobService(BaseBlobService):
                 block_size=self.MAX_BLOCK_SIZE,
                 stream=stream,
                 max_connections=max_connections,
-                max_retries=max_retries,
-                retry_wait=retry_wait,
                 progress_callback=progress_callback,
                 validate_content=validate_content,
                 lease_id=lease_id,
                 uploader_class=_BlockBlobChunkUploader,
-                timeout=timeout
+                timeout=timeout,
+                content_encryption_key=cek, 
+                initialization_vector=iv
             )
 
-            self.put_block_list(
+            self._put_block_list(
                 container_name=container_name,
                 blob_name=blob_name,
                 block_list=block_ids,
@@ -628,15 +525,16 @@ class BlockBlobService(BaseBlobService):
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
                 if_none_match=if_none_match,
-                timeout=timeout
+                timeout=timeout,
+                encryption_data=encryption_data
             )
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        content_settings=None, metadata=None, validate_content=False, progress_callback=None,
-        max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        content_settings=None, metadata=None, validate_content=False, 
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -673,10 +571,6 @@ class BlockBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use when the blob size exceeds 
             64MB.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -730,8 +624,6 @@ class BlockBlobService(BaseBlobService):
             validate_content=validate_content,
             progress_callback=progress_callback,
             max_connections=max_connections,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             lease_id=lease_id,
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
@@ -742,9 +634,9 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
         content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, max_retries=5, retry_wait=1.0,
-        lease_id=None, if_modified_since=None, if_unmodified_since=None,
-        if_match=None, if_none_match=None, timeout=None):
+        progress_callback=None, max_connections=2, lease_id=None, 
+        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        if_none_match=None, timeout=None):
         '''
         Creates a new blob from str/unicode, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -777,10 +669,6 @@ class BlockBlobService(BaseBlobService):
         :param int max_connections:
             Maximum number of parallel connections to use when the blob size exceeds 
             64MB.
-        :param int max_retries:
-            Number of times to retry upload of blob chunk if an error occurs.
-        :param int retry_wait:
-            Sleep time in secs between retries.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -829,10 +717,181 @@ class BlockBlobService(BaseBlobService):
             lease_id=lease_id,
             progress_callback=progress_callback,
             max_connections=max_connections,
-            max_retries=max_retries,
-            retry_wait=retry_wait,
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
             timeout=timeout)
+
+    #-----Helper methods------------------------------------
+    def _put_blob(self, container_name, blob_name, blob, content_settings=None,
+                  metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
+                  if_unmodified_since=None, if_match=None,  if_none_match=None, 
+                  timeout=None):
+        '''
+        Creates a blob or updates an existing blob.
+
+        See create_blob_from_* for high level
+        functions that handle the creation and upload of large blobs with
+        automatic chunking and progress notifications.
+
+        :param str container_name:
+            Name of existing container.
+        :param str blob_name:
+            Name of blob to create or update.
+        :param bytes blob:
+            Content of blob as bytes (size < 64MB). For larger size, you
+            must call put_block and put_block_list to set content of blob.
+        :param ~azure.storage.blob.models.ContentSettings content_settings:
+            ContentSettings object used to set properties on the blob.
+        :param metadata:
+            Name-value pairs associated with the blob as metadata.
+        :param bool validate_content:
+            If true, calculates an MD5 hash of the blob content. The storage 
+            service checks the hash of the content that has arrived
+            with the hash that was sent. This is primarily valuable for detecting 
+            bitflips on the wire if using http instead of https as https (the default) 
+            will already validate. Note that this MD5 hash is not stored with the 
+            blob.
+        :param str lease_id:
+            Required if the blob has an active lease.
+        :param datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC. 
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+        :param datetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+        :param str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+        :param str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: ETag and last modified properties for the new Block Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_encryption_required(self.require_encryption, self.key_encryption_key)
+
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {
+            'x-ms-blob-type': _to_str(self.blob_type),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
+        _add_metadata_headers(metadata, request)
+        if content_settings is not None:
+            request.headers.update(content_settings._to_headers())
+        blob = _get_data_bytes_only('blob', blob)
+        if self.key_encryption_key:            
+            encryption_data, blob = _encrypt_blob(blob, self.key_encryption_key)
+            request.headers['x-ms-meta-encryptiondata'] = encryption_data
+        request.body = blob
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
+
+        return self._perform_request(request, _parse_base_properties)
+
+    def _put_block(self, container_name, blob_name, block, block_id,
+                  validate_content=False, lease_id=None, timeout=None):
+        '''
+        See put_block for more details. This helper method
+        allows for encryption or other such special behavior because
+        it is safely handled by the library. These behaviors are
+        prohibited in the public version of this function.
+        '''
+
+
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('block', block)
+        _validate_not_none('block_id', block_id)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {
+            'comp': 'block',
+            'blockid': _encode_base64(_to_str(block_id)),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id)
+        }
+        request.body = _get_data_bytes_only('block', block)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
+
+        self._perform_request(request)
+
+    def _put_block_list(
+        self, container_name, blob_name, block_list, content_settings=None, 
+        metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None, 
+        timeout=None, encryption_data=None):
+        '''
+        See put_block_list for more details. This helper method
+        allows for encryption or other such special behavior because
+        it is safely handled by the library. These behaviors are
+        prohibited in the public version of this function.
+        :param str encryption_data:
+            A JSON formatted string containing the encryption metadata generated for this 
+            blob if it was encrypted all at once upon upload. This should only be passed
+            in by internal methods.
+        '''
+
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('block_list', block_list)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {
+            'comp': 'blocklist',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
+        _add_metadata_headers(metadata, request)
+        if content_settings is not None:
+            request.headers.update(content_settings._to_headers())
+        request.body = _get_request_body(
+            _convert_block_list_to_xml(block_list))
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
+
+        if encryption_data is not None:
+            request.headers['x-ms-meta-encryptiondata'] = encryption_data
+
+        return self._perform_request(request, _parse_base_properties)

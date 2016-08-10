@@ -21,6 +21,7 @@ from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
     AzureMissingResourceHttpError,
+    AzureException,
 )
 from azure.storage import (
     AccessPolicy,
@@ -388,13 +389,29 @@ class StorageShareTest(StorageTestCase):
         share_name = self._create_share()
 
         # Act
-        resp = self.fs.set_share_acl(share_name, dict())
+        self.fs.set_share_acl(share_name, dict())
 
         # Assert
-        self.assertIsNone(resp)
         acl = self.fs.get_share_acl(share_name)
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 0)
+
+    @record
+    def test_set_share_acl_with_empty_signed_identifier(self):
+        # Arrange
+        share_name = self._create_share()
+
+        # Act
+        self.fs.set_share_acl(share_name, {'empty': AccessPolicy()})
+
+        # Assert
+        acl = self.fs.get_share_acl(share_name)
+        self.assertIsNotNone(acl)
+        self.assertEqual(len(acl), 1)
+        self.assertIsNotNone(acl['empty'])
+        self.assertIsNone(acl['empty'].permission)
+        self.assertIsNone(acl['empty'].expiry)
+        self.assertIsNone(acl['empty'].start)
 
     @record
     def test_set_share_acl_with_signed_identifiers(self):
@@ -417,6 +434,20 @@ class StorageShareTest(StorageTestCase):
         self.assertIsNotNone(acl)
         self.assertEqual(len(acl), 1)
         self.assertTrue('testid' in acl)
+
+    @record
+    def test_set_share_acl_too_many_ids(self):
+        # Arrange
+        share_name = self._create_share()
+
+        # Act
+        identifiers = dict()
+        for i in range(0, 6):
+            identifiers['id{}'.format(i)] = AccessPolicy()
+
+        # Assert
+        with self.assertRaisesRegexp(AzureException, 'Too many access policies provided. The server does not support setting more than 5 access policies on a single resource.'):
+            self.fs.set_share_acl(share_name, identifiers)
 
     @record
     def test_list_directories_and_files(self):

@@ -17,3 +17,4 @@ from .container_usage import ContainerSamples
 from .block_blob_usage import BlockBlobSamples
 from .append_blob_usage import AppendBlobSamples
 from .page_blob_usage import PageBlobSamples
+from .encryption_usage import BlobEncryptionSamples

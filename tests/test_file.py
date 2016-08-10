@@ -70,16 +70,8 @@ class StorageFileTest(StorageTestCase):
 
         self.short_byte_data = self.get_random_bytes(1024)
 
-        if self.settings.REMOTE_STORAGE_ACCOUNT_NAME and self.settings.REMOTE_STORAGE_ACCOUNT_KEY:
-            self.fs2 = self._create_storage_service(
-                FileService,
-                self.settings,
-                self.settings.REMOTE_STORAGE_ACCOUNT_NAME,
-                self.settings.REMOTE_STORAGE_ACCOUNT_KEY,
-            )
-            self.remote_share_name = None
-        else:
-            print("REMOTE_STORAGE_ACCOUNT_NAME and REMOTE_STORAGE_ACCOUNT_KEY not set in test settings file.")
+        self.fs2 = self._create_remote_storage_service(FileService, self.settings)
+        self.remote_share_name = None
 
     def tearDown(self):
         if not self.is_playback():
@@ -552,71 +544,6 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(copy_resp.status, 'success')
 
     @record
-    def test_with_filter(self):
-        # Single filter
-        if sys.version_info < (3,):
-            strtype = (str, unicode)
-            strornonetype = (str, unicode, type(None))
-        else:
-            strtype = str
-            strornonetype = (str, type(None))
-
-        called = []
-
-        def my_filter(request, next):
-            called.append(True)
-            self.assertIsInstance(request.headers, dict)
-            for header in request.headers.items():
-                self.assertIsInstance(header, tuple)
-                for item in header:
-                    self.assertIsInstance(item, strornonetype)
-            self.assertIsInstance(request.host, strtype)
-            self.assertIsInstance(request.method, strtype)
-            self.assertIsInstance(request.path, strtype)
-            self.assertIsInstance(request.query, dict)
-            self.assertIsInstance(request.body, strtype)
-            response = next(request)
-
-            self.assertIsInstance(response.body, (bytes, type(None)))
-            self.assertIsInstance(response.headers, dict)
-            for header in response.headers.items():
-                self.assertIsInstance(header, tuple)
-                for item in header:
-                    self.assertIsInstance(item, strtype)
-            self.assertIsInstance(response.status, int)
-            return response
-
-        bc = self.fs.with_filter(my_filter)
-        bc.create_share(self.share_name + '0', fail_on_exist=False)
-
-        self.assertTrue(called)
-
-        del called[:]
-
-        bc.delete_share(self.share_name + '0')
-
-        self.assertTrue(called)
-        del called[:]
-
-        # Chained filters
-        def filter_a(request, next):
-            called.append('a')
-            return next(request)
-
-        def filter_b(request, next):
-            called.append('b')
-            return next(request)
-
-        bc = self.fs.with_filter(filter_a).with_filter(filter_b)
-        bc.create_share(self.share_name + '1', fail_on_exist=False)
-
-        self.assertEqual(called, ['b', 'a'])
-
-        bc.delete_share(self.share_name + '1')
-
-        self.assertEqual(called, ['b', 'a', 'b', 'a'])
-
-    @record
     def test_unicode_get_file_unicode_name(self):
         # Arrange
         file_name = '啊齄丂狛狜'
@@ -959,7 +886,7 @@ class StorageFileTest(StorageTestCase):
             sas_token=token,
             request_session=requests.Session(),
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_file_to_bytes(self.share_name, None, file_name)
 
         # Assert
@@ -995,7 +922,7 @@ class StorageFileTest(StorageTestCase):
             sas_token=token,
             request_session=requests.Session(),
         )
-        self._set_service_options(service, self.settings)
+        self._set_test_proxy(service, self.settings)
         result = service.get_file_to_bytes(self.share_name, None, file_name)
 
         # Assert
