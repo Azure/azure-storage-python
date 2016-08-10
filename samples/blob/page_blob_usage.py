@@ -344,7 +344,9 @@ class PageBlobSamples():
 
         # Open mode
         # Append to the blob instead of starting from the beginning
-        blob = self.service.get_blob_to_path(container_name, blob_name, OUTPUT_FILE_PATH, open_mode='ab')
+        # Append streams are not seekable and so must be downloaded serially by setting max_connections=1.
+        blob = self.service.get_blob_to_path(container_name, blob_name, OUTPUT_FILE_PATH, open_mode='ab',
+                                             max_connections=1)
         content_length = blob.properties.content_length # will be the same, but local blob length will be longer
 
         # Download range
@@ -417,15 +419,15 @@ class PageBlobSamples():
         # Clear part of that page
         self.service.clear_page(container_name, blob_name, 1024, 1535)
 
-        self.service.delete_container(container_name)
-
         # Take a page range diff between two versions of page blob
         snapshot = self.service.snapshot_blob(container_name, blob_name)
-        self.service.update_page(container_name, blob_name, data, 0, 511)
+        self.service.update_page(container_name, blob_name, data, 0, 1023)
 
         ranges = self.service.get_page_ranges_diff(container_name, blob_name, snapshot.snapshot)
         for range in ranges:
             print('({}, {}, {}) '.format(range.start, range.end, range.is_cleared)) # (0, 511, False)
+
+        self.service.delete_container(container_name)
 
     def set_sequence_number(self):
         container_name = self._create_container()

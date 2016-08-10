@@ -36,7 +36,6 @@ from tests.testcase import (
     TestMode,
     record,
 )
-
 #------------------------------------------------------------------------------
 TEST_QUEUE_PREFIX = 'queue'
 #------------------------------------------------------------------------------
@@ -260,7 +259,7 @@ class StorageQueueTest(StorageTestCase):
         self.qs.put_message(queue_name, u'message2')
         self.qs.put_message(queue_name, u'message3')
         self.qs.put_message(queue_name, u'message4')
-
+        
     @record
     def test_get_messages(self):
         # Action
@@ -820,7 +819,6 @@ class StorageQueueTest(StorageTestCase):
         self.assertNotEqual('', message.insertion_time)
         self.assertNotEqual('', message.expiration_time)
         self.assertNotEqual('', message.time_next_visible)
-
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

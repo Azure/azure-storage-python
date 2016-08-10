@@ -27,6 +27,8 @@ from .._error import (
     _ERROR_CONFLICT,
     _ERROR_STORAGE_MISSING_INFO,
     _validate_access_policies,
+    _validate_encryption_required,
+    _validate_decryption_required,
 )
 from .._serialization import (
     _get_request_body,
@@ -105,6 +107,27 @@ class QueueService(StorageClient):
         for developing across multiple Azure Storage libraries in different languages. 
         See the :class:`~azure.storage.queue.models.QueueMessageFormat` for xml, base64 
         and no decoding methods as well as binary equivalents.
+    :ivar object key_encryption_key:
+        The key-encryption-key optionally provided by the user. If provided, will be used to
+        encrypt/decrypt in supported methods.
+        For methods requiring decryption, either the key_encryption_key OR the resolver must be provided.
+        If both are provided, the resolver will take precedence.
+        Must implement the following methods for APIs requiring encryption:
+        wrap_key(key)--wraps the specified key (bytes) using an algorithm of the user's choice. Returns the encrypted key as bytes.
+        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
+        get_kid()--returns a string key id for this key-encryption-key.
+        Must implement the following methods for APIs requiring decryption:
+        unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the string-specified algorithm.
+        get_kid()--returns a string key id for this key-encryption-key.
+    :ivar function key_resolver_function(kid):
+        A function to resolve keys optionally provided by the user. If provided, will be used to decrypt in supported methods.
+        For methods requiring decryption, either the key_encryption_key OR
+        the resolver must be provided. If both are provided, the resolver will take precedence.
+        It uses the kid string to return a key-encryption-key implementing the interface defined above.
+    :ivar bool require_encryption:
+        A flag that may be set to ensure that all messages successfully uploaded to the queue and all those downloaded and
+        successfully read from the queue are/were encrypted while on the server. If this flag is set, all required 
+        parameters for encryption/decryption must be provided. See the above comments on the key_encryption_key and resolver.
     '''
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
@@ -164,6 +187,9 @@ class QueueService(StorageClient):
 
         self.encode_function = QueueMessageFormat.text_xmlencode
         self.decode_function = QueueMessageFormat.text_xmldecode
+        self.key_encryption_key = None
+        self.key_resolver_function = None
+        self.require_encryption = False
 
     def generate_account_shared_access_signature(self, resource_types, permission, 
                                         expiry, start=None, ip=None, protocol=None):
@@ -694,6 +720,9 @@ class QueueService(StorageClient):
         queue. The message will be deleted from the queue when the time-to-live 
         period expires.
 
+        If the key-encryption-key field is set on the local service object, this method will
+        encrypt the content before uploading.
+
         :param str queue_name:
             The name of the queue to put the message into.
         :param obj content:
@@ -714,6 +743,9 @@ class QueueService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         '''
+
+        _validate_encryption_required(self.require_encryption, self.key_encryption_key)
+
         _validate_not_none('queue_name', queue_name)
         _validate_not_none('content', content)
         request = HTTPRequest()
@@ -725,7 +757,9 @@ class QueueService(StorageClient):
             'messagettl': _to_str(time_to_live),
             'timeout': _int_to_str(timeout)
         }
-        request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
+
+        request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function,
+                                                                    self.key_encryption_key))
         self._perform_request(request)
 
     def get_messages(self, queue_name, num_messages=None,
@@ -738,6 +772,9 @@ class QueueService(StorageClient):
         The message is not automatically deleted from the queue, but after it has 
         been retrieved, it is not visible to other clients for the time interval 
         specified by the visibility_timeout parameter.
+
+        If the key-encryption-key or resolver field is set on the local service object, the messages will be
+        decrypted before being returned.
 
         :param str queue_name:
             The name of the queue to get messages from.
@@ -756,6 +793,9 @@ class QueueService(StorageClient):
         :return: A list of :class:`~azure.storage.queue.models.QueueMessage` objects.
         :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
+        _validate_decryption_required(self.require_encryption, self.key_encryption_key,
+                                      self.key_resolver_function)
+
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'GET'
@@ -767,7 +807,9 @@ class QueueService(StorageClient):
             'timeout': _int_to_str(timeout)
         }
 
-        return self._perform_request(request, _convert_xml_to_queue_messages, [self.decode_function])
+        return self._perform_request(request, _convert_xml_to_queue_messages,
+                                     [self.decode_function, self.require_encryption,
+                                      self.key_encryption_key, self.key_resolver_function])
 
     def peek_messages(self, queue_name, num_messages=None, timeout=None):
         '''
@@ -781,6 +823,9 @@ class QueueService(StorageClient):
         determine how many times a message has been retrieved. Note that a call 
         to peek_messages does not increment the value of DequeueCount, but returns 
         this value for the client to read.
+
+        If the key-encryption-key or resolver field is set on the local service object, the messages will be
+        decrypted before being returned.
 
         :param str queue_name:
             The name of the queue to peek messages from.
@@ -796,6 +841,10 @@ class QueueService(StorageClient):
             not pop the message and can only retrieve already visible messages.
         :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
+
+        _validate_decryption_required(self.require_encryption, self.key_encryption_key,
+                                      self.key_resolver_function)
+
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
         request.method = 'GET'
@@ -807,7 +856,9 @@ class QueueService(StorageClient):
             'timeout': _int_to_str(timeout)
         }
 
-        return self._perform_request(request, _convert_xml_to_queue_messages, [self.decode_function])
+        return self._perform_request(request, _convert_xml_to_queue_messages,
+                                     [self.decode_function, self.require_encryption,
+                                      self.key_encryption_key, self.key_resolver_function])
 
     def delete_message(self, queue_name, message_id, pop_receipt, timeout=None):
         '''
@@ -877,6 +928,9 @@ class QueueService(StorageClient):
         the worker role were to fail during processing, eventually the message 
         would become visible again and another worker role could process it.
 
+        If the key-encryption-key field is set on the local service object, this method will
+        encrypt the content before uploading.
+
         :param str queue_name:
             The name of the queue containing the message to update.
         :param str message_id:
@@ -900,6 +954,9 @@ class QueueService(StorageClient):
             only time_next_visible and pop_receipt will be populated.
         :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
+
+        _validate_encryption_required(self.require_encryption, self.key_encryption_key)
+
         _validate_not_none('queue_name', queue_name)
         _validate_not_none('message_id', message_id)
         _validate_not_none('pop_receipt', pop_receipt)
@@ -915,6 +972,7 @@ class QueueService(StorageClient):
         }
 
         if content is not None:
-            request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function))
+            request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function,
+                                                                        self.key_encryption_key))
 
         return self._perform_request(request, _parse_queue_message_from_headers)

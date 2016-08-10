@@ -14,3 +14,4 @@
 #--------------------------------------------------------------------------
 from .sas_usage import QueueSasSamples
 from .queue_usage import QueueSamples
+from .encryption_usage import QueueEncryptionSamples

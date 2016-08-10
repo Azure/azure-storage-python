@@ -23,7 +23,6 @@ from .models import (
     _unicode_type,
 )
 
-
 if sys.version_info < (3,):
     def _str(value):
         if isinstance(value, unicode):
@@ -32,7 +31,6 @@ if sys.version_info < (3,):
         return str(value)
 else:
     _str = str
-
 
 def _to_str(value):
     return _str(value) if value is not None else None

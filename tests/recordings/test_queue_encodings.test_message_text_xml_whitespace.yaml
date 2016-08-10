@@ -4,65 +4,64 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [256b9cd2-116b-11e6-b334-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:10:56 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [e5c32d22-5f26-11e6-8135-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:18:54 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.queue.core.windows.net/mytestqueue0509615f0
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 03 May 2016 20:10:56 GMT']
+      Date: ['Wed, 10 Aug 2016 18:18:52 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [b6cff05d-0003-0053-6877-a5e305000000]
+      x-ms-request-id: [0ea99b1e-0003-003c-8033-f34bd1000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
-    body: !!binary |
-      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFF1ZXVlTWVzc2FnZT48TWVz
-      c2FnZVRleHQ+ICBtZXNzCSBhZ2UxCjwvTWVzc2FnZVRleHQ+PC9RdWV1ZU1lc3NhZ2U+
+    body: "<?xml version='1.0' encoding='utf-8'?>\n<QueueMessage><MessageText>  mess\t\
+      \ age1\n</MessageText></QueueMessage>"
     headers:
       Connection: [keep-alive]
       Content-Length: ['108']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [25b3e0b6-116b-11e6-a33e-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:10:57 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [e605f0b0-5f26-11e6-b729-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:18:55 GMT']
       x-ms-version: ['2015-07-08']
     method: POST
     uri: https://storagename.queue.core.windows.net/mytestqueue0509615f0/messages
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 03 May 2016 20:10:56 GMT']
+      Date: ['Wed, 10 Aug 2016 18:18:52 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [b6cff061-0003-0053-6a77-a5e305000000]
+      x-ms-request-id: [0ea99b24-0003-003c-0333-f34bd1000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [25bce75c-116b-11e6-96d4-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:10:57 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [e60d187e-5f26-11e6-b683-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:18:55 GMT']
       x-ms-version: ['2015-07-08']
     method: GET
     uri: https://storagename.queue.core.windows.net/mytestqueue0509615f0/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>c6aa39cb-d2f4-4570-9d25-f03f6a87eef1</MessageId><InsertionTime>Tue,\
-        \ 03 May 2016 20:10:57 GMT</InsertionTime><ExpirationTime>Tue, 10 May 2016\
-        \ 20:10:57 GMT</ExpirationTime><DequeueCount>1</DequeueCount><PopReceipt>AgAAAAMAAAAAAAAAUIxA+Xel0QE=</PopReceipt><TimeNextVisible>Tue,\
-        \ 03 May 2016 20:11:27 GMT</TimeNextVisible><MessageText>  mess\t age1\n</MessageText></QueueMessage></QueueMessagesList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>a3bafa17-2304-40a0-a1d9-9427c6ca591d</MessageId><InsertionTime>Wed,\
+        \ 10 Aug 2016 18:18:53 GMT</InsertionTime><ExpirationTime>Wed, 17 Aug 2016\
+        \ 18:18:53 GMT</ExpirationTime><DequeueCount>1</DequeueCount><PopReceipt>AgAAAAMAAAAAAAAAcwaduDPz0QE=</PopReceipt><TimeNextVisible>Wed,\
+        \ 10 Aug 2016 18:19:23 GMT</TimeNextVisible><MessageText>  mess\t age1\n</MessageText></QueueMessage></QueueMessagesList>"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/xml]
-      Date: ['Tue, 03 May 2016 20:10:56 GMT']
+      Date: ['Wed, 10 Aug 2016 18:18:52 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [b6cff067-0003-0053-7077-a5e305000000]
+      x-ms-request-id: [0ea99b29-0003-003c-0733-f34bd1000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1

@@ -1,27 +1,23 @@
 interactions:
 - request:
-    body: !!binary |
-      eyJtYXJyaWVkIjogdHJ1ZSwgImxhcmdlIjogIjkzMzMxMTEwMCIsICJCaXJ0aGRheSI6ICIxOTcz
-      LTEwLTA0VDAwOjAwOjAwWiIsICJldmVucmF0aW8iOiAzLjAsICJhZ2VAb2RhdGEudHlwZSI6ICJF
-      ZG0uSW50NjQiLCAic2V4IjogIm1hbGUiLCAiUGFydGl0aW9uS2V5IjogInBrYWJjYjE3OTEiLCAi
-      YmlydGhkYXkiOiAiMTk3MC0xMC0wNFQwMDowMDowMFoiLCAib3B0aW9uYWwiOiBudWxsLCAib3Ro
-      ZXIiOiAyMCwgIlJvd0tleSI6ICJya2FiY2IxNzkxIiwgImNsc2lkIjogImM5ZGE2NDU1LTIxM2Qt
-      NDJjOS05YTc5LTNlOTE0OWE1NzgzMyIsICJsYXJnZUBvZGF0YS50eXBlIjogIkVkbS5JbnQ2NCIs
-      ICJyYXRpbyI6IDMuMSwgIkJpcnRoZGF5QG9kYXRhLnR5cGUiOiAiRWRtLkRhdGVUaW1lIiwgImJp
-      cnRoZGF5QG9kYXRhLnR5cGUiOiAiRWRtLkRhdGVUaW1lIiwgImRlY2Vhc2VkIjogZmFsc2UsICJi
-      aW5hcnkiOiBudWxsLCAiY2xzaWRAb2RhdGEudHlwZSI6ICJFZG0uR3VpZCIsICJhZ2UiOiAiMzki
-      fQ==
+    body: '{"age@odata.type": "Edm.Int64", "optional": null, "PartitionKey": "pkabcb1791",
+      "binary": "YmluYXJ5", "Birthday@odata.type": "Edm.DateTime", "deceased": false,
+      "evenratio": 3.0, "birthday@odata.type": "Edm.DateTime", "ratio": 3.1, "large":
+      "933311100", "binary@odata.type": "Edm.Binary", "other": 20, "birthday": "1970-10-04T00:00:00Z",
+      "large@odata.type": "Edm.Int64", "Birthday": "1973-10-04T00:00:00Z", "clsid@odata.type":
+      "Edm.Guid", "RowKey": "rkabcb1791", "married": true, "sex": "male", "age": "39",
+      "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
-      Content-Length: ['514']
+      Content-Length: ['555']
       Content-Type: [application/json]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [d6460e6c-116c-11e6-9dbf-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:23:03 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [f01dae9c-5f28-11e6-946d-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:33:31 GMT']
       x-ms-version: ['2015-07-08']
     method: POST
     uri: https://storagename.table.core.windows.net/uttableabcb1791
@@ -31,21 +27,19 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/uttableabcb1791(PartitionKey=''pkabcb1791'',RowKey=''rkabcb1791'')']
-      Date: ['Tue, 03 May 2016 20:23:02 GMT']
-      ETag: [W/"datetime'2016-05-03T20%3A23%3A03.296684Z'"]
+      Date: ['Wed, 10 Aug 2016 18:33:28 GMT']
+      ETag: [W/"datetime'2016-08-10T18%3A33%3A29.5017326Z'"]
       Location: ['https://storagename.table.core.windows.net/uttableabcb1791(PartitionKey=''pkabcb1791'',RowKey=''rkabcb1791'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [f4fcdfdd-0002-0012-1e79-a5cb16000000]
+      x-ms-request-id: [24816f5c-0002-006b-0635-f3a25c000000]
       x-ms-version: ['2015-07-08']
     status: {code: 204, message: No Content}
 - request:
-    body: !!binary |
-      eyJiaXJ0aGRheUBvZGF0YS50eXBlIjogIkVkbS5EYXRlVGltZSIsICJhZ2UiOiAiYWJjIiwgIlJv
-      d0tleSI6ICJya2FiY2IxNzkxIiwgInNleCI6ICJmZW1hbGUiLCAic2lnbiI6ICJhcXVhcml1cyIs
-      ICJQYXJ0aXRpb25LZXkiOiAicGthYmNiMTc5MSIsICJiaXJ0aGRheSI6ICIxOTkxLTEwLTA0VDAw
-      OjAwOjAwWiJ9
+    body: '{"birthday": "1991-10-04T00:00:00Z", "RowKey": "rkabcb1791", "birthday@odata.type":
+      "Edm.DateTime", "PartitionKey": "pkabcb1791", "sex": "female", "age": "abc",
+      "sign": "aquarius"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -54,23 +48,23 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       If-Match: [W/"datetime'2012-06-15T22%3A51%3A44.9662825Z'"]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [d66492fe-116c-11e6-ab52-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:23:03 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [f0309d88-5f28-11e6-80c6-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:33:31 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.table.core.windows.net/uttableabcb1791(PartitionKey='pkabcb1791',RowKey='rkabcb1791')
   response:
     body: {string: '{"odata.error":{"code":"UpdateConditionNotSatisfied","message":{"lang":"en-US","value":"The
-        update condition specified in the request was not satisfied.\nRequestId:f4fcdff1-0002-0012-2d79-a5cb16000000\nTime:2016-05-03T20:23:03.4067024Z"}}}'}
+        update condition specified in the request was not satisfied.\nRequestId:24816f69-0002-006b-1135-f3a25c000000\nTime:2016-08-10T18:33:29.5397338Z"}}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Tue, 03 May 2016 20:23:02 GMT']
+      Date: ['Wed, 10 Aug 2016 18:33:29 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [f4fcdff1-0002-0012-2d79-a5cb16000000]
+      x-ms-request-id: [24816f69-0002-006b-1135-f3a25c000000]
       x-ms-version: ['2015-07-08']
     status: {code: 412, message: Precondition Failed}
 version: 1

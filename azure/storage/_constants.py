@@ -15,7 +15,7 @@
 import platform
 
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '0.32.0'
+__version__ = '0.33.0'
 
 # x-ms-version for storage service.
 X_MS_VERSION = '2015-07-08'
@@ -38,3 +38,6 @@ DEV_ACCOUNT_KEY = 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6t
 
 # Socket timeout in seconds is 11
 SOCKET_TIMEOUT = 11
+
+#Encryption constants
+_ENCRYPTION_PROTOCOL_V1 = '1.0'

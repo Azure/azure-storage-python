@@ -15,6 +15,8 @@
 from .._error import (
     _validate_not_none,
     _validate_type_bytes,
+    _validate_encryption_required,
+    _validate_encryption_unsupported,
     _ERROR_VALUE_NEGATIVE,
 )
 from .._common_conversion import (
@@ -24,7 +26,7 @@ from .._common_conversion import (
     _get_content_md5,
 )
 from .._serialization import (
-    _get_request_body_bytes_only,
+    _get_data_bytes_only,
     _add_metadata_headers,
 )
 from .._http import HTTPRequest
@@ -43,6 +45,7 @@ from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
 )
+from ._encryption import _generate_blob_encryption_data
 from ._serialization import (
     _get_path,
     _validate_and_format_range_headers,
@@ -183,29 +186,22 @@ class PageBlobService(BaseBlobService):
         :return: ETag and last modified properties for the new Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
-        _validate_not_none('container_name', container_name)
-        _validate_not_none('blob_name', blob_name)
-        _validate_not_none('content_length', content_length)
-        request = HTTPRequest()
-        request.method = 'PUT'
-        request.host_locations = self._get_host_locations()
-        request.path = _get_path(container_name, blob_name)
-        request.query = {'timeout': _int_to_str(timeout)}
-        request.headers = {
-            'x-ms-blob-type': _to_str(self.blob_type),
-            'x-ms-blob-content-length': _to_str(content_length),
-            'x-ms-lease-id': _to_str(lease_id),
-            'x-ms-blob-sequence-number': _to_str(sequence_number),
-            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
-            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
-            'If-Match': _to_str(if_match),
-            'If-None-Match': _to_str(if_none_match)
-        }
-        _add_metadata_headers(metadata, request)
-        if content_settings is not None:
-            request.headers.update(content_settings._to_headers())
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)     
 
-        return self._perform_request(request, _parse_base_properties)
+        return self._create_blob(
+                    container_name,
+                    blob_name,
+                    content_length,
+                    content_settings=content_settings,
+                    sequence_number=sequence_number,
+                    metadata=metadata,
+                    lease_id=lease_id,
+                    if_modified_since=if_modified_since,
+                    if_unmodified_since=if_unmodified_since,
+                    if_match=if_match,
+                    if_none_match=if_none_match,
+                    timeout=timeout
+                )
 
     def update_page(
         self, container_name, blob_name, page, start_range, end_range,
@@ -276,41 +272,26 @@ class PageBlobService(BaseBlobService):
         :return: ETag and last modified properties for the updated Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
-        _validate_not_none('container_name', container_name)
-        _validate_not_none('blob_name', blob_name)
-        _validate_not_none('page', page)
 
-        request = HTTPRequest()
-        request.method = 'PUT'
-        request.host_locations = self._get_host_locations()
-        request.path = _get_path(container_name, blob_name)
-        request.query = {
-            'comp': 'page',
-            'timeout': _int_to_str(timeout),
-        }
-        request.headers = {
-            'x-ms-page-write': 'update',
-            'x-ms-lease-id': _to_str(lease_id),
-            'x-ms-if-sequence-number-le': _to_str(if_sequence_number_lte),
-            'x-ms-if-sequence-number-lt': _to_str(if_sequence_number_lt),
-            'x-ms-if-sequence-number-eq': _to_str(if_sequence_number_eq),
-            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
-            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
-            'If-Match': _to_str(if_match),
-            'If-None-Match': _to_str(if_none_match)
-        }
-        _validate_and_format_range_headers(
-            request,
-            start_range,
-            end_range,
-            align_to_page=True)
-        request.body = _get_request_body_bytes_only('page', page)
-
-        if validate_content:
-            computed_md5 = _get_content_md5(request.body)
-            request.headers['Content-MD5'] = _to_str(computed_md5)
-
-        return self._perform_request(request, _parse_page_properties)
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
+        
+        return self._update_page(
+                    container_name,
+                    blob_name,
+                    page,
+                    start_range,
+                    end_range,
+                    validate_content=validate_content,
+                    lease_id=lease_id,
+                    if_sequence_number_lte=if_sequence_number_lte,
+                    if_sequence_number_lt=if_sequence_number_lt,
+                    if_sequence_number_eq=if_sequence_number_eq,
+                    if_modified_since=if_modified_since,
+                    if_unmodified_since=if_unmodified_since,
+                    if_match=if_match,
+                    if_none_match=if_none_match,
+                    timeout=timeout
+                )
 
     def clear_page(
         self, container_name, blob_name, start_range, end_range,
@@ -877,6 +858,7 @@ class PageBlobService(BaseBlobService):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
         _validate_not_none('count', count)
+        _validate_encryption_required(self.require_encryption, self.key_encryption_key)
 
         if count < 0:
             raise ValueError(_ERROR_VALUE_NEGATIVE.format('count'))
@@ -884,7 +866,11 @@ class PageBlobService(BaseBlobService):
         if count % _PAGE_ALIGNMENT != 0:
             raise ValueError(_ERROR_PAGE_BLOB_SIZE_ALIGNMENT.format(count))
 
-        response = self.create_blob(
+        cek, iv, encryption_data = None, None, None
+        if self.key_encryption_key is not None:
+            cek, iv, encryption_data = _generate_blob_encryption_data(self.key_encryption_key)
+
+        response = self._create_blob(
             container_name=container_name,
             blob_name=blob_name,
             content_length=count,
@@ -895,7 +881,8 @@ class PageBlobService(BaseBlobService):
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
-            timeout=timeout
+            timeout=timeout,
+            encryption_data=encryption_data
         )
 
         _upload_blob_chunks(
@@ -911,7 +898,9 @@ class PageBlobService(BaseBlobService):
             lease_id=lease_id,
             uploader_class=_PageBlobChunkUploader,
             if_match=response.etag,
-            timeout=timeout
+            timeout=timeout,
+            content_encryption_key=cek,
+            initialization_vector=iv
         )
 
     def create_blob_from_bytes(
@@ -1013,3 +1002,93 @@ class PageBlobService(BaseBlobService):
             if_match=if_match,
             if_none_match=if_none_match,
             timeout=timeout)
+
+    #-----Helper methods-----------------------------------------------------
+
+    def _create_blob(
+        self, container_name, blob_name, content_length, content_settings=None,
+        sequence_number=None, metadata=None, lease_id=None, if_modified_since=None,
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
+        encryption_data=None):
+        '''
+        See create_blob for more details. This helper method
+        allows for encryption or other such special behavior because
+        it is safely handled by the library. These behaviors are
+        prohibited in the public version of this function.
+        :param str _encryption_data:
+            The JSON formatted encryption metadata to upload as a part of the blob.
+            This should only be passed internally from other methods and only applied
+            when uploading entire blob contents immediately follows creation of the blob.
+        '''
+
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('content_length', content_length)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {'timeout': _int_to_str(timeout)}
+        request.headers = {
+            'x-ms-blob-type': _to_str(self.blob_type),
+            'x-ms-blob-content-length': _to_str(content_length),
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-blob-sequence-number': _to_str(sequence_number),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
+        _add_metadata_headers(metadata, request)
+        if content_settings is not None:
+            request.headers.update(content_settings._to_headers())
+
+        if encryption_data is not None:
+            request.headers['x-ms-meta-encryptiondata'] = encryption_data
+
+        return self._perform_request(request, _parse_base_properties)
+
+    def _update_page(
+        self, container_name, blob_name, page, start_range, end_range,
+        validate_content=False, lease_id=None, if_sequence_number_lte=None,
+        if_sequence_number_lt=None, if_sequence_number_eq=None,
+        if_modified_since=None, if_unmodified_since=None,
+        if_match=None, if_none_match=None, timeout=None):
+        '''
+        See update_page for more details. This helper method
+        allows for encryption or other such special behavior because
+        it is safely handled by the library. These behaviors are
+        prohibited in the public version of this function.
+        '''
+
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {
+            'comp': 'page',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-page-write': 'update',
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-if-sequence-number-le': _to_str(if_sequence_number_lte),
+            'x-ms-if-sequence-number-lt': _to_str(if_sequence_number_lt),
+            'x-ms-if-sequence-number-eq': _to_str(if_sequence_number_eq),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match)
+        }
+        _validate_and_format_range_headers(
+            request,
+            start_range,
+            end_range,
+            align_to_page=True)
+        request.body = _get_data_bytes_only('page', page)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
+
+        return self._perform_request(request, _parse_page_properties)

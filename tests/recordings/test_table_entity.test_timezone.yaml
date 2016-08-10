@@ -1,9 +1,7 @@
 interactions:
 - request:
-    body: !!binary |
-      eyJSb3dLZXkiOiAicmtjZDUxMGNkYyIsICJQYXJ0aXRpb25LZXkiOiAicGtjZDUxMGNkYyIsICJk
-      YXRlIjogIjIwMDMtMDktMjdUMTI6NTI6NDNaIiwgImRhdGVAb2RhdGEudHlwZSI6ICJFZG0uRGF0
-      ZVRpbWUifQ==
+    body: '{"RowKey": "rkcd510cdc", "date": "2003-09-27T12:52:43Z", "date@odata.type":
+      "Edm.DateTime", "PartitionKey": "pkcd510cdc"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -12,9 +10,9 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [ba0763f0-116c-11e6-93e2-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:22:15 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [a2904bc6-5f28-11e6-b514-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:31:21 GMT']
       x-ms-version: ['2015-07-08']
     method: POST
     uri: https://storagename.table.core.windows.net/uttablecd510cdc
@@ -24,13 +22,13 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/uttablecd510cdc(PartitionKey=''pkcd510cdc'',RowKey=''rkcd510cdc'')']
-      Date: ['Tue, 03 May 2016 20:22:15 GMT']
-      ETag: [W/"datetime'2016-05-03T20%3A22%3A15.4632168Z'"]
+      Date: ['Wed, 10 Aug 2016 18:31:18 GMT']
+      ETag: [W/"datetime'2016-08-10T18%3A31%3A19.1403565Z'"]
       Location: ['https://storagename.table.core.windows.net/uttablecd510cdc(PartitionKey=''pkcd510cdc'',RowKey=''rkcd510cdc'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [90841c54-0002-003b-5979-a5bd54000000]
+      x-ms-request-id: [c52e95a3-0002-0039-7e35-f3bfae000000]
       x-ms-version: ['2015-07-08']
     status: {code: 204, message: No Content}
 - request:
@@ -40,23 +38,23 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [ba1a01a6-116c-11e6-9274-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:22:15 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [a2a33b00-5f28-11e6-b250-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:31:21 GMT']
       x-ms-version: ['2015-07-08']
     method: GET
     uri: https://storagename.table.core.windows.net/uttablecd510cdc(PartitionKey='pkcd510cdc',RowKey='rkcd510cdc')
   response:
-    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttablecd510cdc/@Element","odata.etag":"W/\"datetime''2016-05-03T20%3A22%3A15.4632168Z''\"","PartitionKey":"pkcd510cdc","RowKey":"rkcd510cdc","Timestamp":"2016-05-03T20:22:15.4632168Z","date@odata.type":"Edm.DateTime","date":"2003-09-27T12:52:43Z"}'}
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttablecd510cdc/@Element","odata.etag":"W/\"datetime''2016-08-10T18%3A31%3A19.1403565Z''\"","PartitionKey":"pkcd510cdc","RowKey":"rkcd510cdc","Timestamp":"2016-08-10T18:31:19.1403565Z","date@odata.type":"Edm.DateTime","date":"2003-09-27T12:52:43Z"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Tue, 03 May 2016 20:22:15 GMT']
-      ETag: [W/"datetime'2016-05-03T20%3A22%3A15.4632168Z'"]
+      Date: ['Wed, 10 Aug 2016 18:31:18 GMT']
+      ETag: [W/"datetime'2016-08-10T18%3A31%3A19.1403565Z'"]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [90841c5f-0002-003b-5f79-a5bd54000000]
+      x-ms-request-id: [c52e95b1-0002-0039-0935-f3bfae000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1

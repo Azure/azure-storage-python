@@ -8,6 +8,9 @@
 
 ## Version 0.32.0:
 
+### All:
+- Cryptography library dependency
+
 ### Blob:
 - get_blob_to_* will do an initial get request of size 32 MB. If it then finds the blob is larger than this size, it will parallelize by default.
 - Block blob and page blob create_blob_from_* methods will parallelize by default.

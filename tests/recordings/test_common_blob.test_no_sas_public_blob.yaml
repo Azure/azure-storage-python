@@ -4,36 +4,34 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
       x-ms-blob-public-access: [blob]
-      x-ms-client-request-id: [584eb6de-116b-11e6-9960-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:12:22 GMT']
+      x-ms-client-request-id: [47ac30cc-5f27-11e6-8dab-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:21:39 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/container508f1053?restype=container
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The\
-        \ specified container already exists.\nRequestId:724d70d1-0001-001c-3578-a5271d000000\n\
-        Time:2016-05-03T20:12:22.3356079Z</Message></Error>"}
+        \ specified container already exists.\nRequestId:3b27b65f-0001-001f-0d34-f3241a000000\n\
+        Time:2016-08-10T18:21:37.2215660Z</Message></Error>"}
     headers:
       Content-Length: ['230']
       Content-Type: [application/xml]
-      Date: ['Tue, 03 May 2016 20:12:22 GMT']
+      Date: ['Wed, 10 Aug 2016 18:21:36 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [724d70d1-0001-001c-3578-a5271d000000]
+      x-ms-request-id: [3b27b65f-0001-001f-0d34-f3241a000000]
       x-ms-version: ['2015-07-08']
     status: {code: 409, message: The specified container already exists.}
 - request:
-    body: !!binary |
-      YSBwdWJsaWMgYmxvYiBjYW4gYmUgcmVhZCB3aXRob3V0IGEgc2hhcmVkIGFjY2VzcyBzaWduYXR1
-      cmU=
+    body: a public blob can be read without a shared access signature
     headers:
       Connection: [keep-alive]
       Content-Length: ['59']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [58632952-116b-11e6-9433-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:12:22 GMT']
+      x-ms-client-request-id: [47c407c6-5f27-11e6-a8c2-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:21:39 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
     uri: https://storagename.blob.core.windows.net/container508f1053/blob1.txt
@@ -41,12 +39,12 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [j6l0UPTGPwk/3tcnDpRzcQ==]
-      Date: ['Tue, 03 May 2016 20:12:22 GMT']
-      ETag: ['"0x8D3738F3CAC14A2"']
-      Last-Modified: ['Tue, 03 May 2016 20:12:22 GMT']
+      Date: ['Wed, 10 Aug 2016 18:21:36 GMT']
+      ETag: ['"0x8D3C14B2AF790F8"']
+      Last-Modified: ['Wed, 10 Aug 2016 18:21:37 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [724d70ed-0001-001c-4d78-a5271d000000]
+      x-ms-request-id: [3b27b681-0001-001f-2734-f3241a000000]
       x-ms-version: ['2015-07-08']
     status: {code: 201, message: Created}
 - request:
@@ -55,7 +53,7 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python-requests/2.9.1]
+      User-Agent: [python-requests/2.10.0]
     method: GET
     uri: https://storagename.blob.core.windows.net/container508f1053/blob1.txt
   response:
@@ -65,14 +63,14 @@ interactions:
       Content-Length: ['59']
       Content-MD5: [j6l0UPTGPwk/3tcnDpRzcQ==]
       Content-Type: [application/octet-stream]
-      Date: ['Tue, 03 May 2016 20:12:21 GMT']
-      ETag: ['"0x8D3738F3CAC14A2"']
-      Last-Modified: ['Tue, 03 May 2016 20:12:22 GMT']
+      Date: ['Wed, 10 Aug 2016 18:21:36 GMT']
+      ETag: ['"0x8D3C14B2AF790F8"']
+      Last-Modified: ['Wed, 10 Aug 2016 18:21:37 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
-      x-ms-request-id: [af401390-0001-0031-5778-a5a4dd000000]
+      x-ms-request-id: [552f81f4-0001-0082-4834-f35e5a000000]
       x-ms-version: ['2014-02-14']
       x-ms-write-protection: ['false']
     status: {code: 200, message: OK}

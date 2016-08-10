@@ -1,34 +1,27 @@
 interactions:
 - request:
-    body: !!binary |
-      PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4KPFN0b3JhZ2VTZXJ2aWNlUHJv
-      cGVydGllcz48TG9nZ2luZz48VmVyc2lvbj4xLjA8L1ZlcnNpb24+PERlbGV0ZT5GYWxzZTwvRGVs
-      ZXRlPjxSZWFkPkZhbHNlPC9SZWFkPjxXcml0ZT5GYWxzZTwvV3JpdGU+PFJldGVudGlvblBvbGlj
-      eT48RW5hYmxlZD5GYWxzZTwvRW5hYmxlZD48L1JldGVudGlvblBvbGljeT48L0xvZ2dpbmc+PEhv
-      dXJNZXRyaWNzPjxWZXJzaW9uPjEuMDwvVmVyc2lvbj48RW5hYmxlZD5GYWxzZTwvRW5hYmxlZD48
-      UmV0ZW50aW9uUG9saWN5PjxFbmFibGVkPkZhbHNlPC9FbmFibGVkPjwvUmV0ZW50aW9uUG9saWN5
-      PjwvSG91ck1ldHJpY3M+PE1pbnV0ZU1ldHJpY3M+PFZlcnNpb24+MS4wPC9WZXJzaW9uPjxFbmFi
-      bGVkPkZhbHNlPC9FbmFibGVkPjxSZXRlbnRpb25Qb2xpY3k+PEVuYWJsZWQ+RmFsc2U8L0VuYWJs
-      ZWQ+PC9SZXRlbnRpb25Qb2xpY3k+PC9NaW51dGVNZXRyaWNzPjxDb3JzIC8+PC9TdG9yYWdlU2Vy
-      dmljZVByb3BlcnRpZXM+
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><Logging><Version>1.0</Version><Delete>False</Delete><Read>False</Read><Write>False</Write><RetentionPolicy><Enabled>False</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>False</Enabled><RetentionPolicy><Enabled>False</Enabled></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>False</Enabled><RetentionPolicy><Enabled>False</Enabled></RetentionPolicy></MinuteMetrics><Cors
+      /></StorageServiceProperties>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['528']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [2d7ef4b6-116b-11e6-ab14-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:11:10 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [1fdca34a-5f27-11e6-8045-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:20:32 GMT']
       x-ms-version: ['2015-07-08']
     method: PUT
-    uri: https://storagename.table.core.windows.net/?comp=properties&restype=service
+    uri: https://storagename.table.core.windows.net/?restype=service&comp=properties
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 03 May 2016 20:11:09 GMT']
+      Date: ['Wed, 10 Aug 2016 18:20:30 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [ff5658f7-0002-006f-4177-a557de000000]
+      x-ms-request-id: [f7336446-0002-000c-6c33-f311fb000000]
       x-ms-version: ['2015-07-08']
     status: {code: 202, message: Accepted}
 - request:
@@ -37,21 +30,21 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.32.0 (Python CPython 3.4.3; Windows 8)]
-      x-ms-client-request-id: [2dfb5e14-116b-11e6-b806-8851fb5f57fc]
-      x-ms-date: ['Tue, 03 May 2016 20:11:11 GMT']
+      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      x-ms-client-request-id: [205d623e-5f27-11e6-8d76-0050b66b38e2]
+      x-ms-date: ['Wed, 10 Aug 2016 18:20:33 GMT']
       x-ms-version: ['2015-07-08']
     method: GET
-    uri: https://storagename.table.core.windows.net/?comp=properties&restype=service
+    uri: https://storagename.table.core.windows.net/?restype=service&comp=properties
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors\
         \ /></StorageServiceProperties>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Tue, 03 May 2016 20:11:09 GMT']
+      Date: ['Wed, 10 Aug 2016 18:20:30 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [ff565933-0002-006f-6c77-a557de000000]
+      x-ms-request-id: [f733648a-0002-000c-2333-f311fb000000]
       x-ms-version: ['2015-07-08']
     status: {code: 200, message: OK}
 version: 1
