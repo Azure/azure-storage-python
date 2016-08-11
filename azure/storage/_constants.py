@@ -18,7 +18,7 @@ __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
 __version__ = '0.33.0'
 
 # x-ms-version for storage service.
-X_MS_VERSION = '2015-07-08'
+X_MS_VERSION = '2015-12-11'
 
 # UserAgent string sample: 'Azure-Storage/0.32.0 (Python CPython 3.4.2; Windows 8)'
 USER_AGENT_STRING = 'Azure-Storage/{} (Python {} {}; {} {})'.format(__version__, platform.python_implementation(), platform.python_version(), platform.system(), platform.release())
