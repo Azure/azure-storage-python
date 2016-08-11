@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.sharedaccesssignature &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.sharedaccesssignature &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,14 +23,17 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -38,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.sharedaccesssignature</h1><div class="highlight"><pre>
-<span class="c1">#-------------------------------------------------------------------------</span>
+<span></span><span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -52,17 +55,17 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#--------------------------------------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">date</span>
 
-<span class="kn">from</span> <span class="nn">._common_conversion</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._common_conversion</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_sign_string</span><span class="p">,</span>
     <span class="n">_to_str</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._serialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">url_quote</span><span class="p">,</span>
     <span class="n">_to_utc_datetime</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._constants</span> <span class="kn">import</span> <span class="n">X_MS_VERSION</span>
+<span class="kn">from</span> <span class="nn">._constants</span> <span class="k">import</span> <span class="n">X_MS_VERSION</span>
 
 <div class="viewcode-block" id="SharedAccessSignature"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature">[docs]</a><span class="k">class</span> <span class="nc">SharedAccessSignature</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
@@ -82,11 +85,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">account_name</span> <span class="o">=</span> <span class="n">account_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span> <span class="o">=</span> <span class="n">account_key</span>
 
-<div class="viewcode-block" id="SharedAccessSignature.generate_table"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_table">[docs]</a>    <span class="k">def</span> <span class="nf">generate_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                        <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">start_pk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start_rk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                        <span class="n">end_pk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end_rk</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SharedAccessSignature.generate_table"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_table">[docs]</a>    <span class="k">def</span> <span class="nf">generate_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">start_pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_rk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">end_pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_rk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the table.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of TableService.</span>
@@ -158,9 +161,9 @@
 
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SharedAccessSignature.generate_queue"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_queue">[docs]</a>    <span class="k">def</span> <span class="nf">generate_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                        <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SharedAccessSignature.generate_queue"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_queue">[docs]</a>    <span class="k">def</span> <span class="nf">generate_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the queue.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of QueueService.</span>
@@ -210,11 +213,11 @@
 
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SharedAccessSignature.generate_blob"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_blob">[docs]</a>    <span class="k">def</span> <span class="nf">generate_blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                        <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SharedAccessSignature.generate_blob"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_blob">[docs]</a>    <span class="k">def</span> <span class="nf">generate_blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">cache_control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">content_encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">content_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the blob.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of any BlobService.</span>
@@ -287,11 +290,11 @@
 
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SharedAccessSignature.generate_container"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_container">[docs]</a>    <span class="k">def</span> <span class="nf">generate_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                        <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SharedAccessSignature.generate_container"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_container">[docs]</a>    <span class="k">def</span> <span class="nf">generate_container</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                        <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">cache_control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">content_encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">content_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the container.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of any BlobService.</span>
@@ -360,11 +363,11 @@
 
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SharedAccessSignature.generate_file"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_file">[docs]</a>    <span class="k">def</span> <span class="nf">generate_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_name</span><span class="p">,</span> <span class="n">directory_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                      <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                      <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                      <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                      <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SharedAccessSignature.generate_file"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_file">[docs]</a>    <span class="k">def</span> <span class="nf">generate_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_name</span><span class="p">,</span> <span class="n">directory_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                      <span class="n">permission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cache_control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">content_disposition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                      <span class="n">content_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the file.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of FileService.</span>
@@ -428,7 +431,7 @@
 <span class="sd">            using this shared access signature.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">resource_path</span> <span class="o">=</span> <span class="n">share_name</span>
-        <span class="k">if</span> <span class="n">directory_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">directory_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">resource_path</span> <span class="o">+=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">directory_name</span><span class="p">)</span>
         <span class="n">resource_path</span> <span class="o">+=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
 
@@ -443,11 +446,11 @@
 
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SharedAccessSignature.generate_share"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_share">[docs]</a>    <span class="k">def</span> <span class="nf">generate_share</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                       <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                       <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                       <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                       <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SharedAccessSignature.generate_share"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_share">[docs]</a>    <span class="k">def</span> <span class="nf">generate_share</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                       <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                       <span class="n">cache_control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                       <span class="n">content_encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                       <span class="n">content_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the share.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of FileService.</span>
@@ -516,8 +519,8 @@
 
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="SharedAccessSignature.generate_account"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_account">[docs]</a>    <span class="k">def</span> <span class="nf">generate_account</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">services</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                         <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="SharedAccessSignature.generate_account"><a class="viewcode-back" href="../../../ref/azure.storage.sharedaccesssignature.html#azure.storage.sharedaccesssignature.SharedAccessSignature.generate_account">[docs]</a>    <span class="k">def</span> <span class="nf">generate_account</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">services</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                         <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the account.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of the service </span>
@@ -708,7 +711,7 @@
                         <span class="n">_sign_string</span><span class="p">(</span><span class="n">account_key</span><span class="p">,</span> <span class="n">string_to_sign</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">get_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;&amp;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;{0}={1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">url_quote</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">])</span>
+        <span class="k">return</span> <span class="s1">&#39;&amp;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">=</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">url_quote</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
 </pre></div>
 
           </div>
@@ -727,14 +730,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -745,8 +745,8 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 

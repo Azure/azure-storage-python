@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.queue.queueservice module &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.queue.queueservice module &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,16 +23,19 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../index.html" />
     <link rel="up" title="azure.storage.queue package" href="azure.storage.queue.html" />
     <link rel="next" title="azure.storage.table package" href="azure.storage.table.html" />
     <link rel="prev" title="azure.storage.queue.models module" href="azure.storage.queue.models.html" />
    
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -69,6 +72,24 @@ bytes and other decodings can be used. For example, base64 may be preferable
 for developing across multiple Azure Storage libraries in different languages. 
 See the <a class="reference internal" href="azure.storage.queue.models.html#azure.storage.queue.models.QueueMessageFormat" title="azure.storage.queue.models.QueueMessageFormat"><code class="xref py py-class docutils literal"><span class="pre">QueueMessageFormat</span></code></a> for xml, base64 
 and no decoding methods as well as binary equivalents.</li>
+<li><strong>key_encryption_key</strong> (<em>object</em>) &#8211; The key-encryption-key optionally provided by the user. If provided, will be used to
+encrypt/decrypt in supported methods.
+For methods requiring decryption, either the key_encryption_key OR the resolver must be provided.
+If both are provided, the resolver will take precedence.
+Must implement the following methods for APIs requiring encryption:
+wrap_key(key)&#8211;wraps the specified key (bytes) using an algorithm of the user&#8217;s choice. Returns the encrypted key as bytes.
+get_key_wrap_algorithm()&#8211;returns the algorithm used to wrap the specified symmetric key.
+get_kid()&#8211;returns a string key id for this key-encryption-key.
+Must implement the following methods for APIs requiring decryption:
+unwrap_key(key, algorithm)&#8211;returns the unwrapped form of the specified symmetric key using the string-specified algorithm.
+get_kid()&#8211;returns a string key id for this key-encryption-key.</li>
+<li><strong>key_resolver_function(kid)</strong> (<em>function</em>) &#8211; A function to resolve keys optionally provided by the user. If provided, will be used to decrypt in supported methods.
+For methods requiring decryption, either the key_encryption_key OR
+the resolver must be provided. If both are provided, the resolver will take precedence.
+It uses the kid string to return a key-encryption-key implementing the interface defined above.</li>
+<li><strong>require_encryption</strong> (<em>bool</em>) &#8211; A flag that may be set to ensure that all messages successfully uploaded to the queue and all those downloaded and
+successfully read from the queue are/were encrypted while on the server. If this flag is set, all required 
+parameters for encryption/decryption must be provided. See the above comments on the key_encryption_key and resolver.</li>
 </ul>
 </td>
 </tr>
@@ -99,7 +120,7 @@ for the connection string format.</li>
 </table>
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.clear_messages">
-<code class="descname">clear_messages</code><span class="sig-paren">(</span><em>queue_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.clear_messages" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clear_messages</code><span class="sig-paren">(</span><em>queue_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.clear_messages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.clear_messages" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes all messages from the specified queue.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -117,7 +138,7 @@ for the connection string format.</li>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.create_queue">
-<code class="descname">create_queue</code><span class="sig-paren">(</span><em>queue_name</em>, <em>metadata=None</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.create_queue" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_queue</code><span class="sig-paren">(</span><em>queue_name</em>, <em>metadata=None</em>, <em>fail_on_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.create_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.create_queue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a queue under the given account.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -151,7 +172,7 @@ was set to True, this will throw instead of returning false.</p>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.delete_message">
-<code class="descname">delete_message</code><span class="sig-paren">(</span><em>queue_name</em>, <em>message_id</em>, <em>pop_receipt</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.delete_message" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_message</code><span class="sig-paren">(</span><em>queue_name</em>, <em>message_id</em>, <em>pop_receipt</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.delete_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.delete_message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes the specified message.</p>
 <p>Normally after a client retrieves a message with the get_messages operation, 
 the client is expected to process and delete the message. To delete the 
@@ -181,7 +202,7 @@ to the <a class="reference internal" href="#azure.storage.queue.queueservice.Que
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.delete_queue">
-<code class="descname">delete_queue</code><span class="sig-paren">(</span><em>queue_name</em>, <em>fail_not_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.delete_queue" title="Permalink to this definition">¶</a></dt>
+<code class="descname">delete_queue</code><span class="sig-paren">(</span><em>queue_name</em>, <em>fail_not_exist=False</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.delete_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.delete_queue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes the specified queue and any messages it contains.</p>
 <p>When a queue is successfully deleted, it is immediately marked for deletion 
 and is no longer accessible to clients. The queue is later removed from 
@@ -213,7 +234,7 @@ was set to True, this will throw instead of returning false.</p>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.exists">
-<code class="descname">exists</code><span class="sig-paren">(</span><em>queue_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.exists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">exists</code><span class="sig-paren">(</span><em>queue_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.exists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.exists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a boolean indicating whether the queue exists.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -237,7 +258,7 @@ was set to True, this will throw instead of returning false.</p>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.generate_account_shared_access_signature">
-<code class="descname">generate_account_shared_access_signature</code><span class="sig-paren">(</span><em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.generate_account_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_account_shared_access_signature</code><span class="sig-paren">(</span><em>resource_types</em>, <em>permission</em>, <em>expiry</em>, <em>start=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.generate_account_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.generate_account_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the queue service.
 Use the returned signature with the sas_token parameter of QueueService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -284,7 +305,7 @@ is https,http. See <a class="reference internal" href="azure.storage.models.html
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.generate_queue_shared_access_signature">
-<code class="descname">generate_queue_shared_access_signature</code><span class="sig-paren">(</span><em>queue_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.generate_queue_shared_access_signature" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate_queue_shared_access_signature</code><span class="sig-paren">(</span><em>queue_name</em>, <em>permission=None</em>, <em>expiry=None</em>, <em>start=None</em>, <em>id=None</em>, <em>ip=None</em>, <em>protocol=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.generate_queue_shared_access_signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.generate_queue_shared_access_signature" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a shared access signature for the queue.
 Use the returned signature with the sas_token parameter of QueueService.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -334,13 +355,15 @@ is https,http. See <a class="reference internal" href="azure.storage.models.html
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.get_messages">
-<code class="descname">get_messages</code><span class="sig-paren">(</span><em>queue_name</em>, <em>num_messages=None</em>, <em>visibility_timeout=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_messages" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_messages</code><span class="sig-paren">(</span><em>queue_name</em>, <em>num_messages=None</em>, <em>visibility_timeout=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.get_messages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_messages" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves one or more messages from the front of the queue.</p>
 <p>When a message is retrieved from the queue, the response includes the message 
 content and a pop_receipt value, which is required to delete the message. 
 The message is not automatically deleted from the queue, but after it has 
 been retrieved, it is not visible to other clients for the time interval 
 specified by the visibility_timeout parameter.</p>
+<p>If the key-encryption-key or resolver field is set on the local service object, the messages will be
+decrypted before being returned.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -371,7 +394,7 @@ a message can be set to a value later than the expiry time.</li>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.get_queue_acl">
-<code class="descname">get_queue_acl</code><span class="sig-paren">(</span><em>queue_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_queue_acl" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_queue_acl</code><span class="sig-paren">(</span><em>queue_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.get_queue_acl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_queue_acl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns details about any stored access policies specified on the
 queue that may be used with Shared Access Signatures.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -396,7 +419,7 @@ queue that may be used with Shared Access Signatures.</p>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.get_queue_metadata">
-<code class="descname">get_queue_metadata</code><span class="sig-paren">(</span><em>queue_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_queue_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_queue_metadata</code><span class="sig-paren">(</span><em>queue_name</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.get_queue_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_queue_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves user-defined metadata and queue properties on the specified
 queue. Metadata is associated with the queue as name-value pairs.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -423,7 +446,7 @@ number of messages in the queue.</p>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.get_queue_service_properties">
-<code class="descname">get_queue_service_properties</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_queue_service_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_queue_service_properties</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.get_queue_service_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_queue_service_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the properties of a storage account&#8217;s Queue service, including
 logging, analytics and CORS rules.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -442,7 +465,7 @@ logging, analytics and CORS rules.</p>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.get_queue_service_stats">
-<code class="descname">get_queue_service_stats</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_queue_service_stats" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_queue_service_stats</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.get_queue_service_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.get_queue_service_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves statistics related to replication for the Queue service. It is 
 only available when read-access geo-redundant replication is enabled for 
 the storage account.</p>
@@ -474,7 +497,7 @@ replication is enabled for your storage account.</p>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.list_queues">
-<code class="descname">list_queues</code><span class="sig-paren">(</span><em>prefix=None</em>, <em>num_results=None</em>, <em>include_metadata=False</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.list_queues" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_queues</code><span class="sig-paren">(</span><em>prefix=None</em>, <em>num_results=None</em>, <em>include_metadata=False</em>, <em>marker=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.list_queues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.list_queues" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a generator to list the queues. The generator will lazily follow 
 the continuation tokens returned by the service and stop when all queues 
 have been returned or num_results is reached.</p>
@@ -508,7 +531,7 @@ applied to each individual call.</li>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.peek_messages">
-<code class="descname">peek_messages</code><span class="sig-paren">(</span><em>queue_name</em>, <em>num_messages=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.peek_messages" title="Permalink to this definition">¶</a></dt>
+<code class="descname">peek_messages</code><span class="sig-paren">(</span><em>queue_name</em>, <em>num_messages=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.peek_messages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.peek_messages" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieves one or more messages from the front of the queue, but does
 not alter the visibility of the message.</p>
 <p>Only messages that are visible may be retrieved. When a message is retrieved 
@@ -518,6 +541,8 @@ dequeue_count property is incremented. The client may use this value to
 determine how many times a message has been retrieved. Note that a call 
 to peek_messages does not increment the value of DequeueCount, but returns 
 this value for the client to read.</p>
+<p>If the key-encryption-key or resolver field is set on the local service object, the messages will be
+decrypted before being returned.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -545,7 +570,7 @@ not pop the message and can only retrieve already visible messages.</p>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.put_message">
-<code class="descname">put_message</code><span class="sig-paren">(</span><em>queue_name</em>, <em>content</em>, <em>visibility_timeout=None</em>, <em>time_to_live=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.put_message" title="Permalink to this definition">¶</a></dt>
+<code class="descname">put_message</code><span class="sig-paren">(</span><em>queue_name</em>, <em>content</em>, <em>visibility_timeout=None</em>, <em>time_to_live=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.put_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.put_message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a new message to the back of the message queue.</p>
 <p>The visibility timeout specifies the time that the message will be 
 invisible. After the timeout expires, the message will become visible. 
@@ -553,6 +578,8 @@ If a visibility timeout is not specified, the default value of 0 is used.</p>
 <p>The message time-to-live specifies how long a message will remain in the 
 queue. The message will be deleted from the queue when the time-to-live 
 period expires.</p>
+<p>If the key-encryption-key field is set on the local service object, this method will
+encrypt the content before uploading.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -581,7 +608,7 @@ parameter is omitted, the default time-to-live is 7 days.</li>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.set_queue_acl">
-<code class="descname">set_queue_acl</code><span class="sig-paren">(</span><em>queue_name</em>, <em>signed_identifiers=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.set_queue_acl" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_queue_acl</code><span class="sig-paren">(</span><em>queue_name</em>, <em>signed_identifiers=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.set_queue_acl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.set_queue_acl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets stored access policies for the queue that may be used with Shared 
 Access Signatures.</p>
 <p>When you set permissions for a queue, the existing permissions are replaced. 
@@ -612,7 +639,7 @@ will clear the access policies set on the service.</li>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.set_queue_metadata">
-<code class="descname">set_queue_metadata</code><span class="sig-paren">(</span><em>queue_name</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.set_queue_metadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_queue_metadata</code><span class="sig-paren">(</span><em>queue_name</em>, <em>metadata=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.set_queue_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.set_queue_metadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets user-defined metadata on the specified queue. Metadata is
 associated with the queue as name-value pairs.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -633,7 +660,7 @@ queue as metadata.</li>
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.set_queue_service_properties">
-<code class="descname">set_queue_service_properties</code><span class="sig-paren">(</span><em>logging=None</em>, <em>hour_metrics=None</em>, <em>minute_metrics=None</em>, <em>cors=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.set_queue_service_properties" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_queue_service_properties</code><span class="sig-paren">(</span><em>logging=None</em>, <em>hour_metrics=None</em>, <em>minute_metrics=None</em>, <em>cors=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.set_queue_service_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.set_queue_service_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the properties of a storage account&#8217;s Queue service, including
 Azure Storage Analytics. If an element (ex Logging) is left as None, the 
 existing settings on the service for that functionality are preserved. 
@@ -664,7 +691,7 @@ about CORS rules and evaluation logic, see
 
 <dl class="method">
 <dt id="azure.storage.queue.queueservice.QueueService.update_message">
-<code class="descname">update_message</code><span class="sig-paren">(</span><em>queue_name</em>, <em>message_id</em>, <em>pop_receipt</em>, <em>visibility_timeout</em>, <em>content=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.update_message" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update_message</code><span class="sig-paren">(</span><em>queue_name</em>, <em>message_id</em>, <em>pop_receipt</em>, <em>visibility_timeout</em>, <em>content=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/queue/queueservice.html#QueueService.update_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.queue.queueservice.QueueService.update_message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates the visibility timeout of a message. You can also use this
 operation to update the contents of a message.</p>
 <p>This operation can be used to continually extend the invisibility of a 
@@ -674,6 +701,8 @@ and recognizes that it needs more time to process a message, it can
 continually extend the message’s invisibility until it is processed. If 
 the worker role were to fail during processing, eventually the message 
 would become visible again and another worker role could process it.</p>
+<p>If the key-encryption-key field is set on the local service object, this method will
+encrypt the content before uploading.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -739,14 +768,11 @@ only time_next_visible and pop_receipt will be populated.</p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -757,8 +783,8 @@ only time_next_visible and pop_receipt will be populated.</p>
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
       <a href="../_sources/ref/azure.storage.queue.queueservice.txt"

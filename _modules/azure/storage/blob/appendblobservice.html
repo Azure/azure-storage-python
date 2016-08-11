@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.appendblobservice &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.blob.appendblobservice &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,14 +23,17 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -38,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.blob.appendblobservice</h1><div class="highlight"><pre>
-<span class="c1">#-------------------------------------------------------------------------</span>
+<span></span><span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -52,45 +55,46 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#--------------------------------------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">.._error</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._error</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_validate_not_none</span><span class="p">,</span>
     <span class="n">_validate_type_bytes</span><span class="p">,</span>
+    <span class="n">_validate_encryption_unsupported</span><span class="p">,</span>
     <span class="n">_ERROR_VALUE_NEGATIVE</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_to_str</span><span class="p">,</span>
     <span class="n">_int_to_str</span><span class="p">,</span>
     <span class="n">_datetime_to_utc_string</span><span class="p">,</span>
     <span class="n">_get_content_md5</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_get_request_body_bytes_only</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">_get_data_bytes_only</span><span class="p">,</span>
     <span class="n">_add_metadata_headers</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._http</span> <span class="kn">import</span> <span class="n">HTTPRequest</span>
-<span class="kn">from</span> <span class="nn">._upload_chunking</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._http</span> <span class="k">import</span> <span class="n">HTTPRequest</span>
+<span class="kn">from</span> <span class="nn">._upload_chunking</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_AppendBlobChunkUploader</span><span class="p">,</span>
     <span class="n">_upload_blob_chunks</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">_BlobTypes</span>
-<span class="kn">from</span> <span class="nn">.._constants</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="k">import</span> <span class="n">_BlobTypes</span>
+<span class="kn">from</span> <span class="nn">.._constants</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
     <span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._serialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_get_path</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._deserialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._deserialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_parse_append_block</span><span class="p">,</span>
     <span class="n">_parse_base_properties</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.baseblobservice</span> <span class="kn">import</span> <span class="n">BaseBlobService</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">.baseblobservice</span> <span class="k">import</span> <span class="n">BaseBlobService</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,):</span>
-    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">BytesIO</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="k">as</span> <span class="n">BytesIO</span>
+    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="k">import</span> <span class="n">StringIO</span> <span class="k">as</span> <span class="n">BytesIO</span>
 
 
 <div class="viewcode-block" id="AppendBlobService"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService">[docs]</a><span class="k">class</span> <span class="nc">AppendBlobService</span><span class="p">(</span><span class="n">BaseBlobService</span><span class="p">):</span>
@@ -111,9 +115,9 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">MAX_BLOCK_SIZE</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                 <span class="n">is_emulated</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
-                 <span class="n">custom_domain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">request_session</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">connection_string</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">is_emulated</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
+                 <span class="n">custom_domain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">request_session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connection_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :param str account_name:</span>
 <span class="sd">            The storage account name. This is used to authenticate requests </span>
@@ -155,10 +159,10 @@
             <span class="n">account_name</span><span class="p">,</span> <span class="n">account_key</span><span class="p">,</span> <span class="n">sas_token</span><span class="p">,</span> <span class="n">is_emulated</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="p">,</span> 
             <span class="n">custom_domain</span><span class="p">,</span> <span class="n">request_session</span><span class="p">,</span> <span class="n">connection_string</span><span class="p">)</span>
 
-<div class="viewcode-block" id="AppendBlobService.create_blob"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService.create_blob">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                    <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="AppendBlobService.create_blob"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService.create_blob">[docs]</a>    <span class="k">def</span> <span class="nf">create_blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">content_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a blob or overrides an existing blob. Use if_match=* to</span>
 <span class="sd">        prevent overriding an existing blob. </span>
@@ -206,9 +210,11 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
+        <span class="n">_validate_encryption_unsupported</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
+
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
@@ -220,18 +226,17 @@
             <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)</span>
         <span class="p">}</span>
         <span class="n">_add_metadata_headers</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">content_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">content_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">content_settings</span><span class="o">.</span><span class="n">_to_headers</span><span class="p">())</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_parse_base_properties</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_parse_base_properties</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AppendBlobService.append_block"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService.append_block">[docs]</a>    <span class="k">def</span> <span class="nf">append_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span>
-                     <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">maxsize_condition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">appendpos_condition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">if_unmodified_since</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                     <span class="n">if_none_match</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                     <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">maxsize_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">appendpos_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_modified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">if_unmodified_since</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">if_none_match</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Commits a new block of data to the end of an existing append blob.</span>
 <span class="sd">        </span>
@@ -294,9 +299,11 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;block&#39;</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+        <span class="n">_validate_encryption_unsupported</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
+
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_path</span><span class="p">(</span><span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;appendblock&#39;</span><span class="p">,</span>
@@ -311,21 +318,19 @@
             <span class="s1">&#39;If-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_match</span><span class="p">),</span>
             <span class="s1">&#39;If-None-Match&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">if_none_match</span><span class="p">)</span>
         <span class="p">}</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body_bytes_only</span><span class="p">(</span><span class="s1">&#39;block&#39;</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_data_bytes_only</span><span class="p">(</span><span class="s1">&#39;block&#39;</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">validate_content</span><span class="p">:</span>
             <span class="n">computed_md5</span> <span class="o">=</span> <span class="n">_get_content_md5</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
             <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Content-MD5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">computed_md5</span><span class="p">)</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_parse_append_block</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_parse_append_block</span><span class="p">)</span></div>
 
     <span class="c1">#----Convenience APIs----------------------------------------------</span>
 
 <div class="viewcode-block" id="AppendBlobService.append_blob_from_path"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService.append_blob_from_path">[docs]</a>    <span class="k">def</span> <span class="nf">append_blob_from_path</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-        <span class="n">maxsize_condition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">maxsize_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Appends to the content of an existing blob from a file path, with automatic</span>
 <span class="sd">        chunking and progress notifications.</span>
@@ -354,10 +359,6 @@
 <span class="sd">            current is the number of bytes transfered so far, and total is the</span>
 <span class="sd">            size of the blob, or None if the total size is unknown.</span>
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
-<span class="sd">        :param int max_retries:</span>
-<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
-<span class="sd">        :param int retry_wait:</span>
-<span class="sd">            Sleep time in secs between retries.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param int timeout:</span>
@@ -368,6 +369,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;file_path&#39;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+        <span class="n">_validate_encryption_unsupported</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
 
         <span class="n">count</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
@@ -379,15 +381,13 @@
                 <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
                 <span class="n">maxsize_condition</span><span class="o">=</span><span class="n">maxsize_condition</span><span class="p">,</span>
                 <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
-                <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
-                <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
                 <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
                 <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AppendBlobService.append_blob_from_bytes"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService.append_blob_from_bytes">[docs]</a>    <span class="k">def</span> <span class="nf">append_blob_from_bytes</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">maxsize_condition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">blob</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">maxsize_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Appends to the content of an existing blob from an array of bytes, with</span>
 <span class="sd">        automatic chunking and progress notifications.</span>
@@ -421,10 +421,6 @@
 <span class="sd">            current is the number of bytes transfered so far, and total is the</span>
 <span class="sd">            size of the blob, or None if the total size is unknown.</span>
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
-<span class="sd">        :param int max_retries:</span>
-<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
-<span class="sd">        :param int retry_wait:</span>
-<span class="sd">            Sleep time in secs between retries.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param int timeout:</span>
@@ -437,11 +433,12 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="n">blob</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
         <span class="n">_validate_type_bytes</span><span class="p">(</span><span class="s1">&#39;blob&#39;</span><span class="p">,</span> <span class="n">blob</span><span class="p">)</span>
+        <span class="n">_validate_encryption_unsupported</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">_ERROR_VALUE_NEGATIVE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span> <span class="o">-</span> <span class="n">index</span>
 
         <span class="n">stream</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
@@ -456,14 +453,12 @@
             <span class="n">maxsize_condition</span><span class="o">=</span><span class="n">maxsize_condition</span><span class="p">,</span>
             <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
-            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
-            <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AppendBlobService.append_blob_from_text"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService.append_blob_from_text">[docs]</a>    <span class="k">def</span> <span class="nf">append_blob_from_text</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
-        <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">maxsize_condition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">maxsize_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Appends to the content of an existing blob from str/unicode, with</span>
 <span class="sd">        automatic chunking and progress notifications.</span>
@@ -494,10 +489,6 @@
 <span class="sd">            current is the number of bytes transfered so far, and total is the</span>
 <span class="sd">            size of the blob, or None if the total size is unknown.</span>
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
-<span class="sd">        :param int max_retries:</span>
-<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
-<span class="sd">        :param int retry_wait:</span>
-<span class="sd">            Sleep time in secs between retries.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param int timeout:</span>
@@ -508,6 +499,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="n">_validate_encryption_unsupported</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
@@ -523,14 +515,12 @@
             <span class="n">maxsize_condition</span><span class="o">=</span><span class="n">maxsize_condition</span><span class="p">,</span>
             <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
-            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
-            <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AppendBlobService.append_blob_from_stream"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.appendblobservice.html#azure.storage.blob.appendblobservice.AppendBlobService.append_blob_from_stream">[docs]</a>    <span class="k">def</span> <span class="nf">append_blob_from_stream</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">validate_content</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">maxsize_condition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-        <span class="n">max_retries</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">retry_wait</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lease_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">container_name</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">,</span> <span class="n">stream</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">validate_content</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">maxsize_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">lease_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Appends to the content of an existing blob from a file/stream, with</span>
 <span class="sd">        automatic chunking and progress notifications.</span>
@@ -562,10 +552,6 @@
 <span class="sd">            current is the number of bytes transfered so far, and total is the</span>
 <span class="sd">            size of the blob, or None if the total size is unknown.</span>
 <span class="sd">        :type progress_callback: callback function in format of func(current, total)</span>
-<span class="sd">        :param int max_retries:</span>
-<span class="sd">            Number of times to retry upload of blob chunk if an error occurs.</span>
-<span class="sd">        :param int retry_wait:</span>
-<span class="sd">            Sleep time in secs between retries.</span>
 <span class="sd">        :param str lease_id:</span>
 <span class="sd">            Required if the blob has an active lease.</span>
 <span class="sd">        :param int timeout:</span>
@@ -576,6 +562,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;container_name&#39;</span><span class="p">,</span> <span class="n">container_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;blob_name&#39;</span><span class="p">,</span> <span class="n">blob_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;stream&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+        <span class="n">_validate_encryption_unsupported</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
 
         <span class="n">_upload_blob_chunks</span><span class="p">(</span>
             <span class="n">blob_service</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
@@ -585,8 +572,6 @@
             <span class="n">block_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">MAX_BLOCK_SIZE</span><span class="p">,</span>
             <span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span>
             <span class="n">max_connections</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># upload not easily parallelizable</span>
-            <span class="n">max_retries</span><span class="o">=</span><span class="n">max_retries</span><span class="p">,</span>
-            <span class="n">retry_wait</span><span class="o">=</span><span class="n">retry_wait</span><span class="p">,</span>
             <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span>
             <span class="n">validate_content</span><span class="o">=</span><span class="n">validate_content</span><span class="p">,</span>
             <span class="n">lease_id</span><span class="o">=</span><span class="n">lease_id</span><span class="p">,</span>
@@ -612,14 +597,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -630,8 +612,8 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 

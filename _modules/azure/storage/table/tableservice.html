@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.table.tableservice &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.table.tableservice &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,14 +23,17 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -38,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.table.tableservice</h1><div class="highlight"><pre>
-<span class="c1">#-------------------------------------------------------------------------</span>
+<span></span><span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -52,43 +55,45 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#--------------------------------------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
-<span class="kn">from</span> <span class="nn">azure.common</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">azure.common</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">AzureHttpError</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_int_to_str</span><span class="p">,</span>
     <span class="n">_to_str</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._error</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._error</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_dont_fail_not_exist</span><span class="p">,</span>
     <span class="n">_dont_fail_on_exist</span><span class="p">,</span>
     <span class="n">_validate_not_none</span><span class="p">,</span>
     <span class="n">_ERROR_STORAGE_MISSING_INFO</span><span class="p">,</span>
+    <span class="n">_validate_access_policies</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._serialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_get_request_body</span><span class="p">,</span>
     <span class="n">_update_request</span><span class="p">,</span>
     <span class="n">_convert_signed_identifiers_to_xml</span><span class="p">,</span>
     <span class="n">_convert_service_properties_to_xml</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._http</span> <span class="kn">import</span> <span class="n">HTTPRequest</span>
-<span class="kn">from</span> <span class="nn">..models</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._http</span> <span class="k">import</span> <span class="n">HTTPRequest</span>
+<span class="kn">from</span> <span class="nn">..models</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">Services</span><span class="p">,</span>
     <span class="n">ListGenerator</span><span class="p">,</span>
+    <span class="n">_OperationContext</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">TablePayloadFormat</span>
-<span class="kn">from</span> <span class="nn">.._auth</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.models</span> <span class="k">import</span> <span class="n">TablePayloadFormat</span>
+<span class="kn">from</span> <span class="nn">.._auth</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_StorageSASAuthentication</span><span class="p">,</span>
     <span class="n">_StorageTableSharedKeyAuthentication</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._connection</span> <span class="kn">import</span> <span class="n">_ServiceParameters</span>
-<span class="kn">from</span> <span class="nn">.._deserialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._connection</span> <span class="k">import</span> <span class="n">_ServiceParameters</span>
+<span class="kn">from</span> <span class="nn">.._deserialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_convert_xml_to_service_properties</span><span class="p">,</span>
     <span class="n">_convert_xml_to_signed_identifiers</span><span class="p">,</span>
     <span class="n">_convert_xml_to_service_stats</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._serialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._serialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_convert_table_to_json</span><span class="p">,</span>
     <span class="n">_convert_batch_to_json</span><span class="p">,</span>
     <span class="n">_update_storage_table_header</span><span class="p">,</span>
@@ -97,18 +102,18 @@
     <span class="n">_DEFAULT_CONTENT_TYPE_HEADER</span><span class="p">,</span>
     <span class="n">_DEFAULT_PREFER_HEADER</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._deserialization</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._deserialization</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_convert_json_response_to_entity</span><span class="p">,</span>
     <span class="n">_convert_json_response_to_tables</span><span class="p">,</span>
     <span class="n">_convert_json_response_to_entities</span><span class="p">,</span>
     <span class="n">_parse_batch_response</span><span class="p">,</span>
     <span class="n">_extract_etag</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.._constants</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.._constants</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
     <span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._request</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">._request</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">_get_entity</span><span class="p">,</span>
     <span class="n">_insert_entity</span><span class="p">,</span>
     <span class="n">_update_entity</span><span class="p">,</span>
@@ -117,13 +122,13 @@
     <span class="n">_insert_or_replace_entity</span><span class="p">,</span>
     <span class="n">_insert_or_merge_entity</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..sharedaccesssignature</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">..sharedaccesssignature</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">SharedAccessSignature</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..storageclient</span> <span class="kn">import</span> <span class="n">StorageClient</span>
-<span class="kn">from</span> <span class="nn">.tablebatch</span> <span class="kn">import</span> <span class="n">TableBatch</span>
+<span class="kn">from</span> <span class="nn">..storageclient</span> <span class="k">import</span> <span class="n">StorageClient</span>
+<span class="kn">from</span> <span class="nn">.tablebatch</span> <span class="k">import</span> <span class="n">TableBatch</span>
 
-<div class="viewcode-block" id="TableService"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService">[docs]</a><span class="k">class</span> <span class="nc">TableService</span><span class="p">(</span><span class="n">StorageClient</span><span class="p">):</span></div>
+<div class="viewcode-block" id="TableService"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService">[docs]</a><span class="k">class</span> <span class="nc">TableService</span><span class="p">(</span><span class="n">StorageClient</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This is the main class managing Azure Table resources.</span>
@@ -135,11 +140,36 @@
 <span class="sd">    so two entities in the same table may have different sets of properties. Developers </span>
 <span class="sd">    may choose to enforce a schema on the client side. A table may contain any number </span>
 <span class="sd">    of entities.</span>
+
+<span class="sd">    :ivar object key_encryption_key:</span>
+<span class="sd">        The key-encryption-key optionally provided by the user. If provided, will be used to</span>
+<span class="sd">        encrypt/decrypt in supported methods.</span>
+<span class="sd">        For methods requiring decryption, either the key_encryption_key OR the resolver must be provided.</span>
+<span class="sd">        If both are provided, the resolver will take precedence.</span>
+<span class="sd">        Must implement the following methods for APIs requiring encryption:</span>
+<span class="sd">        wrap_key(key)--wraps the specified key (bytes) using an algorithm of the user&#39;s choice. Returns the encrypted key as bytes.</span>
+<span class="sd">        get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.</span>
+<span class="sd">        get_kid()--returns a string key id for this key-encryption-key.</span>
+<span class="sd">        Must implement the following methods for APIs requiring decryption:</span>
+<span class="sd">        unwrap_key(key, algorithm)--returns the unwrapped form of the specified symmetric key using the string-specified algorithm.</span>
+<span class="sd">        get_kid()--returns a string key id for this key-encryption-key.</span>
+<span class="sd">    :ivar function key_resolver_function(kid):</span>
+<span class="sd">        A function to resolve keys optionally provided by the user. If provided, will be used to decrypt in supported methods.</span>
+<span class="sd">        For methods requiring decryption, either the key_encryption_key OR</span>
+<span class="sd">        the resolver must be provided. If both are provided, the resolver will take precedence.</span>
+<span class="sd">        It uses the kid string to return a key-encryption-key implementing the interface defined above.</span>
+<span class="sd">    :ivar function(partition_key, row_key, property_name) encryption_resolver_functions:</span>
+<span class="sd">        A function that takes in an entity&#39;s partition key, row key, and property name and returns </span>
+<span class="sd">        a boolean that indicates whether that property should be encrypted.</span>
+<span class="sd">    :ivar bool require_encryption:</span>
+<span class="sd">        A flag that may be set to ensure that all messages successfully uploaded to the queue and all those downloaded and</span>
+<span class="sd">        successfully read from the queue are/were encrypted while on the server. If this flag is set, all required </span>
+<span class="sd">        parameters for encryption/decryption must be provided. See the above comments on the key_encryption_key and resolver.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                 <span class="n">is_emulated</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
-                 <span class="n">request_session</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">connection_string</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">account_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">account_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sas_token</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                 <span class="n">is_emulated</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">DEFAULT_PROTOCOL</span><span class="p">,</span> <span class="n">endpoint_suffix</span><span class="o">=</span><span class="n">SERVICE_HOST_BASE</span><span class="p">,</span>
+                 <span class="n">request_session</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">connection_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :param str account_name:</span>
 <span class="sd">            The storage account name. This is used to authenticate requests </span>
@@ -192,9 +222,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_ERROR_STORAGE_MISSING_INFO</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_resolver_function</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encryption_resolver_function</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">generate_account_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
-                                        <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.generate_account_shared_access_signature"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.generate_account_shared_access_signature">[docs]</a>    <span class="k">def</span> <span class="nf">generate_account_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
+                                        <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the table service.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of TableService.</span>
@@ -239,14 +273,14 @@
 
         <span class="n">sas</span> <span class="o">=</span> <span class="n">SharedAccessSignature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">account_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">account_key</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">sas</span><span class="o">.</span><span class="n">generate_account</span><span class="p">(</span><span class="n">Services</span><span class="o">.</span><span class="n">TABLE</span><span class="p">,</span> <span class="n">resource_types</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> 
-                                    <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">)</span>
+                                    <span class="n">expiry</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">generate_table_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                                        <span class="n">expiry</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                        <span class="n">ip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                                        <span class="n">start_pk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start_rk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                                        <span class="n">end_pk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end_rk</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.generate_table_shared_access_signature"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.generate_table_shared_access_signature">[docs]</a>    <span class="k">def</span> <span class="nf">generate_table_shared_access_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                        <span class="n">expiry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">ip</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                        <span class="n">start_pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_rk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                        <span class="n">end_pk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_rk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Generates a shared access signature for the table.</span>
 <span class="sd">        Use the returned signature with the sas_token parameter of TableService.</span>
@@ -325,9 +359,9 @@
             <span class="n">start_rk</span><span class="o">=</span><span class="n">start_rk</span><span class="p">,</span>
             <span class="n">end_pk</span><span class="o">=</span><span class="n">end_pk</span><span class="p">,</span>
             <span class="n">end_rk</span><span class="o">=</span><span class="n">end_rk</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get_table_service_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.get_table_service_stats"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.get_table_service_stats">[docs]</a>    <span class="k">def</span> <span class="nf">get_table_service_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Retrieves statistics related to replication for the Table service. It is </span>
 <span class="sd">        only available when read-access geo-redundant replication is enabled for </span>
@@ -353,7 +387,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">secondary_endpoint</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">primary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;restype&#39;</span><span class="p">:</span> <span class="s1">&#39;service&#39;</span><span class="p">,</span>
@@ -361,10 +395,9 @@
             <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
         <span class="p">}</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_xml_to_service_stats</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_convert_xml_to_service_stats</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get_table_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.get_table_service_properties"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.get_table_service_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_table_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Gets the properties of a storage account&#39;s Table service, including</span>
 <span class="sd">        logging, analytics and CORS rules.</span>
@@ -376,7 +409,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;restype&#39;</span><span class="p">:</span> <span class="s1">&#39;service&#39;</span><span class="p">,</span>
@@ -384,11 +417,10 @@
             <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
         <span class="p">}</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_xml_to_service_properties</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_convert_xml_to_service_properties</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">set_table_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logging</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
-                                    <span class="n">minute_metrics</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.set_table_service_properties"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.set_table_service_properties">[docs]</a>    <span class="k">def</span> <span class="nf">set_table_service_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logging</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                                    <span class="n">minute_metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets the properties of a storage account&#39;s Table service, including</span>
 <span class="sd">        Azure Storage Analytics. If an element (ex Logging) is left as None, the </span>
@@ -416,7 +448,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;restype&#39;</span><span class="p">:</span> <span class="s1">&#39;service&#39;</span><span class="p">,</span>
@@ -426,9 +458,9 @@
         <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span>
             <span class="n">_convert_service_properties_to_xml</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">hour_metrics</span><span class="p">,</span> <span class="n">minute_metrics</span><span class="p">,</span> <span class="n">cors</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">list_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.list_tables"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.list_tables">[docs]</a>    <span class="k">def</span> <span class="nf">list_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a generator to list the tables. The generator will lazily follow </span>
 <span class="sd">        the continuation tokens returned by the service and stop when all tables </span>
@@ -455,12 +487,14 @@
 <span class="sd">        :return: A generator which produces :class:`~azure.storage.models.table.Table` objects.</span>
 <span class="sd">        :rtype: :class:`~azure.storage.models.ListGenerator`:</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_results&#39;</span><span class="p">:</span> <span class="n">num_results</span><span class="p">,</span> <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="n">marker</span><span class="p">,</span> <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">}</span>
+        <span class="n">operation_context</span> <span class="o">=</span> <span class="n">_OperationContext</span><span class="p">(</span><span class="n">location_lock</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_results&#39;</span><span class="p">:</span> <span class="n">num_results</span><span class="p">,</span> <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="n">marker</span><span class="p">,</span> <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">,</span> 
+                  <span class="s1">&#39;_context&#39;</span><span class="p">:</span> <span class="n">operation_context</span><span class="p">}</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_tables</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ListGenerator</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_tables</span><span class="p">,</span> <span class="p">(),</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ListGenerator</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_tables</span><span class="p">,</span> <span class="p">(),</span> <span class="n">kwargs</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_list_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_list_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a list of tables under the specified account. Makes a single list </span>
 <span class="sd">        request to the service. Used internally by the list_tables method.</span>
@@ -484,7 +518,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/Tables&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Accept&#39;</span><span class="p">:</span> <span class="n">TablePayloadFormat</span><span class="o">.</span><span class="n">JSON_NO_METADATA</span><span class="p">}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
@@ -493,10 +527,10 @@
             <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
         <span class="p">}</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_json_response_to_tables</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_convert_json_response_to_tables</span><span class="p">,</span> 
+                                     <span class="n">operation_context</span><span class="o">=</span><span class="n">_context</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">create_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">fail_on_exist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.create_table"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.create_table">[docs]</a>    <span class="k">def</span> <span class="nf">create_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">fail_on_exist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new table in the storage account.</span>
 
@@ -516,7 +550,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;POST&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/Tables&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
@@ -529,15 +563,15 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fail_on_exist</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
             <span class="k">except</span> <span class="n">AzureHttpError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
                 <span class="n">_dont_fail_on_exist</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
 
-    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.exists"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.exists">[docs]</a>    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a boolean indicating whether the table exists.</span>
 
@@ -551,19 +585,19 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/Tables&#39;</span> <span class="o">+</span> <span class="s2">&quot;(&#39;&quot;</span> <span class="o">+</span> <span class="n">table_name</span> <span class="o">+</span> <span class="s2">&quot;&#39;)&quot;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Accept&#39;</span><span class="p">:</span> <span class="n">TablePayloadFormat</span><span class="o">.</span><span class="n">JSON_NO_METADATA</span><span class="p">}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="n">AzureHttpError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
             <span class="n">_dont_fail_not_exist</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
 
-    <span class="k">def</span> <span class="nf">delete_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">fail_not_exist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.delete_table"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.delete_table">[docs]</a>    <span class="k">def</span> <span class="nf">delete_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">fail_not_exist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Deletes the specified table and any data it contains.</span>
 
@@ -589,7 +623,7 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;DELETE&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/Tables(</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">)&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="n">_DEFAULT_ACCEPT_HEADER</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">_DEFAULT_ACCEPT_HEADER</span><span class="p">[</span><span class="mi">1</span><span class="p">]}</span>
@@ -597,15 +631,15 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fail_not_exist</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">True</span>
+                <span class="k">return</span> <span class="kc">True</span>
             <span class="k">except</span> <span class="n">AzureHttpError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
                 <span class="n">_dont_fail_not_exist</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
 
-    <span class="k">def</span> <span class="nf">get_table_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.get_table_acl"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.get_table_acl">[docs]</a>    <span class="k">def</span> <span class="nf">get_table_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns details about any stored access policies specified on the</span>
 <span class="sd">        table that may be used with Shared Access Signatures.</span>
@@ -620,17 +654,16 @@
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;acl&#39;</span><span class="p">,</span>
             <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
         <span class="p">}</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_xml_to_signed_identifiers</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_convert_xml_to_signed_identifiers</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">set_table_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">signed_identifiers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.set_table_acl"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.set_table_acl">[docs]</a>    <span class="k">def</span> <span class="nf">set_table_acl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">signed_identifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Sets stored access policies for the table that may be used with Shared </span>
 <span class="sd">        Access Signatures. </span>
@@ -657,9 +690,10 @@
 <span class="sd">            The server timeout, expressed in seconds.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
+        <span class="n">_validate_access_policies</span><span class="p">(</span><span class="n">signed_identifiers</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;comp&#39;</span><span class="p">:</span> <span class="s1">&#39;acl&#39;</span><span class="p">,</span>
@@ -668,11 +702,11 @@
         <span class="n">request</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">_get_request_body</span><span class="p">(</span>
             <span class="n">_convert_signed_identifiers_to_xml</span><span class="p">(</span><span class="n">signed_identifiers</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">query_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">num_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">marker</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">accept</span><span class="o">=</span><span class="n">TablePayloadFormat</span><span class="o">.</span><span class="n">JSON_MINIMAL_METADATA</span><span class="p">,</span>
-                       <span class="n">property_resolver</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.query_entities"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.query_entities">[docs]</a>    <span class="k">def</span> <span class="nf">query_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">accept</span><span class="o">=</span><span class="n">TablePayloadFormat</span><span class="o">.</span><span class="n">JSON_MINIMAL_METADATA</span><span class="p">,</span>
+                       <span class="n">property_resolver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a generator to list the entities in the table specified. The </span>
 <span class="sd">        generator will lazily follow the continuation tokens returned by the </span>
@@ -719,16 +753,24 @@
 <span class="sd">        :return: A generator which produces :class:`~azure.storage.table.models.Entity` objects.</span>
 <span class="sd">        :rtype: :class:`~azure.storage.models.ListGenerator`</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">operation_context</span> <span class="o">=</span> <span class="n">_OperationContext</span><span class="p">(</span><span class="n">location_lock</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_resolver_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If query already requests all properties, no need to add the metadata columns</span>
+            <span class="k">if</span> <span class="n">select</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">select</span> <span class="o">!=</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+                <span class="n">select</span> <span class="o">+=</span> <span class="s1">&#39;,_ClientEncryptionMetadata1,_ClientEncryptionMetadata2&#39;</span>
+
         <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">table_name</span><span class="p">,)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;filter&#39;</span><span class="p">:</span> <span class="nb">filter</span><span class="p">,</span> <span class="s1">&#39;select&#39;</span><span class="p">:</span> <span class="n">select</span><span class="p">,</span> <span class="s1">&#39;max_results&#39;</span><span class="p">:</span> <span class="n">num_results</span><span class="p">,</span> <span class="s1">&#39;marker&#39;</span><span class="p">:</span> <span class="n">marker</span><span class="p">,</span> 
-                  <span class="s1">&#39;accept&#39;</span><span class="p">:</span> <span class="n">accept</span><span class="p">,</span> <span class="s1">&#39;property_resolver&#39;</span><span class="p">:</span> <span class="n">property_resolver</span><span class="p">,</span> <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">}</span>
+                  <span class="s1">&#39;accept&#39;</span><span class="p">:</span> <span class="n">accept</span><span class="p">,</span> <span class="s1">&#39;property_resolver&#39;</span><span class="p">:</span> <span class="n">property_resolver</span><span class="p">,</span> <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">timeout</span><span class="p">,</span> 
+                  <span class="s1">&#39;_context&#39;</span><span class="p">:</span> <span class="n">operation_context</span><span class="p">}</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_entities</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ListGenerator</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_entities</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ListGenerator</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_entities</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_query_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_results</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                       <span class="n">marker</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">accept</span><span class="o">=</span><span class="n">TablePayloadFormat</span><span class="o">.</span><span class="n">JSON_MINIMAL_METADATA</span><span class="p">,</span>
-                       <span class="n">property_resolver</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_query_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">accept</span><span class="o">=</span><span class="n">TablePayloadFormat</span><span class="o">.</span><span class="n">JSON_MINIMAL_METADATA</span><span class="p">,</span>
+                       <span class="n">property_resolver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns a list of entities under the specified table. Makes a single list </span>
 <span class="sd">        request to the service. Used internally by the query_entities method.</span>
@@ -769,12 +811,12 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;accept&#39;</span><span class="p">,</span> <span class="n">accept</span><span class="p">)</span>
-        <span class="n">next_partition_key</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">marker</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">marker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nextpartitionkey&#39;</span><span class="p">)</span>
-        <span class="n">next_row_key</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">marker</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">marker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nextrowkey&#39;</span><span class="p">)</span>
+        <span class="n">next_partition_key</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">marker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">marker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nextpartitionkey&#39;</span><span class="p">)</span>
+        <span class="n">next_row_key</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">marker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">marker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nextrowkey&#39;</span><span class="p">)</span>
 
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;()&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Accept&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">accept</span><span class="p">)}</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
@@ -786,10 +828,12 @@
             <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span>
         <span class="p">}</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_json_response_to_entities</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">property_resolver</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_convert_json_response_to_entities</span><span class="p">,</span> 
+                                     <span class="p">[</span><span class="n">property_resolver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_resolver_function</span><span class="p">],</span> 
+                                      <span class="n">operation_context</span><span class="o">=</span><span class="n">_context</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">commit_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.commit_batch"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.commit_batch">[docs]</a>    <span class="k">def</span> <span class="nf">commit_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Commits a :class:`~azure.storage.table.TableBatch` request.</span>
 
@@ -807,13 +851,12 @@
         <span class="c1"># Construct the batch request</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">HTTPRequest</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;POST&#39;</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;$batch&#39;</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)}</span>
 
         <span class="c1"># Update the batch operation requests with table and client specific info</span>
         <span class="k">for</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">batch_request</span> <span class="ow">in</span> <span class="n">batch</span><span class="o">.</span><span class="n">_requests</span><span class="p">:</span>
-            <span class="n">batch_request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">batch_request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
                 <span class="n">batch_request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -825,12 +868,10 @@
         <span class="n">request</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="n">boundary</span><span class="p">}</span>
 
         <span class="c1"># Perform the batch request and return the response</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="n">responses</span> <span class="o">=</span> <span class="n">_parse_batch_response</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">responses</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_parse_batch_response</span><span class="p">)</span></div>
 
     <span class="nd">@contextmanager</span>
-    <span class="k">def</span> <span class="nf">batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.batch"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.batch">[docs]</a>    <span class="k">def</span> <span class="nf">batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a batch object which can be used as a context manager. Commits the batch on exit.</span>
 
@@ -839,13 +880,13 @@
 <span class="sd">        :param int timeout:</span>
 <span class="sd">            The server timeout, expressed in seconds.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">batch</span> <span class="o">=</span> <span class="n">TableBatch</span><span class="p">()</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="n">TableBatch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encryption_resolver_function</span><span class="p">)</span>
         <span class="k">yield</span> <span class="n">batch</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">commit_batch</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commit_batch</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<div class="viewcode-block" id="TableService.get_entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.get_entity">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                    <span class="n">accept</span><span class="o">=</span><span class="n">TablePayloadFormat</span><span class="o">.</span><span class="n">JSON_MINIMAL_METADATA</span><span class="p">,</span>
-                   <span class="n">property_resolver</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                   <span class="n">property_resolver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Get an entity from the specified table. Throws if the entity does not exist.</span>
 
@@ -874,14 +915,15 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">_get_entity</span><span class="p">(</span><span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">select</span><span class="p">,</span> <span class="n">accept</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">(</span><span class="n">secondary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_entity_path</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_convert_json_response_to_entity</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">property_resolver</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_convert_json_response_to_entity</span><span class="p">,</span>
+                                     <span class="p">[</span><span class="n">property_resolver</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_resolver_function</span><span class="p">])</span></div>
 
-    <span class="k">def</span> <span class="nf">insert_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.insert_entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.insert_entity">[docs]</a>    <span class="k">def</span> <span class="nf">insert_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Inserts a new entity into the table. Throws if an entity with the same </span>
 <span class="sd">        PartitionKey and RowKey already exists.</span>
@@ -907,15 +949,16 @@
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
-        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">encryption_resolver_function</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">_to_str</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_extract_etag</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_extract_etag</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">update_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.update_entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.update_entity">[docs]</a>    <span class="k">def</span> <span class="nf">update_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Updates an existing entity in a table. Throws if the entity does not exist. </span>
 <span class="sd">        The update_entity operation replaces the entire entity and can be used to </span>
@@ -941,15 +984,15 @@
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
-        <span class="n">request</span> <span class="o">=</span> <span class="n">_update_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_update_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">encryption_resolver_function</span><span class="p">)</span>        
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_entity_path</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">])</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_extract_etag</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_extract_etag</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">merge_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.merge_entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.merge_entity">[docs]</a>    <span class="k">def</span> <span class="nf">merge_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Updates an existing entity by merging the entity&#39;s properties. Throws </span>
 <span class="sd">        if the entity does not exist. </span>
@@ -979,17 +1022,19 @@
 <span class="sd">        :return: The etag of the entity.</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
-        <span class="n">request</span> <span class="o">=</span> <span class="n">_merge_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_merge_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">if_match</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_entity_path</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">])</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_extract_etag</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_extract_etag</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">delete_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span>
-                      <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.delete_entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.delete_entity">[docs]</a>    <span class="k">def</span> <span class="nf">delete_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span>
+                      <span class="n">if_match</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Deletes an existing entity in a table. Throws if the entity does not exist.</span>
 
@@ -1016,13 +1061,13 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
         <span class="n">request</span> <span class="o">=</span> <span class="n">_delete_entity</span><span class="p">(</span><span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">,</span> <span class="n">if_match</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_entity_path</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">row_key</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">insert_or_replace_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.insert_or_replace_entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.insert_or_replace_entity">[docs]</a>    <span class="k">def</span> <span class="nf">insert_or_replace_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Replaces an existing entity or inserts a new entity if it does not</span>
 <span class="sd">        exist in the table. Because this operation can insert or update an</span>
@@ -1044,15 +1089,15 @@
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
-        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_or_replace_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_or_replace_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">encryption_resolver_function</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_entity_path</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">])</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_extract_etag</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_extract_etag</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">insert_or_merge_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="TableService.insert_or_merge_entity"><a class="viewcode-back" href="../../../../ref/azure.storage.table.tableservice.html#azure.storage.table.tableservice.TableService.insert_or_merge_entity">[docs]</a>    <span class="k">def</span> <span class="nf">insert_or_merge_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Merges an existing entity or inserts a new entity if it does not exist</span>
 <span class="sd">        in the table. </span>
@@ -1072,18 +1117,19 @@
 <span class="sd">        :return: The etag of the entity.</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+
         <span class="n">_validate_not_none</span><span class="p">(</span><span class="s1">&#39;table_name&#39;</span><span class="p">,</span> <span class="n">table_name</span><span class="p">)</span>
-        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_or_merge_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
-        <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host</span><span class="p">()</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">_insert_or_merge_entity</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">require_encryption</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">key_encryption_key</span><span class="p">)</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">host_locations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_host_locations</span><span class="p">()</span>
         <span class="n">request</span><span class="o">.</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;timeout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_int_to_str</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">_get_entity_path</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="s1">&#39;RowKey&#39;</span><span class="p">])</span>
 
-        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_extract_etag</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">_extract_etag</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_perform_request_worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_perform_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parser_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">operation_context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">_update_storage_table_header</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TableService</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_perform_request_worker</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TableService</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_perform_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">parser_args</span><span class="p">,</span> <span class="n">operation_context</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -1102,14 +1148,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1120,8 +1163,8 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 

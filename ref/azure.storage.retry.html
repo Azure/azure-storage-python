@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>azure.storage.retry module &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.33.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../index.html" />
+    <link rel="next" title="azure" href="modules.html" />
+    <link rel="prev" title="azure.storage.storageclient module" href="azure.storage.storageclient.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-azure.storage.retry">
+<span id="azure-storage-retry-module"></span><h1>azure.storage.retry module<a class="headerlink" href="#module-azure.storage.retry" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="azure.storage.retry.ExponentialRetry">
+<em class="property">class </em><code class="descclassname">azure.storage.retry.</code><code class="descname">ExponentialRetry</code><span class="sig-paren">(</span><em>initial_backoff=15</em>, <em>increment_power=3</em>, <em>max_attempts=3</em>, <em>retry_to_secondary=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/retry.html#ExponentialRetry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.retry.ExponentialRetry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">azure.storage.retry._Retry</span></code></p>
+<p>Exponential retry.</p>
+<p>Constructs an Exponential retry object. The initial_backoff is used for 
+the first retry. Subsequent retries are retried after initial_backoff + 
+increment_power^retry_count seconds. For example, by default the first retry 
+occurs after 15 seconds, the second after (15+3^1) = 18 seconds, and the 
+third after (15+3^2) = 24 seconds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>initial_backoff</strong> (<em>int</em>) &#8211; The initial backoff interval, in seconds, for the first retry.</li>
+<li><strong>increment_power</strong> (<em>int</em>) &#8211; The base, in seconds, to increment the initial_backoff by after the 
+first retry.</li>
+<li><strong>max_attempts</strong> (<em>int</em>) &#8211; The maximum number of retry attempts.</li>
+<li><strong>retry_to_secondary</strong> (<em>bool</em>) &#8211; Whether the request should be retried to secondary, if able. This should 
+only be enabled of RA-GRS accounts are used and potentially stale data 
+can be handled.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="azure.storage.retry.ExponentialRetry.retry">
+<code class="descname">retry</code><span class="sig-paren">(</span><em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/retry.html#ExponentialRetry.retry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.retry.ExponentialRetry.retry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="azure.storage.retry.LinearRetry">
+<em class="property">class </em><code class="descclassname">azure.storage.retry.</code><code class="descname">LinearRetry</code><span class="sig-paren">(</span><em>backoff=15</em>, <em>max_attempts=3</em>, <em>retry_to_secondary=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/retry.html#LinearRetry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.retry.LinearRetry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">azure.storage.retry._Retry</span></code></p>
+<p>Linear retry.</p>
+<p>Constructs a Linear retry object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>backoff</strong> (<em>int</em>) &#8211; The backoff interval, in seconds, between retries.</li>
+<li><strong>max_attempts</strong> (<em>int</em>) &#8211; The maximum number of retry attempts.</li>
+<li><strong>retry_to_secondary</strong> (<em>bool</em>) &#8211; Whether the request should be retried to secondary, if able. This should 
+only be enabled of RA-GRS accounts are used and potentially stale data 
+can be handled.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="azure.storage.retry.LinearRetry.retry">
+<code class="descname">retry</code><span class="sig-paren">(</span><em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/retry.html#LinearRetry.retry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.retry.LinearRetry.retry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="azure.storage.retry.no_retry">
+<code class="descclassname">azure.storage.retry.</code><code class="descname">no_retry</code><span class="sig-paren">(</span><em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/azure/storage/retry.html#no_retry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#azure.storage.retry.no_retry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies never to retry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="azure.storage.models.html#azure.storage.models.RetryContext" title="azure.storage.models.RetryContext"><em>RetryContext</em></a>) &#8211; The retry context.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Always returns None to indicate never to retry.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="azure.storage.storageclient.html" title="previous chapter">azure.storage.storageclient module</a></li>
+      <li>Next: <a href="modules.html" title="next chapter">azure</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ref/azure.storage.retry.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Microsoft.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="../_sources/ref/azure.storage.retry.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

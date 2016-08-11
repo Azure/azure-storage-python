@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>azure.storage.blob.models &mdash; Azure Storage SDK for Python 0.32.0 documentation</title>
+    <title>azure.storage.blob.models &mdash; Azure Storage SDK for Python 0.33.0 documentation</title>
     
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.32.0',
+        VERSION:     '0.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,14 +23,17 @@
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <link rel="top" title="Azure Storage SDK for Python 0.32.0 documentation" href="../../../../index.html" />
+    <link rel="top" title="Azure Storage SDK for Python 0.33.0 documentation" href="../../../../index.html" />
     <link rel="up" title="Module code" href="../../../index.html" />
    
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head>
-  <body role="document">  
+  <body role="document">
+  
 
     <div class="document">
       <div class="documentwrapper">
@@ -38,7 +41,7 @@
           <div class="body" role="main">
             
   <h1>Source code for azure.storage.blob.models</h1><div class="highlight"><pre>
-<span class="c1">#-------------------------------------------------------------------------</span>
+<span></span><span class="c1">#-------------------------------------------------------------------------</span>
 <span class="c1"># Copyright (c) Microsoft.  All rights reserved.</span>
 <span class="c1">#</span>
 <span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -52,8 +55,8 @@
 <span class="c1"># See the License for the specific language governing permissions and</span>
 <span class="c1"># limitations under the License.</span>
 <span class="c1">#--------------------------------------------------------------------------</span>
-<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="kn">import</span> <span class="n">_to_str</span>
-<div class="viewcode-block" id="Container"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.Container">[docs]</a><span class="k">class</span> <span class="nc">Container</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<span class="kn">from</span> <span class="nn">.._common_conversion</span> <span class="k">import</span> <span class="n">_to_str</span>
+<div class="viewcode-block" id="Container"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.Container">[docs]</a><span class="k">class</span> <span class="nc">Container</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Blob container class. </span>
@@ -70,13 +73,13 @@
 <span class="sd">        System properties for the container.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">props</span> <span class="ow">or</span> <span class="n">ContainerProperties</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span></div>
 
 
-<div class="viewcode-block" id="ContainerProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.ContainerProperties">[docs]</a><span class="k">class</span> <span class="nc">ContainerProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="ContainerProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.ContainerProperties">[docs]</a><span class="k">class</span> <span class="nc">ContainerProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Blob container&#39;s properties class.</span>
@@ -91,12 +94,12 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lease</span> <span class="o">=</span> <span class="n">LeaseProperties</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lease</span> <span class="o">=</span> <span class="n">LeaseProperties</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Blob"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.Blob">[docs]</a><span class="k">class</span> <span class="nc">Blob</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="Blob"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.Blob">[docs]</a><span class="k">class</span> <span class="nc">Blob</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Blob class.</span>
@@ -115,15 +118,15 @@
 <span class="sd">    :ivar metadata:</span>
 <span class="sd">        Name-value pairs associated with the blob as metadata.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span> <span class="o">=</span> <span class="n">snapshot</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">properties</span> <span class="o">=</span> <span class="n">props</span> <span class="ow">or</span> <span class="n">BlobProperties</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span></div>
 
 
-<div class="viewcode-block" id="BlobProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobProperties">[docs]</a><span class="k">class</span> <span class="nc">BlobProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="BlobProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobProperties">[docs]</a><span class="k">class</span> <span class="nc">BlobProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Blob Properties</span>
@@ -156,19 +159,19 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">blob_type</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">content_length</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">content_range</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">append_blob_committed_block_count</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">page_blob_sequence_number</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blob_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_length</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_range</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">append_blob_committed_block_count</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_blob_sequence_number</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">copy</span> <span class="o">=</span> <span class="n">CopyProperties</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">content_settings</span> <span class="o">=</span> <span class="n">ContentSettings</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lease</span> <span class="o">=</span> <span class="n">LeaseProperties</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lease</span> <span class="o">=</span> <span class="n">LeaseProperties</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="ContentSettings"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.ContentSettings">[docs]</a><span class="k">class</span> <span class="nc">ContentSettings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="ContentSettings"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.ContentSettings">[docs]</a><span class="k">class</span> <span class="nc">ContentSettings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Used to store the content settings of a blob.</span>
@@ -197,9 +200,9 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">content_language</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-        <span class="n">cache_control</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">content_md5</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">content_language</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_disposition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache_control</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">content_md5</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="n">content_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">content_encoding</span> <span class="o">=</span> <span class="n">content_encoding</span>
@@ -216,7 +219,7 @@
             <span class="s1">&#39;x-ms-blob-content-md5&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_md5</span><span class="p">),</span>
             <span class="s1">&#39;x-ms-blob-content-encoding&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_encoding</span><span class="p">),</span>
             <span class="s1">&#39;x-ms-blob-content-language&#39;</span><span class="p">:</span> <span class="n">_to_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content_language</span><span class="p">),</span>
-        <span class="p">}</span>
+        <span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="CopyProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.CopyProperties">[docs]</a><span class="k">class</span> <span class="nc">CopyProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -260,15 +263,15 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">completion_time</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">status_description</span> <span class="o">=</span> <span class="bp">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progress</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">completion_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status_description</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="LeaseProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.LeaseProperties">[docs]</a><span class="k">class</span> <span class="nc">LeaseProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="LeaseProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.LeaseProperties">[docs]</a><span class="k">class</span> <span class="nc">LeaseProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Blob Lease Properties.</span>
@@ -283,9 +286,9 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="BlobPrefix"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobPrefix">[docs]</a><span class="k">class</span> <span class="nc">BlobPrefix</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -298,7 +301,7 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="BlobBlockState"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobBlockState">[docs]</a><span class="k">class</span> <span class="nc">BlobBlockState</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -314,7 +317,7 @@
     <span class="sd">&#39;&#39;&#39;Uncommitted blocks.&#39;&#39;&#39;</span></div>
 
 
-<div class="viewcode-block" id="BlobBlock"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobBlock">[docs]</a><span class="k">class</span> <span class="nc">BlobBlock</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="BlobBlock"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobBlock">[docs]</a><span class="k">class</span> <span class="nc">BlobBlock</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    BlockBlob Block class.</span>
@@ -328,15 +331,15 @@
 <span class="sd">        Block size in bytes.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">BlobBlockState</span><span class="o">.</span><span class="n">Latest</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">BlobBlockState</span><span class="o">.</span><span class="n">Latest</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
 
     <span class="k">def</span> <span class="nf">_set_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span></div>
 
 
-<div class="viewcode-block" id="BlobBlockList"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobBlockList">[docs]</a><span class="k">class</span> <span class="nc">BlobBlockList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="BlobBlockList"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobBlockList">[docs]</a><span class="k">class</span> <span class="nc">BlobBlockList</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Blob Block List class.</span>
@@ -351,9 +354,9 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">committed_blocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">uncommitted_blocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uncommitted_blocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="PageRange"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.PageRange">[docs]</a><span class="k">class</span> <span class="nc">PageRange</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="PageRange"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.PageRange">[docs]</a><span class="k">class</span> <span class="nc">PageRange</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Page Range for page blob.</span>
@@ -367,12 +370,12 @@
 <span class="sd">        for get_page_range_diff API.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">is_cleared</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_cleared</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="n">end</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_cleared</span> <span class="o">=</span> <span class="n">is_cleared</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_cleared</span> <span class="o">=</span> <span class="n">is_cleared</span></div>
 
-<div class="viewcode-block" id="ResourceProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.ResourceProperties">[docs]</a><span class="k">class</span> <span class="nc">ResourceProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="ResourceProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.ResourceProperties">[docs]</a><span class="k">class</span> <span class="nc">ResourceProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Base response for a resource request.</span>
@@ -385,10 +388,10 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etag</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="AppendBlockProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.AppendBlockProperties">[docs]</a><span class="k">class</span> <span class="nc">AppendBlockProperties</span><span class="p">(</span><span class="n">ResourceProperties</span><span class="p">):</span></div>
+<div class="viewcode-block" id="AppendBlockProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.AppendBlockProperties">[docs]</a><span class="k">class</span> <span class="nc">AppendBlockProperties</span><span class="p">(</span><span class="n">ResourceProperties</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Response for an append block request.</span>
@@ -401,11 +404,11 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ResourceProperties</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">append_offset</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">committed_block_count</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">append_offset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">committed_block_count</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="PageBlobProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.PageBlobProperties">[docs]</a><span class="k">class</span> <span class="nc">PageBlobProperties</span><span class="p">(</span><span class="n">ResourceProperties</span><span class="p">):</span></div>
+<div class="viewcode-block" id="PageBlobProperties"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.PageBlobProperties">[docs]</a><span class="k">class</span> <span class="nc">PageBlobProperties</span><span class="p">(</span><span class="n">ResourceProperties</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Response for a page request.</span>
@@ -416,7 +419,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ResourceProperties</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <div class="viewcode-block" id="PublicAccess"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.PublicAccess">[docs]</a><span class="k">class</span> <span class="nc">PublicAccess</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -518,7 +521,7 @@
     <span class="n">PageBlob</span> <span class="o">=</span> <span class="s1">&#39;PageBlob&#39;</span>
     <span class="sd">&#39;&#39;&#39;Page blob type.&#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="Include"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.Include">[docs]</a><span class="k">class</span> <span class="nc">Include</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="Include"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.Include">[docs]</a><span class="k">class</span> <span class="nc">Include</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Specifies the datasets to include in the blob list response.</span>
@@ -535,8 +538,8 @@
 <span class="sd">        been committed using Put Block List, be included in the response.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshots</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">uncommitted_blobs</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
-                 <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">uncommitted_blobs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                 <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :param bool snapshots:</span>
 <span class="sd">             Specifies that snapshots should be included in the enumeration.</span>
@@ -570,15 +573,15 @@
                    <span class="p">(</span><span class="s1">&#39;metadata,&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                    <span class="p">(</span><span class="s1">&#39;uncommittedblobs,&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uncommitted_blobs</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                    <span class="p">(</span><span class="s1">&#39;copy,&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">include</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">include</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span></div>
 
-<span class="n">Include</span><span class="o">.</span><span class="n">COPY</span> <span class="o">=</span> <span class="n">Include</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">Include</span><span class="o">.</span><span class="n">METADATA</span> <span class="o">=</span> <span class="n">Include</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">Include</span><span class="o">.</span><span class="n">SNAPSHOTS</span> <span class="o">=</span> <span class="n">Include</span><span class="p">(</span><span class="n">snapshots</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">Include</span><span class="o">.</span><span class="n">UNCOMMITTED_BLOBS</span> <span class="o">=</span> <span class="n">Include</span><span class="p">(</span><span class="n">uncommitted_blobs</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">Include</span><span class="o">.</span><span class="n">COPY</span> <span class="o">=</span> <span class="n">Include</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Include</span><span class="o">.</span><span class="n">METADATA</span> <span class="o">=</span> <span class="n">Include</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Include</span><span class="o">.</span><span class="n">SNAPSHOTS</span> <span class="o">=</span> <span class="n">Include</span><span class="p">(</span><span class="n">snapshots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Include</span><span class="o">.</span><span class="n">UNCOMMITTED_BLOBS</span> <span class="o">=</span> <span class="n">Include</span><span class="p">(</span><span class="n">uncommitted_blobs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="BlobPermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobPermissions">[docs]</a><span class="k">class</span> <span class="nc">BlobPermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="BlobPermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.BlobPermissions">[docs]</a><span class="k">class</span> <span class="nc">BlobPermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    BlobPermissions class to be used with </span>
@@ -598,8 +601,8 @@
 <span class="sd">        copy operation within the same account.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
-                 <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                 <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;    </span>
 <span class="sd">        :param bool read:</span>
 <span class="sd">            Read the content, properties, metadata and block list. Use the blob as </span>
@@ -636,16 +639,16 @@
                 <span class="p">(</span><span class="s1">&#39;a&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;c&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
-                <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
 
-<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">ADD</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">CREATE</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">create</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">READ</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">WRITE</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">ADD</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">CREATE</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">READ</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">BlobPermissions</span><span class="o">.</span><span class="n">WRITE</span> <span class="o">=</span> <span class="n">BlobPermissions</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ContainerPermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.ContainerPermissions">[docs]</a><span class="k">class</span> <span class="nc">ContainerPermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></div>
+<div class="viewcode-block" id="ContainerPermissions"><a class="viewcode-back" href="../../../../ref/azure.storage.blob.models.html#azure.storage.blob.models.ContainerPermissions">[docs]</a><span class="k">class</span> <span class="nc">ContainerPermissions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    ContainerPermissions class to be used with :func:`~azure.storage.blob.baseblobservice.BaseBlobService.generate_container_shared_access_signature`</span>
@@ -668,8 +671,8 @@
 <span class="sd">        a container SAS. Use an account SAS instead.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">list</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
-                 <span class="n">_str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">list</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                 <span class="n">_str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :param bool read:</span>
 <span class="sd">            Read the content, properties, metadata or block list of any blob in the </span>
@@ -706,12 +709,12 @@
         <span class="k">return</span> <span class="p">((</span><span class="s1">&#39;r&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;w&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
                 <span class="p">(</span><span class="s1">&#39;d&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> 
-                <span class="p">(</span><span class="s1">&#39;l&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                <span class="p">(</span><span class="s1">&#39;l&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">))</span></div>
 
-<span class="n">ContainerPermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">ContainerPermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">ContainerPermissions</span><span class="o">.</span><span class="n">LIST</span> <span class="o">=</span> <span class="n">ContainerPermissions</span><span class="p">(</span><span class="nb">list</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">ContainerPermissions</span><span class="o">.</span><span class="n">READ</span> <span class="o">=</span> <span class="n">ContainerPermissions</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">ContainerPermissions</span><span class="o">.</span><span class="n">WRITE</span> <span class="o">=</span> <span class="n">ContainerPermissions</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">ContainerPermissions</span><span class="o">.</span><span class="n">DELETE</span> <span class="o">=</span> <span class="n">ContainerPermissions</span><span class="p">(</span><span class="n">delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ContainerPermissions</span><span class="o">.</span><span class="n">LIST</span> <span class="o">=</span> <span class="n">ContainerPermissions</span><span class="p">(</span><span class="nb">list</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ContainerPermissions</span><span class="o">.</span><span class="n">READ</span> <span class="o">=</span> <span class="n">ContainerPermissions</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ContainerPermissions</span><span class="o">.</span><span class="n">WRITE</span> <span class="o">=</span> <span class="n">ContainerPermissions</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -730,14 +733,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -748,8 +748,8 @@
       &copy;2015, Microsoft.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.4</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
     </div>
 
