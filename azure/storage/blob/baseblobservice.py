@@ -416,8 +416,7 @@ class BaseBlobService(StorageClient):
         :type start: date or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
-            stored access policy. To create a stored access policy, use 
-            set_blob_service_properties.
+            stored access policy. To create a stored access policy, use :func:`~set_container_acl`.
         :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
