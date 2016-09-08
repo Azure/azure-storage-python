@@ -6,6 +6,7 @@
 
 ### Blob:
 - Added support for server-side encryption headers.
+- Properly return connections to pool when checking for non-existent blobs.
 
 ## Version 0.33.0:
 

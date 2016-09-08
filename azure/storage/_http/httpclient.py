@@ -119,4 +119,7 @@ class _HTTPClient(object):
         for key, name in response.headers.items():
             respheaders[key.lower()] = name
 
-        return HTTPResponse(status, response.reason, respheaders, response.content)
+        wrap = HTTPResponse(status, response.reason, respheaders, response.content)
+        response.close()
+
+        return wrap
