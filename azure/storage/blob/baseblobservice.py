@@ -244,11 +244,13 @@ class BaseBlobService(StorageClient):
             blob_name,
         )
 
-        if snapshot:
-            url += '?snapshot=' + snapshot
-
-        if sas_token:
-            url += '?' + sas_token
+        if snapshot and sas_token:
+            url += '?snapshot=' + snapshot + '&' + sas_token
+        else:
+            if snapshot:
+                url += '?snapshot=' + snapshot
+            elif sas_token:
+                url += '?' + sas_token
 
         return url
 

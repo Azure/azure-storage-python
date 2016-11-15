@@ -193,6 +193,19 @@ class StorageCommonBlobTest(StorageTestCase):
                            'snapshot=2016-11-09T14:11:07.6175300Z')
 
     @record
+    def test_make_blob_url_with_snapshot_and_sas(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_blob_url('vhds', 'my.vhd', sas_token='sas',
+                                    snapshot='2016-11-09T14:11:07.6175300Z')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds/my.vhd?'
+                           'snapshot=2016-11-09T14:11:07.6175300Z&sas')
+
+    @record
     def test_create_blob_with_question_mark(self):
         # Arrange
         blob_name = '?ques?tion?'
