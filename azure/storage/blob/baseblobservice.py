@@ -215,7 +215,8 @@ class BaseBlobService(StorageClient):
         self.key_encryption_key = None
         self.key_resolver_function = None
 
-    def make_blob_url(self, container_name, blob_name, protocol=None, sas_token=None):
+    def make_blob_url(self, container_name, blob_name,
+                      snapshot=None, protocol=None, sas_token=None):
         '''
         Creates the url to access a blob.
 
@@ -223,6 +224,9 @@ class BaseBlobService(StorageClient):
             Name of container.
         :param str blob_name:
             Name of blob.
+        :param str snapshot:
+            The snapshot parameter is an opaque DateTime value that,
+            when present, return URL of snapshot.
         :param str protocol:
             Protocol to use: 'http' or 'https'. If not specified, uses the
             protocol specified when BaseBlobService was initialized.
@@ -240,8 +244,12 @@ class BaseBlobService(StorageClient):
             blob_name,
         )
 
-        if sas_token:
-            url += '?' + sas_token
+        if snapshot and sas_token:
+            url = '{}?snapshot={}&{}'.format(url, snapshot, sas_token)
+        elif snapshot:
+            url = '{}?snapshot={}'.format(url, snapshot)
+        elif sas_token:
+            url = '{}?{}'.format(url, sas_token)
 
         return url
 
