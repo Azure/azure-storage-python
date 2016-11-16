@@ -245,12 +245,11 @@ class BaseBlobService(StorageClient):
         )
 
         if snapshot and sas_token:
-            url += '?snapshot=' + snapshot + '&' + sas_token
-        else:
-            if snapshot:
-                url += '?snapshot=' + snapshot
-            elif sas_token:
-                url += '?' + sas_token
+            url = '{}?snapshot={}&{}'.format(url, snapshot, sas_token)
+        elif snapshot:
+            url = '{}?snapshot={}'.format(url, snapshot)
+        elif sas_token:
+            url = '{}?{}'.format(url, sas_token)
 
         return url
 
