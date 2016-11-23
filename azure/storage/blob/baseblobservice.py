@@ -225,8 +225,8 @@ class BaseBlobService(StorageClient):
         :param str blob_name:
             Name of blob.
         :param str snapshot:
-            The snapshot parameter is an opaque DateTime value that
-            when present, return the URL of the snapshot.
+            An opaque DateTime value that when present, returns the URL of
+            the snapshot.
         :param str protocol:
             Protocol to use: 'http' or 'https'. If not specified, uses the
             protocol specified when BaseBlobService was initialized.
