@@ -18,13 +18,13 @@ from datetime import date
 from dateutil.tz import tzutc
 from time import time
 from wsgiref.handlers import format_date_time
+from os import fstat
+from io import (BytesIO, IOBase, SEEK_SET, SEEK_END, UnsupportedOperation)
 
 if sys.version_info >= (3,):
-    from io import BytesIO
     from urllib.parse import quote as url_quote
 else:
-    from cStringIO import StringIO as BytesIO
-    from urllib2 import quote as url_quote   
+    from urllib2 import quote as url_quote
 
 try:
     from xml.etree import cElementTree as ETree
@@ -33,6 +33,8 @@ except ImportError:
 
 from ._error import (
     _ERROR_VALUE_SHOULD_BE_BYTES,
+    _ERROR_VALUE_SHOULD_BE_BYTES_OR_STREAM,
+    _ERROR_VALUE_SHOULD_BE_SEEKABLE_STREAM
 )
 from ._constants import (
     X_MS_VERSION,
@@ -56,11 +58,16 @@ def _to_utc_datetime(value):
 def _update_request(request):
     # Verify body
     if request.body:
-        assert isinstance(request.body, bytes)
+        request.body = _get_data_bytes_or_stream_only('request.body', request.body)
+        length = _len_plus(request.body)
 
-    # if it is PUT, POST, MERGE, DELETE, need to add content-length to header.
-    if request.method in ['PUT', 'POST', 'MERGE', 'DELETE']:
-        request.headers['Content-Length'] = str(len(request.body))
+        # only scenario where this case is plausible is if the stream object is not seekable.
+        if length is None:
+            raise ValueError(_ERROR_VALUE_SHOULD_BE_SEEKABLE_STREAM)
+
+        # if it is PUT, POST, MERGE, DELETE, need to add content-length to header.
+        if request.method in ['PUT', 'POST', 'MERGE', 'DELETE']:
+            request.headers['Content-Length'] = str(length)
 
     # append addtional headers based on the service
     request.headers['x-ms-version'] = X_MS_VERSION
@@ -99,6 +106,18 @@ def _get_data_bytes_only(param_name, param_value):
     raise TypeError(_ERROR_VALUE_SHOULD_BE_BYTES.format(param_name))
 
 
+def _get_data_bytes_or_stream_only(param_name, param_value):
+    '''Validates the request body passed in is a stream/file-like or bytes
+    object.'''
+    if param_value is None:
+        return b''
+
+    if isinstance(param_value, bytes) or hasattr(param_value, 'read'):
+        return param_value
+
+    raise TypeError(_ERROR_VALUE_SHOULD_BE_BYTES_OR_STREAM.format(param_name))
+
+
 def _get_request_body(request_body):
     '''Converts an object into a request body.  If it's None
     we'll return an empty string, if it's one of our objects it'll
@@ -107,7 +126,7 @@ def _get_request_body(request_body):
     if request_body is None:
         return b''
 
-    if isinstance(request_body, bytes):
+    if isinstance(request_body, bytes) or isinstance(request_body, IOBase):
         return request_body
 
     if isinstance(request_body, _unicode_type):
@@ -145,7 +164,7 @@ def _convert_signed_identifiers_to_xml(signed_identifiers):
             if isinstance(access_policy.expiry, date):
                 expiry = _to_utc_datetime(expiry)
             ETree.SubElement(policy, 'Expiry').text = expiry
-        
+
         if access_policy.permission:
             ETree.SubElement(policy, 'Permission').text = _str(access_policy.permission)
 
@@ -243,7 +262,6 @@ def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, co
     if target_version:
         ETree.SubElement(service_properties_element, 'DefaultServiceVersion').text = target_version
 
-
     # Add xml declaration and serialize
     try:
         stream = BytesIO()
@@ -291,3 +309,32 @@ def _convert_retention_policy_to_xml(retention_policy, root):
     # Days
     if retention_policy.enabled and retention_policy.days:
         ETree.SubElement(root, 'Days').text = str(retention_policy.days)
+
+def _len_plus(data):
+    length = None
+    # Check if object implements the __len__ method, covers most input cases such as bytearray.
+    try:
+        length = len(data)
+    except:
+        pass
+
+    if not length:
+        # Check if the stream is a file-like stream object.
+        # If so, calculate the size using the file descriptor.
+        try:
+            fileno = data.fileno()
+        except (AttributeError, UnsupportedOperation):
+            pass
+        else:
+            return fstat(fileno).st_size
+
+        # If the stream is seekable and tell() is implemented, calculate the stream size.
+        try:
+            currentPosition = data.tell()
+            data.seek(0, SEEK_END)
+            length = data.tell() - currentPosition
+            data.seek(currentPosition, SEEK_SET)
+        except (AttributeError, UnsupportedOperation):
+            pass
+
+    return length

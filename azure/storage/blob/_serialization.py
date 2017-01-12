@@ -31,11 +31,7 @@ from ._error import (
     _ERROR_PAGE_BLOB_END_ALIGNMENT,
     _ERROR_INVALID_BLOCK_ID,
 )
-import sys
-if sys.version_info >= (3,):
-    from io import BytesIO
-else:
-    from cStringIO import StringIO as BytesIO
+from io import BytesIO
 
 def _get_path(container_name=None, blob_name=None):
     '''
@@ -55,7 +51,9 @@ def _get_path(container_name=None, blob_name=None):
     else:
         return '/'
 
-def _validate_and_format_range_headers(request, start_range, end_range, start_range_required=True, end_range_required=True, check_content_md5=False, align_to_page=False):
+
+def _validate_and_format_range_headers(request, start_range, end_range, start_range_required=True,
+                                       end_range_required=True, check_content_md5=False, align_to_page=False):
     # If end range is provided, start range must be provided
     if start_range_required == True or end_range is not None:
         _validate_not_none('start_range', start_range)
