@@ -2,13 +2,14 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version 0.34.0
+## Version 0.34.0:
 
 ### Blob:
 - Added support for server-side encryption headers.
 - Properly return connections to pool when checking for non-existent blobs.
 - BlockBlobs: Added streaming upload support for the put_block method and a new memory optimized upload algorithm for create_blob_from_stream and create_blob_from_file APIs.
 - The new upload strategy will no longer fully buffer seekable streams unless Encryption is enabled. See 'use_byte_buffer' parameter documentation on the 'create_blob_from_stream' method for more details.
+- Fixed a deserialization bug with get_block_list() where calling it with anything but the 'all' block_list_type would cause an error.
 
 ## Version 0.33.0:
 

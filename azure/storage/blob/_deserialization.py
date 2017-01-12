@@ -344,20 +344,22 @@ def _convert_xml_to_block_list(response):
     list_element = ETree.fromstring(response.body)
 
     committed_blocks_element = list_element.find('CommittedBlocks')
-    for block_element in committed_blocks_element.findall('Block'):
-        block_id = _decode_base64_to_text(block_element.findtext('Name', ''))
-        block_size = int(block_element.findtext('Size'))
-        block = BlobBlock(id=block_id, state=BlobBlockState.Committed)
-        block._set_size(block_size)
-        block_list.committed_blocks.append(block)
+    if committed_blocks_element is not None:
+        for block_element in committed_blocks_element.findall('Block'):
+            block_id = _decode_base64_to_text(block_element.findtext('Name', ''))
+            block_size = int(block_element.findtext('Size'))
+            block = BlobBlock(id=block_id, state=BlobBlockState.Committed)
+            block._set_size(block_size)
+            block_list.committed_blocks.append(block)
 
     uncommitted_blocks_element = list_element.find('UncommittedBlocks')
-    for block_element in uncommitted_blocks_element.findall('Block'):
-        block_id = _decode_base64_to_text(block_element.findtext('Name', ''))
-        block_size = int(block_element.findtext('Size'))
-        block = BlobBlock(id=block_id, state=BlobBlockState.Uncommitted)
-        block._set_size(block_size)
-        block_list.uncommitted_blocks.append(block)
+    if uncommitted_blocks_element is not None:
+        for block_element in uncommitted_blocks_element.findall('Block'):
+            block_id = _decode_base64_to_text(block_element.findtext('Name', ''))
+            block_size = int(block_element.findtext('Size'))
+            block = BlobBlock(id=block_id, state=BlobBlockState.Uncommitted)
+            block._set_size(block_size)
+            block_list.uncommitted_blocks.append(block)
 
     return block_list
 
