@@ -2,6 +2,9 @@
 
 > See the [Change Log](ChangeLog.md) for a summary of storage library changes.
 
+## Version 0.34.0:
+-  If-None-Match: * will now fail when reading a blob. Previously this header was ignored for blob reads.
+
 ## Version 0.33.0:
 - Remove with_filter from service client in favor of the newer callback functions.
 - Remove max_retries and retry_wait from the blob and file create and get functions in favor of the new client-level retry policies.
