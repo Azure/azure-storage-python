@@ -4,12 +4,18 @@
 
 ## Version 0.34.0:
 
+### All:
+- All: Support for 2016-05-31 REST version. Please see our REST API documentation and blogs for information about the related added features. If you are using the Storage Emulator, please update to Emulator version 4.6
+- All: Several error messages have been clarified or made more specific.
+
 ### Blob:
 - Added support for server-side encryption headers.
 - Properly return connections to pool when checking for non-existent blobs.
-- BlockBlobs: Added streaming upload support for the put_block method and a new memory optimized upload algorithm for create_blob_from_stream and create_blob_from_file APIs.
+- Added large block blob upload support. Blocks can now support sizes up to 100 MB and thus the maximum size of a BlockBlob is now 5,000,000 MB (~4.75 TB).
+- Added streaming upload support for the put_block method and a new memory optimized upload algorithm for create_blob_from_stream and create_blob_from_file APIs. (BlockBlobService)
 - The new upload strategy will no longer fully buffer seekable streams unless Encryption is enabled. See 'use_byte_buffer' parameter documentation on the 'create_blob_from_stream' method for more details.
 - Fixed a deserialization bug with get_block_list() where calling it with anything but the 'all' block_list_type would cause an error.
+- Using If-None-Match: * will now fail when reading a blob. Previously this header was ignored for blob reads.
 
 ## Version 0.33.0:
 
