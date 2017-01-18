@@ -16,6 +16,16 @@
 - The new upload strategy will no longer fully buffer seekable streams unless Encryption is enabled. See 'use_byte_buffer' parameter documentation on the 'create_blob_from_stream' method for more details.
 - Fixed a deserialization bug with get_block_list() where calling it with anything but the 'all' block_list_type would cause an error.
 - Using If-None-Match: * will now fail when reading a blob. Previously this header was ignored for blob reads.
+- Populate public access when listing blob containers.
+- The public access setting on a blob container is now a container property returned from downloadProperties.
+- Populate content MD5 for range gets on blobs.
+
+### File:
+- Prefix support for listing files and directories.
+- Populate content MD5 for range gets on files.
+
+### Queue:
+-  put_message now returns a QueueMessage with the PopReceipt, Id, NextVisibleTime, InsertionTime, and ExpirationTime properties populated along with the content.
 
 ## Version 0.33.0:
 

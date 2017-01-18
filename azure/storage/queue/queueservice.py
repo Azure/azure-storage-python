@@ -741,6 +741,9 @@ class QueueService(StorageClient):
             parameter is omitted, the default time-to-live is 7 days.
         :param int timeout:
             The server timeout, expressed in seconds.
+        :return:
+            A :class:`~azure.storage.queue.models.QueueMessage` object.
+        :rtype: :class:`~azure.storage.queue.models.QueueMessage`
         '''
 
         _validate_encryption_required(self.require_encryption, self.key_encryption_key)
@@ -759,7 +762,11 @@ class QueueService(StorageClient):
 
         request.body = _get_request_body(_convert_queue_message_xml(content, self.encode_function,
                                                                     self.key_encryption_key))
-        self._perform_request(request)
+
+        message_list = self._perform_request(request, _convert_xml_to_queue_messages,
+                                     [self.decode_function, False,
+                                      None, None, content])
+        return message_list[0]
 
     def get_messages(self, queue_name, num_messages=None,
                      visibility_timeout=None, timeout=None):
@@ -789,7 +796,7 @@ class QueueService(StorageClient):
             a message can be set to a value later than the expiry time.
         :param int timeout:
             The server timeout, expressed in seconds.
-        :return: A list of :class:`~azure.storage.queue.models.QueueMessage` objects.
+        :return: A :class:`~azure.storage.queue.models.QueueMessage` object representing the information passed.
         :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
         _validate_decryption_required(self.require_encryption, self.key_encryption_key,

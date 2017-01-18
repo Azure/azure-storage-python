@@ -54,6 +54,7 @@ class ContainerProperties(object):
         self.last_modified = None
         self.etag = None
         self.lease = LeaseProperties()
+        self.public_access = None
 
 
 class Blob(object):
@@ -385,6 +386,12 @@ class PageBlobProperties(ResourceProperties):
 class PublicAccess(object):
     '''
     Specifies whether data in the container may be accessed publicly and the level of access.
+    '''
+
+    OFF = 'off'
+    '''
+    Specifies that there is no public read access for both the container and blobs within the container.
+    Clients cannot enumerate the containers within the storage account as well as the blobs within the container.
     '''
 
     Blob = 'blob'
