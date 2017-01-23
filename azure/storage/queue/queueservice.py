@@ -743,6 +743,8 @@ class QueueService(StorageClient):
             The server timeout, expressed in seconds.
         :return:
             A :class:`~azure.storage.queue.models.QueueMessage` object.
+            This object is also populated with the content although it is not
+            returned from the service.
         :rtype: :class:`~azure.storage.queue.models.QueueMessage`
         '''
 
@@ -956,8 +958,8 @@ class QueueService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: 
-            A list of :class:`~azure.storage.queue.models.QueueMessage` objects. Note that 
-            only time_next_visible and pop_receipt will be populated.
+            A list of :class:`~azure.storage.queue.models.QueueMessage` objects. For convenience,
+            this object is also populated with the content, although it is not returned by the service.
         :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
         '''
 

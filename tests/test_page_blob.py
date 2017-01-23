@@ -16,8 +16,10 @@
 #--------------------------------------------------------------------------
 import os
 import unittest
-
+from datetime import datetime, timedelta
 from azure.common import AzureHttpError
+from azure.storage.blob import BlobPermissions
+
 from azure.storage.blob import (
     Blob,
     PageBlobService,
@@ -79,6 +81,18 @@ class StoragePageBlobTest(StorageTestCase):
     def assertBlobEqual(self, container_name, blob_name, expected_data):
         actual_data = self.bs.get_blob_to_bytes(container_name, blob_name)
         self.assertEqual(actual_data.content, expected_data)
+
+    def _wait_for_async_copy(self, container_name, blob_name):
+        count = 0
+        blob = self.bs.get_blob_properties(container_name, blob_name)
+        while blob.properties.copy.status != 'success':
+            count = count + 1
+            if count > 5:
+                self.assertTrue(
+                    False, 'Timed out waiting for async copy to complete.')
+            self.sleep(5)
+            blob = self.bs.get_blob_properties(container_name, blob_name)
+        self.assertEqual(blob.properties.copy.status, 'success')
 
     class NonSeekableFile(object):
         def __init__(self, wrapped_file):
@@ -641,6 +655,44 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Assert
 
+    @record
+    def test_incremental_copy_blob(self):
+        # Arrange
+        source_blob_name = self._create_blob(2048)
+        data = self.get_random_bytes(512)
+        resp1 = self.bs.update_page(self.container_name, source_blob_name, data, 0, 511)
+        resp2 = self.bs.update_page(self.container_name, source_blob_name, data, 1024, 1535)
+        source_snapshot_blob = self.bs.snapshot_blob(self.container_name, source_blob_name)
+
+        sas_token = self.bs.generate_blob_shared_access_signature(
+            self.container_name,
+            source_blob_name,
+            permission=BlobPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+
+        # Act
+        source_blob_url = self.bs.make_blob_url(
+            self.container_name,
+            source_blob_name, # + '?snapshot=' + source_snapshot_blob.snapshot,
+            sas_token=sas_token,
+            snapshot=source_snapshot_blob.snapshot)
+
+        dest_blob_name = 'dest_blob'
+        copy = self.bs.incremental_copy_blob(self.container_name, dest_blob_name, source_blob_url)
+
+        # Assert
+        self.assertEqual(copy.status, 'pending')
+        self._wait_for_async_copy(self.container_name, dest_blob_name)
+        self.assertIsNotNone(copy)
+        self.assertIsNotNone(copy.id)
+
+        copy_blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertEqual(copy_blob.properties.copy.status, 'success')
+        self.assertIsNotNone(copy_blob.properties.copy.destination_snapshot_time)
+
+        # strip off protocol
+        self.assertTrue(copy_blob.properties.copy.source.endswith(source_blob_url[5:]))
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

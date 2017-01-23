@@ -71,6 +71,7 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-copy-status': ('copy', 'status', _to_str),
     'x-ms-copy-progress': ('copy', 'progress', _to_str),
     'x-ms-copy-completion-time': ('copy', 'completion_time', parser.parse),
+    'x-ms-copy-destination-snapshot': ('copy', 'destination_snapshot_time', parser.parse),
     'x-ms-copy-status-description': ('copy', 'status_description', _to_str),
 }
 

@@ -215,8 +215,7 @@ class BaseBlobService(StorageClient):
         self.key_encryption_key = None
         self.key_resolver_function = None
 
-    def make_blob_url(self, container_name, blob_name,
-                      snapshot=None, protocol=None, sas_token=None):
+    def make_blob_url(self, container_name, blob_name, protocol=None, sas_token=None, snapshot=None):
         '''
         Creates the url to access a blob.
 
@@ -224,15 +223,15 @@ class BaseBlobService(StorageClient):
             Name of container.
         :param str blob_name:
             Name of blob.
-        :param str snapshot:
-            An opaque DateTime value that when present, returns the URL of
-            the snapshot.
         :param str protocol:
             Protocol to use: 'http' or 'https'. If not specified, uses the
             protocol specified when BaseBlobService was initialized.
         :param str sas_token:
             Shared access signature token created with
             generate_shared_access_signature.
+        :param str snapshot:
+            An string value that uniquely identifies the snapshot. The value of
+            this query parameter indicates the snapshot version.
         :return: blob access URL.
         :rtype: str
         '''
@@ -2975,6 +2974,36 @@ class BaseBlobService(StorageClient):
         :return: Copy operation properties such as status, source, and ID.
         :rtype: :class:`~azure.storage.blob.models.CopyProperties`
         '''
+        return self._copy_blob(container_name, blob_name, copy_source,
+                          metadata,
+                          source_if_modified_since, source_if_unmodified_since,
+                          source_if_match, source_if_none_match,
+                          destination_if_modified_since,
+                          destination_if_unmodified_since,
+                          destination_if_match,
+                          destination_if_none_match,
+                          destination_lease_id,
+                          source_lease_id, timeout,
+                          False)
+
+    def _copy_blob(self, container_name, blob_name, copy_source,
+                  metadata=None,
+                  source_if_modified_since=None,
+                  source_if_unmodified_since=None,
+                  source_if_match=None, source_if_none_match=None,
+                  destination_if_modified_since=None,
+                  destination_if_unmodified_since=None,
+                  destination_if_match=None,
+                  destination_if_none_match=None,
+                  destination_lease_id=None,
+                  source_lease_id=None, timeout=None,
+                  incremental_copy=False):
+        '''
+        See copy_blob for more details. This helper method
+        allows for standard copies as well as incremental copies which are only supported for page blobs.
+        :param bool incremental_copy:
+            The timeout parameter is expressed in seconds.
+        '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('copy_source', copy_source)
@@ -2999,7 +3028,15 @@ class BaseBlobService(StorageClient):
         request.method = 'PUT'
         request.host_locations = self._get_host_locations()
         request.path = _get_path(container_name, blob_name)
-        request.query = {'timeout': _int_to_str(timeout)}
+
+        if incremental_copy:
+            request.query = {
+                'comp': 'incrementalcopy',
+                'timeout': _int_to_str(timeout),
+            }
+        else:
+            request.query = {'timeout': _int_to_str(timeout)}
+
         request.headers = {
             'x-ms-copy-source': _to_str(copy_source),
             'x-ms-source-if-modified-since': _to_str(source_if_modified_since),

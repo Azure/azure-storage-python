@@ -19,6 +19,7 @@
 - Populate public access when listing blob containers.
 - The public access setting on a blob container is now a container property returned from downloadProperties.
 - Populate content MD5 for range gets on blobs.
+- Added support for incremental copy on page blobs. The source must be a snapshot of a page blob and include a SAS token.
 
 ### File:
 - Prefix support for listing files and directories.

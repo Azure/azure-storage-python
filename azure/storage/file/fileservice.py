@@ -1060,7 +1060,7 @@ class FileService(StorageClient):
 
     def list_directories_and_files(self, share_name, directory_name=None,
                                    num_results=None, marker=None, timeout=None,
-                                   _context=None, prefix=None):
+                                   prefix=None):
 
         '''
         Returns a generator to list the directories and files under the specified share.
@@ -1105,7 +1105,7 @@ class FileService(StorageClient):
 
     def _list_directories_and_files(self, share_name, directory_name=None,
                                    marker=None, max_results=None, timeout=None,
-                                   _context=None, prefix=None):
+                                    prefix=None, _context=None):
 
         '''
         Returns a list of the directories and files under the specified share.
