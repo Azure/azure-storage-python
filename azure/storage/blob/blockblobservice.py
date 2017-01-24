@@ -837,7 +837,8 @@ class BlockBlobService(BaseBlobService):
             'timeout': _int_to_str(timeout),
         }
         request.headers = {
-            'x-ms-lease-id': _to_str(lease_id)
+            'x-ms-lease-id': _to_str(lease_id),
+            'content-type': 'application/octet-stream'
         }
         request.body = _get_data_bytes_only('block', block)
 
@@ -880,6 +881,7 @@ class BlockBlobService(BaseBlobService):
             'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match),
+            'content-type': 'application/octet-stream'
         }
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
