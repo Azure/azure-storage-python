@@ -28,7 +28,6 @@ from azure.storage import (
 )
 from azure.storage.file import (
     FileService,
-    FileService,
     SharePermissions,
 )
 from tests.testcase import (
