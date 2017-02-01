@@ -258,8 +258,16 @@ class StorageQueueTest(StorageTestCase):
         self.qs.put_message(queue_name, u'message1')
         self.qs.put_message(queue_name, u'message2')
         self.qs.put_message(queue_name, u'message3')
-        self.qs.put_message(queue_name, u'message4')
-        
+        message = self.qs.put_message(queue_name, u'message4')
+
+        # Asserts
+        self.assertIsNotNone(message)
+        self.assertNotEqual('', message.id)
+        self.assertIsInstance(message.insertion_time, datetime)
+        self.assertIsInstance(message.expiration_time, datetime)
+        self.assertNotEqual('', message.pop_receipt)
+        self.assertEqual(u'message4', message.content)
+
     @record
     def test_get_messages(self):
         # Action

@@ -1,6 +1,6 @@
 ﻿# coding: utf-8
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import base64
 import os
 import unittest
@@ -28,13 +28,14 @@ from tests.testcase import (
     record,
 )
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 TEST_FILE_PREFIX = 'file'
 FILE_PATH = 'file_output.temp.dat'
-#------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
 
 class StorageGetFileTest(StorageTestCase):
-
     def setUp(self):
         super(StorageGetFileTest, self).setUp()
 
@@ -74,7 +75,7 @@ class StorageGetFileTest(StorageTestCase):
 
         return super(StorageGetFileTest, self).tearDown()
 
-    #--Helpers-----------------------------------------------------------------
+    # --Helpers-----------------------------------------------------------------
 
     def _get_file_reference(self):
         return self.get_resource_name(TEST_FILE_PREFIX)
@@ -89,7 +90,7 @@ class StorageGetFileTest(StorageTestCase):
         def read(self, count):
             return self.wrapped_file.read(count)
 
-    #-- Get test cases for files ----------------------------------------------
+    # -- Get test cases for files ----------------------------------------------
 
     @record
     def test_unicode_get_file_unicode_data(self):
@@ -108,7 +109,7 @@ class StorageGetFileTest(StorageTestCase):
     @record
     def test_unicode_get_file_binary_data(self):
         # Arrange
-        base64_data = 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w=='       
+        base64_data = 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w=='
         binary_data = base64.b64decode(base64_data)
 
         file_name = self._get_file_reference()
@@ -155,29 +156,35 @@ class StorageGetFileTest(StorageTestCase):
 
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
-        file = self.fs.get_file_to_bytes(self.share_name, self.directory_name, self.byte_file, progress_callback=callback)
+        file = self.fs.get_file_to_bytes(self.share_name, self.directory_name, self.byte_file,
+                                         progress_callback=callback)
 
         # Assert
         self.assertEqual(self.byte_data, file.content)
-        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress)
 
     @record
     def test_get_file_to_bytes_non_parallel(self):
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
-        file = self.fs.get_file_to_bytes(self.share_name, self.directory_name, self.byte_file, max_connections=1, progress_callback=callback)
+        file = self.fs.get_file_to_bytes(self.share_name, self.directory_name, self.byte_file, max_connections=1,
+                                         progress_callback=callback)
 
         # Assert
         self.assertEqual(self.byte_data, file.content)
-        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
 
     @record
     def test_get_file_to_bytes_small(self):
@@ -187,6 +194,7 @@ class StorageGetFileTest(StorageTestCase):
         self.fs.create_file_from_bytes(self.share_name, self.directory_name, file_name, file_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -221,6 +229,7 @@ class StorageGetFileTest(StorageTestCase):
 
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -234,26 +243,30 @@ class StorageGetFileTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress)
 
     @record
     def test_get_file_to_stream_non_parallel(self):
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
         with open(FILE_PATH, 'wb') as stream:
             file = self.fs.get_file_to_stream(
-                self.share_name, self.directory_name, self.byte_file, stream, max_connections=1, progress_callback=callback)
+                self.share_name, self.directory_name, self.byte_file, stream, max_connections=1,
+                progress_callback=callback)
 
         # Assert
         self.assertIsInstance(file, File)
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
 
     @record
     def test_get_file_to_stream_small(self):
@@ -263,12 +276,13 @@ class StorageGetFileTest(StorageTestCase):
         self.fs.create_file_from_bytes(self.share_name, self.directory_name, file_name, file_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
         with open(FILE_PATH, 'wb') as stream:
-            file = self.fs.get_file_to_stream(self.share_name, self.directory_name, file_name, stream, 
+            file = self.fs.get_file_to_stream(self.share_name, self.directory_name, file_name, stream,
                                               progress_callback=callback)
 
         # Assert
@@ -301,6 +315,7 @@ class StorageGetFileTest(StorageTestCase):
 
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -313,12 +328,14 @@ class StorageGetFileTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress)
 
     @record
     def test_get_file_to_path_non_parallel(self):
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -332,7 +349,8 @@ class StorageGetFileTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
 
     @record
     def test_get_file_to_path_small(self):
@@ -342,11 +360,12 @@ class StorageGetFileTest(StorageTestCase):
         self.fs.create_file_from_bytes(self.share_name, self.directory_name, file_name, file_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
-        file = self.fs.get_file_to_path(self.share_name, self.directory_name, file_name, FILE_PATH, 
+        file = self.fs.get_file_to_path(self.share_name, self.directory_name, file_name, FILE_PATH,
                                         progress_callback=callback)
 
         # Assert
@@ -365,14 +384,14 @@ class StorageGetFileTest(StorageTestCase):
 
         # Act
         end_range = self.fs.MAX_SINGLE_GET_SIZE + 1024
-        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH, 
+        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH,
                                         start_range=1, end_range=end_range)
 
         # Assert
         self.assertIsInstance(file, File)
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
-            self.assertEqual(self.byte_data[1:end_range+1], actual)
+            self.assertEqual(self.byte_data[1:end_range + 1], actual)
 
     def test_ranged_get_file_to_path_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
@@ -381,13 +400,14 @@ class StorageGetFileTest(StorageTestCase):
 
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
         start_range = 3
         end_range = self.fs.MAX_SINGLE_GET_SIZE + 1024
-        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH, 
+        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH,
                                         start_range=start_range, end_range=end_range,
                                         progress_callback=callback)
 
@@ -395,15 +415,16 @@ class StorageGetFileTest(StorageTestCase):
         self.assertIsInstance(file, File)
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
-            self.assertEqual(self.byte_data[start_range:end_range+1], actual)
-        self.assert_download_progress(end_range-start_range + 1, self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress)
+            self.assertEqual(self.byte_data[start_range:end_range + 1], actual)
+        self.assert_download_progress(end_range - start_range + 1, self.fs.MAX_CHUNK_GET_SIZE,
+                                      self.fs.MAX_SINGLE_GET_SIZE, progress)
 
     @record
     def test_ranged_get_file_to_path_small(self):
         # Arrange
 
         # Act
-        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH, 
+        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH,
                                         start_range=1, end_range=4)
 
         # Assert
@@ -417,7 +438,7 @@ class StorageGetFileTest(StorageTestCase):
         # Arrange
 
         # Act
-        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH, 
+        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH,
                                         start_range=1, end_range=3, max_connections=1)
 
         # Assert
@@ -440,7 +461,7 @@ class StorageGetFileTest(StorageTestCase):
 
         # Act
         end_range = 2 * self.fs.MAX_SINGLE_GET_SIZE
-        file = self.fs.get_file_to_path(self.share_name, self.directory_name, file_name, FILE_PATH, 
+        file = self.fs.get_file_to_path(self.share_name, self.directory_name, file_name, FILE_PATH,
                                         start_range=1, end_range=end_range)
 
         # Assert
@@ -463,7 +484,7 @@ class StorageGetFileTest(StorageTestCase):
 
         # Act
         end_range = 2 * self.fs.MAX_SINGLE_GET_SIZE
-        file = self.fs.get_file_to_path(self.share_name, self.directory_name, file_name, FILE_PATH, 
+        file = self.fs.get_file_to_path(self.share_name, self.directory_name, file_name, FILE_PATH,
                                         start_range=1, end_range=end_range)
 
         # Assert
@@ -533,6 +554,7 @@ class StorageGetFileTest(StorageTestCase):
         self.fs.create_file_from_text(self.share_name, self.directory_name, text_file, text_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -541,7 +563,8 @@ class StorageGetFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text_data, file.content)
-        self.assert_download_progress(len(text_data.encode('utf-8')), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress)
+        self.assert_download_progress(len(text_data.encode('utf-8')), self.fs.MAX_CHUNK_GET_SIZE,
+                                      self.fs.MAX_SINGLE_GET_SIZE, progress)
 
     @record
     def test_get_file_to_text_non_parallel(self):
@@ -551,15 +574,18 @@ class StorageGetFileTest(StorageTestCase):
         self.fs.create_file_from_text(self.share_name, self.directory_name, text_file, text_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
-        file = self.fs.get_file_to_text(self.share_name, self.directory_name, text_file, max_connections=1, progress_callback=callback)
+        file = self.fs.get_file_to_text(self.share_name, self.directory_name, text_file, max_connections=1,
+                                        progress_callback=callback)
 
         # Assert
         self.assertEqual(text_data, file.content)
-        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
 
     @record
     def test_get_file_to_text_small(self):
@@ -569,6 +595,7 @@ class StorageGetFileTest(StorageTestCase):
         self.fs.create_file_from_text(self.share_name, self.directory_name, file_name, file_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -603,6 +630,7 @@ class StorageGetFileTest(StorageTestCase):
 
         # Act
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -623,7 +651,8 @@ class StorageGetFileTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'wb') as stream:
             non_seekable_stream = StorageGetFileTest.NonSeekableFile(stream)
-            file = self.fs.get_file_to_stream(self.share_name, self.directory_name, self.byte_file, non_seekable_stream, max_connections=1)
+            file = self.fs.get_file_to_stream(self.share_name, self.directory_name, self.byte_file, non_seekable_stream,
+                                              max_connections=1)
 
         # Assert
         self.assertIsInstance(file, File)
@@ -646,7 +675,7 @@ class StorageGetFileTest(StorageTestCase):
                 file = self.fs.get_file_to_stream(
                     self.share_name, self.directory_name, self.byte_file, non_seekable_stream)
 
-        # Assert
+                # Assert
 
     @record
     def test_get_file_exact_get_size(self):
@@ -656,6 +685,7 @@ class StorageGetFileTest(StorageTestCase):
         self.fs.create_file_from_bytes(self.share_name, self.directory_name, file_name, byte_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -677,6 +707,7 @@ class StorageGetFileTest(StorageTestCase):
         self.fs.create_file_from_bytes(self.share_name, self.directory_name, file_name, byte_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -700,6 +731,29 @@ class StorageGetFileTest(StorageTestCase):
         # Assert
         self.assertEqual(self.byte_data, file.content)
 
-#------------------------------------------------------------------------------
+    def test_get_file_range_with_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        file = self.fs.get_file_to_bytes(self.share_name, self.directory_name, self.byte_file, start_range=0,
+                                         end_range=1024, validate_content=True)
+
+        # Assert
+        self.assertFalse(hasattr(file.properties.content_settings, 'content_md5'))
+
+        # Arrange
+        props = self.fs.get_file_properties(self.share_name, self.directory_name, self.byte_file)
+        props.properties.content_settings.content_md5 = 'MDAwMDAwMDA='
+        self.fs.set_file_properties(self.share_name, self.directory_name, self.byte_file, props.properties.content_settings)
+
+        # Act
+        file = self.fs.get_file_to_bytes(self.share_name, self.directory_name, self.byte_file, start_range=0,
+                                         end_range=1024, validate_content=True)
+
+        # Assert
+        self.assertEqual('MDAwMDAwMDA=', file.properties.content_settings.content_md5)
+
+# ------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

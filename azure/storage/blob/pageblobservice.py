@@ -203,6 +203,89 @@ class PageBlobService(BaseBlobService):
                     timeout=timeout
                 )
 
+    def incremental_copy_blob(self, container_name, blob_name, copy_source,
+                  metadata=None, destination_if_modified_since=None, destination_if_unmodified_since=None,
+                  destination_if_match=None, destination_if_none_match=None, destination_lease_id=None,
+                  source_lease_id=None, timeout=None):
+        '''
+        Copies an incremental copy of a blob asynchronously. This operation returns a copy operation
+        properties object, including a copy ID you can use to check or abort the
+        copy operation. The Blob service copies blobs on a best-effort basis.
+
+        The source blob for an incremental copy operation must be a page blob.
+        Call get_blob_properties on the destination blob to check the status of the copy operation.
+        The final blob will be committed when the copy completes.
+
+        :param str container_name:
+            Name of the destination container. The container must exist.
+        :param str blob_name:
+            Name of the destination blob. If the destination blob exists, it will
+            be overwritten. Otherwise, it will be created.
+        :param str copy_source:
+            A URL of up to 2 KB in length that specifies an Azure page blob.
+            The value should be URL-encoded as it would appear in a request URI.
+            The copy source must be a snapshot and include a valid SAS token or be public.
+            Example:
+            https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>&sastoken
+        :param metadata:
+            Name-value pairs associated with the blob as metadata. If no name-value
+            pairs are specified, the operation will copy the metadata from the
+            source blob or file to the destination blob. If one or more name-value
+            pairs are specified, the destination blob is created with the specified
+            metadata, and metadata is not copied from the source blob or file.
+        :type metadata: A dict mapping str to str.
+        :param datetime destination_if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this conditional header to copy the blob only
+            if the destination blob has been modified since the specified date/time.
+            If the destination blob has not been modified, the Blob service returns
+            status code 412 (Precondition Failed).
+        :param datetime destination_if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this conditional header to copy the blob only if the destination blob
+            has not been modified since the specified ate/time. If the destination blob
+            has been modified, the Blob service returns status code 412 (Precondition Failed).
+        :param ETag destination_if_match:
+            An ETag value, or the wildcard character (*). Specify an ETag value for
+            this conditional header to copy the blob only if the specified ETag value
+            matches the ETag value for an existing destination blob. If the ETag for
+            the destination blob does not match the ETag specified for If-Match, the
+            Blob service returns status code 412 (Precondition Failed).
+        :param ETag destination_if_none_match:
+            An ETag value, or the wildcard character (*). Specify an ETag value for
+            this conditional header to copy the blob only if the specified ETag value
+            does not match the ETag value for the destination blob. Specify the wildcard
+            character (*) to perform the operation only if the destination blob does not
+            exist. If the specified condition isn't met, the Blob service returns status
+            code 412 (Precondition Failed).
+        :param str destination_lease_id:
+            The lease ID specified for this header must match the lease ID of the
+            destination blob. If the request does not include the lease ID or it is not
+            valid, the operation fails with status code 412 (Precondition Failed).
+        :param str source_lease_id:
+            Specify this to perform the Copy Blob operation only if
+            the lease ID given matches the active lease ID of the source blob.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: Copy operation properties such as status, source, and ID.
+        :rtype: :class:`~azure.storage.blob.models.CopyProperties`
+        '''
+        return self._copy_blob(container_name, blob_name, copy_source,
+                          metadata,
+                          source_if_modified_since=None, source_if_unmodified_since=None,
+                          source_if_match=None, source_if_none_match=None,
+                          destination_if_modified_since=destination_if_modified_since,
+                          destination_if_unmodified_since=destination_if_unmodified_since,
+                          destination_if_match=destination_if_match,
+                          destination_if_none_match=destination_if_none_match,
+                          destination_lease_id=destination_lease_id,
+                          source_lease_id=source_lease_id, timeout=timeout,
+                          incremental_copy=True)
+
     def update_page(
         self, container_name, blob_name, page, start_range, end_range,
         validate_content=False, lease_id=None, if_sequence_number_lte=None,

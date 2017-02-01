@@ -113,9 +113,17 @@ def _parse_blob(response, name, snapshot, validate_content=False, require_encryp
     metadata = _parse_metadata(response)
     props = _parse_properties(response, BlobProperties)
 
+    # For range gets, only look at 'x-ms-blob-content-md5' for overall MD5
+    content_settings = getattr(props, 'content_settings')
+    if 'content-range' in response.headers:
+        if 'x-ms-blob-content-md5' in response.headers:
+            setattr(content_settings, 'content_md5', _to_str(response.headers['x-ms-blob-content-md5']))
+        else:
+            delattr(content_settings, 'content_md5')
+
     if validate_content:
         computed_md5 = _get_content_md5(response.body)
-        _validate_content_match(props.content_settings.content_md5, computed_md5)
+        _validate_content_match(response.headers['content-md5'], computed_md5)
 
     if key_encryption_key is not None or key_resolver_function is not None:
             try:
@@ -155,7 +163,8 @@ def _convert_xml_to_containers(response):
             <Etag>etag</Etag>
             <LeaseStatus>locked | unlocked</LeaseStatus>
             <LeaseState>available | leased | expired | breaking | broken</LeaseState>
-            <LeaseDuration>infinite | fixed</LeaseDuration>      
+            <LeaseDuration>infinite | fixed</LeaseDuration>
+            <PublicAccess>blob | container</PublicAccess>
           </Properties>
           <Metadata>
             <metadata-name>value</metadata-name>
@@ -195,6 +204,7 @@ def _convert_xml_to_containers(response):
         container.properties.lease_status = properties_element.findtext('LeaseStatus')
         container.properties.lease_state = properties_element.findtext('LeaseState')
         container.properties.lease_duration = properties_element.findtext('LeaseDuration')
+        container.properties.public_access = properties_element.findtext('PublicAccess')
         
         # Add container to list
         containers.append(container)
