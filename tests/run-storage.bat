@@ -29,7 +29,7 @@ if "%PYTHONPATH%" == "" (
 set PYTHONPATH=%PYTHONPATH%;..
 
 echo Running tests using %PYTHONDIR%
-%PYTHONDIR%\python.exe -m unittest discover -p "test_storage_*.py"
+%PYTHONDIR%\python.exe -m unittest discover -p "test_*.py"
 
 
 set UNITTEST_EC=%ERRORLEVEL%

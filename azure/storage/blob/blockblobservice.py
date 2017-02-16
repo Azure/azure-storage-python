@@ -476,16 +476,20 @@ class BlockBlobService(BaseBlobService):
             If True, this will force usage of the original full block buffering upload path.
             By default, this value is False and will employ a memory-efficient,
             streaming upload algorithm under the following conditions:
-            The provided stream is seekable, require_encryption is False, and
+            The provided stream is seekable, 'require_encryption' is False, and
             MAX_BLOCK_SIZE >= MIN_LARGE_BLOCK_UPLOAD_THRESHOLD.
             One should consider the drawbacks of using this approach. In order to achieve
-            memory-efficiency, a IOBase stream or file-like object is segmented into SubStreams(logical blob blocks).
-            If max_connections > 1, each SubStream must LOCK in order to seek to the desired location in the underlying
-            stream so the correct data is read. Generally, for the most common use-cases (file-like stream objects),
-            seeking is an inexpensive operation. However, for other variants this may not be the case. The trade-off
-            for memory-efficiency must be weighed against the cost of seeking with your input stream.
-            The SubStream class will attempt to buffer up to 4MB to reduce the amount of seek and read calls to the
-            underlying stream.
+            memory-efficiency, a IOBase stream or file-like object is segmented into logical blocks
+            using a SubStream wrapper. In order to read the correct data, each SubStream  must acquire
+            a lock so that it can safely seek to the right position on the shared, underlying stream.
+            If max_connections > 1, the concurrency will result in a considerable amount of seeking on
+            the underlying stream. For the most common inputs such as a file-like stream object, seeking
+            is an inexpensive operation and this is not much of a concern. However, for other variants of streams
+            this may not be the case. The trade-off for memory-efficiency must be weighed against the cost of seeking
+            with your input stream.
+            However, the SubStream class will attempt to buffer up to 4 MB internally to reduce the amount of
+            seek and read calls to the underlying stream. This is particularly beneficial when uploading much larger
+            block sizes.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
