@@ -89,8 +89,11 @@ class StorageLargeBlockBlobTest(StorageTestCase):
 
     # --Test cases for block blobs --------------------------------------------
 
-    @record
+
     def test_put_block_large(self):
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._create_blob()
 
@@ -104,8 +107,10 @@ class StorageLargeBlockBlobTest(StorageTestCase):
 
             # Assert
 
-    @record
     def test_put_block_stream_large(self):
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._create_blob()
 
@@ -120,8 +125,11 @@ class StorageLargeBlockBlobTest(StorageTestCase):
 
             # Assert
 
-    @record
+
     def test_put_block_stream_with_md5(self):
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._create_blob()
 
@@ -142,7 +150,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         if TestMode.need_recording_file(self.test_mode):
             return
 
-            # Arrange
+        # Arrange
         blob_name = self._get_blob_reference()
         data = bytearray(os.urandom(LARGE_BLOB_SIZE))
         with open(FILE_PATH, 'wb') as stream:
@@ -154,11 +162,14 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
 
-    @record
+
     def test_create_large_blob_from_path_non_parallel(self):
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._get_blob_reference()
-        data = bytearray(os.urandom(100))
+        data = bytearray(self.get_random_bytes(100))
         with open(FILE_PATH, 'wb') as stream:
             stream.write(data)
 
@@ -197,7 +208,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         if TestMode.need_recording_file(self.test_mode):
             return
 
-            # Arrange
+        # Arrange
         blob_name = self._get_blob_reference()
         data = bytearray(os.urandom(LARGE_BLOB_SIZE))
         with open(FILE_PATH, 'wb') as stream:
@@ -220,7 +231,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         if TestMode.need_recording_file(self.test_mode):
             return
 
-            # Arrange
+        # Arrange
         blob_name = self._get_blob_reference()
         data = bytearray(os.urandom(LARGE_BLOB_SIZE))
         with open(FILE_PATH, 'wb') as stream:
@@ -238,7 +249,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         if TestMode.need_recording_file(self.test_mode):
             return
 
-            # Arrange
+        # Arrange
         blob_name = self._get_blob_reference()
         data = bytearray(os.urandom(LARGE_BLOB_SIZE))
         with open(FILE_PATH, 'wb') as stream:
@@ -262,7 +273,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         if TestMode.need_recording_file(self.test_mode):
             return
 
-            # Arrange
+        # Arrange
         blob_name = self._get_blob_reference()
         data = bytearray(os.urandom(LARGE_BLOB_SIZE))
         with open(FILE_PATH, 'wb') as stream:
@@ -281,7 +292,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         if TestMode.need_recording_file(self.test_mode):
             return
 
-            # Arrange
+        # Arrange
         blob_name = self._get_blob_reference()
         data = bytearray(os.urandom(LARGE_BLOB_SIZE))
         with open(FILE_PATH, 'wb') as stream:
@@ -307,7 +318,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         if TestMode.need_recording_file(self.test_mode):
             return
 
-            # Arrange
+        # Arrange
         blob_name = self._get_blob_reference()
         data = bytearray(os.urandom(LARGE_BLOB_SIZE))
         with open(FILE_PATH, 'wb') as stream:

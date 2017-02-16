@@ -1,11 +1,12 @@
 interactions:
 - request:
-    body: '{"binary": "YmluYXJ5", "age": "39", "married": true, "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833",
-      "large@odata.type": "Edm.Int64", "other": 20, "sex": "male", "deceased": false,
-      "birthday@odata.type": "Edm.DateTime", "ratio": 3.1, "large": "933311100", "binary@odata.type":
-      "Edm.Binary", "age@odata.type": "Edm.Int64", "RowKey": "batch_negative_1", "optional":
-      null, "Birthday": "1973-10-04T00:00:00Z", "clsid@odata.type": "Edm.Guid", "Birthday@odata.type":
-      "Edm.DateTime", "PartitionKey": "001", "evenratio": 3.0, "birthday": "1970-10-04T00:00:00Z"}'
+    body: '{"birthday": "1970-10-04T00:00:00Z", "Birthday": "1973-10-04T00:00:00Z",
+      "PartitionKey": "001", "large@odata.type": "Edm.Int64", "sex": "male", "deceased":
+      false, "birthday@odata.type": "Edm.DateTime", "optional": null, "large": "933311100",
+      "other": 20, "age": "39", "married": true, "clsid@odata.type": "Edm.Guid", "Birthday@odata.type":
+      "Edm.DateTime", "binary": "YmluYXJ5", "RowKey": "batch_negative_1", "evenratio":
+      3.0, "ratio": 3.1, "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833", "age@odata.type":
+      "Edm.Int64", "binary@odata.type": "Edm.Binary"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -14,10 +15,10 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [3634feba-5f29-11e6-affe-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:35:28 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [0943e9fe-f4ab-11e6-957a-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:50:11 GMT']
+      x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.table.core.windows.net/table2efa1532
   response:
@@ -26,13 +27,13 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/table2efa1532(PartitionKey=''001'',RowKey=''batch_negative_1'')']
-      Date: ['Wed, 10 Aug 2016 18:35:26 GMT']
-      ETag: [W/"datetime'2016-08-10T18%3A35%3A27.1449503Z'"]
+      Date: ['Fri, 17 Feb 2017 00:50:10 GMT']
+      ETag: [W/"datetime'2017-02-17T00%3A50%3A11.4428929Z'"]
       Location: ['https://storagename.table.core.windows.net/table2efa1532(PartitionKey=''001'',RowKey=''batch_negative_1'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [99df1ba3-0002-0038-4f35-f3be53000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [5d39a16a-0002-002e-1db7-88c02c000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
 version: 1

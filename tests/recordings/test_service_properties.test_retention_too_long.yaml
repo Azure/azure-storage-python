@@ -6,23 +6,22 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['273']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [1d921e28-5f27-11e6-bdea-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:20:28 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [dd4c3b76-f4aa-11e6-932a-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:48:57 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/?comp=properties&restype=service
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML\
-        \ specified is not syntactically valid.\nRequestId:b35d6206-0001-0060-0b33-f3ba28000000\n\
-        Time:2016-08-10T18:20:26.8566669Z</Message><LineNumber>2</LineNumber><LinePosition>176</LinePosition><Reason>Retention\
-        \ days must be greater than 0 and less than or equal to 365 days.</Reason></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML
+        specified is not syntactically valid.\nRequestId:28811d11-0001-002e-20b7-88c02c000000\nTime:2017-02-17T00:48:57.7567087Z</Message><LineNumber>2</LineNumber><LinePosition>176</LinePosition><Reason>Retention
+        days must be greater than 0 and less than or equal to 365 days.</Reason></Error>"}
     headers:
       Content-Length: ['376']
       Content-Type: [application/xml]
-      Date: ['Wed, 10 Aug 2016 18:20:26 GMT']
+      Date: ['Fri, 17 Feb 2017 00:48:57 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [b35d6206-0001-0060-0b33-f3ba28000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [28811d11-0001-002e-20b7-88c02c000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 400, message: XML specified is not syntactically valid.}
 version: 1

@@ -4,64 +4,64 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [baff2958-5f27-11e6-baaa-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:52 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [b7cb4cd2-f4a8-11e6-a51c-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:35 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerc0081bd7?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:24:49 GMT']
-      ETag: ['"0x8D3C14B9DC9F052"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:24:50 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:35 GMT']
+      ETag: ['"0x8D456CC9C0F1E82"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:35 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [a3a284f0-0001-000b-2c34-f3e77e000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [cc0f5dcf-0001-0044-48b5-881804000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-Unmodified-Since: ['Wed, 10 Aug 2016 18:39:53 GMT']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [bb4b74e8-5f27-11e6-8934-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:53 GMT']
-      x-ms-version: ['2015-07-08']
+      If-Unmodified-Since: ['Fri, 17 Feb 2017 00:48:36 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [b801f6cc-f4a8-11e6-a951-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:36 GMT']
+      x-ms-version: ['2016-05-31']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/utcontainerc0081bd7?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:24:49 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:35 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [a3a28503-0001-000b-3b34-f3e77e000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [cc0f5de0-0001-0044-57b5-881804000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [bb5039b0-5f27-11e6-bea9-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:53 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [b81064ba-f4a8-11e6-a237-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:36 GMT']
+      x-ms-version: ['2016-05-31']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainerc0081bd7?restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
-        \ specified container does not exist.\nRequestId:a3a28513-0001-000b-4b34-f3e77e000000\n\
-        Time:2016-08-10T18:24:50.4037032Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The
+        specified container does not exist.\nRequestId:cc0f5dee-0001-0044-64b5-881804000000\nTime:2017-02-17T00:33:35.9536388Z</Message></Error>"}
     headers:
       Content-Length: ['225']
       Content-Type: [application/xml]
-      Date: ['Wed, 10 Aug 2016 18:24:49 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:35 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [a3a28513-0001-000b-4b34-f3e77e000000]
-      x-ms-version: ['2015-07-08']
+      Vary: [Origin]
+      x-ms-request-id: [cc0f5dee-0001-0044-64b5-881804000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 404, message: The specified container does not exist.}
 version: 1

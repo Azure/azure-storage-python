@@ -4,46 +4,47 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [bc3c433e-5f27-11e6-be5b-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:54 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [d65d90a6-f4a8-11e6-86a1-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:34:26 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontaineree1c1891?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:24:52 GMT']
-      ETag: ['"0x8D3C14B9F94A4F7"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:24:53 GMT']
+      Date: ['Fri, 17 Feb 2017 00:34:26 GMT']
+      ETag: ['"0x8D456CCBAA5AC56"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:34:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [9a78d413-0001-003f-4134-f348d6000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [c1acb23d-0001-000e-14b5-88bb8b000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: hello world
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [bc8fba8a-5f27-11e6-b03a-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:55 GMT']
-      x-ms-version: ['2015-07-08']
+      x-ms-client-request-id: [d6971534-f4a8-11e6-b2ab-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:34:27 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontaineree1c1891/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 10 Aug 2016 18:24:52 GMT']
-      ETag: ['"0x8D3C14B9FC1C995"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:24:53 GMT']
+      Date: ['Fri, 17 Feb 2017 00:34:26 GMT']
+      ETag: ['"0x8D456CCBAB33686"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:34:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [9a78d447-0001-003f-6e34-f348d6000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [c1acb254-0001-000e-29b5-88bb8b000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: hello world
@@ -51,23 +52,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['11']
       If-None-Match: ['0x111111111111111']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [bc96e18c-5f27-11e6-9a07-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:55 GMT']
-      x-ms-version: ['2015-07-08']
+      x-ms-client-request-id: [d6a65a22-f4a8-11e6-bfe9-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:34:27 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontaineree1c1891/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 10 Aug 2016 18:24:53 GMT']
-      ETag: ['"0x8D3C14B9FCA7C32"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:24:53 GMT']
+      Date: ['Fri, 17 Feb 2017 00:34:26 GMT']
+      ETag: ['"0x8D456CCBAC27905"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:34:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [9a78d450-0001-003f-7534-f348d6000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [c1acb262-0001-000e-37b5-88bb8b000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 version: 1

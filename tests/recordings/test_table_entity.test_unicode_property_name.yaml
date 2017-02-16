@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"PartitionKey": "pk9990123c", "RowKey": "rk9990123c", "\u554a\u9f44\u4e02\u72db\u72dc":
-      "\ua015"}'
+    body: '{"RowKey": "rk9990123c", "\u554a\u9f44\u4e02\u72db\u72dc": "\ua015", "PartitionKey":
+      "pk9990123c"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -10,10 +10,10 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [b47e9a4a-5f28-11e6-be71-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:31:51 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [e0ac06e6-f4ab-11e6-92bb-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:56:12 GMT']
+      x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.table.core.windows.net/uttable9990123c
   response:
@@ -22,18 +22,18 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/uttable9990123c(PartitionKey=''pk9990123c'',RowKey=''rk9990123c'')']
-      Date: ['Wed, 10 Aug 2016 18:31:49 GMT']
-      ETag: [W/"datetime'2016-08-10T18%3A31%3A49.4305548Z'"]
+      Date: ['Fri, 17 Feb 2017 00:56:12 GMT']
+      ETag: [W/"datetime'2017-02-17T00%3A56%3A12.8411451Z'"]
       Location: ['https://storagename.table.core.windows.net/uttable9990123c(PartitionKey=''pk9990123c'',RowKey=''rk9990123c'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [cabea232-0002-0055-4735-f3147d000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [76662adb-0002-0032-0eb8-88924c000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
 - request:
-    body: '{"PartitionKey": "pk9990123c", "RowKey": "test2", "\u554a\u9f44\u4e02\u72db\u72dc":
-      "hello"}'
+    body: '{"RowKey": "test2", "\u554a\u9f44\u4e02\u72db\u72dc": "hello", "PartitionKey":
+      "pk9990123c"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -42,10 +42,10 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [b495fb24-5f28-11e6-aeb5-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:31:51 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [e0e5e5be-f4ab-11e6-8ac8-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:56:13 GMT']
+      x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.table.core.windows.net/uttable9990123c
   response:
@@ -54,14 +54,14 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/uttable9990123c(PartitionKey=''pk9990123c'',RowKey=''test2'')']
-      Date: ['Wed, 10 Aug 2016 18:31:49 GMT']
-      ETag: [W/"datetime'2016-08-10T18%3A31%3A49.4775603Z'"]
+      Date: ['Fri, 17 Feb 2017 00:56:12 GMT']
+      ETag: [W/"datetime'2017-02-17T00%3A56%3A12.9441502Z'"]
       Location: ['https://storagename.table.core.windows.net/uttable9990123c(PartitionKey=''pk9990123c'',RowKey=''test2'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [cabea243-0002-0055-5535-f3147d000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [76662ade-0002-0032-0fb8-88924c000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -70,22 +70,22 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [b49cf21a-5f28-11e6-9d15-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:31:51 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [e0f40588-f4ab-11e6-922d-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:56:13 GMT']
+      x-ms-version: ['2016-05-31']
     method: GET
     uri: https://storagename.table.core.windows.net/uttable9990123c()?%24filter=PartitionKey+eq+%27pk9990123c%27
   response:
-    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttable9990123c","value":[{"odata.etag":"W/\"datetime''2016-08-10T18%3A31%3A49.4305548Z''\"","PartitionKey":"pk9990123c","RowKey":"rk9990123c","Timestamp":"2016-08-10T18:31:49.4305548Z","\u554a\u9f44\u4e02\u72db\u72dc":"\ua015"},{"odata.etag":"W/\"datetime''2016-08-10T18%3A31%3A49.4775603Z''\"","PartitionKey":"pk9990123c","RowKey":"test2","Timestamp":"2016-08-10T18:31:49.4775603Z","\u554a\u9f44\u4e02\u72db\u72dc":"hello"}]}'}
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttable9990123c","value":[{"odata.etag":"W/\"datetime''2017-02-17T00%3A56%3A12.8411451Z''\"","PartitionKey":"pk9990123c","RowKey":"rk9990123c","Timestamp":"2017-02-17T00:56:12.8411451Z","\u554a\u9f44\u4e02\u72db\u72dc":"\ua015"},{"odata.etag":"W/\"datetime''2017-02-17T00%3A56%3A12.9441502Z''\"","PartitionKey":"pk9990123c","RowKey":"test2","Timestamp":"2017-02-17T00:56:12.9441502Z","\u554a\u9f44\u4e02\u72db\u72dc":"hello"}]}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Wed, 10 Aug 2016 18:31:49 GMT']
+      Date: ['Fri, 17 Feb 2017 00:56:13 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [cabea249-0002-0055-5b35-f3147d000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [76662ae0-0002-0032-10b8-88924c000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 200, message: OK}
 version: 1

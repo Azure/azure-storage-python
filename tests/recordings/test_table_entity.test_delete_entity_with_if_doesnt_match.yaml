@@ -1,12 +1,12 @@
 interactions:
 - request:
-    body: '{"Birthday": "1973-10-04T00:00:00Z", "age": "39", "optional": null, "PartitionKey":
-      "pka99a1781", "large": "933311100", "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833",
-      "binary": "YmluYXJ5", "ratio": 3.1, "evenratio": 3.0, "birthday": "1970-10-04T00:00:00Z",
-      "birthday@odata.type": "Edm.DateTime", "age@odata.type": "Edm.Int64", "deceased":
-      false, "binary@odata.type": "Edm.Binary", "married": true, "RowKey": "rka99a1781",
-      "sex": "male", "clsid@odata.type": "Edm.Guid", "other": 20, "Birthday@odata.type":
-      "Edm.DateTime", "large@odata.type": "Edm.Int64"}'
+    body: '{"birthday": "1970-10-04T00:00:00Z", "Birthday": "1973-10-04T00:00:00Z",
+      "sex": "male", "large@odata.type": "Edm.Int64", "PartitionKey": "pka99a1781",
+      "deceased": false, "birthday@odata.type": "Edm.DateTime", "optional": null,
+      "large": "933311100", "other": 20, "age": "39", "married": true, "clsid@odata.type":
+      "Edm.Guid", "Birthday@odata.type": "Edm.DateTime", "binary": "YmluYXJ5", "RowKey":
+      "rka99a1781", "evenratio": 3.0, "ratio": 3.1, "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833",
+      "age@odata.type": "Edm.Int64", "binary@odata.type": "Edm.Binary"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -15,10 +15,10 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [acfc9592-5f28-11e6-8f12-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:31:38 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [579c0c14-f4ab-11e6-821d-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:52:22 GMT']
+      x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.table.core.windows.net/uttablea99a1781
   response:
@@ -27,14 +27,14 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/uttablea99a1781(PartitionKey=''pka99a1781'',RowKey=''rka99a1781'')']
-      Date: ['Wed, 10 Aug 2016 18:31:36 GMT']
-      ETag: [W/"datetime'2016-08-10T18%3A31%3A37.0608307Z'"]
+      Date: ['Fri, 17 Feb 2017 00:52:22 GMT']
+      ETag: [W/"datetime'2017-02-17T00%3A52%3A22.8268382Z'"]
       Location: ['https://storagename.table.core.windows.net/uttablea99a1781(PartitionKey=''pka99a1781'',RowKey=''rka99a1781'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [a706fa21-0002-0000-7d35-f3ff0a000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [a42e6e23-0002-0045-44b8-8847d8000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -45,23 +45,23 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       If-Match: [W/"datetime'2012-06-15T22%3A51%3A44.9662825Z'"]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [ad16c59a-5f28-11e6-90c6-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:31:38 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [57d2f0ae-f4ab-11e6-9d78-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:52:23 GMT']
+      x-ms-version: ['2016-05-31']
     method: DELETE
     uri: https://storagename.table.core.windows.net/uttablea99a1781(PartitionKey='pka99a1781',RowKey='rka99a1781')
   response:
     body: {string: '{"odata.error":{"code":"UpdateConditionNotSatisfied","message":{"lang":"en-US","value":"The
-        update condition specified in the request was not satisfied.\nRequestId:a706fa42-0002-0000-1a35-f3ff0a000000\nTime:2016-08-10T18:31:37.1408400Z"}}}'}
+        update condition specified in the request was not satisfied.\nRequestId:a42e6e26-0002-0045-45b8-8847d8000000\nTime:2017-02-17T00:52:22.9238452Z"}}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Wed, 10 Aug 2016 18:31:36 GMT']
+      Date: ['Fri, 17 Feb 2017 00:52:22 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [a706fa42-0002-0000-1a35-f3ff0a000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [a42e6e26-0002-0045-45b8-8847d8000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 412, message: Precondition Failed}
 version: 1

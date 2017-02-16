@@ -1,19 +1,18 @@
 interactions:
 - request:
-    body: '{"evenratio": 3.0, "Birthday": "1973-10-04T00:00:00Z", "Birthday@odata.type":
-      "Edm.DateTime", "other": 20, "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833",
-      "ratio": 3.1, "age": "39", "birthday": "1970-10-04T00:00:00Z", "large@odata.type":
-      "Edm.Int64", "clsid@odata.type": "Edm.Guid", "optional": null, "birthday@odata.type":
-      "Edm.DateTime", "age@odata.type": "Edm.Int64", "sex@odata.type": "Edm.Binary",
-      "binary": "YmluYXJ5", "married": true, "binary@odata.type": "Edm.Binary", "_ClientEncryptionMetadata1":
-      "{\"WrappedContentKey\": {\"KeyId\": \"key1\", \"EncryptedKey\": \"L7cagJbozJL/n/Xt9v+jCR0xTkllCc1yDfR9u+LaRgmdoaSaWVGKLA==\",
+    body: '{"sex": "zw9KNZzY1Qh5EqCWIMmbXA==", "large@odata.type": "Edm.Int64", "deceased":
+      false, "binary": "YmluYXJ5", "name@odata.type": "Edm.Binary", "birthday@odata.type":
+      "Edm.DateTime", "clsid@odata.type": "Edm.Guid", "large": "933311100", "other":
+      20, "age": "39", "married": true, "Birthday@odata.type": "Edm.DateTime", "sex@odata.type":
+      "Edm.Binary", "RowKey": "rk15071980", "evenratio": 3.0, "_ClientEncryptionMetadata2@odata.type":
+      "Edm.Binary", "age@odata.type": "Edm.Int64", "binary@odata.type": "Edm.Binary",
+      "birthday": "1970-10-04T00:00:00Z", "Birthday": "1973-10-04T00:00:00Z", "PartitionKey":
+      "pk15071980", "_ClientEncryptionMetadata2": "no255kQ+cTfknnZYfy9zfQ==", "_ClientEncryptionMetadata1":
+      "{\"WrappedContentKey\": {\"KeyId\": \"key1\", \"EncryptedKey\": \"AnfwlEBG9UaARdhlStw3TpVYknWNXLlNXR5ixYb8z6CjzyWkjjAr6A==\",
       \"Algorithm\": \"A256KW\"}, \"EncryptionAgent\": {\"Protocol\": \"1.0\", \"EncryptionAlgorithm\":
-      \"AES_CBC_256\"}, \"ContentEncryptionIV\": \"8pA66KsZZylffPSspiMu6Q==\", \"KeyWrappingMetadata\":
-      {\"EncryptionLibrary\": \"Python 0.33.0\"}}", "name": "lxHmE8IxQvpNgZrTaDS3fQ==",
-      "_ClientEncryptionMetadata2": "BjkCZCxlNRlI6VrvnNgBXg==", "RowKey": "rk15071980",
-      "_ClientEncryptionMetadata2@odata.type": "Edm.Binary", "sex": "5ztIWLMmJKHjEKze4KqOYg==",
-      "PartitionKey": "pk15071980", "deceased": false, "name@odata.type": "Edm.Binary",
-      "large": "933311100"}'
+      \"AES_CBC_256\"}, \"ContentEncryptionIV\": \"eg8E7M8QzPqu6pvnTjausw==\", \"KeyWrappingMetadata\":
+      {\"EncryptionLibrary\": \"Python 0.34.0\"}}", "optional": null, "name": "MA77qpUtChWBssHVuwLS2A==",
+      "ratio": 3.1, "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -22,10 +21,10 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [979d33d2-5f28-11e6-84bf-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:31:02 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [4ceaf778-f4ab-11e6-9425-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:52:04 GMT']
+      x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.table.core.windows.net/uttable15071980
   response:
@@ -34,14 +33,14 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/uttable15071980(PartitionKey=''pk15071980'',RowKey=''rk15071980'')']
-      Date: ['Wed, 10 Aug 2016 18:31:01 GMT']
-      ETag: [W/"datetime'2016-08-10T18%3A31%3A01.4213639Z'"]
+      Date: ['Fri, 17 Feb 2017 00:52:04 GMT']
+      ETag: [W/"datetime'2017-02-17T00%3A52%3A04.831361Z'"]
       Location: ['https://storagename.table.core.windows.net/uttable15071980(PartitionKey=''pk15071980'',RowKey=''rk15071980'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [281793c1-0002-0015-0735-f33d93000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [b19da996-0002-0021-40b8-88b640000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -50,27 +49,27 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [97b35c66-5f28-11e6-a97a-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:31:02 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [4d24fd64-f4ab-11e6-8ad3-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:52:05 GMT']
+      x-ms-version: ['2016-05-31']
     method: GET
     uri: https://storagename.table.core.windows.net/uttable15071980(PartitionKey='pk15071980',RowKey='rk15071980')
   response:
-    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttable15071980/@Element","odata.etag":"W/\"datetime''2016-08-10T18%3A31%3A01.4213639Z''\"","PartitionKey":"pk15071980","RowKey":"rk15071980","Timestamp":"2016-08-10T18:31:01.4213639Z","evenratio":3.0,"Birthday@odata.type":"Edm.DateTime","Birthday":"1973-10-04T00:00:00Z","other":20,"clsid@odata.type":"Edm.Guid","clsid":"c9da6455-213d-42c9-9a79-3e9149a57833","ratio":3.1,"age@odata.type":"Edm.Int64","age":"39","birthday@odata.type":"Edm.DateTime","birthday":"1970-10-04T00:00:00Z","binary@odata.type":"Edm.Binary","binary":"YmluYXJ5","married":true,"_ClientEncryptionMetadata1":"{\"WrappedContentKey\":
-        {\"KeyId\": \"key1\", \"EncryptedKey\": \"L7cagJbozJL/n/Xt9v+jCR0xTkllCc1yDfR9u+LaRgmdoaSaWVGKLA==\",
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttable15071980/@Element","odata.etag":"W/\"datetime''2017-02-17T00%3A52%3A04.831361Z''\"","PartitionKey":"pk15071980","RowKey":"rk15071980","Timestamp":"2017-02-17T00:52:04.831361Z","sex@odata.type":"Edm.Binary","sex":"zw9KNZzY1Qh5EqCWIMmbXA==","deceased":false,"binary@odata.type":"Edm.Binary","binary":"YmluYXJ5","large@odata.type":"Edm.Int64","large":"933311100","other":20,"age@odata.type":"Edm.Int64","age":"39","married":true,"evenratio":3.0,"birthday@odata.type":"Edm.DateTime","birthday":"1970-10-04T00:00:00Z","Birthday@odata.type":"Edm.DateTime","Birthday":"1973-10-04T00:00:00Z","_ClientEncryptionMetadata2@odata.type":"Edm.Binary","_ClientEncryptionMetadata2":"no255kQ+cTfknnZYfy9zfQ==","_ClientEncryptionMetadata1":"{\"WrappedContentKey\":
+        {\"KeyId\": \"key1\", \"EncryptedKey\": \"AnfwlEBG9UaARdhlStw3TpVYknWNXLlNXR5ixYb8z6CjzyWkjjAr6A==\",
         \"Algorithm\": \"A256KW\"}, \"EncryptionAgent\": {\"Protocol\": \"1.0\", \"EncryptionAlgorithm\":
-        \"AES_CBC_256\"}, \"ContentEncryptionIV\": \"8pA66KsZZylffPSspiMu6Q==\", \"KeyWrappingMetadata\":
-        {\"EncryptionLibrary\": \"Python 0.33.0\"}}","name@odata.type":"Edm.Binary","name":"lxHmE8IxQvpNgZrTaDS3fQ==","_ClientEncryptionMetadata2@odata.type":"Edm.Binary","_ClientEncryptionMetadata2":"BjkCZCxlNRlI6VrvnNgBXg==","sex@odata.type":"Edm.Binary","sex":"5ztIWLMmJKHjEKze4KqOYg==","deceased":false,"large@odata.type":"Edm.Int64","large":"933311100"}'}
+        \"AES_CBC_256\"}, \"ContentEncryptionIV\": \"eg8E7M8QzPqu6pvnTjausw==\", \"KeyWrappingMetadata\":
+        {\"EncryptionLibrary\": \"Python 0.34.0\"}}","name@odata.type":"Edm.Binary","name":"MA77qpUtChWBssHVuwLS2A==","ratio":3.1,"clsid@odata.type":"Edm.Guid","clsid":"c9da6455-213d-42c9-9a79-3e9149a57833"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Wed, 10 Aug 2016 18:31:01 GMT']
-      ETag: [W/"datetime'2016-08-10T18%3A31%3A01.4213639Z'"]
+      Date: ['Fri, 17 Feb 2017 00:52:04 GMT']
+      ETag: [W/"datetime'2017-02-17T00%3A52%3A04.831361Z'"]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [281793d0-0002-0015-1335-f33d93000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [b19da99b-0002-0021-42b8-88b640000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 200, message: OK}
 version: 1

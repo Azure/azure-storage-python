@@ -4,66 +4,68 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [d240ee8a-5f27-11e6-a0b7-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:31 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [c157bdda-f4a8-11e6-8353-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:51 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerb02e1f27?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:25:29 GMT']
-      ETag: ['"0x8D3C14BB5D61C03"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:30 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:50 GMT']
+      ETag: ['"0x8D456CCA59E877D"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:51 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [05f446dd-0001-0016-0334-f33e94000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [ca39a3e0-0001-0006-4cb5-88a184000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: hello world
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [d283b274-5f27-11e6-ba00-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:32 GMT']
-      x-ms-version: ['2015-07-08']
+      x-ms-client-request-id: [c19324c2-f4a8-11e6-8519-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:52 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerb02e1f27/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 10 Aug 2016 18:25:29 GMT']
-      ETag: ['"0x8D3C14BB5B56D7F"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:30 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:51 GMT']
+      ETag: ['"0x8D456CCA5AEBC3F"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:51 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [05f446f8-0001-0016-1a34-f33e94000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [ca39a3f2-0001-0006-5ab5-88a184000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      If-Unmodified-Since: ['Wed, 10 Aug 2016 18:10:32 GMT']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [d28ad964-5f27-11e6-8f7f-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:32 GMT']
-      x-ms-version: ['2015-07-08']
+      If-Unmodified-Since: ['Fri, 17 Feb 2017 00:18:52 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [c1a1e790-f4a8-11e6-9e10-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:52 GMT']
+      x-ms-version: ['2016-05-31']
     method: HEAD
     uri: https://storagename.blob.core.windows.net/utcontainerb02e1f27/blob1
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:25:30 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:51 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [05f4471d-0001-0016-3c34-f33e94000000]
-      x-ms-version: ['2015-07-08']
+      Vary: [Origin]
+      x-ms-request-id: [ca39a403-0001-0006-6bb5-88a184000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}
 version: 1

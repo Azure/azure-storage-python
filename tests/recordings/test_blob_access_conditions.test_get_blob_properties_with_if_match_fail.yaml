@@ -4,66 +4,68 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [c504f3cc-5f27-11e6-b5c5-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:09 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [bdfa78d8-f4a8-11e6-903c-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:46 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer177b1d10?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:25:07 GMT']
-      ETag: ['"0x8D3C14BA8335CE0"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:07 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:45 GMT']
+      ETag: ['"0x8D456CCA24703F4"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:46 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [be42444d-0001-0039-5a34-f3bfae000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [ad82f1cd-0001-002c-03b5-887e94000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: hello world
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [c54a1a08-5f27-11e6-a7ab-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:09 GMT']
-      x-ms-version: ['2015-07-08']
+      x-ms-client-request-id: [be36cff8-f4a8-11e6-92b4-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:46 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer177b1d10/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 10 Aug 2016 18:25:07 GMT']
-      ETag: ['"0x8D3C14BA87ADF45"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:08 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:45 GMT']
+      ETag: ['"0x8D456CCA252FE78"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:46 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [be42445b-0001-0039-6434-f3bfae000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [ad82f1e5-0001-002c-19b5-887e94000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       If-Match: ['0x111111111111111']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [c5514102-5f27-11e6-bc6e-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:10 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [be46631c-f4a8-11e6-a7f8-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:46 GMT']
+      x-ms-version: ['2016-05-31']
     method: HEAD
     uri: https://storagename.blob.core.windows.net/utcontainer177b1d10/blob1
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:25:07 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:45 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [be42446b-0001-0039-7434-f3bfae000000]
-      x-ms-version: ['2015-07-08']
+      Vary: [Origin]
+      x-ms-request-id: [ad82f1fa-0001-002c-2eb5-887e94000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}
 version: 1

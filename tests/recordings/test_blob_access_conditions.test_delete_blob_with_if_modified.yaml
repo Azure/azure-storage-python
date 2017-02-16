@@ -4,66 +4,67 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [d074c676-5f27-11e6-b934-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:28 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [b35d26ec-f4a8-11e6-8f3c-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:28 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer3b618d0?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:25:25 GMT']
-      ETag: ['"0x8D3C14BB375CC27"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:26 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:27 GMT']
+      ETag: ['"0x8D456CC9794994D"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:28 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [e96418dd-0001-001e-6c34-f325e7000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [ba961610-0001-0021-70b5-88b640000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: hello world
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [d0b789ae-5f27-11e6-8231-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:29 GMT']
-      x-ms-version: ['2015-07-08']
+      x-ms-client-request-id: [b39480da-f4a8-11e6-baaf-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:28 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer3b618d0/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 10 Aug 2016 18:25:25 GMT']
-      ETag: ['"0x8D3C14BB3E7854F"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:27 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:27 GMT']
+      ETag: ['"0x8D456CC97B0A231"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:28 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [e96418f0-0001-001e-7b34-f325e7000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [ba961620-0001-0021-7eb5-88b640000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-Modified-Since: ['Wed, 10 Aug 2016 18:10:28 GMT']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [d0beb1b4-5f27-11e6-92ca-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:29 GMT']
-      x-ms-version: ['2015-07-08']
+      If-Modified-Since: ['Fri, 17 Feb 2017 00:18:28 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [b3a31854-f4a8-11e6-ac7c-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:28 GMT']
+      x-ms-version: ['2016-05-31']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/utcontainer3b618d0/blob1
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:25:25 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:27 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [e9641905-0001-001e-0f34-f325e7000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [ba96163d-0001-0021-1bb5-88b640000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 202, message: Accepted}
 version: 1
