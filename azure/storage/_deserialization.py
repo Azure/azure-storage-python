@@ -34,6 +34,9 @@ from .models import (
 def _int_to_str(value):
     return value if value is None else int(value)
 
+def _bool(value):
+    return value.lower() == 'true'
+
 def _get_download_size(start_range, end_range, resource_size):
     if start_range is not None:
         end_range = end_range if end_range else (resource_size if resource_size else None)
@@ -53,6 +56,7 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_to_str),
     'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_to_str),
     'x-ms-share-quota': (None, 'quota', _int_to_str),
+    'x-ms-server-encrypted': (None, 'server_encrypted', _bool),
     'content-type': ('content_settings', 'content_type', _to_str),
     'cache-control': ('content_settings', 'cache_control', _to_str),
     'content-encoding': ('content_settings', 'content_encoding', _to_str),
@@ -67,6 +71,7 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-copy-status': ('copy', 'status', _to_str),
     'x-ms-copy-progress': ('copy', 'progress', _to_str),
     'x-ms-copy-completion-time': ('copy', 'completion_time', parser.parse),
+    'x-ms-copy-destination-snapshot': ('copy', 'destination_snapshot_time', _to_str),
     'x-ms-copy-status-description': ('copy', 'status_description', _to_str),
 }
 
@@ -325,7 +330,3 @@ def _convert_xml_to_retention_policy(xml, retention_policy):
     days_element =  xml.find('Days')
     if days_element is not None:
         retention_policy.days = int(days_element.text)
-
-
-def _bool(value):
-    return value.lower() == 'true'

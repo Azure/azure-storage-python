@@ -34,7 +34,10 @@ from .._deserialization import (
     _parse_metadata,
 )
 from .._error import _validate_content_match
-from .._common_conversion import _get_content_md5
+from .._common_conversion import (
+    _get_content_md5,
+    _to_str,
+)
 
 def _parse_share(response, name):
     if response is None:
@@ -59,9 +62,17 @@ def _parse_file(response, name, validate_content=False):
     metadata = _parse_metadata(response)
     props = _parse_properties(response, FileProperties)
 
+    # For range gets, only look at 'x-ms-content-md5' for overall MD5
+    content_settings = getattr(props, 'content_settings')
+    if 'content-range' in response.headers:
+        if 'x-ms-content-md5' in response.headers:
+            setattr(content_settings, 'content_md5', _to_str(response.headers['x-ms-content-md5']))
+        else:
+            delattr(content_settings, 'content_md5')
+
     if validate_content:
         computed_md5 = _get_content_md5(response.body)
-        _validate_content_match(props.content_settings.content_md5, computed_md5)
+        _validate_content_match(response.headers['content-md5'], computed_md5)
 
     return File(name, response.body, props, metadata)
 

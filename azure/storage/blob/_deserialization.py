@@ -27,6 +27,7 @@ from .._deserialization import (
     _int_to_str,
     _parse_metadata,
     _convert_xml_to_signed_identifiers,
+    _bool,
 )
 from .models import (
     Container,
@@ -112,9 +113,17 @@ def _parse_blob(response, name, snapshot, validate_content=False, require_encryp
     metadata = _parse_metadata(response)
     props = _parse_properties(response, BlobProperties)
 
+    # For range gets, only look at 'x-ms-blob-content-md5' for overall MD5
+    content_settings = getattr(props, 'content_settings')
+    if 'content-range' in response.headers:
+        if 'x-ms-blob-content-md5' in response.headers:
+            setattr(content_settings, 'content_md5', _to_str(response.headers['x-ms-blob-content-md5']))
+        else:
+            delattr(content_settings, 'content_md5')
+
     if validate_content:
         computed_md5 = _get_content_md5(response.body)
-        _validate_content_match(props.content_settings.content_md5, computed_md5)
+        _validate_content_match(response.headers['content-md5'], computed_md5)
 
     if key_encryption_key is not None or key_resolver_function is not None:
             try:
@@ -154,7 +163,8 @@ def _convert_xml_to_containers(response):
             <Etag>etag</Etag>
             <LeaseStatus>locked | unlocked</LeaseStatus>
             <LeaseState>available | leased | expired | breaking | broken</LeaseState>
-            <LeaseDuration>infinite | fixed</LeaseDuration>      
+            <LeaseDuration>infinite | fixed</LeaseDuration>
+            <PublicAccess>blob | container</PublicAccess>
           </Properties>
           <Metadata>
             <metadata-name>value</metadata-name>
@@ -194,6 +204,7 @@ def _convert_xml_to_containers(response):
         container.properties.lease_status = properties_element.findtext('LeaseStatus')
         container.properties.lease_state = properties_element.findtext('LeaseState')
         container.properties.lease_duration = properties_element.findtext('LeaseDuration')
+        container.properties.public_access = properties_element.findtext('PublicAccess')
         
         # Add container to list
         containers.append(container)
@@ -206,6 +217,7 @@ LIST_BLOBS_ATTRIBUTE_MAP = {
     'x-ms-blob-sequence-number': (None, 'sequence_number', _int_to_str),
     'BlobType': (None, 'blob_type', _to_str),
     'Content-Length': (None, 'content_length', _int_to_str),
+    'ServerEncrypted': (None, 'server_encrypted', _bool),
     'Content-Type': ('content_settings', 'content_type', _to_str),
     'Content-Encoding': ('content_settings', 'content_encoding', _to_str),
     'Content-Disposition': ('content_settings', 'content_disposition', _to_str),
@@ -342,20 +354,22 @@ def _convert_xml_to_block_list(response):
     list_element = ETree.fromstring(response.body)
 
     committed_blocks_element = list_element.find('CommittedBlocks')
-    for block_element in committed_blocks_element.findall('Block'):
-        block_id = _decode_base64_to_text(block_element.findtext('Name', ''))
-        block_size = int(block_element.findtext('Size'))
-        block = BlobBlock(id=block_id, state=BlobBlockState.Committed)
-        block._set_size(block_size)
-        block_list.committed_blocks.append(block)
+    if committed_blocks_element is not None:
+        for block_element in committed_blocks_element.findall('Block'):
+            block_id = _decode_base64_to_text(block_element.findtext('Name', ''))
+            block_size = int(block_element.findtext('Size'))
+            block = BlobBlock(id=block_id, state=BlobBlockState.Committed)
+            block._set_size(block_size)
+            block_list.committed_blocks.append(block)
 
     uncommitted_blocks_element = list_element.find('UncommittedBlocks')
-    for block_element in uncommitted_blocks_element.findall('Block'):
-        block_id = _decode_base64_to_text(block_element.findtext('Name', ''))
-        block_size = int(block_element.findtext('Size'))
-        block = BlobBlock(id=block_id, state=BlobBlockState.Uncommitted)
-        block._set_size(block_size)
-        block_list.uncommitted_blocks.append(block)
+    if uncommitted_blocks_element is not None:
+        for block_element in uncommitted_blocks_element.findall('Block'):
+            block_id = _decode_base64_to_text(block_element.findtext('Name', ''))
+            block_size = int(block_element.findtext('Size'))
+            block = BlobBlock(id=block_id, state=BlobBlockState.Uncommitted)
+            block._set_size(block_size)
+            block_list.uncommitted_blocks.append(block)
 
     return block_list
 

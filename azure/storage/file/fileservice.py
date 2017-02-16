@@ -308,8 +308,7 @@ class FileService(StorageClient):
         :type start: date or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
-            stored access policy. To create a stored access policy, use 
-            set_file_service_properties.
+            stored access policy. To create a stored access policy, use :func:`~set_share_acl`.
         :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
@@ -1059,9 +1058,10 @@ class FileService(StorageClient):
 
         self._perform_request(request)
 
-    def list_directories_and_files(self, share_name, directory_name=None, 
+    def list_directories_and_files(self, share_name, directory_name=None,
                                    num_results=None, marker=None, timeout=None,
-                                   _context=None):
+                                   prefix=None):
+
         '''
         Returns a generator to list the directories and files under the specified share.
         The generator will lazily follow the continuation tokens returned by
@@ -1091,18 +1091,22 @@ class FileService(StorageClient):
             where the previous generator stopped.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str prefix:
+            List only the files and/or directories with the given prefix.
         '''
         operation_context = _OperationContext(location_lock=True)
         args = (share_name, directory_name)
         kwargs = {'marker': marker, 'max_results': num_results, 'timeout': timeout,
-                  '_context': operation_context}
+                  '_context': operation_context, 'prefix': prefix}
+
         resp = self._list_directories_and_files(*args, **kwargs)
 
         return ListGenerator(resp, self._list_directories_and_files, args, kwargs)
 
-    def _list_directories_and_files(self, share_name, directory_name=None, 
+    def _list_directories_and_files(self, share_name, directory_name=None,
                                    marker=None, max_results=None, timeout=None,
-                                   _context=None):
+                                    prefix=None, _context=None):
+
         '''
         Returns a list of the directories and files under the specified share.
 
@@ -1125,6 +1129,8 @@ class FileService(StorageClient):
             or equal to zero results in error response code 400 (Bad Request).
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str prefix:
+            List only the files and/or directories with the given prefix.
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -1134,6 +1140,7 @@ class FileService(StorageClient):
         request.query = {
              'restype': 'directory',
              'comp': 'list',
+             'prefix': _to_str(prefix),
              'marker': _to_str(marker),
              'maxresults': _int_to_str(max_results),
              'timeout': _int_to_str(timeout),

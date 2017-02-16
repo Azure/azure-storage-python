@@ -12,7 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #--------------------------------------------------------------------------
-from ._common_conversion import _to_str
+from sys import version_info
+from io import IOBase
+if version_info < (3,):
+    def _str(value):
+        if isinstance(value, unicode):
+            return value.encode('utf-8')
+
+        return str(value)
+else:
+    _str = str
+
+def _to_str(value):
+    return _str(value) if value is not None else None
+
 from azure.common import (
     AzureHttpError,
     AzureConflictHttpError,
@@ -34,6 +47,9 @@ _ERROR_ACCESS_POLICY = \
     'instance'
 _ERROR_PARALLEL_NOT_SEEKABLE = 'Parallel operations require a seekable stream.'
 _ERROR_VALUE_SHOULD_BE_BYTES = '{0} should be of type bytes.'
+_ERROR_VALUE_SHOULD_BE_BYTES_OR_STREAM = '{0} should be of type bytes or a readable file-like/io.IOBase stream object.'
+_ERROR_VALUE_SHOULD_BE_SEEKABLE_STREAM = '{0} should be a seekable file-like/io.IOBase type stream object.'
+_ERROR_VALUE_SHOULD_BE_STREAM = '{0} should be a file-like/io.IOBase type stream object with a read method.'
 _ERROR_VALUE_NONE = '{0} should not be None.'
 _ERROR_VALUE_NONE_OR_EMPTY = '{0} should not be None or empty.'
 _ERROR_VALUE_NEGATIVE = '{0} should not be negative.'
@@ -101,6 +117,10 @@ def _http_error_handler(http_error):
 def _validate_type_bytes(param_name, param):
     if not isinstance(param, bytes):
         raise TypeError(_ERROR_VALUE_SHOULD_BE_BYTES.format(param_name))
+
+def _validate_type_bytes_or_stream(param_name, param):
+    if not (isinstance(param, bytes) or hasattr(param, 'read')):
+        raise TypeError(_ERROR_VALUE_SHOULD_BE_BYTES_OR_STREAM.format(param_name))
 
 def _validate_not_none(param_name, param):
     if param is None:

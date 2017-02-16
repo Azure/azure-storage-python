@@ -19,19 +19,19 @@ if sys.version_info < (3,):
     from httplib import (
         HTTP_PORT,
         HTTPS_PORT,
-        )
+    )
     from urllib2 import quote as url_quote
 else:
     from http.client import (
         HTTP_PORT,
         HTTPS_PORT,
-        )
+    )
     from urllib.parse import quote as url_quote
 
 from . import HTTPError, HTTPResponse
+from .._serialization import _get_data_bytes_or_stream_only
 
 class _HTTPClient(object):
-
     '''
     Takes the request and sends it to cloud service and returns the response.
     '''
@@ -64,9 +64,9 @@ class _HTTPClient(object):
         '''
         Sets the proxy server host and port for the HTTP CONNECT Tunnelling.
 
-        Note that we set the proxies directly on the request later on rather than 
-        using the session object as requests has a bug where session proxy is ignored 
-        in favor of environment proxy. So, auth will not work unless it is passed 
+        Note that we set the proxies directly on the request later on rather than
+        using the session object as requests has a bug where session proxy is ignored
+        in favor of environment proxy. So, auth will not work unless it is passed
         directly when making the request as this overrides both.
 
         :param str host:
@@ -95,11 +95,11 @@ class _HTTPClient(object):
         :param HTTPRequest request:
             The request to serialize and send.
         :return: An HTTPResponse containing the parsed HTTP response.
-        :rtype: :class:`~azure.storage._http.HTTPResponse`             
+        :rtype: :class:`~azure.storage._http.HTTPResponse`
         '''
-        # Verify the body is in bytes
+        # Verify the body is in bytes or either a file-like/stream object
         if request.body:
-            assert isinstance(request.body, bytes)
+            request.body = _get_data_bytes_or_stream_only('request.body', request.body)
 
         # Construct the URI
         uri = self.protocol.lower() + '://' + request.host + request.path
@@ -119,4 +119,7 @@ class _HTTPClient(object):
         for key, name in response.headers.items():
             respheaders[key.lower()] = name
 
-        return HTTPResponse(status, response.reason, respheaders, response.content)
+        wrap = HTTPResponse(status, response.reason, respheaders, response.content)
+        response.close()
+
+        return wrap

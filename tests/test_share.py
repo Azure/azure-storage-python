@@ -28,7 +28,6 @@ from azure.storage import (
 )
 from azure.storage.file import (
     FileService,
-    FileService,
     SharePermissions,
 )
 from tests.testcase import (
@@ -515,6 +514,27 @@ class StorageShareTest(StorageTestCase):
         self.assertNamedItemInContainer(result2, 'filea3')
         self.assertNamedItemInContainer(result2, 'fileb1')
         self.assertEqual(result2.next_marker, None)
+
+    @record
+    def test_list_directories_and_files_with_prefix(self):
+        # Arrange
+        share_name = self._create_share()
+        self.fs.create_directory(share_name, 'dir1')
+        self.fs.create_directory(share_name, 'dir2')
+        self.fs.create_file(share_name, None, 'file1', 1024)
+        self.fs.create_directory(share_name, 'dir1/pref_dir3')
+        self.fs.create_file(share_name, 'dir1', 'pref_file2', 1025)
+        self.fs.create_file(share_name, 'dir1', 'file3', 1025)
+
+        # Act
+        resp = list(self.fs.list_directories_and_files(share_name, 'dir1', prefix='pref'))
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEqual(len(resp), 2)
+        self.assertIsNotNone(resp[0])
+        self.assertNamedItemInContainer(resp, 'pref_file2')
+        self.assertNamedItemInContainer(resp, 'pref_dir3')
 
     @record
     def test_shared_access_share(self):

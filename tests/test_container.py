@@ -29,6 +29,7 @@ from azure.storage.blob import (
     BlockBlobService,
     ContainerPermissions,
     Include,
+    PublicAccess,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -255,6 +256,22 @@ class StorageContainerTest(StorageTestCase):
         self.assertIsNotNone(containers[0])
         self.assertNamedItemInContainer(containers, container_name)
         self.assertDictEqual(containers[0].metadata, metadata)
+
+    @record
+    def test_list_containers_with_public_access(self):
+        # Arrange
+        container_name = self._create_container()
+        resp = self.bs.set_container_acl(container_name, public_access=PublicAccess.Blob)
+
+        # Act
+        containers = list(self.bs.list_containers(prefix=container_name))
+
+        # Assert
+        self.assertIsNotNone(containers)
+        self.assertGreaterEqual(len(containers), 1)
+        self.assertIsNotNone(containers[0])
+        self.assertNamedItemInContainer(containers, container_name)
+        self.assertEqual(containers[0].properties.public_access, PublicAccess.Blob)
 
     @record
     def test_list_containers_with_num_results_and_marker(self):

@@ -205,7 +205,7 @@ class StorageBlockBlobTest(StorageTestCase):
         self.bs.put_block(self.container_name, blob_name, b'CCC', '3')
 
         # Act
-        block_list = self.bs.get_block_list(self.container_name, blob_name, None, 'all')
+        block_list = self.bs.get_block_list(self.container_name, blob_name, None, 'uncommitted')
 
         # Assert
         self.assertIsNotNone(block_list)
@@ -231,7 +231,7 @@ class StorageBlockBlobTest(StorageTestCase):
         self.bs.put_block_list(self.container_name, blob_name, block_list)
 
         # Act
-        block_list = self.bs.get_block_list(self.container_name, blob_name, None, 'all')
+        block_list = self.bs.get_block_list(self.container_name, blob_name, None, 'committed')
 
         # Assert
         self.assertIsNotNone(block_list)
@@ -272,7 +272,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_from_bytes_blob_with_lease_id(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return        
+            return
 
         # Arrange
         blob_name = self._create_blob()
@@ -289,7 +289,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_metadata(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return        
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -307,8 +307,8 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_properties(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return        
-        
+            return
+
         # Arrange
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
@@ -317,7 +317,7 @@ class StorageBlockBlobTest(StorageTestCase):
         content_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish')
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
                                        content_settings=content_settings)
 
         # Assert
@@ -329,7 +329,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return        
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -350,7 +350,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_bytes_with_index(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return        
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -407,7 +407,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_path(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return        
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -462,7 +462,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_path_with_properties(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return      
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -485,7 +485,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_chunked_upload(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return      
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -503,7 +503,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_non_seekable_chunked_upload_known_size(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return    
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -515,7 +515,7 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StorageBlockBlobTest.NonSeekableFile(stream)
-            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file, 
+            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file,
                                             count=blob_size, max_connections=1)
 
         # Assert
@@ -524,7 +524,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_non_seekable_chunked_upload_unknown_size(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return    
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -535,7 +535,7 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StorageBlockBlobTest.NonSeekableFile(stream)
-            self.bs.create_blob_from_stream(self.container_name, blob_name, 
+            self.bs.create_blob_from_stream(self.container_name, blob_name,
                                             non_seekable_file, max_connections=1)
 
         # Assert
@@ -544,7 +544,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_with_progress_chunked_upload(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return    
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -568,7 +568,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_chunked_upload_with_count(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return    
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -587,7 +587,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_chunked_upload_with_count_and_properties(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return    
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -601,7 +601,7 @@ class StorageBlockBlobTest(StorageTestCase):
             content_language='spanish')
         blob_size = len(data) - 301
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, 
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
                                             blob_size, content_settings=content_settings)
 
         # Assert
@@ -613,7 +613,7 @@ class StorageBlockBlobTest(StorageTestCase):
     def test_create_blob_from_stream_chunked_upload_with_properties(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
-            return    
+            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -626,7 +626,7 @@ class StorageBlockBlobTest(StorageTestCase):
             content_type='image/png',
             content_language='spanish')
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, 
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
                                             content_settings=content_settings)
 
         # Assert
@@ -674,7 +674,7 @@ class StorageBlockBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_text(self.container_name, blob_name, text, 'utf-16', 
+        self.bs.create_blob_from_text(self.container_name, blob_name, text, 'utf-16',
                                       progress_callback=callback)
 
         # Assert
@@ -707,7 +707,7 @@ class StorageBlockBlobTest(StorageTestCase):
         data = b'hello world'
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
                                        validate_content=True)
 
         # Assert
@@ -722,7 +722,7 @@ class StorageBlockBlobTest(StorageTestCase):
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
                                        validate_content=True)
 
         # Assert
