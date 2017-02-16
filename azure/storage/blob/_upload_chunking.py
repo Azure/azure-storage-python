@@ -69,8 +69,38 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
 
     if max_connections > 1:
         import concurrent.futures
+        from threading import BoundedSemaphore
+
+        '''
+        Ensures we bound the chunking so we only buffer and submit 'max_connections' amount of work items to the executor.
+        This is necessary as the executor queue will keep accepting submitted work items, which results in buffering all the blocks if
+        the max_connections + 1 ensures the next chunk is already buffered and ready for when the worker thread is available.
+        '''
+        chunk_throttler = BoundedSemaphore(max_connections + 1)
+
         executor = concurrent.futures.ThreadPoolExecutor(max_connections)
-        range_ids = list(executor.map(uploader.process_chunk, uploader.get_chunk_streams()))
+        futures = []
+        running_futures = []
+
+        # Check for exceptions and fail fast.
+        for chunk in uploader.get_chunk_streams():
+            for f in running_futures:
+                if f.done():
+                    if f.exception():
+                        raise f.exception()
+                    else:
+                        running_futures.remove(f)
+
+            chunk_throttler.acquire()
+            future = executor.submit(uploader.process_chunk, chunk)
+
+            # Calls callback upon completion (even if the callback was added after the Future task is done).
+            future.add_done_callback(lambda x: chunk_throttler.release())
+            futures.append(future)
+            running_futures.append(future)
+
+        # result() will wait until completion and also raise any exceptions that may have been set.
+        range_ids = [f.result() for f in futures]
     else:
         range_ids = [uploader.process_chunk(result) for result in uploader.get_chunk_streams()]
 
@@ -172,7 +202,14 @@ class _BlobChunkUploader(object):
                 break
             index += len(data)
 
-    def process_chunk(self, chunk_data):
+    def process_chunk(self, chunk_iterable):
+
+        if self.parallel:
+            with (self.stream_lock):
+                chunk_data = self._get_next(chunk_iterable)
+        else:
+            chunk_data = self._get_next(chunk_iterable)
+
         chunk_bytes = chunk_data[1].read()
         chunk_offset = chunk_data[0]
         return self._upload_chunk_with_progress(chunk_offset, chunk_bytes)
@@ -193,6 +230,12 @@ class _BlobChunkUploader(object):
         self._update_progress(len(chunk_data))
         return range_id
 
+    def _get_next(self, iterable):
+        try:
+            return iterable.next()
+        except:
+            return None
+
     def get_substream_blocks(self):
         assert self.chunk_size is not None
         lock = self.stream_lock
@@ -203,7 +246,7 @@ class _BlobChunkUploader(object):
             if blob_length is None:
                 raise ValueError(_ERROR_VALUE_SHOULD_BE_SEEKABLE_STREAM.format('stream'))
 
-        blocks = int(ceil(blob_length / self.chunk_size))
+        blocks = int(ceil(blob_length / (self.chunk_size * 1.0)))
         last_block_size = self.chunk_size if blob_length % self.chunk_size == 0 else blob_length % self.chunk_size
 
         for i in range(blocks):
@@ -218,6 +261,7 @@ class _BlobChunkUploader(object):
         range_id = self._upload_substream_block(block_id, block_stream)
         self._update_progress(len(block_stream))
         return range_id
+
 
 
 class _BlockBlobChunkUploader(_BlobChunkUploader):
@@ -293,6 +337,22 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 appendpos_condition=self.current_length + chunk_offset,
                 timeout=self.timeout,
             )
+
+class _ChunkIterator():
+    def __init__(self, chunk_generator):
+        self.generator = chunk_generator
+        self.current = 1
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        self.current += 1
+        return self.current
+
+    def __next__(self):
+        self.current += 1
+        return self.current
 
 
 class _SubStream(IOBase):
@@ -413,3 +473,4 @@ class _SubStream(IOBase):
 
     def writeable(self):
         return False
+
