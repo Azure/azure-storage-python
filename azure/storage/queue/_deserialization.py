@@ -136,7 +136,7 @@ def _convert_xml_to_queue_messages(response, decode_function, require_encryption
             if (key_encryption_key is not None) or (resolver is not None):
                 message.content = _decrypt_queue_message(message.content, require_encryption,
                                                             key_encryption_key, resolver)
-                message.content = decode_function(message.content)
+            message.content = decode_function(message.content)
 
         message.insertion_time = parser.parse(message_element.findtext('InsertionTime'))
         message.expiration_time = parser.parse(message_element.findtext('ExpirationTime'))

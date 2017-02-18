@@ -4,20 +4,20 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [843b8ffa-5f28-11e6-99c8-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:30:30 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [30757fb8-f4aa-11e6-bef1-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:44:07 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queuee42613c2
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:30:28 GMT']
+      Date: ['Fri, 17 Feb 2017 00:44:06 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [08c7b1ae-0003-006b-5f35-f3a25c000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [4f6f9160-0003-0046-07b6-88a6bc000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
@@ -26,40 +26,44 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['103']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [8483a29a-5f28-11e6-ac85-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:30:30 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [30ad264a-f4aa-11e6-b775-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:44:07 GMT']
+      x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.queue.core.windows.net/queuee42613c2/messages
   response:
-    body: {string: ''}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>910635a5-6249-421f-82e3-9059f48b9ffd</MessageId><InsertionTime>Fri,
+        17 Feb 2017 00:44:07 GMT</InsertionTime><ExpirationTime>Fri, 24 Feb 2017 00:44:07
+        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAf2pL8raI0gE=</PopReceipt><TimeNextVisible>Fri,
+        17 Feb 2017 00:44:07 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:30:28 GMT']
+      Content-Type: [application/xml]
+      Date: ['Fri, 17 Feb 2017 00:44:06 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [08c7b1b3-0003-006b-6235-f3a25c000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [4f6f9163-0003-0046-08b6-88a6bc000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [8488ac88-5f28-11e6-ad2a-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:30:30 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [30bb4ca4-f4aa-11e6-8cdf-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:44:08 GMT']
+      x-ms-version: ['2016-05-31']
     method: GET
     uri: https://storagename.queue.core.windows.net/queuee42613c2?comp=metadata
   response:
     body: {string: ''}
     headers:
       Cache-Control: [no-cache]
-      Date: ['Wed, 10 Aug 2016 18:30:28 GMT']
+      Date: ['Fri, 17 Feb 2017 00:44:06 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-approximate-messages-count: ['1']
-      x-ms-request-id: [08c7b1bb-0003-006b-6835-f3a25c000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [4f6f9164-0003-0046-09b6-88a6bc000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 200, message: OK}
 version: 1

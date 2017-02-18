@@ -9,10 +9,10 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [30c87ff8-5f29-11e6-b8e5-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:35:19 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [dad55f80-f4ab-11e6-97f1-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:56:02 GMT']
+      x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.table.core.windows.net/Tables
   response:
@@ -21,21 +21,21 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/Tables(''querytablefcf31465'')']
-      Date: ['Wed, 10 Aug 2016 18:35:17 GMT']
+      Date: ['Fri, 17 Feb 2017 00:56:02 GMT']
       Location: ['https://storagename.table.core.windows.net/Tables(''querytablefcf31465'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [d6dfc340-0002-0045-4635-f3229b000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [06ba4c7a-0002-0001-0cb8-88cde7000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 204, message: No Content}
 - request:
-    body: '--batch_30e0c93c-5f29-11e6-a582-0050b66b38e2
+    body: '--batch_db0f8d19-f4ab-11e6-8d2b-64510640cc62
 
-      Content-Type: multipart/mixed; boundary=changeset_30e0c93d-5f29-11e6-b70b-0050b66b38e2
+      Content-Type: multipart/mixed; boundary=changeset_db0f8d1a-f4ab-11e6-8cfd-64510640cc62
 
 
-      --changeset_30e0c93d-5f29-11e6-b70b-0050b66b38e2
+      --changeset_db0f8d1a-f4ab-11e6-8cfd-64510640cc62
 
       Content-Type: application/http
 
@@ -46,25 +46,25 @@ interactions:
 
       Content-ID: 1
 
-      Content-Type: application/json
+      Accept: application/json;odata=minimalmetadata
 
       Prefer: return-no-content
 
-      Accept: application/json;odata=minimalmetadata
+      Content-Type: application/json
 
       Content-Length: 556
 
 
-      {"deceased": false, "RowKey": "rkfcf314651", "age": "39", "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833",
-      "PartitionKey": "pkfcf31465", "married": true, "sex": "male", "binary@odata.type":
-      "Edm.Binary", "clsid@odata.type": "Edm.Guid", "Birthday@odata.type": "Edm.DateTime",
-      "large@odata.type": "Edm.Int64", "age@odata.type": "Edm.Int64", "large": "933311100",
-      "birthday": "1970-10-04T00:00:00Z", "ratio": 3.1, "birthday@odata.type": "Edm.DateTime",
-      "other": 20, "Birthday": "1973-10-04T00:00:00Z", "evenratio": 3.0, "binary":
-      "YmluYXJ5", "optional": null}
+      {"birthday": "1970-10-04T00:00:00Z", "Birthday": "1973-10-04T00:00:00Z", "PartitionKey":
+      "pkfcf31465", "large@odata.type": "Edm.Int64", "sex": "male", "deceased": false,
+      "birthday@odata.type": "Edm.DateTime", "optional": null, "large": "933311100",
+      "other": 20, "age": "39", "married": true, "clsid@odata.type": "Edm.Guid", "Birthday@odata.type":
+      "Edm.DateTime", "binary": "YmluYXJ5", "RowKey": "rkfcf314651", "evenratio":
+      3.0, "ratio": 3.1, "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833", "age@odata.type":
+      "Edm.Int64", "binary@odata.type": "Edm.Binary"}
 
 
-      --changeset_30e0c93d-5f29-11e6-b70b-0050b66b38e2
+      --changeset_db0f8d1a-f4ab-11e6-8cfd-64510640cc62
 
       Content-Type: application/http
 
@@ -75,65 +75,63 @@ interactions:
 
       Content-ID: 2
 
-      Content-Type: application/json
+      Accept: application/json;odata=minimalmetadata
 
       Prefer: return-no-content
 
-      Accept: application/json;odata=minimalmetadata
+      Content-Type: application/json
 
       Content-Length: 557
 
 
-      {"deceased": false, "RowKey": "rkfcf3146512", "age": "39", "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833",
-      "PartitionKey": "pkfcf31465", "married": true, "sex": "male", "binary@odata.type":
-      "Edm.Binary", "clsid@odata.type": "Edm.Guid", "Birthday@odata.type": "Edm.DateTime",
-      "large@odata.type": "Edm.Int64", "age@odata.type": "Edm.Int64", "large": "933311100",
-      "birthday": "1970-10-04T00:00:00Z", "ratio": 3.1, "birthday@odata.type": "Edm.DateTime",
-      "other": 20, "Birthday": "1973-10-04T00:00:00Z", "evenratio": 3.0, "binary":
-      "YmluYXJ5", "optional": null}
+      {"birthday": "1970-10-04T00:00:00Z", "Birthday": "1973-10-04T00:00:00Z", "PartitionKey":
+      "pkfcf31465", "large@odata.type": "Edm.Int64", "sex": "male", "deceased": false,
+      "birthday@odata.type": "Edm.DateTime", "optional": null, "large": "933311100",
+      "other": 20, "age": "39", "married": true, "clsid@odata.type": "Edm.Guid", "Birthday@odata.type":
+      "Edm.DateTime", "binary": "YmluYXJ5", "RowKey": "rkfcf3146512", "evenratio":
+      3.0, "ratio": 3.1, "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833", "age@odata.type":
+      "Edm.Int64", "binary@odata.type": "Edm.Binary"}
 
 
-      --changeset_30e0c93d-5f29-11e6-b70b-0050b66b38e2--
+      --changeset_db0f8d1a-f4ab-11e6-8cfd-64510640cc62--
 
-      --batch_30e0c93c-5f29-11e6-a582-0050b66b38e2--'
+      --batch_db0f8d19-f4ab-11e6-8d2b-64510640cc62--'
     headers:
       Connection: [keep-alive]
       Content-Length: ['1923']
-      Content-Type: [multipart/mixed; boundary=batch_30e0c93c-5f29-11e6-a582-0050b66b38e2]
+      Content-Type: [multipart/mixed; boundary=batch_db0f8d19-f4ab-11e6-8d2b-64510640cc62]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [30e0dcc2-5f29-11e6-8be6-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:35:19 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [db0f8d1b-f4ab-11e6-a12b-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:56:03 GMT']
+      x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.table.core.windows.net/$batch
   response:
-    body: {string: "--batchresponse_150a899e-d155-4178-98f7-2c54053e7f08\r\nContent-Type:\
-        \ multipart/mixed; boundary=changesetresponse_542aaf92-5ab8-4183-a595-59cc53c58a2e\r\
-        \n\r\n--changesetresponse_542aaf92-5ab8-4183-a595-59cc53c58a2e\r\nContent-Type:\
-        \ application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nHTTP/1.1 204\
-        \ No Content\r\nContent-ID: 1\r\nX-Content-Type-Options: nosniff\r\nCache-Control:\
-        \ no-cache\r\nPreference-Applied: return-no-content\r\nDataServiceVersion:\
-        \ 3.0;\r\nLocation: https://storagename.table.core.windows.net/querytablefcf31465(PartitionKey='pkfcf31465',RowKey='rkfcf314651')\r\
-        \nDataServiceId: https://storagename.table.core.windows.net/querytablefcf31465(PartitionKey='pkfcf31465',RowKey='rkfcf314651')\r\
-        \nETag: W/\"datetime'2016-08-10T18%3A35%3A18.0885329Z'\"\r\n\r\n\r\n--changesetresponse_542aaf92-5ab8-4183-a595-59cc53c58a2e\r\
-        \nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\
-        \nHTTP/1.1 204 No Content\r\nContent-ID: 2\r\nX-Content-Type-Options: nosniff\r\
-        \nCache-Control: no-cache\r\nPreference-Applied: return-no-content\r\nDataServiceVersion:\
-        \ 3.0;\r\nLocation: https://storagename.table.core.windows.net/querytablefcf31465(PartitionKey='pkfcf31465',RowKey='rkfcf3146512')\r\
-        \nDataServiceId: https://storagename.table.core.windows.net/querytablefcf31465(PartitionKey='pkfcf31465',RowKey='rkfcf3146512')\r\
-        \nETag: W/\"datetime'2016-08-10T18%3A35%3A18.0885329Z'\"\r\n\r\n\r\n--changesetresponse_542aaf92-5ab8-4183-a595-59cc53c58a2e--\r\
-        \n--batchresponse_150a899e-d155-4178-98f7-2c54053e7f08--\r\n"}
+    body: {string: "--batchresponse_8777b7c9-1730-422c-b5a5-c031f09aae6f\r\nContent-Type:
+        multipart/mixed; boundary=changesetresponse_ca40b7c4-a2d6-4ded-87e4-0f0026c3a92c\r\n\r\n--changesetresponse_ca40b7c4-a2d6-4ded-87e4-0f0026c3a92c\r\nContent-Type:
+        application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nHTTP/1.1 204
+        No Content\r\nContent-ID: 1\r\nX-Content-Type-Options: nosniff\r\nCache-Control:
+        no-cache\r\nPreference-Applied: return-no-content\r\nDataServiceVersion: 3.0;\r\nLocation:
+        https://storagename.table.core.windows.net/querytablefcf31465(PartitionKey='pkfcf31465',RowKey='rkfcf314651')\r\nDataServiceId:
+        https://storagename.table.core.windows.net/querytablefcf31465(PartitionKey='pkfcf31465',RowKey='rkfcf314651')\r\nETag:
+        W/\"datetime'2017-02-17T00%3A56%3A03.1557417Z'\"\r\n\r\n\r\n--changesetresponse_ca40b7c4-a2d6-4ded-87e4-0f0026c3a92c\r\nContent-Type:
+        application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nHTTP/1.1 204
+        No Content\r\nContent-ID: 2\r\nX-Content-Type-Options: nosniff\r\nCache-Control:
+        no-cache\r\nPreference-Applied: return-no-content\r\nDataServiceVersion: 3.0;\r\nLocation:
+        https://storagename.table.core.windows.net/querytablefcf31465(PartitionKey='pkfcf31465',RowKey='rkfcf3146512')\r\nDataServiceId:
+        https://storagename.table.core.windows.net/querytablefcf31465(PartitionKey='pkfcf31465',RowKey='rkfcf3146512')\r\nETag:
+        W/\"datetime'2017-02-17T00%3A56%3A03.1557417Z'\"\r\n\r\n\r\n--changesetresponse_ca40b7c4-a2d6-4ded-87e4-0f0026c3a92c--\r\n--batchresponse_8777b7c9-1730-422c-b5a5-c031f09aae6f--\r\n"}
     headers:
       Cache-Control: [no-cache]
-      Content-Type: [multipart/mixed; boundary=batchresponse_150a899e-d155-4178-98f7-2c54053e7f08]
-      Date: ['Wed, 10 Aug 2016 18:35:17 GMT']
+      Content-Type: [multipart/mixed; boundary=batchresponse_8777b7c9-1730-422c-b5a5-c031f09aae6f]
+      Date: ['Fri, 17 Feb 2017 00:56:02 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [d6dfc34a-0002-0045-4e35-f3229b000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [06ba4c7d-0002-0001-0db8-88cde7000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -142,22 +140,22 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [30ec2976-5f29-11e6-8ed2-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:35:20 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [db1f0c14-f4ab-11e6-b936-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:56:03 GMT']
+      x-ms-version: ['2016-05-31']
     method: GET
     uri: https://storagename.table.core.windows.net/querytablefcf31465()?%24select=age%2Csex
   response:
-    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#querytablefcf31465&$select=age,sex","value":[{"odata.etag":"W/\"datetime''2016-08-10T18%3A35%3A18.0885329Z''\"","age@odata.type":"Edm.Int64","age":"39","sex":"male"},{"odata.etag":"W/\"datetime''2016-08-10T18%3A35%3A18.0885329Z''\"","age@odata.type":"Edm.Int64","age":"39","sex":"male"}]}'}
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#querytablefcf31465&$select=age,sex","value":[{"odata.etag":"W/\"datetime''2017-02-17T00%3A56%3A03.1557417Z''\"","age@odata.type":"Edm.Int64","age":"39","sex":"male"},{"odata.etag":"W/\"datetime''2017-02-17T00%3A56%3A03.1557417Z''\"","age@odata.type":"Edm.Int64","age":"39","sex":"male"}]}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Wed, 10 Aug 2016 18:35:17 GMT']
+      Date: ['Fri, 17 Feb 2017 00:56:03 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [d6dfc35f-0002-0045-6135-f3229b000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [06ba4c7e-0002-0001-0eb8-88cde7000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 200, message: OK}
 version: 1

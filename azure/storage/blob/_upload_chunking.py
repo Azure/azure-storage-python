@@ -69,8 +69,38 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
 
     if max_connections > 1:
         import concurrent.futures
+        from threading import BoundedSemaphore
+
+        '''
+        Ensures we bound the chunking so we only buffer and submit 'max_connections' amount of work items to the executor.
+        This is necessary as the executor queue will keep accepting submitted work items, which results in buffering all the blocks if
+        the max_connections + 1 ensures the next chunk is already buffered and ready for when the worker thread is available.
+        '''
+        chunk_throttler = BoundedSemaphore(max_connections + 1)
+
         executor = concurrent.futures.ThreadPoolExecutor(max_connections)
-        range_ids = list(executor.map(uploader.process_chunk, uploader.get_chunk_streams()))
+        futures = []
+        running_futures = []
+
+        # Check for exceptions and fail fast.
+        for chunk in uploader.get_chunk_streams():
+            for f in running_futures:
+                if f.done():
+                    if f.exception():
+                        raise f.exception()
+                    else:
+                        running_futures.remove(f)
+
+            chunk_throttler.acquire()
+            future = executor.submit(uploader.process_chunk, chunk)
+
+            # Calls callback upon completion (even if the callback was added after the Future task is done).
+            future.add_done_callback(lambda x: chunk_throttler.release())
+            futures.append(future)
+            running_futures.append(future)
+
+        # result() will wait until completion and also raise any exceptions that may have been set.
+        range_ids = [f.result() for f in futures]
     else:
         range_ids = [uploader.process_chunk(result) for result in uploader.get_chunk_streams()]
 
@@ -203,7 +233,7 @@ class _BlobChunkUploader(object):
             if blob_length is None:
                 raise ValueError(_ERROR_VALUE_SHOULD_BE_SEEKABLE_STREAM.format('stream'))
 
-        blocks = int(ceil(blob_length / self.chunk_size))
+        blocks = int(ceil(blob_length / (self.chunk_size * 1.0)))
         last_block_size = self.chunk_size if blob_length % self.chunk_size == 0 else blob_length % self.chunk_size
 
         for i in range(blocks):
@@ -218,7 +248,6 @@ class _BlobChunkUploader(object):
         range_id = self._upload_substream_block(block_id, block_stream)
         self._update_progress(len(block_stream))
         return range_id
-
 
 class _BlockBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_offset, chunk_data):
@@ -293,7 +322,6 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 appendpos_condition=self.current_length + chunk_offset,
                 timeout=self.timeout,
             )
-
 
 class _SubStream(IOBase):
     def __init__(self, wrapped_stream, stream_begin_index, length, lockObj):

@@ -11,6 +11,7 @@
 ### Blob:
 - Added support for server-side encryption headers.
 - Properly return connections to pool when checking for non-existent blobs.
+- Fixed a bug with parallel uploads for PageBlobs and BlockBlobs where chunks were being buffered and queued faster than can be processed, potentially causing out-of-memory issues.
 - Added large block blob upload support. Blocks can now support sizes up to 100 MB and thus the maximum size of a BlockBlob is now 5,000,000 MB (~4.75 TB).
 - Added streaming upload support for the put_block method and a new memory optimized upload algorithm for create_blob_from_stream and create_blob_from_file APIs. (BlockBlobService)
 - The new upload strategy will no longer fully buffer seekable streams unless Encryption is enabled. See 'use_byte_buffer' parameter documentation on the 'create_blob_from_stream' method for more details.

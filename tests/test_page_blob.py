@@ -655,8 +655,11 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Assert
 
-    @record
+
     def test_incremental_copy_blob(self):
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         source_blob_name = self._create_blob(2048)
         data = self.get_random_bytes(512)
