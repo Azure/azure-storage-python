@@ -4,8 +4,11 @@
 
 ## Version 0.34.0:
 
+### All:
+- Several error messages have been clarified or made more specific.
+
 ### Blob:
--  If-None-Match: * will now fail when reading a blob. Previously this header was ignored for blob reads.
+- If-None-Match: * will now fail when reading a blob. Previously this header was ignored for blob reads.
 
 ### Queue:
 - For put_message a QueueMessage will be returned.  This message will have pop receipt, insertion/expiration time, and message ID populated.
