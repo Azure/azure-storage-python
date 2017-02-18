@@ -4,64 +4,63 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [fb513f5c-5f25-11e6-85e6-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:12:21 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [8a6fc2d2-f4aa-11e6-8bc4-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:46:38 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/a92b0bb3?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:12:18 GMT']
-      ETag: ['"0x8D3C149DE58C339"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:12:19 GMT']
+      Date: ['Fri, 17 Feb 2017 00:46:37 GMT']
+      ETag: ['"0x8D456CE6EA5AAB1"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:46:38 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [6ae38f72-0001-0077-0532-f37a4b000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [d4e34be4-0001-0043-25b7-887467000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [fb513f5c-5f25-11e6-85e6-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:12:37 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [8a6fc2d2-f4aa-11e6-8bc4-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:46:53 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/a92b0bb3?restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The\
-        \ specified container already exists.\nRequestId:6ae3a8e1-0001-0077-3932-f37a4b000000\n\
-        Time:2016-08-10T18:12:34.6834420Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The
+        specified container already exists.\nRequestId:d4e356c1-0001-0043-38b7-887467000000\nTime:2017-02-17T00:46:53.6649171Z</Message></Error>"}
     headers:
       Content-Length: ['230']
       Content-Type: [application/xml]
-      Date: ['Wed, 10 Aug 2016 18:12:33 GMT']
+      Date: ['Fri, 17 Feb 2017 00:46:52 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [6ae3a8e1-0001-0077-3932-f37a4b000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [d4e356c1-0001-0043-38b7-887467000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 409, message: The specified container already exists.}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [049f1eee-5f26-11e6-be9c-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:12:37 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [93a5c282-f4aa-11e6-a752-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:46:54 GMT']
+      x-ms-version: ['2016-05-31']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/a92b0bb3?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:12:33 GMT']
+      Date: ['Fri, 17 Feb 2017 00:46:52 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [6ae3a8f9-0001-0077-4d32-f37a4b000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [d4e356d5-0001-0043-49b7-887467000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 202, message: Accepted}
 version: 1

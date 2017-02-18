@@ -98,7 +98,7 @@ def _convert_xml_to_queues(response):
 
     return queues
 
-def _convert_xml_to_queue_messages(response, decode_function, require_encryption, key_encryption_key, resolver):
+def _convert_xml_to_queue_messages(response, decode_function, require_encryption, key_encryption_key, resolver, content=None):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <QueueMessagesList>
@@ -123,13 +123,20 @@ def _convert_xml_to_queue_messages(response, decode_function, require_encryption
         message = QueueMessage()
 
         message.id = message_element.findtext('MessageId')
-        message.dequeue_count = _int_to_str(message_element.findtext('DequeueCount'))
 
-        message.content = message_element.findtext('MessageText')
-        if (key_encryption_key is not None) or (resolver is not None):
-            message.content = _decrypt_queue_message(message.content, require_encryption, 
-                                                        key_encryption_key, resolver)
-        message.content = decode_function(message.content)
+        dequeue_count = message_element.findtext('DequeueCount')
+        if dequeue_count is not None:
+            message.dequeue_count = _int_to_str(dequeue_count)
+
+        # content is not returned for put_message
+        if content is not None:
+            message.content = content
+        else:
+            message.content = message_element.findtext('MessageText')
+            if (key_encryption_key is not None) or (resolver is not None):
+                message.content = _decrypt_queue_message(message.content, require_encryption,
+                                                            key_encryption_key, resolver)
+            message.content = decode_function(message.content)
 
         message.insertion_time = parser.parse(message_element.findtext('InsertionTime'))
         message.expiration_time = parser.parse(message_element.findtext('ExpirationTime'))

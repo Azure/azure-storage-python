@@ -1,6 +1,6 @@
 ﻿# coding: utf-8
 
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import base64
 import os
 import unittest
@@ -28,13 +28,14 @@ from tests.testcase import (
     record,
 )
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 TEST_BLOB_PREFIX = 'blob'
 FILE_PATH = 'blob_output.temp.dat'
-#------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
 
 class StorageGetBlobTest(StorageTestCase):
-
     def setUp(self):
         super(StorageGetBlobTest, self).setUp()
 
@@ -72,7 +73,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         return super(StorageGetBlobTest, self).tearDown()
 
-    #--Helpers-----------------------------------------------------------------
+    # --Helpers-----------------------------------------------------------------
 
     def _get_blob_reference(self):
         return self.get_resource_name(TEST_BLOB_PREFIX)
@@ -87,7 +88,7 @@ class StorageGetBlobTest(StorageTestCase):
         def read(self, count):
             return self.wrapped_file.read(count)
 
-    #-- Get test cases for blobs ----------------------------------------------
+    # -- Get test cases for blobs ----------------------------------------------
 
     @record
     def test_unicode_get_blob_unicode_data(self):
@@ -106,7 +107,7 @@ class StorageGetBlobTest(StorageTestCase):
     @record
     def test_unicode_get_blob_binary_data(self):
         # Arrange
-        base64_data = 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w=='       
+        base64_data = 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGCg4SFhoeIiYqLjI2Oj5CRkpOUlZaXmJmam5ydnp+goaKjpKWmp6ipqqusra6vsLGys7S1tre4ubq7vL2+v8DBwsPExcbHyMnKy8zNzs/Q0dLT1NXW19jZ2tvc3d7f4OHi4+Tl5ufo6err7O3u7/Dx8vP09fb3+Pn6+/z9/v8AAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w=='
         binary_data = base64.b64decode(base64_data)
 
         blob_name = self._get_blob_reference()
@@ -153,6 +154,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -161,21 +163,25 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE,
+                                      progress)
 
     @record
     def test_get_blob_to_bytes_non_parallel(self):
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
-        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, max_connections=1, progress_callback=callback)
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, max_connections=1,
+                                         progress_callback=callback)
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
 
     @record
     def test_get_blob_to_bytes_small(self):
@@ -185,6 +191,7 @@ class StorageGetBlobTest(StorageTestCase):
         self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -219,6 +226,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -232,12 +240,14 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE,
+                                      progress)
 
     @record
     def test_get_blob_to_stream_non_parallel(self):
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -251,7 +261,8 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
 
     @record
     def test_get_blob_to_stream_small(self):
@@ -261,12 +272,13 @@ class StorageGetBlobTest(StorageTestCase):
         self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
         with open(FILE_PATH, 'wb') as stream:
-            blob = self.bs.get_blob_to_stream(self.container_name, blob_name, stream, 
+            blob = self.bs.get_blob_to_stream(self.container_name, blob_name, stream,
                                               progress_callback=callback)
 
         # Assert
@@ -299,6 +311,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -311,12 +324,14 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE,
+                                      progress)
 
     @record
     def test_get_blob_to_path_non_parallel(self):
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -330,7 +345,8 @@ class StorageGetBlobTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
 
     @record
     def test_get_blob_to_path_small(self):
@@ -340,11 +356,12 @@ class StorageGetBlobTest(StorageTestCase):
         self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
-        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH, 
+        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH,
                                         progress_callback=callback)
 
         # Assert
@@ -363,14 +380,14 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Act
         end_range = self.bs.MAX_SINGLE_GET_SIZE + 1024
-        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 
+        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH,
                                         start_range=1, end_range=end_range)
 
         # Assert
         self.assertIsInstance(blob, Blob)
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
-            self.assertEqual(self.byte_data[1:end_range+1], actual)
+            self.assertEqual(self.byte_data[1:end_range + 1], actual)
 
     def test_ranged_get_blob_to_path_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
@@ -379,13 +396,14 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Arrange
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
         # Act
         start_range = 3
         end_range = self.bs.MAX_SINGLE_GET_SIZE + 1024
-        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 
+        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH,
                                         start_range=start_range, end_range=end_range,
                                         progress_callback=callback)
 
@@ -393,15 +411,16 @@ class StorageGetBlobTest(StorageTestCase):
         self.assertIsInstance(blob, Blob)
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
-            self.assertEqual(self.byte_data[start_range:end_range+1], actual)
-        self.assert_download_progress(end_range-start_range + 1, self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+            self.assertEqual(self.byte_data[start_range:end_range + 1], actual)
+        self.assert_download_progress(end_range - start_range + 1, self.bs.MAX_CHUNK_GET_SIZE,
+                                      self.bs.MAX_SINGLE_GET_SIZE, progress)
 
     @record
     def test_ranged_get_blob_to_path_small(self):
         # Arrange
 
         # Act
-        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 
+        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH,
                                         start_range=1, end_range=4)
 
         # Assert
@@ -415,7 +434,7 @@ class StorageGetBlobTest(StorageTestCase):
         # Arrange
 
         # Act
-        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH, 
+        blob = self.bs.get_blob_to_path(self.container_name, self.byte_blob, FILE_PATH,
                                         start_range=1, end_range=3, max_connections=1)
 
         # Assert
@@ -438,7 +457,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Act
         end_range = 2 * self.bs.MAX_SINGLE_GET_SIZE
-        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH, 
+        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH,
                                         start_range=1, end_range=end_range)
 
         # Assert
@@ -461,7 +480,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Act
         end_range = 2 * self.bs.MAX_SINGLE_GET_SIZE
-        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH, 
+        blob = self.bs.get_blob_to_path(self.container_name, blob_name, FILE_PATH,
                                         start_range=1, end_range=end_range)
 
         # Assert
@@ -470,7 +489,7 @@ class StorageGetBlobTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(blob_data[1:blob_size], actual)
 
-        # Assert
+            # Assert
 
     def test_get_blob_to_path_with_mode(self):
         # parallel tests introduce random order of requests, can only run live
@@ -533,6 +552,7 @@ class StorageGetBlobTest(StorageTestCase):
         self.bs.create_blob_from_text(self.container_name, text_blob, text_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -541,7 +561,8 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text_data, blob.content)
-        self.assert_download_progress(len(text_data.encode('utf-8')), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress)
+        self.assert_download_progress(len(text_data.encode('utf-8')), self.bs.MAX_CHUNK_GET_SIZE,
+                                      self.bs.MAX_SINGLE_GET_SIZE, progress)
 
     @record
     def test_get_blob_to_text_non_parallel(self):
@@ -551,6 +572,7 @@ class StorageGetBlobTest(StorageTestCase):
         self.bs.create_blob_from_text(self.container_name, text_blob, text_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -559,7 +581,8 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text_data, blob.content)
-        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE, progress, single_download=True)
+        self.assert_download_progress(len(self.byte_data), self.bs.MAX_CHUNK_GET_SIZE, self.bs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
 
     @record
     def test_get_blob_to_text_small(self):
@@ -569,6 +592,7 @@ class StorageGetBlobTest(StorageTestCase):
         self.bs.create_blob_from_text(self.container_name, blob_name, blob_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -603,6 +627,7 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Act
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -623,7 +648,8 @@ class StorageGetBlobTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'wb') as stream:
             non_seekable_stream = StorageGetBlobTest.NonSeekableFile(stream)
-            blob = self.bs.get_blob_to_stream(self.container_name, self.byte_blob, non_seekable_stream, max_connections=1)
+            blob = self.bs.get_blob_to_stream(self.container_name, self.byte_blob, non_seekable_stream,
+                                              max_connections=1)
 
         # Assert
         self.assertIsInstance(blob, Blob)
@@ -646,7 +672,7 @@ class StorageGetBlobTest(StorageTestCase):
                 blob = self.bs.get_blob_to_stream(
                     self.container_name, self.byte_blob, non_seekable_stream)
 
-        # Assert
+                # Assert
 
     @record
     def test_get_blob_exact_get_size(self):
@@ -656,6 +682,7 @@ class StorageGetBlobTest(StorageTestCase):
         self.bs.create_blob_from_bytes(self.container_name, blob_name, byte_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -677,6 +704,7 @@ class StorageGetBlobTest(StorageTestCase):
         self.bs.create_blob_from_bytes(self.container_name, blob_name, byte_data)
 
         progress = []
+
         def callback(current, total):
             progress.append((current, total))
 
@@ -700,6 +728,56 @@ class StorageGetBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(self.byte_data, blob.content)
 
-#------------------------------------------------------------------------------
+    def test_get_blob_range_with_overall_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=0,
+                                         end_range=1024, validate_content=True)
+
+        # Arrange
+        props = self.bs.get_blob_properties(self.container_name, self.byte_blob)
+        props.properties.content_settings.content_md5 = 'MDAwMDAwMDA='
+        self.bs.set_blob_properties(self.container_name, self.byte_blob, props.properties.content_settings)
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=0,
+                                         end_range=1024, validate_content=True)
+
+        # Assert
+        self.assertEqual('MDAwMDAwMDA=', blob.properties.content_settings.content_md5)
+
+    def test_get_blob_range_with_range_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=0,
+                                         end_range=1024, validate_content=True)
+
+        # Arrange
+        props = self.bs.get_blob_properties(self.container_name, self.byte_blob)
+        props.properties.content_settings.content_md5 = None;
+        self.bs.set_blob_properties(self.container_name, self.byte_blob, props.properties.content_settings)
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=0,
+                                         end_range=1024, validate_content=True)
+
+        # Assert
+        self.assertTrue(hasattr(blob.properties.content_settings, "content_type"));
+        self.assertFalse(hasattr(blob.properties.content_settings, "content_md5"));
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=0,
+                                         end_range=1024, validate_content=True)
+
+        # Assert
+        self.assertTrue(hasattr(blob.properties.content_settings, "content_type"));
+        self.assertFalse(hasattr(blob.properties.content_settings, "content_md5"));
+
+
+# ------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

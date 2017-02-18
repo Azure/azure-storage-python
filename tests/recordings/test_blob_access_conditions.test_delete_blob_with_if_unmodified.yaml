@@ -4,66 +4,67 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [a538d92c-5f27-11e6-9f34-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:16 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [b5a340ec-f4a8-11e6-a81f-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:32 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer374419b3?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:24:14 GMT']
-      ETag: ['"0x8D3C14B888ACDFE"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:24:14 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:32 GMT']
+      ETag: ['"0x8D456CC99E57246"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:32 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [3ae2a097-0001-004b-0e34-f3ce90000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [a695b5e3-0001-0041-51b5-88cadf000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: hello world
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [a57b9bc0-5f27-11e6-8e8e-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:16 GMT']
-      x-ms-version: ['2015-07-08']
+      x-ms-client-request-id: [b5da1278-f4a8-11e6-b812-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:32 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer374419b3/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 10 Aug 2016 18:24:14 GMT']
-      ETag: ['"0x8D3C14B88AA6238"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:24:14 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:32 GMT']
+      ETag: ['"0x8D456CC99F56C9D"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:33:32 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [3ae2a0b7-0001-004b-2b34-f3ce90000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [a695b5f9-0001-0041-65b5-88cadf000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-Unmodified-Since: ['Wed, 10 Aug 2016 18:39:16 GMT']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [a5806074-5f27-11e6-8a0a-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:24:16 GMT']
-      x-ms-version: ['2015-07-08']
+      If-Unmodified-Since: ['Fri, 17 Feb 2017 00:48:32 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [b5e88066-f4a8-11e6-8cd7-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:33:32 GMT']
+      x-ms-version: ['2016-05-31']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/utcontainer374419b3/blob1
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:24:14 GMT']
+      Date: ['Fri, 17 Feb 2017 00:33:32 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [3ae2a0d4-0001-004b-4434-f3ce90000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [a695b60b-0001-0041-77b5-88cadf000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 202, message: Accepted}
 version: 1

@@ -180,6 +180,32 @@ class StorageCommonBlobTest(StorageTestCase):
                          + '.blob.core.windows.net/vhds/my.vhd?sas')
 
     @record
+    def test_make_blob_url_with_snapshot(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_blob_url('vhds', 'my.vhd',
+                                    snapshot='2016-11-09T14:11:07.6175300Z')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds/my.vhd?'
+                           'snapshot=2016-11-09T14:11:07.6175300Z')
+
+    @record
+    def test_make_blob_url_with_snapshot_and_sas(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_blob_url('vhds', 'my.vhd', sas_token='sas',
+                                    snapshot='2016-11-09T14:11:07.6175300Z')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds/my.vhd?'
+                           'snapshot=2016-11-09T14:11:07.6175300Z&sas')
+
+    @record
     def test_create_blob_with_question_mark(self):
         # Arrange
         blob_name = '?ques?tion?'
@@ -373,6 +399,56 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.blob_type, self.bs.blob_type)
         self.assertEqual(blob.properties.content_length, len(self.byte_data))
         self.assertEqual(blob.properties.lease.status, 'unlocked')
+
+    @record
+    def test_get_blob_server_encryption(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+        
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+
+        # Assert
+        self.assertTrue(blob.properties.server_encrypted)
+
+    @record
+    def test_get_blob_properties_server_encryption(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+        
+        # Act
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+        
+        # Assert
+        self.assertTrue(blob.properties.server_encrypted)
+        
+    @record
+    def test_list_blobs_server_encryption(self):
+        #Arrange
+        self._create_block_blob()
+        self._create_block_blob()
+        blob_list = self.bs.list_blobs(self.container_name)
+
+        #Act 
+
+        #Assert
+        for blob in blob_list:
+            self.assertTrue(blob.properties.server_encrypted)
+
+    @record
+    def test_no_server_encryption(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+        
+        #Act
+        def callback(response):
+            response.headers['x-ms-server-encrypted'] = 'false'
+        
+        self.bs.response_callback = callback
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        #Assert
+        self.assertFalse(blob.properties.server_encrypted)
 
     @record
     def test_get_blob_properties_with_snapshot(self):

@@ -18,6 +18,7 @@ from .._error import (
     _validate_encryption_required,
     _validate_encryption_unsupported,
     _ERROR_VALUE_NEGATIVE,
+    _ERROR_VALUE_SHOULD_BE_STREAM
 )
 from .._common_conversion import (
     _encode_base64,
@@ -29,12 +30,14 @@ from .._common_conversion import (
 from .._serialization import (
     _get_request_body,
     _get_data_bytes_only,
+    _get_data_bytes_or_stream_only,
     _add_metadata_headers,
 )
 from .._http import HTTPRequest
 from ._upload_chunking import (
     _BlockBlobChunkUploader,
     _upload_blob_chunks,
+    _upload_blob_substream_blocks,
 )
 from .models import (
     _BlobTypes,
@@ -46,6 +49,9 @@ from .._constants import (
 from ._serialization import (
     _convert_block_list_to_xml,
     _get_path,
+)
+from .._serialization import (
+   _len_plus
 )
 from ._deserialization import (
     _convert_xml_to_block_list,
@@ -60,11 +66,10 @@ from os import(
     path,
 )
 import sys
-if sys.version_info >= (3,):
-    from io import BytesIO
-else:
-    from cStringIO import StringIO as BytesIO
-
+from io import (
+    BytesIO,
+    IOBase
+)
 
 class BlockBlobService(BaseBlobService):
     '''
@@ -75,63 +80,70 @@ class BlockBlobService(BaseBlobService):
     can include up to 50,000 blocks. The maximum size of a block blob is therefore
     slightly more than 195 GB (4 MB X 50,000 blocks). If you are writing a block
     blob that is no more than 64 MB in size, you can upload it in its entirety with
-    a single write operation; see create_blob_from_bytes. 
+    a single write operation; see create_blob_from_bytes.
 
-    :ivar int MAX_SINGLE_PUT_SIZE: 
-        The largest size upload supported in a single put call. This is used by 
-        the create_blob_from_* methods if the content length is known and is less 
+    :ivar int MAX_SINGLE_PUT_SIZE:
+        The largest size upload supported in a single put call. This is used by
+        the create_blob_from_* methods if the content length is known and is less
         than this value.
-    :ivar int MAX_BLOCK_SIZE: 
-        The size of the blocks put by create_blob_from_* methods if the content 
-        length is unknown or is larger than MAX_SINGLE_PUT_SIZE. Smaller blocks 
-        may be put. The maximum block size the service supports is 4MB.
+    :ivar int MAX_BLOCK_SIZE:
+        The size of the blocks put by create_blob_from_* methods if the content
+        length is unknown or is larger than MAX_SINGLE_PUT_SIZE. Smaller blocks
+        may be put. The maximum block size the service supports is 100MB.
+    :ivar int MIN_LARGE_BLOCK_UPLOAD_THRESHOLD:
+        The minimum block size at which the the memory-optimized, block upload
+        algorithm is considered. This algorithm is only applicable to the create_blob_from_file and
+        create_blob_from_stream methods and will prevent the full buffering of blocks.
+        In addition to the block size, ContentMD5 validation and Encryption must be disabled as
+        these options require the blocks to be buffered.
     '''
 
     MAX_SINGLE_PUT_SIZE = 64 * 1024 * 1024
     MAX_BLOCK_SIZE = 4 * 1024 * 1024
+    MIN_LARGE_BLOCK_UPLOAD_THRESHOLD = 4 * 1024 * 1024 + 1
 
-    def __init__(self, account_name=None, account_key=None, sas_token=None, 
+    def __init__(self, account_name=None, account_key=None, sas_token=None,
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
                  custom_domain=None, request_session=None, connection_string=None):
         '''
         :param str account_name:
-            The storage account name. This is used to authenticate requests 
-            signed with an account key and to construct the storage endpoint. It 
-            is required unless a connection string is given, or if a custom 
+            The storage account name. This is used to authenticate requests
+            signed with an account key and to construct the storage endpoint. It
+            is required unless a connection string is given, or if a custom
             domain is used with anonymous authentication.
         :param str account_key:
-            The storage account key. This is used for shared key authentication. 
-            If neither account key or sas token is specified, anonymous access 
+            The storage account key. This is used for shared key authentication.
+            If neither account key or sas token is specified, anonymous access
             will be used.
         :param str sas_token:
-             A shared access signature token to use to authenticate requests 
-             instead of the account key. If account key and sas token are both 
-             specified, account key will be used to sign. If neither are 
+             A shared access signature token to use to authenticate requests
+             instead of the account key. If account key and sas token are both
+             specified, account key will be used to sign. If neither are
              specified, anonymous access will be used.
         :param bool is_emulated:
-            Whether to use the emulator. Defaults to False. If specified, will 
-            override all other parameters besides connection string and request 
+            Whether to use the emulator. Defaults to False. If specified, will
+            override all other parameters besides connection string and request
             session.
         :param str protocol:
             The protocol to use for requests. Defaults to https.
         :param str endpoint_suffix:
-            The host base component of the url, minus the account name. Defaults 
-            to Azure (core.windows.net). Override this to use the China cloud 
+            The host base component of the url, minus the account name. Defaults
+            to Azure (core.windows.net). Override this to use the China cloud
             (core.chinacloudapi.cn).
         :param str custom_domain:
-            The custom domain to use. This can be set in the Azure Portal. For 
+            The custom domain to use. This can be set in the Azure Portal. For
             example, 'www.mydomain.com'.
         :param requests.Session request_session:
             The session object to use for http requests.
         :param str connection_string:
-            If specified, this will override all other parameters besides 
+            If specified, this will override all other parameters besides
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
         '''
         self.blob_type = _BlobTypes.BlockBlob
         super(BlockBlobService, self).__init__(
-            account_name, account_key, sas_token, is_emulated, protocol, endpoint_suffix, 
+            account_name, account_key, sas_token, is_emulated, protocol, endpoint_suffix,
             custom_domain, request_session, connection_string)
 
     def put_block(self, container_name, blob_name, block, block_id,
@@ -143,7 +155,8 @@ class BlockBlobService(BaseBlobService):
             Name of existing container.
         :param str blob_name:
             Name of existing blob.
-        :param bytes block:
+        :param block: Content of the block.
+        :type block: io.IOBase or bytes
             Content of the block.
         :param str block_id:
             A valid Base64 string value that identifies the block. Prior to
@@ -152,11 +165,11 @@ class BlockBlobService(BaseBlobService):
             parameter must be the same size for each block. Note that the Base64
             string must be URL-encoded.
         :param bool validate_content:
-            If true, calculates an MD5 hash of the block content. The storage 
+            If true, calculates an MD5 hash of the block content. The storage
             service checks the hash of the content that has arrived
-            with the hash that was sent. This is primarily valuable for detecting 
-            bitflips on the wire if using http instead of https as https (the default) 
-            will already validate. Note that this MD5 hash is not stored with the 
+            with the hash that was sent. This is primarily valuable for detecting
+            bitflips on the wire if using http instead of https as https (the default)
+            will already validate. Note that this MD5 hash is not stored with the
             blob.
         :param str lease_id:
             Required if the blob has an active lease.
@@ -176,9 +189,9 @@ class BlockBlobService(BaseBlobService):
         )
 
     def put_block_list(
-        self, container_name, blob_name, block_list, content_settings=None, 
+        self, container_name, blob_name, block_list, content_settings=None,
         metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None, 
+        if_unmodified_since=None, if_match=None, if_none_match=None,
         timeout=None):
         '''
         Writes a blob by specifying the list of block IDs that make up the blob.
@@ -205,18 +218,18 @@ class BlockBlobService(BaseBlobService):
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param bool validate_content:
-            If true, calculates an MD5 hash of the block list content. The storage 
+            If true, calculates an MD5 hash of the block list content. The storage
             service checks the hash of the block list content that has arrived
-            with the hash that was sent. This is primarily valuable for detecting 
-            bitflips on the wire if using http instead of https as https (the default) 
-            will already validate. Note that this check is associated with 
+            with the hash that was sent. This is primarily valuable for detecting
+            bitflips on the wire if using http instead of https as https (the default)
+            will already validate. Note that this check is associated with
             the block list content, and not with the content of the blob itself.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
-            If a date is passed in without timezone info, it is assumed to be UTC. 
+            If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only
             if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
@@ -309,7 +322,7 @@ class BlockBlobService(BaseBlobService):
     def create_blob_from_path(
         self, container_name, blob_name, file_path, content_settings=None,
         metadata=None, validate_content=False, progress_callback=None,
-        max_connections=2, lease_id=None, if_modified_since=None, 
+        max_connections=2, lease_id=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
         '''
         Creates a new blob from a file path, or updates the content of an
@@ -327,11 +340,11 @@ class BlockBlobService(BaseBlobService):
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param bool validate_content:
-            If true, calculates an MD5 hash for each chunk of the blob. The storage 
-            service checks the hash of the content that has arrived with the hash 
-            that was sent. This is primarily valuable for detecting bitflips on 
-            the wire if using http instead of https as https (the default) will 
-            already validate. Note that this MD5 hash is not stored with the 
+            If true, calculates an MD5 hash for each chunk of the blob. The storage
+            service checks the hash of the content that has arrived with the hash
+            that was sent. This is primarily valuable for detecting bitflips on
+            the wire if using http instead of https as https (the default) will
+            already validate. Note that this MD5 hash is not stored with the
             blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -339,14 +352,14 @@ class BlockBlobService(BaseBlobService):
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size exceeds 
+            Maximum number of parallel connections to use when the blob size exceeds
             64MB.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
-            If a date is passed in without timezone info, it is assumed to be UTC. 
+            If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only
             if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
@@ -365,8 +378,8 @@ class BlockBlobService(BaseBlobService):
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
         :param int timeout:
-            The timeout parameter is expressed in seconds. This method may make 
-            multiple calls to the Azure service and the timeout will apply to 
+            The timeout parameter is expressed in seconds. This method may make
+            multiple calls to the Azure service and the timeout will apply to
             each call individually.
         '''
         _validate_not_none('container_name', container_name)
@@ -394,10 +407,10 @@ class BlockBlobService(BaseBlobService):
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
-        content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, lease_id=None, 
-        if_modified_since=None, if_unmodified_since=None, if_match=None, 
-        if_none_match=None, timeout=None):
+        content_settings=None, metadata=None, validate_content=False,
+        progress_callback=None, max_connections=2, lease_id=None,
+        if_modified_since=None, if_unmodified_since=None, if_match=None,
+        if_none_match=None, timeout=None, use_byte_buffer=False):
         '''
         Creates a new blob from a file/stream, or updates the content of
         an existing blob, with automatic chunking and progress
@@ -418,11 +431,11 @@ class BlockBlobService(BaseBlobService):
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param bool validate_content:
-            If true, calculates an MD5 hash for each chunk of the blob. The storage 
-            service checks the hash of the content that has arrived with the hash 
-            that was sent. This is primarily valuable for detecting bitflips on 
-            the wire if using http instead of https as https (the default) will 
-            already validate. Note that this MD5 hash is not stored with the 
+            If true, calculates an MD5 hash for each chunk of the blob. The storage
+            service checks the hash of the content that has arrived with the hash
+            that was sent. This is primarily valuable for detecting bitflips on
+            the wire if using http instead of https as https (the default) will
+            already validate. Note that this MD5 hash is not stored with the
             blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -430,14 +443,14 @@ class BlockBlobService(BaseBlobService):
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size exceeds 
+            Maximum number of parallel connections to use when the blob size exceeds
             64MB. Note that parallel upload requires the stream to be seekable.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
-            If a date is passed in without timezone info, it is assumed to be UTC. 
+            If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only
             if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
@@ -456,9 +469,26 @@ class BlockBlobService(BaseBlobService):
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
         :param int timeout:
-            The timeout parameter is expressed in seconds. This method may make 
-            multiple calls to the Azure service and the timeout will apply to 
+            The timeout parameter is expressed in seconds. This method may make
+            multiple calls to the Azure service and the timeout will apply to
             each call individually.
+        :param bool use_byte_buffer:
+            If True, this will force usage of the original full block buffering upload path.
+            By default, this value is False and will employ a memory-efficient,
+            streaming upload algorithm under the following conditions:
+            The provided stream is seekable, 'require_encryption' is False, and
+            MAX_BLOCK_SIZE >= MIN_LARGE_BLOCK_UPLOAD_THRESHOLD.
+            One should consider the drawbacks of using this approach. In order to achieve
+            memory-efficiency, a IOBase stream or file-like object is segmented into logical blocks
+            using a SubStream wrapper. In order to read the correct data, each SubStream must acquire
+            a lock so that it can safely seek to the right position on the shared, underlying stream.
+            If max_connections > 1, the concurrency will result in a considerable amount of seeking on
+            the underlying stream. For the most common inputs such as a file-like stream object, seeking
+            is an inexpensive operation and this is not much of a concern. However, for other variants of streams
+            this may not be the case. The trade-off for memory-efficiency must be weighed against the cost of seeking
+            with your input stream.
+            The SubStream class will attempt to buffer up to 4 MB internally to reduce the amount of
+            seek and read calls to the underlying stream. This is particularly beneficial when uploading larger blocks.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -493,25 +523,47 @@ class BlockBlobService(BaseBlobService):
                 progress_callback(count, count)
         else:
             cek, iv, encryption_data = None, None, None
-            if self.key_encryption_key:
-                cek, iv, encryption_data = _generate_blob_encryption_data(self.key_encryption_key)
 
-            block_ids = _upload_blob_chunks(
-                blob_service=self,
-                container_name=container_name,
-                blob_name=blob_name,
-                blob_size=count,
-                block_size=self.MAX_BLOCK_SIZE,
-                stream=stream,
-                max_connections=max_connections,
-                progress_callback=progress_callback,
-                validate_content=validate_content,
-                lease_id=lease_id,
-                uploader_class=_BlockBlobChunkUploader,
-                timeout=timeout,
-                content_encryption_key=cek, 
-                initialization_vector=iv
-            )
+            use_original_upload_path = use_byte_buffer or self.require_encryption or \
+                                       self.MAX_BLOCK_SIZE < self.MIN_LARGE_BLOCK_UPLOAD_THRESHOLD or \
+                                       hasattr(stream, 'seekable') and not stream.seekable() or \
+                                       not hasattr(stream, 'seek') or not hasattr(stream, 'tell')
+
+            if use_original_upload_path:
+                if self.key_encryption_key:
+                    cek, iv, encryption_data = _generate_blob_encryption_data(self.key_encryption_key)
+
+                block_ids = _upload_blob_chunks(
+                    blob_service=self,
+                    container_name=container_name,
+                    blob_name=blob_name,
+                    blob_size=count,
+                    block_size=self.MAX_BLOCK_SIZE,
+                    stream=stream,
+                    max_connections=max_connections,
+                    progress_callback=progress_callback,
+                    validate_content=validate_content,
+                    lease_id=lease_id,
+                    uploader_class=_BlockBlobChunkUploader,
+                    timeout=timeout,
+                    content_encryption_key=cek,
+                    initialization_vector=iv
+                )
+            else:
+                block_ids = _upload_blob_substream_blocks(
+                    blob_service=self,
+                    container_name=container_name,
+                    blob_name=blob_name,
+                    blob_size=count,
+                    block_size=self.MAX_BLOCK_SIZE,
+                    stream=stream,
+                    max_connections=max_connections,
+                    progress_callback=progress_callback,
+                    validate_content=validate_content,
+                    lease_id=lease_id,
+                    uploader_class=_BlockBlobChunkUploader,
+                    timeout=timeout,
+                )
 
             self._put_block_list(
                 container_name=container_name,
@@ -531,9 +583,9 @@ class BlockBlobService(BaseBlobService):
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
-        content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, lease_id=None, 
-        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        content_settings=None, metadata=None, validate_content=False,
+        progress_callback=None, max_connections=2, lease_id=None,
+        if_modified_since=None, if_unmodified_since=None, if_match=None,
         if_none_match=None, timeout=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
@@ -557,11 +609,11 @@ class BlockBlobService(BaseBlobService):
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param bool validate_content:
-            If true, calculates an MD5 hash for each chunk of the blob. The storage 
-            service checks the hash of the content that has arrived with the hash 
-            that was sent. This is primarily valuable for detecting bitflips on 
-            the wire if using http instead of https as https (the default) will 
-            already validate. Note that this MD5 hash is not stored with the 
+            If true, calculates an MD5 hash for each chunk of the blob. The storage
+            service checks the hash of the content that has arrived with the hash
+            that was sent. This is primarily valuable for detecting bitflips on
+            the wire if using http instead of https as https (the default) will
+            already validate. Note that this MD5 hash is not stored with the
             blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -569,14 +621,14 @@ class BlockBlobService(BaseBlobService):
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size exceeds 
+            Maximum number of parallel connections to use when the blob size exceeds
             64MB.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
-            If a date is passed in without timezone info, it is assumed to be UTC. 
+            If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only
             if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
@@ -595,8 +647,8 @@ class BlockBlobService(BaseBlobService):
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
         :param int timeout:
-            The timeout parameter is expressed in seconds. This method may make 
-            multiple calls to the Azure service and the timeout will apply to 
+            The timeout parameter is expressed in seconds. This method may make
+            multiple calls to the Azure service and the timeout will apply to
             each call individually.
         '''
         _validate_not_none('container_name', container_name)
@@ -629,13 +681,15 @@ class BlockBlobService(BaseBlobService):
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
-            timeout=timeout)
+            timeout=timeout,
+            use_byte_buffer=True
+        )
 
     def create_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
-        content_settings=None, metadata=None, validate_content=False, 
-        progress_callback=None, max_connections=2, lease_id=None, 
-        if_modified_since=None, if_unmodified_since=None, if_match=None, 
+        content_settings=None, metadata=None, validate_content=False,
+        progress_callback=None, max_connections=2, lease_id=None,
+        if_modified_since=None, if_unmodified_since=None, if_match=None,
         if_none_match=None, timeout=None):
         '''
         Creates a new blob from str/unicode, or updates the content of an
@@ -655,11 +709,11 @@ class BlockBlobService(BaseBlobService):
             Name-value pairs associated with the blob as metadata.
         :type metadata: a dict mapping str to str
         :param bool validate_content:
-            If true, calculates an MD5 hash for each chunk of the blob. The storage 
-            service checks the hash of the content that has arrived with the hash 
-            that was sent. This is primarily valuable for detecting bitflips on 
-            the wire if using http instead of https as https (the default) will 
-            already validate. Note that this MD5 hash is not stored with the 
+            If true, calculates an MD5 hash for each chunk of the blob. The storage
+            service checks the hash of the content that has arrived with the hash
+            that was sent. This is primarily valuable for detecting bitflips on
+            the wire if using http instead of https as https (the default) will
+            already validate. Note that this MD5 hash is not stored with the
             blob.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
@@ -667,14 +721,14 @@ class BlockBlobService(BaseBlobService):
             size of the blob, or None if the total size is unknown.
         :type progress_callback: callback function in format of func(current, total)
         :param int max_connections:
-            Maximum number of parallel connections to use when the blob size exceeds 
+            Maximum number of parallel connections to use when the blob size exceeds
             64MB.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
-            If a date is passed in without timezone info, it is assumed to be UTC. 
+            If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only
             if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
@@ -693,8 +747,8 @@ class BlockBlobService(BaseBlobService):
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
         :param int timeout:
-            The timeout parameter is expressed in seconds. This method may make 
-            multiple calls to the Azure service and the timeout will apply to 
+            The timeout parameter is expressed in seconds. This method may make
+            multiple calls to the Azure service and the timeout will apply to
             each call individually.
         '''
         _validate_not_none('container_name', container_name)
@@ -726,7 +780,7 @@ class BlockBlobService(BaseBlobService):
     #-----Helper methods------------------------------------
     def _put_blob(self, container_name, blob_name, blob, content_settings=None,
                   metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
-                  if_unmodified_since=None, if_match=None,  if_none_match=None, 
+                  if_unmodified_since=None, if_match=None,  if_none_match=None,
                   timeout=None):
         '''
         Creates a blob or updates an existing blob.
@@ -747,18 +801,18 @@ class BlockBlobService(BaseBlobService):
         :param metadata:
             Name-value pairs associated with the blob as metadata.
         :param bool validate_content:
-            If true, calculates an MD5 hash of the blob content. The storage 
+            If true, calculates an MD5 hash of the blob content. The storage
             service checks the hash of the content that has arrived
-            with the hash that was sent. This is primarily valuable for detecting 
-            bitflips on the wire if using http instead of https as https (the default) 
-            will already validate. Note that this MD5 hash is not stored with the 
+            with the hash that was sent. This is primarily valuable for detecting
+            bitflips on the wire if using http instead of https as https (the default)
+            will already validate. Note that this MD5 hash is not stored with the
             blob.
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
-            If a date is passed in without timezone info, it is assumed to be UTC. 
+            If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only
             if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
@@ -802,7 +856,7 @@ class BlockBlobService(BaseBlobService):
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
         blob = _get_data_bytes_only('blob', blob)
-        if self.key_encryption_key:            
+        if self.key_encryption_key:
             encryption_data, blob = _encrypt_blob(blob, self.key_encryption_key)
             request.headers['x-ms-meta-encryptiondata'] = encryption_data
         request.body = blob
@@ -839,7 +893,16 @@ class BlockBlobService(BaseBlobService):
         request.headers = {
             'x-ms-lease-id': _to_str(lease_id)
         }
-        request.body = _get_data_bytes_only('block', block)
+        request.body = _get_data_bytes_or_stream_only('block', block)
+        if hasattr(request.body, 'read'):
+            if _len_plus(request.body) is None:
+                try:
+                    data = b''
+                    for chunk in iter(lambda: request.body.read(4096), b""):
+                        data += chunk
+                    request.body = data
+                except AttributeError:
+                    raise ValueError(_ERROR_VALUE_SHOULD_BE_STREAM.format('request.body'))
 
         if validate_content:
             computed_md5 = _get_content_md5(request.body)

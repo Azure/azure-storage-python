@@ -4,69 +4,70 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [de6856da-5f27-11e6-b292-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:52 GMT']
-      x-ms-version: ['2015-07-08']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [ed2a085e-f4a8-11e6-b046-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:35:05 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer3b4919cd?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:25:49 GMT']
-      ETag: ['"0x8D3C14BC17E7DFA"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:50 GMT']
+      Date: ['Fri, 17 Feb 2017 00:35:04 GMT']
+      ETag: ['"0x8D456CCD1836957"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:35:05 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [a3a438fb-0001-001d-1034-f326e0000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [f3a7e2f9-0001-0004-22b5-881f3c000000]
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: hello world
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [deab1970-5f27-11e6-8e20-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:52 GMT']
-      x-ms-version: ['2015-07-08']
+      x-ms-client-request-id: [ed677212-f4a8-11e6-a5d3-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:35:05 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer3b4919cd/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Wed, 10 Aug 2016 18:25:49 GMT']
-      ETag: ['"0x8D3C14BC1D9CD25"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:50 GMT']
+      Date: ['Fri, 17 Feb 2017 00:35:04 GMT']
+      ETag: ['"0x8D456CCD183ED9F"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:35:05 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [a3a4390e-0001-001d-2134-f326e0000000]
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [f3a7e30d-0001-0004-34b5-881f3c000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-Modified-Since: ['Wed, 10 Aug 2016 18:10:52 GMT']
-      User-Agent: [Azure-Storage/0.33.0 (Python CPython 3.4.4rc1; Windows 10)]
-      x-ms-client-request-id: [deafde24-5f27-11e6-b416-0050b66b38e2]
-      x-ms-date: ['Wed, 10 Aug 2016 18:25:52 GMT']
-      x-ms-version: ['2015-07-08']
+      If-Modified-Since: ['Fri, 17 Feb 2017 00:20:05 GMT']
+      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      x-ms-client-request-id: [ed76e0d8-f4a8-11e6-a96e-64510640cc62]
+      x-ms-date: ['Fri, 17 Feb 2017 00:35:05 GMT']
+      x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer3b4919cd/blob1?comp=snapshot
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 10 Aug 2016 18:25:49 GMT']
-      ETag: ['"0x8D3C14BC1D9CD25"']
-      Last-Modified: ['Wed, 10 Aug 2016 18:25:50 GMT']
+      Date: ['Fri, 17 Feb 2017 00:35:04 GMT']
+      ETag: ['"0x8D456CCD183ED9F"']
+      Last-Modified: ['Fri, 17 Feb 2017 00:35:05 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [a3a43926-0001-001d-3734-f326e0000000]
-      x-ms-snapshot: ['2016-08-10T18:25:50.8706420Z']
-      x-ms-version: ['2015-07-08']
+      x-ms-request-id: [f3a7e31a-0001-0004-40b5-881f3c000000]
+      x-ms-snapshot: ['2017-02-17T00:35:05.5493927Z']
+      x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 version: 1

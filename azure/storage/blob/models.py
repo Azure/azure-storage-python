@@ -54,6 +54,7 @@ class ContainerProperties(object):
         self.last_modified = None
         self.etag = None
         self.lease = LeaseProperties()
+        self.public_access = None
 
 
 class Blob(object):
@@ -107,6 +108,8 @@ class BlobProperties(object):
     :ivar int page_blob_sequence_number:
         (For Page Blobs) Sequence number for page blob used for coordinating
         concurrent writes.
+    :ivar bool server_encrypted:
+        Set to true if the blob is encrypted on the server.
     :ivar ~azure.storage.blob.models.CopyProperties copy:
         Stores all the copy properties for the blob.
     :ivar ~azure.storage.blob.models.ContentSettings content_settings:
@@ -123,6 +126,7 @@ class BlobProperties(object):
         self.content_range = None
         self.append_blob_committed_block_count = None
         self.page_blob_sequence_number = None
+        self.server_encrypted = None
         self.copy = CopyProperties()
         self.content_settings = ContentSettings()
         self.lease = LeaseProperties()
@@ -382,6 +386,12 @@ class PageBlobProperties(ResourceProperties):
 class PublicAccess(object):
     '''
     Specifies whether data in the container may be accessed publicly and the level of access.
+    '''
+
+    OFF = 'off'
+    '''
+    Specifies that there is no public read access for both the container and blobs within the container.
+    Clients cannot enumerate the containers within the storage account as well as the blobs within the container.
     '''
 
     Blob = 'blob'

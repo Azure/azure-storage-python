@@ -245,7 +245,11 @@ class StorageClient(object):
                         # in general, or that will not result in an error in 3
                         # However, we can keep the previous error type and message
                         # TODO: In the future we will log the trace
-                        raise AzureException('{}: {}'.format(ex.__class__.__name__, ex.args[0]))
+                        msg = ""
+                        if len(ex.args) > 0:
+                            msg = ex.args[0]
+                        raise AzureException('{}: {}'.format(ex.__class__.__name__, msg))
+
 
             except AzureException as ex:
                 # Decryption failures (invalid objects, invalid algorithms, data unencrypted in strict mode, etc)
