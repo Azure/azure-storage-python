@@ -3,7 +3,7 @@ Microsoft Azure Storage SDK for Python
 
 This project provides a client library in Python that makes it easy to
 consume Microsoft Azure Storage services. For documentation please see
-the Microsoft Azure `Python Developer Center`_ and our `GitHub.io Reference`_ Page.
+the Microsoft Azure `Python Developer Center`_ and our `API Reference`_ Page.
 
     If you are looking for the Service Bus or Azure Management
     libraries, please visit
@@ -135,10 +135,10 @@ Learn More
 -  `Python Developer Center`_
 -  `Azure Storage Service`_
 -  `Azure Storage Team Blog`_
--  `GitHub.io Reference`_
+-  `API Reference`_
 
 .. _Python Developer Center: http://azure.microsoft.com/en-us/develop/python/
-.. _GitHub.io Reference: http://azure.github.io/azure-storage-python/
+.. _API Reference: https://azure-storage.readthedocs.io/en/latest/
 .. _here: https://github.com/Azure/azure-storage-python/archive/master.zip
 .. _create an account: https://account.windowsazure.com/signup
 .. _Developer Forums on MSDN: http://social.msdn.microsoft.com/Forums/windowsazure/en-US/home?forum=windowsazuredata
