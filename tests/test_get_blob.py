@@ -147,6 +147,21 @@ class StorageGetBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(self.byte_data, blob.content)
 
+    def test_get_blob_to_bytes_snapshot(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        snapshot = self.bs.snapshot_blob(self.container_name, self.byte_blob)
+        self.bs.create_blob_from_bytes(self.container_name, self.byte_blob, self.byte_data) # Modify the blob so the Etag no longer matches
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, snapshot.snapshot)
+
+        # Assert
+        self.assertEqual(self.byte_data, blob.content)
+
     def test_get_blob_to_bytes_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):

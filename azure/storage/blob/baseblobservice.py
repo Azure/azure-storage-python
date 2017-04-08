@@ -1985,6 +1985,7 @@ class BaseBlobService(StorageClient):
                 self,
                 container_name,
                 blob_name,
+                snapshot,
                 download_size,
                 self.MAX_CHUNK_GET_SIZE,
                 first_get_size,
