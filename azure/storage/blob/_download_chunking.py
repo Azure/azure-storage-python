@@ -20,7 +20,7 @@ from azure.common import (
 )
 from .._error import _ERROR_NO_SINGLE_THREAD_CHUNKING
 
-def _download_blob_chunks(blob_service, container_name, blob_name,
+def _download_blob_chunks(blob_service, container_name, blob_name, snapshot,
                           download_size, block_size, progress, start_range, end_range, 
                           stream, max_connections, progress_callback, validate_content, 
                           lease_id, if_modified_since, if_unmodified_since, if_match, 
@@ -32,6 +32,7 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
         blob_service,
         container_name,
         blob_name,
+        snapshot,
         download_size,
         block_size,
         progress,
@@ -54,13 +55,14 @@ def _download_blob_chunks(blob_service, container_name, blob_name,
     result = list(executor.map(downloader.process_chunk, downloader.get_chunk_offsets()))
 
 class _BlobChunkDownloader(object):
-    def __init__(self, blob_service, container_name, blob_name, download_size,
+    def __init__(self, blob_service, container_name, blob_name, snapshot, download_size,
                  chunk_size, progress, start_range, end_range, stream, 
                  progress_callback, validate_content, lease_id, if_modified_since, 
                  if_unmodified_since, if_match, if_none_match, timeout, operation_context):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
+        self.snapshot = snapshot
         self.chunk_size = chunk_size
 
         self.download_size = download_size
@@ -117,6 +119,7 @@ class _BlobChunkDownloader(object):
         response = self.blob_service._get_blob(
             self.container_name,
             self.blob_name,
+            snapshot=self.snapshot,
             start_range=chunk_start,
             end_range=chunk_end - 1,
             validate_content=self.validate_content,
