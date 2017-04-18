@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.34.1:
+
+### Blob:
+- Fixed a bug where downloading the snapshot of a blob will fail in some cases.
+
 ## Version 0.34.0:
 
 ### All:
