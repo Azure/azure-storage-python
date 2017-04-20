@@ -2871,7 +2871,7 @@ class BaseBlobService(StorageClient):
         is in progress.
 
         When copying from a page blob, the Blob service creates a destination page 
-        blob of the source blob’s length, initially containing all zeroes. Then 
+        blob of the source blob's length, initially containing all zeroes. Then 
         the source page ranges are enumerated, and non-empty ranges are copied. 
 
         For a block blob or an append blob, the Blob service creates a committed 
