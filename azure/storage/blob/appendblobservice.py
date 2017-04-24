@@ -215,14 +215,14 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param int appendpos_condition:
             Optional conditional header, used only for the Append Block operation.
             A number indicating the byte offset to compare. Append Block will
             succeed only if the append position is equal to this number. If it
             is not, the request will fail with the
             AppendPositionConditionNotMet error
-            (HTTP status code 412 – Precondition Failed).
+            (HTTP status code 412 - Precondition Failed).
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -310,7 +310,7 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -372,7 +372,7 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -440,7 +440,7 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -503,7 +503,7 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the

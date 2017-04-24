@@ -95,7 +95,7 @@ class FileService(StorageClient):
     '''
     The Server Message Block (SMB) protocol is the preferred file share protocol
     used on premise today. The Microsoft Azure File service enables customers to
-    leverage the availability and scalability of Azure’s Cloud Infrastructure as
+    leverage the availability and scalability of Azure's Cloud Infrastructure as
     a Service (IaaS) SMB without having to rewrite SMB client applications.
 
     The Azure File service also offers a compelling alternative to traditional

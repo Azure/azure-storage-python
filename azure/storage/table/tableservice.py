@@ -626,7 +626,7 @@ class TableService(StorageClient):
         Access Signatures. 
         
         When you set permissions for a table, the existing permissions are replaced. 
-        To update the table’s permissions, call :func:`~get_table_acl` to fetch 
+        To update the table's permissions, call :func:`~get_table_acl` to fetch 
         all access policies associated with the table, modify the access policy 
         that you wish to change, and then call this function with the complete 
         set of data to perform the update.

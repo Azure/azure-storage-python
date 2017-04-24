@@ -225,7 +225,7 @@ class CopyProperties(object):
                 Copy completed successfully.
             pending: 
                 Copy is in progress. Check copy_status_description if intermittent,
-                non-fatal errors impede copy progress but don’t cause failure.
+                non-fatal errors impede copy progress but don't cause failure.
             aborted:
                 Copy was ended by Abort Copy File.
             failed:
