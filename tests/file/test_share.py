@@ -30,8 +30,11 @@ from azure.storage.common import (
 )
 from azure.storage.file import (
     FileService,
-    SharePermissions,
+    SharePermissions
 )
+
+from azure.storage.file.models import DeleteSnapshot
+
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -55,7 +58,7 @@ class StorageShareTest(StorageTestCase):
         if not self.is_playback():
             for share_name in self.test_shares:
                 try:
-                    self.fs.delete_share(share_name)
+                    self.fs.delete_share(share_name, delete_snapshots=DeleteSnapshot.Include)
                 except:
                     pass
         return super(StorageShareTest, self).tearDown()
@@ -82,6 +85,29 @@ class StorageShareTest(StorageTestCase):
 
         # Assert
         self.assertTrue(created)
+
+    @record
+    def test_create_share_with_snapshot(self):
+        # Arrange
+        share_name = self._get_share_reference()
+
+        # Act
+        created = self.fs.create_share(share_name)
+        snapshot = self.fs.snapshot_share(share_name)
+
+        # Assert
+        self.assertTrue(created)
+
+
+    def test_delete_share_with_snapshot(self):
+        # Arrange
+        share_name = self._get_share_reference()
+
+        # Act
+        created = self.fs.create_share(share_name)
+        snapshot = self.fs.snapshot_share(share_name)
+        with self.assertRaises(AzureHttpError,):
+            self.fs.delete_share(share_name)
 
     @record
     def test_create_share_fail_on_exist(self):
@@ -196,6 +222,24 @@ class StorageShareTest(StorageTestCase):
         self.assertNamedItemInContainer(shares, share_name)
 
     @record
+    def test_list_shares_with_snapshot(self):
+        # Arrange
+        share_name = self._create_share()
+        snapshot1 = self.fs.snapshot_share(share_name)
+        snapshot2 = self.fs.snapshot_share(share_name)
+
+        # Act
+        shares = list(self.fs.list_shares(include_snapshots=True))
+
+        # Assert
+        self.assertIsNotNone(shares)
+        self.assertGreaterEqual(len(shares), 3)
+        self.assertIsNotNone(shares[0])
+        self.assertNamedItemInContainer(shares, share_name)
+        self.assertNamedItemInContainer(shares, snapshot1.snapshot)
+        self.assertNamedItemInContainer(shares, snapshot2.snapshot)
+
+    @record
     def test_list_shares_with_prefix(self):
         # Arrange
         share_name = self._create_share()
@@ -292,6 +336,23 @@ class StorageShareTest(StorageTestCase):
 
         # Act
         props = self.fs.get_share_properties(share_name)
+
+        # Assert
+        self.assertIsNotNone(props)
+        self.assertDictEqual(props.metadata, metadata)
+
+    @record
+    def test_get_share_properties_with_snapshot(self):
+        # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
+        share_name = self._create_share()
+        self.fs.set_share_metadata(share_name, metadata)
+        snapshot1 = self.fs.snapshot_share(share_name)
+        metadata2 = {'hello': 'world', 'number': '42', 'hello': 'goodbye'}
+        self.fs.set_share_metadata(share_name, metadata2)
+
+        # Act
+        props = self.fs.get_share_properties(share_name, snapshot=snapshot1.snapshot)
 
         # Assert
         self.assertIsNotNone(props)
@@ -469,6 +530,87 @@ class StorageShareTest(StorageTestCase):
         self.assertNamedItemInContainer(resp, 'dir1')
         self.assertNamedItemInContainer(resp, 'dir2')
         self.assertNamedItemInContainer(resp, 'file1')
+
+    @record
+    def test_list_directories_and_files(self):
+        # Arrange
+        share_name = self._create_share()
+        self.fs.create_directory(share_name, 'dir1')
+        self.fs.create_directory(share_name, 'dir2')
+        self.fs.create_file(share_name, None, 'file1', 1024)
+        self.fs.create_file(share_name, 'dir1', 'file2', 1025)
+
+        # Act
+        resp = list(self.fs.list_directories_and_files(share_name))
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEqual(len(resp), 3)
+        self.assertIsNotNone(resp[0])
+        self.assertNamedItemInContainer(resp, 'dir1')
+        self.assertNamedItemInContainer(resp, 'dir2')
+        self.assertNamedItemInContainer(resp, 'file1')
+
+    @record
+    def test_list_directories_and_files(self):
+        # Arrange
+        share_name = self._create_share()
+        self.fs.create_directory(share_name, 'dir1')
+        self.fs.create_directory(share_name, 'dir2')
+        self.fs.create_file(share_name, None, 'file1', 1024)
+        self.fs.create_file(share_name, 'dir1', 'file2', 1025)
+
+        # Act
+        resp = list(self.fs.list_directories_and_files(share_name))
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEqual(len(resp), 3)
+        self.assertIsNotNone(resp[0])
+        self.assertNamedItemInContainer(resp, 'dir1')
+        self.assertNamedItemInContainer(resp, 'dir2')
+        self.assertNamedItemInContainer(resp, 'file1')
+
+    @record
+    def test_list_directories_and_files(self):
+        # Arrange
+        share_name = self._create_share()
+        self.fs.create_directory(share_name, 'dir1')
+        self.fs.create_directory(share_name, 'dir2')
+        self.fs.create_file(share_name, None, 'file1', 1024)
+        self.fs.create_file(share_name, 'dir1', 'file2', 1025)
+
+        # Act
+        resp = list(self.fs.list_directories_and_files(share_name))
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEqual(len(resp), 3)
+        self.assertIsNotNone(resp[0])
+        self.assertNamedItemInContainer(resp, 'dir1')
+        self.assertNamedItemInContainer(resp, 'dir2')
+        self.assertNamedItemInContainer(resp, 'file1')
+
+    @record
+    def test_list_directories_and_files_with_snapshot(self):
+        # Arrange
+        share_name = self._create_share()
+        self.fs.create_directory(share_name, 'dir1')
+        self.fs.create_directory(share_name, 'dir2')
+        snapshot1 = self.fs.snapshot_share(share_name)
+        self.fs.create_directory(share_name, 'dir3')
+        self.fs.create_file(share_name, None, 'file1', 1024)
+
+        # Act
+        resp = list(self.fs.list_directories_and_files(share_name, snapshot=snapshot1.snapshot))
+        print(resp)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEqual(len(resp), 2)
+        self.assertIsNotNone(resp[0])
+        self.assertNamedItemInContainer(resp, 'dir1')
+        self.assertNamedItemInContainer(resp, 'dir2')
 
     @record
     def test_list_directories_and_files_with_num_results(self):

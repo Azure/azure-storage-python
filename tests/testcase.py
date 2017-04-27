@@ -214,6 +214,9 @@ class StorageTestCase(unittest.TestCase):
                     return
             elif item.name == item_name:
                 return
+            elif hasattr(item, 'snapshot') and item.snapshot == item_name:
+                return
+
 
         standardMsg = '{0} not found in {1}'.format(
             repr(item_name), repr(container))

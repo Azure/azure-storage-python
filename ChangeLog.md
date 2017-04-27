@@ -22,6 +22,10 @@
     - Example: the methods generate_blob and generate_container were moved to BlobSharedAccessSignature in the blob package. BlobSharedAccessSignature inherits generate_account from SharedAccessSignature in common.
     - Please refer to the reference documentation for more info.
 
+### File:
+- Added support for creating share snapshots. See the new 'snapshot_share' method on FileService.
+- Listing, Delete, and several other operations now include an additional snapshot parameter.
+
 ## Version 0.36.0:
 
 ### Blob:
