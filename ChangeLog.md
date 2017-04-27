@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.35.0:
+
+### All:
+- Support for 2016-10-16 REST version. Please see our REST API documentation and blogs for information about the related added features. If you are using the Storage Emulator, please update to Emulator version 5.3.
+
 ## Version 0.34.1:
 
 ### Blob:
