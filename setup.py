@@ -17,6 +17,12 @@
 
 from setuptools import setup
 import sys
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
 # azure v0.x is not compatible with this package
 # azure v0.x used to have a __version__ attribute (newer versions don't)
@@ -64,10 +70,10 @@ setup(
         'azure.storage.file',
     ],
     install_requires=[
-        'azure-nspkg',
-        'azure-common',
+        'azure-common>=1.1.5',
         'cryptography',
         'python-dateutil',
         'requests',
     ] + (['futures'] if sys.version_info < (3,0) else []),
+    cmdclass=cmdclass
 )
