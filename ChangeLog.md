@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.34.2:
+
+### All:
+- Updated the azure namespace packaging system.
+
 ## Version 0.34.1:
 
 ### Blob:
