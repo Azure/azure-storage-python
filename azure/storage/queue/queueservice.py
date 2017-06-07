@@ -672,7 +672,7 @@ class QueueService(StorageClient):
         Access Signatures. 
         
         When you set permissions for a queue, the existing permissions are replaced. 
-        To update the queue’s permissions, call :func:`~get_queue_acl` to fetch 
+        To update the queue's permissions, call :func:`~get_queue_acl` to fetch 
         all access policies associated with the queue, modify the access policy 
         that you wish to change, and then call this function with the complete 
         set of data to perform the update.
@@ -930,9 +930,9 @@ class QueueService(StorageClient):
 
         This operation can be used to continually extend the invisibility of a 
         queue message. This functionality can be useful if you want a worker role 
-        to “lease” a queue message. For example, if a worker role calls get_messages 
+        to "lease" a queue message. For example, if a worker role calls get_messages 
         and recognizes that it needs more time to process a message, it can 
-        continually extend the message’s invisibility until it is processed. If 
+        continually extend the message's invisibility until it is processed. If 
         the worker role were to fail during processing, eventually the message 
         would become visible again and another worker role could process it.
 

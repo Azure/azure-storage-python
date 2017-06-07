@@ -15,7 +15,7 @@
 import platform
 
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '0.34.0'
+__version__ = '0.34.2'
 
 # x-ms-version for storage service.
 X_MS_VERSION = '2016-05-31'
