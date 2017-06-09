@@ -47,8 +47,8 @@ _CONNECTION_ENDPONTS = {
 }
 
 class _ServiceParameters(object):
-    def __init__(self, service, account_name=None, account_key=None, sas_token=None, 
-                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE, 
+    def __init__(self, service, account_name=None, account_key=None, sas_token=None,
+                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
                  custom_domain=None):
 
         self.account_name = account_name
@@ -83,9 +83,9 @@ class _ServiceParameters(object):
                 self.protocol = self.protocol if parsed_url.scheme is '' else parsed_url.scheme
             else:
                 if not self.account_name:
-                    raise ValueError(_ERROR_STORAGE_MISSING_INFO)         
+                    raise ValueError(_ERROR_STORAGE_MISSING_INFO)
                 self.primary_endpoint = '{}.{}.{}'.format(self.account_name, service, endpoint_suffix)
-            
+
             # Setup the secondary endpoint
             if self.account_name:
                 self.secondary_endpoint = '{}-secondary.{}.{}'.format(self.account_name, service, endpoint_suffix)
@@ -93,26 +93,27 @@ class _ServiceParameters(object):
                 self.secondary_endpoint = None
 
     @staticmethod
-    def get_service_parameters(service, account_name=None, account_key=None, sas_token=None, is_emulated=None, 
-                 protocol=None, endpoint_suffix=None, custom_domain=None, request_session=None, 
-                 connection_string=None):
+    def get_service_parameters(service, account_name=None, account_key=None, sas_token=None, is_emulated=None,
+                 protocol=None, endpoint_suffix=None, custom_domain=None, request_session=None,
+                 connection_string=None, socket_timeout=None):
         if connection_string:
             params = _ServiceParameters._from_connection_string(connection_string, service)
         elif is_emulated:
             params = _ServiceParameters(service, is_emulated=True)
         elif account_name:
             params = _ServiceParameters(service,
-                                      account_name=account_name, 
-                                      account_key=account_key, 
-                                      sas_token=sas_token, 
-                                      is_emulated=is_emulated, 
-                                      protocol=protocol, 
+                                      account_name=account_name,
+                                      account_key=account_key,
+                                      sas_token=sas_token,
+                                      is_emulated=is_emulated,
+                                      protocol=protocol,
                                       endpoint_suffix=endpoint_suffix,
                                       custom_domain=custom_domain)
         else:
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
 
         params.request_session = request_session
+        params.socket_timeout = socket_timeout
         return params
 
     @staticmethod
@@ -136,10 +137,10 @@ class _ServiceParameters(object):
         endpoint = config.get(_CONNECTION_ENDPONTS[service])
 
         return _ServiceParameters(service,
-                                  account_name=account_name, 
-                                  account_key=account_key, 
-                                  sas_token=sas_token, 
-                                  is_emulated=is_emulated, 
-                                  protocol=protocol, 
+                                  account_name=account_name,
+                                  account_key=account_key,
+                                  sas_token=sas_token,
+                                  is_emulated=is_emulated,
+                                  protocol=protocol,
                                   endpoint_suffix=endpoint_suffix,
                                   custom_domain=endpoint)
