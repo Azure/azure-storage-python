@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version X.X.X:
+ - All: Fixed a bug where SAS tokens were being duplicated on retries
+
 ## Version 0.34.2:
 
 ### All:
