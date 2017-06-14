@@ -4,19 +4,19 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [30757fb8-f4aa-11e6-bef1-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:44:07 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [10c79ce4-50c9-11e7-8edc-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:16:55 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queuee42613c2
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 17 Feb 2017 00:44:06 GMT']
+      Date: ['Wed, 14 Jun 2017 06:16:55 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [4f6f9160-0003-0046-07b6-88a6bc000000]
+      x-ms-request-id: [8e1d068f-0003-005c-14d5-e4a52d000000]
       x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
@@ -26,32 +26,32 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['103']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [30ad264a-f4aa-11e6-b775-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:44:07 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [10d82b74-50c9-11e7-ac8b-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:16:55 GMT']
       x-ms-version: ['2016-05-31']
     method: POST
     uri: https://storagename.queue.core.windows.net/queuee42613c2/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>910635a5-6249-421f-82e3-9059f48b9ffd</MessageId><InsertionTime>Fri,
-        17 Feb 2017 00:44:07 GMT</InsertionTime><ExpirationTime>Fri, 24 Feb 2017 00:44:07
-        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAf2pL8raI0gE=</PopReceipt><TimeNextVisible>Fri,
-        17 Feb 2017 00:44:07 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>a92eb1ee-cc43-4988-bf00-dfc0cec37a61</MessageId><InsertionTime>Wed,\
+        \ 14 Jun 2017 06:16:56 GMT</InsertionTime><ExpirationTime>Wed, 21 Jun 2017\
+        \ 06:16:56 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAjXyu0tXk0gE=</PopReceipt><TimeNextVisible>Wed,\
+        \ 14 Jun 2017 06:16:56 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Fri, 17 Feb 2017 00:44:06 GMT']
+      Date: ['Wed, 14 Jun 2017 06:16:55 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [4f6f9163-0003-0046-08b6-88a6bc000000]
+      x-ms-request-id: [8e1d0697-0003-005c-19d5-e4a52d000000]
       x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [30bb4ca4-f4aa-11e6-8cdf-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:44:08 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [10e035ca-50c9-11e7-b744-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:16:55 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
     uri: https://storagename.queue.core.windows.net/queuee42613c2?comp=metadata
@@ -59,11 +59,11 @@ interactions:
     body: {string: ''}
     headers:
       Cache-Control: [no-cache]
-      Date: ['Fri, 17 Feb 2017 00:44:06 GMT']
+      Date: ['Wed, 14 Jun 2017 06:16:55 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       x-ms-approximate-messages-count: ['1']
-      x-ms-request-id: [4f6f9164-0003-0046-09b6-88a6bc000000]
+      x-ms-request-id: [8e1d06a0-0003-005c-21d5-e4a52d000000]
       x-ms-version: ['2016-05-31']
     status: {code: 200, message: OK}
 version: 1

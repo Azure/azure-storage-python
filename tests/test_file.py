@@ -459,6 +459,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
 
+    # @TODO flaky record mode
     @record
     def test_copy_file_async_private_file_with_sas(self):
         # Arrange
