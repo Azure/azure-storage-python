@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [f449f464-f4a8-11e6-b6e3-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:35:17 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [4ea6ef2e-50c8-11e7-96b5-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:11:30 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerbf121bb4?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 17 Feb 2017 00:35:16 GMT']
-      ETag: ['"0x8D456CCD88BBB2D"']
-      Last-Modified: ['Fri, 17 Feb 2017 00:35:17 GMT']
+      Date: ['Wed, 14 Jun 2017 06:11:29 GMT']
+      ETag: ['"0x8D4B2EC32CA90B8"']
+      Last-Modified: ['Wed, 14 Jun 2017 06:11:30 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [c7f2f20e-0001-003a-2cb5-888843000000]
+      x-ms-request-id: [3f348484-0001-00d5-48d5-e41c09000000]
       x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
@@ -26,23 +26,23 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
       x-ms-blob-content-length: ['1024']
       x-ms-blob-type: [PageBlob]
-      x-ms-client-request-id: [f47e6850-f4a8-11e6-b738-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:35:17 GMT']
+      x-ms-client-request-id: [4ebc2c28-50c8-11e7-90e0-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:11:30 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerbf121bb4/blob1
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 17 Feb 2017 00:35:17 GMT']
-      ETag: ['"0x8D456CCD8BF6874"']
-      Last-Modified: ['Fri, 17 Feb 2017 00:35:17 GMT']
+      Date: ['Wed, 14 Jun 2017 06:11:29 GMT']
+      ETag: ['"0x8D4B2EC32AEADC6"']
+      Last-Modified: ['Wed, 14 Jun 2017 06:11:29 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [ccdeb788-0001-0032-59b5-88924c000000]
+      x-ms-request-id: [17b8f89b-0001-00a5-3dd5-e46fcd000000]
       x-ms-request-server-encrypted: ['true']
       x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
@@ -50,9 +50,9 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [f4b1a2dc-f4a8-11e6-be25-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:35:17 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [4ecfeb52-50c8-11e7-89b1-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:11:30 GMT']
       x-ms-version: ['2016-05-31']
     method: HEAD
     uri: https://storagename.blob.core.windows.net/utcontainerbf121bb4/blob1
@@ -62,16 +62,16 @@ interactions:
       Accept-Ranges: [bytes]
       Content-Length: ['1024']
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 17 Feb 2017 00:35:17 GMT']
-      ETag: ['"0x8D456CCD8BF6874"']
-      Last-Modified: ['Fri, 17 Feb 2017 00:35:17 GMT']
+      Date: ['Wed, 14 Jun 2017 06:11:29 GMT']
+      ETag: ['"0x8D4B2EC32AEADC6"']
+      Last-Modified: ['Wed, 14 Jun 2017 06:11:29 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Vary: [Origin]
       x-ms-blob-sequence-number: ['0']
       x-ms-blob-type: [PageBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
-      x-ms-request-id: [ccdeb79a-0001-0032-6ab5-88924c000000]
+      x-ms-request-id: [17b8f8a5-0001-00a5-46d5-e46fcd000000]
       x-ms-server-encrypted: ['true']
       x-ms-version: ['2016-05-31']
     status: {code: 200, message: OK}
@@ -80,24 +80,25 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['512']
-      If-None-Match: ['"0x8D456CCD8BF6874"']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [f4beff2e-f4a8-11e6-90cf-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:35:17 GMT']
+      If-None-Match: ['"0x8D4B2EC32AEADC6"']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [4ed45800-50c8-11e7-aa02-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:11:30 GMT']
       x-ms-page-write: [update]
       x-ms-range: [bytes=0-511]
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerbf121bb4/blob1?comp=page
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ConditionNotMet</Code><Message>The
-        condition specified using HTTP conditional header(s) is not met.\nRequestId:ccdeb7a8-0001-0032-77b5-88924c000000\nTime:2017-02-17T00:35:17.7531417Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ConditionNotMet</Code><Message>The\
+        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:17b8f8b2-0001-00a5-4fd5-e46fcd000000\n\
+        Time:2017-06-14T06:11:29.7977366Z</Message></Error>"}
     headers:
       Content-Length: ['252']
       Content-Type: [application/xml]
-      Date: ['Fri, 17 Feb 2017 00:35:17 GMT']
+      Date: ['Wed, 14 Jun 2017 06:11:29 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [ccdeb7a8-0001-0032-77b5-88924c000000]
+      x-ms-request-id: [17b8f8b2-0001-00a5-4fd5-e46fcd000000]
       x-ms-version: ['2016-05-31']
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}
