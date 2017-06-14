@@ -16,7 +16,10 @@ import unittest
 from io import BytesIO
 from azure.storage import LocationMode
 from azure.storage.blob import BlockBlobService
-from azure.common import AzureHttpError
+from azure.common import (
+    AzureHttpError,
+    AzureException,
+)
 from azure.storage.retry import (
     LinearRetry,
     ExponentialRetry,
@@ -97,6 +100,30 @@ class StorageRetryTest(StorageTestCase):
         # The initial create will return 201, but we overwrite it and retry.
         # The retry will then get a 409 and return false.
         self.assertFalse(created)
+
+    @record
+    def test_retry_on_socket_timeout(self):
+        # Arrange
+        container_name = self.get_resource_name()
+        service = self._create_storage_service(BlockBlobService, self.settings)
+        service.retry = LinearRetry(backoff=0.1, max_attempts=3).retry
+
+        # make the connect timeout reasonable, but packet timeout truly small, to make sure the request always times out
+        service.socket_timeout = (11, 0.000000000001)
+
+        # Act
+        try:
+            service.create_container(container_name)
+            # self.fail('The socket timeout should force failure.') @TODO this does not work for record mode
+        except AzureException as e:
+            # Assert
+            # This call should succeed on the server side, but fail on the client side due to socket timeout
+            self.assertTrue('read timeout' in str(e), 'Expected socket timeout but got different exception.')
+            pass
+        finally:
+            # we must make the timeout normal again to let the delete operation succeed
+            service.socket_timeout = (11, 11)
+            service.delete_container(container_name)
 
     @record
     def test_no_retry(self):
@@ -230,6 +257,7 @@ class StorageRetryTest(StorageTestCase):
         finally:
             service.delete_container(container_name)
 
+    # @TODO flaky
     @record
     def test_retry_to_secondary_with_get(self):
         # Arrange

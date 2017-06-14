@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [c1d86ede-f4aa-11e6-8a06-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:48:11 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [7541f4ca-50c9-11e7-b59c-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:19:44 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/8c9e1215?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 17 Feb 2017 00:48:10 GMT']
-      ETag: ['"0x8D456CEA61E8F7F"']
-      Last-Modified: ['Fri, 17 Feb 2017 00:48:11 GMT']
+      Date: ['Wed, 14 Jun 2017 06:19:44 GMT']
+      ETag: ['"0x8D4B2ED597F022C"']
+      Last-Modified: ['Wed, 14 Jun 2017 06:19:44 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [6a24b68c-0001-0030-35b7-882cf4000000]
+      x-ms-request-id: [09123e94-0001-0114-17d6-e4d1e5000000]
       x-ms-version: ['2016-05-31']
     status: {code: 201, message: Created}
 - request:
@@ -26,21 +26,22 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [c1d86ede-f4aa-11e6-8a06-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:48:29 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [7541f4ca-50c9-11e7-b59c-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:20:02 GMT']
       x-ms-version: ['2016-05-31']
     method: PUT
     uri: https://storagename.blob.core.windows.net/8c9e1215?restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The
-        specified container already exists.\nRequestId:6a24ca13-0001-0030-61b7-882cf4000000\nTime:2017-02-17T00:48:29.7437832Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The\
+        \ specified container already exists.\nRequestId:09125359-0001-0114-78d6-e4d1e5000000\n\
+        Time:2017-06-14T06:20:02.5052171Z</Message></Error>"}
     headers:
       Content-Length: ['230']
       Content-Type: [application/xml]
-      Date: ['Fri, 17 Feb 2017 00:48:28 GMT']
+      Date: ['Wed, 14 Jun 2017 06:20:02 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [6a24ca13-0001-0030-61b7-882cf4000000]
+      x-ms-request-id: [09125359-0001-0114-78d6-e4d1e5000000]
       x-ms-version: ['2016-05-31']
     status: {code: 409, message: The specified container already exists.}
 - request:
@@ -48,19 +49,19 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [ccda301e-f4aa-11e6-9351-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:48:29 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [80176e8c-50c9-11e7-a296-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:20:02 GMT']
       x-ms-version: ['2016-05-31']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/8c9e1215?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 17 Feb 2017 00:48:28 GMT']
+      Date: ['Wed, 14 Jun 2017 06:20:02 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [6a24ca30-0001-0030-7db7-882cf4000000]
+      x-ms-request-id: [09125365-0001-0114-04d6-e4d1e5000000]
       x-ms-version: ['2016-05-31']
     status: {code: 202, message: Accepted}
 version: 1

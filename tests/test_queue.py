@@ -169,7 +169,7 @@ class StorageQueueTest(StorageTestCase):
         queues1 = list(generator1)
 
         generator2 = self.qs.list_queues(
-            prefix=TEST_QUEUE_PREFIX,
+            prefix=prefix,
             marker=generator1.next_marker,
             include_metadata=True)
         queues2 = list(generator2)

@@ -132,7 +132,7 @@ class QueueService(StorageClient):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 request_session=None, connection_string=None):
+                 request_session=None, connection_string=None, socket_timeout=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests 
@@ -161,6 +161,9 @@ class QueueService(StorageClient):
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
+        :param int socket_timeout:
+            If specified, this will override the default socket timeout. The timeout specified is in seconds.
+            See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
         '''
         service_params = _ServiceParameters.get_service_parameters(
             'queue',
@@ -171,7 +174,8 @@ class QueueService(StorageClient):
             protocol=protocol, 
             endpoint_suffix=endpoint_suffix,
             request_session=request_session,
-            connection_string=connection_string)
+            connection_string=connection_string,
+            socket_timeout=socket_timeout)
             
         super(QueueService, self).__init__(service_params)
 
