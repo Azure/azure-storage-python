@@ -150,7 +150,7 @@ class BaseBlobService(StorageClient):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 custom_domain=None, request_session=None, connection_string=None):
+                 custom_domain=None, request_session=None, connection_string=None, socket_timeout=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests 
@@ -186,6 +186,9 @@ class BaseBlobService(StorageClient):
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format
+        :param int socket_timeout:
+            If specified, this will override the default socket timeout. The timeout specified is in seconds.
+            See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
         '''
         service_params = _ServiceParameters.get_service_parameters(
             'blob',
@@ -197,7 +200,8 @@ class BaseBlobService(StorageClient):
             endpoint_suffix=endpoint_suffix,
             custom_domain=custom_domain,
             request_session=request_session,
-            connection_string=connection_string)
+            connection_string=connection_string,
+            socket_timeout=socket_timeout)
 
         super(BaseBlobService, self).__init__(service_params)
 
