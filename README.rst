@@ -22,11 +22,12 @@ You can check the version using pip:
 
     pip freeze
 
-If you see azure==0.11.0 (or any version below 1.0), uninstall it first:
+If you see azure==0.11.0 (or any version below 1.0), uninstall it first then install it again:
 
 .. code:: shell
 
     pip uninstall azure
+    pip install azure
 
 If you are upgrading from a version older than 0.30.0, see the upgrade doc, the 
 usage samples in the samples directory, and the ChangeLog and BreakingChanges.
