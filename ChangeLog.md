@@ -2,10 +2,13 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version X.X.X:
+## Version XX.XX.XX:
 
 ### Blob:
 - create_from_* and and append_blob_from_* methods will return response_properties which contains the etag and last modified time.
+
+### Table:
+- Table: Fixed a bug where the urls are not correctly formed when making commit_batch to the emulator.
 
 ## Version 0.34.3:
 - All: Made the socket timeout configurable. Increased the default socket timeout to 20 seconds.
