@@ -7,6 +7,9 @@
 ### All:
 - Support for 2016-10-16 REST version. Please see our REST API documentation and blogs for information about the related added features. If you are using the Storage Emulator, please update to Emulator version 5.3.
 
+### File:
+- The `server_encrypted` file property will now be populated when calling 'get_directory_properties', 'get_file', and 'get_file_properties'. This value is set to True if the file data (for files) and application metadata are completely encrypted.
+
 ## Version 0.34.1:
 
 ### Blob:

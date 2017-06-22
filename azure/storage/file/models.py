@@ -87,11 +87,14 @@ class DirectoryProperties(object):
     :ivar str etag:
         The ETag contains a value that you can use to perform operations
         conditionally.
+    :ivar bool server_encrypted:
+        Set to true if the directory metadata is encrypted on the server.
     '''
 
     def __init__(self):
         self.last_modified = None
         self.etag = None
+        self.server_encrypted = None
 
 class File(object):
 
@@ -141,6 +144,8 @@ class FileProperties(object):
         Stores all the content settings for the file.
     :ivar ~azure.storage.file.models.CopyProperties copy:
         Stores all the copy properties for the file.
+    ivar bool server_encrypted:
+        Set to true if the file data and application metadata are completely encrypted.
     '''
 
     def __init__(self):
@@ -150,6 +155,7 @@ class FileProperties(object):
         self.content_range = None
         self.content_settings = ContentSettings()
         self.copy = CopyProperties()
+        self.server_encrypted = None
 
 
 class ContentSettings(object):
@@ -266,7 +272,6 @@ class FileRange(object):
     def __init__(self, start=None, end=None):
         self.start = start
         self.end = end
-
 
 class FilePermissions(object):
 
