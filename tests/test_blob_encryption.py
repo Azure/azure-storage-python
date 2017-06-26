@@ -34,7 +34,7 @@ from tests.testcase import (
     TestMode,
     record,
 )
-from .test_encryption_helper import (
+from tests.test_encryption_helper import (
     KeyWrapper,
     KeyResolver,
     RSAKeyWrapper,

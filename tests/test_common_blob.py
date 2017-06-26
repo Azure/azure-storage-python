@@ -105,10 +105,9 @@ class StorageCommonBlobTest(StorageTestCase):
         blob = self.bs.get_blob_properties(container_name, blob_name)
         while blob.properties.copy.status != 'success':
             count = count + 1
-            if count > 5:
-                self.assertTrue(
-                    False, 'Timed out waiting for async copy to complete.')
-            self.sleep(5)
+            if count > 10:
+                self.fail('Timed out waiting for async copy to complete.')
+            self.sleep(6)
             blob = self.bs.get_blob_properties(container_name, blob_name)
         self.assertEqual(blob.properties.copy.status, 'success')
 
@@ -404,7 +403,7 @@ class StorageCommonBlobTest(StorageTestCase):
     def test_get_blob_server_encryption(self):
         # Arrange
         blob_name = self._create_block_blob()
-        
+
         # Act
         blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
 
@@ -415,13 +414,13 @@ class StorageCommonBlobTest(StorageTestCase):
     def test_get_blob_properties_server_encryption(self):
         # Arrange
         blob_name = self._create_block_blob()
-        
+
         # Act
         blob = self.bs.get_blob_properties(self.container_name, blob_name)
-        
+
         # Assert
         self.assertTrue(blob.properties.server_encrypted)
-        
+
     @record
     def test_list_blobs_server_encryption(self):
         #Arrange
@@ -429,7 +428,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self._create_block_blob()
         blob_list = self.bs.list_blobs(self.container_name)
 
-        #Act 
+        #Act
 
         #Assert
         for blob in blob_list:
@@ -439,11 +438,11 @@ class StorageCommonBlobTest(StorageTestCase):
     def test_no_server_encryption(self):
         # Arrange
         blob_name = self._create_block_blob()
-        
+
         #Act
         def callback(response):
             response.headers['x-ms-server-encrypted'] = 'false'
-        
+
         self.bs.response_callback = callback
         blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
@@ -619,7 +618,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.remote_container_name,
             source_blob_name,
             permission=BlobPermissions.READ,
-            expiry=datetime.utcnow() + timedelta(hours=1),          
+            expiry=datetime.utcnow() + timedelta(hours=1),
         )
 
         source_blob_url = self.bs2.make_blob_url(
@@ -637,6 +636,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(copy_resp.status, 'pending')
         self._wait_for_async_copy(self.container_name, target_blob_name)
         actual_data = self.bs.get_blob_to_bytes(self.container_name, target_blob_name)
+        self.assertEqual(actual_data.content, data)
 
     @record
     def test_abort_copy_blob(self):
