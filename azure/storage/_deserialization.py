@@ -85,7 +85,7 @@ def _parse_metadata(response):
 
     metadata = _dict()
     for key, value in response.headers.items():
-        if key.startswith('x-ms-meta-'):
+        if key.lower().startswith('x-ms-meta-'):
             metadata[key[10:]] = _to_str(value)
 
     return metadata

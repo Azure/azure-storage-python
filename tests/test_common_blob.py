@@ -508,7 +508,8 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(3, len(md))
         self.assertEqual(md['hello'], 'world')
         self.assertEqual(md['number'], '42')
-        self.assertEqual(md['up'], 'UPval')
+        self.assertEqual(md['UP'], 'UPval')
+        self.assertFalse('up' in md)
 
     @record
     def test_delete_blob_with_existing_blob(self):
@@ -637,6 +638,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(copy_resp.status, 'pending')
         self._wait_for_async_copy(self.container_name, target_blob_name)
         actual_data = self.bs.get_blob_to_bytes(self.container_name, target_blob_name)
+        self.assertEqual(data, actual_data.content)
 
     @record
     def test_abort_copy_blob(self):

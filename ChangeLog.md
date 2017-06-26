@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX:
+- File and blob metadata keys are now case-preserving when fetched from the service. Previously they were made lower-case by the library.
+
 ## Version 0.34.3:
 - All: Made the socket timeout configurable. Increased the default socket timeout to 20 seconds.
 - All: Fixed a bug where SAS tokens were being duplicated on retries

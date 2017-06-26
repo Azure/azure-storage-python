@@ -2,6 +2,9 @@
 
 > See the [Change Log](ChangeLog.md) for a summary of storage library changes.
 
+## Version XX.XX.XX:
+- File and blob metadata keys are now case-preserving when fetched from the service. Previously they were made lower-case by the library.
+
 ## Version 0.34.0:
 
 ### All:
