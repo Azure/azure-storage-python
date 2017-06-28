@@ -33,7 +33,10 @@ from ._upload_chunking import (
     _AppendBlobChunkUploader,
     _upload_blob_chunks,
 )
-from .models import _BlobTypes
+from .models import (
+    _BlobTypes,
+    ResourceProperties
+)
 from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
@@ -325,6 +328,8 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -333,16 +338,16 @@ class AppendBlobService(BaseBlobService):
 
         count = path.getsize(file_path)
         with open(file_path, 'rb') as stream:
-            self.append_blob_from_stream(
-                container_name,
-                blob_name,
-                stream,
-                count=count,
-                validate_content=validate_content,
-                maxsize_condition=maxsize_condition,
-                progress_callback=progress_callback,
-                lease_id=lease_id,
-                timeout=timeout)
+            return self.append_blob_from_stream(
+                    container_name,
+                    blob_name,
+                    stream,
+                    count=count,
+                    validate_content=validate_content,
+                    maxsize_condition=maxsize_condition,
+                    progress_callback=progress_callback,
+                    lease_id=lease_id,
+                    timeout=timeout)
 
     def append_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
@@ -387,6 +392,8 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -404,16 +411,16 @@ class AppendBlobService(BaseBlobService):
         stream = BytesIO(blob)
         stream.seek(index)
 
-        self.append_blob_from_stream(
-            container_name,
-            blob_name,
-            stream,
-            count=count,
-            validate_content=validate_content,
-            maxsize_condition=maxsize_condition,
-            lease_id=lease_id,
-            progress_callback=progress_callback,
-            timeout=timeout)
+        return self.append_blob_from_stream(
+                container_name,
+                blob_name,
+                stream,
+                count=count,
+                validate_content=validate_content,
+                maxsize_condition=maxsize_condition,
+                lease_id=lease_id,
+                progress_callback=progress_callback,
+                timeout=timeout)
 
     def append_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
@@ -455,6 +462,8 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -465,17 +474,17 @@ class AppendBlobService(BaseBlobService):
             _validate_not_none('encoding', encoding)
             text = text.encode(encoding)
 
-        self.append_blob_from_bytes(
-            container_name,
-            blob_name,
-            text,
-            index=0,
-            count=len(text),
-            validate_content=validate_content,
-            maxsize_condition=maxsize_condition,
-            lease_id=lease_id,
-            progress_callback=progress_callback,
-            timeout=timeout)
+        return self.append_blob_from_bytes(
+                container_name,
+                blob_name,
+                text,
+                index=0,
+                count=len(text),
+                validate_content=validate_content,
+                maxsize_condition=maxsize_condition,
+                lease_id=lease_id,
+                progress_callback=progress_callback,
+                timeout=timeout)
 
     def append_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
@@ -518,12 +527,18 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
         _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
+        # _upload_blob_chunks returns the block ids for block blobs so resource_properties
+        # is passed as a parameter to get the last_modified and etag for page and append blobs.
+        # this info is not needed for block_blobs since _put_block_list is called after which gets this info
+        resource_properties = ResourceProperties()
         _upload_blob_chunks(
             blob_service=self,
             container_name=container_name,
@@ -537,5 +552,8 @@ class AppendBlobService(BaseBlobService):
             lease_id=lease_id,
             uploader_class=_AppendBlobChunkUploader,
             maxsize_condition=maxsize_condition,
-            timeout=timeout
+            timeout=timeout,
+            resource_properties=resource_properties
         )
+
+        return resource_properties

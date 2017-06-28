@@ -15,6 +15,7 @@
 import sys
 from threading import Lock
 from time import sleep
+
 from cryptography.hazmat.primitives.padding import PKCS7
 from .._common_conversion import _encode_base64
 from .._serialization import (
@@ -37,7 +38,7 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
                         blob_size, block_size, stream, max_connections,
                         progress_callback, validate_content, lease_id, uploader_class, 
                         maxsize_condition=None, if_match=None, timeout=None,
-                        content_encryption_key=None, initialization_vector=None):
+                        content_encryption_key=None, initialization_vector=None, resource_properties=None):
 
     encryptor, padder = _get_blob_encryptor_and_padder(content_encryption_key, initialization_vector,
                                                        uploader_class is not _PageBlobChunkUploader)
@@ -103,6 +104,10 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
         range_ids = [f.result() for f in futures]
     else:
         range_ids = [uploader.process_chunk(result) for result in uploader.get_chunk_streams()]
+
+    if resource_properties:
+        resource_properties.last_modified = uploader.last_modified
+        resource_properties.etag = uploader.etag
 
     return range_ids
 
@@ -249,6 +254,10 @@ class _BlobChunkUploader(object):
         self._update_progress(len(block_stream))
         return range_id
 
+    def set_response_properties(self, resp):
+        self.etag = resp.etag
+        self.last_modified = resp.last_modified
+
 class _BlockBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_offset, chunk_data):
         block_id = url_quote(_encode_base64('{0:032d}'.format(chunk_offset)))
@@ -297,6 +306,8 @@ class _PageBlobChunkUploader(_BlobChunkUploader):
         if not self.parallel:
             self.if_match = resp.etag
 
+        self.set_response_properties(resp)
+
 class _AppendBlobChunkUploader(_BlobChunkUploader):
     def _upload_chunk(self, chunk_offset, chunk_data):
         if not hasattr(self, 'current_length'):
@@ -322,6 +333,8 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 appendpos_condition=self.current_length + chunk_offset,
                 timeout=self.timeout,
             )
+
+        self.set_response_properties(resp)
 
 class _SubStream(IOBase):
     def __init__(self, wrapped_stream, stream_begin_index, length, lockObj):

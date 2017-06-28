@@ -477,10 +477,13 @@ class StoragePageBlobTest(StorageTestCase):
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+        create_resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
     def test_create_blob_from_bytes_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
@@ -497,10 +500,13 @@ class StoragePageBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, progress_callback=callback)
+        create_resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data, progress_callback=callback)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
     def test_create_blob_from_bytes_with_index(self):
         # parallel tests introduce random order of requests, can only run live
@@ -527,10 +533,13 @@ class StoragePageBlobTest(StorageTestCase):
         count = 1024
 
         # Act
-        resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data, index, count)
+        create_resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data, index, count)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[index:index + count])
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
     def test_create_blob_from_path(self):
         # parallel tests introduce random order of requests, can only run live
@@ -545,10 +554,13 @@ class StoragePageBlobTest(StorageTestCase):
             stream.write(data)
 
         # Act
-        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH)
+        create_resp = self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
     def test_create_blob_from_path_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
@@ -588,10 +600,13 @@ class StoragePageBlobTest(StorageTestCase):
         # Act
         blob_size = len(data)
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size)
+            create_resp = self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
     def test_create_blob_from_stream_non_seekable(self):
         # parallel tests introduce random order of requests, can only run live

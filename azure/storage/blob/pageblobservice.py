@@ -39,8 +39,7 @@ from ._upload_chunking import (
 )
 from .models import (
     _BlobTypes,
-    PageBlobProperties,
-)
+    ResourceProperties)
 from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
@@ -849,6 +848,8 @@ class PageBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -856,22 +857,22 @@ class PageBlobService(BaseBlobService):
 
         count = path.getsize(file_path)
         with open(file_path, 'rb') as stream:
-            self.create_blob_from_stream(
-                container_name=container_name,
-                blob_name=blob_name,
-                stream=stream,
-                count=count,
-                content_settings=content_settings,
-                metadata=metadata,
-                validate_content=validate_content,
-                progress_callback=progress_callback,
-                max_connections=max_connections,
-                lease_id=lease_id,
-                if_modified_since=if_modified_since,
-                if_unmodified_since=if_unmodified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                timeout=timeout)
+            return self.create_blob_from_stream(
+                    container_name=container_name,
+                    blob_name=blob_name,
+                    stream=stream,
+                    count=count,
+                    content_settings=content_settings,
+                    metadata=metadata,
+                    validate_content=validate_content,
+                    progress_callback=progress_callback,
+                    max_connections=max_connections,
+                    lease_id=lease_id,
+                    if_modified_since=if_modified_since,
+                    if_unmodified_since=if_unmodified_since,
+                    if_match=if_match,
+                    if_none_match=if_none_match,
+                    timeout=timeout)
 
 
     def create_blob_from_stream(
@@ -939,6 +940,8 @@ class PageBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -971,6 +974,10 @@ class PageBlobService(BaseBlobService):
             encryption_data=encryption_data
         )
 
+        # _upload_blob_chunks returns the block ids for block blobs so resource_properties
+        # is passed as a parameter to get the last_modified and etag for page and append blobs.
+        # this info is not needed for block_blobs since _put_block_list is called after which gets this info
+        resource_properties = ResourceProperties()
         _upload_blob_chunks(
             blob_service=self,
             container_name=container_name,
@@ -986,8 +993,11 @@ class PageBlobService(BaseBlobService):
             if_match=response.etag,
             timeout=timeout,
             content_encryption_key=cek,
-            initialization_vector=iv
+            initialization_vector=iv,
+            resource_properties=resource_properties
         )
+
+        return resource_properties
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
@@ -1057,6 +1067,8 @@ class PageBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1072,22 +1084,22 @@ class PageBlobService(BaseBlobService):
         stream = BytesIO(blob)
         stream.seek(index)
 
-        self.create_blob_from_stream(
-            container_name=container_name,
-            blob_name=blob_name,
-            stream=stream,
-            count=count,
-            content_settings=content_settings,
-            metadata=metadata,
-            validate_content=validate_content,
-            lease_id=lease_id,
-            progress_callback=progress_callback,
-            max_connections=max_connections,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            timeout=timeout)
+        return self.create_blob_from_stream(
+                container_name=container_name,
+                blob_name=blob_name,
+                stream=stream,
+                count=count,
+                content_settings=content_settings,
+                metadata=metadata,
+                validate_content=validate_content,
+                lease_id=lease_id,
+                progress_callback=progress_callback,
+                max_connections=max_connections,
+                if_modified_since=if_modified_since,
+                if_unmodified_since=if_unmodified_since,
+                if_match=if_match,
+                if_none_match=if_none_match,
+                timeout=timeout)
 
     #-----Helper methods-----------------------------------------------------
 
