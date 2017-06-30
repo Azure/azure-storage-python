@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version X.X.X:
+
+### Blob:
+- create_from_* and and append_blob_from_* methods will return response_properties which contains the etag and last modified time.
+
 ## Version 0.34.3:
 - All: Made the socket timeout configurable. Increased the default socket timeout to 20 seconds.
 - All: Fixed a bug where SAS tokens were being duplicated on retries
