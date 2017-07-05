@@ -55,6 +55,7 @@ class _ServiceParameters(object):
         self.account_key = account_key
         self.sas_token = sas_token
         self.protocol = protocol or DEFAULT_PROTOCOL
+        self.is_emulated = is_emulated
 
         if is_emulated:
             self.account_name = DEV_ACCOUNT_NAME

@@ -9,6 +9,7 @@
 
 ### Table:
 - Fixed syntax error in _convert_json_response_to_entities.
+- Table: Fixed a bug where the urls are not correctly formed when making commit_batch to the emulator.
 
 ## Version 0.34.3:
 - All: Made the socket timeout configurable. Increased the default socket timeout to 20 seconds.

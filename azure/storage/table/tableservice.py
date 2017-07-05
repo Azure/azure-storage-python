@@ -69,6 +69,7 @@ from ._deserialization import (
 from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
+    DEV_ACCOUNT_NAME,
 )
 from ._request import (
     _get_entity,
@@ -822,6 +823,8 @@ class TableService(StorageClient):
                 batch_request.path = '/' + _to_str(table_name)
             else:
                 batch_request.path = _get_entity_path(table_name, batch._partition_key, row_key)
+            if self.is_emulated:
+                batch_request.path = '/' + DEV_ACCOUNT_NAME + batch_request.path
             _update_request(batch_request)
 
         # Construct the batch body

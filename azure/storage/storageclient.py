@@ -107,6 +107,7 @@ class StorageClient(object):
         self.account_name = connection_params.account_name
         self.account_key = connection_params.account_key
         self.sas_token = connection_params.sas_token
+        self.is_emulated = connection_params.is_emulated
 
         self.primary_endpoint = connection_params.primary_endpoint
         self.secondary_endpoint = connection_params.secondary_endpoint
