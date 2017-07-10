@@ -4,6 +4,9 @@
 
 ## Version XX.XX.XX:
 
+### All:
+- Fixed a bug where deserialization of service stats throws a TypeError when the service is unavailable.
+
 ### Blob:
 - create_from_* and and append_blob_from_* methods will return response_properties which contains the etag and last modified time.
 
