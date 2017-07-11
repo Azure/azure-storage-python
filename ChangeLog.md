@@ -2,15 +2,13 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version X.X.X:
-
-### Blob:
-- For Premium Accounts only, added support for getting and setting the tier on a page blob. The tier can also be set when creating or copying from an existing page blob.
-
 ## Version 0.35.0:
 
 ### All:
-- Support for 2016-10-16 REST version. Please see our REST API documentation and blogs for information about the related added features. If you are using the Storage Emulator, please update to Emulator version 5.3.
+- Support for 2017-04-17 REST version. Please see our REST API documentation and blogs for information about the related added features. If you are using the Storage Emulator, please update to Emulator version 5.2.
+
+### Blob:
+- For Premium Accounts only, added support for getting and setting the tier on a page blob. The tier can also be set when creating or copying from an existing page blob.
 
 ## Version 0.34.1:
 
