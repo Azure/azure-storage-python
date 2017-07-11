@@ -253,15 +253,10 @@ def _convert_json_response_to_entities(response, property_resolver, require_encr
 
     root = loads(response.body.decode('utf-8'))
 
-    if 'value' in root:
-        for entity in root['value']:
-            entity = _decrypt_and_deserialize_entity(entity, property_resolver, require_encryption, 
-                                           key_encryption_key, key_resolver)
-            entities.append(entity)
-
-    else:
-        entities.append(_convert_json_to_entity(entity, 
-                                             property_resolver))
+    for entity in root['value']:
+        entity = _decrypt_and_deserialize_entity(entity, property_resolver, require_encryption,
+                                                 key_encryption_key, key_resolver)
+        entities.append(entity)
 
     return entities
 

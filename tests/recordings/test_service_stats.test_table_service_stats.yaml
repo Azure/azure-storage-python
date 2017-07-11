@@ -5,21 +5,21 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [e195e54c-f4aa-11e6-a4f5-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:49:04 GMT']
+      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
+      x-ms-client-request-id: [8dc63324-50c9-11e7-8b1d-705a0f3d3f8d]
+      x-ms-date: ['Wed, 14 Jun 2017 06:20:25 GMT']
       x-ms-version: ['2016-05-31']
     method: GET
-    uri: https://storagename-secondary.table.core.windows.net/?comp=stats&restype=service
+    uri: https://storagename-secondary.table.core.windows.net/?restype=service&comp=stats
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Fri,
-        17 Feb 2017 00:45:14 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Wed,\
+        \ 14 Jun 2017 06:18:18 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Fri, 17 Feb 2017 00:49:05 GMT']
+      Date: ['Wed, 14 Jun 2017 06:20:25 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [aa885587-0002-0016-3ab7-8888db000000]
+      x-ms-request-id: [60ca0dde-0002-0056-40d6-e49105000000]
       x-ms-version: ['2016-05-31']
     status: {code: 200, message: OK}
 version: 1

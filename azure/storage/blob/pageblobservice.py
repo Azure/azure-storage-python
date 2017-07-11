@@ -39,8 +39,7 @@ from ._upload_chunking import (
 )
 from .models import (
     _BlobTypes,
-    PageBlobProperties,
-)
+    ResourceProperties)
 from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
@@ -88,7 +87,7 @@ class PageBlobService(BaseBlobService):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 custom_domain=None, request_session=None, connection_string=None):
+                 custom_domain=None, request_session=None, connection_string=None, socket_timeout=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests 
@@ -124,11 +123,14 @@ class PageBlobService(BaseBlobService):
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
+        :param int socket_timeout:
+            If specified, this will override the default socket timeout. The timeout specified is in seconds.
+            See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
         '''
         self.blob_type = _BlobTypes.PageBlob
         super(PageBlobService, self).__init__(
             account_name, account_key, sas_token, is_emulated, protocol, endpoint_suffix, 
-            custom_domain, request_session, connection_string)
+            custom_domain, request_session, connection_string, socket_timeout)
 
     def create_blob(
         self, container_name, blob_name, content_length, content_settings=None,
@@ -855,6 +857,8 @@ class PageBlobService(BaseBlobService):
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -862,7 +866,7 @@ class PageBlobService(BaseBlobService):
 
         count = path.getsize(file_path)
         with open(file_path, 'rb') as stream:
-            self.create_blob_from_stream(
+            return self.create_blob_from_stream(
                 container_name=container_name,
                 blob_name=blob_name,
                 stream=stream,
@@ -951,6 +955,8 @@ class PageBlobService(BaseBlobService):
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -984,6 +990,10 @@ class PageBlobService(BaseBlobService):
             encryption_data=encryption_data
         )
 
+        # _upload_blob_chunks returns the block ids for block blobs so resource_properties
+        # is passed as a parameter to get the last_modified and etag for page and append blobs.
+        # this info is not needed for block_blobs since _put_block_list is called after which gets this info
+        resource_properties = ResourceProperties()
         _upload_blob_chunks(
             blob_service=self,
             container_name=container_name,
@@ -999,8 +1009,11 @@ class PageBlobService(BaseBlobService):
             if_match=response.etag,
             timeout=timeout,
             content_encryption_key=cek,
-            initialization_vector=iv
+            initialization_vector=iv,
+            resource_properties=resource_properties
         )
+
+        return resource_properties
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
@@ -1074,6 +1087,8 @@ class PageBlobService(BaseBlobService):
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1089,7 +1104,7 @@ class PageBlobService(BaseBlobService):
         stream = BytesIO(blob)
         stream.seek(index)
 
-        self.create_blob_from_stream(
+        return self.create_blob_from_stream(
             container_name=container_name,
             blob_name=blob_name,
             stream=stream,

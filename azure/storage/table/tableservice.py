@@ -69,6 +69,7 @@ from ._deserialization import (
 from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
+    DEV_ACCOUNT_NAME,
 )
 from ._request import (
     _get_entity,
@@ -126,7 +127,7 @@ class TableService(StorageClient):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 request_session=None, connection_string=None):
+                 request_session=None, connection_string=None, socket_timeout=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests 
@@ -155,6 +156,9 @@ class TableService(StorageClient):
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
+        :param int socket_timeout:
+            If specified, this will override the default socket timeout. The timeout specified is in seconds.
+            See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
         '''
         service_params = _ServiceParameters.get_service_parameters(
             'table',
@@ -165,7 +169,8 @@ class TableService(StorageClient):
             protocol=protocol, 
             endpoint_suffix=endpoint_suffix,
             request_session=request_session,
-            connection_string=connection_string)
+            connection_string=connection_string,
+            socket_timeout=socket_timeout)
             
         super(TableService, self).__init__(service_params)
 
@@ -626,7 +631,7 @@ class TableService(StorageClient):
         Access Signatures. 
         
         When you set permissions for a table, the existing permissions are replaced. 
-        To update the table’s permissions, call :func:`~get_table_acl` to fetch 
+        To update the table's permissions, call :func:`~get_table_acl` to fetch 
         all access policies associated with the table, modify the access policy 
         that you wish to change, and then call this function with the complete 
         set of data to perform the update.
@@ -818,6 +823,8 @@ class TableService(StorageClient):
                 batch_request.path = '/' + _to_str(table_name)
             else:
                 batch_request.path = _get_entity_path(table_name, batch._partition_key, row_key)
+            if self.is_emulated:
+                batch_request.path = '/' + DEV_ACCOUNT_NAME + batch_request.path
             _update_request(batch_request)
 
         # Construct the batch body

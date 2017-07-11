@@ -381,7 +381,13 @@ class StorageTableTest(StorageTestCase):
     @record
     def test_locale(self):
         # Arrange
-        culture = 'es_ES.utf8' if not os.name is "nt" else "Spanish_Spain"
+        if os.name is "nt":
+            culture = "Spanish_Spain"
+        elif os.name is 'posix':
+            culture = 'es_ES.UTF-8'
+        else:
+            culture = 'es_ES.utf8'
+
         locale.setlocale(locale.LC_ALL, culture)
         e = None
 

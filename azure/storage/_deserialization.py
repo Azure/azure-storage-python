@@ -189,7 +189,8 @@ def _convert_xml_to_service_stats(response):
 
     geo_replication = GeoReplication()
     geo_replication.status = geo_replication_element.find('Status').text
-    geo_replication.last_sync_time = parser.parse(geo_replication_element.find('LastSyncTime').text)
+    last_sync_time = geo_replication_element.find('LastSyncTime').text
+    geo_replication.last_sync_time = parser.parse(last_sync_time) if last_sync_time else None
 
     service_stats = ServiceStats()
     service_stats.geo_replication = geo_replication

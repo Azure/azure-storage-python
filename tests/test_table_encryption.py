@@ -35,7 +35,7 @@ from azure.storage.table import (
 from azure.storage.models import(
     AccessPolicy,
 )
-from .test_encryption_helper import(
+from tests.test_encryption_helper import(
     KeyWrapper,
     KeyResolver,
     RSAKeyWrapper,

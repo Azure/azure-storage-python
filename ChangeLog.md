@@ -6,12 +6,27 @@
 
 ### All:
 - Support for 2017-04-17 REST version. Please see our REST API documentation and blogs for information about the related added features. If you are using the Storage Emulator, please update to Emulator version 5.2.
+- Fixed a bug where deserialization of service stats throws a TypeError when the service is unavailable.
 
 ### Blob:
 - For Premium Accounts only, added support for getting and setting the tier on a page blob. The tier can also be set when creating or copying from an existing page blob.
+- create_from_* and and append_blob_from_* methods will return response_properties which contains the etag and last modified time.
+
+### Table:
+- Fixed syntax error in _convert_json_response_to_entities.
+- Fixed a bug where the urls are not correctly formed when making commit_batch to the emulator.
 
 ### File:
 - The `server_encrypted` file property will now be populated when calling 'get_directory_properties', 'get_file', and 'get_file_properties'. This value is set to True if the file data (for files) and application metadata are completely encrypted.
+
+## Version 0.34.3:
+- All: Made the socket timeout configurable. Increased the default socket timeout to 20 seconds.
+- All: Fixed a bug where SAS tokens were being duplicated on retries
+
+## Version 0.34.2:
+
+### All:
+- Updated the azure namespace packaging system.
 
 ## Version 0.34.1:
 

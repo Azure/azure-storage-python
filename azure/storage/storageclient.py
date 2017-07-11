@@ -29,7 +29,7 @@ from .models import (
 )
 from .retry import ExponentialRetry
 from ._constants import (
-    SOCKET_TIMEOUT
+    DEFAULT_SOCKET_TIMEOUT
 )
 from ._http import HTTPError
 from ._http.httpclient import _HTTPClient
@@ -107,16 +107,18 @@ class StorageClient(object):
         self.account_name = connection_params.account_name
         self.account_key = connection_params.account_key
         self.sas_token = connection_params.sas_token
+        self.is_emulated = connection_params.is_emulated
 
         self.primary_endpoint = connection_params.primary_endpoint
         self.secondary_endpoint = connection_params.secondary_endpoint
 
         protocol = connection_params.protocol
         request_session = connection_params.request_session or requests.Session()
+        socket_timeout = connection_params.socket_timeout or DEFAULT_SOCKET_TIMEOUT
         self._httpclient = _HTTPClient(
             protocol=protocol,
             session=request_session,
-            timeout=SOCKET_TIMEOUT,
+            timeout=socket_timeout,
         )
 
         self.retry = ExponentialRetry().retry
@@ -125,6 +127,14 @@ class StorageClient(object):
         self.request_callback = None
         self.response_callback = None
         self.retry_callback = None
+
+    @property
+    def socket_timeout(self):
+        return self._httpclient.timeout
+
+    @socket_timeout.setter
+    def socket_timeout(self, value):
+        self._httpclient.timeout = value
 
     @property
     def protocol(self):

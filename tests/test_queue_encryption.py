@@ -25,7 +25,7 @@ from tests.testcase import (
 from azure.storage.queue import (
     QueueService,
 )
-from .test_encryption_helper import (
+from tests.test_encryption_helper import (
     KeyWrapper,
     KeyResolver,
     RSAKeyWrapper,
