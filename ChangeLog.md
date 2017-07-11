@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version X.X.X:
+
+### Blob:
+- For Premium Accounts only, added support for getting and setting the tier on a page blob. The tier can also be set when creating or copying from an existing page blob.
+
 ## Version 0.35.0:
 
 ### All:
