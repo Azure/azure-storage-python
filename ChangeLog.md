@@ -10,6 +10,9 @@
 ### Blob:
 - For Premium Accounts only, added support for getting and setting the tier on a page blob. The tier can also be set when creating or copying from an existing page blob.
 
+### File:
+- The `server_encrypted` file property will now be populated when calling 'get_directory_properties', 'get_file', and 'get_file_properties'. This value is set to True if the file data (for files) and application metadata are completely encrypted.
+
 ## Version 0.34.1:
 
 ### Blob:
