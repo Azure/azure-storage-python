@@ -20,6 +20,8 @@ import json
 import os
 import os.path
 import time
+from unittest import SkipTest
+
 import vcr
 import zlib
 import math
@@ -146,6 +148,23 @@ class StorageTestCase(unittest.TestCase):
                 settings.STORAGE_ACCOUNT_KEY,
                 protocol=settings.PROTOCOL,
             )
+        self._set_test_proxy(service, settings)
+        return service
+
+    def _create_premium_storage_service(self, service_class, settings):
+        if hasattr(settings, 'PREMIUM_CONNECTION_STRING') and settings.PREMIUM_CONNECTION_STRING != "":
+            service = service_class(connection_string=settings.PREMIUM_CONNECTION_STRING)
+        elif settings.IS_EMULATED:
+            service = service_class(is_emulated=True)
+        elif hasattr(settings, 'PREMIUM_STORAGE_ACCOUNT_NAME') and settings.PREMIUM_STORAGE_ACCOUNT_NAME != "":
+            service = service_class(
+                settings.PREMIUM_STORAGE_ACCOUNT_NAME,
+                settings.PREMIUM_STORAGE_ACCOUNT_KEY,
+                protocol=settings.PROTOCOL,
+            )
+        else:
+            raise SkipTest('PREMIUM_CONNECTION_STRING or PREMIUM_STORAGE_ACCOUNT_NAME must be populated to run this test')
+
         self._set_test_proxy(service, settings)
         return service
 
