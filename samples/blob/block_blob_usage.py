@@ -157,6 +157,7 @@ class BlockBlobSamples():
         copy = self.service.copy_blob(container_name, 'blob1copy', source)
 
         # Poll for copy completion
+        count = 0
         while copy.status != 'success':
             count = count + 1
             if count > 5:
