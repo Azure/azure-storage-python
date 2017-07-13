@@ -69,7 +69,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
                                          blob_data):
         self._create_container(container_name)
         resp = self.bs.create_blob_from_bytes(container_name, blob_name, blob_data)
-        self.assertIsNone(resp)
+        self.assertIsNotNone(resp.etag)
 
     def _create_container_and_page_blob(self, container_name, blob_name,
                                         content_length):
@@ -284,7 +284,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             if_modified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsNotNone(resp.etag)
 
     @record
     def test_put_blob_with_if_modified_fail(self):
@@ -318,7 +318,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             if_unmodified_since=test_datetime)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsNotNone(resp.etag)
 
     @record
     def test_put_blob_with_if_unmodified_fail(self):
@@ -351,7 +351,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             if_match=etag)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsNotNone(resp.etag)
 
     @record
     def test_put_blob_with_if_match_fail(self):
@@ -381,7 +381,7 @@ class StorageBlobAccessConditionsTest(StorageTestCase):
             if_none_match='0x111111111111111')
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsNotNone(resp.etag)
 
     @record
     def test_put_blob_with_if_none_match_fail(self):

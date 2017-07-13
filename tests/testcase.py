@@ -347,6 +347,10 @@ class StorageTestCase(unittest.TestCase):
                 self.assertTrue(i[0] % max_chunk_size == 0 or i[0] % max_chunk_size == small_chunk_size)
                 self.assertEqual(i[1], size)
 
+    def is_file_encryption_enabled(self):
+        return self.settings.IS_SERVER_SIDE_FILE_ENCRYPTION_ENABLED
+
+
 def record(test):
     def recording_test(self):
         with self.recording():

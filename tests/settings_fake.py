@@ -33,6 +33,9 @@ PROTOCOL = "https"
 # Set to true to target the development storage emulator
 IS_EMULATED = False
 
+# Set to true if server side file encryption is enabled
+IS_SERVER_SIDE_FILE_ENCRYPTION_ENABLED = False
+
 # Decide which test mode to run against. Possible options:
 #   - Playback: run against stored recordings
 #   - Record: run tests against live storage and update recordings
