@@ -773,6 +773,7 @@ class StoragePageBlobTest(StorageTestCase):
         # strip off protocol
         self.assertTrue(copy_blob.properties.copy.source.endswith(source_blob_url[5:]))
 
+    @record
     def test_blob_tier_on_create(self):
         ps = self._create_premium_storage_service(PageBlobService, self.settings)
         try:
@@ -819,6 +820,7 @@ class StoragePageBlobTest(StorageTestCase):
         finally:
             ps.delete_container(container_name)
 
+    @record
     def test_blob_tier_set_tier_api(self):
         ps = self._create_premium_storage_service(PageBlobService, self.settings)
         try:
@@ -850,6 +852,7 @@ class StoragePageBlobTest(StorageTestCase):
         finally:
             ps.delete_container(container_name)
 
+    @record
     def test_blob_tier_copy_blob(self):
         ps = self._create_premium_storage_service(PageBlobService, self.settings)
         try:
