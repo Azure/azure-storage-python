@@ -33,7 +33,10 @@ from ._upload_chunking import (
     _AppendBlobChunkUploader,
     _upload_blob_chunks,
 )
-from .models import _BlobTypes
+from .models import (
+    _BlobTypes,
+    ResourceProperties
+)
 from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
@@ -74,7 +77,7 @@ class AppendBlobService(BaseBlobService):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 custom_domain=None, request_session=None, connection_string=None):
+                 custom_domain=None, request_session=None, connection_string=None, socket_timeout=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests 
@@ -110,11 +113,14 @@ class AppendBlobService(BaseBlobService):
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
+        :param int socket_timeout:
+            If specified, this will override the default socket timeout. The timeout specified is in seconds.
+            See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
         '''
         self.blob_type = _BlobTypes.AppendBlob
         super(AppendBlobService, self).__init__(
             account_name, account_key, sas_token, is_emulated, protocol, endpoint_suffix, 
-            custom_domain, request_session, connection_string)
+            custom_domain, request_session, connection_string, socket_timeout)
 
     def create_blob(self, container_name, blob_name, content_settings=None,
                     metadata=None, lease_id=None,
@@ -215,14 +221,14 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param int appendpos_condition:
             Optional conditional header, used only for the Append Block operation.
             A number indicating the byte offset to compare. Append Block will
             succeed only if the append position is equal to this number. If it
             is not, the request will fail with the
             AppendPositionConditionNotMet error
-            (HTTP status code 412 – Precondition Failed).
+            (HTTP status code 412 - Precondition Failed).
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -310,7 +316,7 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -322,6 +328,8 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -330,16 +338,16 @@ class AppendBlobService(BaseBlobService):
 
         count = path.getsize(file_path)
         with open(file_path, 'rb') as stream:
-            self.append_blob_from_stream(
-                container_name,
-                blob_name,
-                stream,
-                count=count,
-                validate_content=validate_content,
-                maxsize_condition=maxsize_condition,
-                progress_callback=progress_callback,
-                lease_id=lease_id,
-                timeout=timeout)
+            return self.append_blob_from_stream(
+                    container_name,
+                    blob_name,
+                    stream,
+                    count=count,
+                    validate_content=validate_content,
+                    maxsize_condition=maxsize_condition,
+                    progress_callback=progress_callback,
+                    lease_id=lease_id,
+                    timeout=timeout)
 
     def append_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
@@ -372,7 +380,7 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -384,6 +392,8 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -401,16 +411,16 @@ class AppendBlobService(BaseBlobService):
         stream = BytesIO(blob)
         stream.seek(index)
 
-        self.append_blob_from_stream(
-            container_name,
-            blob_name,
-            stream,
-            count=count,
-            validate_content=validate_content,
-            maxsize_condition=maxsize_condition,
-            lease_id=lease_id,
-            progress_callback=progress_callback,
-            timeout=timeout)
+        return self.append_blob_from_stream(
+                container_name,
+                blob_name,
+                stream,
+                count=count,
+                validate_content=validate_content,
+                maxsize_condition=maxsize_condition,
+                lease_id=lease_id,
+                progress_callback=progress_callback,
+                timeout=timeout)
 
     def append_blob_from_text(
         self, container_name, blob_name, text, encoding='utf-8',
@@ -440,7 +450,7 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -452,6 +462,8 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -462,17 +474,17 @@ class AppendBlobService(BaseBlobService):
             _validate_not_none('encoding', encoding)
             text = text.encode(encoding)
 
-        self.append_blob_from_bytes(
-            container_name,
-            blob_name,
-            text,
-            index=0,
-            count=len(text),
-            validate_content=validate_content,
-            maxsize_condition=maxsize_condition,
-            lease_id=lease_id,
-            progress_callback=progress_callback,
-            timeout=timeout)
+        return self.append_blob_from_bytes(
+                container_name,
+                blob_name,
+                text,
+                index=0,
+                count=len(text),
+                validate_content=validate_content,
+                maxsize_condition=maxsize_condition,
+                lease_id=lease_id,
+                progress_callback=progress_callback,
+                timeout=timeout)
 
     def append_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
@@ -503,7 +515,7 @@ class AppendBlobService(BaseBlobService):
             the append blob. If the Append Block operation would cause the blob
             to exceed that limit or if the blob size is already greater than the
             value specified in this header, the request will fail with
-            MaxBlobSizeConditionNotMet error (HTTP status code 412 – Precondition Failed).
+            MaxBlobSizeConditionNotMet error (HTTP status code 412 - Precondition Failed).
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -515,12 +527,18 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :return: ETag and last modified properties for the Append Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
         _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
+        # _upload_blob_chunks returns the block ids for block blobs so resource_properties
+        # is passed as a parameter to get the last_modified and etag for page and append blobs.
+        # this info is not needed for block_blobs since _put_block_list is called after which gets this info
+        resource_properties = ResourceProperties()
         _upload_blob_chunks(
             blob_service=self,
             container_name=container_name,
@@ -534,5 +552,8 @@ class AppendBlobService(BaseBlobService):
             lease_id=lease_id,
             uploader_class=_AppendBlobChunkUploader,
             maxsize_condition=maxsize_condition,
-            timeout=timeout
+            timeout=timeout,
+            resource_properties=resource_properties
         )
+
+        return resource_properties

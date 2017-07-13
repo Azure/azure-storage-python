@@ -39,8 +39,7 @@ from ._upload_chunking import (
 )
 from .models import (
     _BlobTypes,
-    PageBlobProperties,
-)
+    ResourceProperties)
 from .._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
@@ -88,7 +87,7 @@ class PageBlobService(BaseBlobService):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 custom_domain=None, request_session=None, connection_string=None):
+                 custom_domain=None, request_session=None, connection_string=None, socket_timeout=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests 
@@ -124,16 +123,19 @@ class PageBlobService(BaseBlobService):
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format.
+        :param int socket_timeout:
+            If specified, this will override the default socket timeout. The timeout specified is in seconds.
+            See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
         '''
         self.blob_type = _BlobTypes.PageBlob
         super(PageBlobService, self).__init__(
             account_name, account_key, sas_token, is_emulated, protocol, endpoint_suffix, 
-            custom_domain, request_session, connection_string)
+            custom_domain, request_session, connection_string, socket_timeout)
 
     def create_blob(
         self, container_name, blob_name, content_length, content_settings=None,
         sequence_number=None, metadata=None, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None, premium_page_blob_tier=None):
         '''
         Creates a new Page Blob.
 
@@ -183,6 +185,10 @@ class PageBlobService(BaseBlobService):
             operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param PremiumPageBlobTier premium_page_blob_tier:
+            A page blob tier value to set the blob to. The tier correlates to the size of the
+            blob and number of allowed IOPS. This is only applicable to page blobs on
+            premium storage accounts.
         :return: ETag and last modified properties for the new Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -196,6 +202,7 @@ class PageBlobService(BaseBlobService):
                     sequence_number=sequence_number,
                     metadata=metadata,
                     lease_id=lease_id,
+                    premium_page_blob_tier=premium_page_blob_tier,
                     if_modified_since=if_modified_since,
                     if_unmodified_since=if_unmodified_since,
                     if_match=if_match,
@@ -789,7 +796,7 @@ class PageBlobService(BaseBlobService):
         self, container_name, blob_name, file_path, content_settings=None,
         metadata=None, validate_content=False, progress_callback=None, max_connections=2,
         lease_id=None, if_modified_since=None, if_unmodified_since=None, 
-        if_match=None, if_none_match=None, timeout=None):
+        if_match=None, if_none_match=None, timeout=None, premium_page_blob_tier=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -846,6 +853,12 @@ class PageBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param premium_page_blob_tier:
+            A page blob tier value to set the blob to. The tier correlates to the size of the
+            blob and number of allowed IOPS. This is only applicable to page blobs on
+            premium storage accounts.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -853,7 +866,7 @@ class PageBlobService(BaseBlobService):
 
         count = path.getsize(file_path)
         with open(file_path, 'rb') as stream:
-            self.create_blob_from_stream(
+            return self.create_blob_from_stream(
                 container_name=container_name,
                 blob_name=blob_name,
                 stream=stream,
@@ -868,14 +881,16 @@ class PageBlobService(BaseBlobService):
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
                 if_none_match=if_none_match,
-                timeout=timeout)
+                timeout=timeout,
+                premium_page_blob_tier=premium_page_blob_tier)
 
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count, content_settings=None,
         metadata=None, validate_content=False, progress_callback=None,
         max_connections=2, lease_id=None, if_modified_since=None,
-        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+        if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
+        premium_page_blob_tier=None):
         '''
         Creates a new blob from a file/stream, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -936,6 +951,12 @@ class PageBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param premium_page_blob_tier:
+            A page blob tier value to set the blob to. The tier correlates to the size of the
+            blob and number of allowed IOPS. This is only applicable to page blobs on
+            premium storage accounts.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -960,6 +981,7 @@ class PageBlobService(BaseBlobService):
             content_settings=content_settings,
             metadata=metadata,
             lease_id=lease_id,
+            premium_page_blob_tier=premium_page_blob_tier,
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
@@ -968,6 +990,10 @@ class PageBlobService(BaseBlobService):
             encryption_data=encryption_data
         )
 
+        # _upload_blob_chunks returns the block ids for block blobs so resource_properties
+        # is passed as a parameter to get the last_modified and etag for page and append blobs.
+        # this info is not needed for block_blobs since _put_block_list is called after which gets this info
+        resource_properties = ResourceProperties()
         _upload_blob_chunks(
             blob_service=self,
             container_name=container_name,
@@ -983,15 +1009,18 @@ class PageBlobService(BaseBlobService):
             if_match=response.etag,
             timeout=timeout,
             content_encryption_key=cek,
-            initialization_vector=iv
+            initialization_vector=iv,
+            resource_properties=resource_properties
         )
+
+        return resource_properties
 
     def create_blob_from_bytes(
         self, container_name, blob_name, blob, index=0, count=None,
         content_settings=None, metadata=None, validate_content=False, 
         progress_callback=None, max_connections=2, lease_id=None, 
         if_modified_since=None, if_unmodified_since=None, if_match=None, 
-        if_none_match=None, timeout=None):
+        if_none_match=None, timeout=None, premium_page_blob_tier=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -1054,6 +1083,12 @@ class PageBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param premium_page_blob_tier:
+            A page blob tier value to set the blob to. The tier correlates to the size of the
+            blob and number of allowed IOPS. This is only applicable to page blobs on
+            premium storage accounts.
+        :return: ETag and last modified properties for the Page Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -1069,7 +1104,7 @@ class PageBlobService(BaseBlobService):
         stream = BytesIO(blob)
         stream.seek(index)
 
-        self.create_blob_from_stream(
+        return self.create_blob_from_stream(
             container_name=container_name,
             blob_name=blob_name,
             stream=stream,
@@ -1084,13 +1119,191 @@ class PageBlobService(BaseBlobService):
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
-            timeout=timeout)
+            timeout=timeout,
+            premium_page_blob_tier=premium_page_blob_tier)
+
+    def set_premium_page_blob_tier(
+        self, container_name, blob_name, premium_page_blob_tier,
+        timeout=None):
+        '''
+        Sets the page blob tiers on the blob. This API is only supported for page blobs on premium accounts.
+
+        :param str container_name:
+            Name of existing container.
+        :param str blob_name:
+            Name of blob to update.
+        :param premium_page_blob_tier:
+            A page blob tier value to set the blob to. The tier correlates to the size of the
+            blob and number of allowed IOPS. This is only applicable to page blobs on
+            premium storage accounts.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make
+            multiple calls to the Azure service and the timeout will apply to
+            each call individually.
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('premium_page_blob_tier', premium_page_blob_tier)
+
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {
+            'comp': 'tier',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-access-tier': _to_str(premium_page_blob_tier)
+        }
+
+        self._perform_request(request)
+
+    def copy_blob(self, container_name, blob_name, copy_source,
+                  metadata=None,
+                  source_if_modified_since=None,
+                  source_if_unmodified_since=None,
+                  source_if_match=None, source_if_none_match=None,
+                  destination_if_modified_since=None,
+                  destination_if_unmodified_since=None,
+                  destination_if_match=None,
+                  destination_if_none_match=None,
+                  destination_lease_id=None,
+                  source_lease_id=None, timeout=None,
+                  premium_page_blob_tier=None):
+        '''
+        Copies a blob asynchronously. This operation returns a copy operation
+        properties object, including a copy ID you can use to check or abort the
+        copy operation. The Blob service copies blobs on a best-effort basis.
+
+        The source blob for a copy operation must be a page blob. If the destination
+        blob already exists, it must be of the same blob type as the source blob.
+        Any existing destination blob will be overwritten.
+        The destination blob cannot be modified while a copy operation is in progress.
+
+        When copying from a page blob, the Blob service creates a destination page
+        blob of the source blob’s length, initially containing all zeroes. Then
+        the source page ranges are enumerated, and non-empty ranges are copied.
+
+        If the tier on the source blob is larger than the tier being passed to this
+        copy operation or if the size of the blob exceeds the tier being passed to
+        this copy operation then the operation will fail.
+
+        You can call get_blob_properties on the destination
+        blob to check the status of the copy operation. The final blob will be
+        committed when the copy completes.
+
+        :param str container_name:
+            Name of the destination container. The container must exist.
+        :param str blob_name:
+            Name of the destination blob. If the destination blob exists, it will
+            be overwritten. Otherwise, it will be created.
+        :param str copy_source:
+            A URL of up to 2 KB in length that specifies an Azure file or blob.
+            The value should be URL-encoded as it would appear in a request URI.
+            If the source is in another account, the source must either be public
+            or must be authenticated via a shared access signature. If the source
+            is public, no authentication is required.
+            Examples:
+            https://myaccount.blob.core.windows.net/mycontainer/myblob
+            https://myaccount.blob.core.windows.net/mycontainer/myblob?snapshot=<DateTime>
+            https://otheraccount.blob.core.windows.net/mycontainer/myblob?sastoken
+        :param metadata:
+            Name-value pairs associated with the blob as metadata. If no name-value
+            pairs are specified, the operation will copy the metadata from the
+            source blob or file to the destination blob. If one or more name-value
+            pairs are specified, the destination blob is created with the specified
+            metadata, and metadata is not copied from the source blob or file.
+        :type metadata: A dict mapping str to str.
+        :param datetime source_if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this conditional header to copy the blob only if the source
+            blob has been modified since the specified date/time.
+        :param datetime source_if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this conditional header to copy the blob only if the source blob
+            has not been modified since the specified date/time.
+        :param ETag source_if_match:
+            An ETag value, or the wildcard character (*). Specify this conditional
+            header to copy the source blob only if its ETag matches the value
+            specified. If the ETag values do not match, the Blob service returns
+            status code 412 (Precondition Failed). This header cannot be specified
+            if the source is an Azure File.
+        :param ETag source_if_none_match:
+            An ETag value, or the wildcard character (*). Specify this conditional
+            header to copy the blob only if its ETag does not match the value
+            specified. If the values are identical, the Blob service returns status
+            code 412 (Precondition Failed). This header cannot be specified if the
+            source is an Azure File.
+        :param datetime destination_if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this conditional header to copy the blob only
+            if the destination blob has been modified since the specified date/time.
+            If the destination blob has not been modified, the Blob service returns
+            status code 412 (Precondition Failed).
+        :param datetime destination_if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this conditional header to copy the blob only
+            if the destination blob has not been modified since the specified
+            date/time. If the destination blob has been modified, the Blob service
+            returns status code 412 (Precondition Failed).
+        :param ETag destination_if_match:
+            An ETag value, or the wildcard character (*). Specify an ETag value for
+            this conditional header to copy the blob only if the specified ETag value
+            matches the ETag value for an existing destination blob. If the ETag for
+            the destination blob does not match the ETag specified for If-Match, the
+            Blob service returns status code 412 (Precondition Failed).
+        :param ETag destination_if_none_match:
+            An ETag value, or the wildcard character (*). Specify an ETag value for
+            this conditional header to copy the blob only if the specified ETag value
+            does not match the ETag value for the destination blob. Specify the wildcard
+            character (*) to perform the operation only if the destination blob does not
+            exist. If the specified condition isn't met, the Blob service returns status
+            code 412 (Precondition Failed).
+        :param str destination_lease_id:
+            The lease ID specified for this header must match the lease ID of the
+            destination blob. If the request does not include the lease ID or it is not
+            valid, the operation fails with status code 412 (Precondition Failed).
+        :param str source_lease_id:
+            Specify this to perform the Copy Blob operation only if
+            the lease ID given matches the active lease ID of the source blob.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :param PageBlobTier premium_page_blob_tier:
+            A page blob tier value to set on the destination blob. The tier correlates to
+            the size of the blob and number of allowed IOPS. This is only applicable to
+            page blobs on premium storage accounts.
+            If the tier on the source blob is larger than the tier being passed to this
+            copy operation or if the size of the blob exceeds the tier being passed to
+            this copy operation then the operation will fail.
+        :return: Copy operation properties such as status, source, and ID.
+        :rtype: :class:`~azure.storage.blob.models.CopyProperties`
+        '''
+        return self._copy_blob(container_name, blob_name, copy_source,
+                          metadata, premium_page_blob_tier,
+                          source_if_modified_since, source_if_unmodified_since,
+                          source_if_match, source_if_none_match,
+                          destination_if_modified_since,
+                          destination_if_unmodified_since,
+                          destination_if_match,
+                          destination_if_none_match,
+                          destination_lease_id,
+                          source_lease_id, timeout,
+                          False)
 
     #-----Helper methods-----------------------------------------------------
 
     def _create_blob(
         self, container_name, blob_name, content_length, content_settings=None,
-        sequence_number=None, metadata=None, lease_id=None, if_modified_since=None,
+        sequence_number=None, metadata=None, lease_id=None, premium_page_blob_tier=None, if_modified_since=None,
         if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
         encryption_data=None):
         '''
@@ -1117,6 +1330,7 @@ class PageBlobService(BaseBlobService):
             'x-ms-blob-content-length': _to_str(content_length),
             'x-ms-lease-id': _to_str(lease_id),
             'x-ms-blob-sequence-number': _to_str(sequence_number),
+            'x-ms-access-tier': _to_str(premium_page_blob_tier),
             'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
             'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
             'If-Match': _to_str(if_match),

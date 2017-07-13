@@ -150,7 +150,7 @@ class BaseBlobService(StorageClient):
 
     def __init__(self, account_name=None, account_key=None, sas_token=None, 
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 custom_domain=None, request_session=None, connection_string=None):
+                 custom_domain=None, request_session=None, connection_string=None, socket_timeout=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests 
@@ -186,6 +186,9 @@ class BaseBlobService(StorageClient):
             request session. See
             http://azure.microsoft.com/en-us/documentation/articles/storage-configure-connection-string/
             for the connection string format
+        :param int socket_timeout:
+            If specified, this will override the default socket timeout. The timeout specified is in seconds.
+            See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
         '''
         service_params = _ServiceParameters.get_service_parameters(
             'blob',
@@ -197,7 +200,8 @@ class BaseBlobService(StorageClient):
             endpoint_suffix=endpoint_suffix,
             custom_domain=custom_domain,
             request_session=request_session,
-            connection_string=connection_string)
+            connection_string=connection_string,
+            socket_timeout=socket_timeout)
 
         super(BaseBlobService, self).__init__(service_params)
 
@@ -2871,7 +2875,7 @@ class BaseBlobService(StorageClient):
         is in progress.
 
         When copying from a page blob, the Blob service creates a destination page 
-        blob of the source blob’s length, initially containing all zeroes. Then 
+        blob of the source blob's length, initially containing all zeroes. Then 
         the source page ranges are enumerated, and non-empty ranges are copied. 
 
         For a block blob or an append blob, the Blob service creates a committed 
@@ -2977,6 +2981,7 @@ class BaseBlobService(StorageClient):
         '''
         return self._copy_blob(container_name, blob_name, copy_source,
                           metadata,
+                          None,
                           source_if_modified_since, source_if_unmodified_since,
                           source_if_match, source_if_none_match,
                           destination_if_modified_since,
@@ -2989,6 +2994,7 @@ class BaseBlobService(StorageClient):
 
     def _copy_blob(self, container_name, blob_name, copy_source,
                   metadata=None,
+                  premium_page_blob_tier=None,
                   source_if_modified_since=None,
                   source_if_unmodified_since=None,
                   source_if_match=None, source_if_none_match=None,
@@ -3049,7 +3055,8 @@ class BaseBlobService(StorageClient):
             'If-Match': _to_str(destination_if_match),
             'If-None-Match': _to_str(destination_if_none_match),
             'x-ms-lease-id': _to_str(destination_lease_id),
-            'x-ms-source-lease-id': _to_str(source_lease_id)
+            'x-ms-source-lease-id': _to_str(source_lease_id),
+            'x-ms-access-tier': _to_str(premium_page_blob_tier)
         }
         _add_metadata_headers(metadata, request)
 

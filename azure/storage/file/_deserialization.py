@@ -137,7 +137,7 @@ def _convert_xml_to_shares(response):
 def _convert_xml_to_directories_and_files(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
-    <EnumerationResults ServiceEndpoint="https://myaccount.file.core.windows.net/” ShareName="myshare" DirectoryPath="directory-path">
+    <EnumerationResults ServiceEndpoint="https://myaccount.file.core.windows.net/" ShareName="myshare" DirectoryPath="directory-path">
       <Marker>string-value</Marker>
       <MaxResults>int-value</MaxResults>
       <Entries>

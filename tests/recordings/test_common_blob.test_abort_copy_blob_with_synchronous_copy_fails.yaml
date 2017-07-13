@@ -22,72 +22,73 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['1024']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [21248414-f4a9-11e6-81b2-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:36:32 GMT']
-      x-ms-version: ['2016-05-31']
+      x-ms-client-request-id: [0e425c98-67fb-11e7-95a8-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:42:43 GMT']
+      x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer741a1af1/blob741a1af1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [mrrQXfFriRkYM/bJ6E6+kg==]
-      Date: ['Fri, 17 Feb 2017 00:36:32 GMT']
-      ETag: ['"0x8D456CD056B006B"']
-      Last-Modified: ['Fri, 17 Feb 2017 00:36:32 GMT']
+      Date: ['Thu, 13 Jul 2017 18:42:42 GMT']
+      ETag: ['"0x8D4CA1EF259C7CB"']
+      Last-Modified: ['Thu, 13 Jul 2017 18:42:42 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [3a20cf34-0001-0047-66b5-88f960000000]
+      x-ms-request-id: [de61fd57-0001-009c-6e07-fc2f69000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2016-05-31']
+      x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [215dedc2-f4a9-11e6-a382-64510640cc62]
-      x-ms-copy-source: ['https://xclientdevstage.blob.core.windows.net/utcontainer741a1af1/blob741a1af1']
-      x-ms-date: ['Fri, 17 Feb 2017 00:36:32 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [0e579f5e-67fb-11e7-be26-b8e8564491f6]
+      x-ms-copy-source: ['https://xclientdev3.blob.core.windows.net/utcontainer741a1af1/blob741a1af1']
+      x-ms-date: ['Thu, 13 Jul 2017 18:42:43 GMT']
+      x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer741a1af1/targetblob
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 17 Feb 2017 00:36:32 GMT']
-      ETag: ['"0x8D456CD057AB820"']
-      Last-Modified: ['Fri, 17 Feb 2017 00:36:32 GMT']
+      Date: ['Thu, 13 Jul 2017 18:42:42 GMT']
+      ETag: ['"0x8D4CA1EF267D418"']
+      Last-Modified: ['Thu, 13 Jul 2017 18:42:43 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-copy-id: [1c578cf0-911f-4f66-9ef4-e1255867aa7a]
+      x-ms-copy-id: [35829483-6b04-45fe-b82a-d1c80707693a]
       x-ms-copy-status: [success]
-      x-ms-request-id: [3a20cf4d-0001-0047-7eb5-88f960000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [de61fd74-0001-009c-0507-fc2f69000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [216da7f8-f4a9-11e6-929c-64510640cc62]
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [0e687fb8-67fb-11e7-96be-b8e8564491f6]
       x-ms-copy-action: [abort]
-      x-ms-date: ['Fri, 17 Feb 2017 00:36:32 GMT']
-      x-ms-version: ['2016-05-31']
+      x-ms-date: ['Thu, 13 Jul 2017 18:42:43 GMT']
+      x-ms-version: ['2017-04-17']
     method: PUT
-    uri: https://storagename.blob.core.windows.net/utcontainer741a1af1/targetblob?comp=copy&copyid=1c578cf0-911f-4f66-9ef4-e1255867aa7a
+    uri: https://storagename.blob.core.windows.net/utcontainer741a1af1/targetblob?comp=copy&copyid=35829483-6b04-45fe-b82a-d1c80707693a
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>NoPendingCopyOperation</Code><Message>There
-        is currently no pending copy operation.\nRequestId:3a20cf66-0001-0047-16b5-88f960000000\nTime:2017-02-17T00:36:32.8449284Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>NoPendingCopyOperation</Code><Message>There\
+        \ is currently no pending copy operation.\nRequestId:de61fdbb-0001-009c-4307-fc2f69000000\n\
+        Time:2017-07-13T18:42:43.3702241Z</Message></Error>"}
     headers:
       Content-Length: ['236']
       Content-Type: [application/xml]
-      Date: ['Fri, 17 Feb 2017 00:36:32 GMT']
+      Date: ['Thu, 13 Jul 2017 18:42:42 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [3a20cf66-0001-0047-16b5-88f960000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [de61fdbb-0001-009c-4307-fc2f69000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 409, message: There is currently no pending copy operation.}
 version: 1

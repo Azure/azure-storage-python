@@ -206,6 +206,24 @@ class StorageDirectoryTest(StorageTestCase):
 
         # Assert
 
+    @record
+    def test_get_directory_properties_server_encryption(self):
+        # Arrange
+        self.fs.create_directory(self.share_name, 'dir1')
+
+        # Act
+        props = self.fs.get_directory_properties(self.share_name, 'dir1')
+
+        # Assert
+        self.assertIsNotNone(props)
+        self.assertIsNotNone(props.properties.etag)
+        self.assertIsNotNone(props.properties.last_modified)
+
+        if self.is_file_encryption_enabled():
+            self.assertTrue(props.properties.server_encrypted)
+        else:
+            self.assertFalse(props.properties.server_encrypted)
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

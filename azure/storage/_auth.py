@@ -113,6 +113,10 @@ class _StorageSASAuthentication(object):
         self.sas_token = sas_token
 
     def sign_request(self, request):
+        # if 'sig=' is present, then the request has already been signed
+        # as is the case when performing retries
+        if 'sig=' in request.path:
+            return
         if '?' in request.path:
             request.path += '&'
         else:

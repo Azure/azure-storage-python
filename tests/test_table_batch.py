@@ -25,6 +25,9 @@ from azure.storage.table import (
     AzureBatchOperationError,
     AzureBatchValidationError,
 )
+from azure.storage.retry import (
+    LinearRetry,
+)
 from tests.testcase import (
     StorageTestCase,
     record,
@@ -42,7 +45,7 @@ class StorageTableBatchTest(StorageTestCase):
         super(StorageTableBatchTest, self).setUp()
 
         self.ts = self._create_storage_service(TableService, self.settings)
-
+        self.ts.retry = LinearRetry(backoff=1, max_attempts=2).retry
         self.test_tables = []
         self.table_name = self._get_table_reference()
 
@@ -275,7 +278,7 @@ class StorageTableBatchTest(StorageTestCase):
             self.ts.commit_batch(self.table_name, batch)
         except AzureBatchOperationError as error:
             self.assertEqual(error.code, 'UpdateConditionNotSatisfied')
-            self.assertTrue(str(error).startswith('The update condition specified in the request was not satisfied.'))
+            self.assertTrue('The update condition specified in the request was not satisfied.' in str(error))
         else:
             self.fail('AzureBatchOperationError was expected')
 

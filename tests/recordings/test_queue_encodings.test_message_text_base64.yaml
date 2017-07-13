@@ -4,20 +4,20 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [72adbf6c-f4aa-11e6-a042-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:45:58 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [4a7d97f8-67fc-11e7-9f62-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:51:33 GMT']
+      x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.queue.core.windows.net/mytestqueue0ab101218
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 17 Feb 2017 00:45:57 GMT']
+      Date: ['Thu, 13 Jul 2017 18:51:32 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [122a0a96-0003-0018-0cb7-884d5c000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [93ce9b7d-0003-001f-3209-fc8fc4000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
@@ -26,47 +26,47 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['99']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [72e78fe6-f4aa-11e6-9b05-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:45:59 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [4a955c08-67fc-11e7-acde-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:51:33 GMT']
+      x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.queue.core.windows.net/mytestqueue0ab101218/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>7af0ff2a-f363-4545-8b85-64db7056795c</MessageId><InsertionTime>Fri,
-        17 Feb 2017 00:45:59 GMT</InsertionTime><ExpirationTime>Fri, 24 Feb 2017 00:45:59
-        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAuw6tNLeI0gE=</PopReceipt><TimeNextVisible>Fri,
-        17 Feb 2017 00:45:59 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>79353b4a-a9f5-4307-b976-cb06a0d95fb4</MessageId><InsertionTime>Thu,\
+        \ 13 Jul 2017 18:51:33 GMT</InsertionTime><ExpirationTime>Thu, 20 Jul 2017\
+        \ 18:51:33 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAq09WDAn80gE=</PopReceipt><TimeNextVisible>Thu,\
+        \ 13 Jul 2017 18:51:33 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Fri, 17 Feb 2017 00:45:58 GMT']
+      Date: ['Thu, 13 Jul 2017 18:51:33 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [46f64afe-0003-0025-5db7-883b47000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [cc026a30-0003-0018-3509-fc7941000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [731dfbd0-f4aa-11e6-91cd-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:45:59 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [4aaa4da2-67fc-11e7-8020-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:51:34 GMT']
+      x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.queue.core.windows.net/mytestqueue0ab101218/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>7af0ff2a-f363-4545-8b85-64db7056795c</MessageId><InsertionTime>Fri,
-        17 Feb 2017 00:45:59 GMT</InsertionTime><ExpirationTime>Fri, 24 Feb 2017 00:45:59
-        GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAreKcRreI0gE=</PopReceipt><TimeNextVisible>Fri,
-        17 Feb 2017 00:46:29 GMT</TimeNextVisible><DequeueCount>1</DequeueCount><MessageText>AQ==</MessageText></QueueMessage></QueueMessagesList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>79353b4a-a9f5-4307-b976-cb06a0d95fb4</MessageId><InsertionTime>Thu,\
+        \ 13 Jul 2017 18:51:33 GMT</InsertionTime><ExpirationTime>Thu, 20 Jul 2017\
+        \ 18:51:33 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAF8A9Hgn80gE=</PopReceipt><TimeNextVisible>Thu,\
+        \ 13 Jul 2017 18:52:03 GMT</TimeNextVisible><DequeueCount>1</DequeueCount><MessageText>AQ==</MessageText></QueueMessage></QueueMessagesList>"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/xml]
-      Date: ['Fri, 17 Feb 2017 00:45:58 GMT']
+      Date: ['Thu, 13 Jul 2017 18:51:33 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [46f64b01-0003-0025-5eb7-883b47000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [cc026a3b-0003-0018-3e09-fc7941000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

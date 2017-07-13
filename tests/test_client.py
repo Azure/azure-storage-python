@@ -167,6 +167,17 @@ class StorageClientTest(StorageTestCase):
 
         # Assert
 
+    def test_create_service_with_socket_timeout(self):
+        # Arrange
+
+        for type in SERVICES.items():
+            # Act
+            service = type[0](self.account_name, self.account_key, socket_timeout=22)
+
+            # Assert
+            self.validate_standard_account_endpoints(service, type[1])
+            self.assertEqual(service.socket_timeout, 22)
+
     #--Connection String Test Cases --------------------------------------------
 
     def test_create_service_with_connection_string_key(self):

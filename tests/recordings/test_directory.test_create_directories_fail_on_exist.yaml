@@ -4,43 +4,45 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [9f1c4afe-f4a9-11e6-9ffd-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:40:03 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [8c52d068-67fb-11e7-8659-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:46:14 GMT']
+      x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/utshare38121575/dir1?restype=directory
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 17 Feb 2017 00:40:03 GMT']
-      ETag: ['"0x8D456CD83608BEB"']
-      Last-Modified: ['Fri, 17 Feb 2017 00:40:03 GMT']
+      Date: ['Thu, 13 Jul 2017 18:46:14 GMT']
+      ETag: ['"0x8D4CA1F706F52EA"']
+      Last-Modified: ['Thu, 13 Jul 2017 18:46:14 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [a297cba0-001a-002d-67b6-882148000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [6705fbdd-001a-005c-6208-fca52d000000]
+      x-ms-request-server-encrypted: ['false']
+      x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.0 (Python CPython 3.5.2; Windows 10)]
-      x-ms-client-request-id: [9f5625ba-f4a9-11e6-b79f-64510640cc62]
-      x-ms-date: ['Fri, 17 Feb 2017 00:40:04 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [8c729042-67fb-11e7-be18-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:46:14 GMT']
+      x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/utshare38121575/dir1?restype=directory
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceAlreadyExists</Code><Message>The
-        specified resource already exists.\nRequestId:a297cba2-001a-002d-68b6-882148000000\nTime:2017-02-17T00:40:03.9889008Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceAlreadyExists</Code><Message>The\
+        \ specified resource already exists.\nRequestId:6705fbdf-001a-005c-6308-fca52d000000\n\
+        Time:2017-07-13T18:46:14.6944024Z</Message></Error>"}
     headers:
       Content-Length: ['228']
       Content-Type: [application/xml]
-      Date: ['Fri, 17 Feb 2017 00:40:03 GMT']
+      Date: ['Thu, 13 Jul 2017 18:46:14 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [a297cba2-001a-002d-68b6-882148000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [6705fbdf-001a-005c-6308-fca52d000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 409, message: The specified resource already exists.}
 version: 1
