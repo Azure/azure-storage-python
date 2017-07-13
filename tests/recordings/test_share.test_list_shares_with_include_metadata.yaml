@@ -4,68 +4,68 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
-      x-ms-client-request-id: [92fa20b0-50c9-11e7-a7cf-705a0f3d3f8d]
-      x-ms-date: ['Wed, 14 Jun 2017 06:20:34 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [8220c858-67fc-11e7-a3c3-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:53:07 GMT']
+      x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/sharef877141f?restype=share
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 14 Jun 2017 06:20:34 GMT']
-      ETag: ['"0x8D4B2ED7794B5FE"']
-      Last-Modified: ['Wed, 14 Jun 2017 06:20:34 GMT']
+      Date: ['Thu, 13 Jul 2017 18:53:06 GMT']
+      ETag: ['"0x8D4CA206667B013"']
+      Last-Modified: ['Thu, 13 Jul 2017 18:53:07 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [bcc69698-001a-004f-47d6-e490cc000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [2e02c5b2-001a-00ab-6509-fc83c6000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
-      x-ms-client-request-id: [930ce748-50c9-11e7-b09e-705a0f3d3f8d]
-      x-ms-date: ['Wed, 14 Jun 2017 06:20:34 GMT']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [8234e476-67fc-11e7-82ba-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:53:07 GMT']
       x-ms-meta-hello: [world]
       x-ms-meta-number: ['42']
-      x-ms-version: ['2016-05-31']
+      x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/sharef877141f?restype=share&comp=metadata
   response:
     body: {string: ''}
     headers:
-      Date: ['Wed, 14 Jun 2017 06:20:35 GMT']
-      ETag: ['"0x8D4B2ED77D86C96"']
-      Last-Modified: ['Wed, 14 Jun 2017 06:20:35 GMT']
+      Date: ['Thu, 13 Jul 2017 18:53:06 GMT']
+      ETag: ['"0x8D4CA206667B014"']
+      Last-Modified: ['Thu, 13 Jul 2017 18:53:07 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [bcc6969b-001a-004f-48d6-e490cc000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [2e02c5b5-001a-00ab-6609-fc83c6000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
-      x-ms-client-request-id: [93dc3d8c-50c9-11e7-8892-705a0f3d3f8d]
-      x-ms-date: ['Wed, 14 Jun 2017 06:20:35 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [82441e98-67fc-11e7-b3f1-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:53:07 GMT']
+      x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.file.core.windows.net/?comp=list&prefix=sharef877141f&include=metadata
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
-        \ ServiceEndpoint=\"https://storagename.file.core.windows.net/\"><Prefix>sharef877141f</Prefix><Shares><Share><Name>sharef877141f</Name><Properties><Last-Modified>Wed,\
-        \ 14 Jun 2017 06:20:35 GMT</Last-Modified><Etag>\"0x8D4B2ED77D86C96\"</Etag><Quota>5120</Quota></Properties><Metadata><hello>world</hello><number>42</number></Metadata></Share></Shares><NextMarker\
+        \ ServiceEndpoint=\"https://storagename.file.core.windows.net/\"><Prefix>sharef877141f</Prefix><Shares><Share><Name>sharef877141f</Name><Properties><Last-Modified>Thu,\
+        \ 13 Jul 2017 18:53:07 GMT</Last-Modified><Etag>\"0x8D4CA206667B014\"</Etag><Quota>5120</Quota></Properties><Metadata><hello>world</hello><number>42</number></Metadata></Share></Shares><NextMarker\
         \ /></EnumerationResults>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Wed, 14 Jun 2017 06:20:35 GMT']
+      Date: ['Thu, 13 Jul 2017 18:53:06 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [bcc6969c-001a-004f-49d6-e490cc000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [2e02c5b6-001a-00ab-6709-fc83c6000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

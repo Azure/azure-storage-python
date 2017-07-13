@@ -305,6 +305,8 @@ class StorageTestCase(unittest.TestCase):
             self.settings.STORAGE_ACCOUNT_KEY: self.fake_settings.STORAGE_ACCOUNT_KEY,
             self.settings.REMOTE_STORAGE_ACCOUNT_KEY: self.fake_settings.REMOTE_STORAGE_ACCOUNT_KEY,
             self.settings.REMOTE_STORAGE_ACCOUNT_NAME: self.fake_settings.REMOTE_STORAGE_ACCOUNT_NAME,
+            self.settings.PREMIUM_STORAGE_ACCOUNT_NAME: self.fake_settings.PREMIUM_STORAGE_ACCOUNT_NAME,
+            self.settings.PREMIUM_STORAGE_ACCOUNT_KEY: self.fake_settings.PREMIUM_STORAGE_ACCOUNT_KEY,
         }
         replacements = list(old_to_new_dict.keys())
 
