@@ -15,10 +15,10 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
-      x-ms-client-request-id: [4060a67a-50ca-11e7-8d71-705a0f3d3f8d]
-      x-ms-date: ['Wed, 14 Jun 2017 06:25:25 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [0701110c-67fd-11e7-91a6-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:56:49 GMT']
+      x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.table.core.windows.net/uttable9316171e
   response:
@@ -27,14 +27,14 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/uttable9316171e(PartitionKey=''pk9316171e'',RowKey=''rk9316171e'')']
-      Date: ['Wed, 14 Jun 2017 06:25:24 GMT']
-      ETag: [W/"datetime'2017-06-14T06%3A25%3A25.2756469Z'"]
+      Date: ['Thu, 13 Jul 2017 18:56:49 GMT']
+      ETag: [W/"datetime'2017-07-13T18%3A56%3A49.9865614Z'"]
       Location: ['https://storagename.table.core.windows.net/uttable9316171e(PartitionKey=''pk9316171e'',RowKey=''rk9316171e'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [3d2791f0-0002-011e-37d7-e4c86c000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [7eac343e-0002-0007-5d09-fca251000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
     body: '{"PartitionKey": "pk9316171e", "RowKey": "rk9316171e", "age": "abc", "sex":
@@ -48,23 +48,23 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       If-Match: [W/"datetime'2012-06-15T22%3A51%3A44.9662825Z'"]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
-      x-ms-client-request-id: [40899f26-50ca-11e7-a02c-705a0f3d3f8d]
-      x-ms-date: ['Wed, 14 Jun 2017 06:25:25 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.0 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [07166eda-67fd-11e7-8eba-b8e8564491f6]
+      x-ms-date: ['Thu, 13 Jul 2017 18:56:50 GMT']
+      x-ms-version: ['2017-04-17']
     method: MERGE
     uri: https://storagename.table.core.windows.net/uttable9316171e(PartitionKey='pk9316171e',RowKey='rk9316171e')
   response:
     body: {string: '{"odata.error":{"code":"UpdateConditionNotSatisfied","message":{"lang":"en-US","value":"The
-        update condition specified in the request was not satisfied.\nRequestId:3d279218-0002-011e-59d7-e4c86c000000\nTime:2017-06-14T06:25:25.3046682Z"}}}'}
+        update condition specified in the request was not satisfied.\nRequestId:7eac3448-0002-0007-6409-fca251000000\nTime:2017-07-13T18:56:50.0265904Z"}}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Wed, 14 Jun 2017 06:25:24 GMT']
+      Date: ['Thu, 13 Jul 2017 18:56:49 GMT']
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [3d279218-0002-011e-59d7-e4c86c000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [7eac3448-0002-0007-6409-fca251000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 412, message: Precondition Failed}
 version: 1

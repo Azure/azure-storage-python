@@ -754,6 +754,29 @@ class StorageGetFileTest(StorageTestCase):
         # Assert
         self.assertEqual('MDAwMDAwMDA=', file.properties.content_settings.content_md5)
 
+    @record
+    def test_get_file_server_encryption(self):
+        # Act
+        file = self.fs.get_file_to_bytes(self.share_name, self.directory_name, self.byte_file, start_range=0,
+                                         end_range=1024, validate_content=True)
+        # Assert
+        if self.is_file_encryption_enabled():
+            self.assertTrue(file.properties.server_encrypted)
+        else:
+            self.assertFalse(file.properties.server_encrypted)
+
+
+    @record
+    def test_get_file_properties_server_encryption(self):
+        # Act
+        props = self.fs.get_file_properties(self.share_name, self.directory_name, self.byte_file)
+
+        # Assert
+        if self.is_file_encryption_enabled():
+            self.assertTrue(props.properties.server_encrypted)
+        else:
+            self.assertFalse(props.properties.server_encrypted)
+
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

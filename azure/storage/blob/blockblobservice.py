@@ -384,6 +384,8 @@ class BlockBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
+        :return: ETag and last modified properties for the Block Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -391,22 +393,22 @@ class BlockBlobService(BaseBlobService):
 
         count = path.getsize(file_path)
         with open(file_path, 'rb') as stream:
-            self.create_blob_from_stream(
-                container_name=container_name,
-                blob_name=blob_name,
-                stream=stream,
-                count=count,
-                content_settings=content_settings,
-                metadata=metadata,
-                validate_content=validate_content,
-                lease_id=lease_id,
-                progress_callback=progress_callback,
-                max_connections=max_connections,
-                if_modified_since=if_modified_since,
-                if_unmodified_since=if_unmodified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                timeout=timeout)
+            return self.create_blob_from_stream(
+                    container_name=container_name,
+                    blob_name=blob_name,
+                    stream=stream,
+                    count=count,
+                    content_settings=content_settings,
+                    metadata=metadata,
+                    validate_content=validate_content,
+                    lease_id=lease_id,
+                    progress_callback=progress_callback,
+                    max_connections=max_connections,
+                    if_modified_since=if_modified_since,
+                    if_unmodified_since=if_unmodified_since,
+                    if_match=if_match,
+                    if_none_match=if_none_match,
+                    timeout=timeout)
 
     def create_blob_from_stream(
         self, container_name, blob_name, stream, count=None,
@@ -492,6 +494,8 @@ class BlockBlobService(BaseBlobService):
             with your input stream.
             The SubStream class will attempt to buffer up to 4 MB internally to reduce the amount of
             seek and read calls to the underlying stream. This is particularly beneficial when uploading larger blocks.
+        :return: ETag and last modified properties for the Block Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -508,7 +512,7 @@ class BlockBlobService(BaseBlobService):
                 progress_callback(0, count)
 
             data = stream.read(count)
-            self._put_blob(
+            resp = self._put_blob(
                 container_name=container_name,
                 blob_name=blob_name,
                 blob=data,
@@ -524,6 +528,8 @@ class BlockBlobService(BaseBlobService):
 
             if progress_callback:
                 progress_callback(count, count)
+
+            return resp
         else:
             cek, iv, encryption_data = None, None, None
 
@@ -568,7 +574,7 @@ class BlockBlobService(BaseBlobService):
                     timeout=timeout,
                 )
 
-            self._put_block_list(
+            return self._put_block_list(
                 container_name=container_name,
                 blob_name=blob_name,
                 block_list=block_ids,
@@ -653,6 +659,8 @@ class BlockBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
+        :return: ETag and last modified properties for the Block Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -669,7 +677,7 @@ class BlockBlobService(BaseBlobService):
         stream = BytesIO(blob)
         stream.seek(index)
 
-        self.create_blob_from_stream(
+        return self.create_blob_from_stream(
             container_name=container_name,
             blob_name=blob_name,
             stream=stream,
@@ -753,6 +761,8 @@ class BlockBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
+        :return: ETag and last modified properties for the Block Blob
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -762,23 +772,23 @@ class BlockBlobService(BaseBlobService):
             _validate_not_none('encoding', encoding)
             text = text.encode(encoding)
 
-        self.create_blob_from_bytes(
-            container_name=container_name,
-            blob_name=blob_name,
-            blob=text,
-            index=0,
-            count=len(text),
-            content_settings=content_settings,
-            metadata=metadata,
-            validate_content=validate_content,
-            lease_id=lease_id,
-            progress_callback=progress_callback,
-            max_connections=max_connections,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            timeout=timeout)
+        return self.create_blob_from_bytes(
+                container_name=container_name,
+                blob_name=blob_name,
+                blob=text,
+                index=0,
+                count=len(text),
+                content_settings=content_settings,
+                metadata=metadata,
+                validate_content=validate_content,
+                lease_id=lease_id,
+                progress_callback=progress_callback,
+                max_connections=max_connections,
+                if_modified_since=if_modified_since,
+                if_unmodified_since=if_unmodified_since,
+                if_match=if_match,
+                if_none_match=if_none_match,
+                timeout=timeout)
 
     #-----Helper methods------------------------------------
     def _put_blob(self, container_name, blob_name, blob, content_settings=None,

@@ -2981,6 +2981,7 @@ class BaseBlobService(StorageClient):
         '''
         return self._copy_blob(container_name, blob_name, copy_source,
                           metadata,
+                          None,
                           source_if_modified_since, source_if_unmodified_since,
                           source_if_match, source_if_none_match,
                           destination_if_modified_since,
@@ -2993,6 +2994,7 @@ class BaseBlobService(StorageClient):
 
     def _copy_blob(self, container_name, blob_name, copy_source,
                   metadata=None,
+                  premium_page_blob_tier=None,
                   source_if_modified_since=None,
                   source_if_unmodified_since=None,
                   source_if_match=None, source_if_none_match=None,
@@ -3053,7 +3055,8 @@ class BaseBlobService(StorageClient):
             'If-Match': _to_str(destination_if_match),
             'If-None-Match': _to_str(destination_if_none_match),
             'x-ms-lease-id': _to_str(destination_lease_id),
-            'x-ms-source-lease-id': _to_str(source_lease_id)
+            'x-ms-source-lease-id': _to_str(source_lease_id),
+            'x-ms-access-tier': _to_str(premium_page_blob_tier)
         }
         _add_metadata_headers(metadata, request)
 

@@ -894,6 +894,17 @@ class StorageTableEntityTest(StorageTestCase):
             self._assert_default_entity(entity)
 
     @record
+    def test_query_zero_entities(self):
+        # Arrange
+        table_name = self._create_query_table(0)
+
+        # Act
+        entities = list(self.ts.query_entities(table_name))
+
+        # Assert
+        self.assertEqual(len(entities), 0)
+
+    @record
     def test_query_entities_full_metadata(self):
         # Arrange
         table_name = self._create_query_table(2)

@@ -125,10 +125,9 @@ class StorageFileTest(StorageTestCase):
         file = self.fs.get_file_properties(share_name, dir_name, file_name)
         while file.properties.copy.status != 'success':
             count = count + 1
-            if count > 5:
-                self.assertTrue(
-                    False, 'Timed out waiting for async copy to complete.')
-            self.sleep(5)
+            if count > 10:
+                self.fail('Timed out waiting for async copy to complete.')
+            self.sleep(6)
             file = self.fs.get_file_properties(share_name, dir_name, file_name)
         self.assertEqual(file.properties.copy.status, 'success')
 
@@ -189,7 +188,7 @@ class StorageFileTest(StorageTestCase):
             'vhds', 'vhd_dir', 'my.vhd', sas_token='sas')
 
         # Assert
-        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME + 
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME +
                          '.file.core.windows.net/vhds/vhd_dir/my.vhd?sas')
 
     @record
@@ -237,7 +236,7 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.assertFalse(exists)
-        
+
     @record
     def test_resize_file(self):
         # Arrange
@@ -261,7 +260,7 @@ class StorageFileTest(StorageTestCase):
             content_disposition='inline')
         resp = self.fs.set_file_properties(
             self.share_name,
-            None, 
+            None,
             file_name,
             content_settings=content_settings
         )
@@ -459,7 +458,6 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
 
-    # @TODO flaky record mode
     @record
     def test_copy_file_async_private_file_with_sas(self):
         # Arrange

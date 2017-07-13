@@ -93,10 +93,13 @@ class StorageAppendBlobTest(StorageTestCase):
         blob_name = self._get_blob_reference()
 
         # Act
-        self.bs.create_blob(self.container_name, blob_name)
+        create_resp = self.bs.create_blob(self.container_name, blob_name)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertTrue(self.bs.exists(self.container_name, blob_name))
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
     @record
     def test_create_blob_with_lease_id(self):
@@ -170,10 +173,13 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Act
         data = b'abcdefghijklmnopqrstuvwxyz'
-        self.bs.append_blob_from_bytes(self.container_name, blob_name, data)
+        append_resp = self.bs.append_blob_from_bytes(self.container_name, blob_name, data)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, append_resp.etag)
+        self.assertEqual(blob.properties.last_modified, append_resp.last_modified)
 
     @record
     def test_append_blob_from_bytes_with_progress(self):
@@ -224,10 +230,13 @@ class StorageAppendBlobTest(StorageTestCase):
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
-        self.bs.append_blob_from_bytes(self.container_name, blob_name, data)
+        append_resp = self.bs.append_blob_from_bytes(self.container_name, blob_name, data)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, append_resp.etag)
+        self.assertEqual(blob.properties.last_modified, append_resp.last_modified)
 
     @record
     def test_append_blob_from_bytes_with_progress_chunked_upload(self):
@@ -270,10 +279,13 @@ class StorageAppendBlobTest(StorageTestCase):
             stream.write(data)
 
         # Act
-        self.bs.append_blob_from_path(self.container_name, blob_name, FILE_PATH)
+        append_resp = self.bs.append_blob_from_path(self.container_name, blob_name, FILE_PATH)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, append_resp.etag)
+        self.assertEqual(blob.properties.last_modified, append_resp.last_modified)
 
     @record
     def test_append_blob_from_path_with_progress_chunked_upload(self):
@@ -305,10 +317,13 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Act
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.append_blob_from_stream(self.container_name, blob_name, stream)
+            append_resp = self.bs.append_blob_from_stream(self.container_name, blob_name, stream)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, append_resp.etag)
+        self.assertEqual(blob.properties.last_modified, append_resp.last_modified)
 
     @record
     def test_append_blob_from_stream_non_seekable_chunked_upload_known_size(self):
@@ -394,10 +409,13 @@ class StorageAppendBlobTest(StorageTestCase):
         # Act
         blob_size = len(data) - 301
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.append_blob_from_stream(self.container_name, blob_name, stream, blob_size)
+            append_resp = self.bs.append_blob_from_stream(self.container_name, blob_name, stream, blob_size)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
+        self.assertEqual(blob.properties.etag, append_resp.etag)
+        self.assertEqual(blob.properties.last_modified, append_resp.last_modified)
 
     @record
     def test_append_blob_from_text(self):
@@ -407,10 +425,13 @@ class StorageAppendBlobTest(StorageTestCase):
         data = text.encode('utf-8')
 
         # Act
-        self.bs.append_blob_from_text(self.container_name, blob_name, text)
+        append_resp = self.bs.append_blob_from_text(self.container_name, blob_name, text)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, append_resp.etag)
+        self.assertEqual(blob.properties.last_modified, append_resp.last_modified)
 
     @record
     def test_append_blob_from_text_with_encoding(self):
