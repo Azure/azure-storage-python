@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.35.1:
+
+### Blob:
+- Fixed bug where calling create_from_* and and append_blob_from_* methods with no data fails.
+
 ## Version 0.35.0:
 
 ### All:

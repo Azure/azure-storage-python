@@ -507,7 +507,7 @@ class BlockBlobService(BaseBlobService):
         if (self.key_encryption_key is not None) and (adjusted_count is not None):
             adjusted_count += (16 - (count % 16))
 
-        if adjusted_count and adjusted_count < self.MAX_SINGLE_PUT_SIZE:
+        if adjusted_count is not None and (adjusted_count < self.MAX_SINGLE_PUT_SIZE):
             if progress_callback:
                 progress_callback(0, count)
 

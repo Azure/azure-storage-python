@@ -182,6 +182,21 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.last_modified, append_resp.last_modified)
 
     @record
+    def test_append_blob_from_0_bytes(self):
+        # Arrange
+        blob_name = self._create_blob()
+
+        # Act
+        data = b''
+        append_resp = self.bs.append_blob_from_bytes(self.container_name, blob_name, data)
+
+        # Assert
+        self.assertBlobEqual(self.container_name, blob_name, data)
+        # appending nothing should not make any network call
+        self.assertIsNone(append_resp.etag)
+        self.assertIsNone(append_resp.last_modified)
+
+    @record
     def test_append_blob_from_bytes_with_progress(self):
         # Arrange
         blob_name = self._create_blob()
