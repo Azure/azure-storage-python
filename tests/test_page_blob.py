@@ -487,6 +487,24 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.etag, create_resp.etag)
         self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
+    def test_create_blob_from_0_bytes(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(0)
+
+        # Act
+        create_resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
+
     def test_create_blob_from_bytes_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):

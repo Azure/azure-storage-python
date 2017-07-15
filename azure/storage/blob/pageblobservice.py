@@ -990,6 +990,9 @@ class PageBlobService(BaseBlobService):
             encryption_data=encryption_data
         )
 
+        if count == 0:
+            return response
+
         # _upload_blob_chunks returns the block ids for block blobs so resource_properties
         # is passed as a parameter to get the last_modified and etag for page and append blobs.
         # this info is not needed for block_blobs since _put_block_list is called after which gets this info
