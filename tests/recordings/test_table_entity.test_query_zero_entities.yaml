@@ -1,0 +1,93 @@
+interactions:
+- request:
+    body: '{"TableName": "querytable7732118a"}'
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      Content-Length: ['35']
+      Content-Type: [application/json]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      Prefer: [return-no-content]
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [43f50c76-68f7-11e7-91c3-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:48:06 GMT']
+      x-ms-version: ['2017-04-17']
+    method: POST
+    uri: https://storagename.table.core.windows.net/Tables
+  response:
+    body: {string: ''}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Length: ['0']
+      DataServiceId: ['https://storagename.table.core.windows.net/Tables(''querytable7732118a'')']
+      Date: ['Sat, 15 Jul 2017 00:48:06 GMT']
+      Location: ['https://storagename.table.core.windows.net/Tables(''querytable7732118a'')']
+      Preference-Applied: [return-no-content]
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [2392b2ab-0002-0122-4d04-fd7cb7000000]
+      x-ms-version: ['2017-04-17']
+    status: {code: 204, message: No Content}
+- request:
+    body: '--batch_440cbda8-68f7-11e7-94e4-b8e8564491f6
+
+      Content-Type: multipart/mixed; boundary=changeset_440cbf42-68f7-11e7-aa2c-b8e8564491f6
+
+
+      --changeset_440cbf42-68f7-11e7-aa2c-b8e8564491f6--
+
+      --batch_440cbda8-68f7-11e7-94e4-b8e8564491f6--'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['230']
+      Content-Type: [multipart/mixed; boundary=batch_440cbda8-68f7-11e7-94e4-b8e8564491f6]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [440cc17a-68f7-11e7-9ace-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:48:06 GMT']
+      x-ms-version: ['2017-04-17']
+    method: POST
+    uri: https://storagename.table.core.windows.net/$batch
+  response:
+    body: {string: "--batchresponse_c811e134-7346-4761-8bfa-075a8c8d256a\r\nContent-Type:\
+        \ multipart/mixed; boundary=changesetresponse_424caf05-7656-4876-8a1c-3736fe47ad89\r\
+        \n\r\n--changesetresponse_424caf05-7656-4876-8a1c-3736fe47ad89--\r\n--batchresponse_c811e134-7346-4761-8bfa-075a8c8d256a--\r\
+        \n"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [multipart/mixed; boundary=batchresponse_c811e134-7346-4761-8bfa-075a8c8d256a]
+      Date: ['Sat, 15 Jul 2017 00:48:06 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [2392b2b7-0002-0122-5504-fd7cb7000000]
+      x-ms-version: ['2017-04-17']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json;odata=minimalmetadata]
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [4411a2f0-68f7-11e7-816e-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:48:06 GMT']
+      x-ms-version: ['2017-04-17']
+    method: GET
+    uri: https://storagename.table.core.windows.net/querytable7732118a()
+  response:
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#querytable7732118a","value":[]}'}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      Date: ['Sat, 15 Jul 2017 00:48:06 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      X-Content-Type-Options: [nosniff]
+      x-ms-request-id: [2392b2c2-0002-0122-5f04-fd7cb7000000]
+      x-ms-version: ['2017-04-17']
+    status: {code: 200, message: OK}
+version: 1

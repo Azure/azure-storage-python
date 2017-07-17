@@ -682,3 +682,35 @@ ContainerPermissions.DELETE = ContainerPermissions(delete=True)
 ContainerPermissions.LIST = ContainerPermissions(list=True)
 ContainerPermissions.READ = ContainerPermissions(read=True)
 ContainerPermissions.WRITE = ContainerPermissions(write=True)
+
+class PremiumPageBlobTier(object):
+    '''
+    Specifies the page blob tier to set the blob to. This is only applicable to page
+    blobs on premium storage accounts.
+    Please take a look at https://docs.microsoft.com/en-us/azure/storage/storage-premium-storage#scalability-and-performance-targets
+    for detailed information on the corresponding IOPS and throughtput per PageBlobTier.
+    '''
+
+    P4 = 'P4'
+    ''' P4 Tier '''
+
+    P6 = 'P6'
+    ''' P6 Tier '''
+
+    P10 = 'P10'
+    ''' P10 Tier '''
+
+    P20 = 'P20'
+    ''' P20 Tier '''
+
+    P30 = 'P30'
+    ''' P30 Tier '''
+
+    P40 = 'P40'
+    ''' P40 Tier '''
+
+    P50 = 'P50'
+    ''' P50 Tier '''
+
+    P60 = 'P60'
+    ''' P60 Tier '''

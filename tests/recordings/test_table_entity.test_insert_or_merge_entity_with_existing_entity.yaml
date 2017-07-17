@@ -15,10 +15,10 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
-      x-ms-client-request-id: [3ed18ae2-50ca-11e7-be0a-705a0f3d3f8d]
-      x-ms-date: ['Wed, 14 Jun 2017 06:25:22 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [3798c634-68f7-11e7-9083-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:47:45 GMT']
+      x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.table.core.windows.net/uttable95761b92
   response:
@@ -27,14 +27,14 @@ interactions:
       Cache-Control: [no-cache]
       Content-Length: ['0']
       DataServiceId: ['https://storagename.table.core.windows.net/uttable95761b92(PartitionKey=''pk95761b92'',RowKey=''rk95761b92'')']
-      Date: ['Wed, 14 Jun 2017 06:25:22 GMT']
-      ETag: [W/"datetime'2017-06-14T06%3A25%3A23.0766083Z'"]
+      Date: ['Sat, 15 Jul 2017 00:47:43 GMT']
+      ETag: [W/"datetime'2017-07-15T00%3A47%3A44.6420908Z'"]
       Location: ['https://storagename.table.core.windows.net/uttable95761b92(PartitionKey=''pk95761b92'',RowKey=''rk95761b92'')']
       Preference-Applied: [return-no-content]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [31d72531-0002-002c-47d7-e4d6e9000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [da37035f-0002-008c-7003-fd198f000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
     body: '{"PartitionKey": "pk95761b92", "RowKey": "rk95761b92", "age": "abc", "sex":
@@ -47,10 +47,10 @@ interactions:
       Content-Type: [application/json]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
-      x-ms-client-request-id: [3ee5e0ca-50ca-11e7-8ad8-705a0f3d3f8d]
-      x-ms-date: ['Wed, 14 Jun 2017 06:25:22 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [37af52a8-68f7-11e7-83ec-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:47:45 GMT']
+      x-ms-version: ['2017-04-17']
     method: MERGE
     uri: https://storagename.table.core.windows.net/uttable95761b92(PartitionKey='pk95761b92',RowKey='rk95761b92')
   response:
@@ -58,12 +58,12 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Wed, 14 Jun 2017 06:25:22 GMT']
-      ETag: [W/"datetime'2017-06-14T06%3A25%3A23.0776083Z'"]
+      Date: ['Sat, 15 Jul 2017 00:47:43 GMT']
+      ETag: [W/"datetime'2017-07-15T00%3A47%3A45.5605368Z'"]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [31d72538-0002-002c-4cd7-e4d6e9000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [da37036c-0002-008c-7a03-fd198f000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
     body: null
@@ -72,23 +72,23 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.34.3 (Python CPython 3.6.1; Windows 10)]
-      x-ms-client-request-id: [3eeae868-50ca-11e7-927f-705a0f3d3f8d]
-      x-ms-date: ['Wed, 14 Jun 2017 06:25:22 GMT']
-      x-ms-version: ['2016-05-31']
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [37b4e80a-68f7-11e7-809e-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:47:45 GMT']
+      x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.table.core.windows.net/uttable95761b92(PartitionKey='pk95761b92',RowKey='rk95761b92')
   response:
-    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttable95761b92/@Element","odata.etag":"W/\"datetime''2017-06-14T06%3A25%3A23.0776083Z''\"","PartitionKey":"pk95761b92","RowKey":"rk95761b92","Timestamp":"2017-06-14T06:25:23.0776083Z","Birthday@odata.type":"Edm.DateTime","Birthday":"1973-10-04T00:00:00Z","age":"abc","binary@odata.type":"Edm.Binary","binary":"YmluYXJ5","birthday@odata.type":"Edm.DateTime","birthday":"1991-10-04T00:00:00Z","clsid@odata.type":"Edm.Guid","clsid":"c9da6455-213d-42c9-9a79-3e9149a57833","deceased":false,"evenratio":3.0,"large@odata.type":"Edm.Int64","large":"933311100","married":true,"other":20,"ratio":3.1,"sex":"female","sign":"aquarius"}'}
+    body: {string: '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#uttable95761b92/@Element","odata.etag":"W/\"datetime''2017-07-15T00%3A47%3A45.5605368Z''\"","PartitionKey":"pk95761b92","RowKey":"rk95761b92","Timestamp":"2017-07-15T00:47:45.5605368Z","Birthday@odata.type":"Edm.DateTime","Birthday":"1973-10-04T00:00:00Z","age":"abc","binary@odata.type":"Edm.Binary","binary":"YmluYXJ5","birthday@odata.type":"Edm.DateTime","birthday":"1991-10-04T00:00:00Z","clsid@odata.type":"Edm.Guid","clsid":"c9da6455-213d-42c9-9a79-3e9149a57833","deceased":false,"evenratio":3.0,"large@odata.type":"Edm.Int64","large":"933311100","married":true,"other":20,"ratio":3.1,"sex":"female","sign":"aquarius"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Wed, 14 Jun 2017 06:25:22 GMT']
-      ETag: [W/"datetime'2017-06-14T06%3A25%3A23.0776083Z'"]
+      Date: ['Sat, 15 Jul 2017 00:47:43 GMT']
+      ETag: [W/"datetime'2017-07-15T00%3A47%3A45.5605368Z'"]
       Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [31d72540-0002-002c-52d7-e4d6e9000000]
-      x-ms-version: ['2016-05-31']
+      x-ms-request-id: [da370371-0002-008c-7f03-fd198f000000]
+      x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

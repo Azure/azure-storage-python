@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: Foo
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['3']
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [ee14b682-68f4-11e7-958c-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:31:23 GMT']
+      x-ms-version: ['2017-04-17']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer403f19fe/encryption_block_blob403f19fe
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [E1bGfXrRY42Ba/uCLdLCXQ==]
+      Date: ['Sat, 15 Jul 2017 00:31:23 GMT']
+      ETag: ['"0x8D4CB18D2F028C2"']
+      Last-Modified: ['Sat, 15 Jul 2017 00:31:24 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [c237dbfc-0001-0049-2901-fd67b4000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2017-04-17']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [ee3a8058-68f4-11e7-9ec3-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:31:23 GMT']
+      x-ms-range: [bytes=0-33554431]
+      x-ms-version: ['2017-04-17']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer403f19fe/encryption_block_blob403f19fe
+  response:
+    body: {string: Foo}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['3']
+      Content-Range: [bytes 0-2/3]
+      Content-Type: [application/octet-stream]
+      Date: ['Sat, 15 Jul 2017 00:31:23 GMT']
+      ETag: ['"0x8D4CB18D2F028C2"']
+      Last-Modified: ['Sat, 15 Jul 2017 00:31:24 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Vary: [Origin]
+      x-ms-blob-content-md5: [E1bGfXrRY42Ba/uCLdLCXQ==]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-request-id: [c237dc10-0001-0049-3801-fd67b4000000]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2017-04-17']
+    status: {code: 206, message: Partial Content}
+version: 1

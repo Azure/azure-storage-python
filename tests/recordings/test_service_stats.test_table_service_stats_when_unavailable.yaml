@@ -1,0 +1,25 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      DataServiceVersion: [3.0;NetFx]
+      MaxDataServiceVersion: ['3.0']
+      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      x-ms-client-request-id: [aaa8dfc0-68f6-11e7-a5e0-b8e8564491f6]
+      x-ms-date: ['Sat, 15 Jul 2017 00:43:49 GMT']
+      x-ms-version: ['2017-04-17']
+    method: GET
+    uri: https://storagename-secondary.table.core.windows.net/?restype=service&comp=stats
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Sat,\
+        \ 15 Jul 2017 00:40:50 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Sat, 15 Jul 2017 00:43:50 GMT']
+      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [38713674-0002-00b4-4803-fd7577000000]
+      x-ms-version: ['2017-04-17']
+    status: {code: 200, message: OK}
+version: 1

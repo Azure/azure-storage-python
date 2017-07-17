@@ -37,6 +37,9 @@ def _int_to_str(value):
 def _bool(value):
     return value.lower() == 'true'
 
+def _to_upper_str(value):
+    return _to_str(value).upper() if value is not None else None
+
 def _get_download_size(start_range, end_range, resource_size):
     if start_range is not None:
         end_range = end_range if end_range else (resource_size if resource_size else None)
@@ -55,6 +58,8 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'content-range': (None, 'content_range', _to_str),
     'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_to_str),
     'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_to_str),
+    'x-ms-access-tier': (None, 'blob_tier', _to_upper_str),
+    'x-ms-access-tier-inferred': (None, 'blob_tier_inferred', _bool),
     'x-ms-share-quota': (None, 'quota', _int_to_str),
     'x-ms-server-encrypted': (None, 'server_encrypted', _bool),
     'content-type': ('content_settings', 'content_type', _to_str),

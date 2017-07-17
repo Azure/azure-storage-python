@@ -244,7 +244,7 @@ class StorageCommonBlobTest(StorageTestCase):
             lease_id=lease_id)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsNotNone(resp.etag)
         blob = self.bs.get_blob_to_bytes(
             self.container_name, blob_name, lease_id=lease_id)
         self.assertEqual(blob.content, b'hello world again')
@@ -261,7 +261,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, data, metadata=metadata)
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsNotNone(resp.etag)
         md = self.bs.get_blob_metadata(self.container_name, blob_name)
         self.assertDictEqual(md, metadata)
 
@@ -782,7 +782,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(lease_id)
         self.assertIsNotNone(lease_time)
-        self.assertIsNone(blob)
+        self.assertIsNotNone(blob.etag)
 
     @record
     def test_lease_blob_acquire_and_renew(self):
@@ -834,7 +834,7 @@ class StorageCommonBlobTest(StorageTestCase):
             self.container_name, blob_name, data, )
 
         # Assert
-        self.assertIsNone(resp)
+        self.assertIsNotNone(resp.etag)
 
     @record
     def test_no_sas_private_blob(self):

@@ -19,6 +19,7 @@ import unittest
 from datetime import datetime, timedelta
 from azure.common import AzureHttpError
 from azure.storage.blob import BlobPermissions
+from azure.storage.blob.models import PremiumPageBlobTier
 
 from azure.storage.blob import (
     Blob,
@@ -26,6 +27,7 @@ from azure.storage.blob import (
     SequenceNumberAction,
     PageRange,
 )
+
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -485,6 +487,24 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.etag, create_resp.etag)
         self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
+    def test_create_blob_from_0_bytes(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(0)
+
+        # Act
+        create_resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
+
     def test_create_blob_from_bytes_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
@@ -730,6 +750,7 @@ class StoragePageBlobTest(StorageTestCase):
 
 
     def test_incremental_copy_blob(self):
+        # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
 
@@ -769,6 +790,138 @@ class StoragePageBlobTest(StorageTestCase):
 
         # strip off protocol
         self.assertTrue(copy_blob.properties.copy.source.endswith(source_blob_url[5:]))
+
+    @record
+    def test_blob_tier_on_create(self):
+        ps = self._create_premium_storage_service(PageBlobService, self.settings)
+        try:
+            container_name = self.get_resource_name('utpremiumcontainer')
+
+            if not self.is_playback():
+                ps.create_container(container_name)
+
+            # test create_blob API
+            blob_name = self._get_blob_reference()
+            ps.create_blob(container_name, blob_name, 1024, premium_page_blob_tier=PremiumPageBlobTier.P4)
+
+            blob = ps.get_blob_properties(container_name, blob_name)
+            self.assertEqual(blob.properties.blob_tier, PremiumPageBlobTier.P4)
+            self.assertFalse(hasattr(blob.properties, 'blob_tier_inferred'))
+
+            # test create_blob_from_bytes API
+            blob_name2 = self._get_blob_reference()
+            byte_data = self.get_random_bytes(1024)
+            ps.create_blob_from_bytes(container_name, blob_name2, byte_data, premium_page_blob_tier=PremiumPageBlobTier.P6)
+
+            blob2 = ps.get_blob_properties(container_name, blob_name2)
+            self.assertEqual(blob2.properties.blob_tier, PremiumPageBlobTier.P6)
+            self.assertFalse(hasattr(blob.properties, 'blob_tier_inferred'))
+
+            # test create_blob_from_path API
+            blob_name3 = self._get_blob_reference()
+            with open(FILE_PATH, 'wb') as stream:
+                stream.write(byte_data)
+            ps.create_blob_from_path(container_name, blob_name3, FILE_PATH, premium_page_blob_tier=PremiumPageBlobTier.P10)
+
+            blob3 = ps.get_blob_properties(container_name, blob_name3)
+            self.assertEqual(blob3.properties.blob_tier, PremiumPageBlobTier.P10)
+            self.assertFalse(hasattr(blob.properties, 'blob_tier_inferred'))
+
+            # test create_blob_from_stream API
+            blob_name4 = self._get_blob_reference()
+            with open(FILE_PATH, 'rb') as stream:
+                ps.create_blob_from_stream(container_name, blob_name4, stream, 1024, premium_page_blob_tier=PremiumPageBlobTier.P20)
+
+            blob4 = ps.get_blob_properties(container_name, blob_name4)
+            self.assertEqual(blob4.properties.blob_tier, PremiumPageBlobTier.P20)
+            self.assertFalse(hasattr(blob.properties, 'blob_tier_inferred'))
+        finally:
+            ps.delete_container(container_name)
+
+    @record
+    def test_blob_tier_set_tier_api(self):
+        ps = self._create_premium_storage_service(PageBlobService, self.settings)
+        try:
+            container_name = self.get_resource_name('utpremiumcontainer')
+
+            if not self.is_playback():
+                ps.create_container(container_name)
+
+            blob_name = self._get_blob_reference()
+            ps.create_blob(container_name, blob_name, 1024)
+            blob_ref = ps.get_blob_properties(container_name, blob_name)
+            self.assertEqual(PremiumPageBlobTier.P10, blob_ref.properties.blob_tier)
+            self.assertTrue(blob_ref.properties.blob_tier_inferred)
+            ps.set_premium_page_blob_tier(container_name, blob_name, PremiumPageBlobTier.P50)
+
+            blob_ref2 = ps.get_blob_properties(container_name, blob_name)
+            self.assertEqual(PremiumPageBlobTier.P50, blob_ref2.properties.blob_tier)
+            self.assertFalse(hasattr(blob_ref2.properties, 'blob_tier_inferred'))
+
+            blobs = list(ps.list_blobs(container_name))
+
+            # Assert
+            self.assertIsNotNone(blobs)
+            self.assertGreaterEqual(len(blobs), 1)
+            self.assertIsNotNone(blobs[0])
+            self.assertNamedItemInContainer(blobs, blob_name)
+            self.assertEqual(blobs[0].properties.blob_tier, PremiumPageBlobTier.P50)
+            self.assertFalse(hasattr(blobs[0].properties, 'blob_tier_inferred'))
+        finally:
+            ps.delete_container(container_name)
+
+    @record
+    def test_blob_tier_copy_blob(self):
+        ps = self._create_premium_storage_service(PageBlobService, self.settings)
+        try:
+            container_name = self.get_resource_name('utpremiumcontainer')
+
+            if not self.is_playback():
+                ps.create_container(container_name)
+
+            # Arrange
+            source_blob_name = self._get_blob_reference()
+            ps.create_blob(container_name, source_blob_name, 1024, premium_page_blob_tier=PremiumPageBlobTier.P10)
+
+            # Act
+            source_blob = '/{0}/{1}/{2}'.format(self.settings.PREMIUM_STORAGE_ACCOUNT_NAME,
+                                               container_name,
+                                               source_blob_name)
+            copy = ps.copy_blob(container_name, 'blob1copy', source_blob, premium_page_blob_tier=PremiumPageBlobTier.P30)
+
+            # Assert
+            self.assertIsNotNone(copy)
+            self.assertEqual(copy.status, 'success')
+            self.assertIsNotNone(copy.id)
+
+            copy_ref = ps.get_blob_properties(container_name, 'blob1copy')
+            self.assertEqual(copy_ref.properties.blob_tier, PremiumPageBlobTier.P30)
+
+            source_blob_name2 = self._get_blob_reference()
+            ps.create_blob(container_name, source_blob_name2, 1024)
+            source_blob2 = '/{0}/{1}/{2}'.format(self.settings.STORAGE_ACCOUNT_NAME,
+                                                container_name,
+                                                source_blob_name2)
+
+            copy2 = ps.copy_blob(container_name, 'blob2copy', source_blob2, premium_page_blob_tier=PremiumPageBlobTier.P60)
+            self.assertIsNotNone(copy2)
+            self.assertEqual(copy2.status, 'success')
+            self.assertIsNotNone(copy2.id)
+
+            copy_ref2 = ps.get_blob_properties(container_name, 'blob2copy')
+            self.assertEqual(copy_ref2.properties.blob_tier, PremiumPageBlobTier.P60)
+            self.assertFalse(hasattr(copy_ref2.properties, 'blob_tier_inferred'))
+
+            copy3 = ps.copy_blob(container_name, 'blob3copy', source_blob2)
+            self.assertIsNotNone(copy3)
+            self.assertEqual(copy3.status, 'success')
+            self.assertIsNotNone(copy3.id)
+
+            copy_ref3 = ps.get_blob_properties(container_name, 'blob3copy')
+            self.assertEqual(copy_ref3.properties.blob_tier, PremiumPageBlobTier.P10)
+            self.assertTrue(copy_ref3.properties.blob_tier_inferred)
+        finally:
+            ps.delete_container(container_name)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
