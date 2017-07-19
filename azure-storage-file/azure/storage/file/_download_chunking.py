@@ -18,9 +18,9 @@ from azure.storage.common._error import _ERROR_NO_SINGLE_THREAD_CHUNKING
 
 
 def _download_file_chunks(file_service, share_name, directory_name, file_name,
-                          download_size, block_size, progress, start_range, end_range,
-                          stream, max_connections, progress_callback, validate_content,
-                          timeout, operation_context):
+                          download_size, block_size, progress, start_range, end_range, 
+                          stream, max_connections, progress_callback, validate_content, 
+                          timeout, operation_context, snapshot):
     if max_connections <= 1:
         raise ValueError(_ERROR_NO_SINGLE_THREAD_CHUNKING.format('file'))
 
@@ -39,6 +39,7 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
         validate_content,
         timeout,
         operation_context,
+        snapshot,
     )
 
     import concurrent.futures
@@ -47,9 +48,9 @@ def _download_file_chunks(file_service, share_name, directory_name, file_name,
 
 
 class _FileChunkDownloader(object):
-    def __init__(self, file_service, share_name, directory_name, file_name,
-                 download_size, chunk_size, progress, start_range, end_range,
-                 stream, progress_callback, validate_content, timeout, operation_context):
+    def __init__(self, file_service, share_name, directory_name, file_name, 
+                 download_size, chunk_size, progress, start_range, end_range, 
+                 stream, progress_callback, validate_content, timeout, operation_context, snapshot):
         self.file_service = file_service
         self.share_name = share_name
         self.directory_name = directory_name
@@ -69,6 +70,7 @@ class _FileChunkDownloader(object):
         self.validate_content = validate_content
         self.timeout = timeout
         self.operation_context = operation_context
+        self.snapshot = snapshot
 
     def get_chunk_offsets(self):
         index = self.start_index
@@ -109,5 +111,6 @@ class _FileChunkDownloader(object):
             end_range=chunk_end - 1,
             validate_content=self.validate_content,
             timeout=self.timeout,
-            _context=self.operation_context
+            _context=self.operation_context,
+            snapshot=self.snapshot
         )

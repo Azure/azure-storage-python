@@ -25,4 +25,5 @@ from .models import (
     CopyProperties,
     SharePermissions,
     FilePermissions,
+    DeleteSnapshot,
 )

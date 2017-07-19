@@ -23,8 +23,8 @@
     - Please refer to the reference documentation for more info.
 
 ### File:
-- Added support for creating share snapshots. See the new 'snapshot_share' method on FileService.
-- Listing, Delete, and several other operations now include an additional snapshot parameter.
+- Added support for creating and deleting share snapshots. See the new 'snapshot_share' method on FileService.
+- Most read operations (such as getting properties and metadata) now include an additional snapshot parameter.
 
 ## Version 0.36.0:
 

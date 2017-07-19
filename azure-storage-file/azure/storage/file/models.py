@@ -289,11 +289,6 @@ class DeleteSnapshot(object):
     Delete the share and all of its snapshots.
     '''
 
-    Only = 'only'
-    '''
-    Delete only the share's snapshot and not the share itself.
-    '''
-
 
 class FilePermissions(object):
     '''

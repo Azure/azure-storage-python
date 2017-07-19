@@ -98,7 +98,7 @@ def _convert_xml_to_shares(response):
       <Shares>
         <Share>
           <Name>share-name</Name>
-          <Snapshot>snapshot-name</Snapshot>
+          <Snapshot>date-time-value</Snapshot>
           <Properties>
             <Last-Modified>date/time-value</Last-Modified>
             <Etag>etag</Etag>

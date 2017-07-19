@@ -5,44 +5,44 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [ee65d37a-981d-11e7-8ba7-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:53:17 GMT']
+      x-ms-client-request-id: [490523a6-9f69-11e7-a4a2-b8e8564491f6]
+      x-ms-date: ['Fri, 22 Sep 2017 07:40:20 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/share492a15b6?restype=share
   response:
     body: {string: !!python/unicode ''}
     headers:
-      date: ['Wed, 13 Sep 2017 00:53:17 GMT']
-      etag: ['"0x8D4FA41D28C18CC"']
-      last-modified: ['Wed, 13 Sep 2017 00:53:17 GMT']
+      date: ['Fri, 22 Sep 2017 07:40:20 GMT']
+      etag: ['"0x8D5018D2D79F23D"']
+      last-modified: ['Fri, 22 Sep 2017 07:40:20 GMT']
       server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [0eb1f0f3-001a-00a3-772a-2c98b5000000]
+      x-ms-request-id: [99fddb50-001a-0023-1276-3308f8000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <SignedIdentifiers><SignedIdentifier><Id>testid</Id><AccessPolicy><Start>2017-09-13T00:52:18Z</Start><Expiry>2017-09-13T01:53:18Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
+      <SignedIdentifiers><SignedIdentifier><Id>testid</Id><AccessPolicy><Start>2017-09-22T07:39:20Z</Start><Expiry>2017-09-22T08:40:20Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['257']
       User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [ee7a1702-981d-11e7-9f00-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:53:18 GMT']
+      x-ms-client-request-id: [49432638-9f69-11e7-a395-b8e8564491f6]
+      x-ms-date: ['Fri, 22 Sep 2017 07:40:20 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/share492a15b6?comp=acl&restype=share
   response:
     body: {string: !!python/unicode ''}
     headers:
-      date: ['Wed, 13 Sep 2017 00:53:17 GMT']
-      etag: ['"0x8D4FA41D2B26C39"']
-      last-modified: ['Wed, 13 Sep 2017 00:53:18 GMT']
+      date: ['Fri, 22 Sep 2017 07:40:20 GMT']
+      etag: ['"0x8D5018D2D79F23E"']
+      last-modified: ['Fri, 22 Sep 2017 07:40:20 GMT']
       server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [0eb1f0f6-001a-00a3-782a-2c98b5000000]
+      x-ms-request-id: [99fddb55-001a-0023-1576-3308f8000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
@@ -50,21 +50,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [eeb7d780-981d-11e7-a2c6-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:53:18 GMT']
+      x-ms-client-request-id: [495289fd-9f69-11e7-bb9c-b8e8564491f6]
+      x-ms-date: ['Fri, 22 Sep 2017 07:40:20 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.file.core.windows.net/share492a15b6?comp=acl&restype=share
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>testid</Id><AccessPolicy><Start>2017-09-13T00:52:18.0000000Z</Start><Expiry>2017-09-13T01:53:18.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>testid</Id><AccessPolicy><Start>2017-09-22T07:39:20.0000000Z</Start><Expiry>2017-09-22T08:40:20.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
       content-type: [application/xml]
-      date: ['Wed, 13 Sep 2017 00:53:17 GMT']
-      etag: ['"0x8D4FA41D2B26C39"']
-      last-modified: ['Wed, 13 Sep 2017 00:53:18 GMT']
+      date: ['Fri, 22 Sep 2017 07:40:20 GMT']
+      etag: ['"0x8D5018D2D79F23E"']
+      last-modified: ['Fri, 22 Sep 2017 07:40:20 GMT']
       server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [0eb1f0f9-001a-00a3-7b2a-2c98b5000000]
+      x-ms-request-id: [99fddb57-001a-0023-1776-3308f8000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1
