@@ -32,6 +32,21 @@ If you see azure==0.11.0 (or any version below 1.0), uninstall it first then ins
 If you are upgrading from a version older than 0.30.0, see the upgrade doc, the 
 usage samples in the samples directory, and the ChangeLog and BreakingChanges.
 
+**IMPORTANT**: If you have an earlier version of the azure-storage package
+(version < 0.36.0), you should uninstall it before installing the new packages.
+
+You can check the version using pip:
+
+.. code:: shell
+
+    pip freeze
+
+If you see azure-storage==0.35.1 (or any version below 0.35.1), uninstall it first:
+
+.. code:: shell
+
+    pip uninstall azure-storage
+
 Features
 ========
 
@@ -67,13 +82,24 @@ Getting Started
 Download
 --------
 
+The Azure Storage SDK for Python is composed of 4 packages, each corresponding to a different service:
+- azure-storage-blob
+- azure-storage-file
+- azure-storage-queue
+- azure-storage-table
+
+Note: prior to version 0.36.0, there used to be a single package (azure-storage) containing all services
+
 Option 1: Via PyPi
 ~~~~~~~~~~~~~~~~~~
 
 To install via the Python Package Index (PyPI), type:
 ::
 
-    pip install azure-storage
+    pip install azure-storage-blob
+    pip install azure-storage-file
+    pip install azure-storage-queue
+    pip install azure-storage-table
 
 Option 2: Source Via Git
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,8 +109,11 @@ To get the source code of the SDK via git just type:
 ::
 
     git clone git://github.com/Azure/azure-storage-python.git
-    cd ./azure-storage-python
+    cd ./azure-storage-python/azure-storage-blob
     python setup.py install
+
+
+Replace azure-storage-blob with azure-storage-file, azure-storage-queue, or azure-storage-table to install the other services.
 
 Option 3: Source Zip
 ~~~~~~~~~~~~~~~~~~~~
@@ -93,13 +122,16 @@ Download a zip of the code via GitHub or PyPi. Then, type:
 
 ::
 
-    cd ./azure-storage-python
+    cd ./azure-storage-python/azure-storage-blob
     python setup.py install
+
+
+Replace azure-storage-blob with azure-storage-file, azure-storage-queue, or azure-storage-table to install the other services.
 
 Minimum Requirements
 --------------------
 
--  Python 2.7, 3.3, 3.4, or 3.5.
+-  Python 2.7, 3.3, 3.4, 3.5, or 3.6.
 -  See setup.py for dependencies
 
 Usage

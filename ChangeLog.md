@@ -2,6 +2,19 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+**Note: This changelog is deprecated starting with version 0.36.0, please refer to the ChangeLog.md in each package for future change logs.** 
+
+## Version 0.36.0:
+### All:
+- The library has been split into 4 different packages:
+    - azure-storage-blob
+    - azure-storage-file
+    - azure-storage-queue
+    - azure-storage-table
+- The package `azure-storage` is now deprecated.
+- The classes that were directly under azure.storage, not under azure.storage.*(blob, file, queue, table), are now under azure.storage.common.
+    - Example: azure.storage.retry becomes azure.storage.common.retry
+
 ## Version 0.35.1:
 
 ### Blob:

@@ -1,6 +1,10 @@
 ﻿# coding: utf-8
 
-#-------------------------------------------------------------------------
+import io
+import os
+import random
+import time
+# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +17,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import uuid
-import random
-import io
-import os
-import time
 
 from azure.storage.file import (
     ContentSettings,
 )
 
-class FileSamples():  
 
+class FileSamples():
     def __init__(self, account):
         self.account = account
 
@@ -34,7 +34,7 @@ class FileSamples():
 
         self.create_file()
         self.delete_file()
-        self.file_metadata()   
+        self.file_metadata()
         self.file_properties()
         self.file_exists()
         self.resize_file()
@@ -109,22 +109,23 @@ class FileSamples():
 
         # Basic
         self.service.set_file_metadata(share_name, directory_name, file_name, metadata=metadata)
-        metadata = self.service.get_file_metadata(share_name, directory_name, file_name) # metadata={'val1': 'foo', 'val2': 'blah'}
+        metadata = self.service.get_file_metadata(share_name, directory_name,
+                                                  file_name)  # metadata={'val1': 'foo', 'val2': 'blah'}
 
         # Replaces values, does not merge
         metadata = {'new': 'val'}
         self.service.set_file_metadata(share_name, directory_name, file_name, metadata=metadata)
-        metadata = self.service.get_file_metadata(share_name, directory_name, file_name) # metadata={'new': 'val'}
+        metadata = self.service.get_file_metadata(share_name, directory_name, file_name)  # metadata={'new': 'val'}
 
         # Capital letters
         metadata = {'NEW': 'VAL'}
         self.service.set_file_metadata(share_name, directory_name, file_name, metadata=metadata)
-        metadata = self.service.get_file_metadata(share_name, directory_name, file_name) # metadata={'new': 'VAL'}
+        metadata = self.service.get_file_metadata(share_name, directory_name, file_name)  # metadata={'new': 'VAL'}
 
         # Clearing
         self.service.set_file_metadata(share_name, directory_name, file_name)
-        metadata = self.service.get_file_metadata(share_name, directory_name, file_name) # metadata={}
-    
+        metadata = self.service.get_file_metadata(share_name, directory_name, file_name)  # metadata={}
+
         self.service.delete_share(share_name)
 
     def file_properties(self):
@@ -135,26 +136,26 @@ class FileSamples():
         metadata = {'val1': 'foo', 'val2': 'blah'}
         self.service.create_file(share_name, directory_name, file_name, 512, metadata=metadata)
 
-        settings = ContentSettings(content_type='html', content_language='fr')       
+        settings = ContentSettings(content_type='html', content_language='fr')
 
         # Basic
         self.service.set_file_properties(share_name, directory_name, file_name, content_settings=settings)
         file = self.service.get_file_properties(share_name, directory_name, file_name)
-        content_language = file.properties.content_settings.content_language # fr
-        content_type = file.properties.content_settings.content_type # html
-        content_length = file.properties.content_length # 512
+        content_language = file.properties.content_settings.content_language  # fr
+        content_type = file.properties.content_settings.content_type  # html
+        content_length = file.properties.content_length  # 512
 
         # Metadata
         # Can't set metadata, but get will return metadata already on the file
         file = self.service.get_file_properties(share_name, directory_name, file_name)
-        metadata = file.metadata # metadata={'val1': 'foo', 'val2': 'blah'}
+        metadata = file.metadata  # metadata={'val1': 'foo', 'val2': 'blah'}
 
         # Replaces values, does not merge
         settings = ContentSettings(content_encoding='utf-8')
         self.service.set_file_properties(share_name, directory_name, file_name, content_settings=settings)
         file = self.service.get_file_properties(share_name, directory_name, file_name)
-        content_encoding = file.properties.content_settings.content_encoding # utf-8
-        content_language = file.properties.content_settings.content_language # None
+        content_encoding = file.properties.content_settings.content_encoding  # utf-8
+        content_language = file.properties.content_settings.content_language  # None
 
         self.service.delete_share(share_name)
 
@@ -164,9 +165,9 @@ class FileSamples():
         file_name = self._get_file_reference()
 
         # Basic
-        exists = self.service.exists(share_name, directory_name, file_name) # False
+        exists = self.service.exists(share_name, directory_name, file_name)  # False
         self.service.create_file(share_name, directory_name, file_name, 512)
-        exists = self.service.exists(share_name, directory_name, file_name) # True
+        exists = self.service.exists(share_name, directory_name, file_name)  # True
 
         self.service.delete_share(share_name)
 
@@ -179,7 +180,7 @@ class FileSamples():
         self.service.create_file(share_name, directory_name, file_name, 512)
         self.service.resize_file(share_name, directory_name, file_name, 1024)
         file = self.service.get_file_properties(share_name, directory_name, file_name)
-        length = file.properties.content_length # 1024
+        length = file.properties.content_length  # 1024
 
         self.service.delete_share(share_name)
 
@@ -233,45 +234,48 @@ class FileSamples():
         file_name = self._get_file_reference()
         self.service.create_file_from_bytes(share_name, directory_name, file_name, data)
         file = self.service.get_file_to_bytes(share_name, directory_name, file_name)
-        content = file.content # data
+        content = file.content  # data
 
         # Download range
         file = self.service.get_file_to_bytes(share_name, directory_name, file_name,
                                               start_range=3, end_range=10)
-        content = file.content # data from 3-10
+        content = file.content  # data from 3-10
 
         # Upload from index in byte array
         file_name = self._get_file_reference()
         self.service.create_file_from_bytes(share_name, directory_name, file_name, data, index=3)
 
         # Content settings, metadata
-        settings = ContentSettings(content_type='html', content_language='fr')   
-        metadata={'val1': 'foo', 'val2': 'blah'}
+        settings = ContentSettings(content_type='html', content_language='fr')
+        metadata = {'val1': 'foo', 'val2': 'blah'}
         file_name = self._get_file_reference()
-        self.service.create_file_from_bytes(share_name, directory_name, file_name, data, 
-                                       content_settings=settings,
-                                       metadata=metadata)
+        self.service.create_file_from_bytes(share_name, directory_name, file_name, data,
+                                            content_settings=settings,
+                                            metadata=metadata)
         file = self.service.get_file_to_bytes(share_name, directory_name, file_name)
-        metadata = file.metadata # metadata={'val1': 'foo', 'val2': 'blah'}
-        content_language = file.properties.content_settings.content_language # fr
-        content_type = file.properties.content_settings.content_type # html
+        metadata = file.metadata  # metadata={'val1': 'foo', 'val2': 'blah'}
+        content_language = file.properties.content_settings.content_language  # fr
+        content_type = file.properties.content_settings.content_type  # html
 
         # Progress
         # Use slightly larger data so the chunking is more visible
-        data = self._get_random_bytes(8 * 1024 *1024)
+        data = self._get_random_bytes(8 * 1024 * 1024)
+
         def upload_callback(current, total):
             print('({}, {})'.format(current, total))
+
         def download_callback(current, total):
             print('({}, {}) '.format(current, total))
+
         file_name = self._get_file_reference()
 
         print('upload: ')
-        self.service.create_file_from_bytes(share_name, directory_name, file_name, data, 
-                                       progress_callback=upload_callback)
+        self.service.create_file_from_bytes(share_name, directory_name, file_name, data,
+                                            progress_callback=upload_callback)
 
         print('download: ')
-        file = self.service.get_file_to_bytes(share_name, directory_name, file_name, 
-                                         progress_callback=download_callback)
+        file = self.service.get_file_to_bytes(share_name, directory_name, file_name,
+                                              progress_callback=download_callback)
 
         self.service.delete_share(share_name)
 
@@ -283,10 +287,10 @@ class FileSamples():
         input_stream = io.BytesIO(self._get_random_bytes(15))
         output_stream = io.BytesIO()
         file_name = self._get_file_reference()
-        self.service.create_file_from_stream(share_name, directory_name, file_name, 
+        self.service.create_file_from_stream(share_name, directory_name, file_name,
                                              input_stream, 15)
-        file = self.service.get_file_to_stream(share_name, directory_name, file_name, 
-                                          output_stream)
+        file = self.service.get_file_to_stream(share_name, directory_name, file_name,
+                                               output_stream)
         content_length = file.properties.content_length
 
         # Download range
@@ -318,7 +322,7 @@ class FileSamples():
         # Append streams are not seekable and so must be downloaded serially by setting max_connections=1.
         file = self.service.get_file_to_path(share_name, directory_name, file_name, OUTPUT_FILE_PATH, open_mode='ab',
                                              max_connections=1)
-        content_length = file.properties.content_length # will be the same, but local file length will be longer
+        content_length = file.properties.content_length  # will be the same, but local file length will be longer
 
         # Download range
         # Content settings, metadata
@@ -349,7 +353,7 @@ class FileSamples():
         file_name = self._get_file_reference()
         self.service.create_file_from_text(share_name, directory_name, file_name, data)
         file = self.service.get_file_to_text(share_name, directory_name, file_name)
-        content = file.content # 'hello world'
+        content = file.content  # 'hello world'
 
         # Encoding
         text = u'hello 啊齄丂狛狜 world'
@@ -357,7 +361,7 @@ class FileSamples():
         file_name = self._get_file_reference()
         self.service.create_file_from_text(share_name, directory_name, file_name, text, 'utf-16')
         file = self.service.get_file_to_text(share_name, directory_name, file_name, 'utf-16')
-        content = file.content # 'hello 啊齄丂狛狜 world'
+        content = file.content  # 'hello 啊齄丂狛狜 world'
 
         # Download range
         # Content settings, metadata
@@ -381,7 +385,7 @@ class FileSamples():
         print('list ranges: ')
         ranges = self.service.list_ranges(share_name, directory_name, file_name)
         for range in ranges:
-            print('({}, {}) '.format(range.start, range.end)) # (512, 1535)
+            print('({}, {}) '.format(range.start, range.end))  # (512, 1535)
 
         # Clear part of that range
         self.service.clear_range(share_name, directory_name, file_name, 600, 800)

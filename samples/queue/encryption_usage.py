@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,84 +11,98 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
-from cryptography.hazmat.primitives.keywrap import(
-    aes_key_wrap,
-    aes_key_unwrap,
-)
+# --------------------------------------------------------------------------
+import uuid
+from os import urandom
+
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.asymmetric.padding import (
     OAEP,
     MGF1,
 )
+from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.hashes import SHA1
-from os import urandom
-import uuid
+from cryptography.hazmat.primitives.keywrap import (
+    aes_key_wrap,
+    aes_key_unwrap,
+)
+
 
 # Sample implementations of the encryption-related interfaces.
 class KeyWrapper:
     def __init__(self, kid):
-        self.kek = urandom(32) 
+        self.kek = urandom(32)
         self.backend = default_backend()
         self.kid = 'local:' + kid
+
     def wrap_key(self, key, algorithm='A256KW'):
         if algorithm == 'A256KW':
             return aes_key_wrap(self.kek, key, self.backend)
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def unwrap_key(self, key, algorithm):
         if algorithm == 'A256KW':
             return aes_key_unwrap(self.kek, key, self.backend)
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def get_key_wrap_algorithm(self):
         return 'A256KW'
+
     def get_kid(self):
         return self.kid
+
 
 class KeyResolver:
     def __init__(self):
         self.keys = {}
+
     def put_key(self, key):
         self.keys[key.get_kid()] = key
+
     def resolve_key(self, kid):
         return self.keys[kid]
 
+
 class RSAKeyWrapper:
     def __init__(self, kid):
-        self.private_key = generate_private_key(public_exponent = 65537,
-                                                key_size = 2048,
-                                                backend = default_backend())
+        self.private_key = generate_private_key(public_exponent=65537,
+                                                key_size=2048,
+                                                backend=default_backend())
         self.public_key = self.private_key.public_key()
         self.kid = 'local:' + kid
+
     def wrap_key(self, key, algorithm='RSA'):
         if algorithm == 'RSA':
             return self.public_key.encrypt(key,
-                                     OAEP(
-                                         mgf = MGF1(algorithm=SHA1()),
-                                         algorithm=SHA1(),
-                                         label=None)
-                                     )
+                                           OAEP(
+                                               mgf=MGF1(algorithm=SHA1()),
+                                               algorithm=SHA1(),
+                                               label=None)
+                                           )
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def unwrap_key(self, key, algorithm):
         if algorithm == 'RSA':
             return self.private_key.decrypt(key,
-                                        OAEP(
-                                            mgf=MGF1(algorithm=SHA1()),
-                                            algorithm=SHA1(),
-                                            label=None)
-                                        )
+                                            OAEP(
+                                                mgf=MGF1(algorithm=SHA1()),
+                                                algorithm=SHA1(),
+                                                label=None)
+                                            )
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def get_key_wrap_algorithm(self):
         return 'RSA'
+
     def get_kid(self):
         return self.kid
 
-class QueueEncryptionSamples():
 
+class QueueEncryptionSamples():
     def __init__(self, account):
         self.account = account
 
@@ -113,10 +127,10 @@ class QueueEncryptionSamples():
     def put_encrypted_message(self):
         queue_name = self._create_queue()
 
-        #KeyWrapper implements the key encryption key interface
-        #outlined in the get/update message documentation.
-        #Setting the key_encryption_key property will tell these
-        #APIs to encrypt messages.
+        # KeyWrapper implements the key encryption key interface
+        # outlined in the get/update message documentation.
+        # Setting the key_encryption_key property will tell these
+        # APIs to encrypt messages.
         self.service.key_encryption_key = KeyWrapper('key1')
         self.service.put_message(queue_name, 'message1')
 
@@ -146,14 +160,14 @@ class QueueEncryptionSamples():
 
     def require_encryption(self):
         queue_name = self._create_queue()
-        
-        self.service.put_message(queue_name,'Not encrypted')
-        #Set the require_encryption property on the service to 
-        #ensure all messages sent/received are encrypted.
+
+        self.service.put_message(queue_name, 'Not encrypted')
+        # Set the require_encryption property on the service to
+        # ensure all messages sent/received are encrypted.
         self.service.require_encryption = True
 
-        #If the property is set, but no kek is specified upon 
-        #upload, the method will throw.
+        # If the property is set, but no kek is specified upon
+        # upload, the method will throw.
         try:
             self.service.put_message(queue_name, 'message1')
         except:
@@ -163,8 +177,8 @@ class QueueEncryptionSamples():
         self.service.key_resolver_function = KeyResolver()
         self.service.key_resolver_function.put_key(self.service.key_encryption_key)
 
-        #If encryption is required, but a retrieved message is not
-        #encrypted, the method will throw.
+        # If encryption is required, but a retrieved message is not
+        # encrypted, the method will throw.
         try:
             self.service.peek_message(queue_name, 'message1')
         except:
@@ -175,8 +189,8 @@ class QueueEncryptionSamples():
     def alternate_key_algorithms(self):
         queue_name = self._create_queue()
 
-        #To use an alternate method of key wrapping, simply set the 
-        #key_encryption_key property to a wrapper that uses a different algorithm.
+        # To use an alternate method of key wrapping, simply set the
+        # key_encryption_key property to a wrapper that uses a different algorithm.
         self.service.key_encryption_key = RSAKeyWrapper('key2')
         self.service.key_resolver_function = None
 
@@ -200,8 +214,8 @@ class QueueEncryptionSamples():
         self.service.key_encryption_key = kek
         self.service.put_message(queue_name, 'message1')
 
-        #When decrypting, if both a kek and resolver are set,
-        #the resolver will take precedence. Remove the resolver to just use the kek.
+        # When decrypting, if both a kek and resolver are set,
+        # the resolver will take precedence. Remove the resolver to just use the kek.
         self.service.key_resolver_function = None
         messages = self.service.peek_messages(queue_name)
 
