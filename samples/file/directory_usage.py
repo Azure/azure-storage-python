@@ -1,4 +1,4 @@
-﻿#-------------------------------------------------------------------------
+﻿# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import uuid
 
 from azure.common import (
@@ -19,18 +19,18 @@ from azure.common import (
     AzureMissingResourceHttpError,
 )
 
-class DirectorySamples():  
 
+class DirectorySamples():
     def __init__(self, account):
         self.account = account
 
     def run_all_samples(self):
         self.service = self.account.create_file_service()
 
-        self.list_directories_and_files()    
+        self.list_directories_and_files()
         self.create_directory()
         self.delete_directory()
-        self.directory_metadata()   
+        self.directory_metadata()
         self.directory_properties()
         self.directory_exists()
 
@@ -60,34 +60,34 @@ class DirectorySamples():
         # List from root
         root_file_dir = list(self.service.list_directories_and_files(share_name))
         for res in root_file_dir:
-            print(res.name) # dir1, dir2, rootfile
+            print(res.name)  # dir1, dir2, rootfile
 
         # List from directory
         dir1 = list(self.service.list_directories_and_files(share_name, 'dir1'))
         for res in dir1:
-            print(res.name) # file1, file2
+            print(res.name)  # file1, file2
 
         # Num results
         root_file_dir = list(self.service.list_directories_and_files(share_name, num_results=2))
         for res in root_file_dir:
-            print(res.name) # dir1, dir2
+            print(res.name)  # dir1, dir2
 
     def create_directory(self):
         share_name = self._create_share()
 
         # Basic
         dir_name = self._get_directory_reference()
-        created = self.service.create_directory(share_name, dir_name) # True
+        created = self.service.create_directory(share_name, dir_name)  # True
 
         # Metadata
         metadata = {'val1': 'foo', 'val2': 'blah'}
         dir_name = self._get_directory_reference()
-        created = self.service.create_directory(share_name, dir_name, metadata=metadata) # True
+        created = self.service.create_directory(share_name, dir_name, metadata=metadata)  # True
 
         # Fail on exist
         dir_name = self._get_directory_reference()
-        created = self.service.create_directory(share_name, dir_name) # True 
-        created = self.service.create_directory(share_name, dir_name) # False
+        created = self.service.create_directory(share_name, dir_name)  # True
+        created = self.service.create_directory(share_name, dir_name)  # False
         try:
             self.service.create_directory(share_name, dir_name, fail_on_exist=True)
         except AzureConflictHttpError:
@@ -100,11 +100,11 @@ class DirectorySamples():
 
         # Basic
         dir_name = self._get_directory_reference()
-        deleted = self.service.delete_directory(share_name, dir_name) # True 
+        deleted = self.service.delete_directory(share_name, dir_name)  # True
 
         # Fail not exist
         dir_name = self._get_directory_reference()
-        deleted = self.service.delete_directory(share_name, dir_name) # False
+        deleted = self.service.delete_directory(share_name, dir_name)  # False
         try:
             self.service.delete_directory(share_name, dir_name, fail_not_exist=True)
         except AzureMissingResourceHttpError:
@@ -120,23 +120,24 @@ class DirectorySamples():
 
         # Basic
         self.service.set_directory_metadata(share_name, dir_name, metadata=metadata)
-        metadata = self.service.get_directory_metadata(share_name, dir_name) # metadata={'val1': 'foo', 'val2': 'blah'} 
+        metadata = self.service.get_directory_metadata(share_name,
+                                                       dir_name)  # metadata={'val1': 'foo', 'val2': 'blah'}
 
         # Replaces values, does not merge
         metadata = {'new': 'val'}
         self.service.set_directory_metadata(share_name, dir_name, metadata=metadata)
-        metadata = self.service.get_directory_metadata(share_name, dir_name) # metadata={'new': 'val'}
+        metadata = self.service.get_directory_metadata(share_name, dir_name)  # metadata={'new': 'val'}
 
         # Capital letters
         metadata = {'NEW': 'VAL'}
         self.service.set_directory_metadata(share_name, dir_name, metadata=metadata)
-        metadata = self.service.get_directory_metadata(share_name, dir_name) # metadata={'new': 'VAL'}
+        metadata = self.service.get_directory_metadata(share_name, dir_name)  # metadata={'new': 'VAL'}
 
         # Clearing
         self.service.set_directory_metadata(share_name, dir_name)
-        metadata = self.service.get_directory_metadata(share_name, dir_name) # metadata={}
-    
-        self.service.delete_share(share_name) 
+        metadata = self.service.get_directory_metadata(share_name, dir_name)  # metadata={}
+
+        self.service.delete_share(share_name)
 
     def directory_properties(self):
         share_name = self._create_share()
@@ -148,13 +149,13 @@ class DirectorySamples():
 
         # Basic
         directory = self.service.get_directory_properties(share_name, dir_name)
-        etag = directory.properties.etag # etag string
-        lmt = directory.properties.last_modified # datetime object
+        etag = directory.properties.etag  # etag string
+        lmt = directory.properties.last_modified  # datetime object
 
         # Metadata
         self.service.set_directory_metadata(share_name, dir_name, metadata=metadata)
         directory = self.service.get_directory_properties(share_name, dir_name)
-        metadata = directory.metadata # metadata={'val1': 'foo', 'val2': 'blah'}
+        metadata = directory.metadata  # metadata={'val1': 'foo', 'val2': 'blah'}
 
         self.service.delete_share(share_name)
 
@@ -163,8 +164,8 @@ class DirectorySamples():
         directory_name = self._get_directory_reference()
 
         # Basic
-        exists = self.service.exists(share_name, directory_name) # False
+        exists = self.service.exists(share_name, directory_name)  # False
         self.service.create_directory(share_name, directory_name)
-        exists = self.service.exists(share_name, directory_name) # True
+        exists = self.service.exists(share_name, directory_name)  # True
 
         self.service.delete_share(share_name)

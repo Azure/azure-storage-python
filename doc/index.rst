@@ -1,23 +1,9 @@
-.. pydocumentdb documentation master file, created by
-   sphinx-quickstart.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Azure Storage SDK for Python.
-========================================
+=============================
 
 Installation:
 -------------
- 
-You can use ``pip`` to install the latest released version of ``azure-storage``::
-
-    pip install azure-storage
-
-If you want to install ``azure-storage`` from source::
-
-    git clone git://github.com/Azure/azure-storage-python.git
-    cd azure-storage-python
-    python setup.py install
+Please refer to the Github page for the installation instructions: https://github.com/Azure/azure-storage-python
 
 If you are looking for Azure Service Bus or the Azure management libraries, 
 please visit https://github.com/Azure/azure-sdk-for-python
