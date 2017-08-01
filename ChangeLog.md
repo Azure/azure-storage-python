@@ -19,6 +19,11 @@
 - Fixed a bug where deserialization of service stats throws a TypeError when the service is unavailable.
 
 ### Blob:
+- For Standard Storage Accounts only, added support for getting and setting the tier on an individual block blob.
+
+## Version X.X.X:
+
+### Blob:
 - For Premium Accounts only, added support for getting and setting the tier on a page blob. The tier can also be set when creating or copying from an existing page blob.
 - create_from_* and and append_blob_from_* methods will return response_properties which contains the etag and last modified time.
 

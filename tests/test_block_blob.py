@@ -24,6 +24,7 @@ from azure.storage.blob import (
     BlockBlobService,
     ContentSettings,
 )
+from azure.storage.blob.models import StandardBlobTier
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -778,6 +779,80 @@ class StorageBlockBlobTest(StorageTestCase):
                                        validate_content=True)
 
         # Assert
+
+    @record
+    def test_standard_blob_tier_set_tier_api(self):
+        for tier in vars(StandardBlobTier):
+            if (tier.startswith("__")):
+                continue
+            blob_name = self._get_blob_reference()
+            data = b'hello world'
+            self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+            self.bs.set_standard_blob_tier(self.container_name, blob_name, tier)
+
+            blob_ref2 = self.bs.get_blob_properties(self.container_name, blob_name)
+            self.assertEqual(tier, blob_ref2.properties.blob_tier)
+            self.assertFalse(hasattr(blob_ref2.properties, 'blob_tier_inferred'))
+
+            blobs = list(self.bs.list_blobs(self.container_name))
+
+            # Assert
+            self.assertIsNotNone(blobs)
+            self.assertGreaterEqual(len(blobs), 1)
+            self.assertIsNotNone(blobs[0])
+            self.assertNamedItemInContainer(blobs, blob_name)
+            self.assertEqual(blobs[0].properties.blob_tier, tier)
+            self.assertFalse(hasattr(blobs[0].properties, 'blob_tier_inferred'))
+
+            self.bs.delete_blob(self.container_name, blob_name)
+
+    @record
+    def test_rehydration_status(self):
+        blob_name = self._get_blob_reference()
+        data = b'hello world'
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+        self.bs.set_standard_blob_tier(self.container_name, blob_name, StandardBlobTier.Archive)
+        self.bs.set_standard_blob_tier(self.container_name, blob_name, StandardBlobTier.Cool)
+
+        blob_ref = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(StandardBlobTier.Archive, blob_ref.properties.blob_tier)
+        self.assertEqual("rehydrate-pending-to-cool", blob_ref.properties.rehydration_status)
+        self.assertFalse(hasattr(blob_ref.properties, 'blob_tier_inferred'))
+
+        blobs = list(self.bs.list_blobs(self.container_name))
+
+        # Assert
+        self.assertIsNotNone(blobs)
+        self.assertGreaterEqual(len(blobs), 1)
+        self.assertIsNotNone(blobs[0])
+        self.assertNamedItemInContainer(blobs, blob_name)
+        self.assertEqual(StandardBlobTier.Archive, blobs[0].properties.blob_tier)
+        self.assertEqual("rehydrate-pending-to-cool", blobs[0].properties.rehydration_status)
+        self.assertFalse(hasattr(blobs[0].properties, 'blob_tier_inferred'))
+
+        self.bs.delete_blob(self.container_name, blob_name)
+
+        blob_name2 = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name2, data)
+        self.bs.set_standard_blob_tier(self.container_name, blob_name2, StandardBlobTier.Archive)
+        self.bs.set_standard_blob_tier(self.container_name, blob_name2, StandardBlobTier.Hot)
+
+        blob_ref2 = self.bs.get_blob_properties(self.container_name, blob_name2)
+        self.assertEqual(StandardBlobTier.Archive, blob_ref2.properties.blob_tier)
+        self.assertEqual("rehydrate-pending-to-hot", blob_ref2.properties.rehydration_status)
+        self.assertFalse(hasattr(blob_ref2.properties, 'blob_tier_inferred'))
+
+        blobs = list(self.bs.list_blobs(self.container_name))
+
+        # Assert
+        self.assertIsNotNone(blobs)
+        self.assertGreaterEqual(len(blobs), 1)
+        self.assertIsNotNone(blobs[0])
+        self.assertNamedItemInContainer(blobs, blob_name2)
+        self.assertEqual(StandardBlobTier.Archive, blobs[0].properties.blob_tier)
+        self.assertEqual("rehydrate-pending-to-hot", blobs[0].properties.rehydration_status)
+        self.assertFalse(hasattr(blobs[0].properties, 'blob_tier_inferred'))
+
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
