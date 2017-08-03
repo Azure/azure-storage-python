@@ -115,7 +115,7 @@ def _parse_properties(response, result_class):
                 attr = getattr(props, info[0])
                 setattr(attr, info[1], info[2](value))
 
-    if props.blob_type == 'PageBlob' and props.blob_tier is not None:
+    if hasattr(props, 'blob_type') and props.blob_type == 'PageBlob' and hasattr(props, 'blob_tier') and props.blob_tier is not None:
         props.blob_tier = _to_upper_str(props.blob_tier)
     return props
 

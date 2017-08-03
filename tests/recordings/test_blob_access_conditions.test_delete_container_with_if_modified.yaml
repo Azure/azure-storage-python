@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [cc1ec6ba-68f4-11e7-b17a-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:30:26 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [b11b7818-8784-11e7-88fd-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 21:56:03 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer88321af4?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:30:27 GMT']
-      ETag: ['"0x8D4CB18B135981E"']
-      Last-Modified: ['Sat, 15 Jul 2017 00:30:27 GMT']
+      Date: ['Tue, 22 Aug 2017 21:56:02 GMT']
+      ETag: ['"0x8D4E9A89530E871"']
+      Last-Modified: ['Tue, 22 Aug 2017 21:56:03 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [26e6073e-0001-007f-2501-fdcae6000000]
+      x-ms-request-id: [647237cb-0001-0027-4491-1bce9d000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,43 +26,43 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-Modified-Since: ['Sat, 15 Jul 2017 00:15:26 GMT']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [cc35056c-68f4-11e7-abf7-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:30:26 GMT']
+      If-Modified-Since: ['Tue, 22 Aug 2017 21:41:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [b136dcb4-8784-11e7-b33a-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 21:56:03 GMT']
       x-ms-version: ['2017-04-17']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/utcontainer88321af4?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:30:27 GMT']
+      Date: ['Tue, 22 Aug 2017 21:56:02 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [26e60755-0001-007f-3501-fdcae6000000]
+      x-ms-request-id: [647237ea-0001-0027-5c91-1bce9d000000]
       x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [cc3aa1d4-68f4-11e7-b772-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:30:26 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [b13cfb6c-8784-11e7-984a-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 21:56:03 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainer88321af4?restype=container
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
-        \ specified container does not exist.\nRequestId:26e6075f-0001-007f-3e01-fdcae6000000\n\
-        Time:2017-07-15T00:30:27.9696401Z</Message></Error>"}
+        \ specified container does not exist.\nRequestId:647237fa-0001-0027-6991-1bce9d000000\n\
+        Time:2017-08-22T21:56:03.3681106Z</Message></Error>"}
     headers:
       Content-Length: ['225']
       Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:30:27 GMT']
+      Date: ['Tue, 22 Aug 2017 21:56:02 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Vary: [Origin]
-      x-ms-request-id: [26e6075f-0001-007f-3e01-fdcae6000000]
+      x-ms-request-id: [647237fa-0001-0027-6991-1bce9d000000]
       x-ms-version: ['2017-04-17']
     status: {code: 404, message: The specified container does not exist.}
 version: 1

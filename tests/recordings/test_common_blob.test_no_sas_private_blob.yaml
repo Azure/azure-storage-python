@@ -22,10 +22,10 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['1024']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [53849226-68f5-11e7-9576-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:34:13 GMT']
+      x-ms-client-request-id: [39cffce8-8785-11e7-9462-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 21:59:52 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer61f810cf/blob61f810cf
@@ -33,12 +33,12 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [tW3r4DhkDAivU4SsCDvltg==]
-      Date: ['Sat, 15 Jul 2017 00:34:14 GMT']
-      ETag: ['"0x8D4CB19384D1BE1"']
-      Last-Modified: ['Sat, 15 Jul 2017 00:34:14 GMT']
+      Date: ['Tue, 22 Aug 2017 21:59:52 GMT']
+      ETag: ['"0x8D4E9A91E05CB7F"']
+      Last-Modified: ['Tue, 22 Aug 2017 21:59:52 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [58aa1e51-0001-0071-2802-fd26ed000000]
+      x-ms-request-id: [4c26fb37-0001-007f-2691-1bcae6000000]
       x-ms-request-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
@@ -48,20 +48,20 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.1]
+      User-Agent: [python-requests/2.18.4]
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainer61f810cf/blob61f810cf
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
-        \ specified resource does not exist.\nRequestId:4b0e9022-0001-00c5-3e02-fd2aef000000\n\
-        Time:2017-07-15T00:34:14.2186514Z</Message></Error>"}
+        \ specified resource does not exist.\nRequestId:121fa687-0001-00dc-5b91-1b0687000000\n\
+        Time:2017-08-22T21:59:53.0367636Z</Message></Error>"}
     headers:
       Content-Length: ['223']
       Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:34:13 GMT']
+      Date: ['Tue, 22 Aug 2017 21:59:52 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Vary: [Origin]
-      x-ms-request-id: [4b0e9022-0001-00c5-3e02-fd2aef000000]
+      x-ms-request-id: [121fa687-0001-00dc-5b91-1b0687000000]
       x-ms-version: ['2014-02-14']
     status: {code: 404, message: The specified resource does not exist.}
 version: 1

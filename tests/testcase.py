@@ -151,6 +151,24 @@ class StorageTestCase(unittest.TestCase):
         self._set_test_proxy(service, settings)
         return service
 
+    # for blob storage account
+    def _create_storage_service_for_blob_storage_account(self, service_class, settings):
+        if hasattr(settings, 'BLOB_CONNECTION_STRING') and settings.BLOB_CONNECTION_STRING != "":
+            service = service_class(connection_string=settings.BLOB_CONNECTION_STRING)
+        elif settings.IS_EMULATED:
+            service = service_class(is_emulated=True)
+        elif hasattr(settings, 'BLOB_STORAGE_ACCOUNT_NAME') and settings.BLOB_STORAGE_ACCOUNT_NAME != "":
+            service = service_class(
+                settings.BLOB_STORAGE_ACCOUNT_NAME,
+                settings.BLOB_STORAGE_ACCOUNT_KEY,
+                protocol=settings.PROTOCOL,
+            )
+        else:
+            raise SkipTest('BLOB_CONNECTION_STRING or BLOB_STORAGE_ACCOUNT_NAME must be populated to run this test')
+
+        self._set_test_proxy(service, settings)
+        return service
+
     def _create_premium_storage_service(self, service_class, settings):
         if hasattr(settings, 'PREMIUM_CONNECTION_STRING') and settings.PREMIUM_CONNECTION_STRING != "":
             service = service_class(connection_string=settings.PREMIUM_CONNECTION_STRING)
@@ -303,6 +321,8 @@ class StorageTestCase(unittest.TestCase):
         old_to_new_dict = {
             self.settings.STORAGE_ACCOUNT_NAME: self.fake_settings.STORAGE_ACCOUNT_NAME,
             self.settings.STORAGE_ACCOUNT_KEY: self.fake_settings.STORAGE_ACCOUNT_KEY,
+            self.settings.BLOB_STORAGE_ACCOUNT_NAME: self.fake_settings.BLOB_STORAGE_ACCOUNT_NAME,
+            self.settings.BLOB_STORAGE_ACCOUNT_KEY: self.fake_settings.BLOB_STORAGE_ACCOUNT_KEY,
             self.settings.REMOTE_STORAGE_ACCOUNT_KEY: self.fake_settings.REMOTE_STORAGE_ACCOUNT_KEY,
             self.settings.REMOTE_STORAGE_ACCOUNT_NAME: self.fake_settings.REMOTE_STORAGE_ACCOUNT_NAME,
             self.settings.PREMIUM_STORAGE_ACCOUNT_NAME: self.fake_settings.PREMIUM_STORAGE_ACCOUNT_NAME,
