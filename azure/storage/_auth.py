@@ -16,6 +16,9 @@ from ._common_conversion import (
     _sign_string,
 )
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class _StorageSharedKeyAuthentication(object):
     def __init__(self, account_name, account_key):
@@ -70,6 +73,7 @@ class _StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
             self._get_canonicalized_resource_query(request)
 
         self._add_authorization_header(request, string_to_sign)
+        logger.debug("String_to_sign=%s", string_to_sign)
 
     def _get_canonicalized_resource_query(self, request):
         sorted_queries = [(name, value) for name, value in request.query.items()]
@@ -95,6 +99,7 @@ class _StorageTableSharedKeyAuthentication(_StorageSharedKeyAuthentication):
             self._get_canonicalized_resource_query(request)
 
         self._add_authorization_header(request, string_to_sign)
+        logger.debug("String_to_sign=%s", string_to_sign)
 
     def _get_canonicalized_resource_query(self, request):
         for name, value in request.query.items():

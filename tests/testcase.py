@@ -32,13 +32,9 @@ import random
 import tests.settings_real as settings
 import tests.settings_fake as fake_settings
 
-should_log = os.getenv('SDK_TESTS_LOG', '0')
-if should_log.lower() == 'true' or should_log == '1':
-    import logging
-    logger = logging.getLogger('azure.common.filters')
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.StreamHandler())
-
+# Configure logging to output to console
+import logging
+logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
 
 class TestMode(object):
     none = 'None'.lower() # this will be for unit test, no need for any recordings
