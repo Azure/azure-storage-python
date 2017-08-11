@@ -41,6 +41,9 @@ from azure.storage.common._error import (
     _validate_not_none,
     _validate_key_encryption_key_wrap,
 )
+from ._error import (
+    _ERROR_MESSAGE_NOT_ENCRYPTED
+)
 
 
 def _encrypt_queue_message(message, key_encryption_key):
@@ -83,11 +86,10 @@ def _encrypt_queue_message(message, key_encryption_key):
     encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
 
     # Build the dictionary structure.
-    queue_message = {}
-    queue_message['EncryptedMessageContents'] = _encode_base64(encrypted_data)
-    queue_message['EncryptionData'] = _generate_encryption_data_dict(key_encryption_key,
-                                                                     content_encryption_key,
-                                                                     initialization_vector)
+    queue_message = {'EncryptedMessageContents': _encode_base64(encrypted_data),
+                     'EncryptionData': _generate_encryption_data_dict(key_encryption_key,
+                                                                      content_encryption_key,
+                                                                      initialization_vector)}
 
     return dumps(queue_message)
 
@@ -115,7 +117,7 @@ def _decrypt_queue_message(message, require_encryption, key_encryption_key, reso
 
         encryption_data = _dict_to_encryption_data(message['EncryptionData'])
         decoded_data = _decode_base64_to_bytes(message['EncryptedMessageContents'])
-    except (KeyError, ValueError) as e:
+    except (KeyError, ValueError):
         # Message was not json formatted and so was not encrypted
         # or the user provided a json formatted message.
         if require_encryption:
@@ -124,7 +126,7 @@ def _decrypt_queue_message(message, require_encryption, key_encryption_key, reso
             return message
     try:
         return _decrypt(decoded_data, encryption_data, key_encryption_key, resolver).decode('utf-8')
-    except Exception as e:
+    except Exception:
         raise AzureException(_ERROR_DECRYPTION_FAILURE)
 
 

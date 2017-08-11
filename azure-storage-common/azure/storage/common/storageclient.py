@@ -199,7 +199,7 @@ class StorageClient(object):
         # Apply common settings to the request
         _update_request(request)
 
-        while (True):
+        while True:
             try:
                 try:
                     # Execute the request callback 
@@ -258,7 +258,6 @@ class StorageClient(object):
                         if len(ex.args) > 0:
                             msg = ex.args[0]
                         raise AzureException('{}: {}'.format(ex.__class__.__name__, msg))
-
 
             except AzureException as ex:
                 # Decryption failures (invalid objects, invalid algorithms, data unencrypted in strict mode, etc)

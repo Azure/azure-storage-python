@@ -78,7 +78,7 @@ def _insert_entity(entity, encryption_required=False,
         _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
         _DEFAULT_PREFER_HEADER[0]: _DEFAULT_PREFER_HEADER[1]
     }
-    if (key_encryption_key):
+    if key_encryption_key:
         entity = _encrypt_entity(entity, key_encryption_key, encryption_resolver)
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
@@ -111,7 +111,7 @@ def _update_entity(entity, if_match, encryption_required=False,
         _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
         'If-Match': _to_str(if_match),
     }
-    if (key_encryption_key):
+    if key_encryption_key:
         entity = _encrypt_entity(entity, key_encryption_key, encryption_resolver)
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
@@ -170,7 +170,7 @@ def _insert_or_replace_entity(entity, require_encryption=False,
         _DEFAULT_ACCEPT_HEADER[0]: _DEFAULT_ACCEPT_HEADER[1],
     }
 
-    if (key_encryption_key):
+    if key_encryption_key:
         entity = _encrypt_entity(entity, key_encryption_key, encryption_resolver)
     request.body = _get_request_body(_convert_entity_to_json(entity))
 
@@ -187,9 +187,6 @@ def _insert_or_merge_entity(entity, require_encryption=False, key_encryption_key
         wrap_key(key)--wraps the specified key using an algorithm of the user's choice.
         get_key_wrap_algorithm()--returns the algorithm used to wrap the specified symmetric key.
         get_kid()--returns a string key id for this key-encryption-key.
-    :param function(partition_key, row_key, property_name) encryption_resolver:
-        A function that takes in an entities partition key, row key, and property name and returns 
-        a boolean that indicates whether that property should be encrypted.
     '''
     _validate_entity(entity)
     _validate_encryption_unsupported(require_encryption, key_encryption_key)

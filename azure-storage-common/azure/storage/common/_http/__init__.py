@@ -13,6 +13,7 @@
 # limitations under the License.
 # --------------------------------------------------------------------------
 
+
 class HTTPError(Exception):
     '''
     Represents an HTTP Exception when response status code >= 300.
