@@ -555,7 +555,7 @@ class _QueryStringConstants(object):
     SIGNED_SERVICES = 'ss'
 
 
-class _SharedAccessHelper():
+class _SharedAccessHelper(object):
     def __init__(self):
         self.query_dict = {}
 

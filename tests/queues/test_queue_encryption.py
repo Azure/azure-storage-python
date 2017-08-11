@@ -43,6 +43,9 @@ from azure.storage.common._error import (
     _ERROR_DECRYPTION_FAILURE,
     _ERROR_ENCRYPTION_REQUIRED,
 )
+from azure.storage.queue._error import (
+    _ERROR_MESSAGE_NOT_ENCRYPTED,
+)
 from azure.storage.queue import (
     QueueService,
 )

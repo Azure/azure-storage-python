@@ -122,7 +122,7 @@ def _generate_encryption_data_dict(kek, cek, iv):
     Generates and returns the encryption metadata as a dict.
 
     :param object kek: The key encryption key. See calling functions for more information.
-    :param bytes cek: The conetent encryption key.
+    :param bytes cek: The content encryption key.
     :param bytes iv: The initialization vector.
     :return: A dict containing all the encryption metadata.
     :rtype: dict

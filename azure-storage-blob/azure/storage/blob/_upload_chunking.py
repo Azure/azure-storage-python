@@ -421,16 +421,16 @@ class _SubStream(IOBase):
 
     def seek(self, offset, whence=0):
         if whence is SEEK_SET:
-            startIndex = 0
+            start_index = 0
         elif whence is SEEK_CUR:
-            startIndex = self._position
+            start_index = self._position
         elif whence is SEEK_END:
-            startIndex = self._length
+            start_index = self._length
             offset = - offset
         else:
             raise ValueError("Invalid argument for the 'whence' parameter.")
 
-        pos = startIndex + offset
+        pos = start_index + offset
 
         if pos > self._length:
             pos = self._length

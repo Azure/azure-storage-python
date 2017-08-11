@@ -102,8 +102,7 @@ def _parse_lease(response):
     '''
     Extracts lease time and ID return headers.
     '''
-    lease = {}
-    lease['time'] = response.headers.get('x-ms-lease-time')
+    lease = {'time': response.headers.get('x-ms-lease-time')}
     if lease['time']:
         lease['time'] = _int_to_str(lease['time'])
 

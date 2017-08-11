@@ -105,16 +105,16 @@ class BaseBlobService(StorageClient):
     way to organize sets of blobs. For more information please see:
     https://msdn.microsoft.com/en-us/library/azure/ee691964.aspx
 
-    :ivar int MAX_SINGLE_GET_SIZE: 
-        The size of the first range get performed by get_blob_to_* methods if 
-        max_connections is greater than 1. Less data will be returned if the 
+    :ivar int MAX_SINGLE_GET_SIZE:
+        The size of the first range get performed by get_blob_to_* methods if
+        max_connections is greater than 1. Less data will be returned if the
         blob is smaller than this.
-    :ivar int MAX_CHUNK_GET_SIZE: 
-        The size of subsequent range gets performed by get_blob_to_* methods if 
-        max_connections is greater than 1 and the blob is larger than MAX_SINGLE_GET_SIZE. 
-        Less data will be returned if the remainder of the blob is smaller than 
-        this. If this is set to larger than 4MB, content_validation will throw an 
-        error if enabled. However, if content_validation is not desired a size 
+    :ivar int MAX_CHUNK_GET_SIZE:
+        The size of subsequent range gets performed by get_blob_to_* methods if
+        max_connections is greater than 1 and the blob is larger than MAX_SINGLE_GET_SIZE.
+        Less data will be returned if the remainder of the blob is smaller than
+        this. If this is set to larger than 4MB, content_validation will throw an
+        error if enabled. However, if content_validation is not desired a size
         greater than 4MB may be optimal. Setting this below 4MB is not recommended.
     :ivar object key_encryption_key:
         The key-encryption-key optionally provided by the user. If provided, will be used to
@@ -135,7 +135,7 @@ class BaseBlobService(StorageClient):
         It uses the kid string to return a key-encryption-key implementing the interface defined above.
     :ivar bool require_encryption:
         A flag that may be set to ensure that all messages successfully uploaded to the queue and all those downloaded and
-        successfully read from the queue are/were encrypted while on the server. If this flag is set, all required 
+        successfully read from the queue are/were encrypted while on the server. If this flag is set, all required
         parameters for encryption/decryption must be provided. See the above comments on the key_encryption_key and resolver.
     '''
 
@@ -757,11 +757,17 @@ class BaseBlobService(StorageClient):
             If specified, set_container_acl only succeeds if the
             container's lease is active and matches this ID.
         :param datetime if_modified_since:
-            A DateTime value. Azure expects the date value passed in to be UTC.
+            A datetime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
             If a date is passed in without timezone info, it is assumed to be UTC. 
             Specify this header to perform the operation only
-            if the resource has been modified since the specified time.
+            if the resource has been modified since the specified date/time.
+        :param datetime if_unmodified_since:
+            A datetime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: ETag and last modified properties for the updated Container

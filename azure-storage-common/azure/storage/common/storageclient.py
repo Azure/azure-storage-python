@@ -220,7 +220,7 @@ class StorageClient(object):
         _update_request(request)
         client_request_id_prefix = str.format("Client-Request-ID={0}", request.headers['x-ms-client-request-id'])
 
-        while (True):
+        while True:
             try:
                 try:
                     # Execute the request callback 

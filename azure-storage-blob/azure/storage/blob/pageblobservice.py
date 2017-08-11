@@ -1186,7 +1186,7 @@ class PageBlobService(BaseBlobService):
         The destination blob cannot be modified while a copy operation is in progress.
 
         When copying from a page blob, the Blob service creates a destination page
-        blob of the source blob’s length, initially containing all zeroes. Then
+        blob of the source blob's length, initially containing all zeroes. Then
         the source page ranges are enumerated, and non-empty ranges are copied.
 
         If the tier on the source blob is larger than the tier being passed to this
@@ -1315,7 +1315,7 @@ class PageBlobService(BaseBlobService):
         allows for encryption or other such special behavior because
         it is safely handled by the library. These behaviors are
         prohibited in the public version of this function.
-        :param str _encryption_data:
+        :param str encryption_data:
             The JSON formatted encryption metadata to upload as a part of the blob.
             This should only be passed internally from other methods and only applied
             when uploading entire blob contents immediately follows creation of the blob.

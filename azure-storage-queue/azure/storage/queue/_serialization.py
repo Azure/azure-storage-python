@@ -63,7 +63,7 @@ def _convert_queue_message_xml(message_text, encode_function, key_encryption_key
         <MessageText></MessageText>
     </QueueMessage>
     '''
-    queue_message_element = ETree.Element('QueueMessage');
+    queue_message_element = ETree.Element('QueueMessage')
 
     # Enabled
     message_text = encode_function(message_text)

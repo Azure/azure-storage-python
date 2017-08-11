@@ -149,7 +149,7 @@ def _convert_signed_identifiers_to_xml(signed_identifiers):
     if signed_identifiers is None:
         return ''
 
-    sis = ETree.Element('SignedIdentifiers');
+    sis = ETree.Element('SignedIdentifiers')
     for id, access_policy in signed_identifiers.items():
         # Root signed identifers element
         si = ETree.SubElement(sis, 'SignedIdentifier')
@@ -231,7 +231,7 @@ def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, co
         </Cors>
     </StorageServiceProperties>
     '''
-    service_properties_element = ETree.Element('StorageServiceProperties');
+    service_properties_element = ETree.Element('StorageServiceProperties')
 
     # Logging
     if logging:
@@ -342,10 +342,10 @@ def _len_plus(data):
 
         # If the stream is seekable and tell() is implemented, calculate the stream size.
         try:
-            currentPosition = data.tell()
+            current_position = data.tell()
             data.seek(0, SEEK_END)
-            length = data.tell() - currentPosition
-            data.seek(currentPosition, SEEK_SET)
+            length = data.tell() - current_position
+            data.seek(current_position, SEEK_SET)
         except (AttributeError, UnsupportedOperation):
             pass
 
