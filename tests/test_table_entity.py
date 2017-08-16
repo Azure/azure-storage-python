@@ -1,4 +1,4 @@
-﻿# coding: utf-8
+# coding: utf-8
 
 #-------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
@@ -383,6 +383,18 @@ class StorageTableEntityTest(StorageTestCase):
         # Assert
 
     @record
+    def test_insert_entity_empty_string_pk(self):
+        # Arrange
+        entity = {'RowKey': 'rk',
+                  'PartitionKey': ''}
+
+        # Act
+        resp = self.ts.insert_entity(self.table_name, entity)
+
+        # Assert
+        self.assertIsNotNone(resp)
+
+    @record
     def test_insert_entity_missing_rk(self):
         # Arrange
         entity = {'PartitionKey': 'pk'}
@@ -392,6 +404,18 @@ class StorageTableEntityTest(StorageTestCase):
             resp = self.ts.insert_entity(self.table_name, entity)
 
         # Assert
+
+    @record
+    def test_insert_entity_empty_string_rk(self):
+        # Arrange
+        entity = {'PartitionKey': 'pk',
+                  'RowKey': ''}
+
+        # Act
+        resp = self.ts.insert_entity(self.table_name, entity)
+
+        # Assert
+        self.assertIsNotNone(resp)
 
     @record
     def test_insert_entity_too_many_properties(self):

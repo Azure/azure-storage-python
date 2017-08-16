@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version X.X.X:
+
+### Table:
+- Fixed bug where inserting entity with an empty sting as RowKey raised error.
+
 ## Version 0.35.1:
 
 ### Blob:
