@@ -19,6 +19,8 @@ If you want to install ``azure-storage`` from source::
     cd azure-storage-python
     python setup.py install
 
+On Windows, you need to build the ``cffi`` and ``cryptography`` dependencies natively. See the documentation for those modules, or install from wheel: `cffi 1.10.0 <https://pypi.python.org/packages/0a/ad/5b5e6783d7500fb32978ff7869dc77333b0707b6ebf0d76d23b45134f9c1/cffi-1.10.0-cp34-cp34m-win32.whl#md5=0dcb0100c1941e62510e8abc13f7ee9f>`__, `cryptography 1.5 <https://pypi.python.org/packages/83/5b/59b7de8c938a1856585d91cccd648c3ff2af14ec518051b3bfd50d6a9f73/cryptography-1.5-cp34-cp34m-win32.whl#md5=896b2588347b6d2ebdba2754b035ed1a>`__ (both links are for Python 3.4 in 32-bit environments, the default in Azure Web Apps). On Azure Web Apps, you also need to change the ``cp34m`` portion of the wheel file name to ``none``. 
+
 If you are looking for Azure Service Bus or the Azure management libraries, 
 please visit https://github.com/Azure/azure-sdk-for-python
    
