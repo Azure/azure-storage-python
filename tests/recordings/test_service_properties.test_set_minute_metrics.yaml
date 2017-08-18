@@ -1,46 +1,46 @@
 interactions:
 - request:
-    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
       <StorageServiceProperties><MinuteMetrics><Version>1.0</Version><Enabled>True</Enabled><IncludeAPIs>True</IncludeAPIs><RetentionPolicy><Enabled>True</Enabled><Days>5</Days></RetentionPolicy></MinuteMetrics></StorageServiceProperties>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['271']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [6541e16c-8786-11e7-9256-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:08:15 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [882dbcd9-981d-11e7-a078-b8e8564491f6]
+      x-ms-date: ['Wed, 13 Sep 2017 00:50:26 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
-    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+    uri: https://storagename.blob.core.windows.net/?comp=properties&restype=service
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Tue, 22 Aug 2017 22:08:14 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [e8450d5f-0001-0095-0293-1b35e7000000]
+      date: ['Wed, 13 Sep 2017 00:50:25 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [df4946a8-001e-002f-452a-2cd5ee000000]
       x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [655f1028-8786-11e7-9afb-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:08:15 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [884789c7-981d-11e7-b6af-b8e8564491f6]
+      x-ms-date: ['Wed, 13 Sep 2017 00:50:26 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
-    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+    uri: https://storagename.blob.core.windows.net/?comp=properties&restype=service
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>true</Read><Write>true</Write><Delete>true</Delete><RetentionPolicy><Enabled>true</Enabled><Days>5</Days></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>5</Days></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>true</Enabled><IncludeAPIs>true</IncludeAPIs><RetentionPolicy><Enabled>true</Enabled><Days>5</Days></RetentionPolicy></MinuteMetrics><Cors><CorsRule><AllowedMethods>GET</AllowedMethods><AllowedOrigins>www.xyz.com</AllowedOrigins><AllowedHeaders\
         \ /><ExposedHeaders /><MaxAgeInSeconds>0</MaxAgeInSeconds></CorsRule><CorsRule><AllowedMethods>GET,PUT</AllowedMethods><AllowedOrigins>www.xyz.com,www.ab.com,www.bc.com</AllowedOrigins><AllowedHeaders>x-ms-meta-xyz,x-ms-meta-foo,x-ms-meta-data*,x-ms-meta-target*</AllowedHeaders><ExposedHeaders>x-ms-meta-abc,x-ms-meta-bcd,x-ms-meta-data*,x-ms-meta-source*</ExposedHeaders><MaxAgeInSeconds>500</MaxAgeInSeconds></CorsRule></Cors><DefaultServiceVersion>2014-02-14</DefaultServiceVersion></StorageServiceProperties>"}
     headers:
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:08:14 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      Vary: [Origin]
-      x-ms-request-id: [e8450d86-0001-0095-1d93-1b35e7000000]
+      content-type: [application/xml]
+      date: ['Wed, 13 Sep 2017 00:50:25 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      vary: [Origin]
+      x-ms-request-id: [df4946ba-001e-002f-4f2a-2cd5ee000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

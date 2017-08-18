@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [4039937a-8785-11e7-90da-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:00:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [28850f0f-981d-11e7-8163-b8e8564491f6]
+      x-ms-date: ['Wed, 13 Sep 2017 00:47:45 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/container781721d1?restype=container
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Tue, 22 Aug 2017 22:00:02 GMT']
-      ETag: ['"0x8D4E9A92467AA4D"']
-      Last-Modified: ['Tue, 22 Aug 2017 22:00:03 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [23b993f1-0001-0122-1492-1b7cb7000000]
+      date: ['Wed, 13 Sep 2017 00:47:45 GMT']
+      etag: ['"0x8D4FA410CAF0596"']
+      last-modified: ['Wed, 13 Sep 2017 00:47:45 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [cecba9d6-001e-00db-1f29-2cf002000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,22 +26,22 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [4050fdb4-8785-11e7-9810-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:00:03 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [289ba259-981d-11e7-b3a6-b8e8564491f6]
+      x-ms-date: ['Wed, 13 Sep 2017 00:47:46 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/container781721d1?restype=container
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The\
-        \ specified container already exists.\nRequestId:23b99412-0001-0122-3292-1b7cb7000000\n\
-        Time:2017-08-22T22:00:03.6031284Z</Message></Error>"}
+        \ specified container already exists.\nRequestId:cecba9fe-001e-00db-4229-2cf002000000\n\
+        Time:2017-09-13T00:47:45.9087884Z</Message></Error>"}
     headers:
-      Content-Length: ['230']
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:00:02 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [23b99412-0001-0122-3292-1b7cb7000000]
+      content-length: ['230']
+      content-type: [application/xml]
+      date: ['Wed, 13 Sep 2017 00:47:45 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [cecba9fe-001e-00db-4229-2cf002000000]
       x-ms-version: ['2017-04-17']
     status: {code: 409, message: The specified container already exists.}
 version: 1

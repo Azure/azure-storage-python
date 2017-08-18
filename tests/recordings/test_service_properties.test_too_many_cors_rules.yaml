@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
       <StorageServiceProperties><Cors><CorsRule><AllowedOrigins>www.xyz.com</AllowedOrigins><AllowedMethods>GET</AllowedMethods><MaxAgeInSeconds>0</MaxAgeInSeconds><ExposedHeaders
       /><AllowedHeaders /></CorsRule><CorsRule><AllowedOrigins>www.xyz.com</AllowedOrigins><AllowedMethods>GET</AllowedMethods><MaxAgeInSeconds>0</MaxAgeInSeconds><ExposedHeaders
@@ -12,23 +12,23 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['1143']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [65858552-8786-11e7-99a0-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:08:15 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [886ad2f0-981d-11e7-9862-b8e8564491f6]
+      x-ms-date: ['Wed, 13 Sep 2017 00:50:26 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
-    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+    uri: https://storagename.blob.core.windows.net/?comp=properties&restype=service
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML\
-        \ specified is not syntactically valid.\nRequestId:f854709b-0001-0113-4f93-1b2760000000\n\
-        Time:2017-08-22T22:08:15.8022578Z</Message><LineNumber>0</LineNumber><LinePosition>0</LinePosition><Reason\
+        \ specified is not syntactically valid.\nRequestId:31338709-001e-0099-0d2a-2cdb16000000\n\
+        Time:2017-09-13T00:50:26.7980431Z</Message><LineNumber>0</LineNumber><LinePosition>0</LinePosition><Reason\
         \ /></Error>"}
     headers:
-      Content-Length: ['294']
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:08:15 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [f854709b-0001-0113-4f93-1b2760000000]
+      content-length: ['294']
+      content-type: [application/xml]
+      date: ['Wed, 13 Sep 2017 00:50:26 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [31338709-001e-0099-0d2a-2cdb16000000]
       x-ms-version: ['2017-04-17']
     status: {code: 400, message: XML specified is not syntactically valid.}
 version: 1
