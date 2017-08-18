@@ -4,24 +4,24 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [82261f8c-68f5-11e7-bf3c-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:35:31 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [cd04c85c-8469-11e7-9f67-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:06:00 GMT']
       x-ms-meta-hello: [world]
       x-ms-meta-number: ['43']
       x-ms-version: ['2017-04-17']
     method: PUT
-    uri: https://storagename.blob.core.windows.net/containerd41cef?restype=container&comp=metadata
+    uri: https://storagename.blob.core.windows.net/containerd41cef?comp=metadata&restype=container
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
-        \ specified container does not exist.\nRequestId:4b0f49e1-0001-00c5-2802-fd2aef000000\n\
-        Time:2017-07-15T00:35:32.2542451Z</Message></Error>"}
+        \ specified container does not exist.\nRequestId:18d6e2d0-0001-0055-1c76-18bfa3000000\n\
+        Time:2017-08-18T23:06:00.3140253Z</Message></Error>"}
     headers:
-      Content-Length: ['225']
-      Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:35:31 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [4b0f49e1-0001-00c5-2802-fd2aef000000]
+      content-length: ['225']
+      content-type: [application/xml]
+      date: ['Fri, 18 Aug 2017 23:06:00 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [18d6e2d0-0001-0055-1c76-18bfa3000000]
       x-ms-version: ['2017-04-17']
     status: {code: 404, message: The specified container does not exist.}
 version: 1

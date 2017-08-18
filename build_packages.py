@@ -26,8 +26,8 @@ package_list = ['azure-storage-blob', 'azure-storage-file', 'azure-storage-table
 
 def create_package(name, dest_folder=DEFAULT_DESTINATION_FOLDER):
     absdirpath = os.path.abspath(name)
-    check_call(['python3', 'setup.py', 'bdist_wheel', '-d', dest_folder], cwd=absdirpath)
-    check_call(['python3', 'setup.py', "sdist", '-d', dest_folder], cwd=absdirpath)
+    check_call(['python', 'setup.py', 'bdist_wheel', '-d', dest_folder], cwd=absdirpath)
+    check_call(['python', 'setup.py', "sdist", '-d', dest_folder], cwd=absdirpath)
 
 
 if __name__ == '__main__':

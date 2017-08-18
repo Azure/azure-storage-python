@@ -45,7 +45,7 @@ from samples.table import (
 )
 
 
-# @unittest.skip('Skip sample tests.')
+@unittest.skip('Skip sample tests.')
 class SampleTest(unittest.TestCase):
     def setUp(self):
         super(SampleTest, self).setUp()

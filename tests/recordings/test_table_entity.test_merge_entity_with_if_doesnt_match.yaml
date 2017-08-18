@@ -1,12 +1,12 @@
 interactions:
 - request:
-    body: '{"PartitionKey": "pk9316171e", "RowKey": "rk9316171e", "age": "39", "age@odata.type":
-      "Edm.Int64", "sex": "male", "married": true, "deceased": false, "optional":
-      null, "evenratio": 3.0, "ratio": 3.1, "large": "933311100", "large@odata.type":
-      "Edm.Int64", "Birthday": "1973-10-04T00:00:00Z", "Birthday@odata.type": "Edm.DateTime",
-      "birthday": "1970-10-04T00:00:00Z", "birthday@odata.type": "Edm.DateTime", "binary":
-      "YmluYXJ5", "binary@odata.type": "Edm.Binary", "other": 20, "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833",
-      "clsid@odata.type": "Edm.Guid"}'
+    body: !!python/unicode '{"binary": "YmluYXJ5", "age@odata.type": "Edm.Int64",
+      "PartitionKey": "pk9316171e", "ratio": 3.1, "large@odata.type": "Edm.Int64",
+      "age": "39", "married": true, "Birthday@odata.type": "Edm.DateTime", "sex":
+      "male", "large": "933311100", "birthday@odata.type": "Edm.DateTime", "birthday":
+      "1970-10-04T00:00:00Z", "evenratio": 3.0, "RowKey": "rk9316171e", "clsid": "c9da6455-213d-42c9-9a79-3e9149a57833",
+      "binary@odata.type": "Edm.Binary", "Birthday": "1973-10-04T00:00:00Z", "other":
+      20, "optional": null, "clsid@odata.type": "Edm.Guid", "deceased": false}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -15,31 +15,31 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [394f9cfa-68f7-11e7-92a0-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:47:48 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [3980c6ba-846b-11e7-a255-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:16:11 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.table.core.windows.net/uttable9316171e
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['0']
-      DataServiceId: ['https://storagename.table.core.windows.net/uttable9316171e(PartitionKey=''pk9316171e'',RowKey=''rk9316171e'')']
-      Date: ['Sat, 15 Jul 2017 00:47:48 GMT']
-      ETag: [W/"datetime'2017-07-15T00%3A47%3A48.9689775Z'"]
-      Location: ['https://storagename.table.core.windows.net/uttable9316171e(PartitionKey=''pk9316171e'',RowKey=''rk9316171e'')']
-      Preference-Applied: [return-no-content]
-      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
-      X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [8a4a82e1-0002-00e7-5a03-fd44d9000000]
+      cache-control: [no-cache]
+      content-length: ['0']
+      dataserviceid: ['https://storagename.table.core.windows.net/uttable9316171e(PartitionKey=''pk9316171e'',RowKey=''rk9316171e'')']
+      date: ['Fri, 18 Aug 2017 23:16:10 GMT']
+      etag: [W/"datetime'2017-08-18T23%3A16%3A11.7547734Z'"]
+      location: ['https://storagename.table.core.windows.net/uttable9316171e(PartitionKey=''pk9316171e'',RowKey=''rk9316171e'')']
+      preference-applied: [return-no-content]
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-content-type-options: [nosniff]
+      x-ms-request-id: [20087e72-0002-0076-5177-18d068000000]
       x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
-    body: '{"PartitionKey": "pk9316171e", "RowKey": "rk9316171e", "age": "abc", "sex":
-      "female", "sign": "aquarius", "birthday": "1991-10-04T00:00:00Z", "birthday@odata.type":
-      "Edm.DateTime"}'
+    body: !!python/unicode '{"age": "abc", "birthday": "1991-10-04T00:00:00Z", "sex":
+      "female", "birthday@odata.type": "Edm.DateTime", "PartitionKey": "pk9316171e",
+      "RowKey": "rk9316171e", "sign": "aquarius"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -48,23 +48,23 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       If-Match: [W/"datetime'2012-06-15T22%3A51%3A44.9662825Z'"]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [3965e3f4-68f7-11e7-b538-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:47:48 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [399434ab-846b-11e7-92b2-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:16:12 GMT']
       x-ms-version: ['2017-04-17']
     method: MERGE
     uri: https://storagename.table.core.windows.net/uttable9316171e(PartitionKey='pk9316171e',RowKey='rk9316171e')
   response:
-    body: {string: '{"odata.error":{"code":"UpdateConditionNotSatisfied","message":{"lang":"en-US","value":"The
-        update condition specified in the request was not satisfied.\nRequestId:8a4a82eb-0002-00e7-6103-fd44d9000000\nTime:2017-07-15T00:47:49.0290193Z"}}}'}
+    body: {string: !!python/unicode '{"odata.error":{"code":"UpdateConditionNotSatisfied","message":{"lang":"en-US","value":"The
+        update condition specified in the request was not satisfied.\nRequestId:20087e7c-0002-0076-5977-18d068000000\nTime:2017-08-18T23:16:11.7958051Z"}}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Sat, 15 Jul 2017 00:47:48 GMT']
-      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [8a4a82eb-0002-00e7-6103-fd44d9000000]
+      cache-control: [no-cache]
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      date: ['Fri, 18 Aug 2017 23:16:10 GMT']
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-content-type-options: [nosniff]
+      x-ms-request-id: [20087e7c-0002-0076-5977-18d068000000]
       x-ms-version: ['2017-04-17']
     status: {code: 412, message: Precondition Failed}
 version: 1

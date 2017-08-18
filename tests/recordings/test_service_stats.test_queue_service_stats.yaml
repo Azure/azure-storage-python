@@ -3,22 +3,22 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [a9bc515a-68f6-11e7-9c35-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:43:47 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [03356c23-846a-11e7-9992-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:07:31 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
-    uri: https://storagename-secondary.queue.core.windows.net/?restype=service&comp=stats
+    uri: https://storagename-secondary.queue.core.windows.net/?comp=stats&restype=service
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Sat,\
-        \ 15 Jul 2017 00:41:45 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Fri,\
+        \ 18 Aug 2017 23:04:23 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:43:49 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [2a43fb3e-0003-0130-5d03-fd650a000000]
+      cache-control: [no-cache]
+      content-type: [application/xml]
+      date: ['Fri, 18 Aug 2017 23:07:31 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [a3fcf555-0003-00dd-7876-182adb000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

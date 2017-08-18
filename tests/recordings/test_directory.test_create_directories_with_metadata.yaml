@@ -4,23 +4,23 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [833adf8c-68f5-11e7-b9ef-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:35:33 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [086b5699-846a-11e7-aec7-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:07:40 GMT']
       x-ms-meta-hello: [world]
       x-ms-meta-number: ['42']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/utshare3942156d/dir1?restype=directory
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:35:33 GMT']
-      ETag: ['"0x8D4CB1967E1B7CA"']
-      Last-Modified: ['Sat, 15 Jul 2017 00:35:34 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [ff933fca-001a-00a2-6702-fd9948000000]
+      date: ['Fri, 18 Aug 2017 23:07:39 GMT']
+      etag: ['"0x8D4E68DECA281EC"']
+      last-modified: ['Fri, 18 Aug 2017 23:07:40 GMT']
+      server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [a3e44708-001a-0028-7576-18236b000000]
       x-ms-request-server-encrypted: ['false']
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
@@ -28,23 +28,23 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [834f534c-68f5-11e7-ad87-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:35:33 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [087df24f-846a-11e7-956f-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:07:40 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare3942156d/dir1?restype=directory&comp=metadata
+    uri: https://storagename.file.core.windows.net/utshare3942156d/dir1?comp=metadata&restype=directory
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:35:33 GMT']
-      ETag: ['"0x8D4CB1967E1B7CA"']
-      Last-Modified: ['Sat, 15 Jul 2017 00:35:34 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
+      date: ['Fri, 18 Aug 2017 23:07:39 GMT']
+      etag: ['"0x8D4E68DECA281EC"']
+      last-modified: ['Fri, 18 Aug 2017 23:07:40 GMT']
+      server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
       x-ms-meta-hello: [world]
       x-ms-meta-number: ['42']
-      x-ms-request-id: [ff933fcc-001a-00a2-6802-fd9948000000]
+      x-ms-request-id: [a3e4470a-001a-0028-7676-18236b000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

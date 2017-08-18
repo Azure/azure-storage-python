@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"TableName": "\u554a\u9f44\u4e02\u72db\u72dc"}'
+    body: !!python/unicode '{"TableName": "\u554a\u9f44\u4e02\u72db\u72dc"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -9,24 +9,24 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [b9796128-68f6-11e7-94a5-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:44:14 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [be5aa7cf-846a-11e7-becb-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:12:45 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.table.core.windows.net/Tables
   response:
-    body: {string: '{"odata.error":{"code":"InvalidResourceName","message":{"lang":"en-US","value":"The
-        specifed resource name contains invalid characters.\nRequestId:b62d867e-0002-00df-0103-fd0580000000\nTime:2017-07-15T00:44:14.9030222Z"}}}'}
+    body: {string: !!python/unicode '{"odata.error":{"code":"InvalidResourceName","message":{"lang":"en-US","value":"The
+        specifed resource name contains invalid characters.\nRequestId:c34a3817-0002-011e-2677-18c86c000000\nTime:2017-08-18T23:12:45.4937960Z"}}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Sat, 15 Jul 2017 00:44:14 GMT']
-      Preference-Applied: [return-no-content]
-      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [b62d867e-0002-00df-0103-fd0580000000]
+      cache-control: [no-cache]
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      date: ['Fri, 18 Aug 2017 23:12:45 GMT']
+      preference-applied: [return-no-content]
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-content-type-options: [nosniff]
+      x-ms-request-id: [c34a3817-0002-011e-2677-18c86c000000]
       x-ms-version: ['2017-04-17']
     status: {code: 400, message: Bad Request}
 version: 1

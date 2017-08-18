@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"TableName": "table45dd15a0"}'
+    body: !!python/unicode '{"TableName": "table45dd15a0"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -9,28 +9,28 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [b88dc8da-68f6-11e7-af21-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:44:12 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [bdbceff3-846a-11e7-86f4-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:12:44 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.table.core.windows.net/Tables
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['0']
-      DataServiceId: ['https://storagename.table.core.windows.net/Tables(''table45dd15a0'')']
-      Date: ['Sat, 15 Jul 2017 00:44:12 GMT']
-      Location: ['https://storagename.table.core.windows.net/Tables(''table45dd15a0'')']
-      Preference-Applied: [return-no-content]
-      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
-      X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [af8dfd92-0002-00e2-2503-fdb0a6000000]
+      cache-control: [no-cache]
+      content-length: ['0']
+      dataserviceid: ['https://storagename.table.core.windows.net/Tables(''table45dd15a0'')']
+      date: ['Fri, 18 Aug 2017 23:12:43 GMT']
+      location: ['https://storagename.table.core.windows.net/Tables(''table45dd15a0'')']
+      preference-applied: [return-no-content]
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-content-type-options: [nosniff]
+      x-ms-request-id: [9a9906b2-0002-0036-4e77-18f986000000]
       x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
-    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
       <SignedIdentifiers><SignedIdentifier><Id>testid</Id><AccessPolicy><Start>2011-10-11</Start><Expiry>2011-10-12</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>'
     headers:
@@ -38,19 +38,19 @@ interactions:
       Content-Length: ['237']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [b8a27258-68f6-11e7-8727-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:44:12 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [bdd02042-846a-11e7-9415-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:12:44 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.table.core.windows.net/table45dd15a0?comp=acl
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Content-Length: ['0']
-      Date: ['Sat, 15 Jul 2017 00:44:12 GMT']
-      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [af8dfd9d-0002-00e2-2e03-fdb0a6000000]
+      content-length: ['0']
+      date: ['Fri, 18 Aug 2017 23:12:43 GMT']
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [9a9906b9-0002-0036-5377-18f986000000]
       x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
@@ -59,20 +59,20 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [b8ee6b86-68f6-11e7-9db6-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:44:13 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [bde92999-846a-11e7-9026-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:12:44 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.table.core.windows.net/table45dd15a0?comp=acl
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>testid</Id><AccessPolicy><Start>2011-10-11T00:00:00.0000000Z</Start><Expiry>2011-10-12T00:00:00.0000000Z</Expiry><Permission>r</Permission></AccessPolicy></SignedIdentifier></SignedIdentifiers>"}
     headers:
-      Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:44:13 GMT']
-      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [af8dfe39-0002-00e2-4203-fdb0a6000000]
+      content-type: [application/xml]
+      date: ['Fri, 18 Aug 2017 23:12:43 GMT']
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [9a9906d3-0002-0036-6a77-18f986000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

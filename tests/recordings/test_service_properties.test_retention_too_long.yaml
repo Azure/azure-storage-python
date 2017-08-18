@@ -1,28 +1,28 @@
 interactions:
 - request:
-    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
       <StorageServiceProperties><MinuteMetrics><Version>1.0</Version><Enabled>True</Enabled><IncludeAPIs>True</IncludeAPIs><RetentionPolicy><Enabled>True</Enabled><Days>366</Days></RetentionPolicy></MinuteMetrics></StorageServiceProperties>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['273']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [a86afc28-68f6-11e7-8237-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:43:45 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [019f2c54-846a-11e7-9327-b8e8564491f6]
+      x-ms-date: ['Fri, 18 Aug 2017 23:07:28 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
-    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+    uri: https://storagename.blob.core.windows.net/?comp=properties&restype=service
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML\
-        \ specified is not syntactically valid.\nRequestId:a5fa65ea-0001-0122-2303-fd7cb7000000\n\
-        Time:2017-07-15T00:43:46.8867653Z</Message><LineNumber>2</LineNumber><LinePosition>176</LinePosition><Reason>Retention\
+        \ specified is not syntactically valid.\nRequestId:f830ebab-0001-002a-2c76-182191000000\n\
+        Time:2017-08-18T23:07:29.0559853Z</Message><LineNumber>2</LineNumber><LinePosition>176</LinePosition><Reason>Retention\
         \ days must be greater than 0 and less than or equal to 365 days.</Reason></Error>"}
     headers:
-      Content-Length: ['376']
-      Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:43:46 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [a5fa65ea-0001-0122-2303-fd7cb7000000]
+      content-length: ['376']
+      content-type: [application/xml]
+      date: ['Fri, 18 Aug 2017 23:07:28 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [f830ebab-0001-002a-2c76-182191000000]
       x-ms-version: ['2017-04-17']
     status: {code: 400, message: XML specified is not syntactically valid.}
 version: 1
