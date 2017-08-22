@@ -4,49 +4,49 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [8c7ef1d8-68f6-11e7-bbd9-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:42:58 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [485ae1de-8786-11e7-9fb1-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 22:07:26 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.queue.core.windows.net/encryptionqueued9c213ac
   response:
     body: {string: ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:43:00 GMT']
+      Date: ['Tue, 22 Aug 2017 22:07:25 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [57eb723f-0003-0084-5d03-fd02fc000000]
+      x-ms-request-id: [f7c78234-0003-012f-2d93-1b93bb000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <QueueMessage><MessageText>{"EncryptedMessageContents": "pRuKCW9USLP86tHKMQYr6g==",
-      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "YTkcQI+nXsMDTr2EOnHX3vAdcP04iTnevwr+dxz5+NMpcIGYCPH+GA==",
+      <QueueMessage><MessageText>{"EncryptedMessageContents": "9bIcTbiWlaB3gxzDMmG6Kw==",
+      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "ELR2JDFuyeiB8u9Sj1w/zorUGvhvRujb1AKRC3g/+doR1LniBTQdEQ==",
       "Algorithm": "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-      "AES_CBC_256"}, "ContentEncryptionIV": "KEmFaETGIJwiLGUSVIcePw==", "KeyWrappingMetadata":
-      {"EncryptionLibrary": "Python 0.35.1"}}}</MessageText></QueueMessage>'
+      "AES_CBC_256"}, "ContentEncryptionIV": "qL7zc+JAH9N4Q2zQKj0gcQ==", "KeyWrappingMetadata":
+      {"EncryptionLibrary": "Python 0.36.0"}}}</MessageText></QueueMessage>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['502']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [8c95d722-68f6-11e7-a45a-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:42:58 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [48709240-8786-11e7-9171-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 22:07:26 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.queue.core.windows.net/encryptionqueued9c213ac/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>11629d4a-af71-4993-8d4e-4adc6bd00d2f</MessageId><InsertionTime>Sat,\
-        \ 15 Jul 2017 00:42:59 GMT</InsertionTime><ExpirationTime>Sat, 22 Jul 2017\
-        \ 00:42:59 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAAArTTgP90gE=</PopReceipt><TimeNextVisible>Sat,\
-        \ 15 Jul 2017 00:42:59 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>3e74c4c9-6802-48e3-beef-5f68d8d4f69d</MessageId><InsertionTime>Tue,\
+        \ 22 Aug 2017 22:07:26 GMT</InsertionTime><ExpirationTime>Tue, 29 Aug 2017\
+        \ 22:07:26 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAASbooCpMb0wE=</PopReceipt><TimeNextVisible>Tue,\
+        \ 22 Aug 2017 22:07:26 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:43:00 GMT']
+      Date: ['Tue, 22 Aug 2017 22:07:25 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [57eb7244-0003-0084-6003-fd02fc000000]
+      x-ms-request-id: [f7c78247-0003-012f-3e93-1b93bb000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 version: 1

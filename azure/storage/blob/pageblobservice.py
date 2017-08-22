@@ -1135,7 +1135,7 @@ class PageBlobService(BaseBlobService):
             Name of existing container.
         :param str blob_name:
             Name of blob to update.
-        :param premium_page_blob_tier:
+        :param PremiumPageBlobTier premium_page_blob_tier:
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.

@@ -58,8 +58,9 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'content-range': (None, 'content_range', _to_str),
     'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_to_str),
     'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_to_str),
-    'x-ms-access-tier': (None, 'blob_tier', _to_upper_str),
+    'x-ms-access-tier': (None, 'blob_tier', _to_str),
     'x-ms-access-tier-inferred': (None, 'blob_tier_inferred', _bool),
+    'x-ms-archive-status': (None, 'rehydration_status', _to_str),
     'x-ms-share-quota': (None, 'quota', _int_to_str),
     'x-ms-server-encrypted': (None, 'server_encrypted', _bool),
     'content-type': ('content_settings', 'content_type', _to_str),
@@ -114,6 +115,8 @@ def _parse_properties(response, result_class):
                 attr = getattr(props, info[0])
                 setattr(attr, info[1], info[2](value))
 
+    if hasattr(props, 'blob_type') and props.blob_type == 'PageBlob' and hasattr(props, 'blob_tier') and props.blob_tier is not None:
+        props.blob_tier = _to_upper_str(props.blob_tier)
     return props
 
 def _parse_length_from_content_range(content_range):

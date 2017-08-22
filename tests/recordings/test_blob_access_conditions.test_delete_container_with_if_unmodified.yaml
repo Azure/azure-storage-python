@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [cc859e1e-68f4-11e7-9e33-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:30:27 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [b1ce6778-8784-11e7-92b5-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 21:56:04 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerc0081bd7?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:30:27 GMT']
-      ETag: ['"0x8D4CB18B159ACCC"']
-      Last-Modified: ['Sat, 15 Jul 2017 00:30:28 GMT']
+      Date: ['Tue, 22 Aug 2017 21:56:04 GMT']
+      ETag: ['"0x8D4E9A8961ADB1C"']
+      Last-Modified: ['Tue, 22 Aug 2017 21:56:04 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [0af651c7-0001-00d0-6101-fde876000000]
+      x-ms-request-id: [748f52f6-0001-0070-1f91-1b2710000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,43 +26,43 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-Unmodified-Since: ['Sat, 15 Jul 2017 00:45:27 GMT']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [cc9ce986-68f4-11e7-a824-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:30:27 GMT']
+      If-Unmodified-Since: ['Tue, 22 Aug 2017 22:11:04 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [b1e76bec-8784-11e7-b956-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 21:56:04 GMT']
       x-ms-version: ['2017-04-17']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/utcontainerc0081bd7?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:30:27 GMT']
+      Date: ['Tue, 22 Aug 2017 21:56:04 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [0af651db-0001-00d0-7101-fde876000000]
+      x-ms-request-id: [748f5311-0001-0070-3391-1b2710000000]
       x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [cca63070-68f4-11e7-ae89-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:30:27 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [b1ed1600-8784-11e7-b4bf-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 21:56:04 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainerc0081bd7?restype=container
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
-        \ specified container does not exist.\nRequestId:0af651ed-0001-00d0-0101-fde876000000\n\
-        Time:2017-07-15T00:30:28.2261134Z</Message></Error>"}
+        \ specified container does not exist.\nRequestId:748f531c-0001-0070-3c91-1b2710000000\n\
+        Time:2017-08-22T21:56:04.8973092Z</Message></Error>"}
     headers:
       Content-Length: ['225']
       Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:30:27 GMT']
+      Date: ['Tue, 22 Aug 2017 21:56:04 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Vary: [Origin]
-      x-ms-request-id: [0af651ed-0001-00d0-0101-fde876000000]
+      x-ms-request-id: [748f531c-0001-0070-3c91-1b2710000000]
       x-ms-version: ['2017-04-17']
     status: {code: 404, message: The specified container does not exist.}
 version: 1

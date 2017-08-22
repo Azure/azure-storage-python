@@ -2,6 +2,14 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 0.36.0:
+
+### Blob:
+- For Standard Storage Accounts only, added support for getting and setting the tier on an individual block blob.
+
+### Table:
+- Fixed bug where inserting entity with an empty sting as RowKey or PartitionKey raised error.
+
 ## Version 0.35.1:
 
 ### Blob:
