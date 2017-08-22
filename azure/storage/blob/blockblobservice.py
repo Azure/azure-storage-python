@@ -507,7 +507,7 @@ class BlockBlobService(BaseBlobService):
         if (self.key_encryption_key is not None) and (adjusted_count is not None):
             adjusted_count += (16 - (count % 16))
 
-        if adjusted_count and adjusted_count < self.MAX_SINGLE_PUT_SIZE:
+        if adjusted_count is not None and (adjusted_count < self.MAX_SINGLE_PUT_SIZE):
             if progress_callback:
                 progress_callback(0, count)
 
@@ -789,6 +789,41 @@ class BlockBlobService(BaseBlobService):
                 if_match=if_match,
                 if_none_match=if_none_match,
                 timeout=timeout)
+
+    def set_standard_blob_tier(
+        self, container_name, blob_name, standard_blob_tier, timeout=None):
+        '''
+        Sets the block blob tiers on the blob. This API is only supported for block blobs on standard storage accounts.
+
+        :param str container_name:
+            Name of existing container.
+        :param str blob_name:
+            Name of blob to update.
+        :param StandardBlobTier standard_blob_tier:
+            A standard blob tier value to set the blob to. For this version of the library,
+            this is only applicable to block blobs on standard storage accounts.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make
+            multiple calls to the Azure service and the timeout will apply to
+            each call individually.
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('standard_blob_tier', standard_blob_tier)
+
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {
+            'comp': 'tier',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-access-tier': _to_str(standard_blob_tier)
+        }
+
+        self._perform_request(request)
 
     #-----Helper methods------------------------------------
     def _put_blob(self, container_name, blob_name, blob, content_settings=None,

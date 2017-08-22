@@ -171,6 +171,8 @@ class _BlobChunkUploader(object):
         self.timeout = timeout
         self.encryptor = encryptor
         self.padder = padder
+        self.last_modified = None
+        self.etag = None
 
     def get_chunk_streams(self):
         index = 0

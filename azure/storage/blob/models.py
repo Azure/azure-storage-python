@@ -239,9 +239,10 @@ class LeaseProperties(object):
     
     :ivar str status:
         The lease status of the blob.
+        Possible values: locked|unlocked
     :ivar str state:
         Lease state of the blob.
-        Possible values: pending|success|aborted|failed
+        Possible values: available|leased|expired|breaking|broken
     :ivar str duration:
         When a blob is leased, specifies whether the lease is of infinite or fixed duration.
     '''
@@ -714,3 +715,17 @@ class PremiumPageBlobTier(object):
 
     P60 = 'P60'
     ''' P60 Tier '''
+
+class StandardBlobTier(object):
+    '''
+    Specifies the blob tier to set the blob to. This is only applicable for block blobs on standard storage accounts.
+    '''
+
+    Archive = 'Archive'
+    ''' Archive '''
+
+    Cool = 'Cool'
+    ''' Cool '''
+
+    Hot = 'Hot'
+    ''' Hot '''

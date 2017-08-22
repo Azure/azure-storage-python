@@ -43,7 +43,7 @@ _ERROR_VALUE_TOO_LARGE = '{0} is too large to be cast to type {1}.'
 _ERROR_UNSUPPORTED_TYPE_FOR_ENCRYPTION = 'Encryption is only supported for not None strings.'
 
 def _validate_object_has_param(param_name, object):
-    if not object.get(param_name):
+    if object.get(param_name) is None:
         raise ValueError(_ERROR_VALUE_NONE_OR_EMPTY.format(param_name))
 
 def _validate_entity(entity, encrypt=None):

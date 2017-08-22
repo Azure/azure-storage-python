@@ -24,6 +24,7 @@ from azure.storage.blob import (
     BlockBlobService,
     ContentSettings,
 )
+from azure.storage.blob.models import StandardBlobTier
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -263,21 +264,34 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
     @record
+    def test_create_blob_from_0_bytes(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = b''
+
+        # Act
+        create_resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
+
+    @record
     def test_create_from_bytes_blob_unicode(self):
         # Arrange
         blob_name = self._get_blob_reference()
+        data = u'hello world'
 
-        self.bs.put_block()
-        # # Act
-        # #data = u'hello world'
-        # #with self.assertRaises(TypeError):
-        # data = self.get_random_bytes(10)
-        # resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
-        #
-        # # Assert
-        # self.assertIsNotNone(resp.etag)
-        # self.assertIsNotNone(resp.last_modified)
-        # self.bs.exists(self.container_name, blob_name)
+        # Act
+        create_resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
     @record
     def test_create_from_bytes_blob_unicode(self):

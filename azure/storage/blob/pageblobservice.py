@@ -990,6 +990,9 @@ class PageBlobService(BaseBlobService):
             encryption_data=encryption_data
         )
 
+        if count == 0:
+            return response
+
         # _upload_blob_chunks returns the block ids for block blobs so resource_properties
         # is passed as a parameter to get the last_modified and etag for page and append blobs.
         # this info is not needed for block_blobs since _put_block_list is called after which gets this info
@@ -1132,7 +1135,7 @@ class PageBlobService(BaseBlobService):
             Name of existing container.
         :param str blob_name:
             Name of blob to update.
-        :param premium_page_blob_tier:
+        :param PremiumPageBlobTier premium_page_blob_tier:
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.

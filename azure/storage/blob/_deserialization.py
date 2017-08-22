@@ -233,7 +233,8 @@ LIST_BLOBS_ATTRIBUTE_MAP = {
     'CopyProgress': ('copy', 'progress', _to_str),
     'CopyCompletionTime': ('copy', 'completion_time', _to_str),
     'CopyStatusDescription': ('copy', 'status_description', _to_str),
-    'AccessTier': (None, 'blob_tier', _to_str)
+    'AccessTier': (None, 'blob_tier', _to_str),
+    'ArchiveStatus': (None, 'rehydration_status', _to_str)
 }
 
 def _convert_xml_to_blob_list(response):
@@ -268,7 +269,7 @@ def _convert_xml_to_blob_list(response):
             <CopyProgress>bytes copied/bytes total</CopyProgress>
             <CopyCompletionTime>datetime</CopyCompletionTime>
             <CopyStatusDescription>error string</CopyStatusDescription>
-            <AccessTier>P4 | P6 | P10 | P20 | P30 | P40 | P50 | P60</AccessTier>
+            <AccessTier>P4 | P6 | P10 | P20 | P30 | P40 | P50 | P60 | Archive | Cool | Hot</AccessTier>
           </Properties>
           <Metadata>   
             <Name>value</Name>
@@ -314,7 +315,6 @@ def _convert_xml_to_blob_list(response):
                 else:
                     attr = getattr(blob.properties, info[0])
                     setattr(attr, info[1], info[2](property_element.text))
-
 
         # Metadata
         metadata_root_element = blob_element.find('Metadata')
