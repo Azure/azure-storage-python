@@ -32,6 +32,10 @@ If you see azure==0.11.0 (or any version below 1.0), uninstall it first then ins
 If you are upgrading from a version older than 0.30.0, see the upgrade doc, the 
 usage samples in the samples directory, and the ChangeLog and BreakingChanges.
 
+If you are encountering `problems`_ installing azure-storage on Azure Web Apps,
+`upgrading pip`_ might help.
+
+
 Features
 ========
 
@@ -149,3 +153,5 @@ Learn More
 .. _Azure Storage Service: http://azure.microsoft.com/en-us/documentation/services/storage/
 .. _Azure Storage Team Blog: http://blogs.msdn.com/b/windowsazurestorage/
 .. _CONTRIBUTING.md doc: CONTRIBUTING.md
+.. _problems: https://github.com/Azure/azure-storage-python/issues/219
+.. _upgrading pip: https://docs.microsoft.com/en-us/visualstudio/python/managing-python-on-azure-app-service
