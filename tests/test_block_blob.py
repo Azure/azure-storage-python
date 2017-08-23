@@ -24,6 +24,7 @@ from azure.storage.blob import (
     BlockBlobService,
     ContentSettings,
 )
+from azure.storage.blob.models import StandardBlobTier
 from tests.testcase import (
     StorageTestCase,
     TestMode,

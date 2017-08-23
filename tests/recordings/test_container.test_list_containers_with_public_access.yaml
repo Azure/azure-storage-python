@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [7fdc2686-68f5-11e7-a6f6-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:35:27 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [6c7f5ee2-8785-11e7-8c9f-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 22:01:17 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/container664b164b?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:35:28 GMT']
-      ETag: ['"0x8D4CB1964981559"']
-      Last-Modified: ['Sat, 15 Jul 2017 00:35:28 GMT']
+      Date: ['Tue, 22 Aug 2017 22:01:17 GMT']
+      ETag: ['"0x8D4E9A950CD4089"']
+      Last-Modified: ['Tue, 22 Aug 2017 22:01:18 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [328e107e-0001-0107-5902-fde404000000]
+      x-ms-request-id: [128a8157-0001-00d4-1292-1b1df4000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,46 +26,46 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
       x-ms-blob-public-access: [blob]
-      x-ms-client-request-id: [7ff06150-68f5-11e7-bb99-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:35:28 GMT']
+      x-ms-client-request-id: [6c96d48c-8785-11e7-bd66-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 22:01:18 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/container664b164b?restype=container&comp=acl
   response:
     body: {string: ''}
     headers:
-      Date: ['Sat, 15 Jul 2017 00:35:28 GMT']
-      ETag: ['"0x8D4CB196498155A"']
-      Last-Modified: ['Sat, 15 Jul 2017 00:35:28 GMT']
+      Date: ['Tue, 22 Aug 2017 22:01:17 GMT']
+      ETag: ['"0x8D4E9A950D35C27"']
+      Last-Modified: ['Tue, 22 Aug 2017 22:01:18 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [328e1096-0001-0107-6c02-fde404000000]
+      x-ms-request-id: [128a8175-0001-00d4-2a92-1b1df4000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.35.1 (Python CPython 3.6.1; Darwin 16.6.0)]
-      x-ms-client-request-id: [7ff656fa-68f5-11e7-a334-b8e8564491f6]
-      x-ms-date: ['Sat, 15 Jul 2017 00:35:28 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
+      x-ms-client-request-id: [6c9c8d46-8785-11e7-8c6b-b8e8564491f6]
+      x-ms-date: ['Tue, 22 Aug 2017 22:01:18 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/?comp=list&prefix=container664b164b
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
-        \ ServiceEndpoint=\"https://storagename.blob.core.windows.net/\"><Prefix>container664b164b</Prefix><Containers><Container><Name>container664b164b</Name><Properties><Last-Modified>Sat,\
-        \ 15 Jul 2017 00:35:28 GMT</Last-Modified><Etag>\"0x8D4CB196498155A\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><PublicAccess>blob</PublicAccess></Properties></Container></Containers><NextMarker\
+        \ ServiceEndpoint=\"https://storagename.blob.core.windows.net/\"><Prefix>container664b164b</Prefix><Containers><Container><Name>container664b164b</Name><Properties><Last-Modified>Tue,\
+        \ 22 Aug 2017 22:01:18 GMT</Last-Modified><Etag>\"0x8D4E9A950D35C27\"</Etag><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><PublicAccess>blob</PublicAccess></Properties></Container></Containers><NextMarker\
         \ /></EnumerationResults>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Sat, 15 Jul 2017 00:35:28 GMT']
+      Date: ['Tue, 22 Aug 2017 22:01:17 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       Vary: [Origin]
-      x-ms-request-id: [328e10a5-0001-0107-7b02-fde404000000]
+      x-ms-request-id: [128a8182-0001-00d4-3592-1b1df4000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1
