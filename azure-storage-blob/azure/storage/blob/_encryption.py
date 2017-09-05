@@ -32,6 +32,7 @@ from azure.storage.common._error import (
     _validate_not_none,
     _validate_key_encryption_key_wrap,
     _ERROR_DATA_NOT_ENCRYPTED,
+    _ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM,
 )
 
 
@@ -101,7 +102,7 @@ def _generate_blob_encryption_data(key_encryption_key):
         encryption_data['EncryptionMode'] = 'FullBlob'
         encryption_data = dumps(encryption_data)
 
-    return (content_encryption_key, initialization_vector, encryption_data)
+    return content_encryption_key, initialization_vector, encryption_data
 
 
 def _decrypt_blob(require_encryption, key_encryption_key, key_resolver,
@@ -143,17 +144,17 @@ def _decrypt_blob(require_encryption, key_encryption_key, key_resolver,
     unpad = False
     start_range, end_range = 0, len(content)
     if 'content-range' in response.headers:
-        range = response.headers['content-range']
+        content_range = response.headers['content-range']
         # Format: 'bytes x-y/size'
 
         # Ignore the word 'bytes'
-        range = range.split(' ')
+        content_range = content_range.split(' ')
 
-        range = range[1].split('-')
-        start_range = int(range[0])
-        range = range[1].split('/')
-        end_range = int(range[0])
-        blob_size = int(range[1])
+        content_range = content_range[1].split('-')
+        start_range = int(content_range[0])
+        content_range = content_range[1].split('/')
+        end_range = int(content_range[0])
+        blob_size = int(content_range[1])
 
         if start_offset >= 16:
             iv = content[:16]

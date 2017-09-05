@@ -12,14 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # --------------------------------------------------------------------------
-import sys
-
-if sys.version_info < (3,):
-    from urllib2 import quote as url_quote
-else:
-    pass
-
-from . import HTTPError, HTTPResponse
+from . import HTTPResponse
 from .._serialization import _get_data_bytes_or_stream_only
 
 
@@ -32,7 +25,7 @@ class _HTTPClient(object):
         '''
         :param str protocol:
             http or https.
-        :param requests.Session request_session:
+        :param requests.Session session:
             session object created with requests library (or compatible).
         :param int timeout:
             timeout for the http request, in seconds.
@@ -75,9 +68,8 @@ class _HTTPClient(object):
         else:
             proxy_string = '{}:{}'.format(host, port)
 
-        self.proxies = {}
-        self.proxies['http'] = 'http://{}'.format(proxy_string)
-        self.proxies['https'] = 'https://{}'.format(proxy_string)
+        self.proxies = {'http': 'http://{}'.format(proxy_string),
+                        'https': 'https://{}'.format(proxy_string)}
 
     def perform_request(self, request):
         '''

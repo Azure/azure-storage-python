@@ -86,12 +86,13 @@ Download
 --------
 
 The Azure Storage SDK for Python is composed of 4 packages, each corresponding to a different service:
+
 - azure-storage-blob
 - azure-storage-file
 - azure-storage-queue
 - azure-storage-table
 
-Note: prior to version 0.36.0, there used to be a single package (azure-storage) containing all services
+Note: prior to version 0.36.0, there used to be a single package (azure-storage) containing all services.
 
 Option 1: Via PyPi
 ~~~~~~~~~~~~~~~~~~

@@ -21,7 +21,7 @@ from azure.storage.common._error import (
 _ERROR_MESSAGE_SHOULD_BE_UNICODE = 'message should be of type unicode.'
 _ERROR_MESSAGE_SHOULD_BE_STR = 'message should be of type str.'
 _ERROR_MESSAGE_NOT_BASE64 = 'message is not a valid base64 value.'
-
+_ERROR_MESSAGE_NOT_ENCRYPTED = 'Message was not encrypted.'
 
 def _validate_message_type_text(param):
     if sys.version_info < (3,):

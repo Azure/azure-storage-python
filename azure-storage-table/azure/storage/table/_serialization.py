@@ -227,10 +227,9 @@ def _convert_batch_to_json(batch_requests):
     batch_boundary = b'batch_' + _new_boundary()
     changeset_boundary = b'changeset_' + _new_boundary()
 
-    body = []
-    body.append(b'--' + batch_boundary + b'\n')
-    body.append(b'Content-Type: multipart/mixed; boundary=')
-    body.append(changeset_boundary + b'\n\n')
+    body = [b'--' + batch_boundary + b'\n',
+            b'Content-Type: multipart/mixed; boundary=',
+            changeset_boundary + b'\n\n']
 
     content_id = 1
 

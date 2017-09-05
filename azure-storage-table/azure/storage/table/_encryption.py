@@ -20,6 +20,7 @@ from json import (
     loads,
 )
 
+from azure.common import AzureException
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.hashes import (
     Hash,
@@ -48,6 +49,7 @@ from azure.storage.common._error import (
 )
 from ._error import (
     _ERROR_UNSUPPORTED_TYPE_FOR_ENCRYPTION,
+    _ERROR_ENTITY_NOT_ENCRYPTED
 )
 from .models import (
     Entity,
@@ -238,12 +240,12 @@ def _extract_encryption_metadata(entity, require_encryption, key_encryption_key,
         encrypted_properties_list = _decode_base64_to_bytes(entity['_ClientEncryptionMetadata2'])
         encryption_data = entity['_ClientEncryptionMetadata1']
         encryption_data = _dict_to_encryption_data(loads(encryption_data))
-    except Exception as e:
+    except Exception:
         # Message did not have properly formatted encryption metadata.
         if require_encryption:
             raise ValueError(_ERROR_ENTITY_NOT_ENCRYPTED)
         else:
-            return (None, None, None, None)
+            return None, None, None, None
 
     if not (encryption_data.encryption_agent.encryption_algorithm == _EncryptionAlgorithm.AES_CBC_256):
         raise ValueError(_ERROR_UNSUPPORTED_ENCRYPTION_ALGORITHM)
@@ -252,8 +254,8 @@ def _extract_encryption_metadata(entity, require_encryption, key_encryption_key,
 
     # Special check for compatibility with Java V1 encryption protocol.
     isJavaV1 = (encryption_data.key_wrapping_metadata is None) or \
-               ((encryption_data.encryption_agent.protocol == _ENCRYPTION_PROTOCOL_V1) and \
-                'EncryptionLibrary' in encryption_data.key_wrapping_metadata and \
+               ((encryption_data.encryption_agent.protocol == _ENCRYPTION_PROTOCOL_V1) and
+                'EncryptionLibrary' in encryption_data.key_wrapping_metadata and
                 'Java' in encryption_data.key_wrapping_metadata['EncryptionLibrary'])
 
     metadataIV = _generate_property_iv(encryption_data.content_encryption_IV,
@@ -279,7 +281,7 @@ def _extract_encryption_metadata(entity, require_encryption, key_encryption_key,
     else:
         encrypted_properties_list = loads(encrypted_properties_list)
 
-    return (encryption_data.content_encryption_IV, encrypted_properties_list, content_encryption_key, isJavaV1)
+    return encryption_data.content_encryption_IV, encrypted_properties_list, content_encryption_key, isJavaV1
 
 
 def _generate_property_iv(entity_iv, pk, rk, property_name, isJavaV1):

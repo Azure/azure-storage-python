@@ -50,27 +50,27 @@ class _Retry(object):
         :rtype: bool
         '''
         # If max attempts are reached, do not retry.
-        if (context.count >= self.max_attempts):
+        if context.count >= self.max_attempts:
             return False
 
         status = None
         if context.response and context.response.status:
             status = context.response.status
 
-        if status == None:
+        if status is None:
             '''
             If status is None, retry as this request triggered an exception. For 
             example, network issues would trigger this.
             '''
             return True
-        elif status >= 200 and status < 300:
+        elif 200 <= status < 300:
             '''
             This method is called after a successful response, meaning we failed 
             during the response body download or parsing. So, success codes should 
             be retried.
             '''
             return True
-        elif status >= 300 and status < 500:
+        elif 300 <= status < 500:
             '''
             An exception occured, but in most cases it was expected. Examples could 
             include a 309 Conflict or 412 Precondition Failed.

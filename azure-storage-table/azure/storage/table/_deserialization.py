@@ -163,15 +163,14 @@ def _convert_json_to_entity(entry_element, property_resolver, encrypted_properti
         entity['Timestamp'] = _from_entity_datetime(timestamp)
 
     for name, value in properties.items():
-        mtype = edmtypes.get(name);
+        mtype = edmtypes.get(name)
 
         # use the property resolver if present
         if property_resolver:
             # Clients are not expected to resolve these interal fields.
             # This check avoids unexpected behavior from the user-defined 
             # property resolver.
-            if not (name == '_ClientEncryptionMetadata1' or \
-                                name == '_ClientEncryptionMetadata2'):
+            if not (name == '_ClientEncryptionMetadata1' or name == '_ClientEncryptionMetadata2'):
                 mtype = property_resolver(partition_key, row_key,
                                           name, value, mtype)
 
@@ -315,7 +314,7 @@ def _parse_batch_response(response):
 
 
 def _parse_batch_response_part(part):
-    lines = part.splitlines();
+    lines = part.splitlines()
 
     # First line is the HTTP status/reason
     status, _, reason = lines[0].partition(b' ')[2].partition(b' ')

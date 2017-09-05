@@ -673,10 +673,10 @@ class TableService(StorageClient):
         '''
         Returns a generator to list the entities in the table specified. The 
         generator will lazily follow the continuation tokens returned by the 
-        service and stop when all entities have been returned or max_results is 
+        service and stop when all entities have been returned or num_results is
         reached.
 
-        If max_results is specified and the account has more than that number of 
+        If num_results is specified and the account has more than that number of
         entities, the generator will have a populated next_marker field once it 
         finishes. This marker can be used to create a new generator if more 
         results are desired.
@@ -747,16 +747,15 @@ class TableService(StorageClient):
             for more information on constructing filters.
         :param str select:
             Returns only the desired properties of an entity from the set.
-        :param int top:
+        :param int max_results:
             The maximum number of entities to return.
-        :param marker:
+        :param obj marker:
             A dictionary which identifies the portion of the query to be
             returned with the next query operation. The operation returns a
             next_marker element within the response body if the list returned
             was not complete. This value may then be used as a query parameter
             in a subsequent call to request the next portion of the list of
             table. The marker value is opaque to the client.
-        :type marker: obj
         :param str accept:
             Specifies the accepted content type of the response payload. See 
             :class:`~azure.storage.table.models.TablePayloadFormat` for possible 
