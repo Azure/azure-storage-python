@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX:
+
+### All:
+- Added logging to the library, the name of the logger is 'azure.storage'. User must add handlers to the logger to output logs.
+
 ## Version 0.36.0:
 
 ### Blob:

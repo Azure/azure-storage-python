@@ -112,6 +112,34 @@ Usage
 To use this SDK to call Microsoft Azure storage services, you need to
 first `create an account`_.
 
+Logging
+-----------
+
+To make debugging easier, it is recommended to turn on logging for the logger named 'azure.storage'.
+Here are two example configurations:
+
+.. code:: python
+
+    # Basic configuration: configure the root logger, including 'azure.storage'
+    logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
+
+.. code:: python
+
+    # More advanced configuration allowing more control
+    logger = logging.getLogger('azure.storage')
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s %(name)-20s %(levelname)-5s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+Here is how we use the logging levels, it is recommended to use INFO:
+
+-  DEBUG: log strings to sign
+-  INFO: log outgoing requests and responses, as well as retry attempts
+-  WARNING: not used
+-  ERROR: log calls that still failed after all the retries
+
 Code Sample
 -----------
 

@@ -1,4 +1,4 @@
-﻿#-------------------------------------------------------------------------
+﻿# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,13 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import os
 import sys
 import copy
 import requests
 from time import sleep
 from abc import ABCMeta
+import logging
+
+logger = logging.getLogger(__name__)
 
 from azure.common import (
     AzureException,
@@ -43,8 +46,8 @@ from ._error import (
     _http_error_handler,
 )
 
-class StorageClient(object):
 
+class StorageClient(object):
     '''
     This is the base class for service objects. Service objects are used to do 
     all requests to Storage. This class cannot be instantiated directly.
@@ -177,7 +180,7 @@ class StorageClient(object):
             # override the request location and host_location.
             request.host_locations = operation_context.host_location
             request.host = list(operation_context.host_location.values())[0]
-            retry_context.location_mode = list(operation_context.host_location.keys())[0]           
+            retry_context.location_mode = list(operation_context.host_location.keys())[0]
         elif len(request.host_locations) == 1:
             # If only one location is allowed, use that location.
             request.host = list(request.host_locations.values())[0]
@@ -186,6 +189,22 @@ class StorageClient(object):
             # If multiple locations are possible, choose based on the location mode.
             request.host = request.host_locations.get(self.location_mode)
             retry_context.location_mode = self.location_mode
+
+    @staticmethod
+    def extract_date_and_request_id(retry_context):
+        if getattr(retry_context, 'response', None) is None:
+            return ""
+        resp = retry_context.response
+
+        if 'date' in resp.headers and 'x-ms-request-id' in resp.headers:
+            return str.format("Server-Timestamp={0}, Server-Request-ID={1}",
+                              resp.headers['date'], resp.headers['x-ms-request-id'])
+        elif 'date' in resp.headers:
+            return str.format("Server-Timestamp={0}", resp.headers['date'])
+        elif 'x-ms-request-id' in resp.headers:
+            return str.format("Server-Request-ID={0}", resp.headers['x-ms-request-id'])
+        else:
+            return ""
 
     def _perform_request(self, request, parser=None, parser_args=None, operation_context=None):
         '''
@@ -200,8 +219,9 @@ class StorageClient(object):
 
         # Apply common settings to the request
         _update_request(request)
+        client_request_id_prefix = str.format("Client-Request-ID={0}", request.headers['x-ms-client-request-id'])
 
-        while(True):
+        while (True):
             try:
                 try:
                     # Execute the request callback 
@@ -218,6 +238,14 @@ class StorageClient(object):
                     # Set the request context
                     retry_context.request = request
 
+                    # Log the request before it goes out
+                    logger.info("%s Outgoing request: Method=%s, Path=%s, Query=%s, Headers=%s.",
+                                client_request_id_prefix,
+                                request.method,
+                                request.path,
+                                request.query,
+                                str(request.headers).replace('\n', ''))
+
                     # Perform the request
                     response = self._httpclient.perform_request(request)
 
@@ -228,11 +256,21 @@ class StorageClient(object):
                     # Set the response context
                     retry_context.response = response
 
+                    # Log the response when it comes back
+                    logger.info("%s Receiving Response: "
+                                "%s, HTTP Status Code=%s, Message=%s, Headers=%s.",
+                                client_request_id_prefix,
+                                self.extract_date_and_request_id(retry_context),
+                                response.status,
+                                response.message,
+                                str(request.headers).replace('\n', ''))
+
                     # Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException
                     if response.status >= 300:
                         # This exception will be caught by the general error handler
                         # and raised as an azure http exception
-                        _http_error_handler(HTTPError(response.status, response.message, response.headers, response.body))
+                        _http_error_handler(
+                            HTTPError(response.status, response.message, response.headers, response.body))
 
                     # Parse the response
                     if parser:
@@ -260,12 +298,32 @@ class StorageClient(object):
                             msg = ex.args[0]
                         raise AzureException('{}: {}'.format(ex.__class__.__name__, msg))
 
-
             except AzureException as ex:
+                # only parse the strings used for logging if logging is at least enabled for CRITICAL
+                if logger.isEnabledFor(logging.CRITICAL):
+                    exception_str_in_one_line = str(ex).replace('\n', '')
+                    status_code = retry_context.response.status if retry_context.response is not None else 'Unknown'
+                    timestamp_and_request_id = self.extract_date_and_request_id(retry_context)
+
+                logger.info("%s Operation failed: checking if the operation should be retried. "
+                            "Current retry count=%s, %s, HTTP status code=%s, Exception=%s.",
+                            client_request_id_prefix,
+                            retry_context.count if hasattr(retry_context, 'count') else 0,
+                            timestamp_and_request_id,
+                            status_code,
+                            exception_str_in_one_line)
+
                 # Decryption failures (invalid objects, invalid algorithms, data unencrypted in strict mode, etc)
                 # will not be resolved with retries.
                 if str(ex) == _ERROR_DECRYPTION_FAILURE:
+                    logger.error("%s Encountered decryption failure: this cannot be retried. "
+                                 "%s, HTTP status code=%s, Exception=%s.",
+                                 client_request_id_prefix,
+                                 timestamp_and_request_id,
+                                 status_code,
+                                 exception_str_in_one_line)
                     raise ex
+
                 # Determine whether a retry should be performed and if so, how 
                 # long to wait before performing retry.
                 retry_interval = self.retry(retry_context)
@@ -274,9 +332,21 @@ class StorageClient(object):
                     if self.retry_callback:
                         self.retry_callback(retry_context)
 
+                    logger.info(
+                        "%s Retry policy is allowing a retry: Retry count=%s, Interval=%s.",
+                        client_request_id_prefix,
+                        retry_context.count,
+                        retry_interval)
+
                     # Sleep for the desired retry interval
                     sleep(retry_interval)
                 else:
+                    logger.error("%s Retry policy did not allow for a retry: "
+                                 "%s, HTTP status code=%s, Exception=%s.",
+                                 client_request_id_prefix,
+                                 timestamp_and_request_id,
+                                 status_code,
+                                 exception_str_in_one_line)
                     raise ex
             finally:
                 # If this is a location locked operation and the location is not set, 

@@ -14,6 +14,9 @@
 #--------------------------------------------------------------------------
 import base64
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 if sys.version_info < (3,):
     from httplib import (
@@ -115,11 +118,11 @@ class _HTTPClient(object):
 
         # Parse the response
         status = int(response.status_code)
-        respheaders = {}
+        response_headers = {}
         for key, name in response.headers.items():
-            respheaders[key.lower()] = name
+            response_headers[key.lower()] = name
 
-        wrap = HTTPResponse(status, response.reason, respheaders, response.content)
+        wrap = HTTPResponse(status, response.reason, response_headers, response.content)
         response.close()
 
         return wrap
