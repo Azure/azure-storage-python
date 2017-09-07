@@ -98,6 +98,7 @@ if sys.version_info >= (3,):
     from io import BytesIO
 else:
     from cStringIO import StringIO as BytesIO
+import os
 
 class BaseBlobService(StorageClient):
 
@@ -190,6 +191,10 @@ class BaseBlobService(StorageClient):
             If specified, this will override the default socket timeout. The timeout specified is in seconds.
             See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
         '''
+        account_name = account_name or os.environ.get('AZURE_STORAGE_ACCOUNT')
+        account_key = account_key or os.environ.get('AZURE_STORAGE_ACCESS_KEY')
+        connection_string = connection_string or os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
+
         service_params = _ServiceParameters.get_service_parameters(
             'blob',
             account_name=account_name, 
