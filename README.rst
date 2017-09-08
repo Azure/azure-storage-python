@@ -3,6 +3,8 @@ Microsoft Azure Storage SDK for Python
 
 .. image:: https://travis-ci.org/Azure/azure-storage-python.svg?branch=split-library
     :target: https://travis-ci.org/Azure/azure-storage-python
+.. image:: https://img.shields.io/codecov/c/github/azure/azure-storage-python/split-library.svg
+    :target: https://codecov.io/gh/Azure/azure-storage-python/branch/split-library
 
 This project provides a client library in Python that makes it easy to
 consume Microsoft Azure Storage services. For documentation please see
