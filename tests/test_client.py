@@ -36,6 +36,20 @@ SERVICES = {
     FileService: 'file'
 }
 
+_CONNECTION_ENDPOINTS = {
+    'blob': 'BlobEndpoint',
+    'queue': 'QueueEndpoint',
+    'table': 'TableEndpoint',
+    'file': 'FileEndpoint',
+}
+
+_CONNECTION_ENDPOINTS_SECONDARY = {
+    'blob': 'BlobSecondaryEndpoint',
+    'queue': 'QueueSecondaryEndpoint',
+    'table': 'TableSecondaryEndpoint',
+    'file': 'FileSecondaryEndpoint',
+}
+
 class StorageClientTest(StorageTestCase):
 
     def setUp(self):
@@ -293,6 +307,32 @@ class StorageClientTest(StorageTestCase):
         self.assertEqual(service.account_key, self.account_key)
         self.assertEqual(service.primary_endpoint, 'www.mydomain.com')
         self.assertEqual(service.secondary_endpoint, self.account_name + '-secondary.blob.core.windows.net')
+
+    def test_create_service_with_connection_string_fails_if_secondary_without_primary(self):
+        for type in SERVICES.items():
+            # Arrange
+            conn_string = 'AccountName={};AccountKey={};{}=www.mydomain.com;'.format(self.account_name, self.account_key, _CONNECTION_ENDPOINTS_SECONDARY.get(type[1]))
+
+            # Act
+
+            # Fails if primary excluded
+            with self.assertRaises(ValueError):
+                service = type[0](connection_string=conn_string)
+
+    def test_create_service_with_connection_string_succeeds_if_secondary_with_primary(self):
+        for type in SERVICES.items():
+            # Arrange
+            conn_string = 'AccountName={};AccountKey={};{}=www.mydomain.com;{}=www-sec.mydomain.com;'.format(self.account_name, self.account_key, _CONNECTION_ENDPOINTS.get(type[1]), _CONNECTION_ENDPOINTS_SECONDARY.get(type[1]))
+
+            # Act
+            service = type[0](connection_string=conn_string)
+
+            # Assert
+            self.assertIsNotNone(service)
+            self.assertEqual(service.account_name, self.account_name)
+            self.assertEqual(service.account_key, self.account_key)
+            self.assertEqual(service.primary_endpoint, 'www.mydomain.com')
+            self.assertEqual(service.secondary_endpoint, 'www-sec.mydomain.com')
 
     @record
     def test_request_callback_signed_header(self):

@@ -39,17 +39,24 @@ _EMULATOR_ENDPOINTS = {
    'file': '',
 }
 
-_CONNECTION_ENDPONTS = {
+_CONNECTION_ENDPOINTS = {
     'blob': 'BlobEndpoint',
     'queue': 'QueueEndpoint',
     'table': 'TableEndpoint',
     'file': 'FileEndpoint',
 }
 
+_CONNECTION_ENDPOINTS_SECONDARY = {
+    'blob': 'BlobSecondaryEndpoint',
+    'queue': 'QueueSecondaryEndpoint',
+    'table': 'TableSecondaryEndpoint',
+    'file': 'FileSecondaryEndpoint',
+}
+
 class _ServiceParameters(object):
-    def __init__(self, service, account_name=None, account_key=None, sas_token=None,
-                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 custom_domain=None):
+    def __init__(self, service, account_name=None, account_key=None, sas_token=None, 
+                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE, 
+                 custom_domain=None, custom_domain_secondary=None):
 
         self.account_name = account_name
         self.account_key = account_key
@@ -88,10 +95,21 @@ class _ServiceParameters(object):
                 self.primary_endpoint = '{}.{}.{}'.format(self.account_name, service, endpoint_suffix)
 
             # Setup the secondary endpoint
-            if self.account_name:
-                self.secondary_endpoint = '{}-secondary.{}.{}'.format(self.account_name, service, endpoint_suffix)
+            if custom_domain_secondary:
+                if not custom_domain:
+                    raise ValueError(_ERROR_STORAGE_MISSING_INFO)   
+
+                parsed_url = urlparse(custom_domain_secondary)
+
+                # Trim any trailing slashes from the path
+                path = parsed_url.path.rstrip('/')
+
+                self.secondary_endpoint = parsed_url.netloc + path
             else:
-                self.secondary_endpoint = None
+                if self.account_name:
+                    self.secondary_endpoint = '{}-secondary.{}.{}'.format(self.account_name, service, endpoint_suffix)
+                else:
+                    self.secondary_endpoint = None
 
     @staticmethod
     def get_service_parameters(service, account_name=None, account_key=None, sas_token=None, is_emulated=None,
@@ -135,7 +153,8 @@ class _ServiceParameters(object):
         endpoint_suffix = config.get('EndpointSuffix')
 
         # Custom URLs
-        endpoint = config.get(_CONNECTION_ENDPONTS[service])
+        endpoint = config.get(_CONNECTION_ENDPOINTS[service])
+        endpoint_secondary = config.get(_CONNECTION_ENDPOINTS_SECONDARY[service])
 
         return _ServiceParameters(service,
                                   account_name=account_name,
@@ -144,4 +163,5 @@ class _ServiceParameters(object):
                                   is_emulated=is_emulated,
                                   protocol=protocol,
                                   endpoint_suffix=endpoint_suffix,
-                                  custom_domain=endpoint)
+                                  custom_domain=endpoint,
+                                  custom_domain_secondary=endpoint_secondary)

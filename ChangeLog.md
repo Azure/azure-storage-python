@@ -6,6 +6,7 @@
 
 ### All:
 - Added logging to the library, the name of the logger is 'azure.storage'. User must add handlers to the logger to output logs.
+- Secondary endpoints may now be specified in connection strings, provided the corresponding primary endpoint is specified. See the connection string documentation for details.
 
 ## Version 0.36.0:
 
