@@ -26,7 +26,7 @@ class Container(object):
         This var is set to None unless the include=metadata param was included 
         for the list containers operation. If this parameter was specified but the 
         container has no metadata, metadata will be set to an empty dictionary.
-    :vartype metadata: dict mapping str to str
+    :vartype metadata: dict(str, str)
     :ivar ContainerProperties properties:
         System properties for the container.
     '''
@@ -302,10 +302,10 @@ class BlobBlockList(object):
    
     :ivar committed_blocks:
         List of committed blocks.
-    :vartype committed_blocks: list of :class:`BlobBlock`
+    :vartype committed_blocks: list(:class:`~azure.storage.blob.models.BlobBlock`)
     :ivar uncommitted_blocks:
         List of uncommitted blocks.
-    :vartype uncommitted_blocks: list of :class:`BlobBlock`
+    :vartype uncommitted_blocks: list(:class:`~azure.storage.blob.models.BlobBlock`)
     '''
 
     def __init__(self):

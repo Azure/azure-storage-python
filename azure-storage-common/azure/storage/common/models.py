@@ -120,9 +120,9 @@ class RetryContext(object):
     whether and how to retry. This context is stored across retries and may be 
     used to store other information relevant to the retry strategy.
 
-    :ivar :class:`~azure.storage._http.HTTPRequest` request: 
+    :ivar ~azure.storage.common._http.HTTPRequest request:
         The request sent to the storage service.
-    :ivar :class:`~azure.storage._http.HTTPResponse` response: 
+    :ivar ~azure.storage.common._http.HTTPResponse response:
         The response returned by the storage service.
     :ivar LocationMode location_mode: 
         The location the request was sent to.
@@ -273,12 +273,12 @@ class CorsRule(object):
             A list of origin domains that will be allowed via CORS, or "*" to allow 
             all domains. The list of must contain at least one entry. Limited to 64 
             origin domains. Each allowed origin can have up to 256 characters.
-        :type allowed_origins: list of str
+        :type allowed_origins: list(str)
         :param allowed_methods:
             A list of HTTP methods that are allowed to be executed by the origin. 
             The list of must contain at least one entry. For Azure Storage, 
             permitted methods are DELETE, GET, HEAD, MERGE, POST, OPTIONS or PUT.
-        :type allowed_methods: list of str
+        :type allowed_methods: list(str)
         :param int max_age_in_seconds:
             The number of seconds that the client/browser should cache a 
             preflight response.
@@ -286,12 +286,12 @@ class CorsRule(object):
             Defaults to an empty list. A list of response headers to expose to CORS 
             clients. Limited to 64 defined headers and two prefixed headers. Each 
             header can be up to 256 characters.
-        :type exposed_headers: list of str
+        :type exposed_headers: list(str)
         :param allowed_headers:
             Defaults to an empty list. A list of headers allowed to be part of 
             the cross-origin request. Limited to 64 defined headers and 2 prefixed 
             headers. Each header can be up to 256 characters.
-        :type allowed_headers: list of str
+        :type allowed_headers: list(str)
         '''
         _validate_not_none("allowed_origins", allowed_origins)
         _validate_not_none("allowed_methods", allowed_methods)
@@ -401,14 +401,14 @@ class AccessPolicy(object):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         '''
         self.start = start
         self.expiry = expiry
@@ -487,9 +487,9 @@ class Services(object):
     Specifies the services accessible with the account SAS.
 
     :ivar Services Services.BLOB: The blob service.
-    :ivar Services Services.FILE: The file service 
+    :ivar Services Services.FILE: The file service
     :ivar Services Services.QUEUE: The queue service.
-    :ivar Services Services.TABLE: The table service 
+    :ivar Services Services.TABLE: The table service
     '''
 
     def __init__(self, blob=False, queue=False, table=False, file=False, _str=None):

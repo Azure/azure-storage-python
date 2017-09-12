@@ -28,7 +28,7 @@ class Share(object):
         This var is set to None unless the include=metadata param was included 
         for the list shares operation. If this parameter was specified but the 
         share has no metadata, metadata will be set to an empty dictionary.
-    :vartype metadata: dict mapping str to str
+    :vartype metadata: dict(str, str)
     '''
 
     def __init__(self, name=None, props=None, metadata=None):
@@ -69,7 +69,7 @@ class Directory(object):
         This var is set to None unless the include=metadata param was included 
         for the list directory operation. If this parameter was specified but the 
         directory has no metadata, metadata will be set to an empty dictionary.
-    :vartype metadata: dict mapping str to str
+    :vartype metadata: dict(str, str)
     '''
 
     def __init__(self, name=None, props=None, metadata=None):
@@ -113,7 +113,7 @@ class File(object):
         This var is set to None unless the include=metadata param was included 
         for the list file operation. If this parameter was specified but the 
         file has no metadata, metadata will be set to an empty dictionary.
-    :vartype metadata: dict mapping str to str
+    :vartype metadata: dict(str, str)
     '''
 
     def __init__(self, name=None, content=None, props=None, metadata=None):

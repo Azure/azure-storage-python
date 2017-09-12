@@ -272,14 +272,14 @@ class BaseBlobService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
@@ -288,7 +288,7 @@ class BaseBlobService(StorageClient):
             restricts the request to those IP addresses.
         :param str protocol:
             Specifies the protocol permitted for a request made. The default value
-            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+            is https,http. See :class:`~azure.storage.common.models.Protocol` for possible values.
         :return: A Shared Access Signature (sas) token.
         :rtype: str
         '''
@@ -325,14 +325,14 @@ class BaseBlobService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
             stored access policy. To create a stored access policy, use 
@@ -345,7 +345,7 @@ class BaseBlobService(StorageClient):
             restricts the request to those IP addresses.
         :param str protocol:
             Specifies the protocol permitted for a request made. The default value
-            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+            is https,http. See :class:`~azure.storage.common.models.Protocol` for possible values.
         :param str cache_control:
             Response header value for Cache-Control when resource is accessed
             using this shared access signature.
@@ -412,14 +412,14 @@ class BaseBlobService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
             stored access policy. To create a stored access policy, use :func:`~set_container_acl`.
@@ -431,7 +431,7 @@ class BaseBlobService(StorageClient):
             restricts the request to those IP addresses.
         :param str protocol:
             Specifies the protocol permitted for a request made. The default value
-            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+            is https,http. See :class:`~azure.storage.common.models.Protocol` for possible values.
         :param str cache_control:
             Response header value for Cache-Control when resource is accessed
             using this shared access signature.
@@ -563,11 +563,9 @@ class BaseBlobService(StorageClient):
         :param metadata:
             A dict with name_value pairs to associate with the
             container as metadata. Example:{'Category':'test'}
-        :type metadata: a dict mapping str to str
-        :param public_access:
+        :type metadata: dict(str, str)
+        :param ~azure.storage.blob.models.PublicAccess public_access:
             Possible values include: container, blob.
-        :type public_access:
-            One of the values listed in the :class:`~azure.storage.blob.models.PublicAccess` enum.
         :param bool fail_on_exist:
             Specify whether to throw an exception when the container exists.
         :param int timeout:
@@ -641,7 +639,7 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return:
             A dictionary representing the container metadata name, value pairs.
-        :rtype: a dict mapping str to str
+        :rtype: dict(str, str)
         '''
         _validate_not_none('container_name', container_name)
         request = HTTPRequest()
@@ -670,7 +668,7 @@ class BaseBlobService(StorageClient):
         :param metadata:
             A dict containing name-value pairs to associate with the container as 
             metadata. Example: {'category':'test'}
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param str lease_id:
             If specified, set_container_metadata only succeeds if the
             container's lease is active and matches this ID.
@@ -715,9 +713,8 @@ class BaseBlobService(StorageClient):
             container's lease is active and matches this ID.
         :param int timeout:
             The timeout parameter is expressed in seconds.
-        :return: A dictionary of access policies associated with the container.
-        :rtype:
-            dict of str to :class:`.AccessPolicy` and a public_access property
+        :return: A dictionary of access policies associated with the container. dict of str to
+            :class:`azure.storage.common.models.AccessPolicy` and a public_access property
             if public access is turned on
         '''
         _validate_not_none('container_name', container_name)
@@ -748,11 +745,9 @@ class BaseBlobService(StorageClient):
             A dictionary of access policies to associate with the container. The 
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`.AccessPolicy`
-        :param public_access:
+        :type signed_identifiers: dict(str, :class:`~azure.storage.common.models.AccessPolicy`)
+        :param ~azure.storage.blob.models.PublicAccess public_access:
             Possible values include: container, blob.
-        :type public_access: 
-            One of the values listed in the :class:`~azure.storage.blob.models.PublicAccess` enum.
         :param str lease_id:
             If specified, set_container_acl only succeeds if the
             container's lease is active and matches this ID.
@@ -911,7 +906,7 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return:
             Response headers returned from the service call.
-        :rtype: a dict mapping str to str
+        :rtype: dict(str, str)
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('lease_action', lease_action)
@@ -1235,7 +1230,7 @@ class BaseBlobService(StorageClient):
             opaque to the client.
         :param int max_results:
             Specifies the maximum number of blobs to return,
-            including all :class:`BlobPrefix` elements. If the request does not specify
+            including all :class:`~azure.storage.blob.models.BlobPrefix` elements. If the request does not specify
             max_results or specifies a value greater than 5,000, the server will
             return up to 5,000 items. Setting max_results to a value less than
             or equal to zero results in error response code 400 (Bad Request).
@@ -1259,7 +1254,7 @@ class BaseBlobService(StorageClient):
                     should be included in the response.
         :param str delimiter:
             When the request includes this parameter, the operation
-            returns a :class:`BlobPrefix` element in the response body that acts as a
+            returns a :class:`~azure.storage.blob.models.BlobPrefix` element in the response body that acts as a
             placeholder for all blobs whose names begin with the same
             substring up to the appearance of the delimiter character. The
             delimiter may be a single character or a string.
@@ -1306,7 +1301,7 @@ class BaseBlobService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: The blob service stats.
-        :rtype: :class:`~azure.storage.models.ServiceStats`
+        :rtype: :class:`~azure.storage.common.models.ServiceStats`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -1340,7 +1335,7 @@ class BaseBlobService(StorageClient):
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 
             and CORS will be disabled for the service.
-        :type cors: list of :class:`CorsRule`
+        :type cors: list(:class:`~azure.storage.common.models.CorsRule`)
         :param string target_version:
             Indicates the default version to use for requests if an incoming 
             request's version is not specified. 
@@ -1370,7 +1365,7 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return: The blob service properties.
         :rtype:
-            :class:`~azure.storage.models.ServiceProperties` with an attached
+            :class:`~azure.storage.common.models.ServiceProperties` with an attached
             target_version property
         '''
         request = HTTPRequest()
@@ -1392,7 +1387,8 @@ class BaseBlobService(StorageClient):
         '''
         Returns all user-defined metadata, standard HTTP properties, and
         system properties for the blob. It does not return the content of the blob.
-        Returns :class:`.Blob` with :class:`.BlobProperties` and a metadata dict.
+        Returns :class:`~azure.storage.blob.models.Blob`
+        with :class:`~azure.storage.blob.models.BlobProperties` and a metadata dict.
         
         :param str container_name:
             Name of existing container.
@@ -1667,7 +1663,7 @@ class BaseBlobService(StorageClient):
             timeout=None):
         '''
         Downloads a blob to a file path, with automatic chunking and progress
-        notifications. Returns an instance of :class:`Blob` with 
+        notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
         properties and metadata.
 
         :param str container_name:
@@ -1708,7 +1704,7 @@ class BaseBlobService(StorageClient):
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the blob if known.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             If set to 2 or greater, an initial get will be done for the first 
             self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
@@ -1791,7 +1787,7 @@ class BaseBlobService(StorageClient):
 
         '''
         Downloads a blob to a stream, with automatic chunking and progress
-        notifications. Returns an instance of :class:`Blob` with
+        notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
         properties and metadata.
 
         :param str container_name:
@@ -1828,7 +1824,7 @@ class BaseBlobService(StorageClient):
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the blob if known.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             If set to 2 or greater, an initial get will be done for the first 
             self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
@@ -2030,7 +2026,7 @@ class BaseBlobService(StorageClient):
             if_none_match=None, timeout=None):
         '''
         Downloads a blob as an array of bytes, with automatic chunking and
-        progress notifications. Returns an instance of :class:`Blob` with
+        progress notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
         properties, metadata, and content.
 
         :param str container_name:
@@ -2065,7 +2061,7 @@ class BaseBlobService(StorageClient):
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the blob if known.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             If set to 2 or greater, an initial get will be done for the first 
             self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
@@ -2143,7 +2139,7 @@ class BaseBlobService(StorageClient):
             if_none_match=None, timeout=None):
         '''
         Downloads a blob as unicode text, with automatic chunking and progress
-        notifications. Returns an instance of :class:`Blob` with
+        notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
         properties, metadata, and content.
 
         :param str container_name:
@@ -2180,7 +2176,7 @@ class BaseBlobService(StorageClient):
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the blob if known.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             If set to 2 or greater, an initial get will be done for the first 
             self.MAX_SINGLE_GET_SIZE bytes of the blob. If this is the entire blob, 
@@ -2288,7 +2284,7 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return:
             A dictionary representing the blob metadata name, value pairs.
-        :rtype: a dict mapping str to str
+        :rtype: dict(str, str)
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -2327,7 +2323,7 @@ class BaseBlobService(StorageClient):
             Dict containing name and value pairs. Each call to this operation
             replaces all existing metadata attached to the blob. To remove all
             metadata from the blob, call this operation with no metadata headers.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -2445,7 +2441,7 @@ class BaseBlobService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return:
             Response headers returned from the service call.
-        :rtype: a dict mapping str to str
+        :rtype: dict(str, str)
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -2802,7 +2798,7 @@ class BaseBlobService(StorageClient):
             base blob metadata to the snapshot. If one or more name-value pairs
             are specified, the snapshot is created with the specified metadata,
             and metadata is not copied from the base blob.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -2913,7 +2909,7 @@ class BaseBlobService(StorageClient):
             source blob or file to the destination blob. If one or more name-value 
             pairs are specified, the destination blob is created with the specified 
             metadata, and metadata is not copied from the source blob or file. 
-        :type metadata: A dict mapping str to str.
+        :type metadata: dict(str, str)
         :param datetime source_if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -3120,10 +3116,8 @@ class BaseBlobService(StorageClient):
             when present, specifies the blob snapshot to delete.
         :param str lease_id:
             Required if the blob has an active lease.
-        :param delete_snapshots:
+        :param ~azure.storage.blob.models.DeleteSnapshot delete_snapshots:
             Required if the blob has associated snapshots.
-        :type delete_snapshots: 
-            One of the values listed in the :class:`~azure.storage.blob.models.DeleteSnapshot` enum.
         :param datetime if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.

@@ -243,14 +243,14 @@ class FileService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
@@ -303,14 +303,14 @@ class FileService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
             stored access policy. To create a stored access policy, use :func:`~set_share_acl`.
@@ -401,14 +401,14 @@ class FileService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
             stored access policy. To create a stored access policy, use 
@@ -481,7 +481,7 @@ class FileService(StorageClient):
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 
             and CORS will be disabled for the service.
-        :type cors: list of :class:`~azure.storage.models.CorsRule`
+        :type cors: list(:class:`~azure.storage.common.models.CorsRule`)
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -508,7 +508,7 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return: The file service properties.
         :rtype:
-            :class:`~azure.storage.models.ServiceProperties`
+            :class:`~azure.storage.common.models.ServiceProperties`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -613,7 +613,7 @@ class FileService(StorageClient):
         :param metadata:
             A dict with name_value pairs to associate with the
             share as metadata. Example:{'Category':'test'}
-        :type metadata: a dict of str to str:
+        :type metadata: dict(str, str)
         :param int quota:
             Specifies the maximum size of the share, in gigabytes. Must be 
             greater than 0, and less than or equal to 5TB (5120).
@@ -661,7 +661,7 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A Share that exposes properties and metadata.
-        :rtype: :class:`.Share`
+        :rtype: :class:`~azure.storage.file.models.Share`
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -714,7 +714,7 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return:
             A dictionary representing the share metadata name, value pairs.
-        :rtype: a dict mapping str to str
+        :rtype: dict(str, str)
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -741,7 +741,7 @@ class FileService(StorageClient):
         :param metadata:
             A dict containing name-value pairs to associate with the share as 
             metadata. Example: {'category':'test'}
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -768,7 +768,7 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A dictionary of access policies associated with the share.
-        :rtype: dict of str to :class:`.AccessPolicy`
+        :rtype: dict(str, :class:`~azure.storage.common.models.AccessPolicy`)
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -794,7 +794,7 @@ class FileService(StorageClient):
             A dictionary of access policies to associate with the share. The 
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`.AccessPolicy`
+        :type signed_identifiers: dict(str, :class:`~azure.storage.common.models.AccessPolicy`)
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -896,7 +896,7 @@ class FileService(StorageClient):
         :param metadata:
             A dict with name_value pairs to associate with the
             share as metadata. Example:{'Category':'test'}
-        :type metadata: dict of str to str:
+        :type metadata: dict(str, str):
         :param bool fail_on_exist:
             specify whether to throw an exception when the directory exists.
             False by default.
@@ -1014,7 +1014,7 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return:
             A dictionary representing the directory metadata name, value pairs.
-        :rtype: a dict mapping str to str
+        :rtype: dict(str, str)
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('directory_name', directory_name)
@@ -1044,7 +1044,7 @@ class FileService(StorageClient):
         :param metadata:
             A dict containing name-value pairs to associate with the directory
             as metadata. Example: {'category':'test'}
-        :type metadata: A dict mapping str to str.
+        :type metadata: dict(str, str).
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -1157,8 +1157,8 @@ class FileService(StorageClient):
     def get_file_properties(self, share_name, directory_name, file_name, timeout=None):
         '''
         Returns all user-defined metadata, standard HTTP properties, and
-        system properties for the file. Returns an instance of :class:`.File` with
-        :class:`.FileProperties` and a metadata dict.
+        system properties for the file. Returns an instance of :class:`~azure.storage.file.models.File` with
+        :class:`~azure.storage.file.models.FileProperties` and a metadata dict.
 
         :param str share_name:
             Name of existing share.
@@ -1293,7 +1293,7 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds.
         :return:
             A dictionary representing the file metadata name, value pairs.
-        :rtype: dict mapping str to str.
+        :rtype: dict(str, str)
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
@@ -1324,7 +1324,7 @@ class FileService(StorageClient):
             Dict containing name and value pairs. Each call to this operation
             replaces all existing metadata attached to the file. To remove all
             metadata from the file, call this operation with no metadata headers.
-        :type metadata: dict mapping str to str
+        :type metadata: dict(str, str)
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -1374,7 +1374,7 @@ class FileService(StorageClient):
             source blob or file to the destination file. If one or more name-value 
             pairs are specified, the destination file is created with the specified 
             metadata, and the metadata is not copied from the source blob or file. 
-        :type metadata: A dict mapping str to str.
+        :type metadata: dict(str, str).
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: Copy operation properties such as status, source, and ID.
@@ -1477,7 +1477,7 @@ class FileService(StorageClient):
             ContentSettings object used to set file properties.
         :param metadata:
             Name-value pairs associated with the file as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -1519,7 +1519,7 @@ class FileService(StorageClient):
             ContentSettings object used for setting file properties.
         :param metadata:
             Name-value pairs associated with the file as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param bool validate_content:
             If true, calculates an MD5 hash for each range of the file. The storage 
             service checks the hash of the content that has arrived with the hash 
@@ -1531,7 +1531,7 @@ class FileService(StorageClient):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
         :param int timeout:
@@ -1571,7 +1571,7 @@ class FileService(StorageClient):
             ContentSettings object used to set file properties.
         :param metadata:
             Name-value pairs associated with the file as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param bool validate_content:
             If true, calculates an MD5 hash for each range of the file. The storage 
             service checks the hash of the content that has arrived with the hash 
@@ -1624,7 +1624,7 @@ class FileService(StorageClient):
             ContentSettings object used to set file properties.
         :param metadata:
             Name-value pairs associated with the file as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param bool validate_content:
             If true, calculates an MD5 hash for each range of the file. The storage 
             service checks the hash of the content that has arrived with the hash 
@@ -1636,7 +1636,7 @@ class FileService(StorageClient):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
         :param int timeout:
@@ -1686,7 +1686,7 @@ class FileService(StorageClient):
             ContentSettings object used to set file properties.
         :param metadata:
             Name-value pairs associated with the file as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param bool validate_content:
             If true, calculates an MD5 hash for each range of the file. The storage 
             service checks the hash of the content that has arrived with the hash 
@@ -1698,7 +1698,7 @@ class FileService(StorageClient):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far and total is the
             size of the file, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use. Note that parallel upload 
             requires the stream to be seekable.
@@ -1839,7 +1839,7 @@ class FileService(StorageClient):
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the file if known.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             If set to 2 or greater, an initial get will be done for the first 
             self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
@@ -1882,7 +1882,7 @@ class FileService(StorageClient):
             progress_callback=None, max_connections=2, timeout=None):
         '''
         Downloads a file to a stream, with automatic chunking and progress
-        notifications. Returns an instance of :class:`File` with properties
+        notifications. Returns an instance of :class:`~azure.storage.file.models.File` with properties
         and metadata.
 
         :param str share_name:
@@ -1918,7 +1918,7 @@ class FileService(StorageClient):
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the file if known.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             If set to 2 or greater, an initial get will be done for the first 
             self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
@@ -2073,7 +2073,7 @@ class FileService(StorageClient):
                           progress_callback=None, max_connections=2, timeout=None):
         '''
         Downloads a file as an array of bytes, with automatic chunking and
-        progress notifications. Returns an instance of :class:`File` with
+        progress notifications. Returns an instance of :class:`~azure.storage.file.models.File` with
         properties, metadata, and content.
 
         :param str share_name:
@@ -2107,7 +2107,7 @@ class FileService(StorageClient):
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the file if known.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             If set to 2 or greater, an initial get will be done for the first 
             self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
@@ -2153,7 +2153,7 @@ class FileService(StorageClient):
             progress_callback=None, max_connections=2, timeout=None):
         '''
         Downloads a file as unicode text, with automatic chunking and progress
-        notifications. Returns an instance of :class:`File` with properties,
+        notifications. Returns an instance of :class:`~azure.storage.file.models.File` with properties,
         metadata, and content.
 
         :param str share_name:
@@ -2189,7 +2189,7 @@ class FileService(StorageClient):
             Callback for progress with signature function(current, total) 
             where current is the number of bytes transfered so far, and total is 
             the size of the file if known.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             If set to 2 or greater, an initial get will be done for the first 
             self.MAX_SINGLE_GET_SIZE bytes of the file. If this is the entire file, 
@@ -2351,7 +2351,7 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :returns: a list of valid ranges
-        :rtype: a list of :class:`.FileRange`
+        :rtype: a list of :class:`~azure.storage.file.models.FileRange`
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)

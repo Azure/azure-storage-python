@@ -60,7 +60,7 @@ class TableBatch(object):
         :param entity:
             The entity to insert. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         '''
         request = _insert_entity(entity, self._require_encryption, self._key_encryption_key,
                                  self._encryption_resolver)
@@ -77,7 +77,7 @@ class TableBatch(object):
         :param entity:
             The entity to update. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         :param str if_match:
             The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
@@ -102,7 +102,7 @@ class TableBatch(object):
         :param entity:
             The entity to merge. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         :param str if_match:
             The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
@@ -153,7 +153,7 @@ class TableBatch(object):
         :param entity:
             The entity to insert or replace. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
        '''
         request = _insert_or_replace_entity(entity, self._require_encryption, self._key_encryption_key,
                                             self._encryption_resolver)
@@ -170,7 +170,7 @@ class TableBatch(object):
         :param entity:
             The entity to insert or merge. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         '''
 
         request = _insert_or_merge_entity(entity, self._require_encryption,
