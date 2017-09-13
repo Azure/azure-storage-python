@@ -30,9 +30,10 @@ import sys
 import random
 import tests.settings_fake as fake_settings
 
-# Configure logging to output to console
-import logging
-logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
+# logging is not enabled by default because it pollutes the CI logs
+# uncommenting the following two lines make debugging much easier
+# import logging
+# logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
 
 try:
     import tests.settings_real as settings

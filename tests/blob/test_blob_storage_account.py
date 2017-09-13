@@ -69,10 +69,9 @@ class BlobStorageAccountTest(StorageTestCase):
     @record
     def test_standard_blob_tier_set_tier_api(self):
         self.bs.create_container(self.container_name)
-
-        for tier in vars(StandardBlobTier):
-            if tier.startswith("__"):
-                continue
+        tiers = [StandardBlobTier.Archive, StandardBlobTier.Cool, StandardBlobTier.Hot]
+        
+        for tier in tiers:
             blob_name = self._get_blob_reference()
             data = b'hello world'
             self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
