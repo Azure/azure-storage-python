@@ -4,30 +4,30 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [6bdfa25c-8786-11e7-bafd-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:08:26 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [eb05c60c-981d-11e7-adcb-b8e8564491f6]
+      x-ms-date: ['Wed, 13 Sep 2017 00:53:12 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/share31600fc8?restype=share
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Tue, 22 Aug 2017 22:08:25 GMT']
-      ETag: ['"0x8D4E9AA4FEFA09A"']
-      Last-Modified: ['Tue, 22 Aug 2017 22:08:26 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [dce4cb38-001a-002f-7c93-1bd5ee000000]
+      date: ['Wed, 13 Sep 2017 00:53:11 GMT']
+      etag: ['"0x8D4FA41CF30F649"']
+      last-modified: ['Wed, 13 Sep 2017 00:53:12 GMT']
+      server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [e7133c43-001a-012c-442a-2c90bc000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [6bf6b730-8786-11e7-8ad6-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:08:26 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [eb1ae585-981d-11e7-8115-b8e8564491f6]
+      x-ms-date: ['Wed, 13 Sep 2017 00:53:12 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.file.core.windows.net/?comp=list
@@ -98,8 +98,8 @@ interactions:
         \ 15 May 2017 01:31:21 GMT</Last-Modified><Etag>\"0x8D49B32177151CA\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share1768af94347d4510a12a00d8adbdfbe8</Name><Properties><Last-Modified>Mon,\
         \ 15 May 2017 01:31:14 GMT</Last-Modified><Etag>\"0x8D49B3213C224E2\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share2c4b5a7c1a46472b9b80aecb74bf1135</Name><Properties><Last-Modified>Mon,\
         \ 15 May 2017 01:24:00 GMT</Last-Modified><Etag>\"0x8D49B3110DB9E74\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share3094ecb889cb4e5d8a9bcc4f4093aa8e</Name><Properties><Last-Modified>Sat,\
-        \ 05 Aug 2017 08:38:21 GMT</Last-Modified><Etag>\"0x8D4DBDD548E3D51\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share31600fc8</Name><Properties><Last-Modified>Tue,\
-        \ 22 Aug 2017 22:08:26 GMT</Last-Modified><Etag>\"0x8D4E9AA4FEFA09A\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share3742b7a7e0fe411b92ab35a844851b07</Name><Properties><Last-Modified>Mon,\
+        \ 05 Aug 2017 08:38:21 GMT</Last-Modified><Etag>\"0x8D4DBDD548E3D51\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share31600fc8</Name><Properties><Last-Modified>Wed,\
+        \ 13 Sep 2017 00:53:12 GMT</Last-Modified><Etag>\"0x8D4FA41CF30F649\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share3742b7a7e0fe411b92ab35a844851b07</Name><Properties><Last-Modified>Mon,\
         \ 15 May 2017 01:31:19 GMT</Last-Modified><Etag>\"0x8D49B3216AB6B67\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share37619275eb5c45539b21c554e3066397</Name><Properties><Last-Modified>Thu,\
         \ 03 Aug 2017 01:42:39 GMT</Last-Modified><Etag>\"0x8D4DA10ED26FE79\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share38edba305c404585a6df9983752665e1</Name><Properties><Last-Modified>Mon,\
         \ 15 May 2017 01:31:21 GMT</Last-Modified><Etag>\"0x8D49B3217F392B2\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share44f3592817374c99b0b93ca5e1261d15</Name><Properties><Last-Modified>Wed,\
@@ -717,11 +717,11 @@ interactions:
         \ 08 Aug 2017 17:09:33 GMT</Last-Modified><Etag>\"0x8D4DE803D5FA961\"</Etag><Quota>5120</Quota></Properties></Share></Shares><NextMarker\
         \ /></EnumerationResults>"}
     headers:
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:08:25 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [dce4cb3a-001a-002f-7d93-1bd5ee000000]
+      content-type: [application/xml]
+      date: ['Wed, 13 Sep 2017 00:53:11 GMT']
+      server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [e7133c46-001a-012c-452a-2c90bc000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

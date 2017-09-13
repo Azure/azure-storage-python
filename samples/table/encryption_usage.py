@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,21 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
-from cryptography.hazmat.primitives.keywrap import(
-    aes_key_wrap,
-    aes_key_unwrap,
-)
+import uuid
+from os import urandom
+
+from azure.common import AzureException
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.asymmetric.padding import (
     OAEP,
     MGF1,
 )
+from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.hashes import SHA1
-from os import urandom
-import uuid
+from cryptography.hazmat.primitives.keywrap import (
+    aes_key_wrap,
+    aes_key_unwrap,
+)
+
 from azure.storage.table import (
     Entity,
     TableBatch,
@@ -33,71 +36,83 @@ from azure.storage.table import (
     EntityProperty,
     TablePayloadFormat,
 )
-from azure.common import AzureException
+
 
 # Sample implementations of the encryption-related interfaces.
 class KeyWrapper:
     def __init__(self, kid):
-        self.kek = urandom(32) 
+        self.kek = urandom(32)
         self.backend = default_backend()
         self.kid = 'local:' + kid
+
     def wrap_key(self, key, algorithm='A256KW'):
         if algorithm == 'A256KW':
             return aes_key_wrap(self.kek, key, self.backend)
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def unwrap_key(self, key, algorithm):
         if algorithm == 'A256KW':
             return aes_key_unwrap(self.kek, key, self.backend)
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def get_key_wrap_algorithm(self):
         return 'A256KW'
+
     def get_kid(self):
         return self.kid
+
 
 class KeyResolver:
     def __init__(self):
         self.keys = {}
+
     def put_key(self, key):
         self.keys[key.get_kid()] = key
+
     def resolve_key(self, kid):
         return self.keys[kid]
 
+
 class RSAKeyWrapper:
     def __init__(self, kid):
-        self.private_key = generate_private_key(public_exponent = 65537,
-                                                key_size = 2048,
-                                                backend = default_backend())
+        self.private_key = generate_private_key(public_exponent=65537,
+                                                key_size=2048,
+                                                backend=default_backend())
         self.public_key = self.private_key.public_key()
         self.kid = 'local:' + kid
+
     def wrap_key(self, key, algorithm='RSA'):
         if algorithm == 'RSA':
             return self.public_key.encrypt(key,
-                                     OAEP(
-                                         mgf = MGF1(algorithm=SHA1()),
-                                         algorithm=SHA1(),
-                                         label=None)
-                                     )
+                                           OAEP(
+                                               mgf=MGF1(algorithm=SHA1()),
+                                               algorithm=SHA1(),
+                                               label=None)
+                                           )
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def unwrap_key(self, key, algorithm):
         if algorithm == 'RSA':
             return self.private_key.decrypt(key,
-                                        OAEP(
-                                            mgf=MGF1(algorithm=SHA1()),
-                                            algorithm=SHA1(),
-                                            label=None)
-                                        )
+                                            OAEP(
+                                                mgf=MGF1(algorithm=SHA1()),
+                                                algorithm=SHA1(),
+                                                label=None)
+                                            )
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def get_key_wrap_algorithm(self):
         return 'RSA'
+
     def get_kid(self):
         return self.kid
 
-class TableEncryptionSamples():  
 
+class TableEncryptionSamples():
     def __init__(self, account):
         self.account = account
 
@@ -164,7 +179,7 @@ class TableEncryptionSamples():
     # any property named 'foo' for encryption, regardless of the partition or row 
     # it is in.
     def encryption_resolver(self, pk, rk, property):
-       return property == 'foo'
+        return property == 'foo'
 
     def put_encrypted_entity_properties(self):
         table_name = self._create_table()
@@ -179,7 +194,7 @@ class TableEncryptionSamples():
         entity3 = self._create_base_entity_class()
         entity3['badValue'] = EntityProperty(EdmType.INT64, 12, True)
         entity4 = self._create_base_entity_class()
-        
+
         # KeyWrapper implements the key encryption key interface outlined
         # in the insert/get entity documentation.
         # Setting this property will tell these APIs to encrypt the entity.
@@ -191,7 +206,7 @@ class TableEncryptionSamples():
         # are only 250 custom properties available when encrypting.
         # Note: str is the only type valid for encryption. Trying to encrypt other
         # properties will throw.
-        
+
         self.service.delete_table(table_name)
 
     def put_encrypted_entity_encryption_resolver(self):
@@ -234,8 +249,8 @@ class TableEncryptionSamples():
         entity_full = self.service.get_entity(table_name, entity['PartitionKey'], entity['RowKey'],
                                               accept=TablePayloadFormat.JSON_FULL_METADATA)
         entity_none = self.service.get_entity(table_name, entity['PartitionKey'], entity['RowKey'],
-                                        accept=TablePayloadFormat.JSON_NO_METADATA)
-        
+                                              accept=TablePayloadFormat.JSON_NO_METADATA)
+
         # Note: Properties that are encrypted on upload but not decrypted on download due to lack
         # of an encryption policy are stored in an EntityProperty with as an EdmBinary type.
         # Note: The encryption metadata headers are preserved on the entity if 
@@ -277,7 +292,7 @@ class TableEncryptionSamples():
         batch.insert_entity(entity1)
         batch.insert_entity(entity2)
         self.service.commit_batch(table_name, batch)
-        
+
         # When using the batch as a context manager, the tableservice object will
         # automatically apply its encryption policy to the batch. 
         entity3 = self._create_entity_for_encryption()
@@ -327,8 +342,8 @@ class TableEncryptionSamples():
         self.service.key_encryption_key = None
         self.service.key_resolver_function = None
         try:
-            self.service.get_entity(table_name, entity_encrypted['PartitionKey'], 
-                                    entity_encrypted['RowKey']) 
+            self.service.get_entity(table_name, entity_encrypted['PartitionKey'],
+                                    entity_encrypted['RowKey'])
             raise Exception
         except ValueError:
             pass
@@ -377,7 +392,7 @@ class TableEncryptionSamples():
             raise Exception
         except ValueError:
             pass
-        
+
         self.service.require_encryption = False
         try:
             self.service.merge_entity(table_name, entity)
@@ -393,7 +408,7 @@ class TableEncryptionSamples():
         kek = KeyWrapper('key1')
         self.service.key_encryption_key = kek
         self.service.insert_entity(table_name, entity)
-        
+
         # If the key_encryption_key property is set, the tableservice object will
         # try to decrypt entities using that key. If both the key_resolver and key_encryption_key
         # properties are set, the result of the key_resolver will take precedence and the decryption

@@ -1,8 +1,8 @@
 interactions:
 - request:
-    body: '{"PartitionKey": "pke64a13f7", "RowKey": "rke64a13f7", "age": "abc", "sex":
-      "female", "sign": "aquarius", "birthday": "1991-10-04T00:00:00Z", "birthday@odata.type":
-      "Edm.DateTime"}'
+    body: !!python/unicode '{"age": "abc", "birthday": "1991-10-04T00:00:00Z", "sex":
+      "female", "birthday@odata.type": "Edm.DateTime", "PartitionKey": "pke64a13f7",
+      "RowKey": "rke64a13f7", "sign": "aquarius"}'
     headers:
       Accept: [application/json;odata=minimalmetadata]
       Connection: [keep-alive]
@@ -11,23 +11,23 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       If-Match: ['*']
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [f4d901fa-8786-11e7-8bc9-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:12:16 GMT']
+      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [bccf10f0-981e-11e7-90e4-b8e8564491f6]
+      x-ms-date: ['Wed, 13 Sep 2017 00:59:04 GMT']
       x-ms-version: ['2017-04-17']
     method: MERGE
     uri: https://storagename.table.core.windows.net/uttablee64a13f7(PartitionKey='pke64a13f7',RowKey='rke64a13f7')
   response:
-    body: {string: '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
-        specified resource does not exist.\nRequestId:7a12a68e-0002-00ee-2093-1b5e57000000\nTime:2017-08-22T22:12:16.1873565Z"}}}'}
+    body: {string: !!python/unicode '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
+        specified resource does not exist.\nRequestId:57fee00f-0002-0087-332b-2c01fb000000\nTime:2017-09-13T00:59:04.1615987Z"}}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      Date: ['Tue, 22 Aug 2017 22:12:16 GMT']
-      Server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      X-Content-Type-Options: [nosniff]
-      x-ms-request-id: [7a12a68e-0002-00ee-2093-1b5e57000000]
+      cache-control: [no-cache]
+      content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
+      date: ['Wed, 13 Sep 2017 00:59:03 GMT']
+      server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-content-type-options: [nosniff]
+      x-ms-request-id: [57fee00f-0002-0087-332b-2c01fb000000]
       x-ms-version: ['2017-04-17']
     status: {code: 404, message: Not Found}
 version: 1

@@ -1,4 +1,4 @@
-﻿#-------------------------------------------------------------------------
+﻿# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,31 +11,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import time
 import uuid
-
 from datetime import datetime, timedelta
-from azure.storage import (
-    AccessPolicy,
-    ResourceTypes,
-    AccountPermissions,
-)
+
 from azure.storage.blob import (
     BlockBlobService,
     ContainerPermissions,
     BlobPermissions,
     PublicAccess,
 )
+from azure.storage.common import (
+    AccessPolicy,
+    ResourceTypes,
+    AccountPermissions,
+)
 
-class BlobSasSamples():  
 
+class BlobSasSamples():
     def __init__(self, account):
         self.account = account
 
     def run_all_samples(self):
         self.service = self.account.create_block_blob_service()
-         
+
         self.container_sas()
         self.blob_sas()
         self.account_sas()
@@ -61,7 +61,7 @@ class BlobSasSamples():
 
         # Get the public access level
         acl = self.service.get_container_acl(container_name)
-        access = acl.public_access # 'blob'
+        access = acl.public_access  # 'blob'
 
         # Show a particular blob can be read with no credentials
         anonymous_service = BlockBlobService(self.account.account_name)
@@ -79,7 +79,7 @@ class BlobSasSamples():
 
         # Turn container public access off by simply not sending it with set_container_acl
         self.service.set_container_acl(container_name)
-        
+
         # Wait 30 seconds for it to take effect
         time.sleep(30)
 
@@ -91,7 +91,7 @@ class BlobSasSamples():
 
         self.service.delete_container(container_name)
 
-    def container_sas(self):        
+    def container_sas(self):
         container_name = self._create_container()
         self.service.create_blob_from_text(container_name, 'blob1', b'hello world')
 
@@ -111,7 +111,7 @@ class BlobSasSamples():
         )
 
         blob = sas_service.get_blob_to_text(container_name, 'blob1')
-        content = blob.content # hello world
+        content = blob.content  # hello world
 
         self.service.delete_container(container_name)
 
@@ -135,7 +135,7 @@ class BlobSasSamples():
         )
 
         blob = sas_service.get_blob_to_text(container_name, 'blob1')
-        content = blob.content # hello world
+        content = blob.content  # hello world
 
         self.service.delete_container(container_name)
 
@@ -157,7 +157,7 @@ class BlobSasSamples():
             account_name=self.account.account_name,
             sas_token=token,
         )
-        metadata = sas_service.get_container_metadata(container_name) # metadata={'val1': 'foo', 'val2': 'blah'}
+        metadata = sas_service.get_container_metadata(container_name)  # metadata={'val1': 'foo', 'val2': 'blah'}
 
         self.service.delete_container(container_name)
 
@@ -172,7 +172,7 @@ class BlobSasSamples():
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_container_acl(container_name) # {id: AccessPolicy()}
+        acl = self.service.get_container_acl(container_name)  # {id: AccessPolicy()}
 
         # Replaces values, does not merge
         access_policy = AccessPolicy(permission=ContainerPermissions.READ,
@@ -182,14 +182,14 @@ class BlobSasSamples():
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_container_acl(container_name) # {id2: AccessPolicy()}
+        acl = self.service.get_container_acl(container_name)  # {id2: AccessPolicy()}
 
         # Clear
         self.service.set_container_acl(container_name)
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_container_acl(container_name) # {}
+        acl = self.service.get_container_acl(container_name)  # {}
 
         self.service.delete_container(container_name)
 
@@ -219,6 +219,6 @@ class BlobSasSamples():
         )
 
         blob = sas_service.get_blob_to_text(container_name, 'blob1')
-        content = blob.content # hello world
-        
+        content = blob.content  # hello world
+
         self.service.delete_container(container_name)
