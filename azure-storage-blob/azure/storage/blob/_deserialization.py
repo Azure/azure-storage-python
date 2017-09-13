@@ -244,7 +244,9 @@ LIST_BLOBS_ATTRIBUTE_MAP = {
     'CopyCompletionTime': ('copy', 'completion_time', _to_str),
     'CopyStatusDescription': ('copy', 'status_description', _to_str),
     'AccessTier': (None, 'blob_tier', _to_str),
-    'ArchiveStatus': (None, 'rehydration_status', _to_str)
+    'AccessTierChangeTime': (None, 'blob_tier_change_time', parser.parse),
+    'AccessTierInferred': (None, 'blob_tier_inferred', _bool),
+    'ArchiveStatus': (None, 'rehydration_status', _to_str),
 }
 
 
@@ -281,6 +283,8 @@ def _convert_xml_to_blob_list(response):
             <CopyCompletionTime>datetime</CopyCompletionTime>
             <CopyStatusDescription>error string</CopyStatusDescription>
             <AccessTier>P4 | P6 | P10 | P20 | P30 | P40 | P50 | P60 | Archive | Cool | Hot</AccessTier>
+            <AccessTierChangeTime>date-time-value</AccessTierChangeTime>
+            <AccessTierInferred>true</AccessTierInferred>
           </Properties>
           <Metadata>   
             <Name>value</Name>
