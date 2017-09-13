@@ -1,4 +1,4 @@
-﻿#-------------------------------------------------------------------------
+﻿# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,13 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import time
 import uuid
 from datetime import datetime, timedelta
 
-
-from azure.storage import (
+from azure.storage.common import (
     AccessPolicy,
     ResourceTypes,
     AccountPermissions,
@@ -27,8 +26,8 @@ from azure.storage.table import (
     TablePermissions,
 )
 
-class TableSasSamples():  
 
+class TableSasSamples():
     def __init__(self, account):
         self.account = account
 
@@ -52,7 +51,7 @@ class TableSasSamples():
             'PartitionKey': 'test',
             'RowKey': 'test1',
             'text': 'hello world',
-            }
+        }
         self.service.insert_entity(table_name, entity)
 
         # Access only to the entities in the given table
@@ -72,7 +71,7 @@ class TableSasSamples():
 
         entities = sas_service.query_entities(table_name)
         for entity in entities:
-            print(entity.text) # hello world
+            print(entity.text)  # hello world
 
         self.service.delete_table(table_name)
 
@@ -82,7 +81,7 @@ class TableSasSamples():
             'PartitionKey': 'test',
             'RowKey': 'test1',
             'text': 'hello world',
-            }
+        }
         self.service.insert_entity(table_name, entity)
 
         # Access to all entities in all the tables
@@ -101,7 +100,7 @@ class TableSasSamples():
 
         entities = list(sas_service.query_entities(table_name))
         for entity in entities:
-            print(entity.text) # hello world
+            print(entity.text)  # hello world
 
         self.service.delete_table(table_name)
 
@@ -116,7 +115,7 @@ class TableSasSamples():
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_table_acl(table_name) # {id: AccessPolicy()}
+        acl = self.service.get_table_acl(table_name)  # {id: AccessPolicy()}
 
         # Replaces values, does not merge
         access_policy = AccessPolicy(permission=TablePermissions.QUERY,
@@ -126,14 +125,14 @@ class TableSasSamples():
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_table_acl(table_name) # {id2: AccessPolicy()}
+        acl = self.service.get_table_acl(table_name)  # {id2: AccessPolicy()}
 
         # Clear
         self.service.set_table_acl(table_name)
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_table_acl(table_name) # {}
+        acl = self.service.get_table_acl(table_name)  # {}
 
         self.service.delete_table(table_name)
 
@@ -143,7 +142,7 @@ class TableSasSamples():
             'PartitionKey': 'test',
             'RowKey': 'test1',
             'text': 'hello world',
-            }
+        }
         self.service.insert_entity(table_name, entity)
 
         # Set access policy on table
@@ -169,6 +168,6 @@ class TableSasSamples():
 
         entities = list(sas_service.query_entities(table_name))
         for entity in entities:
-            print(entity.text) # hello world
+            print(entity.text)  # hello world
 
         self.service.delete_table(table_name)
