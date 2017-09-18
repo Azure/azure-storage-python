@@ -216,14 +216,14 @@ class QueueService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
@@ -232,7 +232,7 @@ class QueueService(StorageClient):
             restricts the request to those IP addresses.
         :param str protocol:
             Specifies the protocol permitted for a request made. The default value
-            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+            is https,http. See :class:`~azure.storage.common.models.Protocol` for possible values.
         :return: A Shared Access Signature (sas) token.
         :rtype: str
         '''
@@ -268,14 +268,14 @@ class QueueService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
             stored access policy. To create a stored access policy, use :func:`~set_queue_acl`.
@@ -287,7 +287,7 @@ class QueueService(StorageClient):
             restricts the request to those IP addresses.
         :param str protocol:
             Specifies the protocol permitted for a request made. The default value
-            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+            is https,http. See :class:`~azure.storage.common.models.Protocol` for possible values.
         :return: A Shared Access Signature (sas) token.
         :rtype: str
         '''
@@ -328,7 +328,7 @@ class QueueService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: The queue service stats.
-        :rtype: :class:`~azure.storage.models.ServiceStats`
+        :rtype: :class:`~azure.storage.common.models.ServiceStats`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -350,7 +350,7 @@ class QueueService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: The queue service properties.
-        :rtype: :class:`~azure.storage.models.ServiceProperties`
+        :rtype: :class:`~azure.storage.common.models.ServiceProperties`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -387,7 +387,7 @@ class QueueService(StorageClient):
             and CORS will be disabled for the service. For detailed information 
             about CORS rules and evaluation logic, see 
             https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx.
-        :type cors: list of :class:`~azure.storage.models.CorsRule`
+        :type cors: list(:class:`~azure.storage.common.models.CorsRule`)
         :param int timeout:
             The server timeout, expressed in seconds.
         '''
@@ -498,7 +498,7 @@ class QueueService(StorageClient):
             A dict containing name-value pairs to associate with the queue as 
             metadata. Note that metadata names preserve the case with which they 
             were created, but are case-insensitive when set or read. 
-        :type metadata: a dict mapping str to str 
+        :type metadata: dict(str, str)
         :param bool fail_on_exist:
             Specifies whether to throw an exception if the queue already exists.
         :param int timeout:
@@ -588,7 +588,7 @@ class QueueService(StorageClient):
             A dictionary representing the queue metadata with an 
             approximate_message_count int property on the dict estimating the 
             number of messages in the queue.
-        :rtype: a dict mapping str to str
+        :rtype: dict(str, str)
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -656,7 +656,7 @@ class QueueService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: A dictionary of access policies associated with the queue.
-        :rtype: dict of str to :class:`~azure.storage.models.AccessPolicy`
+        :rtype: dict(str, :class:`~azure.storage.common.models.AccessPolicy`)
         '''
         _validate_not_none('queue_name', queue_name)
         request = HTTPRequest()
@@ -692,7 +692,7 @@ class QueueService(StorageClient):
             A dictionary of access policies to associate with the queue. The 
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`~azure.storage.models.AccessPolicy`
+        :type signed_identifiers: dict(str, :class:`~azure.storage.common.models.AccessPolicy`)
         :param int timeout:
             The server timeout, expressed in seconds.
         '''
@@ -803,7 +803,7 @@ class QueueService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: A :class:`~azure.storage.queue.models.QueueMessage` object representing the information passed.
-        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
+        :rtype: list(:class:`~azure.storage.queue.models.QueueMessage`)
         '''
         _validate_decryption_required(self.require_encryption, self.key_encryption_key,
                                       self.key_resolver_function)
@@ -851,7 +851,7 @@ class QueueService(StorageClient):
             A list of :class:`~azure.storage.queue.models.QueueMessage` objects. Note that 
             time_next_visible and pop_receipt will not be populated as peek does 
             not pop the message and can only retrieve already visible messages.
-        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
+        :rtype: list(:class:`~azure.storage.queue.models.QueueMessage`)
         '''
 
         _validate_decryption_required(self.require_encryption, self.key_encryption_key,
@@ -964,7 +964,7 @@ class QueueService(StorageClient):
         :return: 
             A list of :class:`~azure.storage.queue.models.QueueMessage` objects. For convenience,
             this object is also populated with the content, although it is not returned by the service.
-        :rtype: list of :class:`~azure.storage.queue.models.QueueMessage`
+        :rtype: list(:class:`~azure.storage.queue.models.QueueMessage`)
         '''
 
         _validate_encryption_required(self.require_encryption, self.key_encryption_key)

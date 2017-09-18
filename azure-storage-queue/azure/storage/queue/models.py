@@ -37,7 +37,7 @@ class Queue(object):
         This var is set to None unless the include=metadata param was included 
         for the list queues operation. If this parameter was specified but the 
         queue has no metadata, metadata will be set to an empty dictionary.
-    :vartype metadata: dict mapping str to str
+    :vartype metadata: dict(str, str)
     '''
 
     def __init__(self):

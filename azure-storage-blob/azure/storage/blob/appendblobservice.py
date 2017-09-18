@@ -144,7 +144,7 @@ class AppendBlobService(BaseBlobService):
             ContentSettings object used to set blob properties.
         :param metadata:
             Name-value pairs associated with the blob as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -323,7 +323,7 @@ class AppendBlobService(BaseBlobService):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -387,7 +387,7 @@ class AppendBlobService(BaseBlobService):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -457,7 +457,7 @@ class AppendBlobService(BaseBlobService):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:
@@ -522,7 +522,7 @@ class AppendBlobService(BaseBlobService):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param str lease_id:
             Required if the blob has an active lease.
         :param int timeout:

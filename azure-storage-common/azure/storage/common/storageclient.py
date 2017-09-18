@@ -73,10 +73,10 @@ class StorageClient(object):
         reading from secondary.
     :ivar function(context) retry:
         A function which determines whether to retry. Takes as a parameter a 
-        :class:`~azure.storage.models.RetryContext` object. Returns the number 
+        :class:`~azure.storage.common.models.RetryContext` object. Returns the number
         of seconds to wait before retrying the request, or None to indicate not 
         to retry.
-    :ivar LocationMode location_mode:
+    :ivar ~azure.storage.common.models.LocationMode location_mode:
         The host location to use to make requests. Defaults to LocationMode.PRIMARY.
         Note that this setting only applies to RA-GRS accounts as other account 
         types do not allow reading from secondary. If the location_mode is set to 

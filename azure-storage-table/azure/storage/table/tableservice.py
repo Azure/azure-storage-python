@@ -212,14 +212,14 @@ class TableService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str ip:
             Specifies an IP address or a range of IP addresses from which to accept requests.
             If the IP address from which the request originates does not match the IP address
@@ -228,7 +228,7 @@ class TableService(StorageClient):
             restricts the request to those IP addresses.
         :param str protocol:
             Specifies the protocol permitted for a request made. The default value
-            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+            is https,http. See :class:`~azure.storage.common.models.Protocol` for possible values.
         :return: A Shared Access Signature (sas) token.
         :rtype: str
         '''
@@ -263,14 +263,14 @@ class TableService(StorageClient):
             been specified in an associated stored access policy. Azure will always 
             convert values to UTC. If a date is passed in without timezone info, it 
             is assumed to be UTC.
-        :type expiry: datetime.datetime or str
+        :type expiry: datetime or str
         :param start:
             The time at which the shared access signature becomes valid. If 
             omitted, start time for this call is assumed to be the time when the 
             storage service receives the request. Azure will always convert values 
             to UTC. If a date is passed in without timezone info, it is assumed to 
             be UTC.
-        :type start: datetime.datetime or str
+        :type start: datetime or str
         :param str id:
             A unique value up to 64 characters in length that correlates to a 
             stored access policy. To create a stored access policy, use :func:`~set_table_acl`.
@@ -282,7 +282,7 @@ class TableService(StorageClient):
             restricts the request to those IP addresses.
         :param str protocol:
             Specifies the protocol permitted for a request made. The default value
-            is https,http. See :class:`~azure.storage.models.Protocol` for possible values.
+            is https,http. See :class:`~azure.storage.common.models.Protocol` for possible values.
         :param str start_pk:
             The minimum partition key accessible with this shared access 
             signature. startpk must accompany startrk. Key values are inclusive. 
@@ -346,7 +346,7 @@ class TableService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: The table service stats.
-        :rtype: :class:`~azure.storage.models.ServiceStats`
+        :rtype: :class:`~azure.storage.common.models.ServiceStats`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -368,7 +368,7 @@ class TableService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: The table service properties.
-        :rtype: :class:`~azure.storage.models.ServiceProperties`
+        :rtype: :class:`~azure.storage.common.models.ServiceProperties`
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -405,7 +405,7 @@ class TableService(StorageClient):
             and CORS will be disabled for the service. For detailed information 
             about CORS rules and evaluation logic, see 
             https://msdn.microsoft.com/en-us/library/azure/dn535601.aspx.
-        :type cors: list of :class:`~azure.storage.models.CorsRule`
+        :type cors: list(:class:`~azure.storage.common.models.CorsRule`)
         :param int timeout:
             The server timeout, expressed in seconds.
         '''
@@ -447,8 +447,8 @@ class TableService(StorageClient):
             The server timeout, expressed in seconds. This function may make multiple 
             calls to the service in which case the timeout value specified will be 
             applied to each individual call.
-        :return: A generator which produces :class:`~azure.storage.models.table.Table` objects.
-        :rtype: :class:`~azure.storage.models.ListGenerator`:
+        :return: A generator which produces :class:`~azure.storage.common.models.table.Table` objects.
+        :rtype: :class:`~azure.storage.common.models.ListGenerator`:
         '''
         operation_context = _OperationContext(location_lock=True)
         kwargs = {'max_results': num_results, 'marker': marker, 'timeout': timeout,
@@ -477,7 +477,7 @@ class TableService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: A list of tables, potentially with a next_marker property.
-        :rtype: list of :class:`~azure.storage.models.table.Table`:  
+        :rtype: list(:class:`~azure.storage.common.models.table.Table`)
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -612,7 +612,7 @@ class TableService(StorageClient):
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: A dictionary of access policies associated with the table.
-        :rtype: dict of str to :class:`~azure.storage.models.AccessPolicy`:
+        :rtype: dict(str, :class:`~azure.storage.common.models.AccessPolicy`)
         '''
         _validate_not_none('table_name', table_name)
         request = HTTPRequest()
@@ -648,7 +648,7 @@ class TableService(StorageClient):
             A dictionary of access policies to associate with the table. The 
             dictionary may contain up to 5 elements. An empty dictionary 
             will clear the access policies set on the service. 
-        :type signed_identifiers: dict of str to :class:`~azure.storage.models.AccessPolicy`
+        :type signed_identifiers: dict(str, :class:`~azure.storage.common.models.AccessPolicy`)
         :param int timeout:
             The server timeout, expressed in seconds.
         '''
@@ -708,13 +708,13 @@ class TableService(StorageClient):
             property value, and the property EdmType if returned by the service, 
             returns the EdmType of the property. Generally used if accept is set 
             to JSON_NO_METADATA.
-        :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
+        :type property_resolver: func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
             The server timeout, expressed in seconds. This function may make multiple 
             calls to the service in which case the timeout value specified will be 
             applied to each individual call.
         :return: A generator which produces :class:`~azure.storage.table.models.Entity` objects.
-        :rtype: :class:`~azure.storage.models.ListGenerator`
+        :rtype: :class:`~azure.storage.common.models.ListGenerator`
         '''
 
         operation_context = _OperationContext(location_lock=True)
@@ -765,11 +765,11 @@ class TableService(StorageClient):
             property value, and the property EdmType if returned by the service, 
             returns the EdmType of the property. Generally used if accept is set 
             to JSON_NO_METADATA.
-        :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
+        :type property_resolver: func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: A list of entities, potentially with a next_marker property.
-        :rtype: list of :class:`~azure.storage.table.models.Entity`
+        :rtype: list(:class:`~azure.storage.table.models.Entity`)
         '''
         _validate_not_none('table_name', table_name)
         _validate_not_none('accept', accept)
@@ -805,8 +805,10 @@ class TableService(StorageClient):
             The batch to commit.
         :param int timeout:
             The server timeout, expressed in seconds.
-        :return: A list of the batch responses corresponding to the requests in the batch.
-        :rtype: list of response objects
+        :return:
+            A list of the batch responses corresponding to the requests in the batch.
+            The items could either be an etag, in case of success, or an error object in case of failure.
+        :rtype: list(:class:`~azure.storage.table.models.AzureBatchOperationError`, str)
         '''
         _validate_not_none('table_name', table_name)
 
@@ -871,7 +873,7 @@ class TableService(StorageClient):
             property value, and the property EdmType if returned by the service, 
             returns the EdmType of the property. Generally used if accept is set 
             to JSON_NO_METADATA.
-        :type property_resolver: callback function in format of func(pk, rk, prop_name, prop_value, service_edm_type)
+        :type property_resolver: func(pk, rk, prop_name, prop_value, service_edm_type)
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: The retrieved entity.
@@ -906,7 +908,7 @@ class TableService(StorageClient):
         :param entity:
             The entity to insert. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: The etag of the inserted entity.
@@ -933,7 +935,7 @@ class TableService(StorageClient):
         :param entity:
             The entity to update. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         :param str if_match:
             The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
@@ -972,7 +974,7 @@ class TableService(StorageClient):
         :param entity:
             The entity to merge. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         :param str if_match:
             The client may specify the ETag for the entity on the 
             request in order to compare to the ETag maintained by the service 
@@ -1046,7 +1048,7 @@ class TableService(StorageClient):
         :param entity:
             The entity to insert or replace. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: The etag of the entity.
@@ -1075,7 +1077,7 @@ class TableService(StorageClient):
         :param entity:
             The entity to insert or merge. Could be a dict or an entity object. 
             Must contain a PartitionKey and a RowKey.
-        :type entity: a dict or :class:`~azure.storage.table.models.Entity`
+        :type entity: dict or :class:`~azure.storage.table.models.Entity`
         :param int timeout:
             The server timeout, expressed in seconds.
         :return: The etag of the entity.

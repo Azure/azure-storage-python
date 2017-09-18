@@ -82,7 +82,7 @@ class _HTTPClient(object):
         :param HTTPRequest request:
             The request to serialize and send.
         :return: An HTTPResponse containing the parsed HTTP response.
-        :rtype: :class:`~azure.storage._http.HTTPResponse`
+        :rtype: :class:`~azure.storage.common._http.HTTPResponse`
         '''
         # Verify the body is in bytes or either a file-like/stream object
         if request.body:

@@ -161,7 +161,7 @@ class PageBlobService(BaseBlobService):
             and 2^63 - 1.The default value is 0.
         :param metadata:
             Name-value pairs associated with the blob as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param str lease_id:
             Required if the blob has an active lease.
         :param datetime if_modified_since:
@@ -242,7 +242,7 @@ class PageBlobService(BaseBlobService):
             source blob or file to the destination blob. If one or more name-value
             pairs are specified, the destination blob is created with the specified
             metadata, and metadata is not copied from the source blob or file.
-        :type metadata: A dict mapping str to str.
+        :type metadata: dict(str, str).
         :param datetime destination_if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
@@ -531,7 +531,7 @@ class PageBlobService(BaseBlobService):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A list of valid Page Ranges for the Page Blob.
-        :rtype: list of :class:`~azure.storage.blob.models.PageRange`
+        :rtype: list(:class:`~azure.storage.blob.models.PageRange`)
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -623,7 +623,7 @@ class PageBlobService(BaseBlobService):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A list of different Page Ranges for the Page Blob.
-        :rtype: list of :class:`~azure.storage.blob.models.PageRange`
+        :rtype: list(:class:`~azure.storage.blob.models.PageRange`)
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -670,7 +670,7 @@ class PageBlobService(BaseBlobService):
             Name of existing blob.
         :param str sequence_number_action:
             This property indicates how the service should modify the blob's sequence
-            number. See :class:`.SequenceNumberAction` for more information.
+            number. See :class:`~azure.storage.blob.models.SequenceNumberAction` for more information.
         :param str sequence_number:
             This property sets the blob's sequence number. The sequence number is a
             user-controlled property that you can use to track requests and manage
@@ -813,7 +813,7 @@ class PageBlobService(BaseBlobService):
             ContentSettings object used to set blob properties.
         :param metadata:
             Name-value pairs associated with the blob as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param bool validate_content:
             If true, calculates an MD5 hash for each page of the blob. The storage 
             service checks the hash of the content that has arrived with the hash 
@@ -825,7 +825,7 @@ class PageBlobService(BaseBlobService):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
         :param str lease_id:
@@ -909,7 +909,7 @@ class PageBlobService(BaseBlobService):
             ContentSettings object used to set the blob properties.
         :param metadata:
             Name-value pairs associated with the blob as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param bool validate_content:
             If true, calculates an MD5 hash for each page of the blob. The storage 
             service checks the hash of the content that has arrived with the hash 
@@ -921,7 +921,7 @@ class PageBlobService(BaseBlobService):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use. Note that parallel upload 
             requires the stream to be seekable.
@@ -1045,7 +1045,7 @@ class PageBlobService(BaseBlobService):
             ContentSettings object used to set blob properties.
         :param metadata:
             Name-value pairs associated with the blob as metadata.
-        :type metadata: a dict mapping str to str
+        :type metadata: dict(str, str)
         :param bool validate_content:
             If true, calculates an MD5 hash for each page of the blob. The storage 
             service checks the hash of the content that has arrived with the hash 
@@ -1057,7 +1057,7 @@ class PageBlobService(BaseBlobService):
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
             size of the blob, or None if the total size is unknown.
-        :type progress_callback: callback function in format of func(current, total)
+        :type progress_callback: func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
         :param str lease_id:
@@ -1218,7 +1218,7 @@ class PageBlobService(BaseBlobService):
             source blob or file to the destination blob. If one or more name-value
             pairs are specified, the destination blob is created with the specified
             metadata, and metadata is not copied from the source blob or file.
-        :type metadata: A dict mapping str to str.
+        :type metadata: dict(str, str).
         :param datetime source_if_modified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
