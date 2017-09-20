@@ -133,6 +133,7 @@ class _Retry(object):
         # Determine whether to retry, and if so increment the count, modify the 
         # request as desired, and return the backoff.
         if self._should_retry(context):
+            backoff_interval = backoff(context)
             context.count += 1
 
             # If retry to secondary is enabled, attempt to change the host if the 
@@ -140,7 +141,7 @@ class _Retry(object):
             if self.retry_to_secondary:
                 self._set_next_host_location(context)
 
-            return backoff(context)
+            return backoff_interval
 
         return None
 
@@ -200,7 +201,7 @@ class ExponentialRetry(_Retry):
     '''
 
     def _backoff(self, context):
-        return self.initial_backoff + pow(self.increment_power, context.count)
+        return self.initial_backoff + (0 if context.count == 0 else pow(self.increment_power, context.count))
 
 
 class LinearRetry(_Retry):

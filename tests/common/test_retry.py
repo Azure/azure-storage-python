@@ -26,6 +26,7 @@ from azure.storage.common.retry import (
     ExponentialRetry,
     no_retry,
 )
+from azure.storage.common.models import RetryContext
 from tests.testcase import (
     StorageTestCase,
     record,
@@ -38,15 +39,18 @@ class ResponseCallback(object):
         self.status = status
         self.new_status = new_status
         self.first = True
+        self.count = 0
 
     def override_first_status(self, response):
         if self.first and response.status == self.status:
             response.status = self.new_status
             self.first = False
+        self.count += 1
 
     def override_status(self, response):
         if response.status == self.status:
             response.status = self.new_status
+        self.count += 1
 
 
 class _OperationContext(object):
@@ -169,6 +173,64 @@ class StorageRetryTest(StorageTestCase):
         # The initial create will return 201, but we overwrite it and retry.
         # The retry will then get a 409 and return false.
         self.assertFalse(created)
+
+    @record
+    def test_exponential_retry(self):
+        # Arrange
+        container_name = self.get_resource_name()
+        service = self._create_storage_service(BlockBlobService, self.settings)
+        service.create_container(container_name)
+        service.retry = ExponentialRetry(max_attempts=3).retry
+
+        # Force the create call to 'timeout' with a 408
+        response_callback = ResponseCallback(status=200, new_status=408)
+        service.response_callback = response_callback.override_status
+
+        # Act
+        with self.assertRaises(AzureHttpError):
+            service.get_container_metadata(container_name)
+
+        # Assert the response was called the right number of times (1 initial request + 3 retries)
+        self.assertEqual(response_callback.count, 1+3)
+
+        # Clean up
+        service.response_callback = None
+        service.delete_container(container_name)
+
+    def test_exponential_retry_interval(self):
+        # Arrange
+        initial_backoff = 15
+        increment_power = 3
+        retry_policy = ExponentialRetry(initial_backoff, increment_power)
+        context_stub = RetryContext()
+
+        # Act
+        context_stub.count = 0
+        backoff = retry_policy._backoff(context_stub)
+
+        # Assert
+        self.assertEqual(backoff, 15)
+
+        # Act
+        context_stub.count = 1
+        backoff = retry_policy._backoff(context_stub)
+
+        # Assert
+        self.assertEqual(backoff, 18)
+
+        # Act
+        context_stub.count = 2
+        backoff = retry_policy._backoff(context_stub)
+
+        # Assert
+        self.assertEqual(backoff, 24)
+
+        # Act
+        context_stub.count = 3
+        backoff = retry_policy._backoff(context_stub)
+
+        # Assert
+        self.assertEqual(backoff, 42)
 
     @record
     def test_invalid_retry(self):
