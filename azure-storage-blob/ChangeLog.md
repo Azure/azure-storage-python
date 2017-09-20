@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX:
+- Added support for soft delete feature. If a delete retention policy is enabled through the set service properties API, then blobs or snapshots could be deleted softly and retained for a specified number of days, before being permanently removed by garbage collection.
+
 ## Version 1.0.0:
 
 - The package has switched from Apache 2.0 to the MIT license.

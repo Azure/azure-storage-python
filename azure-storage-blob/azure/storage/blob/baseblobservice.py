@@ -1278,6 +1278,10 @@ class BaseBlobService(StorageClient):
                     Version 2012-02-12 and newer. Specifies that metadata
                     related to any current or previous Copy Blob operation
                     should be included in the response.
+                deleted:
+                    Version 2017-07-29 and newer. Specifies that soft deleted blobs
+                    which are retained by the service should be included
+                    in the response.
         :param str delimiter:
             When the request includes this parameter, the operation
             returns a :class:`~azure.storage.blob.models.BlobPrefix` element in the response body that acts as a
@@ -1343,30 +1347,41 @@ class BaseBlobService(StorageClient):
 
     def set_blob_service_properties(
             self, logging=None, hour_metrics=None, minute_metrics=None,
-            cors=None, target_version=None, timeout=None):
+            cors=None, target_version=None, timeout=None, delete_retention_policy=None):
         '''
         Sets the properties of a storage account's Blob service, including
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
         existing settings on the service for that functionality are preserved.
 
-        :param Logging logging:
+        :param logging:
             Groups the Azure Analytics Logging settings.
-        :param Metrics hour_metrics:
+        :type logging:
+            :class:`~azure.storage.common.models.Logging`
+        :param hour_metrics:
             The hour metrics settings provide a summary of request 
             statistics grouped by API in hourly aggregates for blobs.
-        :param Metrics minute_metrics:
+        :type hour_metrics:
+            :class:`~azure.storage.common.models.Metrics`
+        :param minute_metrics:
             The minute metrics settings provide request statistics 
             for each minute for blobs.
+        :type minute_metrics:
+            :class:`~azure.storage.common.models.Metrics`
         :param cors:
             You can include up to five CorsRule elements in the 
             list. If an empty list is specified, all CORS rules will be deleted, 
             and CORS will be disabled for the service.
         :type cors: list(:class:`~azure.storage.common.models.CorsRule`)
-        :param string target_version:
+        :param str target_version:
             Indicates the default version to use for requests if an incoming 
             request's version is not specified. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param delete_retention_policy:
+            The delete retention policy specifies whether to retain deleted blobs.
+            It also specifies the number of days and versions of blob to keep.
+        :type delete_retention_policy:
+            :class:`~azure.storage.common.models.DeleteRetentionPolicy`
         '''
         request = HTTPRequest()
         request.method = 'PUT'
@@ -1378,7 +1393,8 @@ class BaseBlobService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
         request.body = _get_request_body(
-            _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors, target_version))
+            _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics,
+                                               cors, target_version, delete_retention_policy))
 
         self._perform_request(request)
 
@@ -1389,10 +1405,8 @@ class BaseBlobService(StorageClient):
 
         :param int timeout:
             The timeout parameter is expressed in seconds.
-        :return: The blob service properties.
-        :rtype:
-            :class:`~azure.storage.common.models.ServiceProperties` with an attached
-            target_version property
+        :return: The blob :class:`~azure.storage.common.models.ServiceProperties` with an attached
+            target_version property.
         '''
         request = HTTPRequest()
         request.method = 'GET'
@@ -3136,6 +3150,12 @@ class BaseBlobService(StorageClient):
         snapshots. You can delete both at the same time with the Delete
         Blob operation.
 
+        If a delete retention policy is enabled for the service, then this operation soft deletes the blob or snapshot
+        and retains the blob or snapshot for specified number of days.
+        After specified number of days, blob's data is removed from the service during garbage collection.
+        Soft deleted blob or snapshot is accessible through List Blobs API specifying include=Include.Deleted option.
+        Soft-deleted blob or snapshot can be restored using Undelete API.
+
         :param str container_name:
             Name of existing container.
         :param str blob_name:
@@ -3187,6 +3207,31 @@ class BaseBlobService(StorageClient):
         }
         request.query = {
             'snapshot': _to_str(snapshot),
+            'timeout': _int_to_str(timeout)
+        }
+
+        self._perform_request(request)
+
+    def undelete_blob(self, container_name, blob_name, timeout=None):
+        '''
+        The undelete Blob operation restores the contents and metadata of soft deleted blob or snapshot.
+        Attempting to undelete a blob or snapshot that is not soft deleted will succeed without any changes.
+
+        :param str container_name:
+            Name of existing container.
+        :param str blob_name:
+            Name of existing blob.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {
+            'comp': 'undelete',
             'timeout': _int_to_str(timeout)
         }
 

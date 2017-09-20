@@ -15,6 +15,7 @@ from azure.storage.common import (
     Metrics,
     CorsRule,
     RetentionPolicy,
+    DeleteRetentionPolicy,
 )
 from azure.storage.file import FileService
 from azure.storage.queue import QueueService
@@ -58,6 +59,22 @@ class ServicePropertiesTest(StorageTestCase):
         self.assertEqual(log1.write, log2.write)
         self.assertEqual(log1.delete, log2.delete)
         self._assert_retention_equal(log1.retention_policy, log2.retention_policy)
+
+    def _assert_delete_retention_policy_equal(self, policy1, policy2):
+        if policy1 is None or policy2 is None:
+            self.assertEqual(policy1, policy2)
+            return
+
+        self.assertEqual(policy1.enabled, policy2.enabled)
+        self.assertEqual(policy1.days, policy2.days)
+
+    def _assert_delete_retention_policy_not_equal(self, policy1, policy2):
+        if policy1 is None or policy2 is None:
+            self.assertNotEqual(policy1, policy2)
+            return
+
+        self.assertFalse(policy1.enabled == policy2.enabled
+                         and policy1.days == policy2.days)
 
     def _assert_metrics_equal(self, metrics1, metrics2):
         if metrics1 is None or metrics2 is None:
@@ -144,6 +161,68 @@ class ServicePropertiesTest(StorageTestCase):
         # Assert
         received_props = self.bs.get_blob_service_properties()
         self.assertEqual(received_props.target_version, '2014-02-14')
+
+    @record
+    def test_set_delete_retention_policy(self):
+        # Arrange
+        delete_retention_policy = DeleteRetentionPolicy(enabled=True, days=2)
+
+        # Act
+        self.bs.set_blob_service_properties(delete_retention_policy=delete_retention_policy)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_delete_retention_policy_equal(received_props.delete_retention_policy, delete_retention_policy)
+
+    @record
+    def test_set_delete_retention_policy_edge_cases(self):
+        # Should work with minimum settings
+        delete_retention_policy = DeleteRetentionPolicy(enabled=True, days=1)
+        self.bs.set_blob_service_properties(delete_retention_policy=delete_retention_policy)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_delete_retention_policy_equal(received_props.delete_retention_policy, delete_retention_policy)
+
+        # Should work with maximum settings
+        delete_retention_policy = DeleteRetentionPolicy(enabled=True, days=365)
+        self.bs.set_blob_service_properties(delete_retention_policy=delete_retention_policy)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_delete_retention_policy_equal(received_props.delete_retention_policy, delete_retention_policy)
+
+        # Should not work with 0 days
+        delete_retention_policy = DeleteRetentionPolicy(enabled=True, days=0)
+
+        with self.assertRaises(AzureHttpError):
+            self.bs.set_blob_service_properties(delete_retention_policy=delete_retention_policy)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_delete_retention_policy_not_equal(received_props.delete_retention_policy, delete_retention_policy)
+
+        # Should not work with 366 days
+        delete_retention_policy = DeleteRetentionPolicy(enabled=True, days=366)
+
+        with self.assertRaises(AzureHttpError):
+            self.bs.set_blob_service_properties(delete_retention_policy=delete_retention_policy)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_delete_retention_policy_not_equal(received_props.delete_retention_policy, delete_retention_policy)
+
+    @record
+    def test_set_disabled_delete_retention_policy(self):
+        # Arrange
+        delete_retention_policy = DeleteRetentionPolicy(enabled=False)
+
+        # Act
+        self.bs.set_blob_service_properties(delete_retention_policy=delete_retention_policy)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_delete_retention_policy_equal(received_props.delete_retention_policy, delete_retention_policy)
 
     @record
     def test_set_logging(self):

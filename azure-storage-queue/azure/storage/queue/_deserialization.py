@@ -18,7 +18,7 @@ from azure.storage.common.models import (
     _list,
 )
 from azure.storage.common._deserialization import (
-    _int_to_str,
+    _to_int,
     _parse_metadata,
 )
 from ._encryption import (
@@ -31,7 +31,7 @@ def _parse_metadata_and_message_count(response):
     Extracts approximate messages count header.
     '''
     metadata = _parse_metadata(response)
-    metadata.approximate_message_count = _int_to_str(response.headers.get('x-ms-approximate-messages-count'))
+    metadata.approximate_message_count = _to_int(response.headers.get('x-ms-approximate-messages-count'))
 
     return metadata
 
@@ -123,7 +123,7 @@ def _convert_xml_to_queue_messages(response, decode_function, require_encryption
 
         dequeue_count = message_element.findtext('DequeueCount')
         if dequeue_count is not None:
-            message.dequeue_count = _int_to_str(dequeue_count)
+            message.dequeue_count = _to_int(dequeue_count)
 
         # content is not returned for put_message
         if content is not None:

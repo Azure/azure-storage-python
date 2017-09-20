@@ -17,7 +17,7 @@ from azure.storage.common._common_conversion import (
 )
 from azure.storage.common._deserialization import (
     _parse_properties,
-    _int_to_str,
+    _to_int,
     _parse_metadata,
     _convert_xml_to_signed_identifiers,
     _bool,
@@ -62,7 +62,7 @@ def _parse_page_properties(response):
     put_page = PageBlobProperties()
     put_page.last_modified = parser.parse(response.headers.get('last-modified'))
     put_page.etag = response.headers.get('etag')
-    put_page.sequence_number = _int_to_str(response.headers.get('x-ms-blob-sequence-number'))
+    put_page.sequence_number = _to_int(response.headers.get('x-ms-blob-sequence-number'))
 
     return put_page
 
@@ -74,8 +74,8 @@ def _parse_append_block(response):
     append_block = AppendBlockProperties()
     append_block.last_modified = parser.parse(response.headers.get('last-modified'))
     append_block.etag = response.headers.get('etag')
-    append_block.append_offset = _int_to_str(response.headers.get('x-ms-blob-append-offset'))
-    append_block.committed_block_count = _int_to_str(response.headers.get('x-ms-blob-committed-block-count'))
+    append_block.append_offset = _to_int(response.headers.get('x-ms-blob-append-offset'))
+    append_block.committed_block_count = _to_int(response.headers.get('x-ms-blob-committed-block-count'))
 
     return append_block
 
@@ -95,7 +95,7 @@ def _parse_lease(response):
     '''
     lease = {'time': response.headers.get('x-ms-lease-time')}
     if lease['time']:
-        lease['time'] = _int_to_str(lease['time'])
+        lease['time'] = _to_int(lease['time'])
 
     lease['id'] = response.headers.get('x-ms-lease-id')
 
@@ -215,9 +215,9 @@ def _convert_xml_to_containers(response):
 LIST_BLOBS_ATTRIBUTE_MAP = {
     'Last-Modified': (None, 'last_modified', parser.parse),
     'Etag': (None, 'etag', _to_str),
-    'x-ms-blob-sequence-number': (None, 'sequence_number', _int_to_str),
+    'x-ms-blob-sequence-number': (None, 'sequence_number', _to_int),
     'BlobType': (None, 'blob_type', _to_str),
-    'Content-Length': (None, 'content_length', _int_to_str),
+    'Content-Length': (None, 'content_length', _to_int),
     'ServerEncrypted': (None, 'server_encrypted', _bool),
     'Content-Type': ('content_settings', 'content_type', _to_str),
     'Content-Encoding': ('content_settings', 'content_encoding', _to_str),
@@ -238,6 +238,8 @@ LIST_BLOBS_ATTRIBUTE_MAP = {
     'AccessTierChangeTime': (None, 'blob_tier_change_time', parser.parse),
     'AccessTierInferred': (None, 'blob_tier_inferred', _bool),
     'ArchiveStatus': (None, 'rehydration_status', _to_str),
+    'DeletedTime': (None, 'deleted_time', parser.parse),
+    'RemainingRetentionDays': (None, 'remaining_retention_days', _to_int),
 }
 
 
@@ -252,6 +254,7 @@ def _convert_xml_to_blob_list(response):
       <Blobs>
         <Blob>
           <Name>blob-name</name>
+          <Deleted>true</Deleted>
           <Snapshot>date-time-value</Snapshot>
           <Properties>
             <Last-Modified>date-time-value</Last-Modified>
@@ -276,6 +279,8 @@ def _convert_xml_to_blob_list(response):
             <AccessTier>P4 | P6 | P10 | P20 | P30 | P40 | P50 | P60 | Archive | Cool | Hot</AccessTier>
             <AccessTierChangeTime>date-time-value</AccessTierChangeTime>
             <AccessTierInferred>true</AccessTierInferred>
+            <DeletedTime>datetime</DeletedTime>
+            <RemainingRetentionDays>int</RemainingRetentionDays>
           </Properties>
           <Metadata>   
             <Name>value</Name>
@@ -308,6 +313,10 @@ def _convert_xml_to_blob_list(response):
         blob = Blob()
         blob.name = blob_element.findtext('Name')
         blob.snapshot = blob_element.findtext('Snapshot')
+
+        deleted = blob_element.findtext('Deleted')
+        if deleted:
+            blob.deleted = _bool(deleted)
 
         # Properties
         properties_element = blob_element.find('Properties')
