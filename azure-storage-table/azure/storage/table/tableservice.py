@@ -56,8 +56,8 @@ from azure.storage.common.models import (
     ListGenerator,
     _OperationContext,
 )
-from azure.storage.common.sharedaccesssignature import (
-    SharedAccessSignature,
+from .sharedaccesssignature import (
+    TableSharedAccessSignature,
 )
 from azure.storage.common.storageclient import StorageClient
 from ._deserialization import (
@@ -87,6 +87,10 @@ from ._serialization import (
 )
 from .models import TablePayloadFormat
 from .tablebatch import TableBatch
+from ._constants import (
+    X_MS_VERSION,
+    __version__ as package_version,
+)
 
 
 class TableService(StorageClient):
@@ -190,6 +194,8 @@ class TableService(StorageClient):
         self.key_encryption_key = None
         self.key_resolver_function = None
         self.encryption_resolver_function = None
+        self._X_MS_VERSION = X_MS_VERSION
+        self._update_user_agent_string(package_version)
 
     def generate_account_shared_access_signature(self, resource_types, permission,
                                                  expiry, start=None, ip=None, protocol=None):
@@ -235,7 +241,7 @@ class TableService(StorageClient):
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
-        sas = SharedAccessSignature(self.account_name, self.account_key)
+        sas = TableSharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_account(Services.TABLE, resource_types, permission,
                                     expiry, start=start, ip=ip, protocol=protocol)
 
@@ -309,7 +315,7 @@ class TableService(StorageClient):
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
-        sas = SharedAccessSignature(self.account_name, self.account_key)
+        sas = TableSharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_table(
             table_name,
             permission=permission,
@@ -827,7 +833,7 @@ class TableService(StorageClient):
                 batch_request.path = _get_entity_path(table_name, batch._partition_key, row_key)
             if self.is_emulated:
                 batch_request.path = '/' + DEV_ACCOUNT_NAME + batch_request.path
-            _update_request(batch_request)
+            _update_request(batch_request, self._X_MS_VERSION, self._USER_AGENT_STRING)
 
         # Construct the batch body
         request.body, boundary = _convert_batch_to_json(batch._requests)

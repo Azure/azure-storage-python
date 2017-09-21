@@ -37,10 +37,6 @@ from ._error import (
     _ERROR_VALUE_SHOULD_BE_BYTES_OR_STREAM,
     _ERROR_VALUE_SHOULD_BE_SEEKABLE_STREAM
 )
-from ._constants import (
-    X_MS_VERSION,
-    USER_AGENT_STRING,
-)
 from .models import (
     _unicode_type,
 )
@@ -58,7 +54,7 @@ def _to_utc_datetime(value):
     return value.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
-def _update_request(request):
+def _update_request(request, x_ms_version, user_agent_string):
     # Verify body
     if request.body:
         request.body = _get_data_bytes_or_stream_only('request.body', request.body)
@@ -73,8 +69,8 @@ def _update_request(request):
             request.headers['Content-Length'] = str(length)
 
     # append addtional headers based on the service
-    request.headers['x-ms-version'] = X_MS_VERSION
-    request.headers['User-Agent'] = USER_AGENT_STRING
+    request.headers['x-ms-version'] = x_ms_version
+    request.headers['User-Agent'] = user_agent_string
     request.headers['x-ms-client-request-id'] = str(uuid.uuid1())
 
     # If the host has a path component (ex local storage), move it

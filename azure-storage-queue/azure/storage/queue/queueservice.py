@@ -61,8 +61,8 @@ from azure.storage.common.models import (
     ListGenerator,
     _OperationContext,
 )
-from azure.storage.common.sharedaccesssignature import (
-    SharedAccessSignature,
+from .sharedaccesssignature import (
+    QueueSharedAccessSignature,
 )
 from azure.storage.common.storageclient import StorageClient
 from ._deserialization import (
@@ -77,6 +77,10 @@ from ._serialization import (
 )
 from .models import (
     QueueMessageFormat,
+)
+from ._constants import (
+    X_MS_VERSION,
+    __version__ as package_version,
 )
 
 _HTTP_RESPONSE_NO_CONTENT = 204
@@ -194,6 +198,8 @@ class QueueService(StorageClient):
         self.key_encryption_key = None
         self.key_resolver_function = None
         self.require_encryption = False
+        self._X_MS_VERSION = X_MS_VERSION
+        self._update_user_agent_string(package_version)
 
     def generate_account_shared_access_signature(self, resource_types, permission,
                                                  expiry, start=None, ip=None, protocol=None):
@@ -239,7 +245,7 @@ class QueueService(StorageClient):
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
-        sas = SharedAccessSignature(self.account_name, self.account_key)
+        sas = QueueSharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_account(Services.QUEUE, resource_types, permission,
                                     expiry, start=start, ip=ip, protocol=protocol)
 
@@ -295,7 +301,7 @@ class QueueService(StorageClient):
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
-        sas = SharedAccessSignature(self.account_name, self.account_key)
+        sas = QueueSharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_queue(
             queue_name,
             permission=permission,
