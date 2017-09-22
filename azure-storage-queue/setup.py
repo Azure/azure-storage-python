@@ -60,7 +60,7 @@ except ImportError:
 
 setup(
     name='azure-storage-queue',
-    version='0.36.0',
+    version='0.37.0',
     description='Microsoft Azure Storage Queue Client Library for Python',
     long_description=open('README.rst', 'r').read(),
     license='Apache License 2.0',
@@ -86,7 +86,7 @@ setup(
                          'cryptography',
                          'python-dateutil',
                          'requests',
-                         'azure-storage-common'
+                         'azure-storage-common>=0.37.0,<0.38.0'
                      ] + (['futures'] if sys.version_info < (3, 0) else []),
     cmdclass=cmdclass
 )

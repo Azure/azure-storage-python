@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: !!python/unicode '{"test3": "3", "test2": "value", "test5": "2017-09-13T00:55:38Z",
+    body: !!python/unicode '{"test3": "3", "test2": "value", "test5": "2017-10-02T20:21:26Z",
       "test4": "1234567890", "PartitionKey": "001", "test5@odata.type": "Edm.DateTime",
       "test3@odata.type": "Edm.Int64", "RowKey": "batch_delete", "test": "true", "test4@odata.type":
       "Edm.Int64"}'
@@ -12,9 +12,9 @@ interactions:
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
       Prefer: [return-no-content]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [426395e8-981e-11e7-95e7-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:55:38 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [447b75a8-a7af-11e7-8e33-b8e8564491f6]
+      x-ms-date: ['Mon, 02 Oct 2017 20:21:26 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.table.core.windows.net/tablef0500daa
@@ -24,13 +24,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['0']
       dataserviceid: ['https://storagename.table.core.windows.net/tablef0500daa(PartitionKey=''001'',RowKey=''batch_delete'')']
-      date: ['Wed, 13 Sep 2017 00:55:37 GMT']
-      etag: [W/"datetime'2017-09-13T00%3A55%3A38.767046Z'"]
+      date: ['Mon, 02 Oct 2017 20:21:27 GMT']
+      etag: [W/"datetime'2017-10-02T20%3A21%3A27.8003725Z'"]
       location: ['https://storagename.table.core.windows.net/tablef0500daa(PartitionKey=''001'',RowKey=''batch_delete'')']
       preference-applied: [return-no-content]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       x-content-type-options: [nosniff]
-      x-ms-request-id: [5dd93e6a-0002-0125-202b-2c8a32000000]
+      x-ms-request-id: [e03a23d0-0002-00e2-30bc-3bb0a6000000]
       x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
@@ -40,32 +40,32 @@ interactions:
       Connection: [keep-alive]
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [4279644a-981e-11e7-819a-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:55:38 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [448f67d4-a7af-11e7-9d98-b8e8564491f6]
+      x-ms-date: ['Mon, 02 Oct 2017 20:21:26 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.table.core.windows.net/tablef0500daa(PartitionKey='001',RowKey='batch_delete')
   response:
-    body: {string: !!python/unicode '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#tablef0500daa/@Element","odata.etag":"W/\"datetime''2017-09-13T00%3A55%3A38.767046Z''\"","PartitionKey":"001","RowKey":"batch_delete","Timestamp":"2017-09-13T00:55:38.767046Z","test3@odata.type":"Edm.Int64","test3":"3","test2":"value","test5@odata.type":"Edm.DateTime","test5":"2017-09-13T00:55:38Z","test4@odata.type":"Edm.Int64","test4":"1234567890","test":"true"}'}
+    body: {string: !!python/unicode '{"odata.metadata":"https://storagename.table.core.windows.net/$metadata#tablef0500daa/@Element","odata.etag":"W/\"datetime''2017-10-02T20%3A21%3A27.8003725Z''\"","PartitionKey":"001","RowKey":"batch_delete","Timestamp":"2017-10-02T20:21:27.8003725Z","test3@odata.type":"Edm.Int64","test3":"3","test2":"value","test5@odata.type":"Edm.DateTime","test5":"2017-10-02T20:21:26Z","test4@odata.type":"Edm.Int64","test4":"1234567890","test":"true"}'}
     headers:
       cache-control: [no-cache]
       content-type: [application/json;odata=minimalmetadata;streaming=true;charset=utf-8]
-      date: ['Wed, 13 Sep 2017 00:55:37 GMT']
-      etag: [W/"datetime'2017-09-13T00%3A55%3A38.767046Z'"]
+      date: ['Mon, 02 Oct 2017 20:21:27 GMT']
+      etag: [W/"datetime'2017-10-02T20%3A21%3A27.8003725Z'"]
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
-      x-ms-request-id: [5dd93e7c-0002-0125-302b-2c8a32000000]
+      x-ms-request-id: [e03a23df-0002-00e2-3abc-3bb0a6000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '--batch_427e999c-981e-11e7-8eae-b8e8564491f6
+    body: !!python/unicode '--batch_4494bdba-a7af-11e7-afca-b8e8564491f6
 
-      Content-Type: multipart/mixed; boundary=changeset_427e9a1e-981e-11e7-b0bb-b8e8564491f6
+      Content-Type: multipart/mixed; boundary=changeset_4494be47-a7af-11e7-a05e-b8e8564491f6
 
 
-      --changeset_427e9a1e-981e-11e7-b0bb-b8e8564491f6
+      --changeset_4494be47-a7af-11e7-a05e-b8e8564491f6
 
       Content-Type: application/http
 
@@ -81,37 +81,37 @@ interactions:
       Accept: application/json;odata=minimalmetadata
 
 
-      --changeset_427e9a1e-981e-11e7-b0bb-b8e8564491f6--
+      --changeset_4494be47-a7af-11e7-a05e-b8e8564491f6--
 
-      --batch_427e999c-981e-11e7-8eae-b8e8564491f6--'
+      --batch_4494bdba-a7af-11e7-afca-b8e8564491f6--'
     headers:
       Connection: [keep-alive]
       Content-Length: ['492']
-      Content-Type: [!!python/unicode 'multipart/mixed; boundary=batch_427e999c-981e-11e7-8eae-b8e8564491f6']
+      Content-Type: [!!python/unicode 'multipart/mixed; boundary=batch_4494bdba-a7af-11e7-afca-b8e8564491f6']
       DataServiceVersion: [3.0;NetFx]
       MaxDataServiceVersion: ['3.0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [427e9c61-981e-11e7-abb2-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:55:39 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [4494c026-a7af-11e7-a92f-b8e8564491f6]
+      x-ms-date: ['Mon, 02 Oct 2017 20:21:26 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.table.core.windows.net/$batch
   response:
-    body: {string: !!python/unicode "--batchresponse_d7f48bfe-0d31-4deb-a146-fee129bc5848\r\
-        \nContent-Type: multipart/mixed; boundary=changesetresponse_a61c0f4e-1182-42ca-81f9-a711787861ac\r\
-        \n\r\n--changesetresponse_a61c0f4e-1182-42ca-81f9-a711787861ac\r\nContent-Type:\
+    body: {string: !!python/unicode "--batchresponse_e84a0d5b-bfc1-4e29-9f17-a19434b4dd67\r\
+        \nContent-Type: multipart/mixed; boundary=changesetresponse_05e6df90-d649-46a0-a8b3-b8696f8dfb8c\r\
+        \n\r\n--changesetresponse_05e6df90-d649-46a0-a8b3-b8696f8dfb8c\r\nContent-Type:\
         \ application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nHTTP/1.1 204\
         \ No Content\r\nContent-ID: 1\r\nX-Content-Type-Options: nosniff\r\nCache-Control:\
-        \ no-cache\r\nDataServiceVersion: 1.0;\r\n\r\n\r\n--changesetresponse_a61c0f4e-1182-42ca-81f9-a711787861ac--\r\
-        \n--batchresponse_d7f48bfe-0d31-4deb-a146-fee129bc5848--\r\n"}
+        \ no-cache\r\nDataServiceVersion: 1.0;\r\n\r\n\r\n--changesetresponse_05e6df90-d649-46a0-a8b3-b8696f8dfb8c--\r\
+        \n--batchresponse_e84a0d5b-bfc1-4e29-9f17-a19434b4dd67--\r\n"}
     headers:
       cache-control: [no-cache]
-      content-type: [multipart/mixed; boundary=batchresponse_d7f48bfe-0d31-4deb-a146-fee129bc5848]
-      date: ['Wed, 13 Sep 2017 00:55:37 GMT']
+      content-type: [multipart/mixed; boundary=batchresponse_e84a0d5b-bfc1-4e29-9f17-a19434b4dd67]
+      date: ['Mon, 02 Oct 2017 20:21:27 GMT']
       server: [Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
-      x-ms-request-id: [5dd93e83-0002-0125-352b-2c8a32000000]
+      x-ms-request-id: [e03a23e3-0002-00e2-3ebc-3bb0a6000000]
       x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 version: 1

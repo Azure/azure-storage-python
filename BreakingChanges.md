@@ -4,7 +4,7 @@
 
 **Note: This changelog is deprecated starting with version XX.XX.XX, please refer to the ChangeLog.md in each package for future change logs.** 
 
-## Version XX.XX.XX:
+## Version 0.37.0:
 
 ### All:
 - The library has been split into 5 different packages:

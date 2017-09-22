@@ -2,13 +2,14 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-**Note: This changelog is deprecated starting with version XX.XX.XX, please refer to the ChangeLog.md in each package for future change logs.** 
+**Note: This changelog is deprecated starting with version 0.37.0, please refer to the ChangeLog.md in each package for future change logs.** 
 
-## Version XX.XX.XX:
+## Version 0.37.0:
     
 ### All:
 - Added logging to the library, the name of the logger is 'azure.storage'. User must add handlers to the logger to output logs. Please refer to readme for more info.
 - Secondary endpoints may now be specified in connection strings, provided the corresponding primary endpoint is specified. See the connection string documentation for details.
+- Fixed an off-by-1 bug in exponential retry interval calculation.
 - The library has been split into 5 different packages:
     - azure-storage-common
     - azure-storage-blob
