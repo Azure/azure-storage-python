@@ -1,4 +1,4 @@
-﻿# -------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,33 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # --------------------------------------------------------------------------
-from ._constants import (
-    __author__,
-    __version__,
-    DEFAULT_X_MS_VERSION,
-)
-from .cloudstorageaccount import CloudStorageAccount
-from .models import (
-    RetentionPolicy,
-    Logging,
-    Metrics,
-    CorsRule,
-    ServiceProperties,
-    AccessPolicy,
-    ResourceTypes,
-    Services,
-    AccountPermissions,
-    Protocol,
-    ServiceStats,
-    GeoReplication,
-    LocationMode,
-    RetryContext,
-)
-from .retry import (
-    ExponentialRetry,
-    LinearRetry,
-    no_retry,
-)
-from .sharedaccesssignature import (
-    SharedAccessSignature,
-)
+
+__author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
+__version__ = '0.36.0'
+
+# x-ms-version for storage service.
+X_MS_VERSION = '2017-04-17'

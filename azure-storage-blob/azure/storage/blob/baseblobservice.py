@@ -59,8 +59,8 @@ from azure.storage.common.models import (
     ListGenerator,
     _OperationContext,
 )
-from azure.storage.common.sharedaccesssignature import (
-    SharedAccessSignature,
+from .sharedaccesssignature import (
+    BlobSharedAccessSignature,
 )
 from azure.storage.common.storageclient import StorageClient
 from ._deserialization import (
@@ -87,6 +87,11 @@ from .models import (
     _LeaseActions,
     ContainerPermissions,
     BlobPermissions,
+)
+
+from ._constants import (
+    X_MS_VERSION,
+    __version__ as package_version,
 )
 
 if sys.version_info >= (3,):
@@ -213,6 +218,8 @@ class BaseBlobService(StorageClient):
         self.require_encryption = False
         self.key_encryption_key = None
         self.key_resolver_function = None
+        self._X_MS_VERSION = X_MS_VERSION
+        self._update_user_agent_string(package_version)
 
     def make_blob_url(self, container_name, blob_name, protocol=None, sas_token=None, snapshot=None):
         '''
@@ -295,7 +302,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
-        sas = SharedAccessSignature(self.account_name, self.account_key)
+        sas = BlobSharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_account(Services.BLOB, resource_types, permission,
                                     expiry, start=start, ip=ip, protocol=protocol)
 
@@ -368,7 +375,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
-        sas = SharedAccessSignature(self.account_name, self.account_key)
+        sas = BlobSharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_container(
             container_name,
             permission,
@@ -455,7 +462,7 @@ class BaseBlobService(StorageClient):
         _validate_not_none('self.account_name', self.account_name)
         _validate_not_none('self.account_key', self.account_key)
 
-        sas = SharedAccessSignature(self.account_name, self.account_key)
+        sas = BlobSharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_blob(
             container_name,
             blob_name,

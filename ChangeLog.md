@@ -7,9 +7,10 @@
 ## Version XX.XX.XX:
     
 ### All:
-- Added logging to the library, the name of the logger is 'azure.storage'. User must add handlers to the logger to output logs.
+- Added logging to the library, the name of the logger is 'azure.storage'. User must add handlers to the logger to output logs. Please refer to readme for more info.
 - Secondary endpoints may now be specified in connection strings, provided the corresponding primary endpoint is specified. See the connection string documentation for details.
-- The library has been split into 4 different packages:
+- The library has been split into 5 different packages:
+    - azure-storage-common
     - azure-storage-blob
     - azure-storage-file
     - azure-storage-queue
@@ -17,6 +18,9 @@
 - The package `azure-storage` is now deprecated.
 - The classes that were directly under azure.storage, not under azure.storage.*(blob, file, queue, table), are now under azure.storage.common.
     - Example: azure.storage.retry becomes azure.storage.common.retry
+- The methods on the class SharedAccessSignature were moved into corresponding new subclasses in each service package.
+    - Example: the methods generate_blob and generate_container were moved to BlobSharedAccessSignature in the blob package. BlobSharedAccessSignature inherits generate_account from SharedAccessSignature in common.
+    - Please refer to the reference documentation for more info.
 
 ## Version 0.36.0:
 
