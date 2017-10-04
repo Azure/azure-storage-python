@@ -38,11 +38,6 @@ from samples.queue import (
     QueueSamples,
     QueueEncryptionSamples,
 )
-from samples.table import (
-    TableSasSamples,
-    TableEncryptionSamples,
-    TableSamples,
-)
 
 
 @unittest.skip('Skip sample tests.')
@@ -86,10 +81,6 @@ class SampleTest(unittest.TestCase):
         queue = QueueSamples(self.account)
         queue.run_all_samples()
 
-    def test_table_samples(self):
-        table = TableSamples(self.account)
-        table.run_all_samples()
-
     def test_share_samples(self):
         share = ShareSamples(self.account)
         share.run_all_samples()
@@ -110,10 +101,6 @@ class SampleTest(unittest.TestCase):
         sas = QueueSasSamples(self.account)
         sas.run_all_samples()
 
-    def test_table_sas_samples(self):
-        sas = TableSasSamples(self.account)
-        sas.run_all_samples()
-
     def test_file_sas_samples(self):
         sas = FileSasSamples(self.account)
         sas.run_all_samples()
@@ -128,10 +115,6 @@ class SampleTest(unittest.TestCase):
 
     def test_queue_encryption_samples(self):
         encryption = QueueEncryptionSamples(self.account)
-        encryption.run_all_samples()
-
-    def test_table_encryption_samples(self):
-        encryption = TableEncryptionSamples(self.account)
         encryption.run_all_samples()
 
     def test_blob_encryption_samples(self):

@@ -8,4 +8,3 @@ azure
    azure.storage.blob
    azure.storage.file
    azure.storage.queue
-   azure.storage.table

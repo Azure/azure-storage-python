@@ -15,14 +15,15 @@
     - azure-storage-blob
     - azure-storage-file
     - azure-storage-queue
-    - azure-storage-table
+    - azure-storage-nspkg
+- azure.storage.table is now releasing under a different namespace: azure-cosmosdb-table. Please refer to github.com/Azure/azure-cosmosdb-python for more info.
 - The package `azure-storage` is now deprecated.
-- The classes that were directly under azure.storage, not under azure.storage.*(blob, file, queue, table), are now under azure.storage.common.
+- The classes that were directly under azure.storage, not under azure.storage.*(blob, file, queue), are now under azure.storage.common.
     - Example: azure.storage.retry becomes azure.storage.common.retry
 - The methods on the class SharedAccessSignature were moved into corresponding new subclasses in each service package.
     - Example: the methods generate_blob and generate_container were moved to BlobSharedAccessSignature in the blob package. BlobSharedAccessSignature inherits generate_account from SharedAccessSignature in common.
     - Please refer to the reference documentation for more info.
-
+    
 ### File:
 - Added support for creating and deleting share snapshots. See the new 'snapshot_share' method on FileService.
 - Most read operations (such as getting properties and metadata) now include an additional snapshot parameter.

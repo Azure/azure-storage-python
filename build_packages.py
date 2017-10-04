@@ -20,7 +20,7 @@ import os
 from subprocess import check_call
 
 DEFAULT_DESTINATION_FOLDER = "../dist"
-package_list = ['azure-storage-blob', 'azure-storage-file', 'azure-storage-table', 'azure-storage-queue',
+package_list = ['azure-storage-blob', 'azure-storage-file', 'azure-storage-queue',
                 'azure-storage-common', 'azure-storage-nspkg']
 
 

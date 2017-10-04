@@ -35,7 +35,6 @@ DEFAULT_PROTOCOL = 'https'
 # Development ServiceClient URLs
 DEV_BLOB_HOST = '127.0.0.1:10000'
 DEV_QUEUE_HOST = '127.0.0.1:10001'
-DEV_TABLE_HOST = '127.0.0.1:10002'
 
 # Default credentials for Development Storage Service
 DEV_ACCOUNT_NAME = 'devstoreaccount1'

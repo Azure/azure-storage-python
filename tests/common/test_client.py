@@ -21,7 +21,6 @@ from azure.storage.blob import (
 )
 from azure.storage.file import FileService
 from azure.storage.queue import QueueService
-from azure.storage.table import TableService
 from tests.testcase import (
     StorageTestCase,
     record,
@@ -33,21 +32,18 @@ SERVICES = {
     PageBlobService: 'blob',
     AppendBlobService: 'blob',
     QueueService: 'queue',
-    TableService: 'table',
     FileService: 'file'
 }
 
 _CONNECTION_ENDPOINTS = {
     'blob': 'BlobEndpoint',
     'queue': 'QueueEndpoint',
-    'table': 'TableEndpoint',
     'file': 'FileEndpoint',
 }
 
 _CONNECTION_ENDPOINTS_SECONDARY = {
     'blob': 'BlobSecondaryEndpoint',
     'queue': 'QueueSecondaryEndpoint',
-    'table': 'TableSecondaryEndpoint',
     'file': 'FileSecondaryEndpoint',
 }
 
@@ -162,12 +158,12 @@ class StorageClientTest(StorageTestCase):
 
     def test_create_service_empty_key(self):
         # Arrange
-        NON_BLOB_SERVICES = [QueueService, TableService, FileService]
+        NON_BLOB_SERVICES = [QueueService, FileService]
 
         for type in NON_BLOB_SERVICES:
             # Act
             try:
-                table_service = type('testaccount', '')
+                test_service = type('testaccount', '')
                 self.fail('Passing an empty key to create account should fail.')
             except ValueError as e:
                 self.assertTrue(str(

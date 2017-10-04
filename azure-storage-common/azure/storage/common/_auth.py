@@ -87,27 +87,6 @@ class _StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
         return string_to_sign
 
 
-class _StorageTableSharedKeyAuthentication(_StorageSharedKeyAuthentication):
-    def sign_request(self, request):
-        string_to_sign = \
-            self._get_verb(request) + \
-            self._get_headers(
-                request,
-                ['content-md5', 'content-type', 'x-ms-date'],
-            ) + \
-            self._get_canonicalized_resource(request) + \
-            self._get_canonicalized_resource_query(request)
-
-        self._add_authorization_header(request, string_to_sign)
-        logger.debug("String_to_sign=%s", string_to_sign)
-
-    def _get_canonicalized_resource_query(self, request):
-        for name, value in request.query.items():
-            if name == 'comp':
-                return '?comp=' + value
-        return ''
-
-
 class _StorageNoAuthentication(object):
     def sign_request(self, request):
         pass
