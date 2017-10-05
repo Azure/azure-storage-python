@@ -4,62 +4,62 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [0448ca58-8786-11e7-8670-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:05:32 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [080ccb0a-a898-11e7-96c9-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:07:38 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queuec3a217f5
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Tue, 22 Aug 2017 22:05:31 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [a219ec09-0003-00d1-6b92-1be98b000000]
+      date: ['Wed, 04 Oct 2017 00:07:37 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [371d2cc9-0003-00ec-6aa4-3c5cad000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
-    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
       <SignedIdentifiers><SignedIdentifier><Id>empty</Id><AccessPolicy /></SignedIdentifier></SignedIdentifiers>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['145']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [045de152-8786-11e7-b770-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:05:32 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [08251f47-a898-11e7-afa8-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:07:38 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queuec3a217f5?comp=acl
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Content-Length: ['0']
-      Date: ['Tue, 22 Aug 2017 22:05:31 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [a219ec0d-0003-00d1-6d92-1be98b000000]
+      content-length: ['0']
+      date: ['Wed, 04 Oct 2017 00:07:37 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [371d2cd2-0003-00ec-71a4-3c5cad000000]
       x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [04639e46-8786-11e7-b053-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:05:32 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [082b0980-a898-11e7-b99a-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:07:38 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.queue.core.windows.net/queuec3a217f5?comp=acl
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers><SignedIdentifier><Id>empty</Id></SignedIdentifier></SignedIdentifiers>"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:05:31 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [a219ec0f-0003-00d1-6f92-1be98b000000]
+      cache-control: [no-cache]
+      content-type: [application/xml]
+      date: ['Wed, 04 Oct 2017 00:07:37 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [371d2cd7-0003-00ec-76a4-3c5cad000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

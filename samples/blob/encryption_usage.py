@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,89 +11,99 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
-from cryptography.hazmat.primitives.keywrap import(
-    aes_key_wrap,
-    aes_key_unwrap,
-)
+# --------------------------------------------------------------------------
+import uuid
+from os import urandom
+
+from azure.common import AzureException
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.asymmetric.padding import (
     OAEP,
     MGF1,
 )
+from cryptography.hazmat.primitives.asymmetric.rsa import generate_private_key
 from cryptography.hazmat.primitives.hashes import SHA1
-from os import urandom
-import uuid
-from azure.storage.blob import(
-    BlockBlobService,
-    PageBlobService,
+from cryptography.hazmat.primitives.keywrap import (
+    aes_key_wrap,
+    aes_key_unwrap,
 )
-from azure.common import AzureException
+
 
 # Sample implementations of the encryption-related interfaces.
 class KeyWrapper:
     def __init__(self, kid):
-        self.kek = urandom(32) 
+        self.kek = urandom(32)
         self.backend = default_backend()
         self.kid = 'local:' + kid
+
     def wrap_key(self, key, algorithm='A256KW'):
         if algorithm == 'A256KW':
             return aes_key_wrap(self.kek, key, self.backend)
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def unwrap_key(self, key, algorithm):
         if algorithm == 'A256KW':
             return aes_key_unwrap(self.kek, key, self.backend)
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def get_key_wrap_algorithm(self):
         return 'A256KW'
+
     def get_kid(self):
         return self.kid
+
 
 class KeyResolver:
     def __init__(self):
         self.keys = {}
+
     def put_key(self, key):
         self.keys[key.get_kid()] = key
+
     def resolve_key(self, kid):
         return self.keys[kid]
 
+
 class RSAKeyWrapper:
     def __init__(self, kid):
-        self.private_key = generate_private_key(public_exponent = 65537,
-                                                key_size = 2048,
-                                                backend = default_backend())
+        self.private_key = generate_private_key(public_exponent=65537,
+                                                key_size=2048,
+                                                backend=default_backend())
         self.public_key = self.private_key.public_key()
         self.kid = 'local:' + kid
+
     def wrap_key(self, key, algorithm='RSA'):
         if algorithm == 'RSA':
             return self.public_key.encrypt(key,
-                                     OAEP(
-                                         mgf = MGF1(algorithm=SHA1()),
-                                         algorithm=SHA1(),
-                                         label=None)
-                                     )
+                                           OAEP(
+                                               mgf=MGF1(algorithm=SHA1()),
+                                               algorithm=SHA1(),
+                                               label=None)
+                                           )
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def unwrap_key(self, key, algorithm):
         if algorithm == 'RSA':
             return self.private_key.decrypt(key,
-                                        OAEP(
-                                            mgf=MGF1(algorithm=SHA1()),
-                                            algorithm=SHA1(),
-                                            label=None)
-                                        )
+                                            OAEP(
+                                                mgf=MGF1(algorithm=SHA1()),
+                                                algorithm=SHA1(),
+                                                label=None)
+                                            )
         else:
             raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
     def get_key_wrap_algorithm(self):
         return 'RSA'
+
     def get_kid(self):
         return self.kid
 
-class BlobEncryptionSamples():  
 
+class BlobEncryptionSamples():
     def __init__(self, account):
         self.account = account
 
@@ -101,8 +111,8 @@ class BlobEncryptionSamples():
 
         self.block_blob_service = self.account.create_block_blob_service()
         self.page_blob_service = self.account.create_page_blob_service()
-        self.service_dict = {'block_blob':self.block_blob_service,
-                             'page_blob':self.page_blob_service}
+        self.service_dict = {'block_blob': self.block_blob_service,
+                             'page_blob': self.page_blob_service}
         self.put_encrypted_blob()
         self.get_encrypted_blob()
         self.get_encrypted_blob_key_encryption_key()
@@ -136,7 +146,7 @@ class BlobEncryptionSamples():
         container_name = self._create_container()
         block_blob_name = self._get_blob_reference(prefix='block_blob')
         page_blob_name = self._get_blob_reference(prefix='page_blob')
-        
+
         # KeyWrapper implements the key encryption key interface outlined
         # in the create_blob_from_* documentation on each service. Setting
         # this property will tell the service to encrypt the blob. Blob encryption
@@ -152,7 +162,7 @@ class BlobEncryptionSamples():
         # chunk the data and parallelize the upload with max_connections
         # defaulting to 2.
         self.block_blob_service.create_blob_from_bytes(container_name, block_blob_name,
-                                        b'Foo' * self.block_blob_service.MAX_SINGLE_PUT_SIZE)
+                                                       b'Foo' * self.block_blob_service.MAX_SINGLE_PUT_SIZE)
 
         self.block_blob_service.delete_container(container_name)
 
@@ -175,8 +185,8 @@ class BlobEncryptionSamples():
         # and decrypting range gets.
         blob_full = self.block_blob_service.get_blob_to_bytes(container_name, block_blob_name)
         blob_range = self.block_blob_service.get_blob_to_bytes(container_name, block_blob_name,
-                                                start_range=len(data)//2 + 5,
-                                                end_range=(3*len(data)//4) + 1)
+                                                               start_range=len(data) // 2 + 5,
+                                                               end_range=(3 * len(data) // 4) + 1)
 
         self.block_blob_service.delete_container(container_name)
 
@@ -215,16 +225,16 @@ class BlobEncryptionSamples():
             raise Exception
         except ValueError:
             pass
-        
+
         # If the require_encryption flag is set, the service object will throw if
         # there is no encryption policy set on download.
         kek = KeyWrapper('key1')
         key_resolver = KeyResolver()
         key_resolver.put_key(kek)
-        
+
         self.block_blob_service.key_encryption_key = kek
         self.block_blob_service.create_blob_from_bytes(container_name, encrypted_blob_name, data)
-        
+
         self.block_blob_service.key_encryption_key = None
         try:
             self.block_blob_service.get_blob_to_bytes(container_name, encrypted_blob_name)

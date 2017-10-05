@@ -16,7 +16,6 @@ from __future__ import division
 from contextlib import contextmanager
 import copy
 import inspect
-import json
 import os
 import os.path
 import time
@@ -29,15 +28,17 @@ import uuid
 import unittest
 import sys
 import random
-import tests.settings_real as settings
 import tests.settings_fake as fake_settings
 
-should_log = os.getenv('SDK_TESTS_LOG', '0')
-if should_log.lower() == 'true' or should_log == '1':
-    import logging
-    logger = logging.getLogger('azure.common.filters')
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.StreamHandler())
+# logging is not enabled by default because it pollutes the CI logs
+# uncommenting the following two lines make debugging much easier
+# import logging
+# logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
+
+try:
+    import tests.settings_real as settings
+except ImportError:
+    settings = None
 
 
 class TestMode(object):
@@ -67,7 +68,10 @@ class StorageTestCase(unittest.TestCase):
         self.settings = settings        
         self.fake_settings = fake_settings
 
-        self.test_mode = self.settings.TEST_MODE.lower() or TestMode.playback
+        if settings is None:
+            self.test_mode = TestMode.playback
+        else:
+            self.test_mode = self.settings.TEST_MODE.lower() or TestMode.playback
         
         if self.test_mode == TestMode.playback:
             self.settings = self.fake_settings
@@ -111,7 +115,7 @@ class StorageTestCase(unittest.TestCase):
             rand = random.Random(checksum)
         result = bytearray(size)
         for i in range(size):
-            result[i] = rand.randint(0, 255)
+            result[i] = int(rand.random()*255)  # random() is consistent between python 2 and 3
         return bytes(result)
 
     def get_random_text_data(self, size):
@@ -122,7 +126,7 @@ class StorageTestCase(unittest.TestCase):
         text = u''
         words = [u'hello', u'world', u'python', u'啊齄丂狛狜']
         while (len(text) < size):
-            index = rand.randint(0, len(words) - 1)
+            index = int(rand.random()*(len(words) - 1))
             text = text + u' ' + words[index]
 
         return text
@@ -210,6 +214,9 @@ class StorageTestCase(unittest.TestCase):
                     return
             elif item.name == item_name:
                 return
+            elif hasattr(item, 'snapshot') and item.snapshot == item_name:
+                return
+
 
         standardMsg = '{0} not found in {1}'.format(
             repr(item_name), repr(container))
