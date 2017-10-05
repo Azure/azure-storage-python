@@ -1,0 +1,93 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [e10b6d5e-a897-11e7-bd52-b8e8564491f6]
+      x-ms-content-length: ['1024']
+      x-ms-date: ['Wed, 04 Oct 2017 00:06:32 GMT']
+      x-ms-type: [file]
+      x-ms-version: ['2017-04-17']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharea85b1299/filea85b1299
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      date: ['Wed, 04 Oct 2017 00:06:31 GMT']
+      etag: ['"0x8D50ABBC54C423C"']
+      last-modified: ['Wed, 04 Oct 2017 00:06:32 GMT']
+      server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [4ab6e114-001a-0034-59a4-3cfb7c000000]
+      x-ms-request-server-encrypted: ['false']
+      x-ms-version: ['2017-04-17']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [e12084a1-a897-11e7-bc3a-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:06:32 GMT']
+      x-ms-version: ['2017-04-17']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utsharea85b1299?comp=snapshot&restype=share
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      date: ['Wed, 04 Oct 2017 00:06:31 GMT']
+      etag: ['"0x8D50ABBC5283E97"']
+      last-modified: ['Wed, 04 Oct 2017 00:06:32 GMT']
+      server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [4ab6e116-001a-0034-5aa4-3cfb7c000000]
+      x-ms-snapshot: ['2017-10-04T00:06:32.0000000Z']
+      x-ms-version: ['2017-04-17']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [e1270a94-a897-11e7-b62b-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:06:32 GMT']
+      x-ms-version: ['2017-04-17']
+    method: DELETE
+    uri: https://storagename.file.core.windows.net/utsharea85b1299/filea85b1299
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      date: ['Wed, 04 Oct 2017 00:06:31 GMT']
+      server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [4ab6e117-001a-0034-5ba4-3cfb7c000000]
+      x-ms-version: ['2017-04-17']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [e12dc74f-a897-11e7-9abc-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:06:32 GMT']
+      x-ms-version: ['2017-04-17']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utsharea85b1299/filea85b1299?comp=rangelist&sharesnapshot=2017-10-04T00%3A06%3A32.0000000Z
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Ranges />"}
+    headers:
+      content-type: [application/xml]
+      date: ['Wed, 04 Oct 2017 00:06:31 GMT']
+      etag: ['"0x8D50ABBC54C423C"']
+      last-modified: ['Wed, 04 Oct 2017 00:06:32 GMT']
+      server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-content-length: ['1024']
+      x-ms-request-id: [4ab6e118-001a-0034-5ca4-3cfb7c000000]
+      x-ms-version: ['2017-04-17']
+    status: {code: 200, message: OK}
+version: 1

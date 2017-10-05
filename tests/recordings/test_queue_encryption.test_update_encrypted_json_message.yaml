@@ -4,137 +4,137 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [48d6a490-8786-11e7-b2ef-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:07:27 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [e6f67468-a898-11e7-9a74-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:13:52 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.queue.core.windows.net/encryptionqueue9a7c1749
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Tue, 22 Aug 2017 22:07:27 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [1299889e-0003-0039-6593-1b1470000000]
+      date: ['Wed, 04 Oct 2017 00:14:02 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [648391fa-0003-00ff-50a5-3c694c000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
-    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <QueueMessage><MessageText>{"EncryptedMessageContents": "+mbMmHAUP5Ay8PPIqvm7pW0x29knL62EukMLNGl2Au4=",
-      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "JyabP2591HYNOEsICswe8LznCM75oFBYg+lKxsw+Zcl/OFcIagKIbA==",
+      <QueueMessage><MessageText>{"EncryptedMessageContents": "94s9x/gJtZxAqUmBqlcDJdsbu7ZvVwGNCKacqESRQYE=",
+      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "RHU0BLwFKjXugrP+IWpQQPA2/PaNa/Jjv4UDezsi5KCIqrde765AvQ==",
       "Algorithm": "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-      "AES_CBC_256"}, "ContentEncryptionIV": "bLB8lf+YNmbpS2gBZQxeAQ==", "KeyWrappingMetadata":
-      {"EncryptionLibrary": "Python 0.36.0"}}}</MessageText></QueueMessage>'
+      "AES_CBC_256"}, "ContentEncryptionIV": "B4keEsqaHs3Ely/JiSa+kA==", "KeyWrappingMetadata":
+      {"EncryptionLibrary": "Python 0.37.0"}}}</MessageText></QueueMessage>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['522']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [48ec27b6-8786-11e7-b94a-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:07:27 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [ed10d2a8-a898-11e7-a19f-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:14:02 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.queue.core.windows.net/encryptionqueue9a7c1749/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>e7c9d733-d14f-49a8-9cd5-e2165cc7ff90</MessageId><InsertionTime>Tue,\
-        \ 22 Aug 2017 22:07:27 GMT</InsertionTime><ExpirationTime>Tue, 29 Aug 2017\
-        \ 22:07:27 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAYhukCpMb0wE=</PopReceipt><TimeNextVisible>Tue,\
-        \ 22 Aug 2017 22:07:27 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>92e7e6f2-9b91-4ae1-9033-6da869955efa</MessageId><InsertionTime>Wed,\
+        \ 04 Oct 2017 00:14:02 GMT</InsertionTime><ExpirationTime>Wed, 11 Oct 2017\
+        \ 00:14:02 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAxIywrqU80wE=</PopReceipt><TimeNextVisible>Wed,\
+        \ 04 Oct 2017 00:14:02 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
     headers:
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:07:27 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [129988ae-0003-0039-7393-1b1470000000]
+      content-type: [application/xml]
+      date: ['Wed, 04 Oct 2017 00:14:02 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [6483987e-0003-00ff-6da5-3c694c000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [48f22c9c-8786-11e7-9108-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:07:27 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [ed16604f-a898-11e7-9fd0-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:14:02 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.queue.core.windows.net/encryptionqueue9a7c1749/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>e7c9d733-d14f-49a8-9cd5-e2165cc7ff90</MessageId><InsertionTime>Tue,\
-        \ 22 Aug 2017 22:07:27 GMT</InsertionTime><ExpirationTime>Tue, 29 Aug 2017\
-        \ 22:07:27 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAv2SLHJMb0wE=</PopReceipt><TimeNextVisible>Tue,\
-        \ 22 Aug 2017 22:07:57 GMT</TimeNextVisible><DequeueCount>1</DequeueCount><MessageText>{\"\
-        EncryptedMessageContents\": \"+mbMmHAUP5Ay8PPIqvm7pW0x29knL62EukMLNGl2Au4=\"\
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>92e7e6f2-9b91-4ae1-9033-6da869955efa</MessageId><InsertionTime>Wed,\
+        \ 04 Oct 2017 00:14:02 GMT</InsertionTime><ExpirationTime>Wed, 11 Oct 2017\
+        \ 00:14:02 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAG9aXwKU80wE=</PopReceipt><TimeNextVisible>Wed,\
+        \ 04 Oct 2017 00:14:32 GMT</TimeNextVisible><DequeueCount>1</DequeueCount><MessageText>{\"\
+        EncryptedMessageContents\": \"94s9x/gJtZxAqUmBqlcDJdsbu7ZvVwGNCKacqESRQYE=\"\
         , \"EncryptionData\": {\"WrappedContentKey\": {\"KeyId\": \"key1\", \"EncryptedKey\"\
-        : \"JyabP2591HYNOEsICswe8LznCM75oFBYg+lKxsw+Zcl/OFcIagKIbA==\", \"Algorithm\"\
+        : \"RHU0BLwFKjXugrP+IWpQQPA2/PaNa/Jjv4UDezsi5KCIqrde765AvQ==\", \"Algorithm\"\
         : \"A256KW\"}, \"EncryptionAgent\": {\"Protocol\": \"1.0\", \"EncryptionAlgorithm\"\
-        : \"AES_CBC_256\"}, \"ContentEncryptionIV\": \"bLB8lf+YNmbpS2gBZQxeAQ==\"\
-        , \"KeyWrappingMetadata\": {\"EncryptionLibrary\": \"Python 0.36.0\"}}}</MessageText></QueueMessage></QueueMessagesList>"}
+        : \"AES_CBC_256\"}, \"ContentEncryptionIV\": \"B4keEsqaHs3Ely/JiSa+kA==\"\
+        , \"KeyWrappingMetadata\": {\"EncryptionLibrary\": \"Python 0.37.0\"}}}</MessageText></QueueMessage></QueueMessagesList>"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:07:27 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [129988bb-0003-0039-7f93-1b1470000000]
+      cache-control: [no-cache]
+      content-type: [application/xml]
+      date: ['Wed, 04 Oct 2017 00:14:02 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [64839887-0003-00ff-75a5-3c694c000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
-    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+    body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <QueueMessage><MessageText>{"EncryptedMessageContents": "vLaj3QXoYxEdDfTqURi0aBhWMdwcPCD1qwbkJwKYCqE=",
-      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "ps2XO0nwNGhPw+pYk4CGPVnlNqZCuW5wsPDRsW6Yk9v67RZ0H4x48Q==",
+      <QueueMessage><MessageText>{"EncryptedMessageContents": "9XvE7d8RfkPCxUlm9ecFW8h1uLQyExUQHaSSeYQHhoc=",
+      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "guuSSCz+3cPe90bN+8CI8GNAZydKahcnFKGIFxzp+UmJazT0GpPLNw==",
       "Algorithm": "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-      "AES_CBC_256"}, "ContentEncryptionIV": "ZzGqSLZ79ErfCIcLIwqyog==", "KeyWrappingMetadata":
-      {"EncryptionLibrary": "Python 0.36.0"}}}</MessageText></QueueMessage>'
+      "AES_CBC_256"}, "ContentEncryptionIV": "/x4QeI272WLQs7r1tLBiQg==", "KeyWrappingMetadata":
+      {"EncryptionLibrary": "Python 0.37.0"}}}</MessageText></QueueMessage>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['522']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [48f8203e-8786-11e7-957f-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:07:27 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [ed1ca6c0-a898-11e7-bf5f-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:14:02 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
-    uri: https://storagename.queue.core.windows.net/encryptionqueue9a7c1749/messages/e7c9d733-d14f-49a8-9cd5-e2165cc7ff90?popreceipt=AgAAAAMAAAAAAAAAv2SLHJMb0wE%3D&visibilitytimeout=0
+    uri: https://storagename.queue.core.windows.net/encryptionqueue9a7c1749/messages/92e7e6f2-9b91-4ae1-9033-6da869955efa?popreceipt=AgAAAAMAAAAAAAAAG9aXwKU80wE%3D&visibilitytimeout=0
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Content-Length: ['0']
-      Date: ['Tue, 22 Aug 2017 22:07:27 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-popreceipt: [AwAAAAMAAAAAAAAAcASwCpMb0wEBAAAA]
-      x-ms-request-id: [129988c1-0003-0039-0593-1b1470000000]
-      x-ms-time-next-visible: ['Tue, 22 Aug 2017 22:07:27 GMT']
+      content-length: ['0']
+      date: ['Wed, 04 Oct 2017 00:14:02 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-popreceipt: [AwAAAAMAAAAAAAAAz3W8rqU80wEBAAAA]
+      x-ms-request-id: [6483988d-0003-00ff-7aa5-3c694c000000]
+      x-ms-time-next-visible: ['Wed, 04 Oct 2017 00:14:02 GMT']
       x-ms-version: ['2017-04-17']
     status: {code: 204, message: No Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [48fe61b0-8786-11e7-9b54-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:07:27 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [ed228619-a898-11e7-a013-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:14:02 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.queue.core.windows.net/encryptionqueue9a7c1749/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>e7c9d733-d14f-49a8-9cd5-e2165cc7ff90</MessageId><InsertionTime>Tue,\
-        \ 22 Aug 2017 22:07:27 GMT</InsertionTime><ExpirationTime>Tue, 29 Aug 2017\
-        \ 22:07:27 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAPRGYHJMb0wE=</PopReceipt><TimeNextVisible>Tue,\
-        \ 22 Aug 2017 22:07:57 GMT</TimeNextVisible><DequeueCount>2</DequeueCount><MessageText>{\"\
-        EncryptedMessageContents\": \"vLaj3QXoYxEdDfTqURi0aBhWMdwcPCD1qwbkJwKYCqE=\"\
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>92e7e6f2-9b91-4ae1-9033-6da869955efa</MessageId><InsertionTime>Wed,\
+        \ 04 Oct 2017 00:14:02 GMT</InsertionTime><ExpirationTime>Wed, 11 Oct 2017\
+        \ 00:14:02 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAPeajwKU80wE=</PopReceipt><TimeNextVisible>Wed,\
+        \ 04 Oct 2017 00:14:32 GMT</TimeNextVisible><DequeueCount>2</DequeueCount><MessageText>{\"\
+        EncryptedMessageContents\": \"9XvE7d8RfkPCxUlm9ecFW8h1uLQyExUQHaSSeYQHhoc=\"\
         , \"EncryptionData\": {\"WrappedContentKey\": {\"KeyId\": \"key1\", \"EncryptedKey\"\
-        : \"ps2XO0nwNGhPw+pYk4CGPVnlNqZCuW5wsPDRsW6Yk9v67RZ0H4x48Q==\", \"Algorithm\"\
+        : \"guuSSCz+3cPe90bN+8CI8GNAZydKahcnFKGIFxzp+UmJazT0GpPLNw==\", \"Algorithm\"\
         : \"A256KW\"}, \"EncryptionAgent\": {\"Protocol\": \"1.0\", \"EncryptionAlgorithm\"\
-        : \"AES_CBC_256\"}, \"ContentEncryptionIV\": \"ZzGqSLZ79ErfCIcLIwqyog==\"\
-        , \"KeyWrappingMetadata\": {\"EncryptionLibrary\": \"Python 0.36.0\"}}}</MessageText></QueueMessage></QueueMessagesList>"}
+        : \"AES_CBC_256\"}, \"ContentEncryptionIV\": \"/x4QeI272WLQs7r1tLBiQg==\"\
+        , \"KeyWrappingMetadata\": {\"EncryptionLibrary\": \"Python 0.37.0\"}}}</MessageText></QueueMessage></QueueMessagesList>"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:07:27 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [129988d2-0003-0039-1493-1b1470000000]
+      cache-control: [no-cache]
+      content-type: [application/xml]
+      date: ['Wed, 04 Oct 2017 00:14:02 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [64839895-0003-00ff-02a5-3c694c000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

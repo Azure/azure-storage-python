@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [4231b2e8-8785-11e7-b778-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:00:06 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [08581142-a897-11e7-8141-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:00:29 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerba31475?restype=container
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Tue, 22 Aug 2017 22:00:07 GMT']
-      ETag: ['"0x8D4E9A9269A417B"']
-      Last-Modified: ['Tue, 22 Aug 2017 22:00:07 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [978a2763-0001-0115-4492-1bd018000000]
+      date: ['Wed, 04 Oct 2017 00:00:28 GMT']
+      etag: ['"0x8D50ABAECA57223"']
+      last-modified: ['Wed, 04 Oct 2017 00:00:29 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [f3b90b8e-001e-0037-71a3-3cf87b000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,24 +26,24 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [426967e2-8785-11e7-8275-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:00:07 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [08905b91-a897-11e7-a17c-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:00:29 GMT']
       x-ms-lease-action: [acquire]
       x-ms-lease-duration: ['15']
       x-ms-version: ['2017-04-17']
     method: PUT
-    uri: https://storagename.blob.core.windows.net/containerba31475?restype=container&comp=lease
+    uri: https://storagename.blob.core.windows.net/containerba31475?comp=lease&restype=container
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Tue, 22 Aug 2017 22:00:07 GMT']
-      ETag: ['"0x8D4E9A9269A417B"']
-      Last-Modified: ['Tue, 22 Aug 2017 22:00:07 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-lease-id: [0abe3d2b-b21d-4e81-872f-f1e7c46f7cf5]
-      x-ms-request-id: [978a27c1-0001-0115-1392-1bd018000000]
+      date: ['Wed, 04 Oct 2017 00:00:28 GMT']
+      etag: ['"0x8D50ABAECA57223"']
+      last-modified: ['Wed, 04 Oct 2017 00:00:29 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-lease-id: [9e8a6e0d-51fc-489e-9215-4db772091161]
+      x-ms-request-id: [f3b90bed-001e-0037-44a3-3cf87b000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -51,43 +51,43 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [426f6048-8785-11e7-a03c-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:00:07 GMT']
-      x-ms-lease-id: [0abe3d2b-b21d-4e81-872f-f1e7c46f7cf5]
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [08965e99-a897-11e7-9010-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:00:29 GMT']
+      x-ms-lease-id: [9e8a6e0d-51fc-489e-9215-4db772091161]
       x-ms-version: ['2017-04-17']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/containerba31475?restype=container
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      Date: ['Tue, 22 Aug 2017 22:00:07 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [978a27c7-0001-0115-1992-1bd018000000]
+      date: ['Wed, 04 Oct 2017 00:00:28 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      transfer-encoding: [chunked]
+      x-ms-request-id: [f3b90bf9-001e-0037-4ea3-3cf87b000000]
       x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [42758392-8785-11e7-bf43-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:00:07 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [089be457-a897-11e7-94a1-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:00:29 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/containerba31475?restype=container
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
-        \ specified container does not exist.\nRequestId:978a27df-0001-0115-2f92-1bd018000000\n\
-        Time:2017-08-22T22:00:07.4342222Z</Message></Error>"}
+        \ specified container does not exist.\nRequestId:f3b90c08-001e-0037-5ca3-3cf87b000000\n\
+        Time:2017-10-04T00:00:29.4414501Z</Message></Error>"}
     headers:
-      Content-Length: ['225']
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:00:07 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Vary: [Origin]
-      x-ms-request-id: [978a27df-0001-0115-2f92-1bd018000000]
+      content-length: ['225']
+      content-type: [application/xml]
+      date: ['Wed, 04 Oct 2017 00:00:28 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      vary: [Origin]
+      x-ms-request-id: [f3b90c08-001e-0037-5ca3-3cf87b000000]
       x-ms-version: ['2017-04-17']
     status: {code: 404, message: The specified container does not exist.}
 version: 1

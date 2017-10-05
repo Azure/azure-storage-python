@@ -1,6 +1,10 @@
 ﻿# coding: utf-8
 
-#-------------------------------------------------------------------------
+import io
+import os
+import random
+import time
+# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +17,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import uuid
-import random
-import io
-import os
-import time
 
 from azure.storage.blob import (
     ContentSettings,
@@ -26,8 +26,8 @@ from azure.storage.blob import (
     BlockListType,
 )
 
-class BlockBlobSamples():  
 
+class BlockBlobSamples():
     def __init__(self, account):
         self.account = account
 
@@ -35,7 +35,7 @@ class BlockBlobSamples():
         self.service = self.account.create_block_blob_service()
 
         self.delete_blob()
-        self.blob_metadata()   
+        self.blob_metadata()
         self.blob_properties()
         self.blob_exists()
         self.copy_blob()
@@ -46,7 +46,7 @@ class BlockBlobSamples():
         self.blob_with_stream()
         self.blob_with_path()
         self.blob_with_text()
-        
+
         self.blocks()
 
     def _get_resource_reference(self, prefix):
@@ -88,22 +88,22 @@ class BlockBlobSamples():
 
         # Basic
         self.service.set_blob_metadata(container_name, blob_name, metadata=metadata)
-        metadata = self.service.get_blob_metadata(container_name, blob_name) # metadata={'val1': 'foo', 'val2': 'blah'}
+        metadata = self.service.get_blob_metadata(container_name, blob_name)  # metadata={'val1': 'foo', 'val2': 'blah'}
 
         # Replaces values, does not merge
         metadata = {'new': 'val'}
         self.service.set_blob_metadata(container_name, blob_name, metadata=metadata)
-        metadata = self.service.get_blob_metadata(container_name, blob_name) # metadata={'new': 'val'}
+        metadata = self.service.get_blob_metadata(container_name, blob_name)  # metadata={'new': 'val'}
 
         # Capital letters
         metadata = {'NEW': 'VAL'}
         self.service.set_blob_metadata(container_name, blob_name, metadata=metadata)
-        metadata = self.service.get_blob_metadata(container_name, blob_name) # metadata={'new': 'VAL'}
+        metadata = self.service.get_blob_metadata(container_name, blob_name)  # metadata={'new': 'VAL'}
 
         # Clearing
         self.service.set_blob_metadata(container_name, blob_name)
-        metadata = self.service.get_blob_metadata(container_name, blob_name) # metadata={}
-    
+        metadata = self.service.get_blob_metadata(container_name, blob_name)  # metadata={}
+
         self.service.delete_container(container_name)
 
     def blob_properties(self):
@@ -113,26 +113,26 @@ class BlockBlobSamples():
         metadata = {'val1': 'foo', 'val2': 'blah'}
         self.service.create_blob_from_text(container_name, blob_name, u'hello world', metadata=metadata)
 
-        settings = ContentSettings(content_type='html', content_language='fr')       
+        settings = ContentSettings(content_type='html', content_language='fr')
 
         # Basic
         self.service.set_blob_properties(container_name, blob_name, content_settings=settings)
         blob = self.service.get_blob_properties(container_name, blob_name)
-        content_language = blob.properties.content_settings.content_language # fr
-        content_type = blob.properties.content_settings.content_type # html
-        content_length = blob.properties.content_length # 512
+        content_language = blob.properties.content_settings.content_language  # fr
+        content_type = blob.properties.content_settings.content_type  # html
+        content_length = blob.properties.content_length  # 512
 
         # Metadata
         # Can't set metadata, but get will return metadata already on the blob
         blob = self.service.get_blob_properties(container_name, blob_name)
-        metadata = blob.metadata # metadata={'val1': 'foo', 'val2': 'blah'}
+        metadata = blob.metadata  # metadata={'val1': 'foo', 'val2': 'blah'}
 
         # Replaces values, does not merge
         settings = ContentSettings(content_encoding='utf-8')
         self.service.set_blob_properties(container_name, blob_name, content_settings=settings)
         blob = self.service.get_blob_properties(container_name, blob_name)
-        content_encoding = blob.properties.content_settings.content_encoding # utf-8
-        content_language = blob.properties.content_settings.content_language # None
+        content_encoding = blob.properties.content_settings.content_encoding  # utf-8
+        content_language = blob.properties.content_settings.content_language  # None
 
         self.service.delete_container(container_name)
 
@@ -141,9 +141,9 @@ class BlockBlobSamples():
         blob_name = self._get_blob_reference()
 
         # Basic
-        exists = self.service.exists(container_name, blob_name) # False
+        exists = self.service.exists(container_name, blob_name)  # False
         self.service.create_blob_from_text(container_name, blob_name, u'hello world')
-        exists = self.service.exists(container_name, blob_name) # True
+        exists = self.service.exists(container_name, blob_name)  # True
 
         self.service.delete_container(container_name)
 
@@ -209,7 +209,7 @@ class BlockBlobSamples():
         # Acquire
         # Defaults to infinite lease
         infinite_lease_id = self.service.acquire_blob_lease(container_name, blob_name1)
-        
+
         # Acquire
         # Set lease time, may be between 15 and 60 seconds
         fixed_lease_id = self.service.acquire_blob_lease(container_name, blob_name2, lease_duration=30)
@@ -221,7 +221,7 @@ class BlockBlobSamples():
                                                             blob_name3,
                                                             proposed_lease_id=proposed_lease_id_1,
                                                             lease_duration=30)
-        modified_lease_id # equal to proposed_lease_id_1
+        modified_lease_id  # equal to proposed_lease_id_1
 
         # Renew
         # Resets the 30 second lease timer
@@ -232,7 +232,7 @@ class BlockBlobSamples():
         # Change
         # Change the lease ID of an active lease. 
         proposed_lease_id_2 = '55e97f64-73e8-4390-838d-d9e84a374322'
-        self.service.change_blob_lease(container_name, blob_name3, modified_lease_id, 
+        self.service.change_blob_lease(container_name, blob_name3, modified_lease_id,
                                        proposed_lease_id=proposed_lease_id_2)
 
         # Release
@@ -245,14 +245,14 @@ class BlockBlobSamples():
         # By default, a fixed-duration lease breaks after the remaining lease period 
         # elapses, and an infinite lease breaks immediately.
         infinite_lease_break_time = self.service.break_blob_lease(container_name, blob_name1)
-        infinite_lease_break_time # 0
+        infinite_lease_break_time  # 0
 
         # Break
         # By default this would leave whatever time remained of the 30 second 
         # lease period, but a break period can be provided to indicate when the 
         # break should take affect
         lease_break_time = self.service.break_blob_lease(container_name, blob_name2, lease_break_period=10)
-        lease_break_time # 10
+        lease_break_time  # 10
 
         self.service.delete_container(container_name)
 
@@ -264,45 +264,48 @@ class BlockBlobSamples():
         blob_name = self._get_blob_reference()
         self.service.create_blob_from_bytes(container_name, blob_name, data)
         blob = self.service.get_blob_to_bytes(container_name, blob_name)
-        content = blob.content # hello world
+        content = blob.content  # hello world
 
         # Download range
         blob = self.service.get_blob_to_bytes(container_name, blob_name,
                                               start_range=3, end_range=10)
-        content = blob.content # data from 3-10
+        content = blob.content  # data from 3-10
 
         # Upload from index in byte array
         blob_name = self._get_blob_reference()
         self.service.create_blob_from_bytes(container_name, blob_name, data, index=3)
 
         # Content settings, metadata
-        settings = ContentSettings(content_type='html', content_language='fr')   
-        metadata={'val1': 'foo', 'val2': 'blah'}
+        settings = ContentSettings(content_type='html', content_language='fr')
+        metadata = {'val1': 'foo', 'val2': 'blah'}
         blob_name = self._get_blob_reference()
-        self.service.create_blob_from_bytes(container_name, blob_name, data, 
-                                       content_settings=settings,
-                                       metadata=metadata)
+        self.service.create_blob_from_bytes(container_name, blob_name, data,
+                                            content_settings=settings,
+                                            metadata=metadata)
         blob = self.service.get_blob_to_bytes(container_name, blob_name)
-        metadata = blob.metadata # metadata={'val1': 'foo', 'val2': 'blah'}
-        content_language = blob.properties.content_settings.content_language # fr
-        content_type = blob.properties.content_settings.content_type # html
+        metadata = blob.metadata  # metadata={'val1': 'foo', 'val2': 'blah'}
+        content_language = blob.properties.content_settings.content_language  # fr
+        content_type = blob.properties.content_settings.content_type  # html
 
         # Progress
         # Use slightly larger data so the chunking is more visible
-        data = self._get_random_bytes(8 * 1024 *1024)
+        data = self._get_random_bytes(8 * 1024 * 1024)
+
         def upload_callback(current, total):
             print('({}, {})'.format(current, total))
+
         def download_callback(current, total):
             print('({}, {}) '.format(current, total))
+
         blob_name = self._get_blob_reference()
 
         print('upload: ')
-        self.service.create_blob_from_bytes(container_name, blob_name, data, 
-                                       progress_callback=upload_callback)
+        self.service.create_blob_from_bytes(container_name, blob_name, data,
+                                            progress_callback=upload_callback)
 
         print('download: ')
-        blob = self.service.get_blob_to_bytes(container_name, blob_name, 
-                                         progress_callback=download_callback)
+        blob = self.service.get_blob_to_bytes(container_name, blob_name,
+                                              progress_callback=download_callback)
 
         self.service.delete_container(container_name)
 
@@ -313,10 +316,10 @@ class BlockBlobSamples():
         input_stream = io.BytesIO(self._get_random_bytes(15))
         output_stream = io.BytesIO()
         blob_name = self._get_blob_reference()
-        self.service.create_blob_from_stream(container_name, blob_name, 
+        self.service.create_blob_from_stream(container_name, blob_name,
                                              input_stream, 15)
-        blob = self.service.get_blob_to_stream(container_name, blob_name, 
-                                          output_stream)
+        blob = self.service.get_blob_to_stream(container_name, blob_name,
+                                               output_stream)
         content_length = blob.properties.content_length
 
         # Download range
@@ -347,7 +350,7 @@ class BlockBlobSamples():
         # Append streams are not seekable and so must be downloaded serially by setting max_connections=1.
         blob = self.service.get_blob_to_path(container_name, blob_name, OUTPUT_FILE_PATH, open_mode='ab',
                                              max_connections=1)
-        content_length = blob.properties.content_length # will be the same, but local blob length will be longer
+        content_length = blob.properties.content_length  # will be the same, but local blob length will be longer
 
         # Download range
         # Content settings, metadata
@@ -377,7 +380,7 @@ class BlockBlobSamples():
         blob_name = self._get_blob_reference()
         self.service.create_blob_from_text(container_name, blob_name, data)
         blob = self.service.get_blob_to_text(container_name, blob_name)
-        content = blob.content # 'hello world'
+        content = blob.content  # 'hello world'
 
         # Encoding
         text = u'hello 啊齄丂狛狜 world'
@@ -385,7 +388,7 @@ class BlockBlobSamples():
         blob_name = self._get_blob_reference()
         self.service.create_blob_from_text(container_name, blob_name, text, 'utf-16')
         blob = self.service.get_blob_to_text(container_name, blob_name, 'utf-16')
-        content = blob.content # 'hello 啊齄丂狛狜 world'
+        content = blob.content  # 'hello 啊齄丂狛狜 world'
 
         # Download range
         # Content settings, metadata
@@ -407,13 +410,13 @@ class BlockBlobSamples():
 
         # Get Block List
         # Defaults to committed only, specify all to get committed and uncommitted
-        block_list = self.service.get_block_list(container_name, blob_name, 
+        block_list = self.service.get_block_list(container_name, blob_name,
                                                  block_list_type=BlockListType.All)
-        uncommitted = len(block_list.uncommitted_blocks) # 3
-        committed = len(block_list.committed_blocks) # 0
+        uncommitted = len(block_list.uncommitted_blocks)  # 3
+        committed = len(block_list.committed_blocks)  # 0
 
         # Note the blob does not yet appears as blocks have not been committed
-        exists = self.service.exists(container_name, blob_name) # False
+        exists = self.service.exists(container_name, blob_name)  # False
 
         # Commit the blocks
         # BlockBlock state defaults to Latest meaning the uncommitted and then 
@@ -423,10 +426,10 @@ class BlockBlobSamples():
 
         # Get Block List
         # Defaults to committed only, specify all to get committed and uncommitted
-        block_list = self.service.get_block_list(container_name, blob_name, 
+        block_list = self.service.get_block_list(container_name, blob_name,
                                                  block_list_type=BlockListType.All)
-        uncommitted = len(block_list.uncommitted_blocks) # 0
-        committed = len(block_list.committed_blocks) # 3
+        uncommitted = len(block_list.uncommitted_blocks)  # 0
+        committed = len(block_list.committed_blocks)  # 3
 
         # Add a block
 
@@ -434,10 +437,10 @@ class BlockBlobSamples():
         self.service.put_block(container_name, blob_name, b'DDD', '4')
 
         # Get the existing blocks
-        block_list = self.service.get_block_list(container_name, blob_name, 
+        block_list = self.service.get_block_list(container_name, blob_name,
                                                  block_list_type=BlockListType.All)
-        uncommitted = len(block_list.uncommitted_blocks) # 1
-        committed = len(block_list.committed_blocks) # 3
+        uncommitted = len(block_list.uncommitted_blocks)  # 1
+        committed = len(block_list.committed_blocks)  # 3
 
         # Added the new block to the existing list and commit
         new_block_list = block_list.committed_blocks

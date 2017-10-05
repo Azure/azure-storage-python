@@ -1,23 +1,9 @@
-.. pydocumentdb documentation master file, created by
-   sphinx-quickstart.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Azure Storage SDK for Python.
-========================================
+=============================
 
 Installation:
 -------------
- 
-You can use ``pip`` to install the latest released version of ``azure-storage``::
-
-    pip install azure-storage
-
-If you want to install ``azure-storage`` from source::
-
-    git clone git://github.com/Azure/azure-storage-python.git
-    cd azure-storage-python
-    python setup.py install
+Please refer to the Github page for the installation instructions: https://github.com/Azure/azure-storage-python
 
 If you are looking for Azure Service Bus or the Azure management libraries, 
 please visit https://github.com/Azure/azure-sdk-for-python
@@ -26,7 +12,6 @@ Documentation:
 --------------
 * `Blob Getting Started Doc <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-blob-storage/>`__ -- (:doc:`API <ref/azure.storage.blob>`)
 * `Queue Getting Started Doc <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-queue-storage/>`__ -- (:doc:`API <ref/azure.storage.queue>`)
-* `Table Getting Started Doc <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-table-storage/>`__ -- (:doc:`API <ref/azure.storage.table>`)
 * `File Getting Started Doc <https://azure.microsoft.com/en-us/documentation/articles/storage-python-how-to-use-file-storage/>`__ -- (:doc:`API <ref/azure.storage.file>`)
 * :ref:`Reference Documentation - All Services<modindex>`
 
@@ -45,13 +30,6 @@ Features:
    -  Create/Delete Queues
    -  Insert/Peek Queue Messages
    -  Advanced Queue Operations
-
--  Table
-
-   -  Create/Read/Update/Delete Tables
-   -  Create/Read/Update/Delete Entities
-   -  Batch operations
-   -  Advanced Table Operations
 
 -  Files
 

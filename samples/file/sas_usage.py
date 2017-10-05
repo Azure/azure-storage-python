@@ -1,4 +1,4 @@
-﻿#-------------------------------------------------------------------------
+﻿# -------------------------------------------------------------------------
 # Copyright (c) Microsoft.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 import time
 import uuid
-
 from datetime import datetime, timedelta
-from azure.storage import (
+
+from azure.storage.common import (
     AccessPolicy,
     ResourceTypes,
     AccountPermissions,
@@ -27,14 +27,14 @@ from azure.storage.file import (
     FilePermissions,
 )
 
-class FileSasSamples():  
 
+class FileSasSamples():
     def __init__(self, account):
         self.account = account
 
     def run_all_samples(self):
         self.service = self.account.create_file_service()
-         
+
         self.share_sas()
         self.file_sas()
         self.account_sas()
@@ -47,7 +47,7 @@ class FileSasSamples():
         self.service.create_share(share_name)
         return share_name
 
-    def share_sas(self):        
+    def share_sas(self):
         share_name = self._create_share()
         self.service.create_file_from_text(share_name, None, 'file1', b'hello world')
 
@@ -67,7 +67,7 @@ class FileSasSamples():
         )
 
         file = sas_service.get_file_to_text(share_name, None, 'file1')
-        content = file.content # hello world
+        content = file.content  # hello world
 
         self.service.delete_share(share_name)
 
@@ -93,7 +93,7 @@ class FileSasSamples():
         )
 
         file = sas_service.get_file_to_text(share_name, 'dir1', 'file1')
-        content = file.content # hello world
+        content = file.content  # hello world
 
         self.service.delete_share(share_name)
 
@@ -115,7 +115,7 @@ class FileSasSamples():
             account_name=self.account.account_name,
             sas_token=token,
         )
-        metadata = sas_service.get_share_metadata(share_name) # metadata={'val1': 'foo', 'val2': 'blah'}
+        metadata = sas_service.get_share_metadata(share_name)  # metadata={'val1': 'foo', 'val2': 'blah'}
 
         self.service.delete_share(share_name)
 
@@ -130,7 +130,7 @@ class FileSasSamples():
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_share_acl(share_name) # {id: AccessPolicy()}
+        acl = self.service.get_share_acl(share_name)  # {id: AccessPolicy()}
 
         # Replaces values, does not merge
         access_policy = AccessPolicy(permission=SharePermissions.READ,
@@ -140,14 +140,14 @@ class FileSasSamples():
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_share_acl(share_name) # {id2: AccessPolicy()}
+        acl = self.service.get_share_acl(share_name)  # {id2: AccessPolicy()}
 
         # Clear
         self.service.set_share_acl(share_name)
 
         # Wait 30 seconds for acl to propagate
         time.sleep(30)
-        acl = self.service.get_share_acl(share_name) # {}
+        acl = self.service.get_share_acl(share_name)  # {}
 
         self.service.delete_share(share_name)
 
@@ -178,6 +178,6 @@ class FileSasSamples():
         )
 
         file = sas_service.get_file_to_text(share_name, 'dir1', 'file1')
-        content = file.content # hello world
-        
+        content = file.content  # hello world
+
         self.service.delete_share(share_name)
