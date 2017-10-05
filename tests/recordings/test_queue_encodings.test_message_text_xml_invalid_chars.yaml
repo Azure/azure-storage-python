@@ -1,27 +1,27 @@
 interactions:
 - request:
-    body: "<?xml version='1.0' encoding='utf-8'?>\n<QueueMessage><MessageText>\x01\
+    body: !!python/unicode "<?xml version='1.0' encoding='utf-8'?>\n<QueueMessage><MessageText>\x01\
       </MessageText></QueueMessage>"
     headers:
       Connection: [keep-alive]
       Content-Length: ['96']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [3a354748-8786-11e7-8d10-b8e8564491f6]
-      x-ms-date: ['Tue, 22 Aug 2017 22:07:03 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [38668730-a898-11e7-8e5b-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:08:59 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.queue.core.windows.net/mytestqueue093de171a/messages
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML\
-        \ specified is not syntactically valid.\nRequestId:5b0aae3f-0003-00bb-4c92-1bb520000000\n\
-        Time:2017-08-22T22:07:03.2361688Z</Message><LineNumber>2</LineNumber><LinePosition>28</LinePosition><Reason>Error\
+        \ specified is not syntactically valid.\nRequestId:fa31d009-0003-00ca-47a4-3cc719000000\n\
+        Time:2017-10-04T00:08:59.5304607Z</Message><LineNumber>2</LineNumber><LinePosition>28</LinePosition><Reason>Error\
         \ parsing Xml content</Reason></Error>"}
     headers:
-      Content-Length: ['327']
-      Content-Type: [application/xml]
-      Date: ['Tue, 22 Aug 2017 22:07:03 GMT']
-      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [5b0aae3f-0003-00bb-4c92-1bb520000000]
+      content-length: ['327']
+      content-type: [application/xml]
+      date: ['Wed, 04 Oct 2017 00:08:58 GMT']
+      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [fa31d009-0003-00ca-47a4-3cc719000000]
       x-ms-version: ['2017-04-17']
     status: {code: 400, message: XML specified is not syntactically valid.}
 version: 1
