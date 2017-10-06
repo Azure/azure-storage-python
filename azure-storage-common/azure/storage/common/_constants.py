@@ -15,7 +15,7 @@
 import platform
 
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '0.36.0'
+__version__ = '0.37.0'
 
 # UserAgent string sample: 'Azure-Storage/0.37.0-0.38.0 (Python CPython 3.4.2; Windows 8)'
 # First version(0.37.0) is the common package, and the second version(0.38.0) is the service package
@@ -35,7 +35,6 @@ DEFAULT_PROTOCOL = 'https'
 # Development ServiceClient URLs
 DEV_BLOB_HOST = '127.0.0.1:10000'
 DEV_QUEUE_HOST = '127.0.0.1:10001'
-DEV_TABLE_HOST = '127.0.0.1:10002'
 
 # Default credentials for Development Storage Service
 DEV_ACCOUNT_NAME = 'devstoreaccount1'

@@ -23,6 +23,7 @@ from azure.common import (
 
 from azure.storage.file import (
     FileService,
+    DeleteSnapshot,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -46,7 +47,7 @@ class StorageDirectoryTest(StorageTestCase):
     def tearDown(self):
         if not self.is_playback():
             try:
-                self.fs.delete_share(self.share_name)
+                self.fs.delete_share(self.share_name, delete_snapshots=DeleteSnapshot.Include)
             except:
                 pass
 
@@ -115,6 +116,40 @@ class StorageDirectoryTest(StorageTestCase):
         self.assertIsNotNone(props.properties.last_modified)
 
     @record
+    def test_get_directory_properties_with_snapshot(self):
+        # Arrange
+        metadata = {"test1": "foo", "test2": "bar"}
+        self.fs.create_directory(self.share_name, 'dir1', metadata)
+        snapshot1 = self.fs.snapshot_share(self.share_name)
+        metadata2 = {"test100": "foo100", "test200": "bar200"}
+        self.fs.set_directory_metadata(self.share_name, 'dir1', metadata2)
+
+        # Act
+        props = self.fs.get_directory_properties(self.share_name, 'dir1', snapshot=snapshot1.snapshot)
+
+        # Assert
+        self.assertIsNotNone(props)
+        self.assertIsNotNone(props.properties.etag)
+        self.assertIsNotNone(props.properties.last_modified)
+        self.assertDictEqual(metadata, props.metadata)
+
+    @record
+    def test_get_directory_metadata_with_snapshot(self):
+        # Arrange
+        metadata = {"test1": "foo", "test2": "bar"}
+        self.fs.create_directory(self.share_name, 'dir1', metadata)
+        snapshot1 = self.fs.snapshot_share(self.share_name)
+        metadata2 = {"test100": "foo100", "test200": "bar200"}
+        self.fs.set_directory_metadata(self.share_name, 'dir1', metadata2)
+
+        # Act
+        snapshot_metadata = self.fs.get_directory_metadata(self.share_name, 'dir1', snapshot=snapshot1.snapshot)
+
+        # Assert
+        self.assertIsNotNone(snapshot_metadata)
+        self.assertDictEqual(metadata, snapshot_metadata)
+
+    @record
     def test_get_directory_properties_with_non_existing_directory(self):
         # Arrange
 
@@ -141,6 +176,31 @@ class StorageDirectoryTest(StorageTestCase):
 
         # Act
         exists = self.fs.exists(self.share_name, 'missing')
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
+    def test_directory_exists_with_snapshot(self):
+        # Arrange
+        self.fs.create_directory(self.share_name, 'dir1')
+        snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_directory(self.share_name, 'dir1')
+
+        # Act
+        exists = self.fs.exists(self.share_name, 'dir1', snapshot=snapshot.snapshot)
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_directory_not_exists_with_snapshot(self):
+        # Arrange
+        snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.create_directory(self.share_name, 'dir1')
+
+        # Act
+        exists = self.fs.exists(self.share_name, 'dir1', snapshot=snapshot.snapshot)
 
         # Assert
         self.assertFalse(exists)

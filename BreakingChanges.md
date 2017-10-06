@@ -4,7 +4,7 @@
 
 **Note: This changelog is deprecated starting with version XX.XX.XX, please refer to the ChangeLog.md in each package for future change logs.** 
 
-## Version XX.XX.XX:
+## Version 0.37.0:
 
 ### All:
 - The library has been split into 5 different packages:
@@ -12,9 +12,10 @@
     - azure-storage-blob
     - azure-storage-file
     - azure-storage-queue
-    - azure-storage-table
+    - azure-storage-nspkg
+- azure.storage.table is now releasing under a different namespace: azure-cosmosdb-table. Please refer to github.com/Azure/azure-cosmosdb-python for more info.
 - The package `azure-storage` is now deprecated.
-- The classes that were directly under azure.storage, not under azure.storage.*(blob, file, queue, table), are now under azure.storage.common.
+- The classes that were directly under azure.storage, not under azure.storage.*(blob, file, queue), are now under azure.storage.common.
     - Example: azure.storage.retry becomes azure.storage.common.retry
 - The methods on the class SharedAccessSignature were moved into corresponding new subclasses in each service package.
     - Example: the methods generate_blob and generate_container were moved to BlobSharedAccessSignature in the blob package. BlobSharedAccessSignature inherits generate_account from SharedAccessSignature in common.

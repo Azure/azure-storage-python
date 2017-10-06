@@ -74,6 +74,7 @@ from ._deserialization import (
     _convert_xml_to_share_stats,
     _parse_file,
     _parse_share,
+    _parse_snapshot_share,
     _parse_directory,
 )
 from ._download_chunking import _download_file_chunks
@@ -530,7 +531,7 @@ class FileService(StorageClient):
         return self._perform_request(request, _convert_xml_to_service_properties)
 
     def list_shares(self, prefix=None, marker=None, num_results=None,
-                    include_metadata=False, timeout=None):
+                    include_metadata=False, timeout=None, include_snapshots=False):
         '''
         Returns a generator to list the shares under the specified account.
         The generator will lazily follow the continuation tokens returned by
@@ -557,8 +558,15 @@ class FileService(StorageClient):
             where the previous generator stopped.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param bool include_snapshots:
+            Specifies that share snapshots be returned in the response.
         '''
-        include = 'metadata' if include_metadata else None
+        include = 'snapshots' if include_snapshots else None
+        if include_metadata:
+            if include is not None:
+                include = include + ',metadata'
+            else:
+                include = 'metadata'
         operation_context = _OperationContext(location_lock=True)
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results,
                   'include': include, 'timeout': timeout, '_context': operation_context}
@@ -586,9 +594,10 @@ class FileService(StorageClient):
             request may return up to 1000 shares and potentially a continuation
             token which should be followed to get additional resutls.
         :param string include:
-            Include this parameter to specify that the share's
-            metadata be returned as part of the response body. set this
-            parameter to string 'metadata' to get share's metadata.
+            Include this parameter to specify that either the share's
+            metadata, snapshots or both be returned as part of the response body. set this
+            parameter to string 'metadata' to get share's metadata. set this parameter to 'snapshots'
+            to get all the share snapshots. for both use 'snapshots,metadata'.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -657,7 +666,42 @@ class FileService(StorageClient):
             self._perform_request(request)
             return True
 
-    def get_share_properties(self, share_name, timeout=None):
+    def snapshot_share(self, share_name, metadata=None, quota=None, timeout=None):
+        '''
+        Creates a snapshot of an existing share under the specified account.
+
+        :param str share_name:
+            The name of the share to create a snapshot of.
+        :param metadata:
+            A dict with name_value pairs to associate with the
+            share as metadata. Example:{'Category':'test'}
+        :type metadata: a dict of str to str:
+        :param int quota:
+            Specifies the maximum size of the share, in gigabytes. Must be
+            greater than 0, and less than or equal to 5TB (5120).
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: snapshot properties
+        :rtype: azure.storage.file.models.Share
+        '''
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(share_name)
+        request.query = {
+            'restype': 'share',
+            'comp':  'snapshot',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-share-quota': _int_to_str(quota)
+        }
+        _add_metadata_headers(metadata, request)
+
+        return self._perform_request(request, _parse_snapshot_share, [share_name])
+
+    def get_share_properties(self, share_name, timeout=None, snapshot=None):
         '''
         Returns all user-defined metadata and system properties for the
         specified share. The data returned does not include the shares's
@@ -667,6 +711,8 @@ class FileService(StorageClient):
             Name of existing share.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return: A Share that exposes properties and metadata.
         :rtype: :class:`~azure.storage.file.models.Share`
         '''
@@ -676,8 +722,9 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
-            'restype': 'share',
-            'timeout': _int_to_str(timeout),
+             'restype': 'share',
+             'timeout': _int_to_str(timeout),
+             'sharesnapshot': _to_str(snapshot)
         }
 
         return self._perform_request(request, _parse_share, [share_name])
@@ -711,7 +758,7 @@ class FileService(StorageClient):
 
         self._perform_request(request)
 
-    def get_share_metadata(self, share_name, timeout=None):
+    def get_share_metadata(self, share_name, timeout=None, snapshot=None):
         '''
         Returns all user-defined metadata for the specified share.
 
@@ -719,6 +766,8 @@ class FileService(StorageClient):
             Name of existing share.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return:
             A dictionary representing the share metadata name, value pairs.
         :rtype: dict(str, str)
@@ -729,9 +778,10 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
-            'restype': 'share',
-            'comp': 'metadata',
-            'timeout': _int_to_str(timeout),
+             'restype': 'share',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+             'sharesnapshot': _to_str(snapshot),
         }
 
         return self._perform_request(request, _parse_metadata)
@@ -849,7 +899,7 @@ class FileService(StorageClient):
 
         return self._perform_request(request, _convert_xml_to_share_stats)
 
-    def delete_share(self, share_name, fail_not_exist=False, timeout=None):
+    def delete_share(self, share_name, fail_not_exist=False, timeout=None, snapshot=None, delete_snapshots=None):
         '''
         Marks the specified share for deletion. If the share
         does not exist, the operation fails on the service. By 
@@ -863,6 +913,12 @@ class FileService(StorageClient):
             exist. False by default.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
+            Specify this argument to delete a specific snapshot only.
+            delete_snapshots must be None if this is specified.
+        :param ~azure.storage.file.models.DeleteSnapshot delete_snapshots:
+            To delete a share that has snapshots, this must be specified as DeleteSnapshot.Include.
         :return: True if share is deleted, False share doesn't exist.
         :rtype: bool
         '''
@@ -871,9 +927,13 @@ class FileService(StorageClient):
         request.method = 'DELETE'
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
+        request.headers = {
+            'x-ms-delete-snapshots': _to_str(delete_snapshots)
+        }
         request.query = {
-            'restype': 'share',
-            'timeout': _int_to_str(timeout),
+             'restype': 'share',
+             'timeout': _int_to_str(timeout),
+             'sharesnapshot': _to_str(snapshot),
         }
 
         if not fail_not_exist:
@@ -981,7 +1041,7 @@ class FileService(StorageClient):
             self._perform_request(request)
             return True
 
-    def get_directory_properties(self, share_name, directory_name, timeout=None):
+    def get_directory_properties(self, share_name, directory_name, timeout=None, snapshot=None):
         '''
         Returns all user-defined metadata and system properties for the
         specified directory. The data returned does not include the directory's
@@ -994,6 +1054,8 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: properties for the specified directory within a directory object.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :rtype: :class:`~azure.storage.file.models.Directory`
         '''
         _validate_not_none('share_name', share_name)
@@ -1003,13 +1065,14 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
-            'restype': 'directory',
-            'timeout': _int_to_str(timeout),
+             'restype': 'directory',
+             'timeout': _int_to_str(timeout),
+             'sharesnapshot': _to_str(snapshot)
         }
 
         return self._perform_request(request, _parse_directory, [directory_name])
 
-    def get_directory_metadata(self, share_name, directory_name, timeout=None):
+    def get_directory_metadata(self, share_name, directory_name, timeout=None, snapshot=None):
         '''
         Returns all user-defined metadata for the specified directory.
 
@@ -1019,6 +1082,8 @@ class FileService(StorageClient):
             The path to the directory.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return:
             A dictionary representing the directory metadata name, value pairs.
         :rtype: dict(str, str)
@@ -1030,9 +1095,10 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
-            'restype': 'directory',
-            'comp': 'metadata',
-            'timeout': _int_to_str(timeout),
+             'restype': 'directory',
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+             'sharesnapshot': _to_str(snapshot)
         }
 
         return self._perform_request(request, _parse_metadata)
@@ -1072,7 +1138,7 @@ class FileService(StorageClient):
 
     def list_directories_and_files(self, share_name, directory_name=None,
                                    num_results=None, marker=None, timeout=None,
-                                   prefix=None):
+                                   prefix=None, snapshot=None):
 
         '''
         Returns a generator to list the directories and files under the specified share.
@@ -1105,20 +1171,21 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds.
         :param str prefix:
             List only the files and/or directories with the given prefix.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         '''
         operation_context = _OperationContext(location_lock=True)
         args = (share_name, directory_name)
         kwargs = {'marker': marker, 'max_results': num_results, 'timeout': timeout,
-                  '_context': operation_context, 'prefix': prefix}
+                  '_context': operation_context, 'prefix': prefix, 'snapshot': snapshot}
 
         resp = self._list_directories_and_files(*args, **kwargs)
 
         return ListGenerator(resp, self._list_directories_and_files, args, kwargs)
 
     def _list_directories_and_files(self, share_name, directory_name=None,
-                                    marker=None, max_results=None, timeout=None,
-                                    prefix=None, _context=None):
-
+                                   marker=None, max_results=None, timeout=None,
+                                    prefix=None, _context=None, snapshot=None):
         '''
         Returns a list of the directories and files under the specified share.
 
@@ -1143,6 +1210,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds.
         :param str prefix:
             List only the files and/or directories with the given prefix.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         '''
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
@@ -1150,18 +1219,19 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
-            'restype': 'directory',
-            'comp': 'list',
-            'prefix': _to_str(prefix),
-            'marker': _to_str(marker),
-            'maxresults': _int_to_str(max_results),
-            'timeout': _int_to_str(timeout),
+             'restype': 'directory',
+             'comp': 'list',
+             'prefix': _to_str(prefix),
+             'marker': _to_str(marker),
+             'maxresults': _int_to_str(max_results),
+             'timeout': _int_to_str(timeout),
+             'sharesnapshot': _to_str(snapshot)
         }
 
         return self._perform_request(request, _convert_xml_to_directories_and_files,
                                      operation_context=_context)
 
-    def get_file_properties(self, share_name, directory_name, file_name, timeout=None):
+    def get_file_properties(self, share_name, directory_name, file_name, timeout=None, snapshot=None):
         '''
         Returns all user-defined metadata, standard HTTP properties, and
         system properties for the file. Returns an instance of :class:`~azure.storage.file.models.File` with
@@ -1175,6 +1245,8 @@ class FileService(StorageClient):
             Name of existing file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return: a file object including properties and metadata.
         :rtype: :class:`~azure.storage.file.models.File`
         '''
@@ -1184,11 +1256,11 @@ class FileService(StorageClient):
         request.method = 'HEAD'
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = {'timeout': _int_to_str(timeout)}
+        request.query = { 'timeout': _int_to_str(timeout), 'sharesnapshot': _to_str(snapshot)}
 
         return self._perform_request(request, _parse_file, [file_name])
 
-    def exists(self, share_name, directory_name=None, file_name=None, timeout=None):
+    def exists(self, share_name, directory_name=None, file_name=None, timeout=None, snapshot=None):
         '''
         Returns a boolean indicating whether the share exists if only share name is
         given. If directory_name is specificed a boolean will be returned indicating
@@ -1203,17 +1275,19 @@ class FileService(StorageClient):
             Name of a file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return: A boolean indicating whether the resource exists.
         :rtype: bool
         '''
         _validate_not_none('share_name', share_name)
         try:
             if file_name is not None:
-                self.get_file_properties(share_name, directory_name, file_name, timeout=timeout)
+                self.get_file_properties(share_name, directory_name, file_name, timeout=timeout, snapshot=snapshot)
             elif directory_name is not None:
-                self.get_directory_properties(share_name, directory_name, timeout=timeout)
+                self.get_directory_properties(share_name, directory_name, timeout=timeout, snapshot=snapshot)
             else:
-                self.get_share_properties(share_name, timeout=timeout)
+                self.get_share_properties(share_name, timeout=timeout, snapshot=snapshot)
             return True
         except AzureHttpError as ex:
             _dont_fail_not_exist(ex)
@@ -1286,7 +1360,7 @@ class FileService(StorageClient):
 
         self._perform_request(request)
 
-    def get_file_metadata(self, share_name, directory_name, file_name, timeout=None):
+    def get_file_metadata(self, share_name, directory_name, file_name, timeout=None, snapshot=None):
         '''
         Returns all user-defined metadata for the specified file.
 
@@ -1298,6 +1372,8 @@ class FileService(StorageClient):
             Name of existing file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return:
             A dictionary representing the file metadata name, value pairs.
         :rtype: dict(str, str)
@@ -1309,8 +1385,9 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
-            'comp': 'metadata',
-            'timeout': _int_to_str(timeout),
+             'comp': 'metadata',
+             'timeout': _int_to_str(timeout),
+             'sharesnapshot': _to_str(snapshot),
         }
 
         return self._perform_request(request, _parse_metadata)
@@ -1747,8 +1824,8 @@ class FileService(StorageClient):
         )
 
     def _get_file(self, share_name, directory_name, file_name,
-                  start_range=None, end_range=None, validate_content=False,
-                  timeout=None, _context=None):
+                 start_range=None, end_range=None, validate_content=False,
+                 timeout=None, _context=None, snapshot=None):
         '''
         Downloads a file's content, metadata, and properties. You can specify a
         range if you don't need to download the file in its entirety. If no range
@@ -1779,6 +1856,8 @@ class FileService(StorageClient):
             is less than or equal to 4 MB in size.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return: A File with content, properties, and metadata.
         :rtype: :class:`~azure.storage.file.models.File`
         '''
@@ -1788,7 +1867,7 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = {'timeout': _int_to_str(timeout)}
+        request.query = { 'timeout': _int_to_str(timeout), 'sharesnapshot': _to_str(snapshot)}
         _validate_and_format_range_headers(
             request,
             start_range,
@@ -1804,7 +1883,7 @@ class FileService(StorageClient):
     def get_file_to_path(self, share_name, directory_name, file_name, file_path,
                          open_mode='wb', start_range=None, end_range=None,
                          validate_content=False, progress_callback=None,
-                         max_connections=2, timeout=None):
+                         max_connections=2, timeout=None, snapshot=None):
         '''
         Downloads a file to a file path, with automatic chunking and progress
         notifications. Returns an instance of File with properties and metadata.
@@ -1864,6 +1943,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return: A File with properties and metadata.
         :rtype: :class:`~azure.storage.file.models.File`
         '''
@@ -1879,14 +1960,14 @@ class FileService(StorageClient):
             file = self.get_file_to_stream(
                 share_name, directory_name, file_name, stream,
                 start_range, end_range, validate_content,
-                progress_callback, max_connections, timeout)
+                progress_callback, max_connections, timeout, snapshot)
 
         return file
 
     def get_file_to_stream(
-            self, share_name, directory_name, file_name, stream,
-            start_range=None, end_range=None, validate_content=False,
-            progress_callback=None, max_connections=2, timeout=None):
+        self, share_name, directory_name, file_name, stream,
+        start_range=None, end_range=None, validate_content=False,
+        progress_callback=None, max_connections=2, timeout=None, snapshot=None):
         '''
         Downloads a file to a stream, with automatic chunking and progress
         notifications. Returns an instance of :class:`~azure.storage.file.models.File` with properties
@@ -1943,6 +2024,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return: A File with properties and metadata.
         :rtype: :class:`~azure.storage.file.models.File`
         '''
@@ -1958,7 +2041,8 @@ class FileService(StorageClient):
                                   start_range=start_range,
                                   end_range=end_range,
                                   validate_content=validate_content,
-                                  timeout=timeout)
+                                  timeout=timeout,
+                                  snapshot=snapshot)
 
             # Set the download size
             download_size = file.properties.content_length
@@ -1976,7 +2060,7 @@ class FileService(StorageClient):
 
             initial_request_start = start_range if start_range else 0
 
-            if end_range and end_range - start_range < first_get_size:
+            if end_range is not None and end_range - start_range < first_get_size:
                 initial_request_end = end_range
             else:
                 initial_request_end = initial_request_start + first_get_size - 1
@@ -1991,7 +2075,8 @@ class FileService(StorageClient):
                                       end_range=initial_request_end,
                                       validate_content=validate_content,
                                       timeout=timeout,
-                                      _context=operation_context)
+                                      _context=operation_context,
+                                      snapshot=snapshot)
 
                 # Parse the total file size and adjust the download size if ranges 
                 # were specified
@@ -2013,7 +2098,8 @@ class FileService(StorageClient):
                                           file_name,
                                           validate_content=validate_content,
                                           timeout=timeout,
-                                          _context=operation_context)
+                                          _context=operation_context,
+                                          snapshot=snapshot)
 
                     # Set the download size to empty
                     download_size = 0
@@ -2059,6 +2145,7 @@ class FileService(StorageClient):
                 validate_content,
                 timeout,
                 operation_context,
+                snapshot
             )
 
             # Set the content length to the download size instead of the size of 
@@ -2077,7 +2164,7 @@ class FileService(StorageClient):
 
     def get_file_to_bytes(self, share_name, directory_name, file_name,
                           start_range=None, end_range=None, validate_content=False,
-                          progress_callback=None, max_connections=2, timeout=None):
+                          progress_callback=None, max_connections=2, timeout=None, snapshot=None):
         '''
         Downloads a file as an array of bytes, with automatic chunking and
         progress notifications. Returns an instance of :class:`~azure.storage.file.models.File` with
@@ -2132,6 +2219,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return: A File with properties, content, and metadata.
         :rtype: :class:`~azure.storage.file.models.File`
         '''
@@ -2149,15 +2238,16 @@ class FileService(StorageClient):
             validate_content,
             progress_callback,
             max_connections,
-            timeout)
+            timeout,
+            snapshot)
 
         file.content = stream.getvalue()
         return file
 
     def get_file_to_text(
-            self, share_name, directory_name, file_name, encoding='utf-8',
-            start_range=None, end_range=None, validate_content=False,
-            progress_callback=None, max_connections=2, timeout=None):
+        self, share_name, directory_name, file_name, encoding='utf-8',
+        start_range=None, end_range=None, validate_content=False,
+        progress_callback=None, max_connections=2, timeout=None, snapshot=None):
         '''
         Downloads a file as unicode text, with automatic chunking and progress
         notifications. Returns an instance of :class:`~azure.storage.file.models.File` with properties,
@@ -2214,6 +2304,8 @@ class FileService(StorageClient):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :return: A File with properties, content, and metadata.
         :rtype: :class:`~azure.storage.file.models.File`
         '''
@@ -2230,7 +2322,8 @@ class FileService(StorageClient):
             validate_content,
             progress_callback,
             max_connections,
-            timeout)
+            timeout,
+            snapshot)
 
         file.content = file.content.decode(encoding)
         return file
@@ -2337,7 +2430,7 @@ class FileService(StorageClient):
         self._perform_request(request)
 
     def list_ranges(self, share_name, directory_name, file_name,
-                    start_range=None, end_range=None, timeout=None):
+                    start_range=None, end_range=None, timeout=None, snapshot=None):
         '''
         Retrieves the valid ranges for a file.
 
@@ -2357,6 +2450,8 @@ class FileService(StorageClient):
             Ex: start_range=0, end_range=511 will download first 512 bytes of file.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
         :returns: a list of valid ranges
         :rtype: a list of :class:`~azure.storage.file.models.FileRange`
         '''
@@ -2367,8 +2462,9 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
-            'comp': 'rangelist',
-            'timeout': _int_to_str(timeout),
+             'comp': 'rangelist',
+             'timeout': _int_to_str(timeout),
+             'sharesnapshot': _to_str(snapshot),
         }
         if start_range is not None:
             _validate_and_format_range_headers(

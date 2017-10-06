@@ -211,10 +211,10 @@ def _validate_and_unwrap_cek(encryption_data, key_encryption_key=None, key_resol
         The encryption metadata of the retrieved value.
     :param obj key_encryption_key:
         The key_encryption_key used to unwrap the cek. Please refer to high-level service object
-        (i.e. TableService) instance variables for more details.
+        instance variables for more details.
     :param func key_resolver:
         A function used that, given a key_id, will return a key_encryption_key. Please refer 
-        to high service object (i.e. TableService) instance variables for more details.
+        to high-level service object instance variables for more details.
     :return: the content_encryption_key stored in the encryption_data object.
     :rtype: bytes[]
     '''

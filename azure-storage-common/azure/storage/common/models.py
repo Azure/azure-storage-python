@@ -150,8 +150,8 @@ class LocationMode(object):
 
 class RetentionPolicy(object):
     '''
-    By default, Storage Analytics will not delete any logging or metrics data. Blobs 
-    and table entities will continue to be written until the shared 20TB limit is 
+    By default, Storage Analytics will not delete any logging or metrics data. Blobs
+    will continue to be written until the shared 20TB limit is
     reached. Once the 20TB limit is reached, Storage Analytics will stop writing 
     new data and will not resume until free space is available. This 20TB limit 
     is independent of the total limit for your storage account.
@@ -370,7 +370,7 @@ class AccessPolicy(object):
 
     A stored access policy can specify the start time, expiry time, and 
     permissions for the Shared Access Signatures with which it's associated. 
-    Depending on how you want to control access to your table resource, you can 
+    Depending on how you want to control access to your resource, you can
     specify all of these parameters within the stored access policy, and omit 
     them from the URL for the Shared Access Signature. Doing so permits you to 
     modify the associated signature's behavior at any time, as well as to revoke 
@@ -434,27 +434,27 @@ class ResourceTypes(object):
 
     :ivar ResourceTypes ResourceTypes.CONTAINER:
         Access to container-level APIs (e.g., Create/Delete Container, 
-        Create/Delete Queue, Create/Delete Table, Create/Delete Share, 
+        Create/Delete Queue, Create/Delete Share,
         List Blobs/Files and Directories) 
     :ivar ResourceTypes ResourceTypes.OBJECT:
-        Access to object-level APIs for blobs, queue messages, table entities, and 
+        Access to object-level APIs for blobs, queue messages, and
         files(e.g. Put Blob, Query Entity, Get Messages, Create File, etc.) 
     :ivar ResourceTypes ResourceTypes.SERVICE:
         Access to service-level APIs (e.g., Get/Set Service Properties, 
-        Get Service Stats, List Containers/Queues/Tables/Shares) 
+        Get Service Stats, List Containers/Queues/Shares)
     '''
 
     def __init__(self, service=False, container=False, object=False, _str=None):
         '''
         :param bool service:
             Access to service-level APIs (e.g., Get/Set Service Properties, 
-            Get Service Stats, List Containers/Queues/Tables/Shares) 
+            Get Service Stats, List Containers/Queues/Shares)
         :param bool container:
             Access to container-level APIs (e.g., Create/Delete Container, 
-            Create/Delete Queue, Create/Delete Table, Create/Delete Share, 
+            Create/Delete Queue, Create/Delete Share,
             List Blobs/Files and Directories) 
         :param bool object:
-            Access to object-level APIs for blobs, queue messages, table entities, and 
+            Access to object-level APIs for blobs, queue messages, and
             files(e.g. Put Blob, Query Entity, Get Messages, Create File, etc.) 
         :param str _str: 
             A string representing the resource types.
@@ -489,17 +489,14 @@ class Services(object):
     :ivar Services Services.BLOB: The blob service.
     :ivar Services Services.FILE: The file service
     :ivar Services Services.QUEUE: The queue service.
-    :ivar Services Services.TABLE: The table service
     '''
 
-    def __init__(self, blob=False, queue=False, table=False, file=False, _str=None):
+    def __init__(self, blob=False, queue=False, file=False, _str=None):
         '''
         :param bool blob:
             Access to any blob service, for example, the `.BlockBlobService`
         :param bool queue:
             Access to the `.QueueService`
-        :param bool table:
-            Access to the `.TableService`
         :param bool file:
             Access to the `.FileService`
         :param str _str: 
@@ -509,7 +506,6 @@ class Services(object):
             _str = ''
         self.blob = blob or ('b' in _str)
         self.queue = queue or ('q' in _str)
-        self.table = table or ('t' in _str)
         self.file = file or ('f' in _str)
 
     def __or__(self, other):
@@ -521,13 +517,11 @@ class Services(object):
     def __str__(self):
         return (('b' if self.blob else '') +
                 ('q' if self.queue else '') +
-                ('t' if self.table else '') +
                 ('f' if self.file else ''))
 
 
 Services.BLOB = Services(blob=True)
 Services.QUEUE = Services(queue=True)
-Services.TABLE = Services(table=True)
 Services.FILE = Services(file=True)
 
 
@@ -541,8 +535,7 @@ class AccountPermissions(object):
     perms found here.
 
     :ivar AccountPermissions AccountPermissions.ADD:
-        Valid for the following Object resource types only: queue messages, table 
-        entities, and append blobs. 
+        Valid for the following Object resource types only: queue messages and append blobs.
     :ivar AccountPermissions AccountPermissions.CREATE:
         Valid for the following Object resource types only: blobs and files. Users 
         can create new blobs or files, but may not overwrite existing blobs or files. 
@@ -556,8 +549,7 @@ class AccountPermissions(object):
         Valid for all signed resources types (Service, Container, and Object). 
         Permits read permissions to the specified resource type. 
     :ivar AccountPermissions AccountPermissions.UPDATE:
-        Valid for the following Object resource types only: queue messages and table 
-        entities. 
+        Valid for the following Object resource types only: queue messages.
     :ivar AccountPermissions AccountPermissions.WRITE:
         Valid for all signed resources types (Service, Container, and Object). 
         Permits write permissions to the specified resource type. 
@@ -577,15 +569,13 @@ class AccountPermissions(object):
         :param bool list:
             Valid for Service and Container resource types only.
         :param bool add:
-            Valid for the following Object resource types only: queue messages, 
-            table entities, and append blobs.
+            Valid for the following Object resource types only: queue messages, and append blobs.
         :param bool create:
             Valid for the following Object resource types only: blobs and files. 
             Users can create new blobs or files, but may not overwrite existing 
             blobs or files.
         :param bool update:
-            Valid for the following Object resource types only: queue messages and 
-            table entities.
+            Valid for the following Object resource types only: queue messages.
         :param bool process:
             Valid for the following Object resource type only: queue messages.
         :param str _str: 

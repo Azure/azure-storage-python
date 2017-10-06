@@ -32,8 +32,11 @@ If you see azure==0.11.0 (or any version below 1.0), uninstall it first then ins
 If you are upgrading from a version older than 0.30.0, see the upgrade doc, the 
 usage samples in the samples directory, and the ChangeLog and BreakingChanges.
 
+If you are encountering `problems`_ installing azure storage on Azure Web Apps,
+`upgrading pip`_ might help.
+
 **IMPORTANT**: If you have an earlier version of the azure-storage package
-(version <= 0.36.0), you should uninstall it before installing the new packages.
+(version <= 0.36.0), you should uninstall it before installing the new split packages.
 
 You can check the version using pip:
 
@@ -41,7 +44,7 @@ You can check the version using pip:
 
     pip freeze
 
-If you see azure-storage==0.35.1 (or any version below 0.35.1), uninstall it first:
+If you see azure-storage==0.36.0 (or any version below 0.36.0), uninstall it first:
 
 .. code:: shell
 
@@ -62,13 +65,6 @@ Features
    -  Insert/Peek Queue Messages
    -  Advanced Queue Operations
 
--  Table
-
-   -  Create/Read/Update/Delete Tables
-   -  Create/Read/Update/Delete Entities
-   -  Batch operations
-   -  Advanced Table Operations
-
 -  Files
 
    -  Create/Update/Delete Shares
@@ -82,13 +78,31 @@ Getting Started
 Download
 --------
 
-The Azure Storage SDK for Python is composed of 4 packages, each corresponding to a different service:
-- azure-storage-blob
-- azure-storage-file
-- azure-storage-queue
-- azure-storage-table
+The Azure Storage SDK for Python is composed of 5 packages:
 
-Note: prior to version 0.36.0, there used to be a single package (azure-storage) containing all services
+- azure-storage-blob
+
+  - Contains the blob service APIs.
+
+- azure-storage-file
+
+  - Contains the file service APIs.
+
+- azure-storage-queue
+
+  - Contains the queue service APIs.
+
+- azure-storage-common
+
+  - Contains common code shared by blob, file and queue.
+
+- azure-storage-nspkg
+
+  - Owns the azure.storage namespace, user should not use this directly.
+
+**Note**: prior to and including version 0.36.0, there used to be a single package (azure-storage) containing all services.
+It is no longer supported, and users should install the 3 before-mentioned service packages individually, depending on the need.
+In addition, the **table** package is no longer releasing under the azure-storage namespace, please refer to `cosmosdb`_.
 
 Option 1: Via PyPi
 ~~~~~~~~~~~~~~~~~~
@@ -99,7 +113,6 @@ To install via the Python Package Index (PyPI), type:
     pip install azure-storage-blob
     pip install azure-storage-file
     pip install azure-storage-queue
-    pip install azure-storage-table
 
 Option 2: Source Via Git
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,24 +122,23 @@ To get the source code of the SDK via git just type:
 ::
 
     git clone git://github.com/Azure/azure-storage-python.git
-    cd ./azure-storage-python/azure-storage-blob
+
+    cd ./azure-storage-python/azure-storage-nspkg
+    python setup.py install
+
+    cd ../azure-storage-common
+    python setup.py install
+
+    cd ../azure-storage-blob
     python setup.py install
 
 
-Replace azure-storage-blob with azure-storage-file, azure-storage-queue, or azure-storage-table to install the other services.
+Replace azure-storage-blob with azure-storage-file or azure-storage-queue, to install the other services.
 
 Option 3: Source Zip
 ~~~~~~~~~~~~~~~~~~~~
 
-Download a zip of the code via GitHub or PyPi. Then, type:
-
-::
-
-    cd ./azure-storage-python/azure-storage-blob
-    python setup.py install
-
-
-Replace azure-storage-blob with azure-storage-file, azure-storage-queue, or azure-storage-table to install the other services.
+Download a zip of the code via GitHub or PyPi. Then follow the same instructions in option 2.
 
 Minimum Requirements
 --------------------
@@ -140,10 +152,38 @@ Usage
 To use this SDK to call Microsoft Azure storage services, you need to
 first `create an account`_.
 
+Logging
+-----------
+
+To make debugging easier, it is recommended to turn on logging for the logger named 'azure.storage'.
+Here are two example configurations:
+
+.. code:: python
+
+    # Basic configuration: configure the root logger, including 'azure.storage'
+    logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
+
+.. code:: python
+
+    # More advanced configuration allowing more control
+    logger = logging.getLogger('azure.storage')
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s %(name)-20s %(levelname)-5s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+Here is how we use the logging levels, it is recommended to use INFO:
+
+-  DEBUG: log strings to sign
+-  INFO: log outgoing requests and responses, as well as retry attempts
+-  WARNING: not used
+-  ERROR: log calls that still failed after all the retries
+
 Code Sample
 -----------
 
-See the samples directory for blob, queue, table, and file usage samples.
+See the samples directory for blob, queue, and file usage samples.
 
 Need Help?
 ==========
@@ -181,3 +221,6 @@ Learn More
 .. _Azure Storage Service: http://azure.microsoft.com/en-us/documentation/services/storage/
 .. _Azure Storage Team Blog: http://blogs.msdn.com/b/windowsazurestorage/
 .. _CONTRIBUTING.md doc: CONTRIBUTING.md
+.. _problems: https://github.com/Azure/azure-storage-python/issues/219
+.. _upgrading pip: https://docs.microsoft.com/en-us/visualstudio/python/managing-python-on-azure-app-service
+.. _cosmosdb: https://github.com/Azure/azure-cosmosdb-python

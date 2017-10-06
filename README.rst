@@ -1,10 +1,10 @@
 Microsoft Azure Storage SDK for Python
 ======================================
 
-.. image:: https://travis-ci.org/Azure/azure-storage-python.svg?branch=split-library
+.. image:: https://travis-ci.org/Azure/azure-storage-python.svg?branch=dev
     :target: https://travis-ci.org/Azure/azure-storage-python
-.. image:: https://img.shields.io/codecov/c/github/azure/azure-storage-python/split-library.svg
-    :target: https://codecov.io/gh/Azure/azure-storage-python/branch/split-library
+.. image:: https://img.shields.io/codecov/c/github/azure/azure-storage-python/dev.svg
+    :target: https://codecov.io/gh/Azure/azure-storage-python/branch/dev
 
 This project provides a client library in Python that makes it easy to
 consume Microsoft Azure Storage services. For documentation please see
@@ -37,11 +37,11 @@ If you see azure==0.11.0 (or any version below 1.0), uninstall it first then ins
 If you are upgrading from a version older than 0.30.0, see the upgrade doc, the 
 usage samples in the samples directory, and the ChangeLog and BreakingChanges.
 
-If you are encountering `problems`_ installing azure-storage on Azure Web Apps,
+If you are encountering `problems`_ installing azure storage on Azure Web Apps,
 `upgrading pip`_ might help.
 
 **IMPORTANT**: If you have an earlier version of the azure-storage package
-(version <= 0.36.0), you should uninstall it before installing the new packages.
+(version <= 0.36.0), you should uninstall it before installing the new split packages.
 
 You can check the version using pip:
 
@@ -70,13 +70,6 @@ Features
    -  Insert/Peek Queue Messages
    -  Advanced Queue Operations
 
--  Table
-
-   -  Create/Read/Update/Delete Tables
-   -  Create/Read/Update/Delete Entities
-   -  Batch operations
-   -  Advanced Table Operations
-
 -  Files
 
    -  Create/Update/Delete Shares
@@ -90,15 +83,31 @@ Getting Started
 Download
 --------
 
-The Azure Storage SDK for Python is composed of 4 packages, each corresponding to a different service:
+The Azure Storage SDK for Python is composed of 5 packages:
 
 - azure-storage-blob
-- azure-storage-file
-- azure-storage-queue
-- azure-storage-table
 
-Note: prior to and including version 0.36.0, there used to be a single package (azure-storage) containing all services.
-It is no longer supported, and users should install the 4 before-mentioned packages individually, depending on the need.
+  - Contains the blob service APIs.
+
+- azure-storage-file
+
+  - Contains the file service APIs.
+
+- azure-storage-queue
+
+  - Contains the queue service APIs.
+
+- azure-storage-common
+
+  - Contains common code shared by blob, file and queue.
+
+- azure-storage-nspkg
+
+  - Owns the azure.storage namespace, user should not use this directly.
+
+**Note**: prior to and including version 0.36.0, there used to be a single package (azure-storage) containing all services.
+It is no longer supported, and users should install the 3 before-mentioned service packages individually, depending on the need.
+In addition, the **table** package is no longer releasing under the azure-storage namespace, please refer to `cosmosdb`_.
 
 Option 1: Via PyPi
 ~~~~~~~~~~~~~~~~~~
@@ -109,7 +118,6 @@ To install via the Python Package Index (PyPI), type:
     pip install azure-storage-blob
     pip install azure-storage-file
     pip install azure-storage-queue
-    pip install azure-storage-table
 
 Option 2: Source Via Git
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -119,24 +127,23 @@ To get the source code of the SDK via git just type:
 ::
 
     git clone git://github.com/Azure/azure-storage-python.git
-    cd ./azure-storage-python/azure-storage-blob
+
+    cd ./azure-storage-python/azure-storage-nspkg
+    python setup.py install
+
+    cd ../azure-storage-common
+    python setup.py install
+
+    cd ../azure-storage-blob
     python setup.py install
 
 
-Replace azure-storage-blob with azure-storage-file, azure-storage-queue, or azure-storage-table to install the other services.
+Replace azure-storage-blob with azure-storage-file or azure-storage-queue, to install the other services.
 
 Option 3: Source Zip
 ~~~~~~~~~~~~~~~~~~~~
 
-Download a zip of the code via GitHub or PyPi. Then, type:
-
-::
-
-    cd ./azure-storage-python/azure-storage-blob
-    python setup.py install
-
-
-Replace azure-storage-blob with azure-storage-file, azure-storage-queue, or azure-storage-table to install the other services.
+Download a zip of the code via GitHub or PyPi. Then follow the same instructions in option 2.
 
 Minimum Requirements
 --------------------
@@ -181,7 +188,7 @@ Here is how we use the logging levels, it is recommended to use INFO:
 Code Sample
 -----------
 
-See the samples directory for blob, queue, table, and file usage samples.
+See the samples directory for blob, queue, and file usage samples.
 
 Need Help?
 ==========
@@ -221,3 +228,4 @@ Learn More
 .. _CONTRIBUTING.md doc: CONTRIBUTING.md
 .. _problems: https://github.com/Azure/azure-storage-python/issues/219
 .. _upgrading pip: https://docs.microsoft.com/en-us/visualstudio/python/managing-python-on-azure-app-service
+.. _cosmosdb: https://github.com/Azure/azure-cosmosdb-python

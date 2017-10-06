@@ -30,7 +30,6 @@ from azure.storage.common import (
 )
 from azure.storage.file import FileService
 from azure.storage.queue import QueueService
-from azure.storage.table import TableService
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -83,15 +82,6 @@ class StorageAccountTest(StorageTestCase):
 
         # Assert
         self.validate_service(service, AppendBlobService)
-
-    def test_create_table_service(self):
-        # Arrange
-
-        # Act
-        service = self.account.create_table_service()
-
-        # Assert
-        self.validate_service(service, TableService)
 
     def test_create_queue_service(self):
         # Arrange

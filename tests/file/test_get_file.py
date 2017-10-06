@@ -21,6 +21,7 @@ import unittest
 from azure.storage.file import (
     File,
     FileService,
+    DeleteSnapshot,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -63,7 +64,7 @@ class StorageGetFileTest(StorageTestCase):
     def tearDown(self):
         if not self.is_playback():
             try:
-                self.fs.delete_share(self.share_name)
+                self.fs.delete_share(self.share_name, delete_snapshots=DeleteSnapshot.Include)
             except:
                 pass
 
@@ -284,6 +285,107 @@ class StorageGetFileTest(StorageTestCase):
         with open(FILE_PATH, 'wb') as stream:
             file = self.fs.get_file_to_stream(self.share_name, self.directory_name, file_name, stream,
                                               progress_callback=callback)
+
+        # Assert
+        self.assertIsInstance(file, File)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(file_data, actual)
+        self.assert_download_progress(len(file_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress)
+
+    def test_get_file_to_stream_from_snapshot(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        # Create a snapshot of the share and delete the file
+        share_snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, self.directory_name, self.byte_file)
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            file = self.fs.get_file_to_stream(self.share_name, self.directory_name,
+                                              self.byte_file, stream, snapshot=share_snapshot.snapshot)
+
+        # Assert
+        self.assertIsInstance(file, File)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data, actual)
+
+    def test_get_file_to_stream_with_progress_from_snapshot(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        # Create a snapshot of the share and delete the file
+        share_snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, self.directory_name, self.byte_file)
+        progress = []
+
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            file = self.fs.get_file_to_stream(
+                self.share_name, self.directory_name,
+                self.byte_file, stream, progress_callback=callback, snapshot=share_snapshot.snapshot)
+
+        # Assert
+        self.assertIsInstance(file, File)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data, actual)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress)
+
+    @record
+    def test_get_file_to_stream_non_parallel_from_snapshot(self):
+        # Arrange
+        # Create a snapshot of the share and delete the file
+        share_snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, self.directory_name, self.byte_file)
+        progress = []
+
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            file = self.fs.get_file_to_stream(
+                self.share_name, self.directory_name, self.byte_file, stream, max_connections=1,
+                progress_callback=callback, snapshot=share_snapshot.snapshot)
+
+        # Assert
+        self.assertIsInstance(file, File)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data, actual)
+        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress, single_download=True)
+
+    @record
+    def test_get_file_to_stream_small_from_snapshot(self):
+        # Arrange
+        file_data = self.get_random_bytes(1024)
+        file_name = self._get_file_reference()
+        self.fs.create_file_from_bytes(self.share_name, self.directory_name, file_name, file_data)
+
+        # Create a snapshot of the share and delete the file
+        share_snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, self.directory_name, file_name)
+        progress = []
+
+        def callback(current, total):
+            progress.append((current, total))
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            file = self.fs.get_file_to_stream(self.share_name, self.directory_name, file_name, stream,
+                                              progress_callback=callback, snapshot=share_snapshot.snapshot)
 
         # Assert
         self.assertIsInstance(file, File)
@@ -676,6 +778,48 @@ class StorageGetFileTest(StorageTestCase):
                     self.share_name, self.directory_name, self.byte_file, non_seekable_stream)
 
                 # Assert
+
+    def test_get_file_non_seekable_from_snapshot(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        # Create a snapshot of the share and delete the file
+        share_snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, self.directory_name, self.byte_file)
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            non_seekable_stream = StorageGetFileTest.NonSeekableFile(stream)
+            file = self.fs.get_file_to_stream(self.share_name, self.directory_name, self.byte_file, non_seekable_stream,
+                                              max_connections=1, snapshot=share_snapshot.snapshot)
+
+        # Assert
+        self.assertIsInstance(file, File)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(self.byte_data, actual)
+
+    def test_get_file_non_seekable_parallel_from_snapshot(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        # Create a snapshot of the share and delete the file
+        share_snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, self.directory_name, self.byte_file)
+
+        # Act
+        with open(FILE_PATH, 'wb') as stream:
+            non_seekable_stream = StorageGetFileTest.NonSeekableFile(stream)
+
+            with self.assertRaises(BaseException):
+                self.fs.get_file_to_stream(
+                    self.share_name, self.directory_name,
+                    self.byte_file, non_seekable_stream, snapshot=share_snapshot.snapshot)
+
 
     @record
     def test_get_file_exact_get_size(self):

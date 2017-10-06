@@ -4,49 +4,49 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [3b210111-981e-11e7-9a52-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:55:26 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [ce88f72b-a898-11e7-9619-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:13:11 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.queue.core.windows.net/encryptionqueued9c213ac
   response:
     body: {string: !!python/unicode ''}
     headers:
-      date: ['Wed, 13 Sep 2017 00:55:26 GMT']
+      date: ['Wed, 04 Oct 2017 00:13:20 GMT']
       server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [86b303ab-0003-0132-412a-2c4a51000000]
+      x-ms-request-id: [5663166d-0003-010e-5da5-3cfe8a000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: !!python/unicode '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <QueueMessage><MessageText>{"EncryptedMessageContents": "h2eAZuVFfASVUDdwGvA4ww==",
-      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "SIEn1jGNX9Qxkm2FpEMjid7HZ3hhJka7wnVBgq/rewxfQHJ3gu/OWQ==",
+      <QueueMessage><MessageText>{"EncryptedMessageContents": "W/4oNAY+mZnoKBpNyNQCgQ==",
+      "EncryptionData": {"WrappedContentKey": {"KeyId": "key1", "EncryptedKey": "jJgSnaurmVZ9j2bvA0RTIj5q/YQnz06IlkSBcwsiU5kYqVo+RFBLSQ==",
       "Algorithm": "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-      "AES_CBC_256"}, "ContentEncryptionIV": "JhbQyQawv8cssyIF3a6DaA==", "KeyWrappingMetadata":
-      {"EncryptionLibrary": "Python 0.36.0"}}}</MessageText></QueueMessage>'
+      "AES_CBC_256"}, "ContentEncryptionIV": "+KSce2b3WDtzDy9UBqorhg==", "KeyWrappingMetadata":
+      {"EncryptionLibrary": "Python 0.37.0"}}}</MessageText></QueueMessage>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['502']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [3b33b94a-981e-11e7-ac60-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:55:26 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [d496ef33-a898-11e7-8684-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:13:21 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.queue.core.windows.net/encryptionqueued9c213ac/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>342f2850-9e8b-456f-9e1c-c61d53806f07</MessageId><InsertionTime>Wed,\
-        \ 13 Sep 2017 00:55:26 GMT</InsertionTime><ExpirationTime>Wed, 20 Sep 2017\
-        \ 00:55:26 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAJAvX/Cos0wE=</PopReceipt><TimeNextVisible>Wed,\
-        \ 13 Sep 2017 00:55:26 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>e09dba40-f607-4f8e-aa2a-b388b9446b6d</MessageId><InsertionTime>Wed,\
+        \ 04 Oct 2017 00:13:21 GMT</InsertionTime><ExpirationTime>Wed, 11 Oct 2017\
+        \ 00:13:21 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAg802lqU80wE=</PopReceipt><TimeNextVisible>Wed,\
+        \ 04 Oct 2017 00:13:21 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
     headers:
       content-type: [application/xml]
-      date: ['Wed, 13 Sep 2017 00:55:26 GMT']
+      date: ['Wed, 04 Oct 2017 00:13:20 GMT']
       server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [86b303b3-0003-0132-472a-2c4a51000000]
+      x-ms-request-id: [566320c5-0003-010e-59a5-3cfe8a000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 version: 1

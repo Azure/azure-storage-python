@@ -13,10 +13,10 @@
 # limitations under the License.
 # --------------------------------------------------------------------------
 
-# Note that we import BlobService/QueueService/TableService on demand
+# Note that we import BlobService/QueueService/FileService on demand
 # because this module is imported by azure/storage/__init__
 # ie. we don't want 'import azure.storage' to trigger an automatic import
-# of blob/queue/table packages.
+# of blob/queue/file packages.
 
 from azure.storage.common._error import _validate_not_none
 from azure.storage.common.models import (
@@ -31,7 +31,7 @@ from azure.storage.common.sharedaccesssignature import (
 
 class CloudStorageAccount(object):
     """
-    Provides a factory for creating the blob, queue, table, and file services
+    Provides a factory for creating the blob, queue, and file services
     with a common account name and account key or sas token.  Users can either 
     use the factory or can construct the appropriate service directly.
     """
@@ -107,23 +107,6 @@ class CloudStorageAccount(object):
         except ImportError:
             raise Exception('The package azure-storage-blob is required. '
                             + 'Please install it using "pip install azure-storage-blob"')
-
-    def create_table_service(self):
-        '''
-        Creates a TableService object with the settings specified in the 
-        CloudStorageAccount.
-
-        :return: A service object.
-        :rtype: :class:`~azure.storage.table.tableservice.TableService`
-        '''
-        try:
-            from azure.storage.table.tableservice import TableService
-            return TableService(self.account_name, self.account_key,
-                                sas_token=self.sas_token,
-                                is_emulated=self.is_emulated)
-        except ImportError:
-            raise Exception('The package azure-storage-table is required. '
-                            + 'Please install it using "pip install azure-storage-table"')
 
     def create_queue_service(self):
         '''

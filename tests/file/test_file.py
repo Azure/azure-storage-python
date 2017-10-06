@@ -35,6 +35,7 @@ from azure.storage.file import (
     FileService,
     ContentSettings,
     FilePermissions,
+    DeleteSnapshot,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -77,13 +78,13 @@ class StorageFileTest(StorageTestCase):
     def tearDown(self):
         if not self.is_playback():
             try:
-                self.fs.delete_share(self.share_name)
+                self.fs.delete_share(self.share_name, delete_snapshots=DeleteSnapshot.Include)
             except:
                 pass
 
             if self.remote_share_name:
                 try:
-                    self.fs2.delete_share(self.remote_share_name)
+                    self.fs2.delete_share(self.remote_share_name, delete_snapshots=DeleteSnapshot.Include)
                 except:
                     pass
 
@@ -239,6 +240,31 @@ class StorageFileTest(StorageTestCase):
         self.assertFalse(exists)
 
     @record
+    def test_file_exists_with_snapshot(self):
+        # Arrange
+        file_name = self._create_file()
+        snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, None, file_name)
+
+        # Act
+        exists = self.fs.exists(self.share_name, None, file_name, snapshot=snapshot.snapshot)
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_file_not_exists_with_snapshot(self):
+        # Arrange
+        snapshot = self.fs.snapshot_share(self.share_name)
+        file_name = self._create_file()
+
+        # Act
+        exists = self.fs.exists(self.share_name, None, file_name, snapshot=snapshot.snapshot)
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
     def test_resize_file(self):
         # Arrange
         file_name = self._create_file()
@@ -282,6 +308,44 @@ class StorageFileTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(file)
         self.assertEqual(file.properties.content_length, len(self.short_byte_data))
+
+    @record
+    def test_get_file_properties_with_snapshot(self):
+        # Arrange
+        file_name = self._create_file()
+        metadata = {"test1": "foo", "test2": "bar"}
+        self.fs.set_file_metadata(self.share_name, None, file_name, metadata)
+        snapshot = self.fs.snapshot_share(self.share_name)
+        metadata2 = {"test100": "foo100", "test200": "bar200"}
+        self.fs.set_file_metadata(self.share_name, None, file_name, metadata2)
+
+        # Act
+        file = self.fs.get_file_properties(self.share_name, None, file_name)
+        file_snapshot = self.fs.get_file_properties(self.share_name, None, file_name, snapshot=snapshot.snapshot)
+
+        # Assert
+        self.assertIsNotNone(file)
+        self.assertIsNotNone(file_snapshot)
+        self.assertEqual(file.properties.content_length, file_snapshot.properties.content_length)
+        self.assertDictEqual(metadata, file_snapshot.metadata)
+
+    @record
+    def test_get_file_metadata_with_snapshot(self):
+        # Arrange
+        file_name = self._create_file()
+        metadata = {"test1": "foo", "test2": "bar"}
+        self.fs.set_file_metadata(self.share_name, None, file_name, metadata)
+        snapshot = self.fs.snapshot_share(self.share_name)
+        metadata2 = {"test100": "foo100", "test200": "bar200"}
+        self.fs.set_file_metadata(self.share_name, None, file_name, metadata2)
+
+        # Act
+        file_metadata = self.fs.get_file_metadata(self.share_name, None, file_name)
+        file_snapshot_metadata = self.fs.get_file_metadata(self.share_name, None, file_name, snapshot=snapshot.snapshot)
+
+        # Assert
+        self.assertDictEqual(metadata2, file_metadata)
+        self.assertDictEqual(metadata, file_snapshot_metadata)
 
     @record
     def test_get_file_properties_with_non_existing_file(self):
@@ -420,6 +484,44 @@ class StorageFileTest(StorageTestCase):
 
         # Act
         ranges = self.fs.list_ranges(self.share_name, None, file_name)
+
+        # Assert
+        self.assertIsNotNone(ranges)
+        self.assertEqual(len(ranges), 2)
+        self.assertEqual(ranges[0].start, 0)
+        self.assertEqual(ranges[0].end, 511)
+        self.assertEqual(ranges[1].start, 1024)
+        self.assertEqual(ranges[1].end, 1535)
+
+    @record
+    def test_list_ranges_none_from_snapshot(self):
+        # Arrange
+        file_name = self._get_file_reference()
+        self.fs.create_file(self.share_name, None, file_name, 1024)
+        share_snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, None, file_name)
+
+        # Act
+        ranges = self.fs.list_ranges(self.share_name, None, file_name, snapshot=share_snapshot.snapshot)
+
+        # Assert
+        self.assertIsNotNone(ranges)
+        self.assertEqual(len(ranges), 0)
+
+    @record
+    def test_list_ranges_2_from_snapshot(self):
+        # Arrange
+        file_name = self._get_file_reference()
+        self.fs.create_file(self.share_name, None, file_name, 2048)
+
+        data = b'abcdefghijklmnop' * 32
+        resp1 = self.fs.update_range(self.share_name, None, file_name, data, 0, 511)
+        resp2 = self.fs.update_range(self.share_name, None, file_name, data, 1024, 1535)
+        share_snapshot = self.fs.snapshot_share(self.share_name)
+        self.fs.delete_file(self.share_name, None, file_name)
+
+        # Act
+        ranges = self.fs.list_ranges(self.share_name, None, file_name, snapshot=share_snapshot.snapshot)
 
         # Assert
         self.assertIsNotNone(ranges)

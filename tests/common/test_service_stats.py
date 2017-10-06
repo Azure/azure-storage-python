@@ -19,7 +19,6 @@ from azure.storage.common.retry import (
     LinearRetry
 )
 from azure.storage.queue import QueueService
-from azure.storage.table import TableService
 from tests.testcase import (
     StorageTestCase,
     record,
@@ -97,30 +96,6 @@ class ServiceStatsTest(StorageTestCase):
 
         # Act
         stats = qs.get_queue_service_stats()
-
-        # Assert
-        self._assert_stats_unavailable(stats)
-
-    @record
-    def test_table_service_stats(self):
-        # Arrange
-        ts = self._create_storage_service(TableService, self.settings)
-
-        # Act
-        stats = ts.get_table_service_stats()
-
-        # Assert
-        self._assert_stats_default(stats)
-
-    @record
-    def test_table_service_stats_when_unavailable(self):
-        # Arrange
-        ts = self._create_storage_service(TableService, self.settings)
-        ts.response_callback = self.override_response_body_with_unavailable_status
-        ts.retry = LinearRetry(backoff=1).retry
-
-        # Act
-        stats = ts.get_table_service_stats()
 
         # Assert
         self._assert_stats_unavailable(stats)

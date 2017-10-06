@@ -40,14 +40,21 @@ from azure.storage.common._common_conversion import (
     _to_str,
 )
 
+def _parse_snapshot_share(response, name):
+    '''
+    Extracts snapshot return header.
+    '''
+    snapshot = response.headers.get('x-ms-snapshot')
 
-def _parse_share(response, name):
+    return _parse_share(response, name, snapshot)
+
+def _parse_share(response, name, snapshot=None):
     if response is None:
         return None
 
     metadata = _parse_metadata(response)
     props = _parse_properties(response, ShareProperties)
-    return Share(name, props, metadata)
+    return Share(name, props, metadata, snapshot)
 
 
 def _parse_directory(response, name):
@@ -91,6 +98,7 @@ def _convert_xml_to_shares(response):
       <Shares>
         <Share>
           <Name>share-name</Name>
+          <Snapshot>date-time-value</Snapshot>
           <Properties>
             <Last-Modified>date/time-value</Last-Modified>
             <Etag>etag</Etag>
@@ -120,6 +128,9 @@ def _convert_xml_to_shares(response):
         # Name element
         share = Share()
         share.name = share_element.findtext('Name')
+
+        # Snapshot
+        share.snapshot = share_element.findtext('Snapshot')
 
         # Metadata
         metadata_root_element = share_element.find('Metadata')

@@ -4,19 +4,19 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [f3b6f69c-981d-11e7-a008-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:53:26 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [03f2a999-a898-11e7-bdd7-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:07:31 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queuee42613c2
   response:
     body: {string: !!python/unicode ''}
     headers:
-      date: ['Wed, 13 Sep 2017 00:53:25 GMT']
+      date: ['Wed, 04 Oct 2017 00:07:31 GMT']
       server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [aa057e74-0003-007c-602a-2cc9e1000000]
+      x-ms-request-id: [dba52389-0003-0021-32a4-3c39e5000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,32 +26,32 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['103']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [f3ca0fd4-981d-11e7-a263-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:53:26 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [0409361c-a898-11e7-a725-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:07:31 GMT']
       x-ms-version: ['2017-04-17']
     method: POST
     uri: https://storagename.queue.core.windows.net/queuee42613c2/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>1bf94be9-a3f7-4ba9-a556-ce42cbed9e0e</MessageId><InsertionTime>Wed,\
-        \ 13 Sep 2017 00:53:26 GMT</InsertionTime><ExpirationTime>Wed, 20 Sep 2017\
-        \ 00:53:26 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAA/vtstSos0wE=</PopReceipt><TimeNextVisible>Wed,\
-        \ 13 Sep 2017 00:53:26 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><QueueMessagesList><QueueMessage><MessageId>5ad60747-6fb8-41cd-9f26-ccec9a7a53b4</MessageId><InsertionTime>Wed,\
+        \ 04 Oct 2017 00:07:31 GMT</InsertionTime><ExpirationTime>Wed, 11 Oct 2017\
+        \ 00:07:31 GMT</ExpirationTime><PopReceipt>AgAAAAMAAAAAAAAAfj6pxaQ80wE=</PopReceipt><TimeNextVisible>Wed,\
+        \ 04 Oct 2017 00:07:31 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>"}
     headers:
       content-type: [application/xml]
-      date: ['Wed, 13 Sep 2017 00:53:25 GMT']
+      date: ['Wed, 04 Oct 2017 00:07:31 GMT']
       server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [aa057e7d-0003-007c-662a-2cc9e1000000]
+      x-ms-request-id: [dba5239f-0003-0021-46a4-3c39e5000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [f3d03223-981d-11e7-9634-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:53:27 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [040f0f85-a898-11e7-89c8-b8e8564491f6]
+      x-ms-date: ['Wed, 04 Oct 2017 00:07:31 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.queue.core.windows.net/queuee42613c2?comp=metadata
@@ -59,11 +59,11 @@ interactions:
     body: {string: !!python/unicode ''}
     headers:
       cache-control: [no-cache]
-      date: ['Wed, 13 Sep 2017 00:53:25 GMT']
+      date: ['Wed, 04 Oct 2017 00:07:31 GMT']
       server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-approximate-messages-count: ['1']
-      x-ms-request-id: [aa057e8a-0003-007c-712a-2cc9e1000000]
+      x-ms-request-id: [dba523b0-0003-0021-57a4-3c39e5000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

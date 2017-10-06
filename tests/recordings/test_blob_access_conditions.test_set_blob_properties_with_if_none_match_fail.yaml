@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [cdb3b999-981c-11e7-a4d1-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:45:13 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [93684405-a896-11e7-a3b4-b8e8564491f6]
+      x-ms-date: ['Tue, 03 Oct 2017 23:57:12 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerb1921f2b?restype=container
   response:
     body: {string: !!python/unicode ''}
     headers:
-      date: ['Wed, 13 Sep 2017 00:45:13 GMT']
-      etag: ['"0x8D4FA40B1E04260"']
-      last-modified: ['Wed, 13 Sep 2017 00:45:13 GMT']
+      date: ['Tue, 03 Oct 2017 23:57:12 GMT']
+      etag: ['"0x8D50ABA7780CDC3"']
+      last-modified: ['Tue, 03 Oct 2017 23:57:12 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [48532e14-001e-0071-1729-2c26ed000000]
+      x-ms-request-id: [58adc803-001e-0136-27a3-3cbfd3000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,10 +26,10 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [cdcb8b19-981c-11e7-8c34-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:45:13 GMT']
+      x-ms-client-request-id: [9382cbdc-a896-11e7-ad08-b8e8564491f6]
+      x-ms-date: ['Tue, 03 Oct 2017 23:57:13 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerb1921f2b/blob1
@@ -37,12 +37,12 @@ interactions:
     body: {string: !!python/unicode ''}
     headers:
       content-md5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      date: ['Wed, 13 Sep 2017 00:45:13 GMT']
-      etag: ['"0x8D4FA40B1DE7745"']
-      last-modified: ['Wed, 13 Sep 2017 00:45:13 GMT']
+      date: ['Tue, 03 Oct 2017 23:57:12 GMT']
+      etag: ['"0x8D50ABA77B45CD9"']
+      last-modified: ['Tue, 03 Oct 2017 23:57:13 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
-      x-ms-request-id: [48532e31-001e-0071-2f29-2c26ed000000]
+      x-ms-request-id: [58adc823-001e-0136-41a3-3cbfd3000000]
       x-ms-request-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
@@ -50,9 +50,9 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
-      x-ms-client-request-id: [cdd154ee-981c-11e7-abe6-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:45:13 GMT']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      x-ms-client-request-id: [93893223-a896-11e7-9975-b8e8564491f6]
+      x-ms-date: ['Tue, 03 Oct 2017 23:57:13 GMT']
       x-ms-version: ['2017-04-17']
     method: HEAD
     uri: https://storagename.blob.core.windows.net/utcontainerb1921f2b/blob1
@@ -63,15 +63,15 @@ interactions:
       content-length: ['11']
       content-md5: [XrY7u+Ae7tCTyyK7j1rNww==]
       content-type: [application/octet-stream]
-      date: ['Wed, 13 Sep 2017 00:45:13 GMT']
-      etag: ['"0x8D4FA40B1DE7745"']
-      last-modified: ['Wed, 13 Sep 2017 00:45:13 GMT']
+      date: ['Tue, 03 Oct 2017 23:57:12 GMT']
+      etag: ['"0x8D50ABA77B45CD9"']
+      last-modified: ['Tue, 03 Oct 2017 23:57:13 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       vary: [Origin]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
-      x-ms-request-id: [48532e3f-001e-0071-3b29-2c26ed000000]
+      x-ms-request-id: [58adc82c-001e-0136-49a3-3cbfd3000000]
       x-ms-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
@@ -80,25 +80,25 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      If-None-Match: ['"0x8D4FA40B1DE7745"']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
+      If-None-Match: ['"0x8D50ABA77B45CD9"']
+      User-Agent: [Azure-Storage/0.37.0-0.36.0 (Python CPython 2.7.10; Darwin 16.7.0)]
       x-ms-blob-content-disposition: [inline]
       x-ms-blob-content-language: [spanish]
-      x-ms-client-request-id: [cdd6c3f3-981c-11e7-bde4-b8e8564491f6]
-      x-ms-date: ['Wed, 13 Sep 2017 00:45:13 GMT']
+      x-ms-client-request-id: [938f01e1-a896-11e7-85d6-b8e8564491f6]
+      x-ms-date: ['Tue, 03 Oct 2017 23:57:13 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerb1921f2b/blob1?comp=properties
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ConditionNotMet</Code><Message>The\
-        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:48532e4f-001e-0071-4b29-2c26ed000000\n\
-        Time:2017-09-13T00:45:13.6278568Z</Message></Error>"}
+        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:58adc833-001e-0136-50a3-3cbfd3000000\n\
+        Time:2017-10-03T23:57:12.9118873Z</Message></Error>"}
     headers:
       content-length: ['252']
       content-type: [application/xml]
-      date: ['Wed, 13 Sep 2017 00:45:13 GMT']
+      date: ['Tue, 03 Oct 2017 23:57:12 GMT']
       server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [48532e4f-001e-0071-4b29-2c26ed000000]
+      x-ms-request-id: [58adc833-001e-0136-50a3-3cbfd3000000]
       x-ms-version: ['2017-04-17']
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}

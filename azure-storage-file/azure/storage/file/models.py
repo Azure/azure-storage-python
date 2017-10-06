@@ -28,13 +28,22 @@ class Share(object):
         This var is set to None unless the include=metadata param was included 
         for the list shares operation. If this parameter was specified but the 
         share has no metadata, metadata will be set to an empty dictionary.
+<<<<<<< HEAD:azure-storage-file/azure/storage/file/models.py
     :vartype metadata: dict(str, str)
+=======
+    :vartype metadata: dict mapping str to str
+    :ivar str snapshot:
+        A DateTime value that uniquely identifies the snapshot. The value of
+        this header indicates the snapshot version, and may be used in
+        subsequent requests to access the snapshot.
+>>>>>>> 8cc3167... sharesnapshot:azure/storage/file/models.py
     '''
 
-    def __init__(self, name=None, props=None, metadata=None):
+    def __init__(self, name=None, props=None, metadata=None, snapshot=None):
         self.name = name
         self.properties = props or ShareProperties()
         self.metadata = metadata
+        self.snapshot = snapshot
 
 
 class ShareProperties(object):
@@ -268,6 +277,17 @@ class FileRange(object):
     def __init__(self, start=None, end=None):
         self.start = start
         self.end = end
+
+
+class DeleteSnapshot(object):
+    '''
+    Required if the Share has associated snapshots. Specifies how to handle the snapshots.
+    '''
+
+    Include = 'include'
+    '''
+    Delete the share and all of its snapshots.
+    '''
 
 
 class FilePermissions(object):

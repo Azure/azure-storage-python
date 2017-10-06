@@ -115,7 +115,6 @@ class _QueryStringConstants(object):
     SIGNED_CONTENT_ENCODING = 'rsce'
     SIGNED_CONTENT_LANGUAGE = 'rscl'
     SIGNED_CONTENT_TYPE = 'rsct'
-    TABLE_NAME = 'tn'
     START_PK = 'spk'
     START_RK = 'srk'
     END_PK = 'epk'
@@ -155,14 +154,6 @@ class _SharedAccessHelper(object):
     def add_account(self, services, resource_types):
         self._add_query(_QueryStringConstants.SIGNED_SERVICES, services)
         self._add_query(_QueryStringConstants.SIGNED_RESOURCE_TYPES, resource_types)
-
-    def add_table_access_ranges(self, table_name, start_pk, start_rk,
-                                end_pk, end_rk):
-        self._add_query(_QueryStringConstants.TABLE_NAME, table_name)
-        self._add_query(_QueryStringConstants.START_PK, start_pk)
-        self._add_query(_QueryStringConstants.START_RK, start_rk)
-        self._add_query(_QueryStringConstants.END_PK, end_pk)
-        self._add_query(_QueryStringConstants.END_RK, end_rk)
 
     def add_override_response_headers(self, cache_control,
                                       content_disposition,
@@ -204,13 +195,6 @@ class _SharedAccessHelper(object):
                  get_value_to_append(_QueryStringConstants.SIGNED_CONTENT_ENCODING) +
                  get_value_to_append(_QueryStringConstants.SIGNED_CONTENT_LANGUAGE) +
                  get_value_to_append(_QueryStringConstants.SIGNED_CONTENT_TYPE))
-
-        if service == 'table':
-            string_to_sign += \
-                (get_value_to_append(_QueryStringConstants.START_PK) +
-                 get_value_to_append(_QueryStringConstants.START_RK) +
-                 get_value_to_append(_QueryStringConstants.END_PK) +
-                 get_value_to_append(_QueryStringConstants.END_RK))
 
         # remove the trailing newline
         if string_to_sign[-1] == '\n':

@@ -31,7 +31,9 @@ from azure.storage.common import (
 from azure.storage.file import (
     FileService,
     SharePermissions,
+    DeleteSnapshot,
 )
+
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -55,7 +57,7 @@ class StorageShareTest(StorageTestCase):
         if not self.is_playback():
             for share_name in self.test_shares:
                 try:
-                    self.fs.delete_share(share_name)
+                    self.fs.delete_share(share_name, delete_snapshots=DeleteSnapshot.Include)
                 except:
                     pass
         return super(StorageShareTest, self).tearDown()
@@ -82,6 +84,74 @@ class StorageShareTest(StorageTestCase):
 
         # Assert
         self.assertTrue(created)
+
+    @record
+    def test_create_share_snapshot(self):
+        # Arrange
+        share_name = self._get_share_reference()
+
+        # Act
+        created = self.fs.create_share(share_name)
+        snapshot = self.fs.snapshot_share(share_name)
+
+        # Assert
+        self.assertTrue(created)
+        self.assertIsNotNone(snapshot.snapshot)
+        self.assertIsNotNone(snapshot.name)
+        self.assertIsNotNone(snapshot.properties.etag)
+        self.assertIsNotNone(snapshot.properties.last_modified)
+
+    @record
+    def test_create_snapshot_with_metadata(self):
+        # Arrange
+        share_name = self._get_share_reference()
+        metadata = {"test1": "foo", "test2": "bar"}
+        metadata2 = {"test100": "foo100", "test200": "bar200"}
+
+        # Act
+        created = self.fs.create_share(share_name, metadata=metadata)
+        snapshot = self.fs.snapshot_share(share_name, metadata=metadata2)
+        share_metadata = self.fs.get_share_metadata(share_name)
+        snapshot_metadata = self.fs.get_share_metadata(share_name, snapshot=snapshot.snapshot)
+
+        # Assert
+        self.assertTrue(created)
+        self.assertIsNotNone(snapshot.snapshot)
+        self.assertIsNotNone(snapshot.name)
+        self.assertIsNotNone(snapshot.properties.etag)
+        self.assertIsNotNone(snapshot.properties.last_modified)
+        self.assertDictEqual(share_metadata, metadata)
+        self.assertDictEqual(snapshot_metadata, metadata2)
+
+    @record
+    def test_delete_share_with_snapshots(self):
+        # Arrange
+        share_name = self._get_share_reference()
+        self.fs.create_share(share_name)
+        snapshot = self.fs.snapshot_share(share_name)
+
+        # Act
+        with self.assertRaises(AzureHttpError,):
+            self.fs.delete_share(share_name)
+
+        self.fs.delete_share(share_name, delete_snapshots=DeleteSnapshot.Include)
+        self.assertFalse(self.fs.exists(share_name))
+        self.assertFalse(self.fs.exists(share_name, snapshot=snapshot.snapshot))
+
+    @record
+    def test_delete_snapshot(self):
+        # Arrange
+        share_name = self._get_share_reference()
+        self.fs.create_share(share_name)
+        snapshot = self.fs.snapshot_share(share_name)
+
+        # Act
+        with self.assertRaises(AzureHttpError,):
+            self.fs.delete_share(share_name)
+
+        self.fs.delete_share(share_name, snapshot=snapshot.snapshot)
+        self.assertTrue(self.fs.exists(share_name))
+        self.assertFalse(self.fs.exists(share_name, snapshot=snapshot.snapshot))
 
     @record
     def test_create_share_fail_on_exist(self):
@@ -170,6 +240,30 @@ class StorageShareTest(StorageTestCase):
         self.assertFalse(exists)
 
     @record
+    def test_share_snapshot_exists(self):
+        # Arrange
+        share_name = self._create_share()
+        snapshot = self.fs.snapshot_share(share_name)
+
+        # Act
+        exists = self.fs.exists(share_name, snapshot=snapshot.snapshot)
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_share_snapshot_not_exists(self):
+        # Arrange
+        share_name = self._create_share()
+        made_up_snapshot = '2017-07-19T06:53:46.0000000Z'
+
+        # Act
+        exists = self.fs.exists(share_name, snapshot=made_up_snapshot)
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
     def test_unicode_create_share_unicode_name(self):
         # Arrange
         share_name = u'啊齄丂狛狜'
@@ -194,6 +288,24 @@ class StorageShareTest(StorageTestCase):
         self.assertGreaterEqual(len(shares), 1)
         self.assertIsNotNone(shares[0])
         self.assertNamedItemInContainer(shares, share_name)
+
+    @record
+    def test_list_shares_with_snapshot(self):
+        # Arrange
+        share_name = self._create_share()
+        snapshot1 = self.fs.snapshot_share(share_name)
+        snapshot2 = self.fs.snapshot_share(share_name)
+
+        # Act
+        shares = list(self.fs.list_shares(include_snapshots=True))
+
+        # Assert
+        self.assertIsNotNone(shares)
+        self.assertGreaterEqual(len(shares), 3)
+        self.assertIsNotNone(shares[0])
+        self.assertNamedItemInContainer(shares, share_name)
+        self.assertNamedItemInContainer(shares, snapshot1.snapshot)
+        self.assertNamedItemInContainer(shares, snapshot2.snapshot)
 
     @record
     def test_list_shares_with_prefix(self):
@@ -284,6 +396,20 @@ class StorageShareTest(StorageTestCase):
         self.assertDictEqual(md, metadata)
 
     @record
+    def test_get_share_metadata_with_snapshot(self):
+        # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
+        share_name = self._create_share()
+        self.fs.set_share_metadata(share_name, metadata)
+        snapshot = self.fs.snapshot_share(share_name)
+
+        # Act
+        md = self.fs.get_share_metadata(share_name, snapshot=snapshot.snapshot)
+
+        # Assert
+        self.assertDictEqual(md, metadata)
+
+    @record
     def test_get_share_properties(self):
         # Arrange
         metadata = {'hello': 'world', 'number': '42'}
@@ -292,6 +418,23 @@ class StorageShareTest(StorageTestCase):
 
         # Act
         props = self.fs.get_share_properties(share_name)
+
+        # Assert
+        self.assertIsNotNone(props)
+        self.assertDictEqual(props.metadata, metadata)
+
+    @record
+    def test_get_share_properties_with_snapshot(self):
+        # Arrange
+        metadata = {'hello': 'world', 'number': '42'}
+        share_name = self._create_share()
+        self.fs.set_share_metadata(share_name, metadata)
+        snapshot1 = self.fs.snapshot_share(share_name)
+        metadata2 = {'hello': 'world', 'number': '42', 'testy': 'goodbye'}
+        self.fs.set_share_metadata(share_name, metadata2)
+
+        # Act
+        props = self.fs.get_share_properties(share_name, snapshot=snapshot1.snapshot)
 
         # Assert
         self.assertIsNotNone(props)
@@ -469,6 +612,26 @@ class StorageShareTest(StorageTestCase):
         self.assertNamedItemInContainer(resp, 'dir1')
         self.assertNamedItemInContainer(resp, 'dir2')
         self.assertNamedItemInContainer(resp, 'file1')
+
+    @record
+    def test_list_directories_and_files_with_snapshot(self):
+        # Arrange
+        share_name = self._create_share()
+        self.fs.create_directory(share_name, 'dir1')
+        self.fs.create_directory(share_name, 'dir2')
+        snapshot1 = self.fs.snapshot_share(share_name)
+        self.fs.create_directory(share_name, 'dir3')
+        self.fs.create_file(share_name, None, 'file1', 1024)
+
+        # Act
+        resp = list(self.fs.list_directories_and_files(share_name, snapshot=snapshot1.snapshot))
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEqual(len(resp), 2)
+        self.assertIsNotNone(resp[0])
+        self.assertNamedItemInContainer(resp, 'dir1')
+        self.assertNamedItemInContainer(resp, 'dir2')
 
     @record
     def test_list_directories_and_files_with_num_results(self):

@@ -26,7 +26,6 @@ from ._constants import (
     DEV_ACCOUNT_KEY,
     DEV_BLOB_HOST,
     DEV_QUEUE_HOST,
-    DEV_TABLE_HOST
 )
 from ._error import (
     _ERROR_STORAGE_MISSING_INFO,
@@ -35,21 +34,18 @@ from ._error import (
 _EMULATOR_ENDPOINTS = {
     'blob': DEV_BLOB_HOST,
     'queue': DEV_QUEUE_HOST,
-    'table': DEV_TABLE_HOST,
     'file': '',
 }
 
 _CONNECTION_ENDPOINTS = {
     'blob': 'BlobEndpoint',
     'queue': 'QueueEndpoint',
-    'table': 'TableEndpoint',
     'file': 'FileEndpoint',
 }
 
 _CONNECTION_ENDPOINTS_SECONDARY = {
     'blob': 'BlobSecondaryEndpoint',
     'queue': 'QueueSecondaryEndpoint',
-    'table': 'TableSecondaryEndpoint',
     'file': 'FileSecondaryEndpoint',
 }
 
