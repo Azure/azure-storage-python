@@ -593,10 +593,10 @@ class AccountPermissions(object):
         self.process = process or ('p' in _str)
 
     def __or__(self, other):
-        return ResourceTypes(_str=str(self) + str(other))
+        return AccountPermissions(_str=str(self) + str(other))
 
     def __add__(self, other):
-        return ResourceTypes(_str=str(self) + str(other))
+        return AccountPermissions(_str=str(self) + str(other))
 
     def __str__(self):
         return (('r' if self.read else '') +
