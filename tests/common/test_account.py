@@ -183,6 +183,50 @@ class StorageAccountTest(StorageTestCase):
         finally:
             service.delete_container(container_name)
 
+    @record
+    def test_generate_account_sas_with_multiple_permissions(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Validate both + and | generate the same permissions
+        permissions = AccountPermissions.READ + AccountPermissions.WRITE
+        permissions_or = AccountPermissions.READ | AccountPermissions.WRITE
+        self.assertEqual(str(permissions), str(permissions_or))
+
+        # Arrange
+        token = self.account.generate_shared_access_signature(
+            Services.BLOB,
+            ResourceTypes.OBJECT,
+            permissions,
+            datetime.utcnow() + timedelta(hours=1),
+        )
+
+        service_with_key = self.account.create_block_blob_service()
+        service_with_sas = BlockBlobService(account_name=self.account_name, sas_token=token)
+        data = b'shared access signature with read/write permission on blob'
+        container_name = 'container2'
+        blob_name = 'blob1.txt'
+
+        try:
+            # Act Write
+            service_with_key.create_container(container_name)
+            resp = service_with_sas.create_blob_from_text(container_name, blob_name, data)
+
+            # Assert Write
+            self.assertIsNotNone(resp.etag)
+            self.assertIsNotNone(resp.last_modified)
+
+            # Act Read
+            blob = service_with_sas.get_blob_to_text(container_name, blob_name)
+
+            # Assert Read
+            self.assertIsNotNone(blob.content)
+            self.assertEqual(data, blob.content)
+
+        finally:
+            service_with_key.delete_container(container_name)
+
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
