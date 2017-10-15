@@ -8,6 +8,7 @@ Submodules
 
    azure.storage.file.fileservice
    azure.storage.file.models
+   azure.storage.file.sharedaccesssignature
 
 Module contents
 ---------------

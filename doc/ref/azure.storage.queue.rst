@@ -8,6 +8,7 @@ Submodules
 
    azure.storage.queue.models
    azure.storage.queue.queueservice
+   azure.storage.queue.sharedaccesssignature
 
 Module contents
 ---------------

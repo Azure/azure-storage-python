@@ -11,6 +11,7 @@ Submodules
    azure.storage.blob.blockblobservice
    azure.storage.blob.models
    azure.storage.blob.pageblobservice
+   azure.storage.blob.sharedaccesssignature
 
 Module contents
 ---------------
