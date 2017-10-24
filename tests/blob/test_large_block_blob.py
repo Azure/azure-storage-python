@@ -36,10 +36,11 @@ from tests.testcase import (
 # ------------------------------------------------------------------------------
 TEST_BLOB_PREFIX = 'largeblob'
 FILE_PATH = 'blob_large_input.temp.dat'
-LARGE_BLOB_SIZE = 6 * 1024 * 1024
-
+LARGE_BLOB_SIZE = 12 * 1024 * 1024
+LARGE_BLOCK_SIZE = 6 * 1024 * 1024
 
 # ------------------------------------------------------------------------------
+
 
 class StorageLargeBlockBlobTest(StorageTestCase):
     def setUp(self):
@@ -56,7 +57,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         # for chunking and the size of each chunk, otherwise
         # the tests would take too long to execute
         self.bs.MAX_BLOCK_SIZE = 2 * 1024 * 1024
-        self.bs.MIN_LARGE_BLOCK_UPLOAD_THRESHOLD = 1 * 1024 * 1024;
+        self.bs.MIN_LARGE_BLOCK_UPLOAD_THRESHOLD = 1 * 1024 * 1024
         self.bs.MAX_SINGLE_PUT_SIZE = 32 * 1024
 
     def tearDown(self):
@@ -89,8 +90,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
 
     # --Test cases for block blobs --------------------------------------------
 
-
-    def test_put_block_large(self):
+    def test_put_block_bytes_large(self):
         if TestMode.need_recording_file(self.test_mode):
             return
 
@@ -101,11 +101,27 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         for i in range(5):
             resp = self.bs.put_block(self.container_name,
                                      blob_name,
-                                     'block {0}'.format(i).encode('utf-8'),
-                                     i)
+                                     os.urandom(LARGE_BLOCK_SIZE),
+                                     'block {0}'.format(i).encode('utf-8'),)
             self.assertIsNone(resp)
 
             # Assert
+
+    def test_put_block_bytes_large_with_md5(self):
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._create_blob()
+
+        # Act
+        for i in range(5):
+            resp = self.bs.put_block(self.container_name,
+                                     blob_name,
+                                     os.urandom(LARGE_BLOCK_SIZE),
+                                     'block {0}'.format(i).encode('utf-8'),
+                                     validate_content=True)
+            self.assertIsNone(resp)
 
     def test_put_block_stream_large(self):
         if TestMode.need_recording_file(self.test_mode):
@@ -116,17 +132,16 @@ class StorageLargeBlockBlobTest(StorageTestCase):
 
         # Act
         for i in range(5):
-            stream = BytesIO(bytearray(self.bs.MAX_BLOCK_SIZE))
+            stream = BytesIO(bytearray(LARGE_BLOCK_SIZE))
             resp = self.bs.put_block(self.container_name,
                                      blob_name,
-                                     'block {0}'.format(i).encode('utf-8'),
-                                     stream)
+                                     stream,
+                                     'block {0}'.format(i).encode('utf-8'),)
             self.assertIsNone(resp)
 
             # Assert
 
-
-    def test_put_block_stream_with_md5(self):
+    def test_put_block_stream_large_with_md5(self):
         if TestMode.need_recording_file(self.test_mode):
             return
 
@@ -135,11 +150,11 @@ class StorageLargeBlockBlobTest(StorageTestCase):
 
         # Act
         for i in range(5):
-            stream = BytesIO(bytearray(self.bs.MAX_BLOCK_SIZE))
+            stream = BytesIO(bytearray(LARGE_BLOCK_SIZE))
             resp = self.bs.put_block(self.container_name,
                                      blob_name,
-                                     'block {0}'.format(i).encode('utf-8'),
                                      stream,
+                                     'block {0}'.format(i).encode('utf-8'),
                                      validate_content=True)
             self.assertIsNone(resp)
 
@@ -162,6 +177,22 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
 
+    def test_create_large_blob_from_path_with_md5(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = bytearray(os.urandom(LARGE_BLOB_SIZE))
+        with open(FILE_PATH, 'wb') as stream:
+            stream.write(data)
+
+        # Act
+        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, validate_content=True)
+
+        # Assert
+        self.assertBlobEqual(self.container_name, blob_name, data)
 
     def test_create_large_blob_from_path_non_parallel(self):
         if TestMode.need_recording_file(self.test_mode):
@@ -339,5 +370,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
 
 # ------------------------------------------------------------------------------
+
+
 if __name__ == '__main__':
     unittest.main()
