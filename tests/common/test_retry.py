@@ -109,6 +109,28 @@ class StorageRetryTest(StorageTestCase):
         self.assertFalse(created)
 
     @record
+    def test_retry_callback_and_retry_context(self):
+        # Arrange
+        container_name = self.get_resource_name()
+        service = self._create_storage_service(BlockBlobService, self.settings)
+        service.retry = LinearRetry(backoff=1).retry
+
+        # Force the create call to 'timeout' with a 408
+        service.response_callback = ResponseCallback(status=201, new_status=408).override_status
+
+        def assert_exception_is_present_on_retry_context(retry_context):
+            self.assertIsNotNone(retry_context.exception)
+
+        service.retry_callback = assert_exception_is_present_on_retry_context
+
+        # Act
+        try:
+            service.create_container(container_name)
+        finally:
+            service.response_callback = None
+            service.delete_container(container_name)
+
+    @record
     def test_retry_on_socket_timeout(self):
         # Arrange
         container_name = self.get_resource_name()
