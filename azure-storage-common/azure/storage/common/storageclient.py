@@ -293,8 +293,10 @@ class StorageClient(object):
                     else:
                         return
                 except AzureException as ex:
+                    retry_context.exception = ex
                     raise ex
                 except Exception as ex:
+                    retry_context.exception = ex
                     if sys.version_info >= (3,):
                         # Automatic chaining in Python 3 means we keep the trace
                         raise AzureException(ex.args[0])
