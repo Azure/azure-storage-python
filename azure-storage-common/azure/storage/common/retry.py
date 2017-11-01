@@ -14,6 +14,7 @@
 # --------------------------------------------------------------------------
 from abc import ABCMeta
 from math import pow
+import random
 
 from .models import LocationMode
 
@@ -152,7 +153,7 @@ class ExponentialRetry(_Retry):
     '''
 
     def __init__(self, initial_backoff=15, increment_power=3, max_attempts=3,
-                 retry_to_secondary=False):
+                 retry_to_secondary=False, random_jitter_range=3):
         '''
         Constructs an Exponential retry object. The initial_backoff is used for 
         the first retry. Subsequent retries are retried after initial_backoff + 
@@ -171,9 +172,13 @@ class ExponentialRetry(_Retry):
             Whether the request should be retried to secondary, if able. This should 
             only be enabled of RA-GRS accounts are used and potentially stale data 
             can be handled.
+        :param int random_jitter_range:
+            A number in seconds which indicates a range to jitter/randomize for the back-off interval.
+            For example, a random_jitter_range of 3 results in the back-off interval x to vary between x+3 and x-3.
         '''
         self.initial_backoff = initial_backoff
         self.increment_power = increment_power
+        self.random_jitter_range = random_jitter_range
         super(ExponentialRetry, self).__init__(max_attempts, retry_to_secondary)
 
     '''
@@ -201,7 +206,11 @@ class ExponentialRetry(_Retry):
     '''
 
     def _backoff(self, context):
-        return self.initial_backoff + (0 if context.count == 0 else pow(self.increment_power, context.count))
+        random_generator = random.Random()
+        backoff = self.initial_backoff + (0 if context.count == 0 else pow(self.increment_power, context.count))
+        random_range_start = backoff - self.random_jitter_range if backoff > self.random_jitter_range else 0
+        random_range_end = backoff + self.random_jitter_range
+        return random_generator.uniform(random_range_start, random_range_end)
 
 
 class LinearRetry(_Retry):
@@ -209,7 +218,7 @@ class LinearRetry(_Retry):
     Linear retry.
     '''
 
-    def __init__(self, backoff=15, max_attempts=3, retry_to_secondary=False):
+    def __init__(self, backoff=15, max_attempts=3, retry_to_secondary=False, random_jitter_range=3):
         '''
         Constructs a Linear retry object.
 
@@ -221,9 +230,13 @@ class LinearRetry(_Retry):
             Whether the request should be retried to secondary, if able. This should 
             only be enabled of RA-GRS accounts are used and potentially stale data 
             can be handled.
+        :param int random_jitter_range:
+            A number in seconds which indicates a range to jitter/randomize for the back-off interval.
+            For example, a random_jitter_range of 3 results in the back-off interval x to vary between x+3 and x-3.
         '''
         self.backoff = backoff
         self.max_attempts = max_attempts
+        self.random_jitter_range = random_jitter_range
         super(LinearRetry, self).__init__(max_attempts, retry_to_secondary)
 
     '''
@@ -251,7 +264,12 @@ class LinearRetry(_Retry):
     '''
 
     def _backoff(self, context):
-        return self.backoff
+        random_generator = random.Random()
+        # the backoff interval normally does not change, however there is the possibility
+        # that it was modified by accessing the property directly after initializing the object
+        self.random_range_start = self.backoff - self.random_jitter_range if self.backoff > self.random_jitter_range else 0
+        self.random_range_end = self.backoff + self.random_jitter_range
+        return random_generator.uniform(self.random_range_start, self.random_range_end)
 
 
 def no_retry(context):
