@@ -221,38 +221,63 @@ class StorageRetryTest(StorageTestCase):
 
     def test_exponential_retry_interval(self):
         # Arrange
-        initial_backoff = 15
-        increment_power = 3
-        retry_policy = ExponentialRetry(initial_backoff, increment_power)
+        retry_policy = ExponentialRetry(initial_backoff=1, increment_power=3, random_jitter_range=3)
         context_stub = RetryContext()
 
-        # Act
-        context_stub.count = 0
-        backoff = retry_policy._backoff(context_stub)
+        for i in range(10):
+            # Act
+            context_stub.count = 0
+            backoff = retry_policy._backoff(context_stub)
 
-        # Assert
-        self.assertEqual(backoff, 15)
+            # Assert backoff interval is within +/- 3 of 1
+            self.assertTrue(0 <= backoff <= 4)
 
-        # Act
-        context_stub.count = 1
-        backoff = retry_policy._backoff(context_stub)
+            # Act
+            context_stub.count = 1
+            backoff = retry_policy._backoff(context_stub)
 
-        # Assert
-        self.assertEqual(backoff, 18)
+            # Assert backoff interval is within +/- 3 of 4(1+3^1)
+            self.assertTrue(1 <= backoff <= 7)
 
-        # Act
-        context_stub.count = 2
-        backoff = retry_policy._backoff(context_stub)
+            # Act
+            context_stub.count = 2
+            backoff = retry_policy._backoff(context_stub)
 
-        # Assert
-        self.assertEqual(backoff, 24)
+            # Assert backoff interval is within +/- 3 of 10(1+3^2)
+            self.assertTrue(7 <= backoff <= 13)
 
-        # Act
-        context_stub.count = 3
-        backoff = retry_policy._backoff(context_stub)
+            # Act
+            context_stub.count = 3
+            backoff = retry_policy._backoff(context_stub)
 
-        # Assert
-        self.assertEqual(backoff, 42)
+            # Assert backoff interval is within +/- 3 of 28(1+3^3)
+            self.assertTrue(25 <= backoff <= 31)
+
+    def test_linear_retry_interval(self):
+        # Arrange
+        context_stub = RetryContext()
+
+        for i in range(10):
+            # Act
+            retry_policy = LinearRetry(backoff=1, random_jitter_range=3)
+            backoff = retry_policy._backoff(context_stub)
+
+            # Assert backoff interval is within +/- 3 of 1
+            self.assertTrue(0 <= backoff <= 4)
+
+            # Act
+            retry_policy = LinearRetry(backoff=5, random_jitter_range=3)
+            backoff = retry_policy._backoff(context_stub)
+
+            # Assert backoff interval is within +/- 3 of 5
+            self.assertTrue(2 <= backoff <= 8)
+
+            # Act
+            retry_policy = LinearRetry(backoff=15, random_jitter_range=3)
+            backoff = retry_policy._backoff(context_stub)
+
+            # Assert backoff interval is within +/- 3 of 15
+            self.assertTrue(12 <= backoff <= 18)
 
     @record
     def test_invalid_retry(self):
