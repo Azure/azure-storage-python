@@ -748,7 +748,6 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Assert
 
-
     def test_incremental_copy_blob(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
@@ -806,7 +805,7 @@ class StoragePageBlobTest(StorageTestCase):
 
             blob = ps.get_blob_properties(container_name, blob_name)
             self.assertEqual(blob.properties.blob_tier, PremiumPageBlobTier.P4)
-            self.assertFalse(hasattr(blob.properties, 'blob_tier_inferred'))
+            self.assertFalse(blob.properties.blob_tier_inferred)
 
             # test create_blob_from_bytes API
             blob_name2 = self._get_blob_reference()
@@ -815,7 +814,7 @@ class StoragePageBlobTest(StorageTestCase):
 
             blob2 = ps.get_blob_properties(container_name, blob_name2)
             self.assertEqual(blob2.properties.blob_tier, PremiumPageBlobTier.P6)
-            self.assertFalse(hasattr(blob.properties, 'blob_tier_inferred'))
+            self.assertFalse(blob.properties.blob_tier_inferred)
 
             # test create_blob_from_path API
             blob_name3 = self._get_blob_reference()
@@ -825,7 +824,7 @@ class StoragePageBlobTest(StorageTestCase):
 
             blob3 = ps.get_blob_properties(container_name, blob_name3)
             self.assertEqual(blob3.properties.blob_tier, PremiumPageBlobTier.P10)
-            self.assertFalse(hasattr(blob.properties, 'blob_tier_inferred'))
+            self.assertFalse(blob.properties.blob_tier_inferred)
 
             # test create_blob_from_stream API
             blob_name4 = self._get_blob_reference()
@@ -834,7 +833,7 @@ class StoragePageBlobTest(StorageTestCase):
 
             blob4 = ps.get_blob_properties(container_name, blob_name4)
             self.assertEqual(blob4.properties.blob_tier, PremiumPageBlobTier.P20)
-            self.assertFalse(hasattr(blob.properties, 'blob_tier_inferred'))
+            self.assertFalse(blob.properties.blob_tier_inferred)
         finally:
             ps.delete_container(container_name)
 
@@ -851,12 +850,22 @@ class StoragePageBlobTest(StorageTestCase):
             ps.create_blob(container_name, blob_name, 1024)
             blob_ref = ps.get_blob_properties(container_name, blob_name)
             self.assertEqual(PremiumPageBlobTier.P10, blob_ref.properties.blob_tier)
+            self.assertIsNotNone(blob_ref.properties.blob_tier)
             self.assertTrue(blob_ref.properties.blob_tier_inferred)
+
+            blobs = list(ps.list_blobs(container_name))
+
+            # Assert
+            self.assertIsNotNone(blobs)
+            self.assertGreaterEqual(len(blobs), 1)
+            self.assertIsNotNone(blobs[0])
+            self.assertNamedItemInContainer(blobs, blob_name)
+
             ps.set_premium_page_blob_tier(container_name, blob_name, PremiumPageBlobTier.P50)
 
             blob_ref2 = ps.get_blob_properties(container_name, blob_name)
             self.assertEqual(PremiumPageBlobTier.P50, blob_ref2.properties.blob_tier)
-            self.assertFalse(hasattr(blob_ref2.properties, 'blob_tier_inferred'))
+            self.assertFalse(blob_ref2.properties.blob_tier_inferred)
 
             blobs = list(ps.list_blobs(container_name))
 
@@ -866,7 +875,7 @@ class StoragePageBlobTest(StorageTestCase):
             self.assertIsNotNone(blobs[0])
             self.assertNamedItemInContainer(blobs, blob_name)
             self.assertEqual(blobs[0].properties.blob_tier, PremiumPageBlobTier.P50)
-            self.assertFalse(hasattr(blobs[0].properties, 'blob_tier_inferred'))
+            self.assertFalse(blobs[0].properties.blob_tier_inferred)
         finally:
             ps.delete_container(container_name)
 
@@ -910,7 +919,7 @@ class StoragePageBlobTest(StorageTestCase):
 
             copy_ref2 = ps.get_blob_properties(container_name, 'blob2copy')
             self.assertEqual(copy_ref2.properties.blob_tier, PremiumPageBlobTier.P60)
-            self.assertFalse(hasattr(copy_ref2.properties, 'blob_tier_inferred'))
+            self.assertFalse(copy_ref2.properties.blob_tier_inferred)
 
             copy3 = ps.copy_blob(container_name, 'blob3copy', source_blob2)
             self.assertIsNotNone(copy3)

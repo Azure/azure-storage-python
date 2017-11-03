@@ -15,7 +15,7 @@
 import platform
 
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '0.37.0'
+__version__ = '0.37.1'
 
 # UserAgent string sample: 'Azure-Storage/0.37.0-0.38.0 (Python CPython 3.4.2; Windows 8)'
 # First version(0.37.0) is the common package, and the second version(0.38.0) is the service package

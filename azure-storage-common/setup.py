@@ -60,7 +60,7 @@ except ImportError:
 
 setup(
     name='azure-storage-common',
-    version='0.37.0',
+    version='0.37.1',
     description='Microsoft Azure Storage Common Client Library for Python',
     long_description=open('README.rst', 'r').read(),
     license='Apache License 2.0',

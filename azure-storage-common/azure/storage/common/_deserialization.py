@@ -65,6 +65,7 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_to_str),
     'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_to_str),
     'x-ms-access-tier': (None, 'blob_tier', _to_str),
+    'x-ms-access-tier-change-time': (None, 'blob_tier_change_time', parser.parse),
     'x-ms-access-tier-inferred': (None, 'blob_tier_inferred', _bool),
     'x-ms-archive-status': (None, 'rehydration_status', _to_str),
     'x-ms-share-quota': (None, 'quota', _int_to_str),
