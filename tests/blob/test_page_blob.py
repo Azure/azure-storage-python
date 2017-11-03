@@ -628,6 +628,38 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.etag, create_resp.etag)
         self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
 
+    def test_create_blob_from_stream_with_empty_pages(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        # data is almost all empty (0s) except two ranges
+        blob_name = self._get_blob_reference()
+        data = bytearray(LARGE_BLOB_SIZE)
+        data[512: 1024] = self.get_random_bytes(512)
+        data[8192: 8196] = self.get_random_bytes(4)
+        with open(FILE_PATH, 'wb') as stream:
+            stream.write(data)
+
+        # Act
+        blob_size = len(data)
+        with open(FILE_PATH, 'rb') as stream:
+            create_resp = self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        # the uploader should have skipped the empty ranges
+        self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
+        page_ranges = list(self.bs.get_page_ranges(self.container_name, blob_name))
+        self.assertEqual(len(page_ranges), 2)
+        self.assertEqual(page_ranges[0].start, 0)
+        self.assertEqual(page_ranges[0].end, 4095)
+        self.assertEqual(page_ranges[1].start, 8192)
+        self.assertEqual(page_ranges[1].end, 12287)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
+
     def test_create_blob_from_stream_non_seekable(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):

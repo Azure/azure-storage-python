@@ -77,12 +77,12 @@ class PageBlobService(BaseBlobService):
     and a range that align to 512-byte page boundaries. A write to a page blob
     can overwrite just one page, some pages, or up to 4 MB of the page blob.
     Writes to page blobs happen in-place and are immediately committed to the
-    blob. The maximum size for a page blob is 1 TB.
+    blob. The maximum size for a page blob is 8 TB.
 
     :ivar int MAX_PAGE_SIZE: 
         The size of the pages put by create_blob_from_* methods. Smaller pages 
         may be put if there is less data provided. The maximum page size the service 
-        supports is 4MB.
+        supports is 4MB. When using the create_blob_from_* methods, empty pages are skipped.
     '''
 
     MAX_PAGE_SIZE = 4 * 1024 * 1024
@@ -802,6 +802,7 @@ class PageBlobService(BaseBlobService):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
+        Empty chunks are skipped, while non-emtpy ones(even if only partly filled) are uploaded.
 
         :param str container_name:
             Name of existing container.
@@ -895,6 +896,7 @@ class PageBlobService(BaseBlobService):
         '''
         Creates a new blob from a file/stream, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
+        Empty chunks are skipped, while non-emtpy ones(even if only partly filled) are uploaded.
 
         :param str container_name:
             Name of existing container.
@@ -1028,7 +1030,7 @@ class PageBlobService(BaseBlobService):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
-        notifications.
+        notifications. Empty chunks are skipped, while non-emtpy ones(even if only partly filled) are uploaded.
 
         :param str container_name:
             Name of existing container.

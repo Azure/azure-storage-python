@@ -196,19 +196,19 @@ class _BlobChunkUploader(object):
                     data = self.padder.update(data)
                 if self.encryptor:
                     data = self.encryptor.update(data)
-                yield index, BytesIO(data)
+                yield index, data
             else:
                 if self.padder:
                     data = self.padder.update(data) + self.padder.finalize()
                 if self.encryptor:
                     data = self.encryptor.update(data) + self.encryptor.finalize()
                 if len(data) > 0:
-                    yield index, BytesIO(data)
+                    yield index, data
                 break
             index += len(data)
 
     def process_chunk(self, chunk_data):
-        chunk_bytes = chunk_data[1].read()
+        chunk_bytes = chunk_data[1]
         chunk_offset = chunk_data[0]
         return self._upload_chunk_with_progress(chunk_offset, chunk_bytes)
 
@@ -290,24 +290,39 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
 
 
 class _PageBlobChunkUploader(_BlobChunkUploader):
+    EMPTY_PAGE = bytearray(512)
+
+    def _is_chunk_empty(self, chunk_data):
+        # read until non-zero data is encountered
+        # if reached the end without returning, then chunk_data is all 0's
+        data = BytesIO(chunk_data)
+        page = data.read(512)
+        while page != b'':
+            if page != self.EMPTY_PAGE:
+                return False
+            page = data.read(512)
+        return True
+
     def _upload_chunk(self, chunk_start, chunk_data):
-        chunk_end = chunk_start + len(chunk_data) - 1
-        resp = self.blob_service._update_page(
-            self.container_name,
-            self.blob_name,
-            chunk_data,
-            chunk_start,
-            chunk_end,
-            validate_content=self.validate_content,
-            lease_id=self.lease_id,
-            if_match=self.if_match,
-            timeout=self.timeout,
-        )
+        # avoid uploading the empty pages
+        if not self._is_chunk_empty(chunk_data):
+            chunk_end = chunk_start + len(chunk_data) - 1
+            resp = self.blob_service._update_page(
+                self.container_name,
+                self.blob_name,
+                chunk_data,
+                chunk_start,
+                chunk_end,
+                validate_content=self.validate_content,
+                lease_id=self.lease_id,
+                if_match=self.if_match,
+                timeout=self.timeout,
+            )
 
-        if not self.parallel:
-            self.if_match = resp.etag
+            if not self.parallel:
+                self.if_match = resp.etag
 
-        self.set_response_properties(resp)
+            self.set_response_properties(resp)
 
 
 class _AppendBlobChunkUploader(_BlobChunkUploader):
