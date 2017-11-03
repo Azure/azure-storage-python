@@ -124,14 +124,18 @@ class RetryContext(object):
         The request sent to the storage service.
     :ivar ~azure.storage.common._http.HTTPResponse response:
         The response returned by the storage service.
-    :ivar LocationMode location_mode: 
+    :ivar LocationMode location_mode:
         The location the request was sent to.
+    :ivar Exception exception:
+        The exception that just occurred. The type could either be AzureException (for HTTP errors),
+        or other Exception types from lower layers, which are kept unwrapped for easier processing.
     '''
 
     def __init__(self):
         self.request = None
         self.response = None
         self.location_mode = None
+        self.exception = None
 
 
 class LocationMode(object):
@@ -593,10 +597,10 @@ class AccountPermissions(object):
         self.process = process or ('p' in _str)
 
     def __or__(self, other):
-        return ResourceTypes(_str=str(self) + str(other))
+        return AccountPermissions(_str=str(self) + str(other))
 
     def __add__(self, other):
-        return ResourceTypes(_str=str(self) + str(other))
+        return AccountPermissions(_str=str(self) + str(other))
 
     def __str__(self):
         return (('r' if self.read else '') +

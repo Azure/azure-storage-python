@@ -115,6 +115,18 @@ class BlobProperties(object):
         Stores all the content settings for the blob.
     :ivar ~azure.storage.blob.models.LeaseProperties lease:
         Stores all the lease information for the blob.
+    :ivar StandardBlobTier blob_tier:
+        Indicates the access tier of the blob. The hot tier is optimized
+        for storing data that is accessed frequently. The cool storage tier
+        is optimized for storing data that is infrequently accessed and stored
+        for at least a month. The archive tier is optimized for storing
+        data that is rarely accessed and stored for at least six months
+        with flexible latency requirements.
+    :ivar datetime blob_tier_change_time:
+        Indicates when the access tier was last changed.
+    :ivar bool blob_tier_inferred:
+        Indicates whether the access tier was inferred by the service.
+        If false, it indicates that the tier was set explicitly.
     '''
 
     def __init__(self):
@@ -129,6 +141,9 @@ class BlobProperties(object):
         self.copy = CopyProperties()
         self.content_settings = ContentSettings()
         self.lease = LeaseProperties()
+        self.blob_tier = None
+        self.blob_tier_change_time = None
+        self.blob_tier_inferred = False
 
 
 class ContentSettings(object):

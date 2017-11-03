@@ -348,7 +348,9 @@ class BlockBlobService(BaseBlobService):
             that was sent. This is primarily valuable for detecting bitflips on
             the wire if using http instead of https as https (the default) will
             already validate. Note that this MD5 hash is not stored with the
-            blob.
+            blob. Also note that if enabled, the memory-efficient upload algorithm
+            will not be used, because computing the MD5 hash requires buffering
+            entire blocks, and doing so defeats the purpose of the memory-efficient algorithm.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -441,7 +443,9 @@ class BlockBlobService(BaseBlobService):
             that was sent. This is primarily valuable for detecting bitflips on
             the wire if using http instead of https as https (the default) will
             already validate. Note that this MD5 hash is not stored with the
-            blob.
+            blob. Also note that if enabled, the memory-efficient upload algorithm
+            will not be used, because computing the MD5 hash requires buffering
+            entire blocks, and doing so defeats the purpose of the memory-efficient algorithm.
         :param progress_callback:
             Callback for progress with signature function(current, total) where
             current is the number of bytes transfered so far, and total is the
@@ -507,6 +511,7 @@ class BlockBlobService(BaseBlobService):
         if (self.key_encryption_key is not None) and (adjusted_count is not None):
             adjusted_count += (16 - (count % 16))
 
+        # Do single put if the size is smaller than MAX_SINGLE_PUT_SIZE
         if adjusted_count is not None and (adjusted_count < self.MAX_SINGLE_PUT_SIZE):
             if progress_callback:
                 progress_callback(0, count)
@@ -530,10 +535,10 @@ class BlockBlobService(BaseBlobService):
                 progress_callback(count, count)
 
             return resp
-        else:
+        else:  # Size is larger than MAX_SINGLE_PUT_SIZE, must upload with multiple put_block calls
             cek, iv, encryption_data = None, None, None
 
-            use_original_upload_path = use_byte_buffer or self.require_encryption or \
+            use_original_upload_path = use_byte_buffer or validate_content or self.require_encryption or \
                                        self.MAX_BLOCK_SIZE < self.MIN_LARGE_BLOCK_UPLOAD_THRESHOLD or \
                                        hasattr(stream, 'seekable') and not stream.seekable() or \
                                        not hasattr(stream, 'seek') or not hasattr(stream, 'tell')

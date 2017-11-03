@@ -75,11 +75,29 @@ class BlobStorageAccountTest(StorageTestCase):
             blob_name = self._get_blob_reference()
             data = b'hello world'
             self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+
+            blob_ref = self.bs.get_blob_properties(self.container_name, blob_name)
+            self.assertIsNotNone(blob_ref.properties.blob_tier)
+            self.assertTrue(blob_ref.properties.blob_tier_inferred)
+            self.assertIsNone(blob_ref.properties.blob_tier_change_time)
+
+            blobs = list(self.bs.list_blobs(self.container_name))
+
+            # Assert
+            self.assertIsNotNone(blobs)
+            self.assertGreaterEqual(len(blobs), 1)
+            self.assertIsNotNone(blobs[0])
+            self.assertNamedItemInContainer(blobs, blob_name)
+            self.assertIsNotNone(blobs[0].properties.blob_tier)
+            self.assertTrue(blobs[0].properties.blob_tier_inferred)
+            self.assertIsNone(blobs[0].properties.blob_tier_change_time)
+
             self.bs.set_standard_blob_tier(self.container_name, blob_name, tier)
 
             blob_ref2 = self.bs.get_blob_properties(self.container_name, blob_name)
             self.assertEqual(tier, blob_ref2.properties.blob_tier)
-            self.assertFalse(hasattr(blob_ref2.properties, 'blob_tier_inferred'))
+            self.assertFalse(blob_ref2.properties.blob_tier_inferred)
+            self.assertIsNotNone(blob_ref2.properties.blob_tier_change_time)
 
             blobs = list(self.bs.list_blobs(self.container_name))
 
@@ -89,7 +107,8 @@ class BlobStorageAccountTest(StorageTestCase):
             self.assertIsNotNone(blobs[0])
             self.assertNamedItemInContainer(blobs, blob_name)
             self.assertEqual(blobs[0].properties.blob_tier, tier)
-            self.assertFalse(hasattr(blobs[0].properties, 'blob_tier_inferred'))
+            self.assertFalse(blobs[0].properties.blob_tier_inferred)
+            self.assertIsNotNone(blobs[0].properties.blob_tier_change_time)
 
             self.bs.delete_blob(self.container_name, blob_name)
 
@@ -106,7 +125,7 @@ class BlobStorageAccountTest(StorageTestCase):
         blob_ref = self.bs.get_blob_properties(self.container_name, blob_name)
         self.assertEqual(StandardBlobTier.Archive, blob_ref.properties.blob_tier)
         self.assertEqual("rehydrate-pending-to-cool", blob_ref.properties.rehydration_status)
-        self.assertFalse(hasattr(blob_ref.properties, 'blob_tier_inferred'))
+        self.assertFalse(blob_ref.properties.blob_tier_inferred)
 
         blobs = list(self.bs.list_blobs(self.container_name))
         self.bs.delete_blob(self.container_name, blob_name)
@@ -118,7 +137,7 @@ class BlobStorageAccountTest(StorageTestCase):
         self.assertNamedItemInContainer(blobs, blob_name)
         self.assertEqual(StandardBlobTier.Archive, blobs[0].properties.blob_tier)
         self.assertEqual("rehydrate-pending-to-cool", blobs[0].properties.rehydration_status)
-        self.assertFalse(hasattr(blobs[0].properties, 'blob_tier_inferred'))
+        self.assertFalse(blobs[0].properties.blob_tier_inferred)
 
         self.bs.create_blob_from_bytes(self.container_name, blob_name2, data)
         self.bs.set_standard_blob_tier(self.container_name, blob_name2, StandardBlobTier.Archive)
@@ -127,7 +146,7 @@ class BlobStorageAccountTest(StorageTestCase):
         blob_ref2 = self.bs.get_blob_properties(self.container_name, blob_name2)
         self.assertEqual(StandardBlobTier.Archive, blob_ref2.properties.blob_tier)
         self.assertEqual("rehydrate-pending-to-hot", blob_ref2.properties.rehydration_status)
-        self.assertFalse(hasattr(blob_ref2.properties, 'blob_tier_inferred'))
+        self.assertFalse(blob_ref2.properties.blob_tier_inferred)
 
         blobs = list(self.bs.list_blobs(self.container_name))
 
@@ -138,7 +157,7 @@ class BlobStorageAccountTest(StorageTestCase):
         self.assertNamedItemInContainer(blobs, blob_name2)
         self.assertEqual(StandardBlobTier.Archive, blobs[0].properties.blob_tier)
         self.assertEqual("rehydrate-pending-to-hot", blobs[0].properties.rehydration_status)
-        self.assertFalse(hasattr(blobs[0].properties, 'blob_tier_inferred'))
+        self.assertFalse(blobs[0].properties.blob_tier_inferred)
 
 
 # ------------------------------------------------------------------------------

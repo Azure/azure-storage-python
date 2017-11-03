@@ -27,6 +27,9 @@ from ._encryption import (
     _get_blob_encryptor_and_padder,
 )
 from .models import BlobBlock
+from ._constants import (
+    _LARGE_BLOB_UPLOAD_MAX_READ_BUFFER_SIZE
+)
 
 
 def _upload_blob_chunks(blob_service, container_name, blob_name,
@@ -342,6 +345,7 @@ class _SubStream(IOBase):
         # derivations of io.IOBase and thus do not implement seekable().
         # Python > 3.0: file-like objects created with open() are derived from io.IOBase.
         try:
+            # only the main thread runs this, so there's no need grabbing the lock
             wrapped_stream.seek(0, SEEK_CUR)
         except:
             raise ValueError("Wrapped stream must support seek().")
@@ -351,9 +355,14 @@ class _SubStream(IOBase):
         self._position = 0
         self._stream_begin_index = stream_begin_index
         self._length = length
-        self._count = 0
         self._buffer = BytesIO()
-        self._read_buffer_size = 4 * 1024 * 1024
+
+        # we must avoid buffering more than necessary, and also not use up too much memory
+        # so the max buffer size is capped at 4MB
+        self._max_buffer_size = length if length < _LARGE_BLOB_UPLOAD_MAX_READ_BUFFER_SIZE \
+            else _LARGE_BLOB_UPLOAD_MAX_READ_BUFFER_SIZE
+        self._current_buffer_start = 0
+        self._current_buffer_size = 0
 
     def __len__(self):
         return self._length
@@ -382,35 +391,45 @@ class _SubStream(IOBase):
         if n is 0 or self._buffer.closed:
             return b''
 
-        # attempt first read from the read buffer
+        # attempt first read from the read buffer and update position
         read_buffer = self._buffer.read(n)
         bytes_read = len(read_buffer)
         bytes_remaining = n - bytes_read
+        self._position += bytes_read
 
         # repopulate the read buffer from the underlying stream to fulfill the request
         # ensure the seek and read operations are done atomically (only if a lock is provided)
         if bytes_remaining > 0:
             with self._buffer:
+                # either read in the max buffer size specified on the class
+                # or read in just enough data for the current block/sub stream
+                current_max_buffer_size = min(self._max_buffer_size, self._length - self._position)
+
                 # lock is only defined if max_connections > 1 (parallel uploads)
                 if self._lock:
                     with self._lock:
-                        # reposition the underlying stream to match the start of the substream
+                        # reposition the underlying stream to match the start of the data to read
                         absolute_position = self._stream_begin_index + self._position
                         self._wrapped_stream.seek(absolute_position, SEEK_SET)
                         # If we can't seek to the right location, our read will be corrupted so fail fast.
                         if self._wrapped_stream.tell() != absolute_position:
                             raise IOError("Stream failed to seek to the desired location.")
-                        buffer_from_stream = self._wrapped_stream.read(self._read_buffer_size)
+                        buffer_from_stream = self._wrapped_stream.read(current_max_buffer_size)
                 else:
-                    buffer_from_stream = self._wrapped_stream.read(self._read_buffer_size)
+                    buffer_from_stream = self._wrapped_stream.read(current_max_buffer_size)
 
             if buffer_from_stream:
+                # update the buffer with new data from the wrapped stream
+                # we need to note down the start position and size of the buffer, in case seek is performed later
                 self._buffer = BytesIO(buffer_from_stream)
-                second_read_buffer = self._buffer.read(bytes_remaining)
-                bytes_read += len(second_read_buffer)
-                read_buffer += second_read_buffer
+                self._current_buffer_start = self._position
+                self._current_buffer_size = len(buffer_from_stream)
 
-        self._position += bytes_read
+                # read the remaining bytes from the new buffer and update position
+                second_read_buffer = self._buffer.read(bytes_remaining)
+                read_buffer += second_read_buffer
+                self._position += len(second_read_buffer)
+
         return read_buffer
 
     def readable(self):
@@ -436,6 +455,15 @@ class _SubStream(IOBase):
             pos = self._length
         elif pos < 0:
             pos = 0
+
+        # check if buffer is still valid
+        # if not, drop buffer
+        if pos < self._current_buffer_start or pos >= self._current_buffer_start + self._current_buffer_size:
+            self._buffer.close()
+            self._buffer = BytesIO()
+        else:  # if yes seek to correct position
+            delta = pos - self._current_buffer_start
+            self._buffer.seek(delta, SEEK_SET)
 
         self._position = pos
         return pos
