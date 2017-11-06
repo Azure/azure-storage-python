@@ -218,7 +218,7 @@ class StorageAccountTest(StorageTestCase):
             self.assertIsNotNone(resp.last_modified)
 
             # Act Read
-            blob = service_with_sas.get_blob_to_text(container_name, blob_name)
+            blob = service_with_sas.get_blob_to_bytes(container_name, blob_name)
 
             # Assert Read
             self.assertIsNotNone(blob.content)
