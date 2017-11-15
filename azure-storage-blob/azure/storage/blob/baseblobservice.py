@@ -559,7 +559,7 @@ class BaseBlobService(StorageClient):
         return self._perform_request(request, _convert_xml_to_containers, operation_context=_context)
 
     def create_container(self, container_name, metadata=None,
-                         public_access=None, fail_on_exist=False, timeout=None):
+                         public_access=None, fail_on_exist=True, timeout=None):
         '''
         Creates a new container under the specified account. If the container
         with the same name already exists, the operation fails if
