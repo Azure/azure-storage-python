@@ -6,7 +6,11 @@
 # license information.
 # --------------------------------------------------------------------------
 import unittest
-from datetime import datetime, timedelta
+from datetime import (
+    datetime,
+    timedelta,
+    date,
+)
 
 from azure.common import (
     AzureHttpError,
@@ -14,6 +18,7 @@ from azure.common import (
     AzureMissingResourceHttpError,
     AzureException,
 )
+from dateutil.tz import tzutc
 
 from azure.storage.common import (
     AccessPolicy,
@@ -262,6 +267,32 @@ class StorageQueueTest(StorageTestCase):
         self.assertIsInstance(message.expiration_time, datetime)
         self.assertNotEqual('', message.pop_receipt)
         self.assertEqual(u'message4', message.content)
+
+    @record
+    def test_put_message_large_time_to_live(self):
+        # Arrange
+        queue_name = self._create_queue()
+        # There should be no upper bound on a queue message's time to live
+        self.qs.put_message(queue_name, u'message1', time_to_live=1024*1024*1024)
+
+        # Act
+        messages = self.qs.peek_messages(queue_name)
+
+        # Assert
+        self.assertGreaterEqual(messages[0].expiration_time,
+                                (datetime.now() + timedelta(seconds=1024*1024*1024-3600)).astimezone((tzutc())))
+
+    @record
+    def test_put_message_infinite_time_to_live(self):
+        # Arrange
+        queue_name = self._create_queue()
+        self.qs.put_message(queue_name, u'message1', time_to_live=-1)
+
+        # Act
+        messages = self.qs.peek_messages(queue_name)
+
+        # Assert
+        self.assertEqual(messages[0].expiration_time.year, date.max.year)
 
     @record
     def test_get_messages(self):

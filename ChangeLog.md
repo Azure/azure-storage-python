@@ -3,6 +3,8 @@
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
 **Note: This changelog is deprecated starting with version 0.37.0, please refer to the ChangeLog.md in each package for future change logs.** 
+## Version XX.XX.XX:
+- Added support for unbounded and infinite queue message TTL
 
 ## Version 0.37.0:
     
