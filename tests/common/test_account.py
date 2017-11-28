@@ -184,6 +184,37 @@ class StorageAccountTest(StorageTestCase):
             service.delete_container(container_name)
 
     @record
+    def test_account_sas_with_question_mark_prefix(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        token = '?' + self.account.generate_shared_access_signature(
+            Services.BLOB,
+            ResourceTypes.OBJECT + ResourceTypes.CONTAINER,
+            AccountPermissions.READ + AccountPermissions.WRITE + AccountPermissions.DELETE + AccountPermissions.CREATE,
+            datetime.utcnow() + timedelta(hours=1),
+        )
+
+        service = BlockBlobService(self.account_name, sas_token=token)
+        data = b'shared access signature with read/write permission on blob'
+        container_name = 'container1'
+        blob_name = 'blob1.txt'
+
+        try:
+            # Act
+            service.create_container(container_name)
+            service.create_blob_from_bytes(container_name, blob_name, data)
+            blob = service.get_blob_to_bytes(container_name, blob_name)
+
+            # Assert
+            self.assertIsNotNone(blob)
+            self.assertEqual(data, blob.content)
+        finally:
+            service.delete_container(container_name)
+
+    @record
     def test_generate_account_sas_with_multiple_permissions(self):
         # SAS URL is calculated from storage key, so this test runs live only
         if TestMode.need_recording_file(self.test_mode):
