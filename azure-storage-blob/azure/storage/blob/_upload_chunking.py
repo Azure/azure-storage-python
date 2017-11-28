@@ -290,17 +290,12 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
 
 
 class _PageBlobChunkUploader(_BlobChunkUploader):
-    EMPTY_PAGE = bytearray(512)
-
     def _is_chunk_empty(self, chunk_data):
-        # read until non-zero data is encountered
+        # read until non-zero byte is encountered
         # if reached the end without returning, then chunk_data is all 0's
-        data = BytesIO(chunk_data)
-        page = data.read(512)
-        while page != b'':
-            if page != self.EMPTY_PAGE:
+        for each_byte in chunk_data:
+            if each_byte != 0:
                 return False
-            page = data.read(512)
         return True
 
     def _upload_chunk(self, chunk_start, chunk_data):
