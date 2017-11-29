@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX:
+- Added back the ability to generate account SAS for table service.
+
 ## Version 0.37.1:
 - Fixed the return type of __add__ and __or__ methods on the AccountPermissions class
 - Added the captured exception to retry_context, in case the user wants more info in retry_callback or implement their own retry class.

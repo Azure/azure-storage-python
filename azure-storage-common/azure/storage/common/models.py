@@ -493,9 +493,10 @@ class Services(object):
     :ivar Services Services.BLOB: The blob service.
     :ivar Services Services.FILE: The file service
     :ivar Services Services.QUEUE: The queue service.
+    :ivar Services Services.TABLE: The table service.
     '''
 
-    def __init__(self, blob=False, queue=False, file=False, _str=None):
+    def __init__(self, blob=False, queue=False, file=False, table=False, _str=None):
         '''
         :param bool blob:
             Access to any blob service, for example, the `.BlockBlobService`
@@ -503,6 +504,8 @@ class Services(object):
             Access to the `.QueueService`
         :param bool file:
             Access to the `.FileService`
+        :param bool table:
+            Access to the TableService
         :param str _str: 
             A string representing the services.
         '''
@@ -511,6 +514,7 @@ class Services(object):
         self.blob = blob or ('b' in _str)
         self.queue = queue or ('q' in _str)
         self.file = file or ('f' in _str)
+        self.table = table or ('t' in _str)
 
     def __or__(self, other):
         return Services(_str=str(self) + str(other))
@@ -521,11 +525,13 @@ class Services(object):
     def __str__(self):
         return (('b' if self.blob else '') +
                 ('q' if self.queue else '') +
+                ('t' if self.table else '') +
                 ('f' if self.file else ''))
 
 
 Services.BLOB = Services(blob=True)
 Services.QUEUE = Services(queue=True)
+Services.TABLE = Services(table=True)
 Services.FILE = Services(file=True)
 
 
