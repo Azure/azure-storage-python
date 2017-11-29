@@ -258,6 +258,33 @@ class BaseBlobService(StorageClient):
 
         return url
 
+    def make_container_url(self, container_name, protocol=None, sas_token=None):
+        '''
+        Creates the url to access a container.
+
+        :param str container_name:
+            Name of container.
+        :param str protocol:
+            Protocol to use: 'http' or 'https'. If not specified, uses the
+            protocol specified when BaseBlobService was initialized.
+        :param str sas_token:
+            Shared access signature token created with
+            generate_shared_access_signature.
+        :return: container access URL.
+        :rtype: str
+        '''
+
+        url = '{}://{}/{}?restype=container'.format(
+            protocol or self.protocol,
+            self.primary_endpoint,
+            container_name,
+        )
+
+        if sas_token:
+            url = '{}&{}'.format(url, sas_token)
+
+        return url
+
     def generate_account_shared_access_signature(self, resource_types, permission,
                                                  expiry, start=None, ip=None, protocol=None):
         '''

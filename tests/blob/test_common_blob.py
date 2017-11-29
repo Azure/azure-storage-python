@@ -204,6 +204,36 @@ class StorageCommonBlobTest(StorageTestCase):
                          + '.blob.core.windows.net/vhds/my.vhd?'
                            'snapshot=2016-11-09T14:11:07.6175300Z&sas')
 
+    def test_make_container_url(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_container_url('vhds')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds?restype=container')
+
+    def test_make_container_url_with_protocol(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_container_url('vhds', protocol='http')
+
+        # Assert
+        self.assertEqual(res, 'http://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds?restype=container')
+
+    def test_make_container_url_with_sas(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_container_url('vhds', sas_token='sas')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds?restype=container&sas')
+
     @record
     def test_create_blob_with_question_mark(self):
         # Arrange
@@ -959,22 +989,29 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = self._create_block_blob()
 
         token = self.bs.generate_account_shared_access_signature(
-            ResourceTypes.OBJECT,
+            ResourceTypes.OBJECT + ResourceTypes.CONTAINER,
             AccountPermissions.READ,
             datetime.utcnow() + timedelta(hours=1),
         )
 
         # Act
-        url = self.bs.make_blob_url(
+        blob_url = self.bs.make_blob_url(
             self.container_name,
             blob_name,
             sas_token=token,
         )
-        response = requests.get(url)
+        container_url = self.bs.make_container_url(
+            self.container_name,
+            sas_token=token,
+        )
+
+        blob_response = requests.get(blob_url)
+        container_response = requests.get(container_url)
 
         # Assert
-        self.assertTrue(response.ok)
-        self.assertEqual(self.byte_data, response.content)
+        self.assertTrue(blob_response.ok)
+        self.assertEqual(self.byte_data, blob_response.content)
+        self.assertTrue(container_response.ok)
 
     @record
     def test_shared_read_access_blob(self):
