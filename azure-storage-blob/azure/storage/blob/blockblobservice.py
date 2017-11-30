@@ -76,9 +76,9 @@ class BlockBlobService(BaseBlobService):
     Block blobs let you upload large blobs efficiently. Block blobs are comprised
     of blocks, each of which is identified by a block ID. You create or modify a
     block blob by writing a set of blocks and committing them by their block IDs.
-    Each block can be a different size, up to a maximum of 4 MB, and a block blob
+    Each block can be a different size, up to a maximum of 100 MB, and a block blob
     can include up to 50,000 blocks. The maximum size of a block blob is therefore
-    slightly more than 195 GB (4 MB X 50,000 blocks). If you are writing a block
+    approximately 4.75 TB (100 MB X 50,000 blocks). If you are writing a block
     blob that is no more than 64 MB in size, you can upload it in its entirety with
     a single write operation; see create_blob_from_bytes.
 
