@@ -227,6 +227,58 @@ class StorageAccountTest(StorageTestCase):
         finally:
             service_with_key.delete_container(container_name)
 
+    @record
+    def test_generate_account_sas_with_multiple_services(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        token = self.account.generate_shared_access_signature(
+            Services.BLOB + Services.TABLE,
+            ResourceTypes.SERVICE + ResourceTypes.OBJECT,
+            AccountPermissions.READ + AccountPermissions.WRITE,
+            datetime.utcnow() + timedelta(hours=1),
+        )
+        self.assertTrue('ss=bt' in token)
+
+        # Act Table
+        url = '{}://{}.table.core.windows.net/?restype=service&comp=properties&{}'.format(
+            self.settings.PROTOCOL,
+            self.account_name,
+            token,
+        )
+        response = requests.get(url)
+
+        # Assert Table
+        self.assertTrue(response.ok)
+
+        # Act Blob
+        service_with_key = self.account.create_block_blob_service()
+        service_with_sas = BlockBlobService(account_name=self.account_name, sas_token=token)
+        data = b'shared access signature with read/write permission on blob'
+        container_name = 'container2'
+        blob_name = 'blob1.txt'
+
+        try:
+            # Act Write
+            service_with_key.create_container(container_name)
+            resp = service_with_sas.create_blob_from_text(container_name, blob_name, data)
+
+            # Assert Write
+            self.assertIsNotNone(resp.etag)
+            self.assertIsNotNone(resp.last_modified)
+
+            # Act Read
+            blob = service_with_sas.get_blob_to_bytes(container_name, blob_name)
+
+            # Assert Read
+            self.assertIsNotNone(blob.content)
+            self.assertEqual(data, blob.content)
+
+        finally:
+            service_with_key.delete_container(container_name)
+
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
