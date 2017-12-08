@@ -5,6 +5,7 @@
 ## Version XX.XX.XX:
 
 - Optimized page blob upload for create_blob_from_* methods, by skipping the empty chunks.
+- Added convenient method to generate container url (make_container_url).
 
 ## Version 0.37.1:
 
