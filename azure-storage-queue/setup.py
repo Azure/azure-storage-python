@@ -83,10 +83,7 @@ setup(
     packages=find_packages(),
     install_requires=[
                          'azure-common>=1.1.5',
-                         'cryptography',
-                         'python-dateutil',
-                         'requests',
                          'azure-storage-common>=0.37.0,<0.38.0'
-                     ] + (['futures'] if sys.version_info < (3, 0) else []),
+                     ],
     cmdclass=cmdclass
 )

@@ -86,6 +86,6 @@ setup(
                          'cryptography',
                          'python-dateutil',
                          'requests',
-                     ] + (['futures'] if sys.version_info < (3, 0) else []),
+                     ],
     cmdclass=cmdclass
 )
