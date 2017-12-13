@@ -94,7 +94,12 @@ class _StorageNoAuthentication(object):
 
 class _StorageSASAuthentication(object):
     def __init__(self, sas_token):
-        self.sas_token = sas_token
+        # ignore ?-prefix (added by tools such as Azure Portal) on sas tokens
+        # doing so avoids double question marks when signing
+        if sas_token[0] == '?':
+            self.sas_token = sas_token[1:]
+        else:
+            self.sas_token = sas_token
 
     def sign_request(self, request):
         # if 'sig=' is present, then the request has already been signed
