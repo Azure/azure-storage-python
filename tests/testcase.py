@@ -378,3 +378,12 @@ def record(test):
             test(self)
     recording_test.__name__ = test.__name__
     return recording_test
+
+
+def not_for_emulator(test):
+    def skip_test_if_targeting_emulator(self):
+        if self.settings.IS_EMULATED:
+            return
+        else:
+            test(self)
+    return skip_test_if_targeting_emulator

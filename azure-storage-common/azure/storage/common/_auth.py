@@ -6,15 +6,20 @@
 from ._common_conversion import (
     _sign_string,
 )
+from ._constants import (
+    DEV_ACCOUNT_NAME,
+    DEV_ACCOUNT_SECONDARY_NAME
+)
 
 import logging
 logger = logging.getLogger(__name__)
 
 
 class _StorageSharedKeyAuthentication(object):
-    def __init__(self, account_name, account_key):
+    def __init__(self, account_name, account_key, is_emulated=False):
         self.account_name = account_name
         self.account_key = account_key
+        self.is_emulated = is_emulated
 
     def _get_headers(self, request, headers_to_sign):
         headers = dict((name.lower(), value) for name, value in request.headers.items() if value)
@@ -27,6 +32,13 @@ class _StorageSharedKeyAuthentication(object):
 
     def _get_canonicalized_resource(self, request):
         uri_path = request.path.split('?')[0]
+
+        # for emulator, use the DEV_ACCOUNT_NAME instead of DEV_ACCOUNT_SECONDARY_NAME
+        # as this is how the emulator works
+        if self.is_emulated and uri_path.find(DEV_ACCOUNT_SECONDARY_NAME) == 1:
+            # only replace the first instance
+            uri_path = uri_path.replace(DEV_ACCOUNT_SECONDARY_NAME, DEV_ACCOUNT_NAME, 1)
+
         return '/' + self.account_name + uri_path
 
     def _get_canonicalized_headers(self, request):

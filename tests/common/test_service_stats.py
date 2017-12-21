@@ -27,8 +27,9 @@ class ServiceStatsTest(StorageTestCase):
         self.assertIsNotNone(stats)
         self.assertIsNotNone(stats.geo_replication)
 
-        self.assertEqual(stats.geo_replication.status, 'live')
-        self.assertIsNotNone(stats.geo_replication.last_sync_time)
+        if not self.settings.IS_EMULATED:
+            self.assertEqual(stats.geo_replication.status, 'live')
+            self.assertIsNotNone(stats.geo_replication.last_sync_time)
 
     def _assert_stats_unavailable(self, stats):
         self.assertIsNotNone(stats)

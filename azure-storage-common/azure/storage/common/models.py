@@ -120,6 +120,8 @@ class RetryContext(object):
     :ivar Exception exception:
         The exception that just occurred. The type could either be AzureException (for HTTP errors),
         or other Exception types from lower layers, which are kept unwrapped for easier processing.
+    :ivar bool is_emulated:
+        Whether retry is targeting the emulator. The default value is False.
     '''
 
     def __init__(self):
@@ -127,6 +129,7 @@ class RetryContext(object):
         self.response = None
         self.location_mode = None
         self.exception = None
+        self.is_emulated = False
 
 
 class LocationMode(object):

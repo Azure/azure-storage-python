@@ -14,6 +14,7 @@ from ._constants import (
     SERVICE_HOST_BASE,
     DEFAULT_PROTOCOL,
     DEV_ACCOUNT_NAME,
+    DEV_ACCOUNT_SECONDARY_NAME,
     DEV_ACCOUNT_KEY,
     DEV_BLOB_HOST,
     DEV_QUEUE_HOST,
@@ -58,8 +59,8 @@ class _ServiceParameters(object):
             # Only set the account key if a sas_token is not present to allow sas to be used with the emulator
             self.account_key = DEV_ACCOUNT_KEY if not self.sas_token else None
 
-            self.primary_endpoint = '{}/{}'.format(_EMULATOR_ENDPOINTS[service], self.account_name)
-            self.secondary_endpoint = '{}/{}-secondary'.format(_EMULATOR_ENDPOINTS[service], self.account_name)
+            self.primary_endpoint = '{}/{}'.format(_EMULATOR_ENDPOINTS[service], DEV_ACCOUNT_NAME)
+            self.secondary_endpoint = '{}/{}'.format(_EMULATOR_ENDPOINTS[service], DEV_ACCOUNT_SECONDARY_NAME)
         else:
             # Strip whitespace from the key
             if self.account_key:

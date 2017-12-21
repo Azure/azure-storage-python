@@ -193,7 +193,7 @@ class StorageRetryTest(StorageTestCase):
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
         service.create_container(container_name)
-        service.retry = ExponentialRetry(max_attempts=3).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_power=3, max_attempts=3).retry
 
         # Force the create call to 'timeout' with a 408
         response_callback = ResponseCallback(status=200, new_status=408)
@@ -330,7 +330,10 @@ class StorageRetryTest(StorageTestCase):
 
             # Assert
             def request_callback(request):
-                self.assertNotEqual(-1, request.host.find('-secondary'))
+                if self.settings.IS_EMULATED:
+                    self.assertNotEqual(-1, request.path.find('-secondary'))
+                else:
+                    self.assertNotEqual(-1, request.host.find('-secondary'))
 
             service.request_callback = request_callback
             service.get_container_metadata(container_name)
@@ -415,7 +418,10 @@ class StorageRetryTest(StorageTestCase):
         # to the final location of the first list request (aka secondary) despite 
         # the client normally trying primary first
         def request_callback(request):
-            self.assertNotEqual(-1, request.host.find('-secondary'))
+            if self.settings.IS_EMULATED:
+                self.assertNotEqual(-1, request.path.find('-secondary'))
+            else:
+                self.assertNotEqual(-1, request.host.find('-secondary'))
 
         service.request_callback = request_callback
         service._list_containers(prefix='lock', _context=context)
