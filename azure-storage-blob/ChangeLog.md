@@ -4,6 +4,7 @@
 
 ## Version XX.XX.XX:
 
+- Fixed bug where get_blob_to_* cannot get a single byte when start_range and end_range are both equal to 0. 
 - Optimized page blob upload for create_blob_from_* methods, by skipping the empty chunks.
 - Added convenient method to generate container url (make_container_url).
 - The package has switched from Apache 2.0 to the MIT license.

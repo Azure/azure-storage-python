@@ -9,6 +9,8 @@ import base64
 import os
 import unittest
 
+from azure.common import AzureHttpError
+
 from azure.storage.blob import (
     Blob,
     BlockBlobService,
@@ -137,6 +139,41 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
+
+    def test_ranged_get_blob_to_bytes_with_single_byte(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=0, end_range=0)
+
+        # Assert
+        self.assertEqual(1, len(blob.content))
+        self.assertEqual(self.byte_data[0], blob.content[0])
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=5, end_range=5)
+
+        # Assert
+        self.assertEqual(1, len(blob.content))
+        self.assertEqual(self.byte_data[5], blob.content[0])
+
+    @record
+    def test_ranged_get_blob_to_bytes_with_zero_byte(self):
+        blob_data = b''
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
+
+        # Act
+        # the get request should fail in this case since the blob is empty and yet there is a range specified
+        with self.assertRaises(AzureHttpError):
+            self.bs.get_blob_to_bytes(self.container_name, blob_name, start_range=0, end_range=5)
+
+        with self.assertRaises(AzureHttpError):
+            self.bs.get_blob_to_bytes(self.container_name, blob_name, start_range=3, end_range=5)
 
     def test_get_blob_to_bytes_snapshot(self):
         # parallel tests introduce random order of requests, can only run live
