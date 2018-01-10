@@ -2,6 +2,6 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version XX.XX.XX:
+## Version 1.0.0:
 
 - The package has switched from Apache 2.0 to the MIT license.
