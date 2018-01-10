@@ -29,6 +29,7 @@ DEV_QUEUE_HOST = '127.0.0.1:10001'
 
 # Default credentials for Development Storage Service
 DEV_ACCOUNT_NAME = 'devstoreaccount1'
+DEV_ACCOUNT_SECONDARY_NAME = 'devstoreaccount1-secondary'
 DEV_ACCOUNT_KEY = 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=='
 
 # Socket timeout in seconds

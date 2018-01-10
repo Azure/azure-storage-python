@@ -19,12 +19,17 @@ from azure.storage.common import (
     AccountPermissions,
     Services,
 )
+from azure.storage.common._constants import (
+    DEV_ACCOUNT_NAME,
+    DEV_ACCOUNT_KEY
+)
 from azure.storage.file import FileService
 from azure.storage.queue import QueueService
 from tests.testcase import (
     StorageTestCase,
     TestMode,
     record,
+    not_for_emulator,
 )
 
 
@@ -34,10 +39,18 @@ from tests.testcase import (
 class StorageAccountTest(StorageTestCase):
     def setUp(self):
         super(StorageAccountTest, self).setUp()
-        self.account_name = self.settings.STORAGE_ACCOUNT_NAME
-        self.account_key = self.settings.STORAGE_ACCOUNT_KEY
         self.sas_token = '?sv=2015-04-05&st=2015-04-29T22%3A18%3A26Z&se=2015-04-30T02%3A23%3A26Z&sr=b&sp=rw&sip=168.1.5.60-168.1.5.70&spr=https&sig=Z%2FRHIX5Xcg0Mq2rqI3OlWTjEg2tYkboXr1P9ZUXDtkk%3D'
-        self.account = CloudStorageAccount(self.account_name, self.account_key)
+
+        if self.settings.IS_EMULATED:
+            self.account_name = DEV_ACCOUNT_NAME
+            self.account_key = DEV_ACCOUNT_KEY
+            self.protocol = "http"
+            self.account = CloudStorageAccount(DEV_ACCOUNT_NAME, DEV_ACCOUNT_KEY, is_emulated=True)
+        else:
+            self.account_name = self.settings.STORAGE_ACCOUNT_NAME
+            self.account_key = self.settings.STORAGE_ACCOUNT_KEY
+            self.account = CloudStorageAccount(self.account_name, self.account_key)
+            self.protocol = self.settings.PROTOCOL
 
     # --Helpers-----------------------------------------------------------------
     def validate_service(self, service, type):
@@ -83,6 +96,7 @@ class StorageAccountTest(StorageTestCase):
         # Assert
         self.validate_service(service, QueueService)
 
+    @not_for_emulator
     def test_create_file_service(self):
         # Arrange
 
@@ -188,7 +202,7 @@ class StorageAccountTest(StorageTestCase):
             datetime.utcnow() + timedelta(hours=1),
         )
 
-        service = BlockBlobService(self.account_name, sas_token=token)
+        service = BlockBlobService(self.account_name, sas_token=token, is_emulated=self.settings.IS_EMULATED)
         data = b'shared access signature with read/write permission on blob'
         container_name = 'container1'
         blob_name = 'blob1.txt'
@@ -225,7 +239,7 @@ class StorageAccountTest(StorageTestCase):
         )
 
         service_with_key = self.account.create_block_blob_service()
-        service_with_sas = BlockBlobService(account_name=self.account_name, sas_token=token)
+        service_with_sas = BlockBlobService(account_name=self.account_name, sas_token=token, is_emulated=self.settings.IS_EMULATED)
         data = b'shared access signature with read/write permission on blob'
         container_name = 'container2'
         blob_name = 'blob1.txt'
@@ -265,9 +279,10 @@ class StorageAccountTest(StorageTestCase):
         self.assertTrue('ss=bt' in token)
 
         # Act Table
-        url = '{}://{}.table.core.windows.net/?restype=service&comp=properties&{}'.format(
-            self.settings.PROTOCOL,
-            self.account_name,
+        # this needs to be hard coded as the table package is no longer maintained here
+        url = '{}://{}/?restype=service&comp=properties&{}'.format(
+            self.protocol,
+            self.account_name + ".table.core.windows.net" if not self.settings.IS_EMULATED else "127.0.0.1:10002/" + DEV_ACCOUNT_NAME,
             token,
         )
         response = requests.get(url)
@@ -277,7 +292,7 @@ class StorageAccountTest(StorageTestCase):
 
         # Act Blob
         service_with_key = self.account.create_block_blob_service()
-        service_with_sas = BlockBlobService(account_name=self.account_name, sas_token=token)
+        service_with_sas = BlockBlobService(account_name=self.account_name, sas_token=token, is_emulated=self.settings.IS_EMULATED)
         data = b'shared access signature with read/write permission on blob'
         container_name = 'container2'
         blob_name = 'blob1.txt'

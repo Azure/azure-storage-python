@@ -200,6 +200,7 @@ class BaseBlobService(StorageClient):
             self.authentication = _StorageSharedKeyAuthentication(
                 self.account_name,
                 self.account_key,
+                self.is_emulated
             )
         elif self.sas_token:
             self.authentication = _StorageSASAuthentication(self.sas_token)

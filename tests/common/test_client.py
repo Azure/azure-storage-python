@@ -330,7 +330,7 @@ class StorageClientTest(StorageTestCase):
     @record
     def test_request_callback_signed_header(self):
         # Arrange
-        service = BlockBlobService(self.account_name, self.account_key)
+        service = BlockBlobService(self.account_name, self.account_key, is_emulated=self.settings.IS_EMULATED)
         name = self.get_resource_name('cont')
 
         # Act
@@ -351,7 +351,7 @@ class StorageClientTest(StorageTestCase):
     @record
     def test_response_callback(self):
         # Arrange
-        service = BlockBlobService(self.account_name, self.account_key)
+        service = BlockBlobService(self.account_name, self.account_key, is_emulated=self.settings.IS_EMULATED)
         name = self.get_resource_name('cont')
 
         # Act

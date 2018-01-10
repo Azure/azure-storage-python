@@ -21,6 +21,7 @@ from azure.storage.queue import QueueService
 from tests.testcase import (
     StorageTestCase,
     record,
+    not_for_emulator,
 )
 
 
@@ -33,7 +34,10 @@ class ServicePropertiesTest(StorageTestCase):
 
         self.bs = self._create_storage_service(BlockBlobService, self.settings)
         self.qs = self._create_storage_service(QueueService, self.settings)
-        self.fs = self._create_storage_service(FileService, self.settings)
+
+        # file service is not supported on the emulator
+        if not self.settings.IS_EMULATED:
+            self.fs = self._create_storage_service(FileService, self.settings)
 
     # --Helpers-----------------------------------------------------------------
     def _assert_properties_default(self, prop):
@@ -113,6 +117,7 @@ class ServicePropertiesTest(StorageTestCase):
         self.assertIsNone(resp)
         self._assert_properties_default(self.qs.get_queue_service_properties())
 
+    @not_for_emulator
     @record
     def test_file_service_properties(self):
         # Arrange

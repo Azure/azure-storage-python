@@ -8,6 +8,10 @@ from math import pow
 import random
 
 from .models import LocationMode
+from ._constants import (
+    DEV_ACCOUNT_NAME,
+    DEV_ACCOUNT_SECONDARY_NAME
+)
 
 
 class _Retry(object):
@@ -98,10 +102,22 @@ class _Retry(object):
             # If there's more than one possible location, retry to the alternative
             if context.location_mode == LocationMode.PRIMARY:
                 context.location_mode = LocationMode.SECONDARY
+
+                # if targeting the emulator (with path style), change path instead of host
+                if context.is_emulated:
+                    # replace the first instance of primary account name with the secondary account name
+                    context.request.path = context.request.path.replace(DEV_ACCOUNT_NAME, DEV_ACCOUNT_SECONDARY_NAME, 1)
+                else:
+                    context.request.host = context.request.host_locations.get(context.location_mode)
             else:
                 context.location_mode = LocationMode.PRIMARY
 
-            context.request.host = context.request.host_locations.get(context.location_mode)
+                # if targeting the emulator (with path style), change path instead of host
+                if context.is_emulated:
+                    # replace the first instance of secondary account name with the primary account name
+                    context.request.path = context.request.path.replace(DEV_ACCOUNT_SECONDARY_NAME, DEV_ACCOUNT_NAME, 1)
+                else:
+                    context.request.host = context.request.host_locations.get(context.location_mode)
 
     def _retry(self, context, backoff):
         '''

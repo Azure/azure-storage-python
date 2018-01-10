@@ -6,6 +6,7 @@
 - Added back the ability to generate account SAS for table service.
 - Fixed bug where a question mark prefix on SAS tokens causes failures.
 - The package has switched from Apache 2.0 to the MIT license.
+- Fixed the handling of path style host for the Storage Emulator, specifically the location lock and retry to secondary location.
 
 ## Version 0.37.1:
 - Fixed the return type of __add__ and __or__ methods on the AccountPermissions class

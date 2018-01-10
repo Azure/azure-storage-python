@@ -214,6 +214,7 @@ class StorageClient(object):
         '''
         operation_context = operation_context or _OperationContext()
         retry_context = RetryContext()
+        retry_context.is_emulated = self.is_emulated
 
         # Apply the appropriate host based on the location mode
         self._apply_host(request, operation_context, retry_context)
@@ -356,4 +357,7 @@ class StorageClient(object):
                 # this is the first request of that operation. Set the location to 
                 # be used for subsequent requests in the operation.
                 if operation_context.location_lock and not operation_context.host_location:
-                    operation_context.host_location = {retry_context.location_mode: request.host}
+                    # note: to cover the emulator scenario, the host_location is grabbed
+                    # from request.host_locations(which includes the dev account name)
+                    # instead of request.host(which at this point no longer includes the dev account name)
+                    operation_context.host_location = {retry_context.location_mode: request.host_locations[retry_context.location_mode]}
