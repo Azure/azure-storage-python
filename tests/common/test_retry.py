@@ -84,7 +84,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=2).retry
 
         service.response_callback = ResponseCallback(status=201, new_status=408).override_status
 
@@ -193,7 +193,7 @@ class StorageRetryTest(StorageTestCase):
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
         service.create_container(container_name)
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=3, max_attempts=3).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=3, max_attempts=3).retry
 
         # Force the create call to 'timeout' with a 408
         response_callback = ResponseCallback(status=200, new_status=408)
@@ -212,7 +212,7 @@ class StorageRetryTest(StorageTestCase):
 
     def test_exponential_retry_interval(self):
         # Arrange
-        retry_policy = ExponentialRetry(initial_backoff=1, increment_power=3, random_jitter_range=3)
+        retry_policy = ExponentialRetry(initial_backoff=1, increment_base=3, random_jitter_range=3)
         context_stub = RetryContext()
 
         for i in range(10):
@@ -275,7 +275,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=2).retry
 
         # Force the create call to fail by pretending it's a teapot
         service.response_callback = ResponseCallback(status=201, new_status=418).override_status
@@ -296,7 +296,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name(prefix='retry')
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=2).retry
 
         try:
             created = service.create_container(container_name)
@@ -317,7 +317,7 @@ class StorageRetryTest(StorageTestCase):
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
         service.location_mode = LocationMode.SECONDARY
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=2).retry
 
         # Act
         try:
@@ -347,7 +347,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_base=2).retry
 
         # Act
         try:
@@ -374,7 +374,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_base=2).retry
 
         # Act
         try:
@@ -402,7 +402,7 @@ class StorageRetryTest(StorageTestCase):
 
         # Act
         # Fail the first request and set the retry policy to retry to secondary
-        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_base=2).retry
         service.response_callback = ResponseCallback(status=200, new_status=408).override_first_status
         context = _OperationContext(location_lock=True)
 

@@ -39,7 +39,7 @@ class ClientSamples():
         # Use an exponential retry, but modify the backoff settings
         # Here, we increase the initial back off, increase the number of retry attempts
         # and decrease the base of the exponential backoff.
-        client.retry = ExponentialRetry(initial_backoff=30, increment_power=2, max_attempts=5).retry
+        client.retry = ExponentialRetry(initial_backoff=30, increment_base=2, max_attempts=5).retry
 
         # Use a default linear retry policy instead
         client.retry = LinearRetry().retry
