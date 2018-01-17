@@ -9,6 +9,8 @@ import base64
 import os
 import unittest
 
+from azure.common import AzureHttpError
+
 from azure.storage.file import (
     File,
     FileService,
@@ -485,6 +487,40 @@ class StorageGetFileTest(StorageTestCase):
         with open(FILE_PATH, 'rb') as stream:
             actual = stream.read()
             self.assertEqual(self.byte_data[1:end_range + 1], actual)
+
+    def test_ranged_get_file_to_path_with_single_byte(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+
+        # Act
+        end_range = self.fs.MAX_SINGLE_GET_SIZE + 1024
+        file = self.fs.get_file_to_path(self.share_name, self.directory_name, self.byte_file, FILE_PATH,
+                                        start_range=0, end_range=0)
+
+        # Assert
+        self.assertIsInstance(file, File)
+        with open(FILE_PATH, 'rb') as stream:
+            actual = stream.read()
+            self.assertEqual(1, len(actual))
+            self.assertEqual(self.byte_data[0], actual[0])
+
+    @record
+    def test_ranged_get_file_to_bytes_with_zero_byte(self):
+        # Arrange
+        file_data = b''
+        file_name = self._get_file_reference()
+        self.fs.create_file_from_bytes(self.share_name, self.directory_name, file_name, file_data)
+
+        # Act
+        # the get request should fail in this case since the blob is empty and yet there is a range specified
+        with self.assertRaises(AzureHttpError):
+            self.fs.get_file_to_bytes(self.share_name, self.directory_name, file_name, start_range=0, end_range=5)
+
+        with self.assertRaises(AzureHttpError):
+            self.fs.get_file_to_bytes(self.share_name, self.directory_name, file_name, start_range=3, end_range=5)
 
     def test_ranged_get_file_to_path_with_progress(self):
         # parallel tests introduce random order of requests, can only run live
