@@ -4,43 +4,43 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [1a1832c6-c0c6-11e7-b4d0-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:37:53 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [7bc47cc6-fc9b-11e7-a8c1-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:03:58 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/447f1027?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:37:48 GMT']
-      ETag: ['"0x8D522E9FBCE0F0D"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:37:49 GMT']
+      Date: ['Thu, 18 Jan 2018 22:03:58 GMT']
+      ETag: ['"0x8D55EBF5FFC8882"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:03:58 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [32318cc7-001e-00de-6bd2-54047d000000]
+      x-ms-request-id: [4be99847-001e-00e7-0ea8-9044d9000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [1a2d2212-c0c6-11e7-8302-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:37:53 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [7befa9f0-fc9b-11e7-be0b-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:03:58 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename-secondary.blob.core.windows.net/447f1027?restype=container&comp=metadata
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
-        \ specified container does not exist.\nRequestId:0acf6661-001e-0015-1cd2-54bbec000000\n\
-        Time:2017-11-03T18:37:53.6940470Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The
+        specified container does not exist.\nRequestId:96c1b477-001e-00fd-1aa8-904617000000\nTime:2018-01-18T22:03:58.9734517Z</Message></Error>"}
     headers:
       Content-Length: ['225']
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:37:52 GMT']
+      Date: ['Thu, 18 Jan 2018 22:03:57 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [0acf6661-001e-0015-1cd2-54bbec000000]
+      Vary: [Origin]
+      x-ms-request-id: [96c1b477-001e-00fd-1aa8-904617000000]
       x-ms-version: ['2017-04-17']
     status: {code: 404, message: The specified container does not exist.}
 - request:
@@ -48,19 +48,19 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [1a6fae98-c0c6-11e7-b6c1-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:37:53 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [7c3cfe3a-fc9b-11e7-937d-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:03:59 GMT']
       x-ms-version: ['2017-04-17']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/447f1027?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:37:48 GMT']
+      Date: ['Thu, 18 Jan 2018 22:03:58 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [32318d97-001e-00de-22d2-54047d000000]
+      x-ms-request-id: [4be999ab-001e-00e7-53a8-9044d9000000]
       x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 version: 1

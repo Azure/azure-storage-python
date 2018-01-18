@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [24f2d128-c0c5-11e7-a97a-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:01 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [b1c076c8-fc9a-11e7-a709-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:58:19 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer6be21e1b?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:31:05 GMT']
-      ETag: ['"0x8D522E90B9630FB"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:05 GMT']
+      Date: ['Thu, 18 Jan 2018 21:58:18 GMT']
+      ETag: ['"0x8D55EBE958E2B6E"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:58:18 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [c81d9ed5-001e-00d1-7cd1-54e98b000000]
+      x-ms-request-id: [87550927-001e-0055-2ba7-90bfa3000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,10 +26,10 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [25081d14-c0c5-11e7-a877-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:02 GMT']
+      x-ms-client-request-id: [b1d62d88-fc9a-11e7-ba9c-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:58:19 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer6be21e1b/blob1
@@ -37,12 +37,12 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Fri, 03 Nov 2017 18:31:05 GMT']
-      ETag: ['"0x8D522E909548340"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:02 GMT']
+      Date: ['Thu, 18 Jan 2018 21:58:18 GMT']
+      ETag: ['"0x8D55EBE95A0D9E6"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:58:18 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [c81d9ee9-001e-00d1-0ed1-54e98b000000]
+      x-ms-request-id: [87550942-001e-0055-43a7-90bfa3000000]
       x-ms-request-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
@@ -50,23 +50,23 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      If-Unmodified-Since: ['Fri, 03 Nov 2017 18:16:02 GMT']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [250f07b4-c0c5-11e7-b765-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:02 GMT']
+      If-Unmodified-Since: ['Thu, 18 Jan 2018 21:43:19 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [b1dbddf0-fc9a-11e7-be2b-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:58:19 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainer6be21e1b/blob1?comp=metadata
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ConditionNotMet</Code><Message>The\
-        \ condition specified using HTTP conditional header(s) is not met.\nRequestId:c81d9ef4-001e-00d1-19d1-54e98b000000\n\
-        Time:2017-11-03T18:31:06.0780592Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ConditionNotMet</Code><Message>The
+        condition specified using HTTP conditional header(s) is not met.\nRequestId:8755095e-001e-0055-5ba7-90bfa3000000\nTime:2018-01-18T21:58:18.9503332Z</Message></Error>"}
     headers:
       Content-Length: ['252']
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:31:05 GMT']
+      Date: ['Thu, 18 Jan 2018 21:58:18 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c81d9ef4-001e-00d1-19d1-54e98b000000]
+      Vary: [Origin]
+      x-ms-request-id: [8755095e-001e-0055-5ba7-90bfa3000000]
       x-ms-version: ['2017-04-17']
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}
