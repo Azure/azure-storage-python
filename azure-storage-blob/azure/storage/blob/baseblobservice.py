@@ -1900,6 +1900,9 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
 
+        if end_range is not None:
+            _validate_not_none("start_range", start_range)
+
         # If the user explicitly sets max_connections to 1, do a single shot download
         if max_connections == 1:
             blob = self._get_blob(container_name,
