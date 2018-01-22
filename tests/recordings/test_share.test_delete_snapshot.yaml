@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [d494f258-c0c6-11e7-afd1-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [066bdb88-fc9e-11e7-a87a-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/sharecaeb0cc2?restype=share
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:43:05 GMT']
-      ETag: ['"0x8D522EAB8F5524B"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      Date: ['Thu, 18 Jan 2018 22:22:09 GMT']
+      ETag: ['"0x8D55EC1EAB5968C"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:22:10 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [d7f7219c-001a-002e-23d3-54d413000000]
+      x-ms-request-id: [43bb47db-001a-0091-30aa-90c065000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,22 +26,22 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [d4aa8f4c-c0c6-11e7-9eb0-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [068065b4-fc9e-11e7-9f1f-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.file.core.windows.net/sharecaeb0cc2?restype=share&comp=snapshot
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:43:05 GMT']
-      ETag: ['"0x8D522EAB8F5524B"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      Date: ['Thu, 18 Jan 2018 22:22:10 GMT']
+      ETag: ['"0x8D55EC1EAB5968C"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:22:10 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [d7f7219f-001a-002e-24d3-54d413000000]
-      x-ms-snapshot: ['2017-11-03T18:43:05.0000000Z']
+      x-ms-request-id: [43bb47de-001a-0091-31aa-90c065000000]
+      x-ms-snapshot: ['2018-01-18T22:22:09.0000000Z']
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -49,22 +49,22 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [d4d5830c-c0c6-11e7-bd1e-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [06d12ec0-fc9e-11e7-aab2-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       x-ms-version: ['2017-04-17']
     method: DELETE
     uri: https://storagename.file.core.windows.net/sharecaeb0cc2?restype=share
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ShareHasSnapshots</Code><Message>The\
-        \ share has snapshots and the operation requires no snapshots.\nRequestId:d7f721a1-001a-002e-25d3-54d413000000\n\
-        Time:2017-11-03T18:43:06.8053129Z</Message></Error>"}
+        \ share has snapshots and the operation requires no snapshots.\nRequestId:43bb47df-001a-0091-32aa-90c065000000\n\
+        Time:2018-01-18T22:22:10.7975341Z</Message></Error>"}
     headers:
       Content-Length: ['250']
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:43:05 GMT']
+      Date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [d7f721a1-001a-002e-25d3-54d413000000]
+      x-ms-request-id: [43bb47df-001a-0091-32aa-90c065000000]
       x-ms-version: ['2017-04-17']
     status: {code: 409, message: The share has snapshots and the operation requires
         no snapshots.}
@@ -73,40 +73,40 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [d4ee9a36-c0c6-11e7-9af4-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [06d6e1da-fc9e-11e7-be1c-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       x-ms-version: ['2017-04-17']
     method: DELETE
-    uri: https://storagename.file.core.windows.net/sharecaeb0cc2?restype=share&sharesnapshot=2017-11-03T18%3A43%3A05.0000000Z
+    uri: https://storagename.file.core.windows.net/sharecaeb0cc2?restype=share&sharesnapshot=2018-01-18T22%3A22%3A09.0000000Z
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:43:05 GMT']
+      Date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [d7f721a2-001a-002e-26d3-54d413000000]
+      x-ms-request-id: [43bb47e1-001a-0091-33aa-90c065000000]
       x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [d4f5167a-c0c6-11e7-9faa-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [06dcf086-fc9e-11e7-a8e6-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.file.core.windows.net/sharecaeb0cc2?restype=share
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:43:05 GMT']
-      ETag: ['"0x8D522EAB8F5524B"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      Date: ['Thu, 18 Jan 2018 22:22:10 GMT']
+      ETag: ['"0x8D55EC1EAB5968C"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:22:10 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [d7f721a3-001a-002e-27d3-54d413000000]
+      x-ms-request-id: [43bb47e2-001a-0091-34aa-90c065000000]
       x-ms-share-quota: ['5120']
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
@@ -114,22 +114,22 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.0 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [d4faf830-c0c6-11e7-8223-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:43:06 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [06e22900-fc9e-11e7-bbeb-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
-    uri: https://storagename.file.core.windows.net/sharecaeb0cc2?restype=share&sharesnapshot=2017-11-03T18%3A43%3A05.0000000Z
+    uri: https://storagename.file.core.windows.net/sharecaeb0cc2?restype=share&sharesnapshot=2018-01-18T22%3A22%3A09.0000000Z
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ShareNotFound</Code><Message>The\
-        \ specified share does not exist.\nRequestId:d7f721a4-001a-002e-28d3-54d413000000\n\
-        Time:2017-11-03T18:43:06.9324018Z</Message></Error>"}
+        \ specified share does not exist.\nRequestId:43bb47e3-001a-0091-35aa-90c065000000\n\
+        Time:2018-01-18T22:22:10.9116142Z</Message></Error>"}
     headers:
       Content-Length: ['217']
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:43:05 GMT']
+      Date: ['Thu, 18 Jan 2018 22:22:10 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [d7f721a4-001a-002e-28d3-54d413000000]
+      x-ms-request-id: [43bb47e3-001a-0091-35aa-90c065000000]
       x-ms-version: ['2017-04-17']
     status: {code: 404, message: The specified share does not exist.}
 version: 1

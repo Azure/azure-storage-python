@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [9f258474-c0c5-11e7-bd1a-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:34:26 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [10da5374-fc9b-11e7-b6ce-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:00:59 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerc5151c0e?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:34:26 GMT']
-      ETag: ['"0x8D522E983801C09"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:34:27 GMT']
+      Date: ['Thu, 18 Jan 2018 22:00:58 GMT']
+      ETag: ['"0x8D55EBEF51F5762"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:00:59 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [c4b3385e-001e-0005-62d2-54a0ab000000]
+      x-ms-request-id: [0e0e380d-001e-0126-02a7-908935000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,22 +26,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [9f4113b0-c0c5-11e7-8af6-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:34:27 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [10f4a038-fc9b-11e7-893c-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:00:59 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerc5151c0e?restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The\
-        \ specified container already exists.\nRequestId:c4b33875-001e-0005-74d2-54a0ab000000\n\
-        Time:2017-11-03T18:34:27.2118933Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The
+        specified container already exists.\nRequestId:0e0e3829-001e-0126-1ba7-908935000000\nTime:2018-01-18T22:00:59.2822847Z</Message></Error>"}
     headers:
       Content-Length: ['230']
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:34:26 GMT']
+      Date: ['Thu, 18 Jan 2018 22:00:58 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c4b33875-001e-0005-74d2-54a0ab000000]
+      x-ms-request-id: [0e0e3829-001e-0126-1ba7-908935000000]
       x-ms-version: ['2017-04-17']
     status: {code: 409, message: The specified container already exists.}
 version: 1

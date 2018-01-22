@@ -2,6 +2,6 @@
 
 > See the [Change Log](ChangeLog.md) for a summary of storage library changes.
 
-## Version XX.XX.XX:
+## Version 1.0.0:
 
 - Renamed the confusing argument name increment_power to increment_base on ExponentialRetry.

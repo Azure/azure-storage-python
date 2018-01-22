@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [2431f4fa-c0c5-11e7-b802-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:00 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [b114f8de-fc9a-11e7-93d9-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:58:18 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerd8e71c18?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:31:01 GMT']
-      ETag: ['"0x8D522E908F74BFE"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:01 GMT']
+      Date: ['Thu, 18 Jan 2018 21:58:18 GMT']
+      ETag: ['"0x8D55EBE95991715"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:58:18 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [aba317cd-001e-0098-3dd1-54daeb000000]
+      x-ms-request-id: [9f2c7356-001e-005a-3fa7-905255000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,10 +26,10 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [244fbfc6-c0c5-11e7-8340-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:00 GMT']
+      x-ms-client-request-id: [b12ad80c-fc9a-11e7-8592-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:58:18 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerd8e71c18/blob1
@@ -37,12 +37,12 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Fri, 03 Nov 2017 18:31:01 GMT']
-      ETag: ['"0x8D522E9089B4C34"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:00 GMT']
+      Date: ['Thu, 18 Jan 2018 21:58:18 GMT']
+      ETag: ['"0x8D55EBE94F69919"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:58:17 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [aba317dd-001e-0098-47d1-54daeb000000]
+      x-ms-request-id: [9f2c736c-001e-005a-4ea7-905255000000]
       x-ms-request-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
@@ -51,21 +51,22 @@ interactions:
     headers:
       Connection: [keep-alive]
       If-None-Match: ['0x111111111111111']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [2456589a-c0c5-11e7-a2bf-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:00 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [b13209d8-fc9a-11e7-b2d2-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:58:18 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainerd8e71c18/blob1?comp=metadata
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:31:01 GMT']
-      ETag: ['"0x8D522E9089B4C34"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:00 GMT']
+      Date: ['Thu, 18 Jan 2018 21:58:18 GMT']
+      ETag: ['"0x8D55EBE94F69919"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:58:17 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [aba317ea-001e-0098-53d1-54daeb000000]
+      Vary: [Origin]
+      x-ms-request-id: [9f2c737a-001e-005a-5ba7-905255000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

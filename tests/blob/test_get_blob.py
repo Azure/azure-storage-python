@@ -175,6 +175,17 @@ class StorageGetBlobTest(StorageTestCase):
         with self.assertRaises(AzureHttpError):
             self.bs.get_blob_to_bytes(self.container_name, blob_name, start_range=3, end_range=5)
 
+    @record
+    def test_ranged_get_blob_with_missing_start_range(self):
+        blob_data = b'foobar'
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
+
+        # Act
+        # the get request should fail fast in this case since start_range is missing while end_range is specified
+        with self.assertRaises(ValueError):
+            self.bs.get_blob_to_bytes(self.container_name, blob_name, end_range=3)
+
     def test_get_blob_to_bytes_snapshot(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):

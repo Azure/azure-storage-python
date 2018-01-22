@@ -28,7 +28,7 @@ PROTOCOL = "https"
 IS_EMULATED = False
 
 # Set to true if server side file encryption is enabled
-IS_SERVER_SIDE_FILE_ENCRYPTION_ENABLED = False
+IS_SERVER_SIDE_FILE_ENCRYPTION_ENABLED = True
 
 # Decide which test mode to run against. Possible options:
 #   - Playback: run against stored recordings

@@ -528,7 +528,8 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(3, len(md))
         self.assertEqual(md['hello'], 'world')
         self.assertEqual(md['number'], '42')
-        self.assertEqual(md['up'], 'UPval')
+        self.assertEqual(md['UP'], 'UPval')
+        self.assertFalse('up' in md)
 
     @record
     def test_delete_blob_with_existing_blob(self):

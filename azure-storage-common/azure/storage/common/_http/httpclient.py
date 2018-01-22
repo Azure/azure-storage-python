@@ -95,7 +95,11 @@ class _HTTPClient(object):
         status = int(response.status_code)
         response_headers = {}
         for key, name in response.headers.items():
-            response_headers[key.lower()] = name
+            # Preserve the case of metadata
+            if key.lower().startswith('x-ms-meta-'):
+                response_headers[key] = name
+            else:
+                response_headers[key.lower()] = name
 
         wrap = HTTPResponse(status, response.reason, response_headers, response.content)
         response.close()
