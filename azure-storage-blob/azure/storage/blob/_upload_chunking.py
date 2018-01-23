@@ -1,16 +1,7 @@
-﻿# -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 from io import (BytesIO, IOBase, SEEK_CUR, SEEK_END, SEEK_SET, UnsupportedOperation)
 from math import ceil
@@ -196,19 +187,19 @@ class _BlobChunkUploader(object):
                     data = self.padder.update(data)
                 if self.encryptor:
                     data = self.encryptor.update(data)
-                yield index, BytesIO(data)
+                yield index, data
             else:
                 if self.padder:
                     data = self.padder.update(data) + self.padder.finalize()
                 if self.encryptor:
                     data = self.encryptor.update(data) + self.encryptor.finalize()
                 if len(data) > 0:
-                    yield index, BytesIO(data)
+                    yield index, data
                 break
             index += len(data)
 
     def process_chunk(self, chunk_data):
-        chunk_bytes = chunk_data[1].read()
+        chunk_bytes = chunk_data[1]
         chunk_offset = chunk_data[0]
         return self._upload_chunk_with_progress(chunk_offset, chunk_bytes)
 
@@ -290,24 +281,34 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
 
 
 class _PageBlobChunkUploader(_BlobChunkUploader):
+    def _is_chunk_empty(self, chunk_data):
+        # read until non-zero byte is encountered
+        # if reached the end without returning, then chunk_data is all 0's
+        for each_byte in chunk_data:
+            if each_byte != 0:
+                return False
+        return True
+
     def _upload_chunk(self, chunk_start, chunk_data):
-        chunk_end = chunk_start + len(chunk_data) - 1
-        resp = self.blob_service._update_page(
-            self.container_name,
-            self.blob_name,
-            chunk_data,
-            chunk_start,
-            chunk_end,
-            validate_content=self.validate_content,
-            lease_id=self.lease_id,
-            if_match=self.if_match,
-            timeout=self.timeout,
-        )
+        # avoid uploading the empty pages
+        if not self._is_chunk_empty(chunk_data):
+            chunk_end = chunk_start + len(chunk_data) - 1
+            resp = self.blob_service._update_page(
+                self.container_name,
+                self.blob_name,
+                chunk_data,
+                chunk_start,
+                chunk_end,
+                validate_content=self.validate_content,
+                lease_id=self.lease_id,
+                if_match=self.if_match,
+                timeout=self.timeout,
+            )
 
-        if not self.parallel:
-            self.if_match = resp.etag
+            if not self.parallel:
+                self.if_match = resp.etag
 
-        self.set_response_properties(resp)
+            self.set_response_properties(resp)
 
 
 class _AppendBlobChunkUploader(_BlobChunkUploader):

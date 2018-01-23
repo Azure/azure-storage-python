@@ -1,16 +1,7 @@
-﻿# -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 
 import logging
@@ -104,7 +95,11 @@ class _HTTPClient(object):
         status = int(response.status_code)
         response_headers = {}
         for key, name in response.headers.items():
-            response_headers[key.lower()] = name
+            # Preserve the case of metadata
+            if key.lower().startswith('x-ms-meta-'):
+                response_headers[key] = name
+            else:
+                response_headers[key.lower()] = name
 
         wrap = HTTPResponse(status, response.reason, response_headers, response.content)
         response.close()

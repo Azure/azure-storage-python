@@ -1,22 +1,17 @@
 # -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 from abc import ABCMeta
 from math import pow
 import random
 
 from .models import LocationMode
+from ._constants import (
+    DEV_ACCOUNT_NAME,
+    DEV_ACCOUNT_SECONDARY_NAME
+)
 
 
 class _Retry(object):
@@ -107,10 +102,22 @@ class _Retry(object):
             # If there's more than one possible location, retry to the alternative
             if context.location_mode == LocationMode.PRIMARY:
                 context.location_mode = LocationMode.SECONDARY
+
+                # if targeting the emulator (with path style), change path instead of host
+                if context.is_emulated:
+                    # replace the first instance of primary account name with the secondary account name
+                    context.request.path = context.request.path.replace(DEV_ACCOUNT_NAME, DEV_ACCOUNT_SECONDARY_NAME, 1)
+                else:
+                    context.request.host = context.request.host_locations.get(context.location_mode)
             else:
                 context.location_mode = LocationMode.PRIMARY
 
-            context.request.host = context.request.host_locations.get(context.location_mode)
+                # if targeting the emulator (with path style), change path instead of host
+                if context.is_emulated:
+                    # replace the first instance of secondary account name with the primary account name
+                    context.request.path = context.request.path.replace(DEV_ACCOUNT_SECONDARY_NAME, DEV_ACCOUNT_NAME, 1)
+                else:
+                    context.request.host = context.request.host_locations.get(context.location_mode)
 
     def _retry(self, context, backoff):
         '''
@@ -152,7 +159,7 @@ class ExponentialRetry(_Retry):
     Exponential retry.
     '''
 
-    def __init__(self, initial_backoff=15, increment_power=3, max_attempts=3,
+    def __init__(self, initial_backoff=15, increment_base=3, max_attempts=3,
                  retry_to_secondary=False, random_jitter_range=3):
         '''
         Constructs an Exponential retry object. The initial_backoff is used for 
@@ -163,7 +170,7 @@ class ExponentialRetry(_Retry):
 
         :param int initial_backoff: 
             The initial backoff interval, in seconds, for the first retry.
-        :param int increment_power:
+        :param int increment_base:
             The base, in seconds, to increment the initial_backoff by after the 
             first retry.
         :param int max_attempts: 
@@ -177,7 +184,7 @@ class ExponentialRetry(_Retry):
             For example, a random_jitter_range of 3 results in the back-off interval x to vary between x+3 and x-3.
         '''
         self.initial_backoff = initial_backoff
-        self.increment_power = increment_power
+        self.increment_base = increment_base
         self.random_jitter_range = random_jitter_range
         super(ExponentialRetry, self).__init__(max_attempts, retry_to_secondary)
 
@@ -207,7 +214,7 @@ class ExponentialRetry(_Retry):
 
     def _backoff(self, context):
         random_generator = random.Random()
-        backoff = self.initial_backoff + (0 if context.count == 0 else pow(self.increment_power, context.count))
+        backoff = self.initial_backoff + (0 if context.count == 0 else pow(self.increment_base, context.count))
         random_range_start = backoff - self.random_jitter_range if backoff > self.random_jitter_range else 0
         random_range_end = backoff + self.random_jitter_range
         return random_generator.uniform(random_range_start, random_range_end)

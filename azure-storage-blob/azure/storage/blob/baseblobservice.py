@@ -1,16 +1,7 @@
-﻿# -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 import sys
 from abc import ABCMeta
@@ -209,6 +200,7 @@ class BaseBlobService(StorageClient):
             self.authentication = _StorageSharedKeyAuthentication(
                 self.account_name,
                 self.account_key,
+                self.is_emulated
             )
         elif self.sas_token:
             self.authentication = _StorageSASAuthentication(self.sas_token)
@@ -255,6 +247,33 @@ class BaseBlobService(StorageClient):
             url = '{}?snapshot={}'.format(url, snapshot)
         elif sas_token:
             url = '{}?{}'.format(url, sas_token)
+
+        return url
+
+    def make_container_url(self, container_name, protocol=None, sas_token=None):
+        '''
+        Creates the url to access a container.
+
+        :param str container_name:
+            Name of container.
+        :param str protocol:
+            Protocol to use: 'http' or 'https'. If not specified, uses the
+            protocol specified when BaseBlobService was initialized.
+        :param str sas_token:
+            Shared access signature token created with
+            generate_shared_access_signature.
+        :return: container access URL.
+        :rtype: str
+        '''
+
+        url = '{}://{}/{}?restype=container'.format(
+            protocol or self.protocol,
+            self.primary_endpoint,
+            container_name,
+        )
+
+        if sas_token:
+            url = '{}&{}'.format(url, sas_token)
 
         return url
 
@@ -1881,6 +1900,9 @@ class BaseBlobService(StorageClient):
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('stream', stream)
 
+        if end_range is not None:
+            _validate_not_none("start_range", start_range)
+
         # If the user explicitly sets max_connections to 1, do a single shot download
         if max_connections == 1:
             blob = self._get_blob(container_name,
@@ -1910,9 +1932,9 @@ class BaseBlobService(StorageClient):
             # chunk so a transactional MD5 can be retrieved.
             first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
 
-            initial_request_start = start_range if start_range else 0
+            initial_request_start = start_range if start_range is not None else 0
 
-            if end_range and end_range - start_range < first_get_size:
+            if end_range is not None and end_range - start_range < first_get_size:
                 initial_request_end = end_range
             else:
                 initial_request_end = initial_request_start + first_get_size - 1
@@ -1937,15 +1959,15 @@ class BaseBlobService(StorageClient):
                 # Parse the total blob size and adjust the download size if ranges 
                 # were specified
                 blob_size = _parse_length_from_content_range(blob.properties.content_range)
-                if end_range:
+                if end_range is not None:
                     # Use the end_range unless it is over the end of the blob
                     download_size = min(blob_size, end_range - start_range + 1)
-                elif start_range:
+                elif start_range is not None:
                     download_size = blob_size - start_range
                 else:
                     download_size = blob_size
             except AzureHttpError as ex:
-                if not start_range and ex.status_code == 416:
+                if start_range is None and ex.status_code == 416:
                     # Get range will fail on an empty blob. If the user did not 
                     # request a range, do a regular get request in order to get 
                     # any properties.
@@ -1984,7 +2006,7 @@ class BaseBlobService(StorageClient):
             if_match = if_match if if_match is not None else blob.properties.etag
 
             end_blob = blob_size
-            if end_range:
+            if end_range is not None:
                 # Use the end_range unless it is over the end of the blob
                 end_blob = min(blob_size, end_range + 1)
 

@@ -1,16 +1,7 @@
-﻿# -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 import sys
 from os import path
@@ -2058,7 +2049,7 @@ class FileService(StorageClient):
             # chunk so a transactional MD5 can be retrieved.
             first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
 
-            initial_request_start = start_range if start_range else 0
+            initial_request_start = start_range if start_range is not None else 0
 
             if end_range is not None and end_range - start_range < first_get_size:
                 initial_request_end = end_range
@@ -2081,15 +2072,15 @@ class FileService(StorageClient):
                 # Parse the total file size and adjust the download size if ranges 
                 # were specified
                 file_size = _parse_length_from_content_range(file.properties.content_range)
-                if end_range:
+                if end_range is not None:
                     # Use the end_range unless it is over the end of the file
                     download_size = min(file_size, end_range - start_range + 1)
-                elif start_range:
+                elif start_range is not None:
                     download_size = file_size - start_range
                 else:
                     download_size = file_size
             except AzureHttpError as ex:
-                if not start_range and ex.status_code == 416:
+                if start_range is None and ex.status_code == 416:
                     # Get range will fail on an empty file. If the user did not 
                     # request a range, do a regular get request in order to get 
                     # any properties.
@@ -2125,7 +2116,7 @@ class FileService(StorageClient):
             # this feature is not yet available on the file service.
 
             end_file = file_size
-            if end_range:
+            if end_range is not None:
                 # Use the end_range unless it is over the end of the file
                 end_file = min(file_size, end_range + 1)
 

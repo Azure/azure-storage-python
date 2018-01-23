@@ -1,16 +1,7 @@
-﻿# -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 from io import (
     BytesIO
@@ -76,9 +67,9 @@ class BlockBlobService(BaseBlobService):
     Block blobs let you upload large blobs efficiently. Block blobs are comprised
     of blocks, each of which is identified by a block ID. You create or modify a
     block blob by writing a set of blocks and committing them by their block IDs.
-    Each block can be a different size, up to a maximum of 4 MB, and a block blob
+    Each block can be a different size, up to a maximum of 100 MB, and a block blob
     can include up to 50,000 blocks. The maximum size of a block blob is therefore
-    slightly more than 195 GB (4 MB X 50,000 blocks). If you are writing a block
+    approximately 4.75 TB (100 MB X 50,000 blocks). If you are writing a block
     blob that is no more than 64 MB in size, you can upload it in its entirety with
     a single write operation; see create_blob_from_bytes.
 

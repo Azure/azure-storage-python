@@ -1,16 +1,7 @@
-﻿# -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 import unittest
 
@@ -93,7 +84,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=2).retry
 
         service.response_callback = ResponseCallback(status=201, new_status=408).override_status
 
@@ -202,7 +193,7 @@ class StorageRetryTest(StorageTestCase):
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
         service.create_container(container_name)
-        service.retry = ExponentialRetry(max_attempts=3).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=3, max_attempts=3).retry
 
         # Force the create call to 'timeout' with a 408
         response_callback = ResponseCallback(status=200, new_status=408)
@@ -221,7 +212,7 @@ class StorageRetryTest(StorageTestCase):
 
     def test_exponential_retry_interval(self):
         # Arrange
-        retry_policy = ExponentialRetry(initial_backoff=1, increment_power=3, random_jitter_range=3)
+        retry_policy = ExponentialRetry(initial_backoff=1, increment_base=3, random_jitter_range=3)
         context_stub = RetryContext()
 
         for i in range(10):
@@ -284,7 +275,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=2).retry
 
         # Force the create call to fail by pretending it's a teapot
         service.response_callback = ResponseCallback(status=201, new_status=418).override_status
@@ -305,7 +296,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name(prefix='retry')
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=2).retry
 
         try:
             created = service.create_container(container_name)
@@ -326,7 +317,7 @@ class StorageRetryTest(StorageTestCase):
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
         service.location_mode = LocationMode.SECONDARY
-        service.retry = ExponentialRetry(initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=2).retry
 
         # Act
         try:
@@ -339,7 +330,10 @@ class StorageRetryTest(StorageTestCase):
 
             # Assert
             def request_callback(request):
-                self.assertNotEqual(-1, request.host.find('-secondary'))
+                if self.settings.IS_EMULATED:
+                    self.assertNotEqual(-1, request.path.find('-secondary'))
+                else:
+                    self.assertNotEqual(-1, request.host.find('-secondary'))
 
             service.request_callback = request_callback
             service.get_container_metadata(container_name)
@@ -353,7 +347,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_base=2).retry
 
         # Act
         try:
@@ -380,7 +374,7 @@ class StorageRetryTest(StorageTestCase):
         # Arrange
         container_name = self.get_resource_name()
         service = self._create_storage_service(BlockBlobService, self.settings)
-        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_base=2).retry
 
         # Act
         try:
@@ -408,7 +402,7 @@ class StorageRetryTest(StorageTestCase):
 
         # Act
         # Fail the first request and set the retry policy to retry to secondary
-        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_power=2).retry
+        service.retry = ExponentialRetry(retry_to_secondary=True, initial_backoff=1, increment_base=2).retry
         service.response_callback = ResponseCallback(status=200, new_status=408).override_first_status
         context = _OperationContext(location_lock=True)
 
@@ -424,7 +418,10 @@ class StorageRetryTest(StorageTestCase):
         # to the final location of the first list request (aka secondary) despite 
         # the client normally trying primary first
         def request_callback(request):
-            self.assertNotEqual(-1, request.host.find('-secondary'))
+            if self.settings.IS_EMULATED:
+                self.assertNotEqual(-1, request.path.find('-secondary'))
+            else:
+                self.assertNotEqual(-1, request.host.find('-secondary'))
 
         service.request_callback = request_callback
         service._list_containers(prefix='lock', _context=context)

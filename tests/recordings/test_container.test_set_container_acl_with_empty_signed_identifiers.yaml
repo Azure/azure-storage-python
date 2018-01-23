@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [c966e4ba-c0c5-11e7-a9b9-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:35:37 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [3ad867b8-fc9b-11e7-8fc9-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:02:09 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containeraaa91ba4?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:35:36 GMT']
-      ETag: ['"0x8D522E9ADAA714E"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:35:37 GMT']
+      Date: ['Thu, 18 Jan 2018 22:02:09 GMT']
+      ETag: ['"0x8D55EBF1F06DA6F"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:02:09 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [143a808e-001e-00d4-79d2-541df4000000]
+      x-ms-request-id: [5cfb83b6-001e-013f-09a7-90a55d000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -28,44 +28,45 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['60']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [c98068b0-c0c5-11e7-bff8-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:35:37 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [3aedfcc2-fc9b-11e7-a552-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:02:09 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containeraaa91ba4?restype=container&comp=acl
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:35:37 GMT']
-      ETag: ['"0x8D522E9ADAA714F"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:35:37 GMT']
+      Date: ['Thu, 18 Jan 2018 22:02:09 GMT']
+      ETag: ['"0x8D55EBF1F332262"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:02:09 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [143a80a9-001e-00d4-0fd2-541df4000000]
+      x-ms-request-id: [5cfb83d3-001e-013f-21a7-90a55d000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [c98667cc-c0c5-11e7-b0d7-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:35:38 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [3af43b9e-fc9b-11e7-91a2-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:02:09 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/containeraaa91ba4?restype=container&comp=acl
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers\
-        \ />"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><SignedIdentifiers
+        />"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:35:37 GMT']
-      ETag: ['"0x8D522E9ADAA714F"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:35:37 GMT']
+      Date: ['Thu, 18 Jan 2018 22:02:09 GMT']
+      ETag: ['"0x8D55EBF1F332262"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:02:09 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [143a80bc-001e-00d4-1cd2-541df4000000]
+      Vary: [Origin]
+      x-ms-request-id: [5cfb83ed-001e-013f-38a7-90a55d000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

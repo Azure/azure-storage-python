@@ -1,16 +1,7 @@
-﻿# -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 
 import sys
@@ -223,6 +214,7 @@ class StorageClient(object):
         '''
         operation_context = operation_context or _OperationContext()
         retry_context = RetryContext()
+        retry_context.is_emulated = self.is_emulated
 
         # Apply the appropriate host based on the location mode
         self._apply_host(request, operation_context, retry_context)
@@ -365,4 +357,7 @@ class StorageClient(object):
                 # this is the first request of that operation. Set the location to 
                 # be used for subsequent requests in the operation.
                 if operation_context.location_lock and not operation_context.host_location:
-                    operation_context.host_location = {retry_context.location_mode: request.host}
+                    # note: to cover the emulator scenario, the host_location is grabbed
+                    # from request.host_locations(which includes the dev account name)
+                    # instead of request.host(which at this point no longer includes the dev account name)
+                    operation_context.host_location = {retry_context.location_mode: request.host_locations[retry_context.location_mode]}

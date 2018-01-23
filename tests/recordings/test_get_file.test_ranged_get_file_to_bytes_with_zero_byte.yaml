@@ -1,0 +1,75 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [d9f412fa-fc9b-11e7-8c02-b8e8564491f6]
+      x-ms-content-length: ['0']
+      x-ms-date: ['Thu, 18 Jan 2018 22:06:36 GMT']
+      x-ms-type: [file]
+      x-ms-version: ['2017-04-17']
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utshareb8d917d0/utdirb8d917d0/fileb8d917d0
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 18 Jan 2018 22:06:36 GMT']
+      ETag: ['"0x8D55EBFBE822396"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:06:37 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [a86c690f-001a-005d-0aa8-90a4d0000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2017-04-17']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [da0a0e90-fc9b-11e7-b6a3-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:06:36 GMT']
+      x-ms-range: [bytes=0-5]
+      x-ms-version: ['2017-04-17']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utshareb8d917d0/utdirb8d917d0/fileb8d917d0
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidRange</Code><Message>The
+        range specified is invalid for the current size of the resource.\nRequestId:a86c6911-001a-005d-0ba8-90a4d0000000\nTime:2018-01-18T22:06:36.4876673Z</Message></Error>"}
+    headers:
+      Content-Length: ['249']
+      Content-Range: [bytes */0]
+      Content-Type: [application/xml]
+      Date: ['Thu, 18 Jan 2018 22:06:36 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a86c6911-001a-005d-0ba8-90a4d0000000]
+      x-ms-version: ['2017-04-17']
+    status: {code: 416, message: The range specified is invalid for the current size
+        of the resource.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [da10124a-fc9b-11e7-934a-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:06:36 GMT']
+      x-ms-range: [bytes=3-5]
+      x-ms-version: ['2017-04-17']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utshareb8d917d0/utdirb8d917d0/fileb8d917d0
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidRange</Code><Message>The
+        range specified is invalid for the current size of the resource.\nRequestId:a86c6912-001a-005d-0ca8-90a4d0000000\nTime:2018-01-18T22:06:36.5246939Z</Message></Error>"}
+    headers:
+      Content-Length: ['249']
+      Content-Range: [bytes */0]
+      Content-Type: [application/xml]
+      Date: ['Thu, 18 Jan 2018 22:06:36 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a86c6912-001a-005d-0ca8-90a4d0000000]
+      x-ms-version: ['2017-04-17']
+    status: {code: 416, message: The range specified is invalid for the current size
+        of the resource.}
+version: 1

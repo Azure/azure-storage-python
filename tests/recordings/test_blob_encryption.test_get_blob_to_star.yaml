@@ -1,32 +1,32 @@
 interactions:
 - request:
     body: !!binary |
-      2O0oIXoM7j4biwFz0Br+Ng==
+      ySxq50R47j4JmprLjpfJfA==
     headers:
       Connection: [keep-alive]
       Content-Length: ['16']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [41de39e6-c0c5-11e7-a60c-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      x-ms-client-request-id: [cf0b9dfa-fc9a-11e7-b062-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:59:08 GMT']
       x-ms-meta-encryptiondata: ['{"WrappedContentKey": {"KeyId": "key1", "EncryptedKey":
-          "+SBJyW3O91cLdiN+B15YNSbXHoWqhW6axDSdcZiYEekRgD1Jr42I1w==", "Algorithm":
+          "oT3t3WBTyJPXxzlwfWWMVIGH7xA0EnKYKZJsBBn+rcPw/E6wPSD/pw==", "Algorithm":
           "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-          "AES_CBC_256"}, "ContentEncryptionIV": "X5aBx48/Td4kH4BfG56NjQ==", "KeyWrappingMetadata":
-          {"EncryptionLibrary": "Python 0.37.1"}, "EncryptionMode": "FullBlob"}']
+          "AES_CBC_256"}, "ContentEncryptionIV": "jSN5LiE2Red6Z1yEC8rzXA==", "KeyWrappingMetadata":
+          {"EncryptionLibrary": "Python 1.0.0"}, "EncryptionMode": "FullBlob"}']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer74a6114f/encryption_block_blob74a6114f
   response:
     body: {string: ''}
     headers:
-      Content-MD5: [6Z+tozksxQfsRe2FL6kSew==]
-      Date: ['Fri, 03 Nov 2017 18:31:49 GMT']
-      ETag: ['"0x8D522E92638972A"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      Content-MD5: [344pCzWxRH+N/Z7umSeVRQ==]
+      Date: ['Thu, 18 Jan 2018 21:59:08 GMT']
+      ETag: ['"0x8D55EBEB2E4239F"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:59:08 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [a7bb8c36-001e-00e1-20d2-54b3a1000000]
+      x-ms-request-id: [abea7d94-001e-00bb-15a7-90b520000000]
       x-ms-request-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
@@ -34,9 +34,9 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [41f32cf4-c0c5-11e7-8bb0-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [cf1f76cc-fc9a-11e7-a0a9-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:59:08 GMT']
       x-ms-range: [bytes=0-33554431]
       x-ms-version: ['2017-04-17']
     method: GET
@@ -44,26 +44,27 @@ interactions:
   response:
     body:
       string: !!binary |
-        2O0oIXoM7j4biwFz0Br+Ng==
+        ySxq50R47j4JmprLjpfJfA==
     headers:
       Accept-Ranges: [bytes]
       Content-Length: ['16']
       Content-Range: [bytes 0-15/16]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 03 Nov 2017 18:31:49 GMT']
-      ETag: ['"0x8D522E92638972A"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      Date: ['Thu, 18 Jan 2018 21:59:08 GMT']
+      ETag: ['"0x8D55EBEB2E4239F"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:59:08 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-blob-content-md5: [6Z+tozksxQfsRe2FL6kSew==]
+      Vary: [Origin]
+      x-ms-blob-content-md5: [344pCzWxRH+N/Z7umSeVRQ==]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
       x-ms-meta-encryptiondata: ['{"WrappedContentKey": {"KeyId": "key1", "EncryptedKey":
-          "+SBJyW3O91cLdiN+B15YNSbXHoWqhW6axDSdcZiYEekRgD1Jr42I1w==", "Algorithm":
+          "oT3t3WBTyJPXxzlwfWWMVIGH7xA0EnKYKZJsBBn+rcPw/E6wPSD/pw==", "Algorithm":
           "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-          "AES_CBC_256"}, "ContentEncryptionIV": "X5aBx48/Td4kH4BfG56NjQ==", "KeyWrappingMetadata":
-          {"EncryptionLibrary": "Python 0.37.1"}, "EncryptionMode": "FullBlob"}']
-      x-ms-request-id: [a7bb8c56-001e-00e1-3ed2-54b3a1000000]
+          "AES_CBC_256"}, "ContentEncryptionIV": "jSN5LiE2Red6Z1yEC8rzXA==", "KeyWrappingMetadata":
+          {"EncryptionLibrary": "Python 1.0.0"}, "EncryptionMode": "FullBlob"}']
+      x-ms-request-id: [abea7d9e-001e-00bb-1ca7-90b520000000]
       x-ms-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 206, message: Partial Content}
@@ -71,9 +72,9 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [41f92546-c0c5-11e7-a85d-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [cf254c1e-fc9a-11e7-8536-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:59:08 GMT']
       x-ms-range: [bytes=0-33554431]
       x-ms-version: ['2017-04-17']
     method: GET
@@ -81,26 +82,27 @@ interactions:
   response:
     body:
       string: !!binary |
-        2O0oIXoM7j4biwFz0Br+Ng==
+        ySxq50R47j4JmprLjpfJfA==
     headers:
       Accept-Ranges: [bytes]
       Content-Length: ['16']
       Content-Range: [bytes 0-15/16]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 03 Nov 2017 18:31:49 GMT']
-      ETag: ['"0x8D522E92638972A"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      Date: ['Thu, 18 Jan 2018 21:59:08 GMT']
+      ETag: ['"0x8D55EBEB2E4239F"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:59:08 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-blob-content-md5: [6Z+tozksxQfsRe2FL6kSew==]
+      Vary: [Origin]
+      x-ms-blob-content-md5: [344pCzWxRH+N/Z7umSeVRQ==]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
       x-ms-meta-encryptiondata: ['{"WrappedContentKey": {"KeyId": "key1", "EncryptedKey":
-          "+SBJyW3O91cLdiN+B15YNSbXHoWqhW6axDSdcZiYEekRgD1Jr42I1w==", "Algorithm":
+          "oT3t3WBTyJPXxzlwfWWMVIGH7xA0EnKYKZJsBBn+rcPw/E6wPSD/pw==", "Algorithm":
           "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-          "AES_CBC_256"}, "ContentEncryptionIV": "X5aBx48/Td4kH4BfG56NjQ==", "KeyWrappingMetadata":
-          {"EncryptionLibrary": "Python 0.37.1"}, "EncryptionMode": "FullBlob"}']
-      x-ms-request-id: [a7bb8c6c-001e-00e1-50d2-54b3a1000000]
+          "AES_CBC_256"}, "ContentEncryptionIV": "jSN5LiE2Red6Z1yEC8rzXA==", "KeyWrappingMetadata":
+          {"EncryptionLibrary": "Python 1.0.0"}, "EncryptionMode": "FullBlob"}']
+      x-ms-request-id: [abea7da6-001e-00bb-23a7-90b520000000]
       x-ms-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 206, message: Partial Content}
@@ -108,9 +110,9 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [41fec968-c0c5-11e7-80f2-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [cf2aee28-fc9a-11e7-8af0-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:59:08 GMT']
       x-ms-range: [bytes=0-33554431]
       x-ms-version: ['2017-04-17']
     method: GET
@@ -118,26 +120,27 @@ interactions:
   response:
     body:
       string: !!binary |
-        2O0oIXoM7j4biwFz0Br+Ng==
+        ySxq50R47j4JmprLjpfJfA==
     headers:
       Accept-Ranges: [bytes]
       Content-Length: ['16']
       Content-Range: [bytes 0-15/16]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 03 Nov 2017 18:31:49 GMT']
-      ETag: ['"0x8D522E92638972A"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      Date: ['Thu, 18 Jan 2018 21:59:08 GMT']
+      ETag: ['"0x8D55EBEB2E4239F"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:59:08 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-blob-content-md5: [6Z+tozksxQfsRe2FL6kSew==]
+      Vary: [Origin]
+      x-ms-blob-content-md5: [344pCzWxRH+N/Z7umSeVRQ==]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
       x-ms-meta-encryptiondata: ['{"WrappedContentKey": {"KeyId": "key1", "EncryptedKey":
-          "+SBJyW3O91cLdiN+B15YNSbXHoWqhW6axDSdcZiYEekRgD1Jr42I1w==", "Algorithm":
+          "oT3t3WBTyJPXxzlwfWWMVIGH7xA0EnKYKZJsBBn+rcPw/E6wPSD/pw==", "Algorithm":
           "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-          "AES_CBC_256"}, "ContentEncryptionIV": "X5aBx48/Td4kH4BfG56NjQ==", "KeyWrappingMetadata":
-          {"EncryptionLibrary": "Python 0.37.1"}, "EncryptionMode": "FullBlob"}']
-      x-ms-request-id: [a7bb8c7c-001e-00e1-5ed2-54b3a1000000]
+          "AES_CBC_256"}, "ContentEncryptionIV": "jSN5LiE2Red6Z1yEC8rzXA==", "KeyWrappingMetadata":
+          {"EncryptionLibrary": "Python 1.0.0"}, "EncryptionMode": "FullBlob"}']
+      x-ms-request-id: [abea7dac-001e-00bb-29a7-90b520000000]
       x-ms-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 206, message: Partial Content}
@@ -145,9 +148,9 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [4204aec8-c0c5-11e7-9870-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [cf3060c6-fc9a-11e7-a2f6-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 21:59:08 GMT']
       x-ms-range: [bytes=0-33554431]
       x-ms-version: ['2017-04-17']
     method: GET
@@ -155,26 +158,27 @@ interactions:
   response:
     body:
       string: !!binary |
-        2O0oIXoM7j4biwFz0Br+Ng==
+        ySxq50R47j4JmprLjpfJfA==
     headers:
       Accept-Ranges: [bytes]
       Content-Length: ['16']
       Content-Range: [bytes 0-15/16]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 03 Nov 2017 18:31:50 GMT']
-      ETag: ['"0x8D522E92638972A"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:31:50 GMT']
+      Date: ['Thu, 18 Jan 2018 21:59:08 GMT']
+      ETag: ['"0x8D55EBEB2E4239F"']
+      Last-Modified: ['Thu, 18 Jan 2018 21:59:08 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-blob-content-md5: [6Z+tozksxQfsRe2FL6kSew==]
+      Vary: [Origin]
+      x-ms-blob-content-md5: [344pCzWxRH+N/Z7umSeVRQ==]
       x-ms-blob-type: [BlockBlob]
       x-ms-lease-state: [available]
       x-ms-lease-status: [unlocked]
       x-ms-meta-encryptiondata: ['{"WrappedContentKey": {"KeyId": "key1", "EncryptedKey":
-          "+SBJyW3O91cLdiN+B15YNSbXHoWqhW6axDSdcZiYEekRgD1Jr42I1w==", "Algorithm":
+          "oT3t3WBTyJPXxzlwfWWMVIGH7xA0EnKYKZJsBBn+rcPw/E6wPSD/pw==", "Algorithm":
           "A256KW"}, "EncryptionAgent": {"Protocol": "1.0", "EncryptionAlgorithm":
-          "AES_CBC_256"}, "ContentEncryptionIV": "X5aBx48/Td4kH4BfG56NjQ==", "KeyWrappingMetadata":
-          {"EncryptionLibrary": "Python 0.37.1"}, "EncryptionMode": "FullBlob"}']
-      x-ms-request-id: [a7bb8c8b-001e-00e1-6dd2-54b3a1000000]
+          "AES_CBC_256"}, "ContentEncryptionIV": "jSN5LiE2Red6Z1yEC8rzXA==", "KeyWrappingMetadata":
+          {"EncryptionLibrary": "Python 1.0.0"}, "EncryptionMode": "FullBlob"}']
+      x-ms-request-id: [abea7db5-001e-00bb-31a7-90b520000000]
       x-ms-server-encrypted: ['true']
       x-ms-version: ['2017-04-17']
     status: {code: 206, message: Partial Content}

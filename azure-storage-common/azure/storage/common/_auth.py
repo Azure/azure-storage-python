@@ -1,19 +1,14 @@
-﻿# -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 from ._common_conversion import (
     _sign_string,
+)
+from ._constants import (
+    DEV_ACCOUNT_NAME,
+    DEV_ACCOUNT_SECONDARY_NAME
 )
 
 import logging
@@ -21,9 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class _StorageSharedKeyAuthentication(object):
-    def __init__(self, account_name, account_key):
+    def __init__(self, account_name, account_key, is_emulated=False):
         self.account_name = account_name
         self.account_key = account_key
+        self.is_emulated = is_emulated
 
     def _get_headers(self, request, headers_to_sign):
         headers = dict((name.lower(), value) for name, value in request.headers.items() if value)
@@ -36,6 +32,13 @@ class _StorageSharedKeyAuthentication(object):
 
     def _get_canonicalized_resource(self, request):
         uri_path = request.path.split('?')[0]
+
+        # for emulator, use the DEV_ACCOUNT_NAME instead of DEV_ACCOUNT_SECONDARY_NAME
+        # as this is how the emulator works
+        if self.is_emulated and uri_path.find(DEV_ACCOUNT_SECONDARY_NAME) == 1:
+            # only replace the first instance
+            uri_path = uri_path.replace(DEV_ACCOUNT_SECONDARY_NAME, DEV_ACCOUNT_NAME, 1)
+
         return '/' + self.account_name + uri_path
 
     def _get_canonicalized_headers(self, request):
@@ -94,7 +97,12 @@ class _StorageNoAuthentication(object):
 
 class _StorageSASAuthentication(object):
     def __init__(self, sas_token):
-        self.sas_token = sas_token
+        # ignore ?-prefix (added by tools such as Azure Portal) on sas tokens
+        # doing so avoids double question marks when signing
+        if sas_token[0] == '?':
+            self.sas_token = sas_token[1:]
+        else:
+            self.sas_token = sas_token
 
     def sign_request(self, request):
         # if 'sig=' is present, then the request has already been signed

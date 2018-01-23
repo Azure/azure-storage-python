@@ -3,66 +3,69 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [058fbd42-c0c6-11e7-80a7-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:37:18 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [62524c00-fc9b-11e7-b2ea-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:03:15 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/?comp=list&prefix=lock
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
-        \ ServiceEndpoint=\"https://storagename.blob.core.windows.net/\"><Prefix>lock</Prefix><Containers\
-        \ /><NextMarker /></EnumerationResults>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storagename.blob.core.windows.net/\"><Prefix>lock</Prefix><Containers
+        /><NextMarker /></EnumerationResults>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:37:18 GMT']
+      Date: ['Thu, 18 Jan 2018 22:03:16 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [c3d962e2-001e-0105-11d2-54e6fe000000]
+      Vary: [Origin]
+      x-ms-request-id: [4a1ef663-001e-009d-2ba8-902e94000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [058fbd42-c0c6-11e7-80a7-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:37:21 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [62524c00-fc9b-11e7-b2ea-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:03:17 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename-secondary.blob.core.windows.net/?comp=list&prefix=lock
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
-        \ ServiceEndpoint=\"https://storagename-secondary.blob.core.windows.net/\"\
-        ><Prefix>lock</Prefix><Containers /><NextMarker /></EnumerationResults>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storagename-secondary.blob.core.windows.net/\"><Prefix>lock</Prefix><Containers
+        /><NextMarker /></EnumerationResults>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:37:22 GMT']
+      Date: ['Thu, 18 Jan 2018 22:03:17 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [6b6c465b-001e-0126-20d2-54a494000000]
+      Vary: [Origin]
+      x-ms-request-id: [052138d5-001e-0008-20a8-906206000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [07808ee2-c0c6-11e7-9cb7-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:37:22 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [63a5bd6c-fc9b-11e7-b42c-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:03:18 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename-secondary.blob.core.windows.net/?comp=list&prefix=lock
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
-        \ ServiceEndpoint=\"https://storagename-secondary.blob.core.windows.net/\"\
-        ><Prefix>lock</Prefix><Containers /><NextMarker /></EnumerationResults>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://storagename-secondary.blob.core.windows.net/\"><Prefix>lock</Prefix><Containers
+        /><NextMarker /></EnumerationResults>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:37:22 GMT']
+      Date: ['Thu, 18 Jan 2018 22:03:17 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [6b6c4662-001e-0126-24d2-54a494000000]
+      Vary: [Origin]
+      x-ms-request-id: [052138da-001e-0008-23a8-906206000000]
       x-ms-version: ['2017-04-17']
     status: {code: 200, message: OK}
 version: 1

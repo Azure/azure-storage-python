@@ -1,18 +1,9 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 
 # -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 
 import sys
@@ -60,10 +51,10 @@ except ImportError:
 
 setup(
     name='azure-storage-queue',
-    version='0.37.0',
+    version='1.0.0',
     description='Microsoft Azure Storage Queue Client Library for Python',
     long_description=open('README.rst', 'r').read(),
-    license='Apache License 2.0',
+    license='MIT License',
     author='Microsoft Corporation',
     author_email='ascl@microsoft.com',
     url='https://github.com/Azure/azure-storage-python',
@@ -77,16 +68,13 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: MIT License',
     ],
     zip_safe=False,
     packages=find_packages(),
     install_requires=[
                          'azure-common>=1.1.5',
-                         'cryptography',
-                         'python-dateutil',
-                         'requests',
-                         'azure-storage-common>=0.37.0,<0.38.0'
-                     ] + (['futures'] if sys.version_info < (3, 0) else []),
+                         'azure-storage-common>=1.0.0,<1.1.0'
+                     ],
     cmdclass=cmdclass
 )

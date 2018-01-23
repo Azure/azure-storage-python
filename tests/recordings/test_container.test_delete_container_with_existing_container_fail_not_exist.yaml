@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [a0c936d8-c0c5-11e7-81f8-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:34:29 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [125809cc-fc9b-11e7-a238-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:01:01 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://storagename.blob.core.windows.net/container96311f03?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:34:29 GMT']
-      ETag: ['"0x8D522E9854719F7"']
-      Last-Modified: ['Fri, 03 Nov 2017 18:34:30 GMT']
+      Date: ['Thu, 18 Jan 2018 22:01:01 GMT']
+      ETag: ['"0x8D55EBEF6A1C6EC"']
+      Last-Modified: ['Thu, 18 Jan 2018 22:01:01 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [2a7182df-001e-0130-59d2-5448ab000000]
+      x-ms-request-id: [937454b8-001e-00be-10a7-90415f000000]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
@@ -26,41 +26,41 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [a0ee1674-c0c5-11e7-ba39-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:34:29 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [126fd358-fc9b-11e7-bcea-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:01:01 GMT']
       x-ms-version: ['2017-04-17']
     method: DELETE
     uri: https://storagename.blob.core.windows.net/container96311f03?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 03 Nov 2017 18:34:29 GMT']
+      Date: ['Thu, 18 Jan 2018 22:01:01 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [2a718319-001e-0130-0ed2-5448ab000000]
+      x-ms-request-id: [937454df-001e-00be-33a7-90415f000000]
       x-ms-version: ['2017-04-17']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/0.37.1-0.37.1 (Python CPython 3.6.1; Darwin 16.7.0)]
-      x-ms-client-request-id: [a0f3be24-c0c5-11e7-ada4-b8e8564491f6]
-      x-ms-date: ['Fri, 03 Nov 2017 18:34:29 GMT']
+      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [1275db66-fc9b-11e7-aac0-b8e8564491f6]
+      x-ms-date: ['Thu, 18 Jan 2018 22:01:01 GMT']
       x-ms-version: ['2017-04-17']
     method: GET
     uri: https://storagename.blob.core.windows.net/container96311f03?restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
-        \ specified container does not exist.\nRequestId:2a718322-001e-0130-17d2-5448ab000000\n\
-        Time:2017-11-03T18:34:30.3168027Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The
+        specified container does not exist.\nRequestId:93745500-001e-00be-50a7-90415f000000\nTime:2018-01-18T22:01:01.8198331Z</Message></Error>"}
     headers:
       Content-Length: ['225']
       Content-Type: [application/xml]
-      Date: ['Fri, 03 Nov 2017 18:34:29 GMT']
+      Date: ['Thu, 18 Jan 2018 22:01:01 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [2a718322-001e-0130-17d2-5448ab000000]
+      Vary: [Origin]
+      x-ms-request-id: [93745500-001e-00be-50a7-90415f000000]
       x-ms-version: ['2017-04-17']
     status: {code: 404, message: The specified container does not exist.}
 version: 1

@@ -1,22 +1,15 @@
-﻿# coding: utf-8
+# coding: utf-8
 
 # -------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------
 import base64
 import os
 import unittest
+
+from azure.common import AzureHttpError
 
 from azure.storage.blob import (
     Blob,
@@ -146,6 +139,52 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(self.byte_data, blob.content)
+
+    def test_ranged_get_blob_to_bytes_with_single_byte(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=0, end_range=0)
+
+        # Assert
+        self.assertEqual(1, len(blob.content))
+        self.assertEqual(self.byte_data[0], blob.content[0])
+
+        # Act
+        blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, start_range=5, end_range=5)
+
+        # Assert
+        self.assertEqual(1, len(blob.content))
+        self.assertEqual(self.byte_data[5], blob.content[0])
+
+    @record
+    def test_ranged_get_blob_to_bytes_with_zero_byte(self):
+        blob_data = b''
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
+
+        # Act
+        # the get request should fail in this case since the blob is empty and yet there is a range specified
+        with self.assertRaises(AzureHttpError):
+            self.bs.get_blob_to_bytes(self.container_name, blob_name, start_range=0, end_range=5)
+
+        with self.assertRaises(AzureHttpError):
+            self.bs.get_blob_to_bytes(self.container_name, blob_name, start_range=3, end_range=5)
+
+    @record
+    def test_ranged_get_blob_with_missing_start_range(self):
+        blob_data = b'foobar'
+        blob_name = self._get_blob_reference()
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, blob_data)
+
+        # Act
+        # the get request should fail fast in this case since start_range is missing while end_range is specified
+        with self.assertRaises(ValueError):
+            self.bs.get_blob_to_bytes(self.container_name, blob_name, end_range=3)
 
     def test_get_blob_to_bytes_snapshot(self):
         # parallel tests introduce random order of requests, can only run live

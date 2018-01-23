@@ -1,19 +1,10 @@
-﻿# coding: utf-8
+# coding: utf-8
 
-#-------------------------------------------------------------------------
-# Copyright (c) Microsoft.  All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#--------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
+# --------------------------------------------------------------------------
 import requests
 import sys
 import unittest
@@ -203,6 +194,36 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
                          + '.blob.core.windows.net/vhds/my.vhd?'
                            'snapshot=2016-11-09T14:11:07.6175300Z&sas')
+
+    def test_make_container_url(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_container_url('vhds')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds?restype=container')
+
+    def test_make_container_url_with_protocol(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_container_url('vhds', protocol='http')
+
+        # Assert
+        self.assertEqual(res, 'http://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds?restype=container')
+
+    def test_make_container_url_with_sas(self):
+        # Arrange
+
+        # Act
+        res = self.bs.make_container_url('vhds', sas_token='sas')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
+                         + '.blob.core.windows.net/vhds?restype=container&sas')
 
     @record
     def test_create_blob_with_question_mark(self):
@@ -507,7 +528,8 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(3, len(md))
         self.assertEqual(md['hello'], 'world')
         self.assertEqual(md['number'], '42')
-        self.assertEqual(md['up'], 'UPval')
+        self.assertEqual(md['UP'], 'UPval')
+        self.assertFalse('up' in md)
 
     @record
     def test_delete_blob_with_existing_blob(self):
@@ -959,22 +981,29 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = self._create_block_blob()
 
         token = self.bs.generate_account_shared_access_signature(
-            ResourceTypes.OBJECT,
+            ResourceTypes.OBJECT + ResourceTypes.CONTAINER,
             AccountPermissions.READ,
             datetime.utcnow() + timedelta(hours=1),
         )
 
         # Act
-        url = self.bs.make_blob_url(
+        blob_url = self.bs.make_blob_url(
             self.container_name,
             blob_name,
             sas_token=token,
         )
-        response = requests.get(url)
+        container_url = self.bs.make_container_url(
+            self.container_name,
+            sas_token=token,
+        )
+
+        blob_response = requests.get(blob_url)
+        container_response = requests.get(container_url)
 
         # Assert
-        self.assertTrue(response.ok)
-        self.assertEqual(self.byte_data, response.content)
+        self.assertTrue(blob_response.ok)
+        self.assertEqual(self.byte_data, blob_response.content)
+        self.assertTrue(container_response.ok)
 
     @record
     def test_shared_read_access_blob(self):
