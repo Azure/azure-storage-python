@@ -217,7 +217,7 @@ Learn More
 
 .. _Python Developer Center: http://azure.microsoft.com/en-us/develop/python/
 .. _API Reference: https://docs.microsoft.com/en-us/python/api/overview/azure/storage/clientlibrary?view=azure-python
-.. _readthedocs: https://azure-storage.readthedocs.io/en/latest/
+.. _readthedocs: https://azure-storage.readthedocs.io/
 .. _here: https://github.com/Azure/azure-storage-python/archive/master.zip
 .. _create an account: https://account.windowsazure.com/signup
 .. _Developer Forums on MSDN: http://social.msdn.microsoft.com/Forums/windowsazure/en-US/home?forum=windowsazuredata
