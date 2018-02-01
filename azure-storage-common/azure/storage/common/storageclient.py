@@ -105,6 +105,7 @@ class StorageClient(object):
         self.account_name = connection_params.account_name
         self.account_key = connection_params.account_key
         self.sas_token = connection_params.sas_token
+        self.token_credential = connection_params.token_credential
         self.is_emulated = connection_params.is_emulated
 
         self.primary_endpoint = connection_params.primary_endpoint
@@ -244,7 +245,13 @@ class StorageClient(object):
                     # callback. This also ensures retry policies with long back offs 
                     # will work as it resets the time sensitive headers.
                     _add_date_header(request)
-                    self.authentication.sign_request(request)
+
+                    try:
+                        # request can be signed individually
+                        self.authentication.sign_request(request)
+                    except AttributeError:
+                        # session can also be signed
+                        self.request_session = self.authentication.signed_session(self.request_session)
 
                     # Set the request context
                     retry_context.request = request

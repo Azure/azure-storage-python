@@ -13,6 +13,7 @@ import os.path
 import time
 from unittest import SkipTest
 
+import adal
 import vcr
 import zlib
 import math
@@ -221,51 +222,6 @@ class StorageTestCase(unittest.TestCase):
                     repr(item_name), repr(container))
                 self.fail(self._formatMessage(msg, standardMsg))
 
-    if sys.version_info < (2,7):
-        def assertIsNone(self, obj):
-            self.assertEqual(obj, None)
-
-        def assertIsNotNone(self, obj):
-            self.assertNotEqual(obj, None)
-
-        def assertIsInstance(self, obj, type):
-            self.assertTrue(isinstance(obj, type))
-
-        def assertGreater(self, a, b):
-            self.assertTrue(a > b)
-
-        def assertGreaterEqual(self, a, b):
-            self.assertTrue(a >= b)
-
-        def assertLess(self, a, b):
-            self.assertTrue(a < b)
-
-        def assertLessEqual(self, a, b):
-            self.assertTrue(a <= b)
-
-        def assertIn(self, member, container):
-            if member not in container:
-                self.fail('{0} not found in {1}.'.format(
-                    safe_repr(member), safe_repr(container)))
-
-        def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
-            @contextmanager
-            def _assertRaisesContextManager(self, excClass):
-                try:
-                    yield
-                    self.fail('{0} was not raised'.format(safe_repr(excClass)))
-                except excClass:
-                    pass
-            if callableObj:
-                super(ExtendedTestCase, self).assertRaises(
-                    excClass,
-                    callableObj,
-                    *args,
-                    **kwargs
-                )
-            else:
-                return self._assertRaisesContextManager(excClass)
-
     def recording(self):
         if TestMode.need_recording_file(self.test_mode):
             cassette_name = '{0}.yaml'.format(self.qualified_test_name)
@@ -326,6 +282,9 @@ class StorageTestCase(unittest.TestCase):
             self.settings.REMOTE_STORAGE_ACCOUNT_NAME: self.fake_settings.REMOTE_STORAGE_ACCOUNT_NAME,
             self.settings.PREMIUM_STORAGE_ACCOUNT_NAME: self.fake_settings.PREMIUM_STORAGE_ACCOUNT_NAME,
             self.settings.PREMIUM_STORAGE_ACCOUNT_KEY: self.fake_settings.PREMIUM_STORAGE_ACCOUNT_KEY,
+            self.settings.ACTIVE_DIRECTORY_APPLICATION_ID: self.fake_settings.ACTIVE_DIRECTORY_APPLICATION_ID,
+            self.settings.ACTIVE_DIRECTORY_APPLICATION_SECRET: self.fake_settings.ACTIVE_DIRECTORY_APPLICATION_SECRET,
+            self.settings.ACTIVE_DIRECTORY_TENANT_ID: self.fake_settings.ACTIVE_DIRECTORY_TENANT_ID,
         }
         replacements = list(old_to_new_dict.keys())
 
@@ -371,6 +330,17 @@ class StorageTestCase(unittest.TestCase):
     def is_file_encryption_enabled(self):
         return self.settings.IS_SERVER_SIDE_FILE_ENCRYPTION_ENABLED
 
+    def generate_oauth_token(self):
+        context = adal.AuthenticationContext(
+            str.format("https://login.microsoftonline.com/{}", self.settings.ACTIVE_DIRECTORY_TENANT_ID),
+            api_version=None, validate_authority=True)
+
+        token = context.acquire_token_with_client_credentials(
+            "https://storage.azure.com",
+            self.settings.ACTIVE_DIRECTORY_APPLICATION_ID,
+            self.settings.ACTIVE_DIRECTORY_APPLICATION_SECRET)
+
+        return token["accessToken"]
 
 def record(test):
     def recording_test(self):

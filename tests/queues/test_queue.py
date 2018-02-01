@@ -24,6 +24,7 @@ from azure.storage.common import (
     AccessPolicy,
     ResourceTypes,
     AccountPermissions,
+    TokenCredential,
 )
 from azure.storage.queue import (
     QueueService,
@@ -514,6 +515,26 @@ class StorageQueueTest(StorageTestCase):
         self.assertIsNotNone(message)
         self.assertNotEqual('', message.id)
         self.assertEqual(u'message1', message.content)
+
+    @record
+    def test_token_credential(self):
+        token_credential = TokenCredential(self.generate_oauth_token())
+
+        # Action 1: make sure token works
+        service = QueueService(self.settings.STORAGE_ACCOUNT_NAME, token_credential=token_credential)
+        queues = list(service.list_queues())
+        self.assertIsNotNone(queues)
+
+        # Action 2: change token value to make request fail
+        token_credential.update_token("YOU SHALL NOT PASS")
+        with self.assertRaises(AzureException):
+            queues = list(service.list_queues())
+            self.assertIsNone(queues)
+
+        # Action 3: update token to make it working again
+        token_credential.update_token(self.generate_oauth_token())
+        queues = list(service.list_queues())
+        self.assertIsNotNone(queues)
 
     def test_sas_read(self):
         # SAS URL is calculated from storage key, so this test runs live only

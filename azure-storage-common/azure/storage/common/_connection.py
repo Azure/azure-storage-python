@@ -41,14 +41,16 @@ _CONNECTION_ENDPOINTS_SECONDARY = {
     'file': 'FileSecondaryEndpoint',
 }
 
+
 class _ServiceParameters(object):
-    def __init__(self, service, account_name=None, account_key=None, sas_token=None, 
+    def __init__(self, service, account_name=None, account_key=None, sas_token=None, token_credential=None,
                  is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE, 
                  custom_domain=None, custom_domain_secondary=None):
 
         self.account_name = account_name
         self.account_key = account_key
         self.sas_token = sas_token
+        self.token_credential = token_credential
         self.protocol = protocol or DEFAULT_PROTOCOL
         self.is_emulated = is_emulated
 
@@ -100,18 +102,21 @@ class _ServiceParameters(object):
                     self.secondary_endpoint = None
 
     @staticmethod
-    def get_service_parameters(service, account_name=None, account_key=None, sas_token=None, is_emulated=None,
-                               protocol=None, endpoint_suffix=None, custom_domain=None, request_session=None,
-                               connection_string=None, socket_timeout=None):
+    def get_service_parameters(service, account_name=None, account_key=None, sas_token=None, token_credential= None,
+                               is_emulated=None, protocol=None, endpoint_suffix=None, custom_domain=None,
+                               request_session=None, connection_string=None, socket_timeout=None):
         if connection_string:
             params = _ServiceParameters._from_connection_string(connection_string, service)
         elif is_emulated:
             params = _ServiceParameters(service, is_emulated=True)
         elif account_name:
+            if protocol.lower() != 'https' and token_credential is not None:
+                raise ValueError("Token credential is only supported with HTTPS.")
             params = _ServiceParameters(service,
                                         account_name=account_name,
                                         account_key=account_key,
                                         sas_token=sas_token,
+                                        token_credential=token_credential,
                                         is_emulated=is_emulated,
                                         protocol=protocol,
                                         endpoint_suffix=endpoint_suffix,

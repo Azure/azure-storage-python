@@ -5,6 +5,7 @@
 ## Version XX.XX.XX:
 
 - Support for write-once read-many containers.
+- Added support for OAuth authentication for HTTPS requests.
 
 ## Version 1.1.0:
 
