@@ -280,7 +280,7 @@ class StorageQueueTest(StorageTestCase):
 
         # Assert
         self.assertGreaterEqual(messages[0].expiration_time,
-                                (datetime.now() + timedelta(seconds=1024*1024*1024-3600)).astimezone((tzutc())))
+                                messages[0].insertion_time + timedelta(seconds=1024 * 1024 * 1024 - 3600))
 
     @record
     def test_put_message_infinite_time_to_live(self):

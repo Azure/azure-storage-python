@@ -2,8 +2,9 @@
 
 > See the [Change Log](ChangeLog.md) for a summary of storage library changes.
 
-## Version XX.XX.XX:
-- Error message now contains the ErrorCode from the x-ms-error-code header value
+## Version 1.1.0:
+
+- Error message now contains the ErrorCode from the x-ms-error-code header value.
 
 ## Version 1.0.0:
 

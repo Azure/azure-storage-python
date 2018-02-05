@@ -204,7 +204,7 @@ class StorageAccountTest(StorageTestCase):
 
         service = BlockBlobService(self.account_name, sas_token=token, is_emulated=self.settings.IS_EMULATED)
         data = b'shared access signature with read/write permission on blob'
-        container_name = 'container1'
+        container_name = self.get_resource_name("container")
         blob_name = 'blob1.txt'
 
         try:
@@ -298,7 +298,7 @@ class StorageAccountTest(StorageTestCase):
         service_with_key = self.account.create_block_blob_service()
         service_with_sas = BlockBlobService(account_name=self.account_name, sas_token=token, is_emulated=self.settings.IS_EMULATED)
         data = b'shared access signature with read/write permission on blob'
-        container_name = 'container2'
+        container_name = self.get_resource_name("container")
         blob_name = 'blob1.txt'
 
         try:

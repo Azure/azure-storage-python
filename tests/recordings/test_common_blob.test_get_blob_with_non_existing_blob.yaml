@@ -3,23 +3,25 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [fb87412e-fc9a-11e7-9605-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:00:23 GMT']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [d0096c64-0aca-11e8-90f5-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:18:02 GMT']
       x-ms-range: [bytes=0-33554431]
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainer4aaa15bf/blob4aaa15bf
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>BlobNotFound</Code><Message>The
-        specified blob does not exist.\nRequestId:0dca82a0-001e-0061-08a7-90100b000000\nTime:2018-01-18T22:00:23.0439791Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>BlobNotFound</Code><Message>The\
+        \ specified blob does not exist.\nRequestId:bc69198d-001e-0101-4cd7-9e137c000000\n\
+        Time:2018-02-05T23:18:02.4105199Z</Message></Error>"}
     headers:
       Content-Length: ['215']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:00:22 GMT']
+      Date: ['Mon, 05 Feb 2018 23:18:01 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Vary: [Origin]
-      x-ms-request-id: [0dca82a0-001e-0061-08a7-90100b000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [BlobNotFound]
+      x-ms-request-id: [bc69198d-001e-0101-4cd7-9e137c000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 404, message: The specified blob does not exist.}
 version: 1

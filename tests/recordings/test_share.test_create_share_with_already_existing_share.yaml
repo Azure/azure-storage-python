@@ -4,44 +4,45 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [02913d64-fc9e-11e7-ac19-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:22:03 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [6004ef86-0acc-11e8-85c4-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:29:13 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.file.core.windows.net/share8d1b16fe?restype=share
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:22:03 GMT']
-      ETag: ['"0x8D55EC1E6FED759"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:22:03 GMT']
+      Date: ['Mon, 05 Feb 2018 23:29:13 GMT']
+      ETag: ['"0x8D56CF044308164"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:29:13 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [5d4ac5eb-001a-00bc-06aa-9043a5000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-request-id: [ecfc12d5-001a-011f-5dd9-9ec991000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [02a5863e-fc9e-11e7-95c7-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:22:03 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [601931b4-0acc-11e8-a2c8-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:29:13 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.file.core.windows.net/share8d1b16fe?restype=share
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ShareAlreadyExists</Code><Message>The\
-        \ specified share already exists.\nRequestId:5d4ac5ee-001a-00bc-07aa-9043a5000000\n\
-        Time:2018-01-18T22:22:04.0323519Z</Message></Error>"}
+        \ specified share already exists.\nRequestId:ecfc12d8-001a-011f-5ed9-9ec991000000\n\
+        Time:2018-02-05T23:29:13.5153882Z</Message></Error>"}
     headers:
       Content-Length: ['222']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:22:03 GMT']
+      Date: ['Mon, 05 Feb 2018 23:29:13 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [5d4ac5ee-001a-00bc-07aa-9043a5000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [ShareAlreadyExists]
+      x-ms-request-id: [ecfc12d8-001a-011f-5ed9-9ec991000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 409, message: The specified share already exists.}
 version: 1

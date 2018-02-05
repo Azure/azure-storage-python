@@ -4,43 +4,45 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [10da5374-fc9b-11e7-b6ce-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:00:59 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [772bddcc-0acb-11e8-9908-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:22:42 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerc5151c0e?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:00:58 GMT']
-      ETag: ['"0x8D55EBEF51F5762"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:00:59 GMT']
+      Date: ['Mon, 05 Feb 2018 23:22:41 GMT']
+      ETag: ['"0x8D56CEF5B5DEC9E"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:22:42 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [0e0e380d-001e-0126-02a7-908935000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-request-id: [e6edb296-001e-0054-05d8-9ebe5e000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [10f4a038-fc9b-11e7-893c-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:00:59 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [77480c10-0acb-11e8-8a96-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:22:43 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerc5151c0e?restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The
-        specified container already exists.\nRequestId:0e0e3829-001e-0126-1ba7-908935000000\nTime:2018-01-18T22:00:59.2822847Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The\
+        \ specified container already exists.\nRequestId:e6edb2d4-001e-0054-3ed8-9ebe5e000000\n\
+        Time:2018-02-05T23:22:42.9039120Z</Message></Error>"}
     headers:
       Content-Length: ['230']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:00:58 GMT']
+      Date: ['Mon, 05 Feb 2018 23:22:42 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [0e0e3829-001e-0126-1ba7-908935000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [ContainerAlreadyExists]
+      x-ms-request-id: [e6edb2d4-001e-0054-3ed8-9ebe5e000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 409, message: The specified container already exists.}
 version: 1
