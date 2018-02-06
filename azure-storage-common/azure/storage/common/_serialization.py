@@ -175,7 +175,8 @@ def _convert_signed_identifiers_to_xml(signed_identifiers):
     return output
 
 
-def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, cors, target_version=None):
+def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics,
+                                       cors, target_version=None, delete_retention_policy=None):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <StorageServiceProperties>
@@ -216,6 +217,10 @@ def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, co
                 <AllowedHeaders>comma-seperated-list-of-request-headers</AllowedHeaders>
             </CorsRule>
         </Cors>
+        <DeleteRetentionPolicy>
+             <Enabled>true|false</Enabled>
+             <Days>number-of-days</Days>
+        </DeleteRetentionPolicy>
     </StorageServiceProperties>
     '''
     service_properties_element = ETree.Element('StorageServiceProperties')
@@ -256,6 +261,14 @@ def _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics, co
     # Target version
     if target_version:
         ETree.SubElement(service_properties_element, 'DefaultServiceVersion').text = target_version
+
+    # DeleteRetentionPolicy
+    if delete_retention_policy:
+        policy_element = ETree.SubElement(service_properties_element, 'DeleteRetentionPolicy')
+        ETree.SubElement(policy_element, 'Enabled').text = str(delete_retention_policy.enabled)
+
+        if delete_retention_policy.enabled:
+            ETree.SubElement(policy_element, 'Days').text = str(delete_retention_policy.days)
 
     # Add xml declaration and serialize
     try:

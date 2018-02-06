@@ -4,63 +4,65 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [830e612c-fc9b-11e7-be1c-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:04:10 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [ef4685c0-0acb-11e8-a471-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:26:04 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:04:09 GMT']
-      ETag: ['"0x8D55EBF67A0B231"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:04:11 GMT']
+      Date: ['Mon, 05 Feb 2018 23:26:03 GMT']
+      ETag: ['"0x8D56CEFD3718285"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:26:04 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [0e37064c-001a-0080-73a8-90f77e000000]
+      x-ms-request-id: [2e1eb6f4-001a-011e-37d8-9ec86c000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [8328c79c-fc9b-11e7-96f4-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:04:10 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [ef5b5950-0acb-11e8-b642-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:26:04 GMT']
+      x-ms-version: ['2017-07-29']
     method: DELETE
     uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:04:09 GMT']
+      Date: ['Mon, 05 Feb 2018 23:26:03 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [0e37064f-001a-0080-75a8-90f77e000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-request-id: [2e1eb6f6-001a-011e-38d8-9ec86c000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [833ae7e2-fc9b-11e7-9801-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:04:10 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [ef60be4a-0acb-11e8-9664-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:26:04 GMT']
+      x-ms-version: ['2017-07-29']
     method: GET
     uri: https://storagename.file.core.windows.net/utshare9e261f39/dir1?restype=directory
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
-        specified resource does not exist.\nRequestId:0e370652-001a-0080-78a8-90f77e000000\nTime:2018-01-18T22:04:10.9921319Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
+        \ specified resource does not exist.\nRequestId:2e1eb6f7-001a-011e-39d8-9ec86c000000\n\
+        Time:2018-02-05T23:26:04.4033085Z</Message></Error>"}
     headers:
       Content-Length: ['223']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:04:10 GMT']
+      Date: ['Mon, 05 Feb 2018 23:26:03 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [0e370652-001a-0080-78a8-90f77e000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [ResourceNotFound]
+      x-ms-request-id: [2e1eb6f7-001a-011e-39d8-9ec86c000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 404, message: The specified resource does not exist.}
 version: 1

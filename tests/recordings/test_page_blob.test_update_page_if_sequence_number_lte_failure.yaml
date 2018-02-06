@@ -4,26 +4,26 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
       x-ms-blob-content-length: ['512']
       x-ms-blob-sequence-number: ['10']
       x-ms-blob-type: [PageBlob]
-      x-ms-client-request-id: [53d72bfa-fc9b-11e7-a13c-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:02:51 GMT']
-      x-ms-version: ['2017-04-17']
+      x-ms-client-request-id: [c3b0f8be-0acb-11e8-bcdb-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:24:51 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer189a1940/blob189a1940
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:02:50 GMT']
-      ETag: ['"0x8D55EBF37B8A402"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:02:50 GMT']
+      Date: ['Mon, 05 Feb 2018 23:24:50 GMT']
+      ETag: ['"0x8D56CEFA7DEA5BA"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:24:51 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [fc326cc5-001e-005b-04a8-9053a8000000]
+      x-ms-request-id: [e816d59a-001e-005e-33d8-9ea7d7000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 - request:
     body: !!binary |
@@ -39,24 +39,26 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['512']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [53f4c570-fc9b-11e7-9322-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:02:51 GMT']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [c3cc0f6e-0acb-11e8-a626-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:24:51 GMT']
       x-ms-if-sequence-number-le: ['9']
       x-ms-page-write: [update]
       x-ms-range: [bytes=0-511]
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer189a1940/blob189a1940?comp=page
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>SequenceNumberConditionNotMet</Code><Message>The
-        sequence number condition specified was not met.\nRequestId:fc326cd6-001e-005b-13a8-9053a8000000\nTime:2018-01-18T22:02:51.7530604Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>SequenceNumberConditionNotMet</Code><Message>The\
+        \ sequence number condition specified was not met.\nRequestId:e816d5cb-001e-005e-5fd8-9ea7d7000000\n\
+        Time:2018-02-05T23:24:51.3153875Z</Message></Error>"}
     headers:
       Content-Length: ['250']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:02:50 GMT']
+      Date: ['Mon, 05 Feb 2018 23:24:50 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [fc326cd6-001e-005b-13a8-9053a8000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [SequenceNumberConditionNotMet]
+      x-ms-request-id: [e816d5cb-001e-005e-5fd8-9ea7d7000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 412, message: The sequence number condition specified was not met.}
 version: 1

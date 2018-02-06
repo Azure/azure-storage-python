@@ -120,7 +120,7 @@ class AppendBlobService(BaseBlobService):
                     if_modified_since=None, if_unmodified_since=None,
                     if_match=None, if_none_match=None, timeout=None):
         '''
-        Creates a blob or overrides an existing blob. Use if_match=* to
+        Creates a blob or overrides an existing blob. Use if_none_match=* to
         prevent overriding an existing blob. 
 
         See create_blob_from_* for high level

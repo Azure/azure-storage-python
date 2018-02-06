@@ -4,95 +4,97 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [2918dd50-fc9b-11e7-a85a-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:01:39 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [908cd806-0acb-11e8-94b7-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:23:25 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerf7d9143c?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:01:39 GMT']
-      ETag: ['"0x8D55EBF0DACB40A"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:01:40 GMT']
+      Date: ['Mon, 05 Feb 2018 23:23:24 GMT']
+      ETag: ['"0x8D56CEF74C7097F"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:23:25 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [743aa61f-001e-0094-43a7-90341a000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-request-id: [cb0bcf5a-001e-0092-56d8-9ec362000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [293570d2-fc9b-11e7-a871-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:01:39 GMT']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [90afd228-0acb-11e8-9355-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:23:25 GMT']
       x-ms-lease-action: [acquire]
       x-ms-lease-duration: ['15']
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerf7d9143c?restype=container&comp=lease
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:01:39 GMT']
-      ETag: ['"0x8D55EBF0DACB40A"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:01:40 GMT']
+      Date: ['Mon, 05 Feb 2018 23:23:25 GMT']
+      ETag: ['"0x8D56CEF74C7097F"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:23:25 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-lease-id: [29c95299-2336-4690-92d6-9e70a3731fcc]
-      x-ms-request-id: [743aa64b-001e-0094-6ba7-90341a000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-lease-id: [bfe216f5-ad61-4d22-8cbd-7a594fc026f6]
+      x-ms-request-id: [cb0bcfa1-001e-0092-17d8-9ec362000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [293afb58-fc9b-11e7-a888-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:01:39 GMT']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [90b53128-0acb-11e8-9da2-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:23:25 GMT']
       x-ms-lease-action: [acquire]
       x-ms-lease-duration: ['-1']
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerf7d9143c?restype=container&comp=lease
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>LeaseAlreadyPresent</Code><Message>There
-        is already a lease present.\nRequestId:743aa659-001e-0094-78a7-90341a000000\nTime:2018-01-18T22:01:40.4760351Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>LeaseAlreadyPresent</Code><Message>There\
+        \ is already a lease present.\nRequestId:cb0bcfb6-001e-0092-2bd8-9ec362000000\n\
+        Time:2018-02-05T23:23:25.5698432Z</Message></Error>"}
     headers:
       Content-Length: ['221']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:01:39 GMT']
+      Date: ['Mon, 05 Feb 2018 23:23:25 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [743aa659-001e-0094-78a7-90341a000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [LeaseAlreadyPresent]
+      x-ms-request-id: [cb0bcfb6-001e-0092-2bd8-9ec362000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 409, message: There is already a lease present.}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [3231affa-fc9b-11e7-882e-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:01:55 GMT']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [99ab945c-0acb-11e8-9d09-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:23:40 GMT']
       x-ms-lease-action: [acquire]
       x-ms-lease-duration: ['-1']
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/containerf7d9143c?restype=container&comp=lease
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:01:54 GMT']
-      ETag: ['"0x8D55EBF0DACB40A"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:01:40 GMT']
+      Date: ['Mon, 05 Feb 2018 23:23:40 GMT']
+      ETag: ['"0x8D56CEF74C7097F"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:23:25 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-lease-id: [a2efc434-eeba-4388-ae56-46fc42dae06f]
-      x-ms-request-id: [743abe5d-001e-0094-5da7-90341a000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-lease-id: [d2bed530-85c4-4de6-b079-1767253eee96]
+      x-ms-request-id: [cb0becd0-001e-0092-4dd8-9ec362000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 version: 1

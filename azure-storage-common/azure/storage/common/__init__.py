@@ -14,6 +14,7 @@ from .models import (
     Logging,
     Metrics,
     CorsRule,
+    DeleteRetentionPolicy,
     ServiceProperties,
     AccessPolicy,
     ResourceTypes,

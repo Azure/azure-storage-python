@@ -302,6 +302,29 @@ class CorsRule(object):
         self.allowed_headers = allowed_headers if allowed_headers else list()
 
 
+class DeleteRetentionPolicy(object):
+    '''
+    To set DeleteRetentionPolicy, you must call Set Blob Service Properties using version 2017-07-29 or later.
+    This class groups the settings related to delete retention policy.
+    '''
+
+    def __init__(self, enabled=False, days=None):
+        '''
+        :param bool enabled:
+            Required. Indicates whether a deleted blob or snapshot is retained or immediately removed by delete operation.
+        :param int days:
+            Required only if Enabled is true. Indicates the number of days that deleted blob be retained.
+            All data older than this value will be permanently deleted.
+            The minimum value you can specify is 1; the largest value is 365.
+        '''
+        _validate_not_none("enabled", enabled)
+        if enabled:
+            _validate_not_none("days", days)
+
+        self.enabled = enabled
+        self.days = days
+
+
 class ServiceProperties(object):
     ''' 
     Returned by get_*_service_properties functions. Contains the properties of a 

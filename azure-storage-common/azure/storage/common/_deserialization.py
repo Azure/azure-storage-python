@@ -21,10 +21,11 @@ from .models import (
     _dict,
     GeoReplication,
     ServiceStats,
+    DeleteRetentionPolicy,
 )
 
 
-def _int_to_str(value):
+def _to_int(value):
     return value if value is None else int(value)
 
 
@@ -51,15 +52,15 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'last-modified': (None, 'last_modified', parser.parse),
     'etag': (None, 'etag', _to_str),
     'x-ms-blob-type': (None, 'blob_type', _to_str),
-    'content-length': (None, 'content_length', _int_to_str),
+    'content-length': (None, 'content_length', _to_int),
     'content-range': (None, 'content_range', _to_str),
-    'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _int_to_str),
-    'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _int_to_str),
+    'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _to_int),
+    'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _to_int),
     'x-ms-access-tier': (None, 'blob_tier', _to_str),
     'x-ms-access-tier-change-time': (None, 'blob_tier_change_time', parser.parse),
     'x-ms-access-tier-inferred': (None, 'blob_tier_inferred', _bool),
     'x-ms-archive-status': (None, 'rehydration_status', _to_str),
-    'x-ms-share-quota': (None, 'quota', _int_to_str),
+    'x-ms-share-quota': (None, 'quota', _to_int),
     'x-ms-server-encrypted': (None, 'server_encrypted', _bool),
     'content-type': ('content_settings', 'content_type', _to_str),
     'cache-control': ('content_settings', 'cache_control', _to_str),
@@ -244,6 +245,10 @@ def _convert_xml_to_service_properties(response):
                 <AllowedHeaders>comma-seperated-list-of-request-headers</AllowedHeaders>
             </CorsRule>
         </Cors>
+        <DeleteRetentionPolicy>
+             <Enabled>true|false</Enabled>
+             <Days>number-of-days</Days>
+        </DeleteRetentionPolicy>
     </StorageServiceProperties>
     '''
     if response is None or response.body is None:
@@ -302,6 +307,16 @@ def _convert_xml_to_service_properties(response):
     target_version = service_properties_element.find('DefaultServiceVersion')
     if target_version is not None:
         service_properties.target_version = target_version.text
+
+    # DeleteRetentionPolicy
+    delete_retention_policy_element = service_properties_element.find('DeleteRetentionPolicy')
+    if delete_retention_policy_element is not None:
+        service_properties.delete_retention_policy = DeleteRetentionPolicy()
+        policy_enabled = _bool(delete_retention_policy_element.find('Enabled').text)
+        service_properties.delete_retention_policy.enabled = policy_enabled
+
+        if policy_enabled:
+            service_properties.delete_retention_policy.days = int(delete_retention_policy_element.find('Days').text)
 
     return service_properties
 
