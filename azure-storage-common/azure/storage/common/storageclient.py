@@ -345,12 +345,13 @@ class StorageClient(object):
                     # Sleep for the desired retry interval
                     sleep(retry_interval)
                 else:
-                    logger.error("%s Retry policy did not allow for a retry: "
-                                 "%s, HTTP status code=%s, Exception=%s.",
-                                 client_request_id_prefix,
-                                 timestamp_and_request_id,
-                                 status_code,
-                                 exception_str_in_one_line)
+                    logger_trace = logger.info if status_code == 404 else logger.error
+                    logger_trace("%s Retry policy did not allow for a retry: "
+                                     "%s, HTTP status code=%s, Exception=%s.",
+                                     client_request_id_prefix,
+                                     timestamp_and_request_id,
+                                     status_code,
+                                     exception_str_in_one_line)
                     raise ex
             finally:
                 # If this is a location locked operation and the location is not set, 
