@@ -739,7 +739,7 @@ class QueueService(StorageClient):
             should be set to a value smaller than the time-to-live value.
         :param int time_to_live:
             Specifies the time-to-live interval for the message, in
-            seconds. The maximum time-to-live allowed is 7 days. If this
+            seconds. The time-to-live may be any positive number or -1 for infinity. If this
             parameter is omitted, the default time-to-live is 7 days.
         :param int timeout:
             The server timeout, expressed in seconds.

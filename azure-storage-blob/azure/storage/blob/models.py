@@ -65,14 +65,20 @@ class Blob(object):
         Stores all the system properties for the blob.
     :ivar metadata:
         Name-value pairs associated with the blob as metadata.
+    :ivar bool deleted:
+        Specify whether the blob was soft deleted.
+        In other words, if the blob is being retained by the delete retention policy,
+        this field would be True. The blob could be undeleted or it will be garbage collected after the specified
+        time period.
     '''
 
-    def __init__(self, name=None, snapshot=None, content=None, props=None, metadata=None):
+    def __init__(self, name=None, snapshot=None, content=None, props=None, metadata=None, deleted=False):
         self.name = name
         self.snapshot = snapshot
         self.content = content
         self.properties = props or BlobProperties()
         self.metadata = metadata
+        self.deleted = deleted
 
 
 class BlobProperties(object):
@@ -118,6 +124,10 @@ class BlobProperties(object):
     :ivar bool blob_tier_inferred:
         Indicates whether the access tier was inferred by the service.
         If false, it indicates that the tier was set explicitly.
+    :ivar datetime deleted_time:
+        A datetime object representing the time at which the blob was deleted.
+    :ivar int remaining_retention_days:
+        The number of days that the blob will be retained before being permanently deleted by the service.
     '''
 
     def __init__(self):
@@ -135,6 +145,8 @@ class BlobProperties(object):
         self.blob_tier = None
         self.blob_tier_change_time = None
         self.blob_tier_inferred = False
+        self.deleted_time = None
+        self.remaining_retention_days = None
 
 
 class ContentSettings(object):
@@ -506,10 +518,12 @@ class Include(object):
     :ivar ~azure.storage.blob.models.Include Include.UNCOMMITTED_BLOBS: 
         Specifies that blobs for which blocks have been uploaded, but which have not 
         been committed using Put Block List, be included in the response.
+    :ivar ~azure.storage.blob.models.Include Include.DELETED:
+        Specifies that deleted blobs should be returned in the response.
     '''
 
     def __init__(self, snapshots=False, metadata=False, uncommitted_blobs=False,
-                 copy=False, _str=None):
+                 copy=False, deleted=False, _str=None):
         '''
         :param bool snapshots:
              Specifies that snapshots should be included in the enumeration.
@@ -520,7 +534,9 @@ class Include(object):
             not been committed using Put Block List, be included in the response.
         :param bool copy: 
             Specifies that metadata related to any current or previous Copy Blob 
-            operation should be included in the response. 
+            operation should be included in the response.
+        :param bool deleted:
+            Specifies that deleted blobs should be returned in the response.
         :param str _str: 
             A string representing the includes.
         '''
@@ -531,6 +547,7 @@ class Include(object):
         self.metadata = metadata or ('metadata' in components)
         self.uncommitted_blobs = uncommitted_blobs or ('uncommittedblobs' in components)
         self.copy = copy or ('copy' in components)
+        self.deleted = deleted or ('deleted' in components)
 
     def __or__(self, other):
         return Include(_str=str(self) + str(other))
@@ -542,7 +559,8 @@ class Include(object):
         include = (('snapshots,' if self.snapshots else '') +
                    ('metadata,' if self.metadata else '') +
                    ('uncommittedblobs,' if self.uncommitted_blobs else '') +
-                   ('copy,' if self.copy else ''))
+                   ('copy,' if self.copy else '') +
+                   ('deleted,' if self.deleted else ''))
         return include.rstrip(',')
 
 
@@ -550,6 +568,7 @@ Include.COPY = Include(copy=True)
 Include.METADATA = Include(metadata=True)
 Include.SNAPSHOTS = Include(snapshots=True)
 Include.UNCOMMITTED_BLOBS = Include(uncommitted_blobs=True)
+Include.DELETED = Include(deleted=True)
 
 
 class BlobPermissions(object):

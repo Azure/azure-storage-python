@@ -3,21 +3,23 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [2e329f0a-fc9c-11e7-8b91-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:08:57 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [75ad29fa-0acc-11e8-8d4d-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:29:49 GMT']
+      x-ms-version: ['2017-07-29']
     method: GET
     uri: https://storagename.queue.core.windows.net/queue4ef515f8?comp=acl
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>QueueNotFound</Code><Message>The
-        specified queue does not exist.\nRequestId:28fea8eb-0003-0123-56a8-907d4a000000\nTime:2018-01-18T22:08:58.6824861Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>QueueNotFound</Code><Message>The\
+        \ specified queue does not exist.\nRequestId:96d0d709-0003-010e-11d9-9efe8a000000\n\
+        Time:2018-02-05T23:29:49.8100785Z</Message></Error>"}
     headers:
       Content-Length: ['217']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:08:58 GMT']
+      Date: ['Mon, 05 Feb 2018 23:29:48 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [28fea8eb-0003-0123-56a8-907d4a000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [QueueNotFound]
+      x-ms-request-id: [96d0d709-0003-010e-11d9-9efe8a000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 404, message: The specified queue does not exist.}
 version: 1

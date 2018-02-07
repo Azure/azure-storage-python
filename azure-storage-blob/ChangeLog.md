@@ -2,6 +2,12 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 1.1.0:
+
+- Support for 2017-07-29 REST version. Please see our REST API documentation and blogs for information about the related added features.
+- Added support for soft delete feature. If a delete retention policy is enabled through the set service properties API, then blobs or snapshots could be deleted softly and retained for a specified number of days, before being permanently removed by garbage collection.
+- Error message now contains the ErrorCode from the x-ms-error-code header value.
+
 ## Version 1.0.0:
 
 - The package has switched from Apache 2.0 to the MIT license.

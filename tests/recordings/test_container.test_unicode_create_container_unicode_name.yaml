@@ -4,21 +4,23 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [3c99536e-fc9b-11e7-9b5f-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:02:12 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [a80fe55c-0acb-11e8-8856-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:24:04 GMT']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.blob.core.windows.net/%E5%95%8A%E9%BD%84%E4%B8%82%E7%8B%9B%E7%8B%9C?restype=container
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidResourceName</Code><Message>The
-        specifed resource name contains invalid characters.\nRequestId:d12dee0f-001e-0036-43a7-90f986000000\nTime:2018-01-18T22:02:12.3883313Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidResourceName</Code><Message>The\
+        \ specifed resource name contains invalid characters.\nRequestId:4e517264-001e-00a6-34d8-9e6cca000000\n\
+        Time:2018-02-05T23:24:05.0033298Z</Message></Error>"}
     headers:
       Content-Length: ['243']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:02:12 GMT']
+      Date: ['Mon, 05 Feb 2018 23:24:04 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [d12dee0f-001e-0036-43a7-90f986000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [InvalidResourceName]
+      x-ms-request-id: [4e517264-001e-00a6-34d8-9e6cca000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 400, message: The specifed resource name contains invalid characters.}
 version: 1

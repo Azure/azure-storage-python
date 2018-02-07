@@ -4,58 +4,60 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [c9f36b6e-fc9b-11e7-99fd-b8e8564491f6]
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [4ea22ec0-0acc-11e8-9546-b8e8564491f6]
       x-ms-content-length: ['0']
-      x-ms-date: ['Thu, 18 Jan 2018 22:06:09 GMT']
+      x-ms-date: ['Mon, 05 Feb 2018 23:28:44 GMT']
       x-ms-type: [file]
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     method: PUT
     uri: https://storagename.file.core.windows.net/utshare2d0b0f81/utdir2d0b0f81/file2d0b0f81
   response:
     body: {string: ''}
     headers:
-      Date: ['Thu, 18 Jan 2018 22:06:09 GMT']
-      ETag: ['"0x8D55EBFAE878030"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:06:10 GMT']
+      Date: ['Mon, 05 Feb 2018 23:28:43 GMT']
+      ETag: ['"0x8D56CF032D04289"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:28:44 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [5fc6932b-001a-00d5-14a8-901c09000000]
+      x-ms-request-id: [7f83dc51-001a-00d2-7cd9-9eea8c000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [ca0f8808-fc9b-11e7-bf63-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:06:09 GMT']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [4ebab8be-0acc-11e8-8842-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:28:44 GMT']
       x-ms-range: [bytes=0-32767]
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     method: GET
     uri: https://storagename.file.core.windows.net/utshare2d0b0f81/utdir2d0b0f81/file2d0b0f81
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidRange</Code><Message>The
-        range specified is invalid for the current size of the resource.\nRequestId:5fc6932e-001a-00d5-16a8-901c09000000\nTime:2018-01-18T22:06:10.0850490Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidRange</Code><Message>The\
+        \ range specified is invalid for the current size of the resource.\nRequestId:7f83dc53-001a-00d2-7dd9-9eea8c000000\n\
+        Time:2018-02-05T23:28:44.3719663Z</Message></Error>"}
     headers:
       Content-Length: ['249']
       Content-Range: [bytes */0]
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:06:09 GMT']
+      Date: ['Mon, 05 Feb 2018 23:28:44 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [5fc6932e-001a-00d5-16a8-901c09000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [InvalidRange]
+      x-ms-request-id: [7f83dc53-001a-00d2-7dd9-9eea8c000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 416, message: The range specified is invalid for the current size
         of the resource.}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [ca162b86-fc9b-11e7-981c-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:06:09 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [4ecf5206-0acc-11e8-8c0f-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:28:44 GMT']
+      x-ms-version: ['2017-07-29']
     method: GET
     uri: https://storagename.file.core.windows.net/utshare2d0b0f81/utdir2d0b0f81/file2d0b0f81
   response:
@@ -64,13 +66,13 @@ interactions:
       Accept-Ranges: [bytes]
       Content-Length: ['0']
       Content-Type: [application/octet-stream]
-      Date: ['Thu, 18 Jan 2018 22:06:09 GMT']
-      ETag: ['"0x8D55EBFAE878030"']
-      Last-Modified: ['Thu, 18 Jan 2018 22:06:10 GMT']
+      Date: ['Mon, 05 Feb 2018 23:28:44 GMT']
+      ETag: ['"0x8D56CF032D04289"']
+      Last-Modified: ['Mon, 05 Feb 2018 23:28:44 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [5fc6932f-001a-00d5-17a8-901c09000000]
+      x-ms-request-id: [7f83dc56-001a-00d2-7ed9-9eea8c000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2017-04-17']
+      x-ms-version: ['2017-07-29']
     status: {code: 200, message: OK}
 version: 1

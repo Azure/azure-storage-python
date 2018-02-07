@@ -29,12 +29,15 @@ def install_dependency_packages(executable_location):
 # install the storage packages into the virtual environment
 def install_storage_package(executable_location, environment):
     if environment == 'test':
+        check_call([executable_location, 'install', 'azure-storage-nspkg'])
+        check_call([executable_location, 'install', 'azure-storage-common', '-i',
+                    'https://testpypi.python.org/pypi', '--no-deps'])
         check_call([executable_location, 'install', 'azure-storage-blob', '-i',
-                    'https://test.pypi.org/legacy/', '--no-deps'])
+                    'https://testpypi.python.org/pypi', '--no-deps'])
         check_call([executable_location, 'install', 'azure-storage-file', '-i',
-                    'https://test.pypi.org/legacy/', '--no-deps'])
+                    'https://testpypi.python.org/pypi', '--no-deps'])
         check_call([executable_location, 'install', 'azure-storage-queue', '-i',
-                    'https://test.pypi.org/legacy/', '--no-deps'])
+                    'https://testpypi.python.org/pypi', '--no-deps'])
     elif environment == 'prod':
         check_call([executable_location, 'install', 'azure-storage-blob'])
         check_call([executable_location, 'install', 'azure-storage-file'])

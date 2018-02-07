@@ -4,21 +4,23 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.0.0-1.0.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [84bac1c8-fc9b-11e7-adbc-b8e8564491f6]
-      x-ms-date: ['Thu, 18 Jan 2018 22:04:13 GMT']
-      x-ms-version: ['2017-04-17']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      x-ms-client-request-id: [f029a4b8-0acb-11e8-8bc1-b8e8564491f6]
+      x-ms-date: ['Mon, 05 Feb 2018 23:26:05 GMT']
+      x-ms-version: ['2017-07-29']
     method: DELETE
     uri: https://storagename.file.core.windows.net/utshare1eeb20e3/dir1?restype=directory
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
-        specified resource does not exist.\nRequestId:824f61c8-001a-0128-4ea8-90653e000000\nTime:2018-01-18T22:04:14.9258980Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
+        \ specified resource does not exist.\nRequestId:921ec442-001a-00ea-57d8-9eabd5000000\n\
+        Time:2018-02-05T23:26:06.5269820Z</Message></Error>"}
     headers:
       Content-Length: ['223']
       Content-Type: [application/xml]
-      Date: ['Thu, 18 Jan 2018 22:04:14 GMT']
+      Date: ['Mon, 05 Feb 2018 23:26:06 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [824f61c8-001a-0128-4ea8-90653e000000]
-      x-ms-version: ['2017-04-17']
+      x-ms-error-code: [ResourceNotFound]
+      x-ms-request-id: [921ec442-001a-00ea-57d8-9eabd5000000]
+      x-ms-version: ['2017-07-29']
     status: {code: 404, message: The specified resource does not exist.}
 version: 1
