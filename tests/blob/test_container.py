@@ -7,26 +7,13 @@
 # --------------------------------------------------------------------------
 import requests
 from datetime import datetime, timedelta
-from azure.common import (
-    AzureHttpError,
-    AzureConflictHttpError,
-    AzureMissingResourceHttpError,
-    AzureException,
-)
-from azure.storage.common import (
-    AccessPolicy,
-)
-from azure.storage.blob import (
-    BlockBlobService,
-    ContainerPermissions,
-    Include,
-    PublicAccess,
-)
-from tests.testcase import (
-    StorageTestCase,
-    TestMode,
-    record,
-)
+from azure.common import (AzureConflictHttpError, AzureException,
+                          AzureHttpError, AzureMissingResourceHttpError)
+from azure.storage.blob import (BlockBlobService, ContainerPermissions,
+                                Include, PublicAccess)
+from azure.storage.common import AccessPolicy
+
+from tests.testcase import StorageTestCase, TestMode, record
 
 #------------------------------------------------------------------------------
 TEST_CONTAINER_PREFIX = 'container'
@@ -368,6 +355,7 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._create_container()
         self.bs.set_container_metadata(container_name, metadata)
         self.bs.acquire_container_lease(container_name)
+        self.bs.set_container_acl(container_name, None, 'container')
 
         # Act
         props = self.bs.get_container_properties(container_name)
@@ -378,6 +366,7 @@ class StorageContainerTest(StorageTestCase):
         self.assertEqual(props.properties.lease.duration, 'infinite')
         self.assertEqual(props.properties.lease.state, 'leased')
         self.assertEqual(props.properties.lease.status, 'locked')
+        self.assertEqual(props.properties.public_access, 'container')
 
     @record
     def test_get_container_properties_with_lease_id(self):
