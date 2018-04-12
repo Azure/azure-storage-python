@@ -5,6 +5,7 @@
 ## Version XX.XX.XX:
 
 - Increased default socket timeout to a more reasonable number for Python 3.5+.
+- Fixed bug where seekable streams (request body) were not being reset for retries.
 
 ## Version 1.1.0:
 

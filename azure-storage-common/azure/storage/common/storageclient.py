@@ -39,6 +39,7 @@ from .models import (
     _OperationContext,
 )
 from .retry import ExponentialRetry
+from io import UnsupportedOperation
 
 
 class StorageClient(object):
@@ -215,6 +216,14 @@ class StorageClient(object):
         operation_context = operation_context or _OperationContext()
         retry_context = RetryContext()
         retry_context.is_emulated = self.is_emulated
+
+        # if request body is a stream, we need to remember its current position in case retries happen
+        if hasattr(request.body, 'read'):
+            try:
+                retry_context.body_position = request.body.tell()
+            except (AttributeError, UnsupportedOperation):
+                # if body position cannot be obtained, then retries will not work
+                pass
 
         # Apply the appropriate host based on the location mode
         self._apply_host(request, operation_context, retry_context)

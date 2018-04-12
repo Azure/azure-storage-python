@@ -122,6 +122,8 @@ class RetryContext(object):
         or other Exception types from lower layers, which are kept unwrapped for easier processing.
     :ivar bool is_emulated:
         Whether retry is targeting the emulator. The default value is False.
+    :ivar int body_position:
+        The initial position of the body stream. It is useful when retries happen and we need to rewind the stream.
     '''
 
     def __init__(self):
@@ -130,6 +132,7 @@ class RetryContext(object):
         self.location_mode = None
         self.exception = None
         self.is_emulated = False
+        self.body_position = None
 
 
 class LocationMode(object):
