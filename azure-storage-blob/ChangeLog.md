@@ -6,6 +6,7 @@
 
 - Added support for setting static website service properties.
 - Added support for getting account information, such as SKU name and account kind.
+- Added support for put block from URL(synchronously).
 
 ## Version 1.2.0rc1:
 
