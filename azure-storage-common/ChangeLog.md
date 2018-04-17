@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX:
+
+- Increased default socket timeout to a more reasonable number for Python 3.5+.
+
 ## Version 1.1.0:
 
 - Support for 2017-07-29 REST version. Please see our REST API documentation and blogs for information about the related added features.
