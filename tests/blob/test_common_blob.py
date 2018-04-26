@@ -444,6 +444,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.blob_type, self.bs.blob_type)
         self.assertEqual(blob.properties.content_length, len(self.byte_data))
         self.assertEqual(blob.properties.lease.status, 'unlocked')
+        self.assertIsNotNone(blob.properties.creation_time)
 
     # This test is to validate that the ErrorCode is retrieved from the header during a
     # HEAD request.

@@ -17,7 +17,7 @@ USER_AGENT_STRING_SUFFIX = '(Python {} {}; {} {})'.format(platform.python_implem
                                                           platform.release())
 
 # default values for common package, in case it is used directly
-DEFAULT_X_MS_VERSION = '2017-07-29'
+DEFAULT_X_MS_VERSION = '2017-11-09'
 DEFAULT_USER_AGENT_STRING = '{}None {}'.format(USER_AGENT_STRING_PREFIX, USER_AGENT_STRING_SUFFIX)
 
 # Live ServiceClient URLs

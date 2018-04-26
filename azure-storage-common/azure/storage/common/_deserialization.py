@@ -63,6 +63,7 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-archive-status': (None, 'rehydration_status', _to_str),
     'x-ms-share-quota': (None, 'quota', _to_int),
     'x-ms-server-encrypted': (None, 'server_encrypted', _bool),
+    'x-ms-creation-time': (None, 'creation_time', parser.parse),
     'content-type': ('content_settings', 'content_type', _to_str),
     'cache-control': ('content_settings', 'cache_control', _to_str),
     'content-encoding': ('content_settings', 'content_encoding', _to_str),
@@ -79,6 +80,8 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-copy-completion-time': ('copy', 'completion_time', parser.parse),
     'x-ms-copy-destination-snapshot': ('copy', 'destination_snapshot_time', _to_str),
     'x-ms-copy-status-description': ('copy', 'status_description', _to_str),
+    'x-ms-has-immutability-policy': (None, 'has_immutability_policy', _bool),
+    'x-ms-has-legal-hold': (None, 'has_legal_hold', _bool),
 }
 
 
