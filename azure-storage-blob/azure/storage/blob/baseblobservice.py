@@ -1358,7 +1358,7 @@ class BaseBlobService(StorageClient):
 
     def set_blob_service_properties(
             self, logging=None, hour_metrics=None, minute_metrics=None,
-            cors=None, target_version=None, timeout=None, delete_retention_policy=None):
+            cors=None, target_version=None, timeout=None, delete_retention_policy=None, static_website=None):
         '''
         Sets the properties of a storage account's Blob service, including
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
@@ -1393,6 +1393,11 @@ class BaseBlobService(StorageClient):
             It also specifies the number of days and versions of blob to keep.
         :type delete_retention_policy:
             :class:`~azure.storage.common.models.DeleteRetentionPolicy`
+        :param static_website:
+            Specifies whether the static website feature is enabled,
+            and if yes, indicates the index document and 404 error document to use.
+        :type static_website:
+            :class:`~azure.storage.common.models.StaticWebsite`
         '''
         request = HTTPRequest()
         request.method = 'PUT'
@@ -1405,7 +1410,7 @@ class BaseBlobService(StorageClient):
         }
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics,
-                                               cors, target_version, delete_retention_policy))
+                                               cors, target_version, delete_retention_policy, static_website))
 
         self._perform_request(request)
 

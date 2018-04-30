@@ -1,0 +1,45 @@
+interactions:
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <StorageServiceProperties><StaticWebsite><Enabled>True</Enabled><IndexDocument>index.html</IndexDocument><ErrorDocument404Path>errors/error/404error.html</ErrorDocument404Path></StaticWebsite></StorageServiceProperties>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['258']
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.4.0)]
+      x-ms-client-request-id: [46afbdb0-4c56-11e8-8466-b8e8564491f6]
+      x-ms-date: ['Mon, 30 Apr 2018 09:10:07 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 30 Apr 2018 09:10:06 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [eb3e1780-901e-003b-0d63-e0d79f000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.4.0)]
+      x-ms-client-request-id: [47106674-4c56-11e8-abae-b8e8564491f6]
+      x-ms-date: ['Mon, 30 Apr 2018 09:10:07 GMT']
+      x-ms-version: ['2018-03-28']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceProperties><Logging><Version>1.0</Version><Read>false</Read><Write>false</Write><Delete>false</Delete><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></Logging><HourMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></HourMetrics><MinuteMetrics><Version>1.0</Version><Enabled>false</Enabled><RetentionPolicy><Enabled>false</Enabled></RetentionPolicy></MinuteMetrics><Cors
+        /><DeleteRetentionPolicy><Enabled>false</Enabled></DeleteRetentionPolicy><StaticWebsite><Enabled>true</Enabled><IndexDocument>index.html</IndexDocument><ErrorDocument404Path>errors/error/404error.html</ErrorDocument404Path></StaticWebsite><DefaultServiceVersion>2017-11-09</DefaultServiceVersion></StorageServiceProperties>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Mon, 30 Apr 2018 09:10:06 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [eb3e178f-901e-003b-1363-e0d79f000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+version: 1
