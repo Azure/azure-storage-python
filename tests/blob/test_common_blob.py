@@ -141,23 +141,47 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertTrue(exists)
 
     @record
-    def test_blob_container_not_exists(self):
-        # Arrange
-        blob_name = self._get_blob_reference()
-
-        # Act
-        exists = self.bs.exists(self._get_container_reference(), blob_name)
-
-        # Assert
-        self.assertFalse(exists)
-
-    @record
     def test_blob_not_exists(self):
         # Arrange
         blob_name = self._get_blob_reference()
 
         # Act
         exists = self.bs.exists(self.container_name, blob_name)
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
+    def test_blob_snapshot_exists(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+        snapshot = self.bs.snapshot_blob(self.container_name, blob_name)
+
+        # Act
+        exists = self.bs.exists(self.container_name, blob_name, snapshot.snapshot)
+
+        # Assert
+        self.assertTrue(exists)
+
+    @record
+    def test_blob_snapshot_not_exists(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+
+        # Act
+        exists = self.bs.exists(self.container_name, blob_name, "1988-08-18T07:52:31.6690068Z")
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
+    def test_blob_container_not_exists(self):
+        # In this case both the blob and container do not exist
+        # Arrange
+        blob_name = self._get_blob_reference()
+
+        # Act
+        exists = self.bs.exists(self._get_container_reference(), blob_name)
 
         # Assert
         self.assertFalse(exists)

@@ -106,6 +106,28 @@ class StorageQueueTest(StorageTestCase):
         self.assertTrue(created)
 
     @record
+    def test_create_queue_already_exist_different_metadata(self):
+        # Action
+        queue_name = self._get_queue_reference()
+        created1 = self.qs.create_queue(queue_name)
+        created2 = self.qs.create_queue(queue_name, {"val": "value"})
+
+        # Asserts
+        self.assertTrue(created1)
+        self.assertFalse(created2)
+
+    @record
+    def test_create_queue_fail_on_exist_different_metadata(self):
+        # Action
+        queue_name = self._get_queue_reference()
+        created = self.qs.create_queue(queue_name, None, True)
+        with self.assertRaises(AzureConflictHttpError):
+            self.qs.create_queue(queue_name, {"val": "value"}, True)
+
+        # Asserts
+        self.assertTrue(created)
+
+    @record
     def test_create_queue_with_options(self):
         # Action
         queue_name = self._get_queue_reference()

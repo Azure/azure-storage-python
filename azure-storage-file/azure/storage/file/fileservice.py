@@ -83,6 +83,12 @@ from ._constants import (
     __version__ as package_version,
 )
 
+_SHARE_NOT_FOUND_ERROR_CODE = 'ShareNotFound'
+_PARENT_NOT_FOUND_ERROR_CODE = 'ParentNotFound'
+_RESOURCE_NOT_FOUND_ERROR_CODE = 'ResourceNotFound'
+_RESOURCE_ALREADY_EXISTS_ERROR_CODE = 'ResourceAlreadyExists'
+_SHARE_ALREADY_EXISTS_ERROR_CODE = 'ShareAlreadyExists'
+
 if sys.version_info >= (3,):
     from io import BytesIO
 else:
@@ -648,7 +654,7 @@ class FileService(StorageClient):
 
         if not fail_on_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_SHARE_ALREADY_EXISTS_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_on_exist(ex)
@@ -977,7 +983,7 @@ class FileService(StorageClient):
 
         if not fail_on_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=_RESOURCE_ALREADY_EXISTS_ERROR_CODE)
                 return True
             except AzureHttpError as ex:
                 _dont_fail_on_exist(ex)
@@ -1273,12 +1279,27 @@ class FileService(StorageClient):
         '''
         _validate_not_none('share_name', share_name)
         try:
+            request = HTTPRequest()
+            request.method = 'HEAD' if file_name is not None else 'GET'
+            request.host_locations = self._get_host_locations()
+            request.path = _get_path(share_name, directory_name, file_name)
+
             if file_name is not None:
-                self.get_file_properties(share_name, directory_name, file_name, timeout=timeout, snapshot=snapshot)
+                restype = None
+                expected_errors = [_RESOURCE_NOT_FOUND_ERROR_CODE, _PARENT_NOT_FOUND_ERROR_CODE]
             elif directory_name is not None:
-                self.get_directory_properties(share_name, directory_name, timeout=timeout, snapshot=snapshot)
+                restype = 'directory'
+                expected_errors = [_RESOURCE_NOT_FOUND_ERROR_CODE, _SHARE_NOT_FOUND_ERROR_CODE]
             else:
-                self.get_share_properties(share_name, timeout=timeout, snapshot=snapshot)
+                restype = 'share'
+                expected_errors = [_SHARE_NOT_FOUND_ERROR_CODE]
+
+            request.query = {
+                'restype': restype,
+                'timeout': _int_to_str(timeout),
+                'sharesnapshot': _to_str(snapshot)
+            }
+            self._perform_request(request, expected_errors=expected_errors)
             return True
         except AzureHttpError as ex:
             _dont_fail_not_exist(ex)

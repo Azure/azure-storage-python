@@ -25,8 +25,8 @@ import tests.settings_fake as fake_settings
 
 # logging is not enabled by default because it pollutes the CI logs
 # uncommenting the following two lines make debugging much easier
-# import logging
-# logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
+import logging
+logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
 
 try:
     import tests.settings_real as settings
