@@ -526,13 +526,13 @@ class StorageQueueTest(StorageTestCase):
         self.assertIsNotNone(queues)
 
         # Action 2: change token value to make request fail
-        token_credential.update_token("YOU SHALL NOT PASS")
+        token_credential.token = "YOU SHALL NOT PASS"
         with self.assertRaises(AzureException):
             queues = list(service.list_queues())
             self.assertIsNone(queues)
 
         # Action 3: update token to make it working again
-        token_credential.update_token(self.generate_oauth_token())
+        token_credential.token = self.generate_oauth_token()
         queues = list(service.list_queues())
         self.assertIsNotNone(queues)
 

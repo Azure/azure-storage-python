@@ -1254,13 +1254,13 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNotNone(result)
 
         # Action 2: change token value to make request fail
-        token_credential.update_token("YOU SHALL NOT PASS")
+        token_credential.token = "YOU SHALL NOT PASS"
         with self.assertRaises(AzureException):
             result = service.exists("test")
             self.assertIsNone(result)
 
         # Action 3: update token to make it working again
-        token_credential.update_token(self.generate_oauth_token())
+        token_credential.token = self.generate_oauth_token()
         result = service.exists("test")
         self.assertIsNotNone(result)
 

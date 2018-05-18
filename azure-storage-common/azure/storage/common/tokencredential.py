@@ -37,18 +37,12 @@ class TokenCredential(object):
         :rtype: requests.Session
         """
         session = session or requests.Session()
-        session.headers['Authorization'] = str.format("Bearer {}", self.token)
+        session.headers['Authorization'] = "Bearer {}".format(self.token)
 
         return session
 
-    def update_token(self, new_value):
+    def token(self, new_value):
         """
         :param new_value: new value to be set as the token.
         """
         self.token = new_value
-
-    def get_token(self):
-        """
-        :return: current token value.
-        """
-        return self.token
