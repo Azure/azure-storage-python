@@ -2,9 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version XX.XX.XX:
+## Version 1.2.0rc1:
 
-- Added support for OAuth authentication for HTTPS requests.
+- Support for 2017-11-09 REST version. Please see our REST API documentation and blog for information about the related added features.
+- Added support for OAuth authentication for HTTPS requests(Please note that this feature is available in preview).
 
 ## Version 1.1.0:
 

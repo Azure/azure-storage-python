@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 1.2.0rc1:
+
+- Support for 2017-11-09 REST version. Please see our REST API documentation and blog for information about the related added features.
+
 ## Version 1.1.0:
 
 - Support for 2017-07-29 REST version. Please see our REST API documentation and blogs for information about the related added features.
