@@ -22,25 +22,25 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['1024']
-      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [e16fb92c-0aca-11e8-a6d0-b8e8564491f6]
-      x-ms-date: ['Mon, 05 Feb 2018 23:18:31 GMT']
-      x-ms-version: ['2017-07-29']
+      x-ms-client-request-id: [6f39b650-5e17-11e8-80d8-b8e8564491f6]
+      x-ms-date: ['Tue, 22 May 2018 23:25:37 GMT']
+      x-ms-version: ['2017-11-09']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer61f810cf/blob61f810cf
   response:
     body: {string: ''}
     headers:
       Content-MD5: [oCH+lQmNcNij0X2pgU0v3A==]
-      Date: ['Mon, 05 Feb 2018 23:18:31 GMT']
-      ETag: ['"0x8D56CEEC59B8462"']
-      Last-Modified: ['Mon, 05 Feb 2018 23:18:31 GMT']
+      Date: ['Tue, 22 May 2018 23:25:37 GMT']
+      ETag: ['"0x8D5C03B5385E9A8"']
+      Last-Modified: ['Tue, 22 May 2018 23:25:37 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [7df0f42f-001e-00a5-4fd7-9e6fcd000000]
+      x-ms-request-id: [2e5f9b53-e01e-00d3-5424-f2eb71000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2017-07-29']
+      x-ms-version: ['2017-11-09']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -48,20 +48,19 @@ interactions:
       Accept: ['*/*']
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      User-Agent: [python-requests/2.18.3]
+      User-Agent: [python-requests/2.18.4]
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainer61f810cf/blob61f810cf
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
-        \ specified resource does not exist.\nRequestId:e1a3015f-001e-004c-7bd7-9e93cb000000\n\
-        Time:2018-02-05T23:18:31.8015056Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
+        specified resource does not exist.\nRequestId:e7a71dd0-801e-004b-7b24-f2654e000000\nTime:2018-05-22T23:25:38.1374832Z</Message></Error>"}
     headers:
       Content-Length: ['223']
       Content-Type: [application/xml]
-      Date: ['Mon, 05 Feb 2018 23:18:31 GMT']
+      Date: ['Tue, 22 May 2018 23:25:37 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Vary: [Origin]
-      x-ms-request-id: [e1a3015f-001e-004c-7bd7-9e93cb000000]
-      x-ms-version: ['2013-08-15']
+      x-ms-request-id: [e7a71dd0-801e-004b-7b24-f2654e000000]
+      x-ms-version: ['2014-02-14']
     status: {code: 404, message: The specified resource does not exist.}
 version: 1

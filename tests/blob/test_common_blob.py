@@ -19,6 +19,7 @@ from azure.storage.common import (
     ResourceTypes,
     AccountPermissions,
     DeleteRetentionPolicy,
+    TokenCredential,
 )
 from azure.storage.blob import (
     Blob,
@@ -444,6 +445,7 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.blob_type, self.bs.blob_type)
         self.assertEqual(blob.properties.content_length, len(self.byte_data))
         self.assertEqual(blob.properties.lease.status, 'unlocked')
+        self.assertIsNotNone(blob.properties.creation_time)
 
     # This test is to validate that the ErrorCode is retrieved from the header during a
     # HEAD request.
@@ -1241,6 +1243,26 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertTrue(blob_response.ok)
         self.assertEqual(self.byte_data, blob_response.content)
         self.assertTrue(container_response.ok)
+
+    @record
+    def test_token_credential(self):
+        token_credential = TokenCredential(self.generate_oauth_token())
+
+        # Action 1: make sure token works
+        service = BlockBlobService(self.settings.STORAGE_ACCOUNT_NAME, token_credential=token_credential)
+        result = service.exists("test")
+        self.assertIsNotNone(result)
+
+        # Action 2: change token value to make request fail
+        token_credential.token = "YOU SHALL NOT PASS"
+        with self.assertRaises(AzureException):
+            result = service.exists("test")
+            self.assertIsNone(result)
+
+        # Action 3: update token to make it working again
+        token_credential.token = self.generate_oauth_token()
+        result = service.exists("test")
+        self.assertIsNotNone(result)
 
     @record
     def test_shared_read_access_blob(self):

@@ -1,28 +1,26 @@
 interactions:
 - request:
-    body: "<?xml version='1.0' encoding='utf-8'?>\n<QueueMessage><MessageText>\x01\
-      </MessageText></QueueMessage>"
+    body: "<?xml version='1.0' encoding='utf-8'?>\n<QueueMessage><MessageText>\x01</MessageText></QueueMessage>"
     headers:
       Connection: [keep-alive]
       Content-Length: ['96']
-      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [a1067a0c-0acc-11e8-aec2-b8e8564491f6]
-      x-ms-date: ['Mon, 05 Feb 2018 23:31:02 GMT']
-      x-ms-version: ['2017-07-29']
+      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
+      x-ms-client-request-id: [e261aca4-5e18-11e8-871a-b8e8564491f6]
+      x-ms-date: ['Tue, 22 May 2018 23:36:00 GMT']
+      x-ms-version: ['2017-11-09']
     method: POST
     uri: https://storagename.queue.core.windows.net/mytestqueue093de171a/messages
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML\
-        \ specified is not syntactically valid.\nRequestId:d1bf0f7a-0003-001f-5bd9-9e8fc4000000\n\
-        Time:2018-02-05T23:31:02.5608316Z</Message><LineNumber>2</LineNumber><LinePosition>28</LinePosition><Reason>Error\
-        \ parsing Xml content</Reason></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML
+        specified is not syntactically valid.\nRequestId:99320a75-8003-0040-2925-f27d3a000000\nTime:2018-05-22T23:36:01.8446193Z</Message><LineNumber>2</LineNumber><LinePosition>28</LinePosition><Reason>Error
+        parsing Xml content</Reason></Error>"}
     headers:
       Content-Length: ['327']
       Content-Type: [application/xml]
-      Date: ['Mon, 05 Feb 2018 23:31:02 GMT']
+      Date: ['Tue, 22 May 2018 23:36:01 GMT']
       Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-error-code: [InvalidXmlDocument]
-      x-ms-request-id: [d1bf0f7a-0003-001f-5bd9-9e8fc4000000]
-      x-ms-version: ['2017-07-29']
+      x-ms-request-id: [99320a75-8003-0040-2925-f27d3a000000]
+      x-ms-version: ['2017-11-09']
     status: {code: 400, message: XML specified is not syntactically valid.}
 version: 1
