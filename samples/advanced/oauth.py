@@ -33,16 +33,18 @@ class AutoUpdatedTokenCredential(TokenCredential):
         self.timer = threading.Timer(first_interval, self.timer_callback)
         self.timer.start()
 
+    # support context manager
     def __enter__(self):
         return self
 
+    # support context manager
     def __exit__(self, *args):
         self.stop_refreshing_token()
 
     def timer_callback(self):
         print("TOKEN UPDATER WAS TRIGGERED")
 
-        # call the user-provided function to get a new token, as well as when to call it again
+        # call the get token function to get a new token, as well as the time to wait before calling it again
         token, next_interval = self.get_token_func()
 
         # the token is set instantaneously, and can be used by BlockBlobService right away
@@ -53,14 +55,20 @@ class AutoUpdatedTokenCredential(TokenCredential):
             self.timer.start()
 
     def stop_refreshing_token(self):
-        # the timer needs to be canceled if the application is terminating
-        # if not the timer will keep going
+        """
+        The timer needs to be canceled if the application is terminating, if not the timer will keep going.
+        """
         with self.lock:
             self.timer.cancel()
 
     @staticmethod
     def get_token_func():
+        """
+        This function makes a call to AAD to fetch an OAuth token
+        :return: the OAuth token and the interval to wait before refreshing it
+        """
         # in this example, the OAuth token is obtained using the ADAL library
+        # however, the user can use any preferred method
         context = adal.AuthenticationContext(
             str.format("https://login.microsoftonline.com/{}", settings.ACTIVE_DIRECTORY_TENANT_ID),
             api_version=None, validate_authority=True)
@@ -70,9 +78,11 @@ class AutoUpdatedTokenCredential(TokenCredential):
             settings.ACTIVE_DIRECTORY_APPLICATION_ID,
             settings.ACTIVE_DIRECTORY_APPLICATION_SECRET)
 
-        # here we are assuming that the token expiration is at least longer than 3 minutes
-        # oauth_token['expiresIn'] - 180
-        return oauth_token['accessToken'], 60
+        # return the token itself and the interval to wait before this function should be called again
+        # generally oauth_token['expiresIn'] - 180 is a good interval to give, as it tells the caller to
+        # refresh the token 3 minutes before it expires, so here we are assuming that the token expiration
+        # is at least longer than 3 minutes, the user should adjust it according to their AAD policy
+        return oauth_token['accessToken'], oauth_token['expiresIn'] - 180
 
 
 def test_token_credential_with_timer():
@@ -89,8 +99,7 @@ def test_token_credential_with_timer():
             if result is None:
                 print("something is wrong")
 
-            # time.sleep(600)
-            time.sleep(60)
+            time.sleep(600)
 
 
 if __name__ == '__main__':
