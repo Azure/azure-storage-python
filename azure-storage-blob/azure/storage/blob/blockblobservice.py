@@ -93,9 +93,9 @@ class BlockBlobService(BaseBlobService):
     MAX_BLOCK_SIZE = 4 * 1024 * 1024
     MIN_LARGE_BLOCK_UPLOAD_THRESHOLD = 4 * 1024 * 1024 + 1
 
-    def __init__(self, account_name=None, account_key=None, sas_token=None,
-                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 custom_domain=None, request_session=None, connection_string=None, socket_timeout=None):
+    def __init__(self, account_name=None, account_key=None, sas_token=None, is_emulated=False,
+                 protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE, custom_domain=None,
+                 request_session=None, connection_string=None, socket_timeout=None, token_credential=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests
@@ -134,11 +134,15 @@ class BlockBlobService(BaseBlobService):
         :param int socket_timeout:
             If specified, this will override the default socket timeout. The timeout specified is in seconds.
             See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
+        :param token_credential:
+            A token credential used to authenticate HTTPS requests. The token value
+            should be updated before its expiration.
+        :type `~azure.storage.common.TokenCredential`
         '''
         self.blob_type = _BlobTypes.BlockBlob
         super(BlockBlobService, self).__init__(
             account_name, account_key, sas_token, is_emulated, protocol, endpoint_suffix,
-            custom_domain, request_session, connection_string, socket_timeout)
+            custom_domain, request_session, connection_string, socket_timeout, token_credential)
 
     def put_block(self, container_name, blob_name, block, block_id,
                   validate_content=False, lease_id=None, timeout=None):

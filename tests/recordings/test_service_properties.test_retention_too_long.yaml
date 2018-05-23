@@ -6,24 +6,23 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['273']
-      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [eac72c0c-0acb-11e8-b127-b8e8564491f6]
-      x-ms-date: ['Mon, 05 Feb 2018 23:25:56 GMT']
-      x-ms-version: ['2017-07-29']
+      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
+      x-ms-client-request-id: [46304e1c-5e18-11e8-aa44-b8e8564491f6]
+      x-ms-date: ['Tue, 22 May 2018 23:31:38 GMT']
+      x-ms-version: ['2017-11-09']
     method: PUT
     uri: https://storagename.blob.core.windows.net/?restype=service&comp=properties
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML\
-        \ specified is not syntactically valid.\nRequestId:98a8cef3-001e-010e-15d8-9efe8a000000\n\
-        Time:2018-02-05T23:25:56.8353091Z</Message><LineNumber>2</LineNumber><LinePosition>176</LinePosition><Reason>Retention\
-        \ days must be greater than 0 and less than or equal to 365 days.</Reason></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML
+        specified is not syntactically valid.\nRequestId:e4706cab-d01e-0071-5f25-f226ed000000\nTime:2018-05-22T23:31:38.5655369Z</Message><LineNumber>2</LineNumber><LinePosition>176</LinePosition><Reason>Retention
+        days must be greater than 0 and less than or equal to 365 days.</Reason></Error>"}
     headers:
       Content-Length: ['376']
       Content-Type: [application/xml]
-      Date: ['Mon, 05 Feb 2018 23:25:56 GMT']
+      Date: ['Tue, 22 May 2018 23:31:37 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-error-code: [InvalidXmlDocument]
-      x-ms-request-id: [98a8cef3-001e-010e-15d8-9efe8a000000]
-      x-ms-version: ['2017-07-29']
+      x-ms-request-id: [e4706cab-d01e-0071-5f25-f226ed000000]
+      x-ms-version: ['2017-11-09']
     status: {code: 400, message: XML specified is not syntactically valid.}
 version: 1

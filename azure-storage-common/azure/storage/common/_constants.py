@@ -4,9 +4,10 @@
 # license information.
 # --------------------------------------------------------------------------
 import platform
+import sys
 
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '1.1.0'
+__version__ = '1.2.0rc1'
 
 # UserAgent string sample: 'Azure-Storage/0.37.0-0.38.0 (Python CPython 3.4.2; Windows 8)'
 # First version(0.37.0) is the common package, and the second version(0.38.0) is the service package
@@ -16,7 +17,7 @@ USER_AGENT_STRING_SUFFIX = '(Python {} {}; {} {})'.format(platform.python_implem
                                                           platform.release())
 
 # default values for common package, in case it is used directly
-DEFAULT_X_MS_VERSION = '2017-07-29'
+DEFAULT_X_MS_VERSION = '2017-11-09'
 DEFAULT_USER_AGENT_STRING = '{}None {}'.format(USER_AGENT_STRING_PREFIX, USER_AGENT_STRING_SUFFIX)
 
 # Live ServiceClient URLs
@@ -34,6 +35,13 @@ DEV_ACCOUNT_KEY = 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6t
 
 # Socket timeout in seconds
 DEFAULT_SOCKET_TIMEOUT = 20
+
+# for python 3.5+, there was a change to the definition of the socket timeout (as far as socket.sendall is concerned)
+# The socket timeout is now the maximum total duration to send all data.
+if sys.version_info >= (3, 5):
+    # the timeout to connect is 20 seconds, and the read timeout is 2000 seconds
+    # the 2000 seconds was calculated with: 100MB (max block size)/ 50KB/s (an arbitrarily chosen minimum upload speed)
+    DEFAULT_SOCKET_TIMEOUT = (20, 2000)
 
 # Encryption constants
 _ENCRYPTION_PROTOCOL_V1 = '1.0'

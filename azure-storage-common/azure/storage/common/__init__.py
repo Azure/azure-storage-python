@@ -34,3 +34,4 @@ from .retry import (
 from .sharedaccesssignature import (
     SharedAccessSignature,
 )
+from .tokencredential import TokenCredential

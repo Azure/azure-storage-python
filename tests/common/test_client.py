@@ -16,6 +16,7 @@ from tests.testcase import (
     StorageTestCase,
     record,
 )
+from azure.storage.common import TokenCredential
 
 # ------------------------------------------------------------------------------
 SERVICES = {
@@ -44,6 +45,7 @@ class StorageClientTest(StorageTestCase):
         self.account_name = self.settings.STORAGE_ACCOUNT_NAME
         self.account_key = self.settings.STORAGE_ACCOUNT_KEY
         self.sas_token = '?sv=2015-04-05&st=2015-04-29T22%3A18%3A26Z&se=2015-04-30T02%3A23%3A26Z&sr=b&sp=rw&sip=168.1.5.60-168.1.5.70&spr=https&sig=Z%2FRHIX5Xcg0Mq2rqI3OlWTjEg2tYkboXr1P9ZUXDtkk%3D'
+        self.token_credential = TokenCredential('initial_token')
 
     # --Helpers-----------------------------------------------------------------
     def validate_standard_account_endpoints(self, service, type):
@@ -77,6 +79,27 @@ class StorageClientTest(StorageTestCase):
             self.assertEqual(service.account_name, self.account_name)
             self.assertEqual(service.sas_token, self.sas_token)
             self.assertIsNone(service.account_key)
+
+    def test_create_service_with_token(self):
+        for type in SERVICES:
+            # Act
+            # token credential is not available for FileService
+            if type != FileService:
+                service = type(self.account_name, token_credential=self.token_credential)
+
+                # Assert
+                self.assertIsNotNone(service)
+                self.assertEqual(service.account_name, self.account_name)
+                self.assertEqual(service.token_credential, self.token_credential)
+                self.assertIsNone(service.account_key)
+
+    def test_create_service_with_token_and_http(self):
+        for type in SERVICES:
+            # Act
+            # token credential is not available for FileService
+            if type != FileService:
+                with self.assertRaises(ValueError):
+                    type(self.settings.STORAGE_ACCOUNT_NAME, token_credential=self.token_credential, protocol="HTTP")
 
     def test_create_service_china(self):
         # Arrange

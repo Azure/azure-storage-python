@@ -84,7 +84,7 @@ class _StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
 
         string_to_sign = ''
         for name, value in sorted_queries:
-            if value:
+            if value is not None:
                 string_to_sign += '\n' + name.lower() + ':' + value
 
         return string_to_sign

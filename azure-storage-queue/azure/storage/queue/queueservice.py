@@ -125,9 +125,9 @@ class QueueService(StorageClient):
         parameters for encryption/decryption must be provided. See the above comments on the key_encryption_key and resolver.
     '''
 
-    def __init__(self, account_name=None, account_key=None, sas_token=None,
-                 is_emulated=False, protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE,
-                 request_session=None, connection_string=None, socket_timeout=None):
+    def __init__(self, account_name=None, account_key=None, sas_token=None, is_emulated=False,
+                 protocol=DEFAULT_PROTOCOL, endpoint_suffix=SERVICE_HOST_BASE, request_session=None,
+                 connection_string=None, socket_timeout=None, token_credential=None):
         '''
         :param str account_name:
             The storage account name. This is used to authenticate requests 
@@ -159,12 +159,17 @@ class QueueService(StorageClient):
         :param int socket_timeout:
             If specified, this will override the default socket timeout. The timeout specified is in seconds.
             See DEFAULT_SOCKET_TIMEOUT in _constants.py for the default value.
+        :param token_credential:
+            A token credential used to authenticate HTTPS requests. The token value
+            should be updated before its expiration.
+        :type `~azure.storage.common.TokenCredential`
         '''
         service_params = _ServiceParameters.get_service_parameters(
             'queue',
             account_name=account_name,
             account_key=account_key,
             sas_token=sas_token,
+            token_credential=token_credential,
             is_emulated=is_emulated,
             protocol=protocol,
             endpoint_suffix=endpoint_suffix,
@@ -182,6 +187,8 @@ class QueueService(StorageClient):
             )
         elif self.sas_token:
             self.authentication = _StorageSASAuthentication(self.sas_token)
+        elif self.token_credential:
+            self.authentication = self.token_credential
         else:
             raise ValueError(_ERROR_STORAGE_MISSING_INFO)
 

@@ -56,12 +56,14 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'content-range': (None, 'content_range', _to_str),
     'x-ms-blob-sequence-number': (None, 'page_blob_sequence_number', _to_int),
     'x-ms-blob-committed-block-count': (None, 'append_blob_committed_block_count', _to_int),
+    'x-ms-blob-public-access': (None, 'public_access', _to_str),
     'x-ms-access-tier': (None, 'blob_tier', _to_str),
     'x-ms-access-tier-change-time': (None, 'blob_tier_change_time', parser.parse),
     'x-ms-access-tier-inferred': (None, 'blob_tier_inferred', _bool),
     'x-ms-archive-status': (None, 'rehydration_status', _to_str),
     'x-ms-share-quota': (None, 'quota', _to_int),
     'x-ms-server-encrypted': (None, 'server_encrypted', _bool),
+    'x-ms-creation-time': (None, 'creation_time', parser.parse),
     'content-type': ('content_settings', 'content_type', _to_str),
     'cache-control': ('content_settings', 'cache_control', _to_str),
     'content-encoding': ('content_settings', 'content_encoding', _to_str),
@@ -78,6 +80,8 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-copy-completion-time': ('copy', 'completion_time', parser.parse),
     'x-ms-copy-destination-snapshot': ('copy', 'destination_snapshot_time', _to_str),
     'x-ms-copy-status-description': ('copy', 'status_description', _to_str),
+    'x-ms-has-immutability-policy': (None, 'has_immutability_policy', _bool),
+    'x-ms-has-legal-hold': (None, 'has_legal_hold', _bool),
 }
 
 

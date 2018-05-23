@@ -21,28 +21,11 @@ from azure.storage.common.models import RetryContext
 from tests.testcase import (
     StorageTestCase,
     record,
+    ResponseCallback
 )
 
 
 # --Helper Classes---------------------------------------------------------------
-class ResponseCallback(object):
-    def __init__(self, status=None, new_status=None):
-        self.status = status
-        self.new_status = new_status
-        self.first = True
-        self.count = 0
-
-    def override_first_status(self, response):
-        if self.first and response.status == self.status:
-            response.status = self.new_status
-            self.first = False
-        self.count += 1
-
-    def override_status(self, response):
-        if response.status == self.status:
-            response.status = self.new_status
-        self.count += 1
-
 
 class _OperationContext(object):
     def __init__(self, location_lock=False):

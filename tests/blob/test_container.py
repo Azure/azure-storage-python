@@ -7,26 +7,13 @@
 # --------------------------------------------------------------------------
 import requests
 from datetime import datetime, timedelta
-from azure.common import (
-    AzureHttpError,
-    AzureConflictHttpError,
-    AzureMissingResourceHttpError,
-    AzureException,
-)
-from azure.storage.common import (
-    AccessPolicy,
-)
-from azure.storage.blob import (
-    BlockBlobService,
-    ContainerPermissions,
-    Include,
-    PublicAccess,
-)
-from tests.testcase import (
-    StorageTestCase,
-    TestMode,
-    record,
-)
+from azure.common import (AzureConflictHttpError, AzureException,
+                          AzureHttpError, AzureMissingResourceHttpError)
+from azure.storage.blob import (BlockBlobService, ContainerPermissions,
+                                Include, PublicAccess)
+from azure.storage.common import AccessPolicy
+
+from tests.testcase import StorageTestCase, TestMode, record
 
 #------------------------------------------------------------------------------
 TEST_CONTAINER_PREFIX = 'container'
@@ -46,7 +33,7 @@ class StorageContainerTest(StorageTestCase):
                 try:
                     self.bs.delete_container(container_name)
                 except AzureHttpError:
-                    try: 
+                    try:
                         self.bs.break_container_lease(container_name, 0)
                         self.bs.delete_container(container_name)
                     except:
@@ -215,6 +202,8 @@ class StorageContainerTest(StorageTestCase):
         self.assertGreaterEqual(len(containers), 1)
         self.assertIsNotNone(containers[0])
         self.assertNamedItemInContainer(containers, container_name)
+        self.assertIsNotNone(containers[0].properties.has_immutability_policy)
+        self.assertIsNotNone(containers[0].properties.has_legal_hold)
 
     @record
     def test_list_containers_with_prefix(self):
@@ -276,8 +265,8 @@ class StorageContainerTest(StorageTestCase):
 
         # Act
         generator1 = self.bs.list_containers(prefix=prefix, num_results=2)
-        generator2 = self.bs.list_containers(prefix=prefix, 
-                                             marker=generator1.next_marker, 
+        generator2 = self.bs.list_containers(prefix=prefix,
+                                             marker=generator1.next_marker,
                                              num_results=2)
 
         containers1 = generator1.items
@@ -368,6 +357,7 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._create_container()
         self.bs.set_container_metadata(container_name, metadata)
         self.bs.acquire_container_lease(container_name)
+        self.bs.set_container_acl(container_name, None, 'container')
 
         # Act
         props = self.bs.get_container_properties(container_name)
@@ -378,6 +368,9 @@ class StorageContainerTest(StorageTestCase):
         self.assertEqual(props.properties.lease.duration, 'infinite')
         self.assertEqual(props.properties.lease.state, 'leased')
         self.assertEqual(props.properties.lease.status, 'locked')
+        self.assertEqual(props.properties.public_access, 'container')
+        self.assertIsNotNone(props.properties.has_immutability_policy)
+        self.assertIsNotNone(props.properties.has_legal_hold)
 
     @record
     def test_get_container_properties_with_lease_id(self):
@@ -506,8 +499,8 @@ class StorageContainerTest(StorageTestCase):
         identifiers = dict()
         identifiers['testid'] = AccessPolicy(
             permission=ContainerPermissions.READ,
-            expiry=datetime.utcnow() + timedelta(hours=1),  
-            start=datetime.utcnow() - timedelta(minutes=1),  
+            expiry=datetime.utcnow() + timedelta(hours=1),
+            start=datetime.utcnow() - timedelta(minutes=1),
             )
 
         self.bs.set_container_acl(container_name, identifiers)
@@ -721,6 +714,7 @@ class StorageContainerTest(StorageTestCase):
         self.assertEqual(blobs[0].properties.content_length, 11)
         self.assertEqual(blobs[1].properties.content_settings.content_type,
                          'application/octet-stream')
+        self.assertIsNotNone(blobs[0].properties.creation_time)
 
     @record
     def test_list_blobs_leased_blob(self):

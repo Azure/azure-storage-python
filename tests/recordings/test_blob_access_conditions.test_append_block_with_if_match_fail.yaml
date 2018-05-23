@@ -4,46 +4,46 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [4df10fca-0aca-11e8-92e9-b8e8564491f6]
-      x-ms-date: ['Mon, 05 Feb 2018 23:14:24 GMT']
-      x-ms-version: ['2017-07-29']
+      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
+      x-ms-client-request-id: [d145733a-5e16-11e8-9d73-b8e8564491f6]
+      x-ms-date: ['Tue, 22 May 2018 23:21:12 GMT']
+      x-ms-version: ['2017-11-09']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer513e1a08?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 05 Feb 2018 23:14:24 GMT']
-      ETag: ['"0x8D56CEE3222C0C1"']
-      Last-Modified: ['Mon, 05 Feb 2018 23:14:24 GMT']
+      Date: ['Tue, 22 May 2018 23:21:12 GMT']
+      ETag: ['"0x8D5C03AB58E26E9"']
+      Last-Modified: ['Tue, 22 May 2018 23:21:12 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [202480ec-001e-00db-5ed7-9ef002000000]
-      x-ms-version: ['2017-07-29']
+      x-ms-request-id: [b2d45e83-b01e-0108-7f23-f209f2000000]
+      x-ms-version: ['2017-11-09']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
+      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
       x-ms-blob-type: [AppendBlob]
-      x-ms-client-request-id: [4e0ad146-0aca-11e8-9a8a-b8e8564491f6]
-      x-ms-date: ['Mon, 05 Feb 2018 23:14:24 GMT']
-      x-ms-version: ['2017-07-29']
+      x-ms-client-request-id: [d1597966-5e16-11e8-ab49-b8e8564491f6]
+      x-ms-date: ['Tue, 22 May 2018 23:21:12 GMT']
+      x-ms-version: ['2017-11-09']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer513e1a08/blob1
   response:
     body: {string: ''}
     headers:
-      Date: ['Mon, 05 Feb 2018 23:14:23 GMT']
-      ETag: ['"0x8D56CEE323725A7"']
-      Last-Modified: ['Mon, 05 Feb 2018 23:14:24 GMT']
+      Date: ['Tue, 22 May 2018 23:21:12 GMT']
+      ETag: ['"0x8D5C03AB5A2484A"']
+      Last-Modified: ['Tue, 22 May 2018 23:21:13 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [8f62f661-001e-010f-50d7-9eff77000000]
+      x-ms-request-id: [3c9a9ea9-401e-0116-3e23-f2d31f000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2017-07-29']
+      x-ms-version: ['2017-11-09']
     status: {code: 201, message: Created}
 - request:
     body: block 0
@@ -51,23 +51,22 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['7']
       If-Match: ['0x111111111111111']
-      User-Agent: [Azure-Storage/1.1.0-1.1.0 (Python CPython 3.6.3; Darwin 17.3.0)]
-      x-ms-client-request-id: [4e210acc-0aca-11e8-b841-b8e8564491f6]
-      x-ms-date: ['Mon, 05 Feb 2018 23:14:24 GMT']
-      x-ms-version: ['2017-07-29']
+      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
+      x-ms-client-request-id: [d16dbf8c-5e16-11e8-b40d-b8e8564491f6]
+      x-ms-date: ['Tue, 22 May 2018 23:21:13 GMT']
+      x-ms-version: ['2017-11-09']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer513e1a08/blob1?comp=appendblock
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>OutOfRangeInput</Code><Message>One\
-        \ of the request inputs is out of range.\nRequestId:8f62f679-001e-010f-63d7-9eff77000000\n\
-        Time:2018-02-05T23:14:24.9686057Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>OutOfRangeInput</Code><Message>One
+        of the request inputs is out of range.\nRequestId:3c9a9ebd-401e-0116-5023-f2d31f000000\nTime:2018-05-22T23:21:13.4349823Z</Message></Error>"}
     headers:
       Content-Length: ['226']
       Content-Type: [application/xml]
-      Date: ['Mon, 05 Feb 2018 23:14:24 GMT']
+      Date: ['Tue, 22 May 2018 23:21:13 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-error-code: [OutOfRangeInput]
-      x-ms-request-id: [8f62f679-001e-010f-63d7-9eff77000000]
-      x-ms-version: ['2017-07-29']
+      x-ms-request-id: [3c9a9ebd-401e-0116-5023-f2d31f000000]
+      x-ms-version: ['2017-11-09']
     status: {code: 400, message: One of the request inputs is out of range.}
 version: 1
