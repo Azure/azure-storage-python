@@ -4,7 +4,8 @@
 
 ## Version XX.XX.XX:
 
-- Added support for static website service properties.
+- Added support for setting static website service properties.
+- Added support for getting account information, such as SKU name and account kind.
 
 ## Version 1.2.0rc1:
 

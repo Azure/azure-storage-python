@@ -28,6 +28,7 @@ from azure.storage.blob import (
     ContentSettings,
     DeleteSnapshot,
     Include,
+    ContainerPermissions,
 )
 from tests.testcase import (
     StorageTestCase,
@@ -1412,6 +1413,85 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertTrue(response.ok)
         with self.assertRaises(AzureMissingResourceHttpError):
             blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+
+    @record
+    def test_get_account_information(self):
+        # Act
+        info = self.bs.get_blob_account_information()
+
+        # Assert
+        self.assertIsNotNone(info.sku_name)
+        self.assertIsNotNone(info.account_kind)
+
+    @record
+    def test_get_account_information_with_container_name(self):
+        # Act
+        # Container name gets ignored
+        info = self.bs.get_blob_account_information("missing")
+
+        # Assert
+        self.assertIsNotNone(info.sku_name)
+        self.assertIsNotNone(info.account_kind)
+
+    @record
+    def test_get_account_information_with_blob_name(self):
+        # Act
+        # Both container and blob names get ignored
+        info = self.bs.get_blob_account_information("missing", "missing")
+
+        # Assert
+        self.assertIsNotNone(info.sku_name)
+        self.assertIsNotNone(info.account_kind)
+
+    @record
+    def test_get_account_information_with_container_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        token = self.bs.generate_container_shared_access_signature(
+            self.container_name,
+            permission=ContainerPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+
+        bs_with_sas = BlockBlobService(account_name=self.settings.STORAGE_ACCOUNT_NAME, sas_token=token,
+                                       protocol=self.settings.PROTOCOL)
+
+        # Act
+        info = bs_with_sas.get_blob_account_information(self.container_name)
+
+        # Assert
+        self.assertIsNotNone(info.sku_name)
+        self.assertIsNotNone(info.account_kind)
+
+    @record
+    def test_get_account_information_with_blob_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._create_block_blob()
+
+        token = self.bs.generate_blob_shared_access_signature(
+            self.container_name,
+            blob_name,
+            permission=BlobPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+
+        bs_with_sas = BlockBlobService(account_name=self.settings.STORAGE_ACCOUNT_NAME, sas_token=token,
+                                       protocol=self.settings.PROTOCOL)
+
+        # Act
+        info = bs_with_sas.get_blob_account_information(self.container_name, blob_name)
+
+        # Assert
+        self.assertIsNotNone(info.sku_name)
+        self.assertIsNotNone(info.account_kind)
+
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
