@@ -17,7 +17,7 @@ CURRENT_DIR = os.path.curdir
 
 # build the wheels for all packages
 def create_storage_package():
-    check_call(['python3', 'build_packages.py', 'all'])
+    check_call(['python3', 'tool_build_packages.py', 'all'])
 
 
 # install dependencies required for testing into the virtual environment
