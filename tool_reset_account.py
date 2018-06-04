@@ -13,7 +13,7 @@ import concurrent.futures
 def purge_blob_containers(account, account_key):
     """
         Delete all blob containers in the given storage account.
-        USE AT OWN RISK.
+        USE AT OWN RISK. NOT SUPPORTED BY STORAGE TEAM.
     """
     bs = BlockBlobService(account, account_key)
 
