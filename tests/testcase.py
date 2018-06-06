@@ -22,16 +22,19 @@ import unittest
 import sys
 import random
 import tests.settings_fake as fake_settings
-
-# logging is not enabled by default because it pollutes the CI logs
-# uncommenting the following two lines make debugging much easier
 import logging
-logging.basicConfig(format='%(asctime)s %(name)-20s %(levelname)-5s %(message)s', level=logging.INFO)
+
+try:
+    from cStringIO import StringIO      # Python 2
+except ImportError:
+    from io import StringIO
 
 try:
     import tests.settings_real as settings
 except ImportError:
     settings = None
+
+LOGGING_FORMAT = '%(asctime)s %(name)-20s %(levelname)-5s %(message)s'
 
 
 class TestMode(object):
@@ -77,6 +80,18 @@ class StorageTestCase(unittest.TestCase):
             name,
             self._testMethodName,
         )
+
+        # enable logging if desired
+        self.configure_logging()
+
+    def configure_logging(self):
+        if self.settings.ENABLE_LOGGING:
+            logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO)
+        else:
+            # disable logging if the user does not want to see them
+            logger = logging.getLogger('azure.storage')
+            logger.propagate = False
+            logger.level = logging.CRITICAL
 
     def sleep(self, seconds):
         if not self.is_playback():
@@ -376,3 +391,34 @@ class ResponseCallback(object):
         if response.status == self.status:
             response.status = self.new_status
         self.count += 1
+
+
+class LogCaptured(object):
+    def __init__(self, test_case=None):
+        # accept the test case so that we may reset logging after capturing logs
+        self.test_case = test_case
+
+    def __enter__(self):
+        # create a string stream to send the logs to
+        self.log_stream = StringIO()
+
+        # the handler needs to be stored so that we can remove it later
+        self.handler = logging.StreamHandler(self.log_stream)
+        self.handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
+
+        # get and enable the logger to send the outputs to the string stream
+        self.logger = logging.getLogger('azure.storage')
+        self.logger.level = logging.INFO
+        self.logger.addHandler(self.handler)
+
+        # the stream is returned to the user so that the capture logs can be retrieved
+        return self.log_stream
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # stop the handler, and close the stream to exit
+        self.logger.removeHandler(self.handler)
+        self.log_stream.close()
+
+        # reset logging since we messed with the setting
+        if self.test_case is not None:
+            self.test_case.configure_logging()

@@ -935,7 +935,7 @@ class FileService(StorageClient):
 
         if not fail_not_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_SHARE_NOT_FOUND_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_not_exist(ex)
@@ -1029,7 +1029,7 @@ class FileService(StorageClient):
 
         if not fail_not_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_RESOURCE_NOT_FOUND_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_not_exist(ex)

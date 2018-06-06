@@ -34,6 +34,7 @@ from tests.testcase import (
     StorageTestCase,
     TestMode,
     record,
+    LogCaptured,
 )
 
 # ------------------------------------------------------------------------------
@@ -146,7 +147,12 @@ class StorageQueueTest(StorageTestCase):
     def test_delete_queue_not_exist(self):
         # Action
         queue_name = self._get_queue_reference()
-        deleted = self.qs.delete_queue(queue_name)
+
+        with LogCaptured(self) as log_captured:
+            deleted = self.qs.delete_queue(queue_name)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Asserts
         self.assertFalse(deleted)
@@ -155,10 +161,13 @@ class StorageQueueTest(StorageTestCase):
     def test_delete_queue_fail_not_exist_not_exist(self):
         # Action
         queue_name = self._get_queue_reference()
-        with self.assertRaises(AzureMissingResourceHttpError):
-            self.qs.delete_queue(queue_name, True)
 
-            # Asserts
+        with LogCaptured(self) as log_captured:
+            with self.assertRaises(AzureMissingResourceHttpError):
+                self.qs.delete_queue(queue_name, True)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' in log_as_str)
 
     @record
     def test_delete_queue_fail_not_exist_already_exist(self):
@@ -269,7 +278,11 @@ class StorageQueueTest(StorageTestCase):
         # Arrange
 
         # Act
-        exists = self.qs.exists(self.get_resource_name('missing'))
+        with LogCaptured(self) as log_captured:
+            exists = self.qs.exists(self.get_resource_name('missing'))
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(exists)

@@ -574,7 +574,7 @@ class QueueService(StorageClient):
         request.query = {'timeout': _int_to_str(timeout)}
         if not fail_not_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_QUEUE_NOT_FOUND_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_not_exist(ex)
