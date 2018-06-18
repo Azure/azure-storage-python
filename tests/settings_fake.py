@@ -41,6 +41,10 @@ IS_SERVER_SIDE_FILE_ENCRYPTION_ENABLED = True
 #   - RunLiveNoRecord: run tests against live storage without altering recordings
 TEST_MODE = 'RunLiveNoRecord'
 
+# Set to true to enable logging for the tests
+# logging is not enabled by default because it pollutes the CI logs
+ENABLE_LOGGING = False
+
 # Set up proxy support
 USE_PROXY = False
 PROXY_HOST = "192.168.15.116"

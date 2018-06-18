@@ -19,6 +19,7 @@ from azure.storage.file import (
 from tests.testcase import (
     StorageTestCase,
     record,
+    LogCaptured,
 )
 
 
@@ -166,7 +167,11 @@ class StorageDirectoryTest(StorageTestCase):
         # Arrange
 
         # Act
-        exists = self.fs.exists(self.share_name, 'missing')
+        with LogCaptured(self) as log_captured:
+            exists = self.fs.exists(self.share_name, 'missing')
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(exists)
@@ -240,7 +245,11 @@ class StorageDirectoryTest(StorageTestCase):
         # Arrange
 
         # Act
-        deleted = self.fs.delete_directory(self.share_name, 'dir1', False)
+        with LogCaptured(self) as log_captured:
+            deleted = self.fs.delete_directory(self.share_name, 'dir1', False)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(deleted)
@@ -250,8 +259,12 @@ class StorageDirectoryTest(StorageTestCase):
         # Arrange
 
         # Act
-        with self.assertRaises(AzureMissingResourceHttpError):
-            self.fs.delete_directory(self.share_name, 'dir1', True)
+        with LogCaptured(self) as log_captured:
+            with self.assertRaises(AzureMissingResourceHttpError):
+                self.fs.delete_directory(self.share_name, 'dir1', True)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' in log_as_str)
 
             # Assert
 

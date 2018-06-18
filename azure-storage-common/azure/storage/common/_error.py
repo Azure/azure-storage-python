@@ -104,11 +104,19 @@ def _dont_fail_not_exist(error):
 def _http_error_handler(http_error):
     ''' Simple error handler for azure.'''
     message = str(http_error)
+    error_code = None
+
     if 'x-ms-error-code' in http_error.respheader:
-        message += 'ErrorCode: ' + http_error.respheader['x-ms-error-code']
+        error_code = http_error.respheader['x-ms-error-code']
+        message += ' ErrorCode: ' + error_code
+
     if http_error.respbody is not None:
         message += '\n' + http_error.respbody.decode('utf-8-sig')
-    raise AzureHttpError(message, http_error.status)
+
+    ex = AzureHttpError(message, http_error.status)
+    ex.error_code = error_code
+
+    raise ex
 
 
 def _validate_type_bytes(param_name, param):

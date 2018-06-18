@@ -74,6 +74,8 @@ from ._constants import (
     __version__ as package_version,
 )
 
+_QUEUE_ALREADY_EXISTS_ERROR_CODE = 'QueueAlreadyExists'
+_QUEUE_NOT_FOUND_ERROR_CODE = 'QueueNotFound'
 _HTTP_RESPONSE_NO_CONTENT = 204
 
 
@@ -526,7 +528,8 @@ class QueueService(StorageClient):
 
         if not fail_on_exist:
             try:
-                response = self._perform_request(request, parser=_return_request)
+                response = self._perform_request(request, parser=_return_request,
+                                                 expected_errors=[_QUEUE_ALREADY_EXISTS_ERROR_CODE])
                 if response.status == _HTTP_RESPONSE_NO_CONTENT:
                     return False
                 return True
@@ -571,7 +574,7 @@ class QueueService(StorageClient):
         request.query = {'timeout': _int_to_str(timeout)}
         if not fail_not_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_QUEUE_NOT_FOUND_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_not_exist(ex)
@@ -644,8 +647,19 @@ class QueueService(StorageClient):
         :return: A boolean indicating whether the queue exists.
         :rtype: bool
         '''
+        _validate_not_none('queue_name', queue_name)
+
         try:
-            self.get_queue_metadata(queue_name, timeout=timeout)
+            request = HTTPRequest()
+            request.method = 'GET'
+            request.host_locations = self._get_host_locations(secondary=True)
+            request.path = _get_path(queue_name)
+            request.query = {
+                'comp': 'metadata',
+                'timeout': _int_to_str(timeout),
+            }
+
+            self._perform_request(request, expected_errors=[_QUEUE_NOT_FOUND_ERROR_CODE])
             return True
         except AzureHttpError as ex:
             _dont_fail_not_exist(ex)

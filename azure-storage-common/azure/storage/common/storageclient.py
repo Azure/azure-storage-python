@@ -14,6 +14,7 @@ from time import sleep
 import requests
 from azure.common import (
     AzureException,
+    AzureHttpError,
 )
 
 from ._constants import (
@@ -209,7 +210,7 @@ class StorageClient(object):
         else:
             return ""
 
-    def _perform_request(self, request, parser=None, parser_args=None, operation_context=None):
+    def _perform_request(self, request, parser=None, parser_args=None, operation_context=None, expected_errors=None):
         '''
         Sends the request and return response. Catches HTTPError and hands it
         to error handler
@@ -281,7 +282,7 @@ class StorageClient(object):
                                 self.extract_date_and_request_id(retry_context),
                                 response.status,
                                 response.message,
-                                str(request.headers).replace('\n', ''))
+                                str(response.headers).replace('\n', ''))
 
                     # Parse and wrap HTTP errors in AzureHttpError which inherits from AzureException
                     if response.status >= 300:
@@ -324,6 +325,16 @@ class StorageClient(object):
                     exception_str_in_one_line = str(ex).replace('\n', '')
                     status_code = retry_context.response.status if retry_context.response is not None else 'Unknown'
                     timestamp_and_request_id = self.extract_date_and_request_id(retry_context)
+
+                # if the http error was expected, we should short-circuit
+                if isinstance(ex, AzureHttpError) and expected_errors is not None and ex.error_code in expected_errors:
+                    logger.info("%s Received expected http error: "
+                                "%s, HTTP status code=%s, Exception=%s.",
+                                client_request_id_prefix,
+                                timestamp_and_request_id,
+                                status_code,
+                                exception_str_in_one_line)
+                    raise ex
 
                 logger.info("%s Operation failed: checking if the operation should be retried. "
                             "Current retry count=%s, %s, HTTP status code=%s, Exception=%s.",
@@ -376,4 +387,5 @@ class StorageClient(object):
                     # note: to cover the emulator scenario, the host_location is grabbed
                     # from request.host_locations(which includes the dev account name)
                     # instead of request.host(which at this point no longer includes the dev account name)
-                    operation_context.host_location = {retry_context.location_mode: request.host_locations[retry_context.location_mode]}
+                    operation_context.host_location = {
+                        retry_context.location_mode: request.host_locations[retry_context.location_mode]}

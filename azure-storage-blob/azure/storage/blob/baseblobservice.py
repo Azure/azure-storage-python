@@ -85,6 +85,10 @@ from ._constants import (
     __version__ as package_version,
 )
 
+_CONTAINER_ALREADY_EXISTS_ERROR_CODE = 'ContainerAlreadyExists'
+_BLOB_NOT_FOUND_ERROR_CODE = 'BlobNotFound'
+_CONTAINER_NOT_FOUND_ERROR_CODE = 'ContainerNotFound'
+
 if sys.version_info >= (3,):
     from io import BytesIO
 else:
@@ -622,7 +626,7 @@ class BaseBlobService(StorageClient):
 
         if not fail_on_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_CONTAINER_ALREADY_EXISTS_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_on_exist(ex)
@@ -873,7 +877,7 @@ class BaseBlobService(StorageClient):
 
         if not fail_not_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_CONTAINER_NOT_FOUND_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_not_exist(ex)
@@ -1575,10 +1579,21 @@ class BaseBlobService(StorageClient):
         '''
         _validate_not_none('container_name', container_name)
         try:
-            if blob_name is None:
-                self.get_container_properties(container_name, timeout=timeout)
-            else:
-                self.get_blob_properties(container_name, blob_name, snapshot=snapshot, timeout=timeout)
+            # make head request to see if container/blob/snapshot exists
+            request = HTTPRequest()
+            request.method = 'GET' if blob_name is None else 'HEAD'
+            request.host_locations = self._get_host_locations(secondary=True)
+            request.path = _get_path(container_name, blob_name)
+            request.query = {
+                'snapshot': _to_str(snapshot),
+                'timeout': _int_to_str(timeout),
+                'restype': 'container' if blob_name is None else None,
+            }
+
+            expected_errors = [_CONTAINER_NOT_FOUND_ERROR_CODE] if blob_name is None \
+                else [_CONTAINER_NOT_FOUND_ERROR_CODE, _BLOB_NOT_FOUND_ERROR_CODE]
+            self._perform_request(request, expected_errors=expected_errors)
+
             return True
         except AzureHttpError as ex:
             _dont_fail_not_exist(ex)

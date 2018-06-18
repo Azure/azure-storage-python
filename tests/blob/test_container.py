@@ -13,7 +13,7 @@ from azure.storage.blob import (BlockBlobService, ContainerPermissions,
                                 Include, PublicAccess)
 from azure.storage.common import AccessPolicy
 
-from tests.testcase import StorageTestCase, TestMode, record
+from tests.testcase import StorageTestCase, TestMode, record, LogCaptured
 
 #------------------------------------------------------------------------------
 TEST_CONTAINER_PREFIX = 'container'
@@ -160,7 +160,11 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._get_container_reference()
 
         # Act
-        exists = self.bs.exists(container_name)
+        with LogCaptured(self) as log_captured:
+            exists = self.bs.exists(container_name)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(exists)
@@ -664,7 +668,11 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._get_container_reference()
 
         # Act
-        deleted = self.bs.delete_container(container_name)
+        with LogCaptured(self) as log_captured:
+            deleted = self.bs.delete_container(container_name)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(deleted)
@@ -675,8 +683,12 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._get_container_reference()
 
         # Act
-        with self.assertRaises(AzureMissingResourceHttpError):
-            self.bs.delete_container(container_name, True)
+        with LogCaptured(self) as log_captured:
+            with self.assertRaises(AzureMissingResourceHttpError):
+                self.bs.delete_container(container_name, True)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' in log_as_str)
 
         # Assert
 
