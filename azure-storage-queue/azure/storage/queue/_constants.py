@@ -5,7 +5,7 @@
 # --------------------------------------------------------------------------
 
 __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
-__version__ = '1.2.0rc1'
+__version__ = '1.3.0'
 
 # x-ms-version for storage service.
 X_MS_VERSION = '2018-03-28'
