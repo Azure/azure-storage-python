@@ -4,47 +4,48 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
-      x-ms-client-request-id: [f0f34e82-5e16-11e8-a970-b8e8564491f6]
-      x-ms-date: ['Tue, 22 May 2018 23:22:05 GMT']
-      x-ms-version: ['2017-11-09']
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
+      x-ms-client-request-id: [1e305798-740e-11e8-873b-8cae4cee5322]
+      x-ms-date: ['Tue, 19 Jun 2018 22:14:21 GMT']
+      x-ms-version: ['2018-03-28']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerda971c24?restype=container
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 22 May 2018 23:22:05 GMT']
-      ETag: ['"0x8D5C03AD53BBCC1"']
-      Last-Modified: ['Tue, 22 May 2018 23:22:06 GMT']
+      Date: ['Tue, 19 Jun 2018 22:14:21 GMT']
+      ETag: ['"0x8D5D6320292AF75"']
+      Last-Modified: ['Tue, 19 Jun 2018 22:14:22 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [87e75039-101e-0089-5423-f2edf0000000]
-      x-ms-version: ['2017-11-09']
+      x-ms-request-id: [15658393-901e-0004-271a-081f3c000000]
+      x-ms-version: ['2018-03-28']
     status: {code: 201, message: Created}
 - request:
     body: hello world
     headers:
       Connection: [keep-alive]
       Content-Length: ['11']
-      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [f1078b9a-5e16-11e8-932e-b8e8564491f6]
-      x-ms-date: ['Tue, 22 May 2018 23:22:06 GMT']
-      x-ms-version: ['2017-11-09']
+      x-ms-client-request-id: [1e66aed8-740e-11e8-829a-8cae4cee5322]
+      x-ms-date: ['Tue, 19 Jun 2018 22:14:22 GMT']
+      x-ms-version: ['2018-03-28']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerda971c24/blob1
   response:
     body: {string: ''}
     headers:
       Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
-      Date: ['Tue, 22 May 2018 23:22:05 GMT']
-      ETag: ['"0x8D5C03AD5423FC6"']
-      Last-Modified: ['Tue, 22 May 2018 23:22:06 GMT']
+      Date: ['Tue, 19 Jun 2018 22:14:21 GMT']
+      ETag: ['"0x8D5D63202A18BA4"']
+      Last-Modified: ['Tue, 19 Jun 2018 22:14:22 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [87e75080-101e-0089-0d23-f2edf0000000]
+      x-ms-content-crc64: [vo7q9sPVKY0=]
+      x-ms-request-id: [15658398-901e-0004-291a-081f3c000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2017-11-09']
+      x-ms-version: ['2018-03-28']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -52,48 +53,47 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       If-None-Match: ['0x111111111111111']
-      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
-      x-ms-client-request-id: [f10d958a-5e16-11e8-b86e-b8e8564491f6]
-      x-ms-date: ['Tue, 22 May 2018 23:22:06 GMT']
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
+      x-ms-client-request-id: [1e75f78a-740e-11e8-9adc-8cae4cee5322]
+      x-ms-date: ['Tue, 19 Jun 2018 22:14:22 GMT']
       x-ms-meta-hello: [world]
       x-ms-meta-number: ['42']
-      x-ms-version: ['2017-11-09']
+      x-ms-version: ['2018-03-28']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerda971c24/blob1?comp=metadata
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 22 May 2018 23:22:05 GMT']
-      ETag: ['"0x8D5C03AD548A99D"']
-      Last-Modified: ['Tue, 22 May 2018 23:22:06 GMT']
+      Date: ['Tue, 19 Jun 2018 22:14:21 GMT']
+      ETag: ['"0x8D5D63202B0CD07"']
+      Last-Modified: ['Tue, 19 Jun 2018 22:14:22 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [87e750b0-101e-0089-3923-f2edf0000000]
+      x-ms-request-id: [15658399-901e-0004-2a1a-081f3c000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2017-11-09']
+      x-ms-version: ['2018-03-28']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 3.6.4; Darwin 17.5.0)]
-      x-ms-client-request-id: [f113fcae-5e16-11e8-926e-b8e8564491f6]
-      x-ms-date: ['Tue, 22 May 2018 23:22:06 GMT']
-      x-ms-version: ['2017-11-09']
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
+      x-ms-client-request-id: [1e84d0c0-740e-11e8-ae29-8cae4cee5322]
+      x-ms-date: ['Tue, 19 Jun 2018 22:14:22 GMT']
+      x-ms-version: ['2018-03-28']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainerda971c24/blob1?comp=metadata
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 22 May 2018 23:22:05 GMT']
-      ETag: ['"0x8D5C03AD548A99D"']
-      Last-Modified: ['Tue, 22 May 2018 23:22:06 GMT']
+      Date: ['Tue, 19 Jun 2018 22:14:21 GMT']
+      ETag: ['"0x8D5D63202B0CD07"']
+      Last-Modified: ['Tue, 19 Jun 2018 22:14:22 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      Vary: [Origin]
       x-ms-meta-hello: [world]
       x-ms-meta-number: ['42']
-      x-ms-request-id: [87e750cd-101e-0089-5223-f2edf0000000]
-      x-ms-version: ['2017-11-09']
+      x-ms-request-id: [1565839a-901e-0004-2b1a-081f3c000000]
+      x-ms-version: ['2018-03-28']
     status: {code: 200, message: OK}
 version: 1
