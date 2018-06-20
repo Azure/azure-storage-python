@@ -12,6 +12,7 @@ from azure.storage.blob import (
 )
 import tests.settings_real as settings
 import time
+import datetime
 import threading
 import adal
 
@@ -22,16 +23,16 @@ class AutoUpdatedTokenCredential(TokenCredential):
     It shows one way of making sure the credential does not become expired.
     """
     def __init__(self):
-        # get the first token
-        first_token, first_interval = self.get_token_func()
-        super(AutoUpdatedTokenCredential, self).__init__(first_token)
+        super(AutoUpdatedTokenCredential, self).__init__()
 
         # a timer is used to trigger a callback to update the token
         # the timer needs to be protected, as later on it is possible that one thread is setting a new timer and
         # another thread is trying to cancel the timer
         self.lock = threading.Lock()
-        self.timer = threading.Timer(first_interval, self.timer_callback)
-        self.timer.start()
+        self.timer_stopped = False
+
+        # get the initial token and schedule the timer for the very first time
+        self.refresh_token()
 
     # support context manager
     def __enter__(self):
@@ -41,9 +42,7 @@ class AutoUpdatedTokenCredential(TokenCredential):
     def __exit__(self, *args):
         self.stop_refreshing_token()
 
-    def timer_callback(self):
-        print("TOKEN UPDATER WAS TRIGGERED")
-
+    def refresh_token(self):
         # call the get token function to get a new token, as well as the time to wait before calling it again
         token, next_interval = self.get_token_func()
 
@@ -51,14 +50,16 @@ class AutoUpdatedTokenCredential(TokenCredential):
         self.token = token
 
         with self.lock:
-            self.timer = threading.Timer(next_interval, self.timer_callback)
-            self.timer.start()
+            if self.timer_stopped is False:
+                self.timer = threading.Timer(next_interval, self.refresh_token)
+                self.timer.start()
 
     def stop_refreshing_token(self):
         """
         The timer needs to be canceled if the application is terminating, if not the timer will keep going.
         """
         with self.lock:
+            self.timer_stopped = True
             self.timer.cancel()
 
     @staticmethod
@@ -67,6 +68,8 @@ class AutoUpdatedTokenCredential(TokenCredential):
         This function makes a call to AAD to fetch an OAuth token
         :return: the OAuth token and the interval to wait before refreshing it
         """
+        print("{}: token updater was triggered".format(datetime.datetime.now()))
+
         # in this example, the OAuth token is obtained using the ADAL library
         # however, the user can use any preferred method
         context = adal.AuthenticationContext(
@@ -97,7 +100,9 @@ def test_token_credential_with_timer():
         for i in range(10):
             result = service.exists("test")
             if result is None:
-                print("something is wrong")
+                print("{}: something is wrong".format(datetime.datetime.now()))
+            else:
+                print("{}: all is well".format(datetime.datetime.now()))
 
             time.sleep(600)
 
