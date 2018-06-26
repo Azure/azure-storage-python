@@ -2,7 +2,7 @@
 
 > See the [Change Log](ChangeLog.md) for a summary of storage library changes.
 
-**Note: This changelog is deprecated starting with version XX.XX.XX, please refer to the ChangeLog.md in each package for future change logs.** 
+**Note: This changelog is deprecated starting with version 0.37.0, please refer to the ChangeLog.md in each package for future change logs.** 
 
 ## Version 0.37.0:
 

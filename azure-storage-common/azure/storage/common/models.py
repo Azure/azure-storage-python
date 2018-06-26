@@ -328,6 +328,29 @@ class DeleteRetentionPolicy(object):
         self.days = days
 
 
+class StaticWebsite(object):
+    '''
+    Class representing the service properties pertaining to static websites.
+    To set StaticWebsite, you must call Set Blob Service Properties using version 2018-03-28 or later.
+    '''
+
+    def __init__(self, enabled=False, index_document=None, error_document_404_path=None):
+        '''
+        :param bool enabled:
+            Required. True if static websites should be enabled on the blob service for the corresponding Storage Account.
+        :param str index_document:
+            Represents the name of the index document. This is commonly "index.html".
+        :param str error_document_404_path:
+            Represents the path to the error document that should be shown when an error 404 is issued,
+            in other words, when a browser requests a page that does not exist.
+        '''
+        _validate_not_none("enabled", enabled)
+
+        self.enabled = enabled
+        self.index_document = index_document
+        self.error_document_404_path = error_document_404_path
+
+
 class ServiceProperties(object):
     ''' 
     Returned by get_*_service_properties functions. Contains the properties of a 

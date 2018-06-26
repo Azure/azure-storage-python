@@ -63,6 +63,7 @@ from ._deserialization import (
     _parse_lease,
     _convert_xml_to_signed_identifiers_and_access,
     _parse_base_properties,
+    _parse_account_information,
 )
 from ._download_chunking import _download_blob_chunks
 from ._error import (
@@ -84,6 +85,10 @@ from ._constants import (
     X_MS_VERSION,
     __version__ as package_version,
 )
+
+_CONTAINER_ALREADY_EXISTS_ERROR_CODE = 'ContainerAlreadyExists'
+_BLOB_NOT_FOUND_ERROR_CODE = 'BlobNotFound'
+_CONTAINER_NOT_FOUND_ERROR_CODE = 'ContainerNotFound'
 
 if sys.version_info >= (3,):
     from io import BytesIO
@@ -622,7 +627,7 @@ class BaseBlobService(StorageClient):
 
         if not fail_on_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_CONTAINER_ALREADY_EXISTS_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_on_exist(ex)
@@ -873,7 +878,7 @@ class BaseBlobService(StorageClient):
 
         if not fail_not_exist:
             try:
-                self._perform_request(request)
+                self._perform_request(request, expected_errors=[_CONTAINER_NOT_FOUND_ERROR_CODE])
                 return True
             except AzureHttpError as ex:
                 _dont_fail_not_exist(ex)
@@ -1316,6 +1321,33 @@ class BaseBlobService(StorageClient):
 
         return self._perform_request(request, _convert_xml_to_blob_list, operation_context=_context)
 
+    def get_blob_account_information(self, container_name=None, blob_name=None, timeout=None):
+        """
+        Gets information related to the storage account.
+        The information can also be retrieved if the user has a SAS to a container or blob.
+
+        :param str container_name:
+            Name of existing container.
+            Optional, unless using a SAS token to a specific container or blob, in which case it's required.
+        :param str blob_name:
+            Name of existing blob.
+            Optional, unless using a SAS token to a specific blob, in which case it's required.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: The :class:`~azure.storage.blob.models.AccountInformation`.
+        """
+        request = HTTPRequest()
+        request.method = 'HEAD'
+        request.host_locations = self._get_host_locations(secondary=True)
+        request.path = _get_path(container_name, blob_name)
+        request.query = {
+            'restype': 'account',
+            'comp': 'properties',
+            'timeout': _int_to_str(timeout),
+        }
+
+        return self._perform_request(request, _parse_account_information)
+
     def get_blob_service_stats(self, timeout=None):
         '''
         Retrieves statistics related to replication for the Blob service. It is 
@@ -1354,7 +1386,7 @@ class BaseBlobService(StorageClient):
 
     def set_blob_service_properties(
             self, logging=None, hour_metrics=None, minute_metrics=None,
-            cors=None, target_version=None, timeout=None, delete_retention_policy=None):
+            cors=None, target_version=None, timeout=None, delete_retention_policy=None, static_website=None):
         '''
         Sets the properties of a storage account's Blob service, including
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
@@ -1389,6 +1421,11 @@ class BaseBlobService(StorageClient):
             It also specifies the number of days and versions of blob to keep.
         :type delete_retention_policy:
             :class:`~azure.storage.common.models.DeleteRetentionPolicy`
+        :param static_website:
+            Specifies whether the static website feature is enabled,
+            and if yes, indicates the index document and 404 error document to use.
+        :type static_website:
+            :class:`~azure.storage.common.models.StaticWebsite`
         '''
         request = HTTPRequest()
         request.method = 'PUT'
@@ -1401,7 +1438,7 @@ class BaseBlobService(StorageClient):
         }
         request.body = _get_request_body(
             _convert_service_properties_to_xml(logging, hour_metrics, minute_metrics,
-                                               cors, target_version, delete_retention_policy))
+                                               cors, target_version, delete_retention_policy, static_website))
 
         self._perform_request(request)
 
@@ -1575,10 +1612,21 @@ class BaseBlobService(StorageClient):
         '''
         _validate_not_none('container_name', container_name)
         try:
-            if blob_name is None:
-                self.get_container_properties(container_name, timeout=timeout)
-            else:
-                self.get_blob_properties(container_name, blob_name, snapshot=snapshot, timeout=timeout)
+            # make head request to see if container/blob/snapshot exists
+            request = HTTPRequest()
+            request.method = 'GET' if blob_name is None else 'HEAD'
+            request.host_locations = self._get_host_locations(secondary=True)
+            request.path = _get_path(container_name, blob_name)
+            request.query = {
+                'snapshot': _to_str(snapshot),
+                'timeout': _int_to_str(timeout),
+                'restype': 'container' if blob_name is None else None,
+            }
+
+            expected_errors = [_CONTAINER_NOT_FOUND_ERROR_CODE] if blob_name is None \
+                else [_CONTAINER_NOT_FOUND_ERROR_CODE, _BLOB_NOT_FOUND_ERROR_CODE]
+            self._perform_request(request, expected_errors=expected_errors)
+
             return True
         except AzureHttpError as ex:
             _dont_fail_not_exist(ex)

@@ -28,6 +28,7 @@ from tests.testcase import (
     StorageTestCase,
     TestMode,
     record,
+    LogCaptured,
 )
 
 # ------------------------------------------------------------------------------
@@ -224,7 +225,11 @@ class StorageShareTest(StorageTestCase):
         share_name = self._get_share_reference()
 
         # Act
-        exists = self.fs.exists(share_name)
+        with LogCaptured(self) as log_captured:
+            exists = self.fs.exists(share_name)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(exists)
@@ -248,7 +253,11 @@ class StorageShareTest(StorageTestCase):
         made_up_snapshot = '2017-07-19T06:53:46.0000000Z'
 
         # Act
-        exists = self.fs.exists(share_name, snapshot=made_up_snapshot)
+        with LogCaptured(self) as log_captured:
+            exists = self.fs.exists(share_name, snapshot=made_up_snapshot)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(exists)
@@ -475,7 +484,11 @@ class StorageShareTest(StorageTestCase):
         share_name = self._get_share_reference()
 
         # Act
-        deleted = self.fs.delete_share(share_name)
+        with LogCaptured(self) as log_captured:
+            deleted = self.fs.delete_share(share_name)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(deleted)
@@ -486,10 +499,12 @@ class StorageShareTest(StorageTestCase):
         share_name = self._get_share_reference()
 
         # Act
-        with self.assertRaises(AzureMissingResourceHttpError):
-            self.fs.delete_share(share_name, True)
+        with LogCaptured(self) as log_captured:
+            with self.assertRaises(AzureMissingResourceHttpError):
+                self.fs.delete_share(share_name, True)
 
-            # Assert
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' in log_as_str)
 
     @record
     def test_get_share_stats(self):

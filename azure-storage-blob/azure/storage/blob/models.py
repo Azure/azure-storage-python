@@ -762,3 +762,19 @@ class StandardBlobTier(object):
 
     Hot = 'Hot'
     ''' Hot '''
+
+
+class AccountInformation(object):
+    """
+    Holds information related to the storage account.
+
+    :ivar str sku_name:
+        Name of the storage SKU, also known as account type.
+        Example: Standard_LRS, Standard_ZRS, Standard_GRS, Standard_RAGRS, Premium_LRS, Premium_ZRS
+    :ivar str account_kind:
+        Describes the flavour of the storage account, also known as account kind.
+        Example: Storage, StorageV2, BlobStorage
+    """
+    def __init__(self):
+        self.sku_name = None
+        self.account_kind = None

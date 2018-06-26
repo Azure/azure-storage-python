@@ -13,7 +13,7 @@ from azure.storage.blob import (BlockBlobService, ContainerPermissions,
                                 Include, PublicAccess)
 from azure.storage.common import AccessPolicy
 
-from tests.testcase import StorageTestCase, TestMode, record
+from tests.testcase import StorageTestCase, TestMode, record, LogCaptured
 
 #------------------------------------------------------------------------------
 TEST_CONTAINER_PREFIX = 'container'
@@ -160,7 +160,11 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._get_container_reference()
 
         # Act
-        exists = self.bs.exists(container_name)
+        with LogCaptured(self) as log_captured:
+            exists = self.bs.exists(container_name)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(exists)
@@ -664,7 +668,11 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._get_container_reference()
 
         # Act
-        deleted = self.bs.delete_container(container_name)
+        with LogCaptured(self) as log_captured:
+            deleted = self.bs.delete_container(container_name)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
 
         # Assert
         self.assertFalse(deleted)
@@ -675,8 +683,12 @@ class StorageContainerTest(StorageTestCase):
         container_name = self._get_container_reference()
 
         # Act
-        with self.assertRaises(AzureMissingResourceHttpError):
-            self.bs.delete_container(container_name, True)
+        with LogCaptured(self) as log_captured:
+            with self.assertRaises(AzureMissingResourceHttpError):
+                self.bs.delete_container(container_name, True)
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' in log_as_str)
 
         # Assert
 
@@ -955,6 +967,34 @@ class StorageContainerTest(StorageTestCase):
         # Assert
         self.assertTrue(response.ok)
         self.assertEqual(data, response.content)
+
+    @record
+    def test_web_container_normal_operations_working(self):
+        web_container = "$web"
+
+        # create the web container in case it does not exist yet
+        created = self.bs.create_container(web_container)
+        self.assertIsNotNone(created)
+
+        try:
+            # test if web container exists
+            exist = self.bs.exists(web_container)
+            self.assertTrue(exist)
+
+            # create a blob
+            blob_name = self.get_resource_name("blob")
+            blob_content = self.get_random_text_data(1024)
+            self.bs.create_blob_from_text(web_container, blob_name, blob_content)
+
+            # get a blob
+            blob = self.bs.get_blob_to_text(web_container, blob_name)
+            self.assertIsNotNone(blob)
+            self.assertEqual(blob.content, blob_content)
+
+        finally:
+            # delete container
+            self.bs.delete_container("$web")
+
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
