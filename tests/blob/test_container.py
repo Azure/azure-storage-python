@@ -968,6 +968,34 @@ class StorageContainerTest(StorageTestCase):
         self.assertTrue(response.ok)
         self.assertEqual(data, response.content)
 
+    @record
+    def test_web_container_normal_operations_working(self):
+        web_container = "$web"
+
+        # create the web container in case it does not exist yet
+        created = self.bs.create_container(web_container)
+        self.assertIsNotNone(created)
+
+        try:
+            # test if web container exists
+            exist = self.bs.exists(web_container)
+            self.assertTrue(exist)
+
+            # create a blob
+            blob_name = self.get_resource_name("blob")
+            blob_content = self.get_random_text_data(1024)
+            self.bs.create_blob_from_text(web_container, blob_name, blob_content)
+
+            # get a blob
+            blob = self.bs.get_blob_to_text(web_container, blob_name)
+            self.assertIsNotNone(blob)
+            self.assertEqual(blob.content, blob_content)
+
+        finally:
+            # delete container
+            self.bs.delete_container("$web")
+
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

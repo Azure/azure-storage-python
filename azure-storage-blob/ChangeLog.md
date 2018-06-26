@@ -2,6 +2,13 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 1.3.0:
+
+- Support for 2018-03-28 REST version. Please see our REST API documentation and blog for information about the related added features.
+- Added support for setting static website service properties.
+- Added support for getting account information, such as SKU name and account kind.
+- Added support for put block from URL(synchronously).
+
 ## Version 1.2.0rc1:
 
 - Support for 2017-11-09 REST version. Please see our REST API documentation and blog for information about the related added features.

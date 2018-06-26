@@ -4,45 +4,43 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 2.7.10; Darwin
-          17.5.0)]
-      x-ms-client-request-id: [13b79ad4-5f27-11e8-be77-b8e8564491f6]
-      x-ms-date: ['Thu, 24 May 2018 07:50:07 GMT']
-      x-ms-version: ['2017-11-09']
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
+      x-ms-client-request-id: [64f72c90-7410-11e8-a52d-8cae4cee5322]
+      x-ms-date: ['Tue, 19 Jun 2018 22:30:39 GMT']
+      x-ms-version: ['2018-03-28']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queue9101903
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
-      date: ['Thu, 24 May 2018 07:50:09 GMT']
-      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
-      transfer-encoding: [chunked]
-      x-ms-request-id: [8734b47d-8003-00c3-7533-f3dd97000000]
-      x-ms-version: ['2017-11-09']
+      Date: ['Tue, 19 Jun 2018 22:30:40 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [92217db7-e003-0031-301d-087328000000]
+      x-ms-version: ['2018-03-28']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.2.0rc1-1.2.0rc1 (Python CPython 2.7.10; Darwin
-          17.5.0)]
-      x-ms-client-request-id: [14ef75ca-5f27-11e8-aa66-b8e8564491f6]
-      x-ms-date: ['Thu, 24 May 2018 07:50:09 GMT']
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
+      x-ms-client-request-id: [6532d380-7410-11e8-ba5b-8cae4cee5322]
+      x-ms-date: ['Tue, 19 Jun 2018 22:30:40 GMT']
       x-ms-meta-val: [value]
-      x-ms-version: ['2017-11-09']
+      x-ms-version: ['2018-03-28']
     method: PUT
     uri: https://storagename.queue.core.windows.net/queue9101903
   response:
     body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>QueueAlreadyExists</Code><Message>The
-        specified queue already exists.\nRequestId:8734b51a-8003-00c3-7833-f3dd97000000\nTime:2018-05-24T07:50:09.4788588Z</Message></Error>"}
+        specified queue already exists.\nRequestId:92217dba-e003-0031-311d-087328000000\nTime:2018-06-19T22:30:40.1438552Z</Message></Error>"}
     headers:
-      content-length: ['222']
-      content-type: [application/xml]
-      date: ['Thu, 24 May 2018 07:50:09 GMT']
-      server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Content-Length: ['222']
+      Content-Type: [application/xml]
+      Date: ['Tue, 19 Jun 2018 22:30:40 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-error-code: [QueueAlreadyExists]
-      x-ms-request-id: [8734b51a-8003-00c3-7833-f3dd97000000]
-      x-ms-version: ['2017-11-09']
+      x-ms-request-id: [92217dba-e003-0031-311d-087328000000]
+      x-ms-version: ['2018-03-28']
     status: {code: 409, message: The specified queue already exists.}
 version: 1

@@ -16,6 +16,7 @@ from azure.storage.common import (
     CorsRule,
     RetentionPolicy,
     DeleteRetentionPolicy,
+    StaticWebsite,
 )
 from azure.storage.file import FileService
 from azure.storage.queue import QueueService
@@ -67,6 +68,15 @@ class ServicePropertiesTest(StorageTestCase):
 
         self.assertEqual(policy1.enabled, policy2.enabled)
         self.assertEqual(policy1.days, policy2.days)
+
+    def _assert_static_website_equal(self, prop1, prop2):
+        if prop1 is None or prop2 is None:
+            self.assertEqual(prop1, prop2)
+            return
+
+        self.assertEqual(prop1.enabled, prop2.enabled)
+        self.assertEqual(prop1.index_document, prop2.index_document)
+        self.assertEqual(prop1.error_document_404_path, prop2.error_document_404_path)
 
     def _assert_delete_retention_policy_not_equal(self, policy1, policy2):
         if policy1 is None or policy2 is None:
@@ -223,6 +233,98 @@ class ServicePropertiesTest(StorageTestCase):
         # Assert
         received_props = self.bs.get_blob_service_properties()
         self._assert_delete_retention_policy_equal(received_props.delete_retention_policy, delete_retention_policy)
+
+    @record
+    def test_set_static_website_properties(self):
+        # Arrange
+        static_website = StaticWebsite(enabled=True, index_document="index.html",
+                                       error_document_404_path="errors/error/404error.html")
+
+        # Act
+        self.bs.set_blob_service_properties(static_website=static_website)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_static_website_equal(received_props.static_website, static_website)
+
+    @record
+    def test_set_static_website_properties_missing_field(self):
+        # Case1: Arrange both missing
+        static_website = StaticWebsite(enabled=True)
+
+        # Act
+        self.bs.set_blob_service_properties(static_website=static_website)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_static_website_equal(received_props.static_website, static_website)
+
+        # Case2: Arrange index document missing
+        static_website = StaticWebsite(enabled=True, error_document_404_path="errors/error/404error.html")
+
+        # Act
+        self.bs.set_blob_service_properties(static_website=static_website)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_static_website_equal(received_props.static_website, static_website)
+
+        # Case3: Arrange error document missing
+        static_website = StaticWebsite(enabled=True, index_document="index.html")
+
+        # Act
+        self.bs.set_blob_service_properties(static_website=static_website)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_static_website_equal(received_props.static_website, static_website)
+
+    @record
+    def test_disabled_static_website_properties(self):
+        # Arrange
+        static_website = StaticWebsite(enabled=False, index_document="index.html",
+                                       error_document_404_path="errors/error/404error.html")
+
+        # Act
+        self.bs.set_blob_service_properties(static_website=static_website)
+
+        # Assert
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_static_website_equal(received_props.static_website, StaticWebsite(enabled=False))
+
+    @record
+    def test_set_static_website_properties_does_not_impact_other_properties(self):
+        # Arrange to set cors
+        cors_rule1 = CorsRule(['www.xyz.com'], ['GET'])
+
+        allowed_origins = ['www.xyz.com', "www.ab.com", "www.bc.com"]
+        allowed_methods = ['GET', 'PUT']
+        max_age_in_seconds = 500
+        exposed_headers = ["x-ms-meta-data*", "x-ms-meta-source*", "x-ms-meta-abc", "x-ms-meta-bcd"]
+        allowed_headers = ["x-ms-meta-data*", "x-ms-meta-target*", "x-ms-meta-xyz", "x-ms-meta-foo"]
+        cors_rule2 = CorsRule(allowed_origins, allowed_methods, max_age_in_seconds,
+                              exposed_headers, allowed_headers)
+
+        cors = [cors_rule1, cors_rule2]
+
+        # Act to set cors
+        self.bs.set_blob_service_properties(cors=cors)
+
+        # Assert cors is updated
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_cors_equal(received_props.cors, cors)
+
+        # Arrange to set static website properties
+        static_website = StaticWebsite(enabled=True, index_document="index.html",
+                                       error_document_404_path="errors/error/404error.html")
+
+        # Act to set static website
+        self.bs.set_blob_service_properties(static_website=static_website)
+
+        # Assert static website was updated was cors was unchanged
+        received_props = self.bs.get_blob_service_properties()
+        self._assert_static_website_equal(received_props.static_website, static_website)
+        self._assert_cors_equal(received_props.cors, cors)
 
     @record
     def test_set_logging(self):

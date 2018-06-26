@@ -35,6 +35,7 @@ from .models import (
     PageBlobProperties,
     ResourceProperties,
     BlobPrefix,
+    AccountInformation,
 )
 from ._encryption import _decrypt_blob
 from azure.storage.common.models import _list
@@ -440,3 +441,11 @@ def _convert_xml_to_page_ranges(response):
         )
 
     return page_list
+
+
+def _parse_account_information(response):
+    account_info = AccountInformation()
+    account_info.sku_name = response.headers['x-ms-sku-name']
+    account_info.account_kind = response.headers['x-ms-account-kind']
+
+    return account_info

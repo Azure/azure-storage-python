@@ -152,7 +152,7 @@ class BlockBlobService(BaseBlobService):
         :param str container_name:
             Name of existing container.
         :param str blob_name:
-            Name of existing blob.
+            Name of blob.
         :param block: Content of the block.
         :type block: io.IOBase or bytes
             Content of the block.
@@ -314,6 +314,61 @@ class BlockBlobService(BaseBlobService):
         request.headers = {'x-ms-lease-id': _to_str(lease_id)}
 
         return self._perform_request(request, _convert_xml_to_block_list)
+
+    def put_block_from_url(self, container_name, blob_name, copy_source_url, source_range_start, source_range_end,
+                           block_id, source_content_md5=None, lease_id=None, timeout=None):
+        """
+        Creates a new block to be committed as part of a blob.
+
+        :param str container_name:
+            Name of existing container.
+        :param str blob_name:
+            Name of blob.
+        :param str copy_source_url:
+            The URL of the source data. It can point to any Azure Blob or File, that is either public or has a
+            shared access signature attached.
+        :param int source_range_start:
+            This indicates the start of the range of bytes(inclusive) that has to be taken from the copy source.
+        :param int source_range_end:
+            This indicates the end of the range of bytes(inclusive) that has to be taken from the copy source.
+        :param str block_id:
+            A valid Base64 string value that identifies the block. Prior to
+            encoding, the string must be less than or equal to 64 bytes in size.
+            For a given blob, the length of the value specified for the blockid
+            parameter must be the same size for each block. Note that the Base64
+            string must be URL-encoded.
+        :param str source_content_md5:
+            If given, the service will calculate the MD5 hash of the block content and compare against this value.
+        :param str lease_id:
+            Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        """
+        _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('blob_name', blob_name)
+        _validate_not_none('copy_source_url', copy_source_url)
+        _validate_not_none('source_range_start', source_range_start)
+        _validate_not_none('source_range_end', source_range_end)
+        _validate_not_none('block_id', block_id)
+
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(container_name, blob_name)
+        request.query = {
+            'comp': 'block',
+            'blockid': _encode_base64(_to_str(block_id)),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-copy-source': copy_source_url,
+            'x-ms-source-range': 'bytes=' + _to_str(source_range_start) + '-' + _to_str(source_range_end),
+            'x-ms-source-content-md5': source_content_md5,
+        }
+
+        self._perform_request(request)
 
     # ----Convenience APIs-----------------------------------------------------
 
@@ -791,7 +846,7 @@ class BlockBlobService(BaseBlobService):
             timeout=timeout)
 
     def set_standard_blob_tier(
-        self, container_name, blob_name, standard_blob_tier, timeout=None):
+            self, container_name, blob_name, standard_blob_tier, timeout=None):
         '''
         Sets the block blob tiers on the blob. This API is only supported for block blobs on standard storage accounts.
 
