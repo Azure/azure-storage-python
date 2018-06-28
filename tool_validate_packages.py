@@ -39,9 +39,9 @@ def install_storage_package(executable_location, environment):
         check_call([executable_location, 'install', 'azure-storage-queue', '-i',
                     'https://testpypi.python.org/pypi', '--no-deps'])
     elif environment == 'prod':
-        check_call([executable_location, 'install', 'azure-storage-blob'])
-        check_call([executable_location, 'install', 'azure-storage-file'])
-        check_call([executable_location, 'install', 'azure-storage-queue'])
+        check_call([executable_location, 'install', 'azure-storage-blob', '--no-cache-dir'])
+        check_call([executable_location, 'install', 'azure-storage-file', '--no-cache-dir'])
+        check_call([executable_location, 'install', 'azure-storage-queue', '--no-cache-dir'])
     else:
         # install the namespace package first
         nspkg_wheel = glob.glob("dist/*nspkg*.whl")
