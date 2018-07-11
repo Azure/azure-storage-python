@@ -1972,50 +1972,63 @@ class BaseBlobService(StorageClient):
         if end_range is not None:
             _validate_not_none("start_range", start_range)
 
-        # If the user explicitly sets max_connections to 1, do a single shot download
-        if max_connections == 1:
+        # the stream must be seekable if parallel download is required
+        if max_connections > 1:
+            if sys.version_info >= (3,) and not stream.seekable():
+                raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+            else:
+                try:
+                    stream.seek(stream.tell())
+                except (NotImplementedError, AttributeError):
+                    raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+
+        # The service only provides transactional MD5s for chunks under 4MB.
+        # If validate_content is on, get only self.MAX_CHUNK_GET_SIZE for the first
+        # chunk so a transactional MD5 can be retrieved.
+        first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
+
+        initial_request_start = start_range if start_range is not None else 0
+
+        if end_range is not None and end_range - start_range < first_get_size:
+            initial_request_end = end_range
+        else:
+            initial_request_end = initial_request_start + first_get_size - 1
+
+        # Send a context object to make sure we always retry to the initial location
+        operation_context = _OperationContext(location_lock=True)
+        try:
             blob = self._get_blob(container_name,
                                   blob_name,
                                   snapshot,
-                                  start_range=start_range,
-                                  end_range=end_range,
+                                  start_range=initial_request_start,
+                                  end_range=initial_request_end,
                                   validate_content=validate_content,
                                   lease_id=lease_id,
                                   if_modified_since=if_modified_since,
                                   if_unmodified_since=if_unmodified_since,
                                   if_match=if_match,
                                   if_none_match=if_none_match,
-                                  timeout=timeout)
+                                  timeout=timeout,
+                                  _context=operation_context)
 
-            # Set the download size
-            download_size = blob.properties.content_length
-
-        # If max_connections is greater than 1, do the first get to establish the 
-        # size of the blob and get the first segment of data
-        else:
-            if sys.version_info >= (3,) and not stream.seekable():
-                raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
-
-            # The service only provides transactional MD5s for chunks under 4MB.           
-            # If validate_content is on, get only self.MAX_CHUNK_GET_SIZE for the first 
-            # chunk so a transactional MD5 can be retrieved.
-            first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
-
-            initial_request_start = start_range if start_range is not None else 0
-
-            if end_range is not None and end_range - start_range < first_get_size:
-                initial_request_end = end_range
+            # Parse the total blob size and adjust the download size if ranges
+            # were specified
+            blob_size = _parse_length_from_content_range(blob.properties.content_range)
+            if end_range is not None:
+                # Use the end_range unless it is over the end of the blob
+                download_size = min(blob_size, end_range - start_range + 1)
+            elif start_range is not None:
+                download_size = blob_size - start_range
             else:
-                initial_request_end = initial_request_start + first_get_size - 1
-
-            # Send a context object to make sure we always retry to the initial location
-            operation_context = _OperationContext(location_lock=True)
-            try:
+                download_size = blob_size
+        except AzureHttpError as ex:
+            if start_range is None and ex.status_code == 416:
+                # Get range will fail on an empty blob. If the user did not
+                # request a range, do a regular get request in order to get
+                # any properties.
                 blob = self._get_blob(container_name,
                                       blob_name,
                                       snapshot,
-                                      start_range=initial_request_start,
-                                      end_range=initial_request_end,
                                       validate_content=validate_content,
                                       lease_id=lease_id,
                                       if_modified_since=if_modified_since,
@@ -2025,51 +2038,24 @@ class BaseBlobService(StorageClient):
                                       timeout=timeout,
                                       _context=operation_context)
 
-                # Parse the total blob size and adjust the download size if ranges 
-                # were specified
-                blob_size = _parse_length_from_content_range(blob.properties.content_range)
-                if end_range is not None:
-                    # Use the end_range unless it is over the end of the blob
-                    download_size = min(blob_size, end_range - start_range + 1)
-                elif start_range is not None:
-                    download_size = blob_size - start_range
-                else:
-                    download_size = blob_size
-            except AzureHttpError as ex:
-                if start_range is None and ex.status_code == 416:
-                    # Get range will fail on an empty blob. If the user did not 
-                    # request a range, do a regular get request in order to get 
-                    # any properties.
-                    blob = self._get_blob(container_name,
-                                          blob_name,
-                                          snapshot,
-                                          validate_content=validate_content,
-                                          lease_id=lease_id,
-                                          if_modified_since=if_modified_since,
-                                          if_unmodified_since=if_unmodified_since,
-                                          if_match=if_match,
-                                          if_none_match=if_none_match,
-                                          timeout=timeout,
-                                          _context=operation_context)
+                # Set the download size to empty
+                download_size = 0
+            else:
+                raise ex
 
-                    # Set the download size to empty
-                    download_size = 0
-                else:
-                    raise ex
-
-        # Mark the first progress chunk. If the blob is small or this is a single 
+        # Mark the first progress chunk. If the blob is small or this is a single
         # shot download, this is the only call
         if progress_callback:
             progress_callback(blob.properties.content_length, download_size)
 
-        # Write the content to the user stream  
-        # Clear blob content since output has been written to user stream   
+        # Write the content to the user stream
+        # Clear blob content since output has been written to user stream
         if blob.content is not None:
             stream.write(blob.content)
             blob.content = None
 
-        # If the blob is small or single shot download was used, the download is 
-        # complete at this point. If blob size is large, use parallel download.
+        # If the blob is small, the download is complete at this point.
+        # If blob size is large, download the rest of the blob in chunks.
         if blob.properties.content_length != download_size:
             # Lock on the etag. This can be overriden by the user by specifying '*'
             if_match = if_match if if_match is not None else blob.properties.etag
@@ -2102,14 +2088,14 @@ class BaseBlobService(StorageClient):
                 operation_context
             )
 
-            # Set the content length to the download size instead of the size of 
+            # Set the content length to the download size instead of the size of
             # the last range
             blob.properties.content_length = download_size
 
             # Overwrite the content range to the user requested range
             blob.properties.content_range = 'bytes {0}-{1}/{2}'.format(start_range, end_range, blob_size)
 
-            # Overwrite the content MD5 as it is the MD5 for the last range instead 
+            # Overwrite the content MD5 as it is the MD5 for the last range instead
             # of the stored MD5
             # TODO: Set to the stored MD5 when the service returns this
             blob.properties.content_md5 = None

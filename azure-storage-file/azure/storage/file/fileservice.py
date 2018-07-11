@@ -2045,81 +2045,73 @@ class FileService(StorageClient):
         _validate_not_none('file_name', file_name)
         _validate_not_none('stream', stream)
 
-        # If the user explicitly sets max_connections to 1, do a single shot download
-        if max_connections == 1:
+        if end_range is not None:
+            _validate_not_none("start_range", start_range)
+
+        # the stream must be seekable if parallel download is required
+        if max_connections > 1:
+            if sys.version_info >= (3,) and not stream.seekable():
+                raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+            else:
+                try:
+                    stream.seek(stream.tell())
+                except (NotImplementedError, AttributeError):
+                    raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+
+        # The service only provides transactional MD5s for chunks under 4MB.
+        # If validate_content is on, get only self.MAX_CHUNK_GET_SIZE for the first
+        # chunk so a transactional MD5 can be retrieved.
+        first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
+
+        initial_request_start = start_range if start_range is not None else 0
+
+        if end_range is not None and end_range - start_range < first_get_size:
+            initial_request_end = end_range
+        else:
+            initial_request_end = initial_request_start + first_get_size - 1
+
+        # Send a context object to make sure we always retry to the initial location
+        operation_context = _OperationContext(location_lock=True)
+        try:
             file = self._get_file(share_name,
                                   directory_name,
                                   file_name,
-                                  start_range=start_range,
-                                  end_range=end_range,
+                                  start_range=initial_request_start,
+                                  end_range=initial_request_end,
                                   validate_content=validate_content,
                                   timeout=timeout,
+                                  _context=operation_context,
                                   snapshot=snapshot)
 
-            # Set the download size
-            download_size = file.properties.content_length
-
-        # If max_connections is greater than 1, do the first get to establish the 
-        # size of the file and get the first segment of data
-        else:
-            if sys.version_info >= (3,) and not stream.seekable():
-                raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
-
-            # The service only provides transactional MD5s for chunks under 4MB.           
-            # If validate_content is on, get only self.MAX_CHUNK_GET_SIZE for the first 
-            # chunk so a transactional MD5 can be retrieved.
-            first_get_size = self.MAX_SINGLE_GET_SIZE if not validate_content else self.MAX_CHUNK_GET_SIZE
-
-            initial_request_start = start_range if start_range is not None else 0
-
-            if end_range is not None and end_range - start_range < first_get_size:
-                initial_request_end = end_range
+            # Parse the total file size and adjust the download size if ranges
+            # were specified
+            file_size = _parse_length_from_content_range(file.properties.content_range)
+            if end_range is not None:
+                # Use the end_range unless it is over the end of the file
+                download_size = min(file_size, end_range - start_range + 1)
+            elif start_range is not None:
+                download_size = file_size - start_range
             else:
-                initial_request_end = initial_request_start + first_get_size - 1
-
-            # Send a context object to make sure we always retry to the initial location
-            operation_context = _OperationContext(location_lock=True)
-            try:
+                download_size = file_size
+        except AzureHttpError as ex:
+            if start_range is None and ex.status_code == 416:
+                # Get range will fail on an empty file. If the user did not
+                # request a range, do a regular get request in order to get
+                # any properties.
                 file = self._get_file(share_name,
                                       directory_name,
                                       file_name,
-                                      start_range=initial_request_start,
-                                      end_range=initial_request_end,
                                       validate_content=validate_content,
                                       timeout=timeout,
                                       _context=operation_context,
                                       snapshot=snapshot)
 
-                # Parse the total file size and adjust the download size if ranges 
-                # were specified
-                file_size = _parse_length_from_content_range(file.properties.content_range)
-                if end_range is not None:
-                    # Use the end_range unless it is over the end of the file
-                    download_size = min(file_size, end_range - start_range + 1)
-                elif start_range is not None:
-                    download_size = file_size - start_range
-                else:
-                    download_size = file_size
-            except AzureHttpError as ex:
-                if start_range is None and ex.status_code == 416:
-                    # Get range will fail on an empty file. If the user did not 
-                    # request a range, do a regular get request in order to get 
-                    # any properties.
-                    file = self._get_file(share_name,
-                                          directory_name,
-                                          file_name,
-                                          validate_content=validate_content,
-                                          timeout=timeout,
-                                          _context=operation_context,
-                                          snapshot=snapshot)
+                # Set the download size to empty
+                download_size = 0
+            else:
+                raise ex
 
-                    # Set the download size to empty
-                    download_size = 0
-                else:
-                    raise ex
-
-        # Mark the first progress chunk. If the file is small or this is a single 
-        # shot download, this is the only call
+        # Mark the first progress chunk. If the file is small, this is the only call
         if progress_callback:
             progress_callback(file.properties.content_length, download_size)
 
@@ -2129,11 +2121,11 @@ class FileService(StorageClient):
             stream.write(file.content)
             file.content = None
 
-        # If the file is small or single shot download was used, the download is 
-        # complete at this point. If file size is large, use parallel download.
+        # If the file is small, the download is complete at this point.
+        # If file size is large, download the rest of the blob in chunks.
         if file.properties.content_length != download_size:
-            # At this point would like to lock on something like the etag so that 
-            # if the file is modified, we dont get a corrupted download. However, 
+            # At this point we would like to lock on something like the etag so that
+            # if the file is modified, we do not get a corrupted download. However,
             # this feature is not yet available on the file service.
 
             end_file = file_size
