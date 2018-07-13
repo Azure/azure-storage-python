@@ -4,8 +4,9 @@
 # license information.
 # --------------------------------------------------------------------------
 from io import (BytesIO, IOBase, SEEK_CUR, SEEK_END, SEEK_SET, UnsupportedOperation)
-from math import ceil
 from threading import Lock
+
+from math import ceil
 
 from azure.storage.common._common_conversion import _encode_base64
 from azure.storage.common._error import _ERROR_VALUE_SHOULD_BE_SEEKABLE_STREAM
@@ -14,19 +15,20 @@ from azure.storage.common._serialization import (
     _get_data_bytes_only,
     _len_plus
 )
+from ._constants import (
+    _LARGE_BLOB_UPLOAD_MAX_READ_BUFFER_SIZE
+)
 from ._encryption import (
     _get_blob_encryptor_and_padder,
 )
 from .models import BlobBlock
-from ._constants import (
-    _LARGE_BLOB_UPLOAD_MAX_READ_BUFFER_SIZE
-)
 
 
 def _upload_blob_chunks(blob_service, container_name, blob_name,
                         blob_size, block_size, stream, max_connections,
                         progress_callback, validate_content, lease_id, uploader_class,
-                        maxsize_condition=None, if_match=None, timeout=None,
+                        maxsize_condition=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+                        if_none_match=None, timeout=None,
                         content_encryption_key=None, initialization_vector=None, resource_properties=None):
     encryptor, padder = _get_blob_encryptor_and_padder(content_encryption_key, initialization_vector,
                                                        uploader_class is not _PageBlobChunkUploader)
@@ -49,9 +51,14 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
 
     uploader.maxsize_condition = maxsize_condition
 
-    # ETag matching does not work with parallelism as a ranged upload may start 
-    # before the previous finishes and provides an etag
-    uploader.if_match = if_match if not max_connections > 1 else None
+    # Access conditions do not work with parallelism
+    if max_connections > 1:
+        uploader.if_match = uploader.if_none_match = uploader.if_modified_since = uploader.if_unmodified_since = None
+    else:
+        uploader.if_match = if_match
+        uploader.if_none_match = if_none_match
+        uploader.if_modified_since = if_modified_since
+        uploader.if_unmodified_since = if_unmodified_since
 
     if progress_callback is not None:
         progress_callback(0, blob_size)
@@ -322,6 +329,10 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 lease_id=self.lease_id,
                 maxsize_condition=self.maxsize_condition,
                 timeout=self.timeout,
+                if_modified_since=self.if_modified_since,
+                if_unmodified_since=self.if_unmodified_since,
+                if_match=self.if_match,
+                if_none_match=self.if_none_match
             )
 
             self.current_length = resp.append_offset
