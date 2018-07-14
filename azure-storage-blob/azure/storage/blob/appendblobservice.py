@@ -290,7 +290,9 @@ class AppendBlobService(BaseBlobService):
 
     def append_blob_from_path(
             self, container_name, blob_name, file_path, validate_content=False,
-            maxsize_condition=None, progress_callback=None, lease_id=None, timeout=None):
+            maxsize_condition=None, progress_callback=None, lease_id=None, timeout=None,
+            if_modified_since=None, if_unmodified_since=None, if_match=None,
+            if_none_match=None):
         '''
         Appends to the content of an existing blob from a file path, with automatic
         chunking and progress notifications.
@@ -325,6 +327,27 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetime will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+        :param datetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetime will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+        :param str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+        :param str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :return: ETag and last modified properties for the Append Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -344,12 +367,17 @@ class AppendBlobService(BaseBlobService):
                 maxsize_condition=maxsize_condition,
                 progress_callback=progress_callback,
                 lease_id=lease_id,
-                timeout=timeout)
+                timeout=timeout,
+                if_modified_since=if_modified_since,
+                if_unmodified_since=if_unmodified_since,
+                if_match=if_match,
+                if_none_match=if_none_match)
 
     def append_blob_from_bytes(
             self, container_name, blob_name, blob, index=0, count=None,
             validate_content=False, maxsize_condition=None, progress_callback=None,
-            lease_id=None, timeout=None):
+            lease_id=None, timeout=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+            if_none_match=None):
         '''
         Appends to the content of an existing blob from an array of bytes, with
         automatic chunking and progress notifications.
@@ -389,6 +417,27 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetime will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+        :param datetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetime will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+        :param str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+        :param str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :return: ETag and last modified properties for the Append Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -417,12 +466,17 @@ class AppendBlobService(BaseBlobService):
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
-            timeout=timeout)
+            timeout=timeout,
+            if_modified_since=if_modified_since,
+            if_unmodified_since=if_unmodified_since,
+            if_match=if_match,
+            if_none_match=if_none_match)
 
     def append_blob_from_text(
             self, container_name, blob_name, text, encoding='utf-8',
             validate_content=False, maxsize_condition=None, progress_callback=None,
-            lease_id=None, timeout=None):
+            lease_id=None, timeout=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+            if_none_match=None):
         '''
         Appends to the content of an existing blob from str/unicode, with
         automatic chunking and progress notifications.
@@ -459,6 +513,27 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetime will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+        :param datetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetime will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+        :param str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+        :param str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :return: ETag and last modified properties for the Append Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -481,12 +556,17 @@ class AppendBlobService(BaseBlobService):
             maxsize_condition=maxsize_condition,
             lease_id=lease_id,
             progress_callback=progress_callback,
-            timeout=timeout)
+            timeout=timeout,
+            if_modified_since=if_modified_since,
+            if_unmodified_since=if_unmodified_since,
+            if_match=if_match,
+            if_none_match=if_none_match)
 
     def append_blob_from_stream(
             self, container_name, blob_name, stream, count=None,
             validate_content=False, maxsize_condition=None, progress_callback=None,
-            lease_id=None, timeout=None):
+            lease_id=None, timeout=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+            if_none_match=None):
         '''
         Appends to the content of an existing blob from a file/stream, with
         automatic chunking and progress notifications.
@@ -524,6 +604,27 @@ class AppendBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
             each call individually.
+        :param datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetime will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+        :param datetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetime will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+        :param str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+        :param str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
         :return: ETag and last modified properties for the Append Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -550,7 +651,11 @@ class AppendBlobService(BaseBlobService):
             uploader_class=_AppendBlobChunkUploader,
             maxsize_condition=maxsize_condition,
             timeout=timeout,
-            resource_properties=resource_properties
+            resource_properties=resource_properties,
+            if_modified_since=if_modified_since,
+            if_unmodified_since=if_unmodified_since,
+            if_match=if_match,
+            if_none_match=if_none_match
         )
 
         return resource_properties
