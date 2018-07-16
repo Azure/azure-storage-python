@@ -2,7 +2,8 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version XX.XX.XX:
+## Version 1.3.1:
+
 - Fixed design flaw where get_file_to_* methods buffer entire file when max_connections is set to 1.
 
 ## Version 1.3.0:
