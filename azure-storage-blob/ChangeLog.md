@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 1.3.1:
+- Fixed design flaw where get_blob_to_* methods buffer entire blob when max_connections is set to 1.
+- Added support for access conditions on append_blob_from_* methods.
+
 ## Version 1.3.0:
 
 - Support for 2018-03-28 REST version. Please see our REST API documentation and blog for information about the related added features.

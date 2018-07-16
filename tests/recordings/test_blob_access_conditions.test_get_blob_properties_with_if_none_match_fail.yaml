@@ -100,4 +100,105 @@ interactions:
       x-ms-version: ['2018-03-28']
     status: {code: 304, message: The condition specified using HTTP conditional header(s)
         is not met.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [1564ad36-8948-11e8-843c-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontaineraf8e1f1f?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:32:11 GMT']
+      ETag: ['"0x8D5EB6BF9C8AAB5"']
+      Last-Modified: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [a2ed83c3-501e-0046-1054-1da6bc000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 201, message: Created}
+- request:
+    body: hello world
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['11']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [159c0f9c-8948-11e8-ae38-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontaineraf8e1f1f/blob1
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Date: ['Mon, 16 Jul 2018 22:32:11 GMT']
+      ETag: ['"0x8D5EB6BF9D8B923"']
+      Last-Modified: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [a2ed83cb-501e-0046-1354-1da6bc000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [15ab5286-8948-11e8-a482-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://storagename.blob.core.windows.net/utcontaineraf8e1f1f/blob1
+  response:
+    body: {string: ''}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['11']
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Content-Type: [application/octet-stream]
+      Date: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      ETag: ['"0x8D5EB6BF9D8B923"']
+      Last-Modified: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Vary: [Origin]
+      x-ms-access-tier: [Hot]
+      x-ms-access-tier-inferred: ['true']
+      x-ms-blob-type: [BlockBlob]
+      x-ms-creation-time: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-request-id: [a2ed83cc-501e-0046-1454-1da6bc000000]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      If-None-Match: ['"0x8D5EB6BF9D8B923"']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [15b9c190-8948-11e8-9503-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://storagename.blob.core.windows.net/utcontaineraf8e1f1f/blob1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:32:12 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Vary: [Origin]
+      x-ms-error-code: [ConditionNotMet]
+      x-ms-request-id: [a2ed83cd-501e-0046-1554-1da6bc000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 304, message: The condition specified using HTTP conditional header(s)
+        is not met.}
 version: 1

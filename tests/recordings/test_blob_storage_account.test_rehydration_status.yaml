@@ -276,4 +276,277 @@ interactions:
       x-ms-request-id: [6d0a132f-e01e-004d-661b-08ec41000000]
       x-ms-version: ['2018-03-28']
     status: {code: 200, message: OK}
+- request:
+    body: hello world
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['11']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [624b2724-8948-11e8-aee9-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:21 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_1
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Date: ['Mon, 16 Jul 2018 22:34:20 GMT']
+      ETag: ['"0x8D5EB6C46B2BFC6"']
+      Last-Modified: ['Mon, 16 Jul 2018 22:34:21 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a8d3dcb-b01e-0055-4555-1dc1d4000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-access-tier: [Archive]
+      x-ms-client-request-id: [6284d140-8948-11e8-93d0-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:21 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_1?comp=tier
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:34:21 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a8d3dfe-b01e-0055-7255-1dc1d4000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-access-tier: [Cool]
+      x-ms-client-request-id: [62fcf58a-8948-11e8-b22f-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_1?comp=tier
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:34:21 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a8d3f33-b01e-0055-0d55-1dc1d4000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [630b5398-8948-11e8-8824-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_1
+  response:
+    body: {string: ''}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['11']
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Content-Type: [application/octet-stream]
+      Date: ['Mon, 16 Jul 2018 22:34:21 GMT']
+      ETag: ['"0x8D5EB6C46B2BFC6"']
+      Last-Modified: ['Mon, 16 Jul 2018 22:34:21 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-access-tier: [Archive]
+      x-ms-access-tier-change-time: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      x-ms-archive-status: [rehydrate-pending-to-cool]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-creation-time: ['Mon, 16 Jul 2018 22:34:21 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-request-id: [3a8d3f54-b01e-0055-2c55-1dc1d4000000]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [63194f14-8948-11e8-8679-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      x-ms-version: ['2018-03-28']
+    method: GET
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458?restype=container&comp=list
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://blobstoragename.blob.core.windows.net/\" ContainerName=\"utcontainerf9461458\"><Blobs><Blob><Name>rehydration_test_blob_1</Name><Properties><Creation-Time>Mon,
+        16 Jul 2018 22:34:21 GMT</Creation-Time><Last-Modified>Mon, 16 Jul 2018 22:34:21
+        GMT</Last-Modified><Etag>0x8D5EB6C46B2BFC6</Etag><Content-Length>11</Content-Length><Content-Type>application/octet-stream</Content-Type><Content-Encoding
+        /><Content-Language /><Content-MD5>XrY7u+Ae7tCTyyK7j1rNww==</Content-MD5><Cache-Control
+        /><Content-Disposition /><BlobType>BlockBlob</BlobType><AccessTier>Archive</AccessTier><ArchiveStatus>rehydrate-pending-to-cool</ArchiveStatus><AccessTierChangeTime>Mon,
+        16 Jul 2018 22:34:22 GMT</AccessTierChangeTime><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><ServerEncrypted>true</ServerEncrypted></Properties></Blob></Blobs><NextMarker
+        /></EnumerationResults>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a8d3f80-b01e-0055-5355-1dc1d4000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [63271e0a-8948-11e8-a2ac-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      x-ms-version: ['2018-03-28']
+    method: DELETE
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-delete-type-permanent: ['true']
+      x-ms-request-id: [3a8d3fa0-b01e-0055-7055-1dc1d4000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 202, message: Accepted}
+- request:
+    body: hello world
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['11']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [6335a3ba-8948-11e8-80e4-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_2
+  response:
+    body: {string: ''}
+    headers:
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      ETag: ['"0x8D5EB6C4772D763"']
+      Last-Modified: ['Mon, 16 Jul 2018 22:34:23 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a8d3fc6-b01e-0055-1155-1dc1d4000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-access-tier: [Archive]
+      x-ms-client-request-id: [63453192-8948-11e8-b249-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:23 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_2?comp=tier
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a8d4003-b01e-0055-3f55-1dc1d4000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-access-tier: [Hot]
+      x-ms-client-request-id: [63536154-8948-11e8-a85a-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:23 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_2?comp=tier
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a8d402a-b01e-0055-6455-1dc1d4000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [6366244c-8948-11e8-a256-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:23 GMT']
+      x-ms-version: ['2018-03-28']
+    method: HEAD
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458/rehydration_test_blob_2
+  response:
+    body: {string: ''}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['11']
+      Content-MD5: [XrY7u+Ae7tCTyyK7j1rNww==]
+      Content-Type: [application/octet-stream]
+      Date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      ETag: ['"0x8D5EB6C4772D763"']
+      Last-Modified: ['Mon, 16 Jul 2018 22:34:23 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-access-tier: [Archive]
+      x-ms-access-tier-change-time: ['Mon, 16 Jul 2018 22:34:23 GMT']
+      x-ms-archive-status: [rehydrate-pending-to-hot]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-creation-time: ['Mon, 16 Jul 2018 22:34:23 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-request-id: [3a8d4056-b01e-0055-0855-1dc1d4000000]
+      x-ms-server-encrypted: ['true']
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [6375bfe2-8948-11e8-9088-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:34:23 GMT']
+      x-ms-version: ['2018-03-28']
+    method: GET
+    uri: https://blobstoragename.blob.core.windows.net/utcontainerf9461458?restype=container&comp=list
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
+        ServiceEndpoint=\"https://blobstoragename.blob.core.windows.net/\" ContainerName=\"utcontainerf9461458\"><Blobs><Blob><Name>rehydration_test_blob_2</Name><Properties><Creation-Time>Mon,
+        16 Jul 2018 22:34:23 GMT</Creation-Time><Last-Modified>Mon, 16 Jul 2018 22:34:23
+        GMT</Last-Modified><Etag>0x8D5EB6C4772D763</Etag><Content-Length>11</Content-Length><Content-Type>application/octet-stream</Content-Type><Content-Encoding
+        /><Content-Language /><Content-MD5>XrY7u+Ae7tCTyyK7j1rNww==</Content-MD5><Cache-Control
+        /><Content-Disposition /><BlobType>BlockBlob</BlobType><AccessTier>Archive</AccessTier><ArchiveStatus>rehydrate-pending-to-hot</ArchiveStatus><AccessTierChangeTime>Mon,
+        16 Jul 2018 22:34:23 GMT</AccessTierChangeTime><LeaseStatus>unlocked</LeaseStatus><LeaseState>available</LeaseState><ServerEncrypted>true</ServerEncrypted></Properties></Blob></Blobs><NextMarker
+        /></EnumerationResults>"}
+    headers:
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Jul 2018 22:34:22 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [3a8d4076-b01e-0055-2455-1dc1d4000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
 version: 1

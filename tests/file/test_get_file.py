@@ -178,7 +178,7 @@ class StorageGetFileTest(StorageTestCase):
         # Assert
         self.assertEqual(self.byte_data, file.content)
         self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
-                                      progress, single_download=True)
+                                      progress)
 
     @record
     def test_get_file_to_bytes_small(self):
@@ -260,7 +260,7 @@ class StorageGetFileTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
         self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
-                                      progress, single_download=True)
+                                      progress)
 
     @record
     def test_get_file_to_stream_small(self):
@@ -358,7 +358,7 @@ class StorageGetFileTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
         self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
-                                      progress, single_download=True)
+                                      progress)
 
     @record
     def test_get_file_to_stream_small_from_snapshot(self):
@@ -445,7 +445,7 @@ class StorageGetFileTest(StorageTestCase):
             actual = stream.read()
             self.assertEqual(self.byte_data, actual)
         self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
-                                      progress, single_download=True)
+                                      progress)
 
     @record
     def test_get_file_to_path_small(self):
@@ -713,8 +713,8 @@ class StorageGetFileTest(StorageTestCase):
 
         # Assert
         self.assertEqual(text_data, file.content)
-        self.assert_download_progress(len(self.byte_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
-                                      progress, single_download=True)
+        self.assert_download_progress(len(text_data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE,
+                                      progress)
 
     @record
     def test_get_file_to_text_small(self):
@@ -770,11 +770,8 @@ class StorageGetFileTest(StorageTestCase):
         self.assertEqual(text, file.content)
         self.assert_download_progress(len(data), self.fs.MAX_CHUNK_GET_SIZE, self.fs.MAX_SINGLE_GET_SIZE, progress)
 
+    @record
     def test_get_file_non_seekable(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
 
         # Act
@@ -806,11 +803,8 @@ class StorageGetFileTest(StorageTestCase):
 
                 # Assert
 
+    @record
     def test_get_file_non_seekable_from_snapshot(self):
-        # parallel tests introduce random order of requests, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
         # Create a snapshot of the share and delete the file
         share_snapshot = self.fs.snapshot_share(self.share_name)

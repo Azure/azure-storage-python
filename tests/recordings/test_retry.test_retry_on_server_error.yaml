@@ -64,4 +64,69 @@ interactions:
       x-ms-request-id: [b5bb0c72-d01e-0005-611c-0840e0000000]
       x-ms-version: ['2018-03-28']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [bd6828ae-8949-11e8-a2f0-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:44:03 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/270d0f94?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:44:03 GMT']
+      ETag: ['"0x8D5EB6DA1CBA8D5"']
+      Last-Modified: ['Mon, 16 Jul 2018 22:44:04 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [6d4210ca-701e-000c-7056-1d0533000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [bd6828ae-8949-11e8-a2f0-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:44:19 GMT']
+      x-ms-version: ['2018-03-28']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/270d0f94?restype=container
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerAlreadyExists</Code><Message>The
+        specified container already exists.\nRequestId:6d42115f-701e-000c-5c56-1d0533000000\nTime:2018-07-16T22:44:19.0825516Z</Message></Error>"}
+    headers:
+      Content-Length: ['230']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Jul 2018 22:44:18 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [ContainerAlreadyExists]
+      x-ms-request-id: [6d42115f-701e-000c-5c56-1d0533000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 409, message: The specified container already exists.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [c6885a08-8949-11e8-afd7-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:44:19 GMT']
+      x-ms-version: ['2018-03-28']
+    method: DELETE
+    uri: https://storagename.blob.core.windows.net/270d0f94?restype=container
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Mon, 16 Jul 2018 22:44:18 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [6d421161-701e-000c-5d56-1d0533000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 202, message: Accepted}
 version: 1
