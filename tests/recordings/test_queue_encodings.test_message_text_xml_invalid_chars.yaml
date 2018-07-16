@@ -23,4 +23,28 @@ interactions:
       x-ms-request-id: [3ff8b6fb-7003-001c-761d-08c05b000000]
       x-ms-version: ['2018-03-28']
     status: {code: 400, message: XML specified is not syntactically valid.}
+- request:
+    body: "<?xml version='1.0' encoding='utf-8'?>\n<QueueMessage><MessageText>\x01</MessageText></QueueMessage>"
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['96']
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [9fd96fe2-894a-11e8-94f3-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:50:23 GMT']
+      x-ms-version: ['2018-03-28']
+    method: POST
+    uri: https://storagename.queue.core.windows.net/mytestqueue093de171a/messages
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidXmlDocument</Code><Message>XML
+        specified is not syntactically valid.\nRequestId:11897a4a-7003-0041-2f57-1dcadf000000\nTime:2018-07-16T22:50:24.1287688Z</Message><LineNumber>2</LineNumber><LinePosition>28</LinePosition><Reason>Error
+        parsing Xml content</Reason></Error>"}
+    headers:
+      Content-Length: ['327']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Jul 2018 22:50:23 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [InvalidXmlDocument]
+      x-ms-request-id: [11897a4a-7003-0041-2f57-1dcadf000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 400, message: XML specified is not syntactically valid.}
 version: 1

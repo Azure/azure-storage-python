@@ -1,6 +1,9 @@
 ### Which service(blob, file, queue) does this issue concern?
 
 
+### Which version of the SDK was used? Please provide the output of `pip freeze`.
+
+
 ### What problem was encountered?
 
 

@@ -21,4 +21,26 @@ interactions:
       x-ms-request-id: [b480d298-a003-0035-7b1c-081218000000]
       x-ms-version: ['2018-03-28']
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [d513cc88-8949-11e8-825c-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:44:43 GMT']
+      x-ms-version: ['2018-03-28']
+    method: GET
+    uri: https://storagename-secondary.queue.core.windows.net/?restype=service&comp=stats
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Mon,
+        16 Jul 2018 22:41:15 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"}
+    headers:
+      Cache-Control: [no-cache]
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Jul 2018 22:44:43 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-request-id: [055155b7-a003-001a-5356-1d1fd3000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 200, message: OK}
 version: 1

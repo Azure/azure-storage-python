@@ -21,4 +21,26 @@ interactions:
       x-ms-request-id: [3491aa00-9003-0014-571d-08da54000000]
       x-ms-version: ['2018-03-28']
     status: {code: 404, message: The specified queue does not exist.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.4; Darwin 17.7.0)]
+      x-ms-client-request-id: [715dbea8-894a-11e8-bfa7-720000665300]
+      x-ms-date: ['Mon, 16 Jul 2018 22:49:05 GMT']
+      x-ms-version: ['2018-03-28']
+    method: GET
+    uri: https://storagename.queue.core.windows.net/missingdb9b0d66?comp=metadata
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>QueueNotFound</Code><Message>The
+        specified queue does not exist.\nRequestId:fdd2b724-e003-0031-3457-1d7328000000\nTime:2018-07-16T22:49:06.0751739Z</Message></Error>"}
+    headers:
+      Content-Length: ['217']
+      Content-Type: [application/xml]
+      Date: ['Mon, 16 Jul 2018 22:49:05 GMT']
+      Server: [Windows-Azure-Queue/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [QueueNotFound]
+      x-ms-request-id: [fdd2b724-e003-0031-3457-1d7328000000]
+      x-ms-version: ['2018-03-28']
+    status: {code: 404, message: The specified queue does not exist.}
 version: 1
