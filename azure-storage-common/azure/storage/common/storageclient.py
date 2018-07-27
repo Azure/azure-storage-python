@@ -321,6 +321,9 @@ class StorageClient(object):
 
             except AzureException as ex:
                 # only parse the strings used for logging if logging is at least enabled for CRITICAL
+                exception_str_in_one_line = ''
+                status_code = ''
+                timestamp_and_request_id = ''
                 if logger.isEnabledFor(logging.CRITICAL):
                     exception_str_in_one_line = str(ex).replace('\n', '')
                     status_code = retry_context.response.status if retry_context.response is not None else 'Unknown'
