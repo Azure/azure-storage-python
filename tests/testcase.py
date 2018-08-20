@@ -59,16 +59,16 @@ class TestMode(object):
 class StorageTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.working_folder = os.path.dirname(__file__)    
+        self.working_folder = os.path.dirname(__file__)
 
-        self.settings = settings        
+        self.settings = settings
         self.fake_settings = fake_settings
 
         if settings is None:
             self.test_mode = TestMode.playback
         else:
             self.test_mode = self.settings.TEST_MODE.lower() or TestMode.playback
-        
+
         if self.test_mode == TestMode.playback:
             self.settings = self.fake_settings
 
@@ -81,17 +81,28 @@ class StorageTestCase(unittest.TestCase):
             self._testMethodName,
         )
 
+        self.logger = logging.getLogger('azure.storage')
         # enable logging if desired
         self.configure_logging()
 
     def configure_logging(self):
-        if self.settings.ENABLE_LOGGING:
-            logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO)
-        else:
-            # disable logging if the user does not want to see them
-            logger = logging.getLogger('azure.storage')
-            logger.propagate = False
-            logger.level = logging.CRITICAL
+        self.enable_logging() if self.settings.ENABLE_LOGGING else self.disable_logging()
+
+    def enable_logging(self):
+        self.handler = logging.StreamHandler()
+        self.handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
+        self.logger.addHandler(self.handler)
+        self.logger.setLevel(logging.INFO)
+        self.logger.propagate = True
+        self.logger.disabled = False
+
+    def disable_logging(self):
+        self.logger.propagate = False
+        self.logger.disabled = True
+
+        if hasattr(self, "handler") and self.handler is not None:
+            self.logger.removeHandler(self.handler)
+            self.handler = None
 
     def sleep(self, seconds):
         if not self.is_playback():
@@ -244,7 +255,7 @@ class StorageTestCase(unittest.TestCase):
             my_vcr = vcr.VCR(
                 before_record_request = self._scrub_sensitive_request_info,
                 before_record_response = self._scrub_sensitive_response_info,
-                record_mode = 'none' if TestMode.is_playback(self.test_mode) else 'all' 
+                record_mode = 'none' if TestMode.is_playback(self.test_mode) else 'all'
             )
 
             self.assertIsNotNone(self.working_folder)
@@ -399,6 +410,10 @@ class LogCaptured(object):
         self.test_case = test_case
 
     def __enter__(self):
+        # enable logging
+        # it is possible that the global logging flag is turned off
+        self.test_case.enable_logging()
+
         # create a string stream to send the logs to
         self.log_stream = StringIO()
 
@@ -420,5 +435,4 @@ class LogCaptured(object):
         self.log_stream.close()
 
         # reset logging since we messed with the setting
-        if self.test_case is not None:
-            self.test_case.configure_logging()
+        self.test_case.configure_logging()
