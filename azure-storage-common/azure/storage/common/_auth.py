@@ -14,6 +14,11 @@ from ._constants import (
 import logging
 logger = logging.getLogger(__name__)
 
+from ._error import (
+    AzureSigningError,
+    _wrap_exception,
+)
+
 
 class _StorageSharedKeyAuthentication(object):
     def __init__(self, account_name, account_key, is_emulated=False):
@@ -54,9 +59,14 @@ class _StorageSharedKeyAuthentication(object):
         return string_to_sign
 
     def _add_authorization_header(self, request, string_to_sign):
-        signature = _sign_string(self.account_key, string_to_sign)
-        auth_string = 'SharedKey ' + self.account_name + ':' + signature
-        request.headers['Authorization'] = auth_string
+        try:
+            signature = _sign_string(self.account_key, string_to_sign)
+            auth_string = 'SharedKey ' + self.account_name + ':' + signature
+            request.headers['Authorization'] = auth_string
+        except Exception as ex:
+            # Wrap any error that occurred as signing error
+            # Doing so will clarify/locate the source of problem
+            raise _wrap_exception(ex, AzureSigningError)
 
 
 class _StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
