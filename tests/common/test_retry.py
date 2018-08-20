@@ -11,7 +11,10 @@ from azure.common import (
 )
 
 from azure.storage.blob import BlockBlobService
-from azure.storage.common import LocationMode
+from azure.storage.common import (
+    LocationMode,
+    AzureSigningError,
+)
 from azure.storage.common.retry import (
     LinearRetry,
     ExponentialRetry,
@@ -21,7 +24,8 @@ from azure.storage.common.models import RetryContext
 from tests.testcase import (
     StorageTestCase,
     record,
-    ResponseCallback
+    ResponseCallback,
+    RetryCounter,
 )
 
 
@@ -391,6 +395,7 @@ class StorageRetryTest(StorageTestCase):
 
         # Assert
         # Confirm that the first request gets retried to secondary
+        # The given test account must be GRS
         def retry_callback(retry_context):
             self.assertEqual(LocationMode.SECONDARY, retry_context.location_mode)
 
@@ -408,6 +413,24 @@ class StorageRetryTest(StorageTestCase):
 
         service.request_callback = request_callback
         service._list_containers(prefix='lock', _context=context)
+
+    def test_invalid_account_key(self):
+        # Arrange
+        container_name = self.get_resource_name()
+        service = BlockBlobService(account_name="dummy_account_name", account_key="dummy_account_key")
+
+        # Shorten retries and add counter
+        service.retry = ExponentialRetry(initial_backoff=1, increment_base=3, max_attempts=3).retry
+        retry_counter = RetryCounter()
+        service.retry_callback = retry_counter.simple_count
+
+        # Act
+        with self.assertRaises(AzureSigningError):
+            service.get_container_metadata(container_name)
+
+        # Assert
+        # No retry should be performed since the signing error is fatal
+        self.assertEqual(retry_counter.count, 0)
 
 
 # ------------------------------------------------------------------------------

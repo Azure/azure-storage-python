@@ -181,3 +181,28 @@ def _validate_kek_id(kid, resolved_id):
 def _validate_encryption_unsupported(require_encryption, key_encryption_key):
     if require_encryption or (key_encryption_key is not None):
         raise ValueError(_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION)
+
+
+# wraps a given exception with the desired exception type
+def _wrap_exception(ex, desired_type):
+    if version_info >= (3,):
+        # Automatic chaining in Python 3 means we keep the trace
+        return desired_type(ex.args[0])
+    else:
+        # There isn't a good solution in 2 for keeping the stack trace
+        # in general, or that will not result in an error in 3
+        # However, we can keep the previous error type and message
+        # TODO: In the future we will log the trace
+        msg = ""
+        if len(ex.args) > 0:
+            msg = ex.args[0]
+        return desired_type('{}: {}'.format(ex.__class__.__name__, msg))
+
+
+class AzureSigningError(AzureException):
+    """
+    Represents a fatal error when attempting to sign a request.
+    In general, the cause of this exception is user error. For example, the given account key is not valid.
+    Please visit https://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account for more info.
+    """
+    pass

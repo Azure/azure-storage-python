@@ -27,6 +27,8 @@ from ._constants import (
 from ._error import (
     _ERROR_DECRYPTION_FAILURE,
     _http_error_handler,
+    _wrap_exception,
+    AzureSigningError,
 )
 from ._http import HTTPError
 from ._http.httpclient import _HTTPClient
@@ -306,18 +308,7 @@ class StorageClient(object):
                     raise ex
                 except Exception as ex:
                     retry_context.exception = ex
-                    if sys.version_info >= (3,):
-                        # Automatic chaining in Python 3 means we keep the trace
-                        raise AzureException(ex.args[0])
-                    else:
-                        # There isn't a good solution in 2 for keeping the stack trace 
-                        # in general, or that will not result in an error in 3
-                        # However, we can keep the previous error type and message
-                        # TODO: In the future we will log the trace
-                        msg = ""
-                        if len(ex.args) > 0:
-                            msg = ex.args[0]
-                        raise AzureException('{}: {}'.format(ex.__class__.__name__, msg))
+                    raise _wrap_exception(ex, AzureException)
 
             except AzureException as ex:
                 # only parse the strings used for logging if logging is at least enabled for CRITICAL
@@ -336,6 +327,11 @@ class StorageClient(object):
                                 client_request_id_prefix,
                                 timestamp_and_request_id,
                                 status_code,
+                                exception_str_in_one_line)
+                    raise ex
+                elif isinstance(ex, AzureSigningError):
+                    logger.info("%s Unable to sign the request: Exception=%s.",
+                                client_request_id_prefix,
                                 exception_str_in_one_line)
                     raise ex
 
