@@ -144,7 +144,7 @@ class StorageQueueTest(StorageTestCase):
         self.assertEqual('blah', metadata['val2'])
 
     @record
-    def test_delete_queue_not_exist(self):
+    def test_delete_non_existing_queue(self):
         # Action
         queue_name = self._get_queue_reference()
 
@@ -158,7 +158,7 @@ class StorageQueueTest(StorageTestCase):
         self.assertFalse(deleted)
 
     @record
-    def test_delete_queue_fail_not_exist_not_exist(self):
+    def test_delete_non_existing_queue_fail_not_exist(self):
         # Action
         queue_name = self._get_queue_reference()
 
@@ -170,7 +170,7 @@ class StorageQueueTest(StorageTestCase):
             self.assertTrue('ERROR' in log_as_str)
 
     @record
-    def test_delete_queue_fail_not_exist_already_exist(self):
+    def test_delete_existing_queue_fail_not_exist(self):
         # Action
         queue_name = self._get_queue_reference()
         created = self.qs.create_queue(queue_name)
