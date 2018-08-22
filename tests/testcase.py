@@ -89,9 +89,9 @@ class StorageTestCase(unittest.TestCase):
         self.enable_logging() if self.settings.ENABLE_LOGGING else self.disable_logging()
 
     def enable_logging(self):
-        self.handler = logging.StreamHandler()
-        self.handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
-        self.logger.addHandler(self.handler)
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
+        self.logger.handlers = [handler]
         self.logger.setLevel(logging.INFO)
         self.logger.propagate = True
         self.logger.disabled = False
@@ -99,10 +99,7 @@ class StorageTestCase(unittest.TestCase):
     def disable_logging(self):
         self.logger.propagate = False
         self.logger.disabled = True
-
-        if hasattr(self, "handler") and self.handler is not None:
-            self.logger.removeHandler(self.handler)
-            self.handler = None
+        self.logger.handlers = []
 
     def sleep(self, seconds):
         if not self.is_playback():
