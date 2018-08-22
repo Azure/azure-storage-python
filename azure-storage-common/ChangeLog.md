@@ -5,6 +5,7 @@
 ## Version XX.XX.XX:
 
 - When unable to sign request, avoid wasting time on retries by failing faster.
+- Allow the use of custom domain when creating service object targeting emulators.
 
 ## Version 1.3.0:
 
