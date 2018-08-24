@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX:
+
+- When unable to sign request, avoid wasting time on retries by failing faster.
+
 ## Version 1.3.0:
 
 - Support for 2018-03-28 REST version. Please see our REST API documentation and blog for information about the related added features.
