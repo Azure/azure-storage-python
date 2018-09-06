@@ -247,15 +247,15 @@ class StorageClient(object):
                     # will work as it resets the time sensitive headers.
                     _add_date_header(request)
 
+                    # Set the request context
+                    retry_context.request = request
+                    
                     try:
                         # request can be signed individually
                         self.authentication.sign_request(request)
                     except AttributeError:
                         # session can also be signed
                         self.request_session = self.authentication.signed_session(self.request_session)
-
-                    # Set the request context
-                    retry_context.request = request
 
                     # Log the request before it goes out
                     logger.info("%s Outgoing request: Method=%s, Path=%s, Query=%s, Headers=%s.",
