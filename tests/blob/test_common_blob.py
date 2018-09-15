@@ -1201,6 +1201,45 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(self.byte_data, result.content)
 
     @record
+    def test_sas_access_blob_snapshot(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._create_block_blob()
+        blob_snapshot = self.bs.snapshot_blob(self.container_name, blob_name)
+
+        token = self.bs.generate_blob_shared_access_signature(
+            self.container_name,
+            blob_name,
+            permission=BlobPermissions.READ + BlobPermissions.DELETE,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+            snapshot=blob_snapshot.snapshot
+        )
+        service = BlockBlobService(
+            self.settings.STORAGE_ACCOUNT_NAME,
+            sas_token=token,
+            request_session=requests.Session(),
+        )
+
+        # Read from the snapshot
+        result = service.get_blob_to_bytes(self.container_name, blob_name, snapshot=blob_snapshot.snapshot)
+
+        # Assert
+        self.assertEqual(self.byte_data, result.content)
+
+        # Delete the snapshot
+        service.delete_blob(self.container_name, blob_name, snapshot=blob_snapshot.snapshot)
+
+        # Assert
+        self.assertFalse(service.exists(self.container_name, blob_name, snapshot=blob_snapshot.snapshot))
+
+        # Accessing the blob with a snapshot sas should fail
+        with self.assertRaises(AzureException):
+            service.get_blob_to_bytes(self.container_name, blob_name)
+
+    @record
     def test_sas_signed_identifier(self):
         # SAS URL is calculated from storage key, so this test runs live only
         if TestMode.need_recording_file(self.test_mode):

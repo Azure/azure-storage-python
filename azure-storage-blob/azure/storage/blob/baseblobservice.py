@@ -424,19 +424,22 @@ class BaseBlobService(StorageClient):
         )
 
     def generate_blob_shared_access_signature(
-            self, container_name, blob_name, permission=None,
+            self, container_name, blob_name, snapshot=None, permission=None,
             expiry=None, start=None, id=None, ip=None, protocol=None,
             cache_control=None, content_disposition=None,
             content_encoding=None, content_language=None,
             content_type=None):
         '''
-        Generates a shared access signature for the blob.
+        Generates a shared access signature for the blob or one of its snapshots.
         Use the returned signature with the sas_token parameter of any BlobService.
 
         :param str container_name:
             Name of container.
         :param str blob_name:
             Name of blob.
+        :param str snapshot:
+            The snapshot parameter is an opaque DateTime value that,
+            when present, specifies the blob snapshot to grant permission.
         :param BlobPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions.
@@ -496,10 +499,11 @@ class BaseBlobService(StorageClient):
 
         sas = BlobSharedAccessSignature(self.account_name, self.account_key)
         return sas.generate_blob(
-            container_name,
-            blob_name,
-            permission,
-            expiry,
+            container_name=container_name,
+            blob_name=blob_name,
+            snapshot=snapshot,
+            permission=permission,
+            expiry=expiry,
             start=start,
             id=id,
             ip=ip,

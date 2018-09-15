@@ -8,7 +8,7 @@ __author__ = 'Microsoft Corp. <ptvshelp@microsoft.com>'
 __version__ = '1.5.0'
 
 # x-ms-version for storage service.
-X_MS_VERSION = '2018-03-28'
+X_MS_VERSION = '2018-06-17'
 
 # internal configurations, should not be changed
 _LARGE_BLOB_UPLOAD_MAX_READ_BUFFER_SIZE = 4 * 1024 * 1024

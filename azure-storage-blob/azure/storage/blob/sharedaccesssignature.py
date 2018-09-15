@@ -7,8 +7,13 @@
 from azure.storage.common.sharedaccesssignature import (
     SharedAccessSignature,
     _SharedAccessHelper,
+    _QueryStringConstants,
+    _sign_string,
 )
 from ._constants import X_MS_VERSION
+from azure.storage.common._serialization import (
+    url_quote,
+)
 
 
 class BlobSharedAccessSignature(SharedAccessSignature):
@@ -28,19 +33,22 @@ class BlobSharedAccessSignature(SharedAccessSignature):
         '''
         super(BlobSharedAccessSignature, self).__init__(account_name, account_key, x_ms_version=X_MS_VERSION)
 
-    def generate_blob(self, container_name, blob_name, permission=None,
+    def generate_blob(self, container_name, blob_name, snapshot=None, permission=None,
                       expiry=None, start=None, id=None, ip=None, protocol=None,
                       cache_control=None, content_disposition=None,
                       content_encoding=None, content_language=None,
                       content_type=None):
         '''
-        Generates a shared access signature for the blob.
+        Generates a shared access signature for the blob or one of its snapshots.
         Use the returned signature with the sas_token parameter of any BlobService.
 
         :param str container_name:
             Name of container.
         :param str blob_name:
             Name of blob.
+        :param str snapshot:
+            The snapshot parameter is an opaque DateTime value that,
+            when present, specifies the blob snapshot to grant permission.
         :param BlobPermissions permission:
             The permissions associated with the shared access signature. The
             user is restricted to operations allowed by the permissions.
@@ -94,14 +102,15 @@ class BlobSharedAccessSignature(SharedAccessSignature):
         '''
         resource_path = container_name + '/' + blob_name
 
-        sas = _SharedAccessHelper()
+        sas = _BlobSharedAccessHelper()
         sas.add_base(permission, expiry, start, ip, protocol, self.x_ms_version)
         sas.add_id(id)
-        sas.add_resource('b')
+        sas.add_resource('b' if snapshot is None else 'bs')
+        sas.add_timestamp(snapshot)
         sas.add_override_response_headers(cache_control, content_disposition,
                                           content_encoding, content_language,
                                           content_type)
-        sas.add_resource_signature(self.account_name, self.account_key, 'blob', resource_path)
+        sas.add_resource_signature(self.account_name, self.account_key, resource_path, snapshot)
 
         return sas.get_token()
 
@@ -167,13 +176,68 @@ class BlobSharedAccessSignature(SharedAccessSignature):
             Response header value for Content-Type when resource is accessed
             using this shared access signature.
         '''
-        sas = _SharedAccessHelper()
+        sas = _BlobSharedAccessHelper()
         sas.add_base(permission, expiry, start, ip, protocol, self.x_ms_version)
         sas.add_id(id)
         sas.add_resource('c')
         sas.add_override_response_headers(cache_control, content_disposition,
                                           content_encoding, content_language,
                                           content_type)
-        sas.add_resource_signature(self.account_name, self.account_key, 'blob', container_name)
+        sas.add_resource_signature(self.account_name, self.account_key, container_name)
 
         return sas.get_token()
+
+
+class _BlobQueryStringConstants(_QueryStringConstants):
+    SIGNED_TIMESTAMP = 'snapshot'
+
+
+class _BlobSharedAccessHelper(_SharedAccessHelper):
+    def __init__(self):
+        super(_BlobSharedAccessHelper, self).__init__()
+
+    def add_timestamp(self, timestamp):
+        self._add_query(_BlobQueryStringConstants.SIGNED_TIMESTAMP, timestamp)
+
+    def add_resource_signature(self, account_name, account_key, path, signed_timestamp=None):
+        def get_value_to_append(query):
+            return_value = self.query_dict.get(query) or ''
+            return return_value + '\n'
+
+        if path[0] != '/':
+            path = '/' + path
+
+        canonicalized_resource = '/blob/' + account_name + path + '\n'
+
+        # Form the string to sign from shared_access_policy and canonicalized
+        # resource. The order of values is important.
+        string_to_sign = \
+            (get_value_to_append(_BlobQueryStringConstants.SIGNED_PERMISSION) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_START) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_EXPIRY) +
+             canonicalized_resource +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_IDENTIFIER) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_IP) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_PROTOCOL) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_VERSION) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_RESOURCE) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_TIMESTAMP) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_CACHE_CONTROL) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_DISPOSITION) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_ENCODING) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_LANGUAGE) +
+             get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_TYPE))
+
+        # remove the trailing newline
+        if string_to_sign[-1] == '\n':
+            string_to_sign = string_to_sign[:-1]
+
+        self._add_query(_BlobQueryStringConstants.SIGNED_SIGNATURE,
+                        _sign_string(account_key, string_to_sign))
+
+    def get_token(self):
+        # a conscious decision was made to exclude the timestamp in the generated token
+        # this is to avoid having two snapshot ids in the query parameters when the user appends the snapshot timestamp
+        exclude = [_BlobQueryStringConstants.SIGNED_TIMESTAMP]
+        return '&'.join(['{0}={1}'.format(n, url_quote(v))
+                         for n, v in self.query_dict.items() if v is not None and n not in exclude])
