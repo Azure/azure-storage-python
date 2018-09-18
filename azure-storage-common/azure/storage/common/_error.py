@@ -185,17 +185,17 @@ def _validate_encryption_unsupported(require_encryption, key_encryption_key):
 
 # wraps a given exception with the desired exception type
 def _wrap_exception(ex, desired_type):
+    msg = ""
+    if len(ex.args) > 0:
+        msg = ex.args[0]
     if version_info >= (3,):
         # Automatic chaining in Python 3 means we keep the trace
-        return desired_type(ex.args[0])
+        return desired_type(msg)
     else:
         # There isn't a good solution in 2 for keeping the stack trace
         # in general, or that will not result in an error in 3
         # However, we can keep the previous error type and message
         # TODO: In the future we will log the trace
-        msg = ""
-        if len(ex.args) > 0:
-            msg = ex.args[0]
         return desired_type('{}: {}'.format(ex.__class__.__name__, msg))
 
 
