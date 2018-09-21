@@ -24,14 +24,19 @@ class BlobSharedAccessSignature(SharedAccessSignature):
     generate_*_shared_access_signature method directly.
     '''
 
-    def __init__(self, account_name, account_key):
+    def __init__(self, account_name, account_key=None, user_delegation_key=None):
         '''
         :param str account_name:
             The storage account name used to generate the shared access signatures.
         :param str account_key:
             The access key to generate the shares access signatures.
+        :param ~azure.storage.blob.models.UserDelegationKey user_delegation_key:
+            Instead of an account key, the user could pass in a user delegation key.
+            A user delegation key can be obtained from the service by authenticating with an AAD identity;
+            this can be accomplished by calling get_user_delegation_key on any Blob service object.
         '''
         super(BlobSharedAccessSignature, self).__init__(account_name, account_key, x_ms_version=X_MS_VERSION)
+        self.user_delegation_key = user_delegation_key
 
     def generate_blob(self, container_name, blob_name, snapshot=None, permission=None,
                       expiry=None, start=None, id=None, ip=None, protocol=None,
@@ -110,7 +115,8 @@ class BlobSharedAccessSignature(SharedAccessSignature):
         sas.add_override_response_headers(cache_control, content_disposition,
                                           content_encoding, content_language,
                                           content_type)
-        sas.add_resource_signature(self.account_name, self.account_key, resource_path, snapshot)
+        sas.add_resource_signature(self.account_name, self.account_key, resource_path,
+                                   user_delegation_key=self.user_delegation_key)
 
         return sas.get_token()
 
@@ -183,13 +189,19 @@ class BlobSharedAccessSignature(SharedAccessSignature):
         sas.add_override_response_headers(cache_control, content_disposition,
                                           content_encoding, content_language,
                                           content_type)
-        sas.add_resource_signature(self.account_name, self.account_key, container_name)
-
+        sas.add_resource_signature(self.account_name, self.account_key, container_name,
+                                   user_delegation_key=self.user_delegation_key)
         return sas.get_token()
 
 
 class _BlobQueryStringConstants(_QueryStringConstants):
     SIGNED_TIMESTAMP = 'snapshot'
+    SIGNED_OID = 'skoid'
+    SIGNED_TID = 'sktid'
+    SIGNED_KEY_START = 'skt'
+    SIGNED_KEY_EXPIRY = 'ske'
+    SIGNED_KEY_SERVICE = 'sks'
+    SIGNED_KEY_VERSION = 'skv'
 
 
 class _BlobSharedAccessHelper(_SharedAccessHelper):
@@ -199,11 +211,11 @@ class _BlobSharedAccessHelper(_SharedAccessHelper):
     def add_timestamp(self, timestamp):
         self._add_query(_BlobQueryStringConstants.SIGNED_TIMESTAMP, timestamp)
 
-    def add_resource_signature(self, account_name, account_key, path, signed_timestamp=None):
-        def get_value_to_append(query):
-            return_value = self.query_dict.get(query) or ''
-            return return_value + '\n'
+    def get_value_to_append(self, query):
+        return_value = self.query_dict.get(query) or ''
+        return return_value + '\n'
 
+    def add_resource_signature(self, account_name, account_key, path, user_delegation_key=None):
         if path[0] != '/':
             path = '/' + path
 
@@ -212,28 +224,48 @@ class _BlobSharedAccessHelper(_SharedAccessHelper):
         # Form the string to sign from shared_access_policy and canonicalized
         # resource. The order of values is important.
         string_to_sign = \
-            (get_value_to_append(_BlobQueryStringConstants.SIGNED_PERMISSION) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_START) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_EXPIRY) +
-             canonicalized_resource +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_IDENTIFIER) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_IP) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_PROTOCOL) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_VERSION) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_RESOURCE) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_TIMESTAMP) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_CACHE_CONTROL) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_DISPOSITION) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_ENCODING) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_LANGUAGE) +
-             get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_TYPE))
+            (self.get_value_to_append(_BlobQueryStringConstants.SIGNED_PERMISSION) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_START) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_EXPIRY) +
+             canonicalized_resource)
+
+        if user_delegation_key is not None:
+            self._add_query(_BlobQueryStringConstants.SIGNED_OID, user_delegation_key.signed_oid)
+            self._add_query(_BlobQueryStringConstants.SIGNED_TID, user_delegation_key.signed_tid)
+            self._add_query(_BlobQueryStringConstants.SIGNED_KEY_START, user_delegation_key.signed_start)
+            self._add_query(_BlobQueryStringConstants.SIGNED_KEY_EXPIRY, user_delegation_key.signed_expiry)
+            self._add_query(_BlobQueryStringConstants.SIGNED_KEY_SERVICE, user_delegation_key.signed_service)
+            self._add_query(_BlobQueryStringConstants.SIGNED_KEY_VERSION, user_delegation_key.signed_version)
+
+            string_to_sign += \
+                (self.get_value_to_append(_BlobQueryStringConstants.SIGNED_OID) +
+                 self.get_value_to_append(_BlobQueryStringConstants.SIGNED_TID) +
+                 self.get_value_to_append(_BlobQueryStringConstants.SIGNED_KEY_START) +
+                 self.get_value_to_append(_BlobQueryStringConstants.SIGNED_KEY_EXPIRY) +
+                 self.get_value_to_append(_BlobQueryStringConstants.SIGNED_KEY_SERVICE) +
+                 self.get_value_to_append(_BlobQueryStringConstants.SIGNED_KEY_VERSION))
+        else:
+            string_to_sign += self.get_value_to_append(_BlobQueryStringConstants.SIGNED_IDENTIFIER)
+
+        string_to_sign += \
+            (self.get_value_to_append(_BlobQueryStringConstants.SIGNED_IP) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_PROTOCOL) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_VERSION) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_RESOURCE) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_TIMESTAMP) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_CACHE_CONTROL) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_DISPOSITION) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_ENCODING) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_LANGUAGE) +
+             self.get_value_to_append(_BlobQueryStringConstants.SIGNED_CONTENT_TYPE))
 
         # remove the trailing newline
         if string_to_sign[-1] == '\n':
             string_to_sign = string_to_sign[:-1]
 
         self._add_query(_BlobQueryStringConstants.SIGNED_SIGNATURE,
-                        _sign_string(account_key, string_to_sign))
+                        _sign_string(account_key if user_delegation_key is None else user_delegation_key.value,
+                                     string_to_sign))
 
     def get_token(self):
         # a conscious decision was made to exclude the timestamp in the generated token

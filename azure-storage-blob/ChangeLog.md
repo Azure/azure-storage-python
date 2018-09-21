@@ -5,6 +5,7 @@
 ## Version XX.XX.XX:
 - Support for 2018-06-17 REST version. Please see our REST API documentation and blog for information about the related added features.
 - Added support for generating and using blob snapshot SAS tokens.
+- Added support for generating user delegation SAS tokens.
 
 ## Version 1.5.0:
 

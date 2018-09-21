@@ -1,4 +1,4 @@
-# coding: utf-8
+﻿# coding: utf-8
 # -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for
@@ -357,7 +357,7 @@ class StorageTestCase(unittest.TestCase):
 
     def generate_oauth_token(self):
         context = adal.AuthenticationContext(
-            str.format("https://login.microsoftonline.com/{}", self.settings.ACTIVE_DIRECTORY_TENANT_ID),
+            str.format("{}/{}", self.settings.ACTIVE_DIRECTORY_AUTH_ENDPOINT, self.settings.ACTIVE_DIRECTORY_TENANT_ID),
             api_version=None, validate_authority=True)
 
         token = context.acquire_token_with_client_credentials(

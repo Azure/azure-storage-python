@@ -4,7 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 from xml.sax.saxutils import escape as xml_escape
-
+from datetime import date
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -12,6 +12,9 @@ except ImportError:
 from azure.storage.common._common_conversion import (
     _encode_base64,
     _str,
+)
+from azure.storage.common._serialization import (
+    _to_utc_datetime,
 )
 from azure.storage.common._error import (
     _validate_not_none,
@@ -110,6 +113,37 @@ def _convert_block_list_to_xml(block_id_list):
         ETree.ElementTree(block_list_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
     except:
         raise
+    finally:
+        output = stream.getvalue()
+        stream.close()
+
+    # return xml value
+    return output
+
+
+def _convert_delegation_key_info_to_xml(start_time, expiry_time):
+    """
+    <?xml version="1.0" encoding="utf-8"?>
+    <KeyInfo>
+        <Start> String, formatted ISO Date </Start>
+        <Expiry> String, formatted ISO Date </Expiry>
+    </KeyInfo>
+
+    Convert key info to xml to send.
+    """
+    if start_time is None or expiry_time is None:
+        raise ValueError("delegation key start/end times are required")
+
+    key_info_element = ETree.Element('KeyInfo')
+    ETree.SubElement(key_info_element, 'Start').text = \
+        _to_utc_datetime(start_time) if isinstance(start_time, date) else start_time
+    ETree.SubElement(key_info_element, 'Expiry').text = \
+        _to_utc_datetime(expiry_time) if isinstance(expiry_time, date) else expiry_time
+
+    # Add xml declaration and serialize
+    try:
+        stream = BytesIO()
+        ETree.ElementTree(key_info_element).write(stream, xml_declaration=True, encoding='utf-8', method='xml')
     finally:
         output = stream.getvalue()
         stream.close()
