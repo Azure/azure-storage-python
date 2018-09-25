@@ -688,7 +688,7 @@ class FileService(StorageClient):
         request.path = _get_path(share_name)
         request.query = {
             'restype': 'share',
-            'comp':  'snapshot',
+            'comp': 'snapshot',
             'timeout': _int_to_str(timeout),
         }
         request.headers = {
@@ -719,9 +719,9 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
-             'restype': 'share',
-             'timeout': _int_to_str(timeout),
-             'sharesnapshot': _to_str(snapshot)
+            'restype': 'share',
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot)
         }
 
         return self._perform_request(request, _parse_share, [share_name])
@@ -775,10 +775,10 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name)
         request.query = {
-             'restype': 'share',
-             'comp': 'metadata',
-             'timeout': _int_to_str(timeout),
-             'sharesnapshot': _to_str(snapshot),
+            'restype': 'share',
+            'comp': 'metadata',
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot),
         }
 
         return self._perform_request(request, _parse_metadata)
@@ -928,9 +928,9 @@ class FileService(StorageClient):
             'x-ms-delete-snapshots': _to_str(delete_snapshots)
         }
         request.query = {
-             'restype': 'share',
-             'timeout': _int_to_str(timeout),
-             'sharesnapshot': _to_str(snapshot),
+            'restype': 'share',
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot),
         }
 
         if not fail_not_exist:
@@ -1062,9 +1062,9 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
-             'restype': 'directory',
-             'timeout': _int_to_str(timeout),
-             'sharesnapshot': _to_str(snapshot)
+            'restype': 'directory',
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot)
         }
 
         return self._perform_request(request, _parse_directory, [directory_name])
@@ -1092,10 +1092,10 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
-             'restype': 'directory',
-             'comp': 'metadata',
-             'timeout': _int_to_str(timeout),
-             'sharesnapshot': _to_str(snapshot)
+            'restype': 'directory',
+            'comp': 'metadata',
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot)
         }
 
         return self._perform_request(request, _parse_metadata)
@@ -1181,7 +1181,7 @@ class FileService(StorageClient):
         return ListGenerator(resp, self._list_directories_and_files, args, kwargs)
 
     def _list_directories_and_files(self, share_name, directory_name=None,
-                                   marker=None, max_results=None, timeout=None,
+                                    marker=None, max_results=None, timeout=None,
                                     prefix=None, _context=None, snapshot=None):
         '''
         Returns a list of the directories and files under the specified share.
@@ -1216,13 +1216,13 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name)
         request.query = {
-             'restype': 'directory',
-             'comp': 'list',
-             'prefix': _to_str(prefix),
-             'marker': _to_str(marker),
-             'maxresults': _int_to_str(max_results),
-             'timeout': _int_to_str(timeout),
-             'sharesnapshot': _to_str(snapshot)
+            'restype': 'directory',
+            'comp': 'list',
+            'prefix': _to_str(prefix),
+            'marker': _to_str(marker),
+            'maxresults': _int_to_str(max_results),
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot)
         }
 
         return self._perform_request(request, _convert_xml_to_directories_and_files,
@@ -1253,7 +1253,7 @@ class FileService(StorageClient):
         request.method = 'HEAD'
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = { 'timeout': _int_to_str(timeout), 'sharesnapshot': _to_str(snapshot)}
+        request.query = {'timeout': _int_to_str(timeout), 'sharesnapshot': _to_str(snapshot)}
 
         return self._perform_request(request, _parse_file, [file_name])
 
@@ -1289,7 +1289,8 @@ class FileService(StorageClient):
                 expected_errors = [_RESOURCE_NOT_FOUND_ERROR_CODE, _PARENT_NOT_FOUND_ERROR_CODE]
             elif directory_name is not None:
                 restype = 'directory'
-                expected_errors = [_RESOURCE_NOT_FOUND_ERROR_CODE, _SHARE_NOT_FOUND_ERROR_CODE]
+                expected_errors = [_RESOURCE_NOT_FOUND_ERROR_CODE, _SHARE_NOT_FOUND_ERROR_CODE,
+                                   _PARENT_NOT_FOUND_ERROR_CODE]
             else:
                 restype = 'share'
                 expected_errors = [_SHARE_NOT_FOUND_ERROR_CODE]
@@ -1397,9 +1398,9 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
-             'comp': 'metadata',
-             'timeout': _int_to_str(timeout),
-             'sharesnapshot': _to_str(snapshot),
+            'comp': 'metadata',
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot),
         }
 
         return self._perform_request(request, _parse_metadata)
@@ -1836,8 +1837,8 @@ class FileService(StorageClient):
         )
 
     def _get_file(self, share_name, directory_name, file_name,
-                 start_range=None, end_range=None, validate_content=False,
-                 timeout=None, _context=None, snapshot=None):
+                  start_range=None, end_range=None, validate_content=False,
+                  timeout=None, _context=None, snapshot=None):
         '''
         Downloads a file's content, metadata, and properties. You can specify a
         range if you don't need to download the file in its entirety. If no range
@@ -1879,7 +1880,7 @@ class FileService(StorageClient):
         request.method = 'GET'
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
-        request.query = { 'timeout': _int_to_str(timeout), 'sharesnapshot': _to_str(snapshot)}
+        request.query = {'timeout': _int_to_str(timeout), 'sharesnapshot': _to_str(snapshot)}
         _validate_and_format_range_headers(
             request,
             start_range,
@@ -1977,9 +1978,9 @@ class FileService(StorageClient):
         return file
 
     def get_file_to_stream(
-        self, share_name, directory_name, file_name, stream,
-        start_range=None, end_range=None, validate_content=False,
-        progress_callback=None, max_connections=2, timeout=None, snapshot=None):
+            self, share_name, directory_name, file_name, stream,
+            start_range=None, end_range=None, validate_content=False,
+            progress_callback=None, max_connections=2, timeout=None, snapshot=None):
         '''
         Downloads a file to a stream, with automatic chunking and progress
         notifications. Returns an instance of :class:`~azure.storage.file.models.File` with properties
@@ -2249,9 +2250,9 @@ class FileService(StorageClient):
         return file
 
     def get_file_to_text(
-        self, share_name, directory_name, file_name, encoding='utf-8',
-        start_range=None, end_range=None, validate_content=False,
-        progress_callback=None, max_connections=2, timeout=None, snapshot=None):
+            self, share_name, directory_name, file_name, encoding='utf-8',
+            start_range=None, end_range=None, validate_content=False,
+            progress_callback=None, max_connections=2, timeout=None, snapshot=None):
         '''
         Downloads a file as unicode text, with automatic chunking and progress
         notifications. Returns an instance of :class:`~azure.storage.file.models.File` with properties,
@@ -2466,9 +2467,9 @@ class FileService(StorageClient):
         request.host_locations = self._get_host_locations()
         request.path = _get_path(share_name, directory_name, file_name)
         request.query = {
-             'comp': 'rangelist',
-             'timeout': _int_to_str(timeout),
-             'sharesnapshot': _to_str(snapshot),
+            'comp': 'rangelist',
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot),
         }
         if start_range is not None:
             _validate_and_format_range_headers(
