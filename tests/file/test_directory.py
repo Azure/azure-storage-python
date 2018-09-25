@@ -177,6 +177,20 @@ class StorageDirectoryTest(StorageTestCase):
         self.assertFalse(exists)
 
     @record
+    def test_directory_parent_not_exists(self):
+        # Arrange
+
+        # Act
+        with LogCaptured(self) as log_captured:
+            exists = self.fs.exists(self.share_name, 'missing1/missing2')
+
+            log_as_str = log_captured.getvalue()
+            self.assertTrue('ERROR' not in log_as_str)
+
+        # Assert
+        self.assertFalse(exists)
+
+    @record
     def test_directory_exists_with_snapshot(self):
         # Arrange
         self.fs.create_directory(self.share_name, 'dir1')
