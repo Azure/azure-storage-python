@@ -10,13 +10,6 @@ import sys
 
 from setuptools import setup, find_packages
 
-try:
-    from azure_bdist_wheel import cmdclass
-except ImportError:
-    from distutils import log as logger
-
-    logger.warn("Wheel is not available, disabling bdist_wheel hook")
-    cmdclass = {}
 
 # azure v0.x is not compatible with this package
 # azure v0.x used to have a __version__ attribute (newer versions don't)
@@ -68,13 +61,17 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'License :: OSI Approved :: MIT License',
     ],
     zip_safe=False,
-    packages=find_packages(),
+    packages=find_packages(
+        # Exclude packages that will be covered by PEP420 or nspkg
+        'azure',
+        'azure.storage',
+    ),
     install_requires=[
-                         'azure-common>=1.1.5',
-                         'azure-storage-common>=1.3.0,<1.4.0'
-                     ],
-    cmdclass=cmdclass
+        'azure-common>=1.1.5',
+        'azure-storage-common>=1.3.0,<1.4.0'
+    ],
 )
