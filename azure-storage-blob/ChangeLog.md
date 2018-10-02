@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX
+
+- Added support for directory operations: create, rename, and delete.
+
 ## Version 2.1.0:
 
 - Support for 2019-02-02 REST version. Please see our REST API documentation and blog for information about the related added features.
@@ -15,6 +19,7 @@
 - Updated dependency on azure-storage-common.
 
 ## Version 2.0.0:
+
 - Support for 2018-11-09 REST version. Please see our REST API documentation and blog for information about the related added features.
 - Added support for append block from URL(synchronously) for append blobs.
 - Added support for update page from URL(synchronously) for page blobs.

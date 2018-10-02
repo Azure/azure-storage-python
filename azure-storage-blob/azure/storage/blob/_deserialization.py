@@ -648,3 +648,8 @@ def _parse_sub_response_to_http_response(sub_response):
         body_stream.close()
 
     return batch_http_sub_response
+
+
+def _parse_continuation_token(response):
+    marker = response.headers.get('x-ms-continuation')
+    return marker if marker is not '' else None

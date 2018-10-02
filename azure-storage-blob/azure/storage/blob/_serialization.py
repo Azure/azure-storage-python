@@ -302,3 +302,12 @@ def _serialize_query(query):
         del serialized_query[-1]
 
     return ''.join(serialized_query)
+
+
+# TODO to be removed after service update
+def _add_file_or_directory_properties_header(properties_dict, request):
+    if properties_dict:
+        if not request.headers:
+            request.headers = {}
+        request.headers['x-ms-properties'] = \
+            ",".join(["{}={}".format(str(name), _encode_base64(value)) for name, value in properties_dict.items()])

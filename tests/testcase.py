@@ -172,6 +172,18 @@ class StorageTestCase(unittest.TestCase):
         self._set_test_proxy(service, settings)
         return service
 
+    def _create_storage_service_with_hierarchical_namespace(self, service_class, settings):
+        if settings.HIERARCHICAL_NAMESPACE_CONNECTION_STRING:
+            service = service_class(connection_string=settings.HIERARCHICAL_NAMESPACE_CONNECTION_STRING)
+        else:
+            service = service_class(
+                settings.HIERARCHICAL_NAMESPACE_ACCOUNT_NAME,
+                settings.HIERARCHICAL_NAMESPACE_ACCOUNT_KEY,
+                protocol=settings.PROTOCOL,
+            )
+        self._set_test_proxy(service, settings)
+        return service
+
     # for blob storage account
     def _create_storage_service_for_blob_storage_account(self, service_class, settings):
         if hasattr(settings, 'BLOB_CONNECTION_STRING') and settings.BLOB_CONNECTION_STRING != "":
@@ -304,6 +316,8 @@ class StorageTestCase(unittest.TestCase):
         old_to_new_dict = {
             self.settings.STORAGE_ACCOUNT_NAME: self.fake_settings.STORAGE_ACCOUNT_NAME,
             self.settings.STORAGE_ACCOUNT_KEY: self.fake_settings.STORAGE_ACCOUNT_KEY,
+            self.settings.HIERARCHICAL_NAMESPACE_ACCOUNT_NAME: self.fake_settings.HIERARCHICAL_NAMESPACE_ACCOUNT_NAME,
+            self.settings.HIERARCHICAL_NAMESPACE_ACCOUNT_KEY: self.fake_settings.HIERARCHICAL_NAMESPACE_ACCOUNT_KEY,
             self.settings.BLOB_STORAGE_ACCOUNT_NAME: self.fake_settings.BLOB_STORAGE_ACCOUNT_NAME,
             self.settings.BLOB_STORAGE_ACCOUNT_KEY: self.fake_settings.BLOB_STORAGE_ACCOUNT_KEY,
             self.settings.REMOTE_STORAGE_ACCOUNT_KEY: self.fake_settings.REMOTE_STORAGE_ACCOUNT_KEY,

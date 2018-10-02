@@ -12,3 +12,6 @@ X_MS_VERSION = '2019-02-02'
 
 # internal configurations, should not be changed
 _LARGE_BLOB_UPLOAD_MAX_READ_BUFFER_SIZE = 4 * 1024 * 1024
+
+_BLOB_SERVICE_PUBLIC_CLOUD_HOST = 'blob.core.windows.net'
+_DFS_SERVICE_PUBLIC_CLOUD_HOST = 'dfs.core.windows.net'
