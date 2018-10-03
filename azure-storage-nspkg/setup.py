@@ -26,7 +26,7 @@ except ImportError:
 
 setup(
     name='azure-storage-nspkg',
-    version='3.0.0',
+    version='3.1.0',
     description='Microsoft Azure Storage Namespace Package [Internal]',
     long_description=open('README.rst', 'r').read(),
     license='MIT License',
@@ -43,11 +43,11 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'License :: OSI Approved :: MIT License',
     ],
     zip_safe=False,
     packages=[
-        'azure',
         'azure.storage',
     ],
     install_requires=[

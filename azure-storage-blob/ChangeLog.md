@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 1.x.x:
+
+- azure-storage-nspkg is not installed anymore on Python 3 (PEP420-based namespace package)
+
 ## Version 1.3.1:
 - Fixed design flaw where get_blob_to_* methods buffer entire blob when max_connections is set to 1.
 - Added support for access conditions on append_blob_from_* methods.
@@ -28,7 +32,7 @@
 ## Version 1.0.0:
 
 - The package has switched from Apache 2.0 to the MIT license.
-- Fixed bug where get_blob_to_* cannot get a single byte when start_range and end_range are both equal to 0. 
+- Fixed bug where get_blob_to_* cannot get a single byte when start_range and end_range are both equal to 0.
 - Optimized page blob upload for create_blob_from_* methods, by skipping the empty chunks.
 - Added convenient method to generate container url (make_container_url).
 - Metadata keys are now case-preserving when fetched from the service. Previously they were made lower-case by the library.

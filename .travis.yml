@@ -33,11 +33,11 @@ install:
   - pip install codecov
   - pip install coverage
   - pip install -r requirements.txt
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then pip install -e azure-storage-nspkg; fi;  # Would work on Python 3, but will not be installed by PyPI. Trying to be close to real life.
   - pip install -e azure-storage-common
   - pip install -e azure-storage-blob
   - pip install -e azure-storage-file
   - pip install -e azure-storage-queue
-  - pip install --force-reinstall azure-nspkg==1.0.0
 script:
   - coverage run -m unittest discover
 after_success:
