@@ -6,7 +6,7 @@
 
 - When unable to sign request, avoid wasting time on retries by failing faster.
 - Allow the use of custom domain when creating service object targeting emulators.
-- azure-mgmt-nspkg is not installed anymore on Python 3 (PEP420-based namespace package)
+- azure-storage-nspkg is not installed anymore on Python 3 (PEP420-based namespace package)
 
 
 ## Version 1.3.0:

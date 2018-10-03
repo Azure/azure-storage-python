@@ -4,7 +4,7 @@
 
 ## Version 1.x.x:
 
-- azure-mgmt-nspkg is not installed anymore on Python 3 (PEP420-based namespace package)
+- azure-storage-nspkg is not installed anymore on Python 3 (PEP420-based namespace package)
 
 ## Version 1.3.0:
 
