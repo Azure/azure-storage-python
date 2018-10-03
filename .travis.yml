@@ -37,7 +37,6 @@ install:
   - pip install -e azure-storage-blob
   - pip install -e azure-storage-file
   - pip install -e azure-storage-queue
-  - pip install --force-reinstall azure-nspkg==1.0.0
 script:
   - coverage run -m unittest discover
 after_success:
