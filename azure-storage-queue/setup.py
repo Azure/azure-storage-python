@@ -65,11 +65,11 @@ setup(
         'License :: OSI Approved :: MIT License',
     ],
     zip_safe=False,
-    packages=find_packages(
+    packages=find_packages(exclude=[
         # Exclude packages that will be covered by PEP420 or nspkg
         'azure',
         'azure.storage',
-    ),
+    ]),
     install_requires=[
         'azure-common>=1.1.5',
         'azure-storage-common>=1.3.0,<1.4.0'
