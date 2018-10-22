@@ -5,6 +5,7 @@
 ## Version 1.x.x:
 
 - azure-storage-nspkg is not installed anymore on Python 3 (PEP420-based namespace package)
+- copy_blob method added to BlockBlobService to enable support for deep sync copy.
 
 ## Version 1.3.1:
 - Fixed design flaw where get_blob_to_* methods buffer entire blob when max_connections is set to 1.

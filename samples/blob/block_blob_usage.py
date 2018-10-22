@@ -174,6 +174,11 @@ class BlockBlobSamples():
         # Abort copy is useful to do along with polling
         # self.service.abort_copy_blob(container_name, blob_name, copy.id)
 
+        # Sync copy
+        # Set requires_sync=True to indicate that the service should not return a result until the blob is copied.
+        # This eliminates the need for polling.
+        self.service.copy_blob(container_name, 'blob1copy', source, requires_sync=True)
+
         self.service.delete_container(container_name)
 
     def snapshot_blob(self):
