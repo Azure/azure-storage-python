@@ -3070,7 +3070,7 @@ class BaseBlobService(StorageClient):
                                destination_if_none_match,
                                destination_lease_id,
                                source_lease_id, timeout,
-                               False)
+                               False, False)
 
     def _copy_blob(self, container_name, blob_name, copy_source,
                    metadata=None,
@@ -3084,12 +3084,16 @@ class BaseBlobService(StorageClient):
                    destination_if_none_match=None,
                    destination_lease_id=None,
                    source_lease_id=None, timeout=None,
-                   incremental_copy=False):
+                   incremental_copy=False,
+                   requires_sync=None):
         '''
         See copy_blob for more details. This helper method
-        allows for standard copies as well as incremental copies which are only supported for page blobs.
+        allows for standard copies as well as incremental copies which are only supported for page blobs and sync
+        copies which are only supported for block blobs.
         :param bool incremental_copy:
-            The timeout parameter is expressed in seconds.
+            Performs an incremental copy operation on a page blob instead of a standard copy operation.
+        :param bool requires_sync:
+            Enforces that the service will not return a response until the copy is complete.
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
@@ -3136,8 +3140,10 @@ class BaseBlobService(StorageClient):
             'If-None-Match': _to_str(destination_if_none_match),
             'x-ms-lease-id': _to_str(destination_lease_id),
             'x-ms-source-lease-id': _to_str(source_lease_id),
-            'x-ms-access-tier': _to_str(premium_page_blob_tier)
+            'x-ms-access-tier': _to_str(premium_page_blob_tier),
+            'x-ms-requires-sync': _to_str(requires_sync)
         }
+
         _add_metadata_headers(metadata, request)
 
         return self._perform_request(request, _parse_properties, [BlobProperties]).copy

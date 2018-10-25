@@ -106,3 +106,20 @@ class StorageBlockBlobTest(StorageTestCase):
         block_list = self.bs.get_block_list(self.container_name, dest_blob_name, None, 'all')
         self.assertEqual(len(block_list.uncommitted_blocks), 1)
         self.assertEqual(len(block_list.committed_blocks), 0)
+
+    @record
+    def test_copy_blob_sync(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+
+        # Act
+        copy_props = self.bs.copy_blob(self.container_name, dest_blob_name, self.source_blob_url, requires_sync=True)
+
+        # Assert
+        self.assertIsNotNone(copy_props)
+        self.assertIsNotNone(copy_props.id)
+        self.assertEqual('success', copy_props.status)
+
+        # Verify content
+        dest_blob = self.bs.get_blob_to_bytes(self.container_name, dest_blob_name)
+        self.assertEqual(self.source_blob_data, dest_blob.content)
