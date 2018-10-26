@@ -1976,11 +1976,11 @@ class BaseBlobService(StorageClient):
         if max_connections > 1:
             if sys.version_info >= (3,) and not stream.seekable():
                 raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
-            else:
-                try:
-                    stream.seek(stream.tell())
-                except (NotImplementedError, AttributeError):
-                    raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
+
+            try:
+                stream.seek(stream.tell())
+            except (NotImplementedError, AttributeError):
+                raise ValueError(_ERROR_PARALLEL_NOT_SEEKABLE)
 
         # The service only provides transactional MD5s for chunks under 4MB.
         # If validate_content is on, get only self.MAX_CHUNK_GET_SIZE for the first
