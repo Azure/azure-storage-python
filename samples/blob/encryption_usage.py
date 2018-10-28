@@ -30,14 +30,14 @@ class KeyWrapper:
     def wrap_key(self, key, algorithm='A256KW'):
         if algorithm == 'A256KW':
             return aes_key_wrap(self.kek, key, self.backend)
-        else:
-            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
+        raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
 
     def unwrap_key(self, key, algorithm):
         if algorithm == 'A256KW':
             return aes_key_unwrap(self.kek, key, self.backend)
-        else:
-            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
+        raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
 
     def get_key_wrap_algorithm(self):
         return 'A256KW'
@@ -73,8 +73,8 @@ class RSAKeyWrapper:
                                                algorithm=SHA1(),
                                                label=None)
                                            )
-        else:
-            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
+        raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
 
     def unwrap_key(self, key, algorithm):
         if algorithm == 'RSA':
@@ -84,8 +84,8 @@ class RSAKeyWrapper:
                                                 algorithm=SHA1(),
                                                 label=None)
                                             )
-        else:
-            raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
+
+        raise ValueError(_ERROR_UNKNOWN_KEY_WRAP_ALGORITHM)
 
     def get_key_wrap_algorithm(self):
         return 'RSA'
