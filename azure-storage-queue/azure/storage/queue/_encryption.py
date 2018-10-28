@@ -113,8 +113,8 @@ def _decrypt_queue_message(message, require_encryption, key_encryption_key, reso
         # or the user provided a json formatted message.
         if require_encryption:
             raise ValueError(_ERROR_MESSAGE_NOT_ENCRYPTED)
-        else:
-            return message
+
+        return message
     try:
         return _decrypt(decoded_data, encryption_data, key_encryption_key, resolver).decode('utf-8')
     except Exception:
