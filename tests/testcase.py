@@ -299,6 +299,8 @@ class StorageTestCase(unittest.TestCase):
         old_to_new_dict = {
             self.settings.STORAGE_ACCOUNT_NAME: self.fake_settings.STORAGE_ACCOUNT_NAME,
             self.settings.STORAGE_ACCOUNT_KEY: self.fake_settings.STORAGE_ACCOUNT_KEY,
+            self.settings.OAUTH_STORAGE_ACCOUNT_NAME: self.fake_settings.OAUTH_STORAGE_ACCOUNT_NAME,
+            self.settings.OAUTH_STORAGE_ACCOUNT_KEY: self.fake_settings.OAUTH_STORAGE_ACCOUNT_KEY,
             self.settings.BLOB_STORAGE_ACCOUNT_NAME: self.fake_settings.BLOB_STORAGE_ACCOUNT_NAME,
             self.settings.BLOB_STORAGE_ACCOUNT_KEY: self.fake_settings.BLOB_STORAGE_ACCOUNT_KEY,
             self.settings.REMOTE_STORAGE_ACCOUNT_KEY: self.fake_settings.REMOTE_STORAGE_ACCOUNT_KEY,
