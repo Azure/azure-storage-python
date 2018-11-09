@@ -4,103 +4,44 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [55048e86-7410-11e8-b392-8cae4cee5322]
-      x-ms-date: ['Tue, 19 Jun 2018 22:30:12 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [5626bce6-e475-11e8-9ac5-acde48001122]
+      x-ms-date: ['Fri, 09 Nov 2018 23:15:24 GMT']
       x-ms-version: ['2018-03-28']
     method: PUT
     uri: https://storagename.file.core.windows.net/share31600fc8?restype=share
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 19 Jun 2018 22:30:13 GMT']
-      ETag: ['"0x8D5D6343968A099"']
-      Last-Modified: ['Tue, 19 Jun 2018 22:30:13 GMT']
+      Date: ['Fri, 09 Nov 2018 23:15:24 GMT']
+      ETag: ['"0x8D646993A6B2719"']
+      Last-Modified: ['Fri, 09 Nov 2018 23:15:24 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [2f2f7550-f01a-0002-0e1d-082c83000000]
+      x-ms-request-id: [442a4d14-201a-0010-1982-78f9cd000000]
       x-ms-version: ['2018-03-28']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [553aff0c-7410-11e8-b5ce-8cae4cee5322]
-      x-ms-date: ['Tue, 19 Jun 2018 22:30:13 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [563e96a4-e475-11e8-9ac5-acde48001122]
+      x-ms-date: ['Fri, 09 Nov 2018 23:15:24 GMT']
       x-ms-version: ['2018-03-28']
     method: GET
     uri: https://storagename.file.core.windows.net/?comp=list
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
-        ServiceEndpoint=\"https://storagename.file.core.windows.net/\"><Shares><Share><Name>share30431eaf1ce3406ba6b7a6d541b68ec6</Name><Properties><Last-Modified>Wed,
-        02 May 2018 21:19:26 GMT</Last-Modified><Etag>\"0x8D5B07262152754\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share31600fc8</Name><Properties><Last-Modified>Tue,
-        19 Jun 2018 22:30:13 GMT</Last-Modified><Etag>\"0x8D5D6343968A099\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share837d3bae7ee445e098ae4145bbe17e36</Name><Properties><Last-Modified>Wed,
-        02 May 2018 20:21:42 GMT</Last-Modified><Etag>\"0x8D5B06A51A3EA68\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>sharebbbb618714cc42b998b33cddb2e293d8</Name><Properties><Last-Modified>Wed,
-        02 May 2018 19:15:25 GMT</Last-Modified><Etag>\"0x8D5B0610F30662E\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>shared51c906eff9d407b9dab3e853bd95b41</Name><Properties><Last-Modified>Wed,
-        02 May 2018 21:27:21 GMT</Last-Modified><Etag>\"0x8D5B0737D4FDF10\"</Etag><Quota>5120</Quota></Properties></Share></Shares><NextMarker
-        /></EnumerationResults>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults\
+        \ ServiceEndpoint=\"https://storagename.file.core.windows.net/\"><Shares><Share><Name>share31600fc8</Name><Properties><Last-Modified>Fri,\
+        \ 09 Nov 2018 23:15:24 GMT</Last-Modified><Etag>\"0x8D646993A6B2719\"</Etag><Quota>5120</Quota></Properties></Share></Shares><NextMarker\
+        \ /></EnumerationResults>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Tue, 19 Jun 2018 22:30:18 GMT']
+      Date: ['Fri, 09 Nov 2018 23:15:24 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [2f2f755e-f01a-0002-131d-082c83000000]
-      x-ms-version: ['2018-03-28']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [56cb01cc-894a-11e8-8e77-720000665300]
-      x-ms-date: ['Mon, 16 Jul 2018 22:48:21 GMT']
-      x-ms-version: ['2018-03-28']
-    method: PUT
-    uri: https://storagename.file.core.windows.net/share31600fc8?restype=share
-  response:
-    body: {string: ''}
-    headers:
-      Date: ['Mon, 16 Jul 2018 22:48:20 GMT']
-      ETag: ['"0x8D5EB6E3B2F25FC"']
-      Last-Modified: ['Mon, 16 Jul 2018 22:48:21 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [64d6b33f-901a-0014-8057-1dda54000000]
-      x-ms-version: ['2018-03-28']
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [57024918-894a-11e8-9d91-720000665300]
-      x-ms-date: ['Mon, 16 Jul 2018 22:48:21 GMT']
-      x-ms-version: ['2018-03-28']
-    method: GET
-    uri: https://storagename.file.core.windows.net/?comp=list
-  response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><EnumerationResults
-        ServiceEndpoint=\"https://storagename.file.core.windows.net/\"><Shares><Share><Name>share23acd26446914344b8997d3a13e75de0</Name><Properties><Last-Modified>Tue,
-        26 Jun 2018 22:04:32 GMT</Last-Modified><Etag>\"0x8D5DBB0CBBFE1D5\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share30431eaf1ce3406ba6b7a6d541b68ec6</Name><Properties><Last-Modified>Wed,
-        02 May 2018 21:19:26 GMT</Last-Modified><Etag>\"0x8D5B07262152754\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share31600fc8</Name><Properties><Last-Modified>Mon,
-        16 Jul 2018 22:48:21 GMT</Last-Modified><Etag>\"0x8D5EB6E3B2F25FC\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share35a45956d8e64d46b10cac561c52bc43</Name><Properties><Last-Modified>Tue,
-        26 Jun 2018 21:03:46 GMT</Last-Modified><Etag>\"0x8D5DBA84E966606\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share41afdbfc71144776873ad61360b793d7</Name><Properties><Last-Modified>Wed,
-        20 Jun 2018 15:57:29 GMT</Last-Modified><Etag>\"0x8D5D6C686A7E011\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share5bd7167d90c3457a8be956d474bf248b</Name><Properties><Last-Modified>Wed,
-        20 Jun 2018 15:27:36 GMT</Last-Modified><Etag>\"0x8D5D6C259E68DD7\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share837d3bae7ee445e098ae4145bbe17e36</Name><Properties><Last-Modified>Wed,
-        02 May 2018 20:21:42 GMT</Last-Modified><Etag>\"0x8D5B06A51A3EA68\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>share959fd12d06f04e648af8ff0ad3381c32</Name><Properties><Last-Modified>Tue,
-        26 Jun 2018 21:55:10 GMT</Last-Modified><Etag>\"0x8D5DBAF7CCBA99F\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>sharebbbb618714cc42b998b33cddb2e293d8</Name><Properties><Last-Modified>Wed,
-        02 May 2018 19:15:25 GMT</Last-Modified><Etag>\"0x8D5B0610F30662E\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>shared51c906eff9d407b9dab3e853bd95b41</Name><Properties><Last-Modified>Wed,
-        02 May 2018 21:27:21 GMT</Last-Modified><Etag>\"0x8D5B0737D4FDF10\"</Etag><Quota>5120</Quota></Properties></Share><Share><Name>shareedb8a6ff37644a9b9a6344add0be82bb</Name><Properties><Last-Modified>Tue,
-        26 Jun 2018 21:13:28 GMT</Last-Modified><Etag>\"0x8D5DBA9A993419C\"</Etag><Quota>5120</Quota></Properties></Share></Shares><NextMarker
-        /></EnumerationResults>"}
-    headers:
-      Content-Type: [application/xml]
-      Date: ['Mon, 16 Jul 2018 22:48:20 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [64d6b342-901a-0014-0157-1dda54000000]
+      x-ms-request-id: [442a4d16-201a-0010-1a82-78f9cd000000]
       x-ms-version: ['2018-03-28']
     status: {code: 200, message: OK}
 version: 1

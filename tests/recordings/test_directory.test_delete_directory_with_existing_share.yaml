@@ -4,21 +4,21 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [c9411aa4-740f-11e8-983d-8cae4cee5322]
-      x-ms-date: ['Tue, 19 Jun 2018 22:26:18 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [b944a154-e474-11e8-9ac5-acde48001122]
+      x-ms-date: ['Fri, 09 Nov 2018 23:11:01 GMT']
       x-ms-version: ['2018-03-28']
     method: PUT
     uri: https://storagename.file.core.windows.net/utshare954e1740/dir1?restype=directory
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 19 Jun 2018 22:26:18 GMT']
-      ETag: ['"0x8D5D633AD9E8E91"']
-      Last-Modified: ['Tue, 19 Jun 2018 22:26:18 GMT']
+      Date: ['Fri, 09 Nov 2018 23:11:00 GMT']
+      ETag: ['"0x8D646989D8A9F57"']
+      Last-Modified: ['Fri, 09 Nov 2018 23:11:01 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [585ea248-901a-0004-791c-081f3c000000]
+      x-ms-request-id: [69ffce91-a01a-0001-5d81-78ced6000000]
       x-ms-request-server-encrypted: ['true']
       x-ms-version: ['2018-03-28']
     status: {code: 201, message: Created}
@@ -27,106 +27,42 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [c9774fd4-740f-11e8-8260-8cae4cee5322]
-      x-ms-date: ['Tue, 19 Jun 2018 22:26:18 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [b95e0d42-e474-11e8-9ac5-acde48001122]
+      x-ms-date: ['Fri, 09 Nov 2018 23:11:01 GMT']
       x-ms-version: ['2018-03-28']
     method: DELETE
     uri: https://storagename.file.core.windows.net/utshare954e1740/dir1?restype=directory
   response:
     body: {string: ''}
     headers:
-      Date: ['Tue, 19 Jun 2018 22:26:18 GMT']
+      Date: ['Fri, 09 Nov 2018 23:11:00 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [585ea24b-901a-0004-7c1c-081f3c000000]
+      x-ms-request-id: [69ffce93-a01a-0001-5e81-78ced6000000]
       x-ms-version: ['2018-03-28']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [c985e062-740f-11e8-bc64-8cae4cee5322]
-      x-ms-date: ['Tue, 19 Jun 2018 22:26:18 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [b965325c-e474-11e8-9ac5-acde48001122]
+      x-ms-date: ['Fri, 09 Nov 2018 23:11:01 GMT']
       x-ms-version: ['2018-03-28']
     method: GET
     uri: https://storagename.file.core.windows.net/utshare954e1740/dir1?restype=directory
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
-        specified resource does not exist.\nRequestId:585ea251-901a-0004-011c-081f3c000000\nTime:2018-06-19T22:26:18.9564683Z</Message></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The\
+        \ specified resource does not exist.\nRequestId:69ffce94-a01a-0001-5f81-78ced6000000\n\
+        Time:2018-11-09T23:11:01.2775502Z</Message></Error>"}
     headers:
       Content-Length: ['223']
       Content-Type: [application/xml]
-      Date: ['Tue, 19 Jun 2018 22:26:18 GMT']
+      Date: ['Fri, 09 Nov 2018 23:11:00 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-error-code: [ResourceNotFound]
-      x-ms-request-id: [585ea251-901a-0004-011c-081f3c000000]
-      x-ms-version: ['2018-03-28']
-    status: {code: 404, message: The specified resource does not exist.}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [d9f92874-8949-11e8-9889-720000665300]
-      x-ms-date: ['Mon, 16 Jul 2018 22:44:51 GMT']
-      x-ms-version: ['2018-03-28']
-    method: PUT
-    uri: https://storagename.file.core.windows.net/utshare954e1740/dir1?restype=directory
-  response:
-    body: {string: ''}
-    headers:
-      Date: ['Mon, 16 Jul 2018 22:44:52 GMT']
-      ETag: ['"0x8D5EB6DBE6C454C"']
-      Last-Modified: ['Mon, 16 Jul 2018 22:44:52 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [0b7f7044-801a-0008-2956-1d8834000000]
-      x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2018-03-28']
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [da40dbd8-8949-11e8-b12b-720000665300]
-      x-ms-date: ['Mon, 16 Jul 2018 22:44:52 GMT']
-      x-ms-version: ['2018-03-28']
-    method: DELETE
-    uri: https://storagename.file.core.windows.net/utshare954e1740/dir1?restype=directory
-  response:
-    body: {string: ''}
-    headers:
-      Date: ['Mon, 16 Jul 2018 22:44:52 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [0b7f7046-801a-0008-2a56-1d8834000000]
-      x-ms-version: ['2018-03-28']
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [da4f6b8a-8949-11e8-81a0-720000665300]
-      x-ms-date: ['Mon, 16 Jul 2018 22:44:52 GMT']
-      x-ms-version: ['2018-03-28']
-    method: GET
-    uri: https://storagename.file.core.windows.net/utshare954e1740/dir1?restype=directory
-  response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ResourceNotFound</Code><Message>The
-        specified resource does not exist.\nRequestId:0b7f7047-801a-0008-2b56-1d8834000000\nTime:2018-07-16T22:44:52.3588297Z</Message></Error>"}
-    headers:
-      Content-Length: ['223']
-      Content-Type: [application/xml]
-      Date: ['Mon, 16 Jul 2018 22:44:52 GMT']
-      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-error-code: [ResourceNotFound]
-      x-ms-request-id: [0b7f7047-801a-0008-2b56-1d8834000000]
+      x-ms-request-id: [69ffce94-a01a-0001-5f81-78ced6000000]
       x-ms-version: ['2018-03-28']
     status: {code: 404, message: The specified resource does not exist.}
 version: 1

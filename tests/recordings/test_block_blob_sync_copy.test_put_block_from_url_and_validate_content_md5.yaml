@@ -4,104 +4,10 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [60fc6546-740e-11e8-aa5c-8cae4cee5322]
-      x-ms-copy-source: ['https://xclientdevstageoauth.blob.core.windows.net/utcontainer740d1e2e/srcblob740d1e2e?se=2018-06-19T23%3A16%3A14Z&sp=r&sv=2018-03-28&sr=b&sig=Ntn3GaBOL5RLVu0FD/SoumerkZ7jdmHUCXMDO0C8LgU%3D']
-      x-ms-date: ['Tue, 19 Jun 2018 22:16:14 GMT']
-      x-ms-source-content-md5: [QBqKsd3fVdDzKdmcTQsCyA==]
-      x-ms-source-range: [bytes=0-8192]
-      x-ms-version: ['2018-03-28']
-    method: PUT
-    uri: https://storagename.blob.core.windows.net/utcontainer740d1e2e/destblob740d1e2e?comp=block&blockid=MQ%3D%3D
-  response:
-    body: {string: ''}
-    headers:
-      Date: ['Tue, 19 Jun 2018 22:16:14 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [850ae1e7-801e-0045-2d1b-0847d8000000]
-      x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2018-03-28']
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [6142ae64-740e-11e8-b19b-8cae4cee5322]
-      x-ms-date: ['Tue, 19 Jun 2018 22:16:14 GMT']
-      x-ms-version: ['2018-03-28']
-    method: GET
-    uri: https://storagename.blob.core.windows.net/utcontainer740d1e2e/destblob740d1e2e?comp=blocklist&blocklisttype=all
-  response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><BlockList><CommittedBlocks
-        /><UncommittedBlocks><Block><Name>MQ==</Name><Size>8192</Size></Block></UncommittedBlocks></BlockList>"}
-    headers:
-      Content-Type: [application/xml]
-      Date: ['Tue, 19 Jun 2018 22:16:14 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [850ae1ee-801e-0045-301b-0847d8000000]
-      x-ms-version: ['2018-03-28']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [61513ba8-740e-11e8-9178-8cae4cee5322]
-      x-ms-copy-source: ['https://xclientdevstageoauth.blob.core.windows.net/utcontainer740d1e2e/srcblob740d1e2e?se=2018-06-19T23%3A16%3A14Z&sp=r&sv=2018-03-28&sr=b&sig=Ntn3GaBOL5RLVu0FD/SoumerkZ7jdmHUCXMDO0C8LgU%3D']
-      x-ms-date: ['Tue, 19 Jun 2018 22:16:14 GMT']
-      x-ms-source-content-md5: [isbyeiguSTgSVIJgfM+1Xw==]
-      x-ms-source-range: [bytes=0-8192]
-      x-ms-version: ['2018-03-28']
-    method: PUT
-    uri: https://storagename.blob.core.windows.net/utcontainer740d1e2e/destblob740d1e2e?comp=block&blockid=Mg%3D%3D
-  response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>Md5Mismatch</Code><Message>The
-        MD5 value specified in the request did not match with the MD5 value calculated
-        by the server.\nRequestId:850ae1f0-801e-0045-321b-0847d8000000\nTime:2018-06-19T22:16:14.6634755Z</Message><UserSpecifiedMd5>isbyeiguSTgSVIJgfM+1Xw==</UserSpecifiedMd5><ServerCalculatedMd5>QBqKsd3fVdDzKdmcTQsCyA==</ServerCalculatedMd5></Error>"}
-    headers:
-      Content-Length: ['405']
-      Content-Type: [application/xml]
-      Date: ['Tue, 19 Jun 2018 22:16:14 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-error-code: [Md5Mismatch]
-      x-ms-request-id: [850ae1f0-801e-0045-321b-0847d8000000]
-      x-ms-version: ['2018-03-28']
-    status: {code: 400, message: The MD5 value specified in the request did not match
-        with the MD5 value calculated by the server.}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.3.0-1.3.0 (Python CPython 3.6.3; Darwin 17.6.0)]
-      x-ms-client-request-id: [6164f438-740e-11e8-8701-8cae4cee5322]
-      x-ms-date: ['Tue, 19 Jun 2018 22:16:14 GMT']
-      x-ms-version: ['2018-03-28']
-    method: GET
-    uri: https://storagename.blob.core.windows.net/utcontainer740d1e2e/destblob740d1e2e?comp=blocklist&blocklisttype=all
-  response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><BlockList><CommittedBlocks
-        /><UncommittedBlocks><Block><Name>MQ==</Name><Size>8192</Size></Block></UncommittedBlocks></BlockList>"}
-    headers:
-      Content-Type: [application/xml]
-      Date: ['Tue, 19 Jun 2018 22:16:14 GMT']
-      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [850ae1f2-801e-0045-341b-0847d8000000]
-      x-ms-version: ['2018-03-28']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [7c19f342-8948-11e8-a17e-720000665300]
-      x-ms-copy-source: ['https://xclientdevstageoauth.blob.core.windows.net/utcontainer740d1e2e/srcblob740d1e2e?se=2018-07-16T23%3A35%3A04Z&sp=r&sv=2018-03-28&sr=b&sig=e6u3degSakP4j%2B4poFPXq158oybuH2NUBoRotWgRHoI%3D']
-      x-ms-date: ['Mon, 16 Jul 2018 22:35:04 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [5c6b18c4-e473-11e8-9ac5-acde48001122]
+      x-ms-copy-source: ['https://zemaintest.blob.core.windows.net/utcontainer740d1e2e/srcblob740d1e2e?se=2018-11-10T00%3A01%3A15Z&sp=r&sv=2018-03-28&sr=b&sig=/D/BQOc41FRrKYt%2BqoOlLTvk6Z0TT4126mBkHectsy0%3D']
+      x-ms-date: ['Fri, 09 Nov 2018 23:01:15 GMT']
       x-ms-source-content-md5: [QBqKsd3fVdDzKdmcTQsCyA==]
       x-ms-source-range: [bytes=0-8192]
       x-ms-version: ['2018-03-28']
@@ -111,10 +17,10 @@ interactions:
     body: {string: ''}
     headers:
       Content-MD5: [QBqKsd3fVdDzKdmcTQsCyA==]
-      Date: ['Mon, 16 Jul 2018 22:35:04 GMT']
+      Date: ['Fri, 09 Nov 2018 23:01:15 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [9c559f76-301e-0022-7055-1d5724000000]
+      x-ms-request-id: [79f1093e-201e-0032-6380-7897fb000000]
       x-ms-request-server-encrypted: ['true']
       x-ms-version: ['2018-03-28']
     status: {code: 201, message: Created}
@@ -122,22 +28,22 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [7c679ff4-8948-11e8-84e9-720000665300]
-      x-ms-date: ['Mon, 16 Jul 2018 22:35:05 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [5c86da00-e473-11e8-9ac5-acde48001122]
+      x-ms-date: ['Fri, 09 Nov 2018 23:01:15 GMT']
       x-ms-version: ['2018-03-28']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainer740d1e2e/destblob740d1e2e?comp=blocklist&blocklisttype=all
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><BlockList><CommittedBlocks
-        /><UncommittedBlocks><Block><Name>MQ==</Name><Size>8192</Size></Block></UncommittedBlocks></BlockList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><BlockList><CommittedBlocks\
+        \ /><UncommittedBlocks><Block><Name>MQ==</Name><Size>8192</Size></Block></UncommittedBlocks></BlockList>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Mon, 16 Jul 2018 22:35:04 GMT']
+      Date: ['Fri, 09 Nov 2018 23:01:15 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       Vary: [Origin]
-      x-ms-request-id: [9c559f79-301e-0022-7155-1d5724000000]
+      x-ms-request-id: [79f10998-201e-0032-3880-7897fb000000]
       x-ms-version: ['2018-03-28']
     status: {code: 200, message: OK}
 - request:
@@ -145,26 +51,26 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [7c759ee8-8948-11e8-adfb-720000665300]
-      x-ms-copy-source: ['https://xclientdevstageoauth.blob.core.windows.net/utcontainer740d1e2e/srcblob740d1e2e?se=2018-07-16T23%3A35%3A04Z&sp=r&sv=2018-03-28&sr=b&sig=e6u3degSakP4j%2B4poFPXq158oybuH2NUBoRotWgRHoI%3D']
-      x-ms-date: ['Mon, 16 Jul 2018 22:35:05 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [5c8d98ea-e473-11e8-9ac5-acde48001122]
+      x-ms-copy-source: ['https://zemaintest.blob.core.windows.net/utcontainer740d1e2e/srcblob740d1e2e?se=2018-11-10T00%3A01%3A15Z&sp=r&sv=2018-03-28&sr=b&sig=/D/BQOc41FRrKYt%2BqoOlLTvk6Z0TT4126mBkHectsy0%3D']
+      x-ms-date: ['Fri, 09 Nov 2018 23:01:15 GMT']
       x-ms-source-content-md5: [isbyeiguSTgSVIJgfM+1Xw==]
       x-ms-source-range: [bytes=0-8192]
       x-ms-version: ['2018-03-28']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainer740d1e2e/destblob740d1e2e?comp=block&blockid=Mg%3D%3D
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>Md5Mismatch</Code><Message>The
-        MD5 value specified in the request did not match with the MD5 value calculated
-        by the server.\nRequestId:9c559f7a-301e-0022-7255-1d5724000000\nTime:2018-07-16T22:35:05.4390049Z</Message><UserSpecifiedMd5>isbyeiguSTgSVIJgfM+1Xw==</UserSpecifiedMd5><ServerCalculatedMd5>QBqKsd3fVdDzKdmcTQsCyA==</ServerCalculatedMd5></Error>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>Md5Mismatch</Code><Message>The\
+        \ MD5 value specified in the request did not match with the MD5 value calculated\
+        \ by the server.\nRequestId:79f109d3-201e-0032-6f80-7897fb000000\nTime:2018-11-09T23:01:16.0551249Z</Message><UserSpecifiedMd5>isbyeiguSTgSVIJgfM+1Xw==</UserSpecifiedMd5><ServerCalculatedMd5>QBqKsd3fVdDzKdmcTQsCyA==</ServerCalculatedMd5></Error>"}
     headers:
       Content-Length: ['405']
       Content-Type: [application/xml]
-      Date: ['Mon, 16 Jul 2018 22:35:04 GMT']
+      Date: ['Fri, 09 Nov 2018 23:01:15 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       x-ms-error-code: [Md5Mismatch]
-      x-ms-request-id: [9c559f7a-301e-0022-7255-1d5724000000]
+      x-ms-request-id: [79f109d3-201e-0032-6f80-7897fb000000]
       x-ms-version: ['2018-03-28']
     status: {code: 400, message: The MD5 value specified in the request did not match
         with the MD5 value calculated by the server.}
@@ -172,22 +78,22 @@ interactions:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.3.0-1.3.1 (Python CPython 3.6.4; Darwin 17.7.0)]
-      x-ms-client-request-id: [7c88d3fa-8948-11e8-a5bd-720000665300]
-      x-ms-date: ['Mon, 16 Jul 2018 22:35:05 GMT']
+      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      x-ms-client-request-id: [5c98f0d2-e473-11e8-9ac5-acde48001122]
+      x-ms-date: ['Fri, 09 Nov 2018 23:01:16 GMT']
       x-ms-version: ['2018-03-28']
     method: GET
     uri: https://storagename.blob.core.windows.net/utcontainer740d1e2e/destblob740d1e2e?comp=blocklist&blocklisttype=all
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><BlockList><CommittedBlocks
-        /><UncommittedBlocks><Block><Name>MQ==</Name><Size>8192</Size></Block></UncommittedBlocks></BlockList>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><BlockList><CommittedBlocks\
+        \ /><UncommittedBlocks><Block><Name>MQ==</Name><Size>8192</Size></Block></UncommittedBlocks></BlockList>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Mon, 16 Jul 2018 22:35:04 GMT']
+      Date: ['Fri, 09 Nov 2018 23:01:15 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
       Vary: [Origin]
-      x-ms-request-id: [9c559f7d-301e-0022-7555-1d5724000000]
+      x-ms-request-id: [79f10a66-201e-0032-7c80-7897fb000000]
       x-ms-version: ['2018-03-28']
     status: {code: 200, message: OK}
 version: 1
