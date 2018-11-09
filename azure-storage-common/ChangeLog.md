@@ -2,7 +2,7 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version XX.XX.XX:
+## Version 1.4.0:
 
 - When unable to sign request, avoid wasting time on retries by failing faster.
 - Allow the use of custom domain when creating service object targeting emulators.

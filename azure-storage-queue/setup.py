@@ -44,7 +44,7 @@ except ImportError:
 
 setup(
     name='azure-storage-queue',
-    version='1.3.0',
+    version='1.4.0',
     description='Microsoft Azure Storage Queue Client Library for Python',
     long_description=open('README.rst', 'r').read(),
     license='MIT License',
@@ -72,6 +72,6 @@ setup(
     ]),
     install_requires=[
         'azure-common>=1.1.5',
-        'azure-storage-common>=1.3.0,<1.4.0'
+        'azure-storage-common~=1.4'
     ],
 )
