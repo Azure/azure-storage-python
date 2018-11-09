@@ -2,7 +2,7 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version 1.x.x:
+## Version 1.4.0:
 
 - azure-storage-nspkg is not installed anymore on Python 3 (PEP420-based namespace package)
 
