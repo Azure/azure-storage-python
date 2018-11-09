@@ -1210,8 +1210,8 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = self._create_block_blob()
 
         access_policy = AccessPolicy()
-        access_policy.start = '2011-10-11'
-        access_policy.expiry = '2018-10-12'
+        access_policy.start = datetime.utcnow() - timedelta(hours=1)
+        access_policy.expiry = datetime.utcnow() + timedelta(hours=1)
         access_policy.permission = BlobPermissions.READ
         identifiers = {'testid': access_policy}
 
@@ -1274,7 +1274,7 @@ class StorageCommonBlobTest(StorageTestCase):
         token_credential = TokenCredential(self.generate_oauth_token())
 
         # Action 1: make sure token works
-        service = BlockBlobService(self.settings.STORAGE_ACCOUNT_NAME, token_credential=token_credential)
+        service = BlockBlobService(self.settings.OAUTH_STORAGE_ACCOUNT_NAME, token_credential=token_credential)
         result = service.exists("test")
         self.assertIsNotNone(result)
 

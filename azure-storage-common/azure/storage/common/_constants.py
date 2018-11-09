@@ -45,3 +45,7 @@ if sys.version_info >= (3, 5):
 
 # Encryption constants
 _ENCRYPTION_PROTOCOL_V1 = '1.0'
+
+_AUTHORIZATION_HEADER_NAME = 'Authorization'
+_COPY_SOURCE_HEADER_NAME = 'x-ms-copy-source'
+_REDACTED_VALUE = 'REDACTED'
