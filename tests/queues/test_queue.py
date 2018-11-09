@@ -556,7 +556,7 @@ class StorageQueueTest(StorageTestCase):
         token_credential = TokenCredential(self.generate_oauth_token())
 
         # Action 1: make sure token works
-        service = QueueService(self.settings.STORAGE_ACCOUNT_NAME, token_credential=token_credential)
+        service = QueueService(self.settings.OAUTH_STORAGE_ACCOUNT_NAME, token_credential=token_credential)
         queues = list(service.list_queues())
         self.assertIsNotNone(queues)
 
@@ -697,8 +697,8 @@ class StorageQueueTest(StorageTestCase):
 
         # Arrange
         access_policy = AccessPolicy()
-        access_policy.start = '2011-10-11'
-        access_policy.expiry = '2018-10-12'
+        access_policy.start = datetime.utcnow() - timedelta(hours=1)
+        access_policy.expiry = datetime.utcnow() + timedelta(hours=1)
         access_policy.permission = QueuePermissions.READ
 
         identifiers = {'testid': access_policy}

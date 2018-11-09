@@ -994,8 +994,8 @@ class StorageFileTest(StorageTestCase):
         file_name = self._create_file()
 
         access_policy = AccessPolicy()
-        access_policy.start = '2011-10-11'
-        access_policy.expiry = '2018-10-12'
+        access_policy.start = datetime.utcnow() - timedelta(hours=1)
+        access_policy.expiry = datetime.utcnow() + timedelta(hours=1)
         access_policy.permission = FilePermissions.READ
         identifiers = {'testid': access_policy}
 
