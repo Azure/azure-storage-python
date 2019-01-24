@@ -351,6 +351,77 @@ def _convert_xml_to_blob_list(response):
     return blob_list
 
 
+def _convert_xml_to_blob_name_list(response):
+    '''
+    <?xml version="1.0" encoding="utf-8"?>
+    <EnumerationResults ServiceEndpoint="http://myaccount.blob.core.windows.net/" ContainerName="mycontainer">
+      <Prefix>string-value</Prefix>
+      <Marker>string-value</Marker>
+      <MaxResults>int-value</MaxResults>
+      <Delimiter>string-value</Delimiter>
+      <Blobs>
+        <Blob>
+          <Name>blob-name</name>
+          <Deleted>true</Deleted>
+          <Snapshot>date-time-value</Snapshot>
+          <Properties>
+            <Last-Modified>date-time-value</Last-Modified>
+            <Etag>etag</Etag>
+            <Content-Length>size-in-bytes</Content-Length>
+            <Content-Type>blob-content-type</Content-Type>
+            <Content-Encoding />
+            <Content-Language />
+            <Content-MD5 />
+            <Cache-Control />
+            <x-ms-blob-sequence-number>sequence-number</x-ms-blob-sequence-number>
+            <BlobType>BlockBlob|PageBlob|AppendBlob</BlobType>
+            <LeaseStatus>locked|unlocked</LeaseStatus>
+            <LeaseState>available | leased | expired | breaking | broken</LeaseState>
+            <LeaseDuration>infinite | fixed</LeaseDuration>
+            <CopyId>id</CopyId>
+            <CopyStatus>pending | success | aborted | failed </CopyStatus>
+            <CopySource>source url</CopySource>
+            <CopyProgress>bytes copied/bytes total</CopyProgress>
+            <CopyCompletionTime>datetime</CopyCompletionTime>
+            <CopyStatusDescription>error string</CopyStatusDescription>
+            <AccessTier>P4 | P6 | P10 | P20 | P30 | P40 | P50 | P60 | Archive | Cool | Hot</AccessTier>
+            <AccessTierChangeTime>date-time-value</AccessTierChangeTime>
+            <AccessTierInferred>true</AccessTierInferred>
+            <DeletedTime>datetime</DeletedTime>
+            <RemainingRetentionDays>int</RemainingRetentionDays>
+            <Creation-Time>date-time-value</Creation-Time>
+          </Properties>
+          <Metadata>   
+            <Name>value</Name>
+          </Metadata>
+        </Blob>
+        <BlobPrefix>
+          <Name>blob-prefix</Name>
+        </BlobPrefix>
+      </Blobs>
+      <NextMarker />
+    </EnumerationResults>
+    '''
+    if response is None or response.body is None:
+        return None
+
+    blob_list = _list()
+    list_element = ETree.fromstring(response.body)
+
+    setattr(blob_list, 'next_marker', list_element.findtext('NextMarker'))
+
+    blobs_element = list_element.find('Blobs')
+    blob_prefix_elements = blobs_element.findall('BlobPrefix')
+    if blob_prefix_elements is not None:
+        for blob_prefix_element in blob_prefix_elements:
+            blob_list.append(blob_prefix_element.findtext('Name'))
+
+    for blob_element in blobs_element.findall('Blob'):
+        blob_list.append(blob_element.findtext('Name'))
+
+    return blob_list
+
+
 def _convert_xml_to_block_list(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>

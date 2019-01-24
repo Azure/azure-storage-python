@@ -707,6 +707,20 @@ class StorageContainerTest(StorageTestCase):
         self.assertFalse(exists)
 
     @record
+    def test_list_names(self):
+        # Arrange
+        container_name = self._create_container()
+        data = b'hello world'
+        self.bs.create_blob_from_bytes (container_name, 'blob1', data, )
+        self.bs.create_blob_from_bytes (container_name, 'blob2', data, )
+
+        # Act
+        blobs = list(self.bs.list_blob_names(container_name))
+
+        self.assertEqual(blobs, ['blob1', 'blob2'])
+
+
+    @record
     def test_list_blobs(self):
         # Arrange
         container_name = self._create_container()

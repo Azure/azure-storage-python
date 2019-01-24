@@ -58,6 +58,7 @@ from ._deserialization import (
     _convert_xml_to_containers,
     _parse_blob,
     _convert_xml_to_blob_list,
+    _convert_xml_to_blob_name_list,
     _parse_container,
     _parse_snapshot_blob,
     _parse_lease,
@@ -1243,14 +1244,66 @@ class BaseBlobService(StorageClient):
         args = (container_name,)
         kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results,
                   'include': include, 'delimiter': delimiter, 'timeout': timeout,
-                  '_context': operation_context}
+                  '_context': operation_context,
+                  '_converter': _convert_xml_to_blob_list}
+        resp = self._list_blobs(*args, **kwargs)
+
+        return ListGenerator(resp, self._list_blobs, args, kwargs)
+
+    def list_blob_names(self, container_name, prefix=None, num_results=None,
+                        include=None, delimiter=None, marker=None,
+                        timeout=None):
+        '''
+        Returns a generator to list the blob names under the specified container.
+        The generator will lazily follow the continuation tokens returned by
+        the service and stop when all blobs have been returned or num_results is reached.
+
+        If num_results is specified and the account has more than that number of 
+        blobs, the generator will have a populated next_marker field once it 
+        finishes. This marker can be used to create a new generator if more 
+        results are desired.
+
+        :param str container_name:
+            Name of existing container.
+        :param str prefix:
+            Filters the results to return only blobs whose names
+            begin with the specified prefix.
+        :param int num_results:
+            Specifies the maximum number of blobs to return,
+            including all :class:`BlobPrefix` elements. If the request does not specify
+            num_results or specifies a value greater than 5,000, the server will
+            return up to 5,000 items. Setting num_results to a value less than
+            or equal to zero results in error response code 400 (Bad Request).
+        :param ~azure.storage.blob.models.Include include:
+            Specifies one or more additional datasets to include in the response.
+        :param str delimiter:
+            When the request includes this parameter, the operation
+            returns a :class:`~azure.storage.blob.models.BlobPrefix` element in the
+            result list that acts as a placeholder for all blobs whose names begin
+            with the same substring up to the appearance of the delimiter character.
+            The delimiter may be a single character or a string.
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the 
+            next_marker field of a previous generator object if num_results was 
+            specified and that generator has finished enumerating results. If 
+            specified, this generator will begin returning results from the point 
+            where the previous generator stopped.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+        operation_context = _OperationContext(location_lock=True)
+        args = (container_name,)
+        kwargs = {'prefix': prefix, 'marker': marker, 'max_results': num_results,
+                  'include': include, 'delimiter': delimiter, 'timeout': timeout,
+                  '_context': operation_context,
+                  '_converter': _convert_xml_to_blob_name_list}
         resp = self._list_blobs(*args, **kwargs)
 
         return ListGenerator(resp, self._list_blobs, args, kwargs)
 
     def _list_blobs(self, container_name, prefix=None, marker=None,
                     max_results=None, include=None, delimiter=None, timeout=None,
-                    _context=None):
+                    _context=None, _converter=None):
         '''
         Returns the list of blobs under the specified container.
 
@@ -1319,7 +1372,7 @@ class BaseBlobService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
 
-        return self._perform_request(request, _convert_xml_to_blob_list, operation_context=_context)
+        return self._perform_request(request, _converter, operation_context=_context)
 
     def get_blob_account_information(self, container_name=None, blob_name=None, timeout=None):
         """
