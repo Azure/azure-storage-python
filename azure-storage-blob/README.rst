@@ -13,7 +13,7 @@ the Microsoft Azure `Python Developer Center`_ and our `API Reference`_ (also av
     If you are looking for the Service Bus or Azure Management
     libraries, please visit
     https://github.com/Azure/azure-sdk-for-python.
-
+ 
 
 Compatibility
 =============
