@@ -1,0 +1,157 @@
+# Variables: 
+#  'codecov-storage-repository-token' Is the codecov.io repository token.
+
+trigger:
+- master
+
+jobs:
+- job: 'Build_Packages'
+
+  pool:
+    vmImage: 'ubuntu-16.04'  
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6'
+    inputs:
+      versionSpec: 3.6
+
+  - script: |
+     pip install wheel setuptools
+    displayName: 'Prep Environment'
+
+  - script: |
+     python ./azure-storage-common/setup.py sdist bdist_wheel -d $(Build.ArtifactStagingDirectory)
+     python ./azure-storage-blob/setup.py sdist bdist_wheel -d $(Build.ArtifactStagingDirectory)
+     python ./azure-storage-file/setup.py sdist bdist_wheel -d $(Build.ArtifactStagingDirectory)
+     python ./azure-storage-queue/setup.py sdist bdist_wheel -d $(Build.ArtifactStagingDirectory)
+    displayName: 'Generate Packages'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts'
+    condition: succeededOrFailed()
+
+
+- job: 'Tests'
+  dependsOn:
+    - 'Build_Packages'
+  strategy:
+    matrix:
+      Linux_Python27:
+        os.name: 'Linux'
+        os.vmImage: 'ubuntu-16.04'
+        python.version: '2.7'
+      Linux_Python34:
+        os.name: 'Linux'
+        os.vmImage: 'ubuntu-16.04'
+        python.version: '3.4'
+      Linux_Python35:
+        os.name: 'Linux'
+        os.vmImage: 'ubuntu-16.04'
+        python.version: '3.5'
+      Linux_Python36:
+        os.name: 'Linux'
+        os.vmImage: 'ubuntu-16.04'
+        python.version: '3.6'
+      Linux_Python37:
+        os.name: 'Linux'
+        os.vmImage: 'ubuntu-16.04'
+        python.version: '3.7'
+      Windows_Python27:
+        os.name: 'Windows'
+        os.vmImage: 'vs2017-win2016'
+        python.version: '2.7'
+      Windows_Python36:
+        os.name: 'Windows'
+        os.vmImage: 'vs2017-win2016'
+        python.version: '3.6'
+      Windows_Python37:
+        os.name: 'Windows'
+        os.vmImage: 'vs2017-win2016'
+        python.version: '3.7'
+      MacOS_Python27:
+        os.name: 'MacOS'
+        os.vmImage: 'macOS-10.13'
+        python.version: '2.7'
+  pool:
+    vmImage: '$(os.vmImage)'
+
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(python.version)'
+    inputs:
+      versionSpec: '$(python.version)'
+
+  - script: |
+      pip install -U pip
+      pip install codecov
+      pip install coverage
+      pip install -r requirements.txt
+      pip install -e azure-storage-common
+      pip install -e azure-storage-blob
+      pip install -e azure-storage-file
+      pip install -e azure-storage-queue
+    displayName: 'Prep Environment'
+    enabled: false
+
+  - script: |
+      pip install -e azure-storage-nspkg
+    displayName: 'Install nspkg'
+    condition: eq('2.7', variables['python.version'])
+    enabled: false
+
+  - script: |
+      coverage run -m unittest discover
+    displayName: 'Run Tests'
+    enabled: false
+
+  - script: |
+     coverage report
+     coverage xml 
+    displayName: 'Generate Coverage'
+    enabled: false
+
+  - script: |
+     codecov -t $(codecov-storage-repository-token)
+    enabled: false
+    displayName: 'Publish Coverage to Codecov.io'
+    condition: ne(variables['codecov-storage-repository-token'], '')
+
+  - task: PublishCodeCoverageResults@1
+    enabled: false
+    displayName: 'Publish Coverage to DevOps'
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Build.SourcesDirectory)/coverage.xml'
+
+- job: Test_PyPy3
+  continueOnError: true
+  timeoutInMinutes: 90
+  dependsOn:
+  - 'Build_Packages'
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.6 For Build Tools'
+    inputs:
+      versionSpec: '3.6'
+
+  - script: |
+     cd ~/
+     wget https://bitbucket.org/pypy/pypy/downloads/pypy3-v6.0.0-linux64.tar.bz2
+     tar xf pypy3-v6.0.0-linux64.tar.bz2
+     
+     cd $(Build.SourcesDirectory)
+     
+     PATH=/home/vsts/pypy3-v6.0.0-linux64/bin/:$PATH
+     pypy3 -m ensurepip
+      pypy3 -m pip install codecov
+      pypy3 -m pip install coverage
+      pypy3 -m pip install -r requirements.txt
+      pypy3 -m pip install -e azure-storage-common
+      pypy3 -m pip install -e azure-storage-blob
+      pypy3 -m pip install -e azure-storage-file
+      pypy3 -m pip install -e azure-storage-queue
+      pypy3 -m coverage run -m unittest discover
+    displayName: 'Setup and Run Tests PyPy3'
