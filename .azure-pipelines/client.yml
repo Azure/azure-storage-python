@@ -31,7 +31,6 @@ jobs:
     displayName: 'Publish Artifacts'
     condition: succeededOrFailed()
 
-
 - job: 'Tests'
   dependsOn:
     - 'Build_Packages'
