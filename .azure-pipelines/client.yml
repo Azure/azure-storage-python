@@ -92,33 +92,27 @@ jobs:
       pip install -e azure-storage-file
       pip install -e azure-storage-queue
     displayName: 'Prep Environment'
-    enabled: false
 
   - script: |
       pip install -e azure-storage-nspkg
     displayName: 'Install nspkg'
     condition: eq('2.7', variables['python.version'])
-    enabled: false
 
   - script: |
       coverage run -m unittest discover
     displayName: 'Run Tests'
-    enabled: false
 
   - script: |
      coverage report
      coverage xml 
     displayName: 'Generate Coverage'
-    enabled: false
 
   - script: |
      codecov -t $(codecov-storage-repository-token)
-    enabled: false
     displayName: 'Publish Coverage to Codecov.io'
     condition: ne(variables['codecov-storage-repository-token'], '')
 
   - task: PublishCodeCoverageResults@1
-    enabled: false
     displayName: 'Publish Coverage to DevOps'
     inputs:
       codeCoverageTool: Cobertura
