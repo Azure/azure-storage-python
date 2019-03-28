@@ -181,6 +181,8 @@ class _BlobChunkUploader(object):
                 if self.blob_size:
                     read_size = min(self.chunk_size - len(data), self.blob_size - (index + len(data)))
                 temp = self.stream.read(read_size)
+                if isinstance(temp, str):
+                    temp = temp.encode('utf-8')
                 temp = _get_data_bytes_only('temp', temp)
                 data += temp
 
