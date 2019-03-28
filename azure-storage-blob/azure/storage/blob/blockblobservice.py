@@ -568,7 +568,7 @@ class BlockBlobService(BaseBlobService):
 
             data = stream.read(count)
             if isinstance(data, str):
-                data = data.encode()
+                data = data.encode('utf-8')
             resp = self._put_blob(
                 container_name=container_name,
                 blob_name=blob_name,
