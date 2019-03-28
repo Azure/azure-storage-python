@@ -260,26 +260,26 @@ class StorageBlobEncryptionTest(StorageTestCase):
         except AzureException as e:
             self.assertEqual(str(e), _ERROR_DECRYPTION_FAILURE)
 
-    @record
-    def test_put_blob_invalid_stream_type(self):
-        # Arrange
-        self.bbs.require_encryption = True
-        self.bbs.key_encryption_key = KeyWrapper('key1')
-        small_stream = StringIO(u'small')
-        large_stream = StringIO(u'large' * self.bbs.MAX_SINGLE_PUT_SIZE)
-        blob_name = self._get_blob_reference('block_blob')
-
-        # Assert
-        # Block blob specific single shot
-        try:
-            self.bbs.create_blob_from_stream(self.container_name, blob_name, small_stream, count=5)
-            self.fail()
-        except TypeError as e:
-            self.assertEqual(str(e), _ERROR_VALUE_SHOULD_BE_BYTES.format('blob'))
-
-        # Generic blob chunked
-        with self.assertRaises(TypeError):
-            self.bbs.create_blob_from_stream(self.container_name, blob_name, large_stream)
+    # @record
+    # def test_put_blob_invalid_stream_type(self):
+    #     # Arrange
+    #     self.bbs.require_encryption = True
+    #     self.bbs.key_encryption_key = KeyWrapper('key1')
+    #     small_stream = StringIO(u'small')
+    #     large_stream = StringIO(u'large' * self.bbs.MAX_SINGLE_PUT_SIZE)
+    #     blob_name = self._get_blob_reference('block_blob')
+    #
+    #     # Assert
+    #     # Block blob specific single shot
+    #     try:
+    #         self.bbs.create_blob_from_stream(self.container_name, blob_name, small_stream, count=5)
+    #         self.fail()
+    #     except TypeError as e:
+    #         self.assertEqual(str(e), _ERROR_VALUE_SHOULD_BE_BYTES.format('blob'))
+    #
+    #     # Generic blob chunked
+    #     with self.assertRaises(TypeError):
+    #         self.bbs.create_blob_from_stream(self.container_name, blob_name, large_stream)
 
     def test_put_blob_chunking_required_mult_of_block_size(self):
         # parallel tests introduce random order of requests, can only run live
