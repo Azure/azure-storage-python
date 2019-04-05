@@ -3,7 +3,8 @@
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
 ## Version XX.XX.XX:
-- Support for 2018-06-17 REST version. Please see our REST API documentation and blog for information about the related added features.
+- Support for 2018-11-09 REST version. Please see our REST API documentation and blog for information about the related added features.
+- Added support for append block from URL(synchronously) for append blobs.
 - Added support for generating and using blob snapshot SAS tokens.
 - Added support for generating user delegation SAS tokens.
 

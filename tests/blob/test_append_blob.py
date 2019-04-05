@@ -7,9 +7,20 @@
 # --------------------------------------------------------------------------
 import os
 import unittest
+from datetime import (
+    timedelta,
+    datetime,
+)
+
+from azure.common import (
+    AzureHttpError,
+    AzureConflictHttpError,
+)
 
 from azure.storage.blob import (
     AppendBlobService,
+    BlobPermissions,
+
 )
 from tests.testcase import (
     StorageTestCase,
@@ -17,11 +28,16 @@ from tests.testcase import (
     record,
 )
 
-#------------------------------------------------------------------------------
+from azure.storage.common._common_conversion import _get_content_md5
+
+# ------------------------------------------------------------------------------
 TEST_BLOB_PREFIX = 'blob'
 FILE_PATH = 'blob_input.temp.dat'
 LARGE_BLOB_SIZE = 64 * 1024
-#------------------------------------------------------------------------------
+SOURCE_BLOB_SIZE = 8 * 1024
+
+
+# ------------------------------------------------------------------------------
 
 class StorageAppendBlobTest(StorageTestCase):
 
@@ -31,12 +47,27 @@ class StorageAppendBlobTest(StorageTestCase):
         self.bs = self._create_storage_service(AppendBlobService, self.settings)
         self.container_name = self.get_resource_name('utcontainer')
 
+        # create source blob to be copied from
+        self.source_blob_name = self.get_resource_name('srcblob')
+        self.source_blob_data = self.get_random_bytes(SOURCE_BLOB_SIZE)
+
         if not self.is_playback():
             self.bs.create_container(self.container_name)
+            self.bs.create_blob(self.container_name, self.source_blob_name)
+            self.bs.append_blob_from_bytes(self.container_name, self.source_blob_name, self.source_blob_data)
 
         # test chunking functionality by reducing the size of each chunk,
         # otherwise the tests would take too long to execute
         self.bs.MAX_BLOCK_SIZE = 4 * 1024
+
+        # generate a SAS so that it is accessible with a URL
+        sas_token = self.bs.generate_blob_shared_access_signature(
+            self.container_name,
+            self.source_blob_name,
+            permission=BlobPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+        self.source_blob_url = self.bs.make_blob_url(self.container_name, self.source_blob_name, sas_token=sas_token)
 
     def tearDown(self):
         if not self.is_playback():
@@ -53,7 +84,7 @@ class StorageAppendBlobTest(StorageTestCase):
 
         return super(StorageAppendBlobTest, self).tearDown()
 
-    #--Helpers-----------------------------------------------------------------
+    # --Helpers-----------------------------------------------------------------
     def _get_blob_reference(self):
         return self.get_resource_name(TEST_BLOB_PREFIX)
 
@@ -76,7 +107,7 @@ class StorageAppendBlobTest(StorageTestCase):
         def read(self, count):
             return self.wrapped_file.read(count)
 
-    #--Test cases for block blobs --------------------------------------------
+    # --Test cases for block blobs --------------------------------------------
 
     @record
     def test_create_blob(self):
@@ -124,8 +155,8 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Act
         for i in range(5):
-            resp = self.bs.append_block(self.container_name, blob_name, 
-                                        u'block {0}'.format(i).encode('utf-8'))          
+            resp = self.bs.append_block(self.container_name, blob_name,
+                                        u'block {0}'.format(i).encode('utf-8'))
             self.assertEqual(resp.append_offset, 7 * i)
             self.assertEqual(resp.committed_block_count, i + 1)
             self.assertIsNotNone(resp.etag)
@@ -151,11 +182,343 @@ class StorageAppendBlobTest(StorageTestCase):
         blob_name = self._create_blob()
 
         # Act
-        resp = self.bs.append_block(self.container_name, blob_name, 
+        resp = self.bs.append_block(self.container_name, blob_name,
                                     b'block',
                                     validate_content=True)
 
         # Assert
+
+    @record
+    def test_append_block_from_url(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=4 * 1024 - 1)
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=4 * 1024, source_range_end=SOURCE_BLOB_SIZE - 1)
+        self.assertEqual(resp.append_offset, 4 * 1024)
+        self.assertEqual(resp.committed_block_count, 2)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+    @record
+    def test_append_block_from_url_and_validate_content_md5(self):
+        # Arrange
+        src_md5 = _get_content_md5(self.source_blob_data)
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls with correct md5
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             source_content_md5=src_md5)
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with wrong md5
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          source_content_md5=_get_content_md5(b"POTATO"))
+
+    @record
+    def test_append_block_from_url_with_source_if_modified(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             source_if_modified_since=resource_properties.last_modified - timedelta(
+                                                 hours=15))
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          source_if_modified_since=resource_properties.last_modified)
+
+    @record
+    def test_append_block_from_url_with_source_if_unmodified(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             source_if_unmodified_since=resource_properties.last_modified)
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          if_unmodified_since=resource_properties.last_modified - timedelta(
+                                              hours=15))
+
+    @record
+    def test_append_block_from_url_with_source_if_match(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name)
+        src_blob_resource_properties = self.bs.get_blob_properties(self.container_name, self.source_blob_name).properties
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             source_if_match=src_blob_resource_properties.etag)
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          source_if_match='0x111111111111111')
+
+    @record
+    def test_append_block_from_url_with_source_if_none_match(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name)
+        src_blob_resource_properties = self.bs.get_blob_properties(self.container_name,
+                                                                   self.source_blob_name).properties
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             source_if_none_match='0x111111111111111')
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          source_if_none_match=src_blob_resource_properties.etag)
+
+    @record
+    def test_append_block_from_url_with_maxsize_condition(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             maxsize_condition=SOURCE_BLOB_SIZE + 1)
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          maxsize_condition=SOURCE_BLOB_SIZE + 1)
+
+    @record
+    def test_append_block_from_url_with_appendpos_condition(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             appendpos_condition=0)
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          appendpos_condition=0)
+
+    @record
+    def test_append_block_from_url_with_if_modified(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             if_modified_since=resource_properties.last_modified - timedelta(
+                                                 minutes=15))
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          if_modified_since=resource_properties.last_modified)
+
+    @record
+    def test_append_block_from_url_with_if_unmodified(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             if_unmodified_since=resource_properties.last_modified)
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          if_unmodified_since=resource_properties.last_modified - timedelta(
+                                              minutes=15))
+
+    @record
+    def test_append_block_from_url_with_if_match(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             if_match=resource_properties.etag)
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          if_match='0x111111111111111')
+
+    @record
+    def test_append_block_from_url_with_if_none_match(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                             if_none_match='0x111111111111111')
+        self.assertEqual(resp.append_offset, 0)
+        self.assertEqual(resp.committed_block_count, 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                          if_none_match=blob.properties.etag)
 
     @record
     def test_append_blob_from_bytes(self):
@@ -343,7 +706,7 @@ class StorageAppendBlobTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StorageAppendBlobTest.NonSeekableFile(stream)
-            self.bs.append_blob_from_stream(self.container_name, blob_name, 
+            self.bs.append_blob_from_stream(self.container_name, blob_name,
                                             non_seekable_file, count=blob_size)
 
         # Assert
@@ -465,7 +828,7 @@ class StorageAppendBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.append_blob_from_text(self.container_name, blob_name, text, 'utf-16', 
+        self.bs.append_blob_from_text(self.container_name, blob_name, text, 'utf-16',
                                       progress_callback=callback)
 
         # Assert
@@ -491,11 +854,12 @@ class StorageAppendBlobTest(StorageTestCase):
         data = b'hello world'
 
         # Act
-        self.bs.append_blob_from_bytes(self.container_name, blob_name, data, 
+        self.bs.append_blob_from_bytes(self.container_name, blob_name, data,
                                        validate_content=True)
 
         # Assert
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()
