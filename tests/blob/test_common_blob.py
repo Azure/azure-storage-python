@@ -1172,6 +1172,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertEqual(data, result.content)
 
+    @record
     def test_token_credential(self):
         token_credential = TokenCredential(self.generate_oauth_token())
 
