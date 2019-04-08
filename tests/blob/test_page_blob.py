@@ -8,32 +8,27 @@
 import os
 import unittest
 from datetime import datetime, timedelta
+
 from azure.common import AzureHttpError
-from azure.storage.blob import BlobPermissions
+
+from azure.storage.blob import BlobPermissions, Blob, PageBlobService, SequenceNumberAction
 from azure.storage.blob.models import PremiumPageBlobTier
-
-from azure.storage.blob import (
-    Blob,
-    PageBlobService,
-    SequenceNumberAction,
-    PageRange,
-)
-
+from azure.storage.common._common_conversion import _get_content_md5
 from tests.testcase import (
     StorageTestCase,
     TestMode,
     record,
 )
-from azure.common import (
-    AzureException,
-)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 TEST_BLOB_PREFIX = 'blob'
 FILE_PATH = 'blob_input.temp.dat'
 LARGE_BLOB_SIZE = 64 * 1024 + 512
 EIGHT_TB = 8 * 1024 * 1024 * 1024 * 1024
-#------------------------------------------------------------------------------s
+SOURCE_BLOB_SIZE = 8 * 1024
+
+
+# ------------------------------------------------------------------------------s
 
 class StoragePageBlobTest(StorageTestCase):
 
@@ -43,12 +38,27 @@ class StoragePageBlobTest(StorageTestCase):
         self.bs = self._create_storage_service(PageBlobService, self.settings)
         self.container_name = self.get_resource_name('utcontainer')
 
+        # create source blob to be copied from
+        self.source_blob_name = self.get_resource_name('srcblob')
+        self.source_blob_data = self.get_random_bytes(SOURCE_BLOB_SIZE)
+
         if not self.is_playback():
             self.bs.create_container(self.container_name)
+            self.bs.create_blob(self.container_name, self.source_blob_name, SOURCE_BLOB_SIZE)
+            self.bs.create_blob_from_bytes(self.container_name, self.source_blob_name, self.source_blob_data)
 
         # test chunking functionality by reducing the size of each chunk,
         # otherwise the tests would take too long to execute
         self.bs.MAX_PAGE_SIZE = 4 * 1024
+
+        # generate a SAS so that it is accessible with a URL
+        sas_token = self.bs.generate_blob_shared_access_signature(
+            self.container_name,
+            self.source_blob_name,
+            permission=BlobPermissions.READ,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+        self.source_blob_url = self.bs.make_blob_url(self.container_name, self.source_blob_name, sas_token=sas_token)
 
     def tearDown(self):
         if not self.is_playback():
@@ -65,7 +75,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         return super(StoragePageBlobTest, self).tearDown()
 
-    #--Helpers-----------------------------------------------------------------
+    # --Helpers-----------------------------------------------------------------
 
     def _get_blob_reference(self):
         return self.get_resource_name(TEST_BLOB_PREFIX)
@@ -105,7 +115,7 @@ class StoragePageBlobTest(StorageTestCase):
         def read(self, count):
             return self.wrapped_file.read(count)
 
-    #--Test cases for page blobs --------------------------------------------
+    # --Test cases for page blobs --------------------------------------------
     @record
     def test_create_blob(self):
         # Arrange
@@ -124,7 +134,7 @@ class StoragePageBlobTest(StorageTestCase):
         # Arrange
         blob_name = self._get_blob_reference()
         metadata = {'hello': 'world', 'number': '42'}
-        
+
         # Act
         resp = self.bs.create_blob(self.container_name, blob_name, 512, metadata=metadata)
 
@@ -200,7 +210,7 @@ class StoragePageBlobTest(StorageTestCase):
         resp = self.bs.update_page(self.container_name, blob_name, data, start_range, end_range)
         blob = self.bs.get_blob_properties(self.container_name, blob_name)
         ranges = self.bs.get_page_ranges(self.container_name, blob_name)
-        
+
         # Assert
         self.assertIsNotNone(resp.etag)
         self.assertIsNotNone(resp.last_modified)
@@ -218,7 +228,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act
         data = self.get_random_bytes(512)
-        resp = self.bs.update_page(self.container_name, blob_name, data, 0, 511, 
+        resp = self.bs.update_page(self.container_name, blob_name, data, 0, 511,
                                    validate_content=True)
 
         # Assert
@@ -240,7 +250,7 @@ class StoragePageBlobTest(StorageTestCase):
     @record
     def test_put_page_if_sequence_number_lt_success(self):
         # Arrange     
-        blob_name = self._get_blob_reference() 
+        blob_name = self._get_blob_reference()
         data = self.get_random_bytes(512)
 
         start_sequence = 10
@@ -248,7 +258,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act
         self.bs.update_page(self.container_name, blob_name, data, 0, 511,
-                         if_sequence_number_lt=start_sequence + 1)
+                            if_sequence_number_lt=start_sequence + 1)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -256,7 +266,7 @@ class StoragePageBlobTest(StorageTestCase):
     @record
     def test_update_page_if_sequence_number_lt_failure(self):
         # Arrange
-        blob_name = self._get_blob_reference() 
+        blob_name = self._get_blob_reference()
         data = self.get_random_bytes(512)
         start_sequence = 10
         self.bs.create_blob(self.container_name, blob_name, 512, sequence_number=start_sequence)
@@ -264,14 +274,14 @@ class StoragePageBlobTest(StorageTestCase):
         # Act
         with self.assertRaises(AzureHttpError):
             self.bs.update_page(self.container_name, blob_name, data, 0, 511,
-                             if_sequence_number_lt=start_sequence)
+                                if_sequence_number_lt=start_sequence)
 
         # Assert
 
     @record
     def test_update_page_if_sequence_number_lte_success(self):
         # Arrange
-        blob_name = self._get_blob_reference() 
+        blob_name = self._get_blob_reference()
         data = self.get_random_bytes(512)
         start_sequence = 10
         self.bs.create_blob(self.container_name, blob_name, 512, sequence_number=start_sequence)
@@ -286,7 +296,7 @@ class StoragePageBlobTest(StorageTestCase):
     @record
     def test_update_page_if_sequence_number_lte_failure(self):
         # Arrange
-        blob_name = self._get_blob_reference() 
+        blob_name = self._get_blob_reference()
         data = self.get_random_bytes(512)
         start_sequence = 10
         self.bs.create_blob(self.container_name, blob_name, 512, sequence_number=start_sequence)
@@ -301,7 +311,7 @@ class StoragePageBlobTest(StorageTestCase):
     @record
     def test_update_page_if_sequence_number_eq_success(self):
         # Arrange
-        blob_name = self._get_blob_reference() 
+        blob_name = self._get_blob_reference()
         data = self.get_random_bytes(512)
         start_sequence = 10
         self.bs.create_blob(self.container_name, blob_name, 512, sequence_number=start_sequence)
@@ -316,7 +326,7 @@ class StoragePageBlobTest(StorageTestCase):
     @record
     def test_update_page_if_sequence_number_eq_failure(self):
         # Arrange
-        blob_name = self._get_blob_reference() 
+        blob_name = self._get_blob_reference()
         data = self.get_random_bytes(512)
         start_sequence = 10
         self.bs.create_blob(self.container_name, blob_name, 512,
@@ -340,6 +350,393 @@ class StoragePageBlobTest(StorageTestCase):
             self.bs.update_page(self.container_name, blob_name, data, 0, 511)
 
         # Assert
+
+    @record
+    def test_update_page_from_url(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+
+        # Act: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0, end_range=4 * 1024 - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=4 * 1024 - 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=4 * 1024,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=4 * 1024, source_range_end=SOURCE_BLOB_SIZE - 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+    @record
+    def test_update_page_from_url_and_validate_content_md5(self):
+        # Arrange
+        src_md5 = _get_content_md5(self.source_blob_data)
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+
+        # Act part 1: make append block from url calls with correct md5
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            source_content_md5=src_md5)
+
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with wrong md5
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         source_content_md5=_get_content_md5(b"POTATO"))
+
+    @record
+    def test_update_page_from_url_with_source_if_modified(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            source_if_modified_since=resource_properties.last_modified - timedelta(
+                                                hours=15))
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         source_if_modified_since=resource_properties.last_modified)
+
+    @record
+    def test_update_page_from_url_with_source_if_unmodified(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            source_if_unmodified_since=resource_properties.last_modified)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         if_unmodified_since=resource_properties.last_modified - timedelta(
+                                             hours=15))
+
+    @record
+    def test_update_page_from_url_with_source_if_match(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+        src_blob_resource_properties = self.bs.get_blob_properties(self.container_name,
+                                                                   self.source_blob_name).properties
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            source_if_match=src_blob_resource_properties.etag)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         source_if_match='0x111111111111111')
+
+    @record
+    def test_update_page_from_url_with_source_if_none_match(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+        src_blob_resource_properties = self.bs.get_blob_properties(self.container_name,
+                                                                   self.source_blob_name).properties
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            source_if_none_match='0x111111111111111')
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         source_if_none_match=src_blob_resource_properties.etag)
+
+    @record
+    def test_update_page_from_url_with_if_modified(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            if_modified_since=resource_properties.last_modified - timedelta(
+                                                minutes=15))
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         if_modified_since=resource_properties.last_modified)
+
+    @record
+    def test_update_page_from_url_with_if_unmodified(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            if_unmodified_since=resource_properties.last_modified)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         if_unmodified_since=resource_properties.last_modified - timedelta(
+                                             minutes=15))
+
+    @record
+    def test_update_page_from_url_with_if_match(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            if_match=resource_properties.etag)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         if_match='0x111111111111111')
+
+    @record
+    def test_update_page_from_url_with_if_none_match(self):
+        # Arrange
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            if_none_match='0x111111111111111')
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         if_none_match=blob.properties.etag)
+
+    @record
+    def test_update_page_from_url_with_sequence_number_lt(self):
+        # Arrange
+        start_sequence = 10
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE, sequence_number=start_sequence)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            if_sequence_number_lt=start_sequence + 1)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         if_sequence_number_lt=start_sequence)
+
+    @record
+    def test_update_page_from_url_with_sequence_number_lte(self):
+        # Arrange
+        start_sequence = 10
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE, sequence_number=start_sequence)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            if_sequence_number_lte=start_sequence)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         if_sequence_number_lte=start_sequence-1)
+
+    @record
+    def test_update_page_from_url_with_sequence_number_eq(self):
+        # Arrange
+        start_sequence = 10
+        dest_blob_name = self.get_resource_name('destblob')
+        self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE, sequence_number=start_sequence)
+
+        # Act part 1: make append block from url calls
+        resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                            end_range=SOURCE_BLOB_SIZE - 1,
+                                            copy_source_url=self.source_blob_url,
+                                            source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                            if_sequence_number_eq=start_sequence)
+        self.assertIsNotNone(resp.etag)
+        self.assertIsNotNone(resp.last_modified)
+
+        # Assert the destination blob is constructed correctly
+        blob = self.bs.get_blob_properties(self.container_name, dest_blob_name)
+        self.assertBlobEqual(self.container_name, dest_blob_name, self.source_blob_data)
+        self.assertEqual(blob.properties.etag, resp.etag)
+        self.assertEqual(blob.properties.last_modified, resp.last_modified)
+
+        # Act part 2: put block from url with failing condition
+        with self.assertRaises(AzureHttpError):
+            self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
+                                         end_range=SOURCE_BLOB_SIZE - 1,
+                                         copy_source_url=self.source_blob_url,
+                                         source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
+                                         if_sequence_number_eq=start_sequence+1)
 
     @record
     def test_get_page_ranges_no_pages(self):
@@ -373,7 +770,6 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertEqual(ranges[0].end, 511)
         self.assertEqual(ranges[1].start, 1024)
         self.assertEqual(ranges[1].end, 1535)
-
 
     @record
     def test_get_page_ranges_diff(self):
@@ -410,7 +806,7 @@ class StoragePageBlobTest(StorageTestCase):
         self.assertEqual(ranges2[0].start, 512)
         self.assertEqual(ranges2[0].end, 1023)
 
-    @record    
+    @record
     def test_update_page_fail(self):
         # Arrange
         blob_name = self._create_blob(2048)
@@ -427,12 +823,11 @@ class StoragePageBlobTest(StorageTestCase):
         # Assert
         raise Exception('Page range validation failed to throw on failure case')
 
-
     @record
     def test_resize_blob(self):
         # Arrange
         blob_name = self._create_blob(1024)
-        
+
         # Act
         resp = self.bs.resize_blob(self.container_name, blob_name, 512)
 
@@ -448,11 +843,11 @@ class StoragePageBlobTest(StorageTestCase):
     def test_set_sequence_number_blob(self):
         # Arrange
         blob_name = self._create_blob()
-        
-        # Act
-        resp = self.bs.set_sequence_number(self.container_name, blob_name, SequenceNumberAction.Update, 6)     
 
-        #Assert
+        # Act
+        resp = self.bs.set_sequence_number(self.container_name, blob_name, SequenceNumberAction.Update, 6)
+
+        # Assert
         self.assertIsNotNone(resp.etag)
         self.assertIsNotNone(resp.last_modified)
         self.assertIsNotNone(resp.sequence_number)
@@ -590,7 +985,7 @@ class StoragePageBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, 
+        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH,
                                       progress_callback=callback)
 
         # Assert
@@ -666,8 +1061,8 @@ class StoragePageBlobTest(StorageTestCase):
         blob_size = len(data)
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StoragePageBlobTest.NonSeekableFile(stream)
-            self.bs.create_blob_from_stream(self.container_name, blob_name, 
-                                            non_seekable_file, blob_size, 
+            self.bs.create_blob_from_stream(self.container_name, blob_name,
+                                            non_seekable_file, blob_size,
                                             max_connections=1)
 
         # Assert
@@ -692,7 +1087,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         blob_size = len(data)
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, 
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
                                             blob_size, progress_callback=callback)
 
         # Assert
@@ -737,7 +1132,7 @@ class StoragePageBlobTest(StorageTestCase):
 
         blob_size = len(data) - 512
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, 
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
                                             blob_size, progress_callback=callback)
 
         # Assert
@@ -751,7 +1146,7 @@ class StoragePageBlobTest(StorageTestCase):
         data = self.get_random_bytes(512)
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
                                        validate_content=True)
 
         # Assert
@@ -766,7 +1161,7 @@ class StoragePageBlobTest(StorageTestCase):
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, 
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
                                        validate_content=True)
 
         # Assert
@@ -793,7 +1188,7 @@ class StoragePageBlobTest(StorageTestCase):
         # Act
         source_blob_url = self.bs.make_blob_url(
             self.container_name,
-            source_blob_name, # + '?snapshot=' + source_snapshot_blob.snapshot,
+            source_blob_name,  # + '?snapshot=' + source_snapshot_blob.snapshot,
             sas_token=sas_token,
             snapshot=source_snapshot_blob.snapshot)
 
@@ -833,7 +1228,8 @@ class StoragePageBlobTest(StorageTestCase):
             # test create_blob_from_bytes API
             blob_name2 = self._get_blob_reference()
             byte_data = self.get_random_bytes(1024)
-            ps.create_blob_from_bytes(container_name, blob_name2, byte_data, premium_page_blob_tier=PremiumPageBlobTier.P6)
+            ps.create_blob_from_bytes(container_name, blob_name2, byte_data,
+                                      premium_page_blob_tier=PremiumPageBlobTier.P6)
 
             blob2 = ps.get_blob_properties(container_name, blob_name2)
             self.assertEqual(blob2.properties.blob_tier, PremiumPageBlobTier.P6)
@@ -843,7 +1239,8 @@ class StoragePageBlobTest(StorageTestCase):
             blob_name3 = self._get_blob_reference()
             with open(FILE_PATH, 'wb') as stream:
                 stream.write(byte_data)
-            ps.create_blob_from_path(container_name, blob_name3, FILE_PATH, premium_page_blob_tier=PremiumPageBlobTier.P10)
+            ps.create_blob_from_path(container_name, blob_name3, FILE_PATH,
+                                     premium_page_blob_tier=PremiumPageBlobTier.P10)
 
             blob3 = ps.get_blob_properties(container_name, blob_name3)
             self.assertEqual(blob3.properties.blob_tier, PremiumPageBlobTier.P10)
@@ -852,7 +1249,8 @@ class StoragePageBlobTest(StorageTestCase):
             # test create_blob_from_stream API
             blob_name4 = self._get_blob_reference()
             with open(FILE_PATH, 'rb') as stream:
-                ps.create_blob_from_stream(container_name, blob_name4, stream, 1024, premium_page_blob_tier=PremiumPageBlobTier.P20)
+                ps.create_blob_from_stream(container_name, blob_name4, stream, 1024,
+                                           premium_page_blob_tier=PremiumPageBlobTier.P20)
 
             blob4 = ps.get_blob_properties(container_name, blob_name4)
             self.assertEqual(blob4.properties.blob_tier, PremiumPageBlobTier.P20)
@@ -917,9 +1315,10 @@ class StoragePageBlobTest(StorageTestCase):
 
             # Act
             source_blob = '/{0}/{1}/{2}'.format(self.settings.PREMIUM_STORAGE_ACCOUNT_NAME,
-                                               container_name,
-                                               source_blob_name)
-            copy = ps.copy_blob(container_name, 'blob1copy', source_blob, premium_page_blob_tier=PremiumPageBlobTier.P30)
+                                                container_name,
+                                                source_blob_name)
+            copy = ps.copy_blob(container_name, 'blob1copy', source_blob,
+                                premium_page_blob_tier=PremiumPageBlobTier.P30)
 
             # Assert
             self.assertIsNotNone(copy)
@@ -932,10 +1331,11 @@ class StoragePageBlobTest(StorageTestCase):
             source_blob_name2 = self._get_blob_reference()
             ps.create_blob(container_name, source_blob_name2, 1024)
             source_blob2 = '/{0}/{1}/{2}'.format(self.settings.STORAGE_ACCOUNT_NAME,
-                                                container_name,
-                                                source_blob_name2)
+                                                 container_name,
+                                                 source_blob_name2)
 
-            copy2 = ps.copy_blob(container_name, 'blob2copy', source_blob2, premium_page_blob_tier=PremiumPageBlobTier.P60)
+            copy2 = ps.copy_blob(container_name, 'blob2copy', source_blob2,
+                                 premium_page_blob_tier=PremiumPageBlobTier.P60)
             self.assertIsNotNone(copy2)
             self.assertEqual(copy2.status, 'success')
             self.assertIsNotNone(copy2.id)
@@ -955,6 +1355,7 @@ class StoragePageBlobTest(StorageTestCase):
         finally:
             ps.delete_container(container_name)
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()
