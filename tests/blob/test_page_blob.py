@@ -357,7 +357,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
 
-        # Act: make append block from url calls
+        # Act: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0, end_range=4 * 1024 - 1,
                                             copy_source_url=self.source_blob_url,
                                             source_range_start=0, source_range_end=4 * 1024 - 1)
@@ -384,7 +384,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
 
-        # Act part 1: make append block from url calls with correct md5
+        # Act part 1: make update page from url calls with correct md5
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -414,7 +414,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -444,7 +444,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -476,7 +476,7 @@ class StoragePageBlobTest(StorageTestCase):
         src_blob_resource_properties = self.bs.get_blob_properties(self.container_name,
                                                                    self.source_blob_name).properties
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -507,7 +507,7 @@ class StoragePageBlobTest(StorageTestCase):
         src_blob_resource_properties = self.bs.get_blob_properties(self.container_name,
                                                                    self.source_blob_name).properties
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -536,7 +536,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -566,7 +566,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -596,7 +596,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         resource_properties = self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -625,7 +625,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -655,7 +655,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE, sequence_number=start_sequence)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -685,7 +685,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE, sequence_number=start_sequence)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,
@@ -715,7 +715,7 @@ class StoragePageBlobTest(StorageTestCase):
         dest_blob_name = self.get_resource_name('destblob')
         self.bs.create_blob(self.container_name, dest_blob_name, SOURCE_BLOB_SIZE, sequence_number=start_sequence)
 
-        # Act part 1: make append block from url calls
+        # Act part 1: make update page from url calls
         resp = self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                             end_range=SOURCE_BLOB_SIZE - 1,
                                             copy_source_url=self.source_blob_url,

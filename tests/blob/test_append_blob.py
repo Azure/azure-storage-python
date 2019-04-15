@@ -215,6 +215,11 @@ class StorageAppendBlobTest(StorageTestCase):
         self.assertEqual(blob.properties.etag, resp.etag)
         self.assertEqual(blob.properties.last_modified, resp.last_modified)
 
+        # Missing start range shouldn't pass the validation
+        with self.assertRaises(ValueError):
+            self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
+                                          source_range_end=SOURCE_BLOB_SIZE - 1)
+
     @record
     def test_append_block_from_url_and_validate_content_md5(self):
         # Arrange
@@ -224,7 +229,6 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Act part 1: make append block from url calls with correct md5
         resp = self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
-                                             source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
                                              source_content_md5=src_md5)
         self.assertEqual(resp.append_offset, 0)
         self.assertEqual(resp.committed_block_count, 1)
@@ -240,7 +244,6 @@ class StorageAppendBlobTest(StorageTestCase):
         # Act part 2: put block from url with wrong md5
         with self.assertRaises(AzureHttpError):
             self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
-                                          source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
                                           source_content_md5=_get_content_md5(b"POTATO"))
 
     @record

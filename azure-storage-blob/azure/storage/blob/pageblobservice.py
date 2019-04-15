@@ -474,8 +474,6 @@ class PageBlobService(BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('copy_source_url', copy_source_url)
-        _validate_not_none('source_range_start', source_range_start)
-        _validate_not_none('source_range_end', source_range_end)
 
         request = HTTPRequest()
         request.method = 'PUT'
@@ -488,7 +486,6 @@ class PageBlobService(BaseBlobService):
         request.headers = {
             'x-ms-page-write': 'update',
             'x-ms-copy-source': copy_source_url,
-            'x-ms-source-range': 'bytes=' + _to_str(source_range_start) + '-' + _to_str(source_range_end),
             'x-ms-source-content-md5': source_content_md5,
             'x-ms-source-if-Modified-Since': _datetime_to_utc_string(source_if_modified_since),
             'x-ms-source-if-Unmodified-Since': _datetime_to_utc_string(source_if_unmodified_since),
@@ -508,6 +505,11 @@ class PageBlobService(BaseBlobService):
             start_range,
             end_range,
             align_to_page=True)
+        _validate_and_format_range_headers(
+            request,
+            source_range_start,
+            source_range_end,
+            range_header_name="x-ms-source-range")
 
         return self._perform_request(request, _parse_page_properties)
 

@@ -33,6 +33,7 @@ from ._deserialization import (
 )
 from ._serialization import (
     _get_path,
+    _validate_and_format_range_headers,
 )
 from ._upload_chunking import (
     _AppendBlobChunkUploader,
@@ -286,8 +287,8 @@ class AppendBlobService(BaseBlobService):
 
         return self._perform_request(request, _parse_append_block)
 
-    def append_block_from_url(self, container_name, blob_name, copy_source_url, source_range_start, source_range_end,
-                              source_content_md5=None, source_if_modified_since=None,
+    def append_block_from_url(self, container_name, blob_name, copy_source_url, source_range_start=None,
+                              source_range_end=None, source_content_md5=None, source_if_modified_since=None,
                               source_if_unmodified_since=None, source_if_match=None,
                               source_if_none_match=None, maxsize_condition=None,
                               appendpos_condition=None, lease_id=None, if_modified_since=None,
@@ -373,8 +374,6 @@ class AppendBlobService(BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('copy_source_url', copy_source_url)
-        _validate_not_none('source_range_start', source_range_start)
-        _validate_not_none('source_range_end', source_range_end)
 
         request = HTTPRequest()
         request.method = 'PUT'
@@ -386,7 +385,6 @@ class AppendBlobService(BaseBlobService):
         }
         request.headers = {
             'x-ms-copy-source': copy_source_url,
-            'x-ms-source-range': 'bytes=' + _to_str(source_range_start) + '-' + _to_str(source_range_end),
             'x-ms-source-content-md5': source_content_md5,
             'x-ms-source-if-Modified-Since': _datetime_to_utc_string(source_if_modified_since),
             'x-ms-source-if-Unmodified-Since': _datetime_to_utc_string(source_if_unmodified_since),
@@ -400,6 +398,11 @@ class AppendBlobService(BaseBlobService):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match)
         }
+
+        _validate_and_format_range_headers(request, source_range_start, source_range_end,
+                                           start_range_required=False,
+                                           end_range_required=False,
+                                           range_header_name="x-ms-source-range")
 
         return self._perform_request(request, _parse_append_block)
 

@@ -89,7 +89,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Act part 1: put block from url with md5 validation
         self.bs.put_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
-                                   source_range_start=0, source_range_end=8 * 1024, block_id=1, source_content_md5=src_md5)
+                                   block_id=1, source_content_md5=src_md5)
 
         # Assert block was staged
         block_list = self.bs.get_block_list(self.container_name, dest_blob_name, None, 'all')
@@ -99,8 +99,7 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act part 2: put block from url with wrong md5
         with self.assertRaises(AzureHttpError):
             self.bs.put_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
-                                       source_range_start=0, source_range_end=8 * 1024, block_id=2,
-                                       source_content_md5=_get_content_md5(b"POTATO"))
+                                       block_id=2, source_content_md5=_get_content_md5(b"POTATO"))
 
         # Assert block was not staged
         block_list = self.bs.get_block_list(self.container_name, dest_blob_name, None, 'all')
