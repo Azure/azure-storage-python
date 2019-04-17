@@ -36,6 +36,7 @@ from .models import (
     ResourceProperties,
     BlobPrefix,
     AccountInformation,
+    UserDelegationKey,
 )
 from ._encryption import _decrypt_blob
 from azure.storage.common.models import _list
@@ -520,3 +521,36 @@ def _parse_account_information(response):
     account_info.account_kind = response.headers['x-ms-account-kind']
 
     return account_info
+
+
+def _convert_xml_to_user_delegation_key(response):
+    """
+    <?xml version="1.0" encoding="utf-8"?>
+    <UserDelegationKey>
+        <SignedOid> Guid </SignedOid>
+        <SignedTid> Guid </SignedTid>
+        <SignedStart> String, formatted ISO Date </SignedStart>
+        <SignedExpiry> String, formatted ISO Date </SignedExpiry>
+        <SignedService>b</SignedService>
+        <SignedVersion> String, rest api version used to create delegation key </SignedVersion>
+        <Value>Ovg+o0K/0/2V8upg7AwlyAPCriEcOSXKuBu2Gv/PU70Y7aWDW3C2ZRmw6kYWqPWBaM1GosLkcSZkgsobAlT+Sw==</value>
+    </UserDelegationKey >
+
+    Converts xml response to UserDelegationKey class.
+    """
+
+    if response is None or response.body is None:
+        return None
+
+    delegation_key = UserDelegationKey()
+
+    key_element = ETree.fromstring(response.body)
+    delegation_key.signed_oid = key_element.findtext('SignedOid')
+    delegation_key.signed_tid = key_element.findtext('SignedTid')
+    delegation_key.signed_start = key_element.findtext('SignedStart')
+    delegation_key.signed_expiry = key_element.findtext('SignedExpiry')
+    delegation_key.signed_service = key_element.findtext('SignedService')
+    delegation_key.signed_version = key_element.findtext('SignedVersion')
+    delegation_key.value = key_element.findtext('Value')
+
+    return delegation_key

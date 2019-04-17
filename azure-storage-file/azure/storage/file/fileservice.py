@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 import sys
+import math
 from os import path
 
 from azure.common import AzureHttpError
@@ -88,6 +89,8 @@ _PARENT_NOT_FOUND_ERROR_CODE = 'ParentNotFound'
 _RESOURCE_NOT_FOUND_ERROR_CODE = 'ResourceNotFound'
 _RESOURCE_ALREADY_EXISTS_ERROR_CODE = 'ResourceAlreadyExists'
 _SHARE_ALREADY_EXISTS_ERROR_CODE = 'ShareAlreadyExists'
+
+_GB = 1024 * 1024 * 1024
 
 if sys.version_info >= (3,):
     from io import BytesIO
@@ -874,7 +877,7 @@ class FileService(StorageClient):
         rounded up to the nearest gigabyte.
         
         Note that this value may not include all recently created
-        or recently resized files.
+        or recently re-sized files.
 
         :param str share_name:
             Name of existing share.
@@ -883,6 +886,34 @@ class FileService(StorageClient):
         :return: the approximate size of the data stored on the share.
         :rtype: int
         '''
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(share_name)
+        request.query = {
+            'restype': 'share',
+            'comp': 'stats',
+            'timeout': _int_to_str(timeout),
+        }
+
+        usage = self._perform_request(request, _convert_xml_to_share_stats)
+        return int(math.ceil(float(usage)/_GB))
+
+    def get_share_stats_in_bytes(self, share_name, timeout=None):
+        """
+        Gets the approximate size of the data stored on the share in bytes.
+
+        Note that this value may not include all recently created
+        or recently re-sized files.
+
+        :param str share_name:
+            Name of existing share.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: the approximate size of the data stored on the share.
+        :rtype: int
+        """
         _validate_not_none('share_name', share_name)
         request = HTTPRequest()
         request.method = 'GET'

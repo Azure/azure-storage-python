@@ -231,11 +231,11 @@ def _convert_xml_to_share_stats(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <ShareStats>
-       <ShareUsage>15</ShareUsage>
+       <ShareUsageBytes>15</ShareUsageBytes>
     </ShareStats>
     '''
     if response is None or response.body is None:
         return None
 
     share_stats_element = ETree.fromstring(response.body)
-    return int(share_stats_element.findtext('ShareUsage'))
+    return int(share_stats_element.findtext('ShareUsageBytes'))

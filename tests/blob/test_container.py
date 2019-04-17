@@ -950,38 +950,6 @@ class StorageContainerTest(StorageTestCase):
         self.assertEqual(blobs[2].metadata['number'], '2')
         self.assertEqual(blobs[2].metadata['name'], 'car')
 
-
-    @record
-    def test_shared_access_container(self):
-        # SAS URL is calculated from storage key, so this test runs live only
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
-        # Arrange
-        container_name = self._create_container()
-        blob_name  = 'blob1'
-        data = b'hello world'
-
-        self.bs.create_blob_from_bytes (container_name, blob_name, data)
-
-        token = self.bs.generate_container_shared_access_signature(
-            container_name,
-            expiry=datetime.utcnow() + timedelta(hours=1),
-            permission=ContainerPermissions.READ,
-        )
-        url = self.bs.make_blob_url(
-            container_name,
-            blob_name,
-            sas_token=token,
-        )
-
-        # Act
-        response = requests.get(url)
-
-        # Assert
-        self.assertTrue(response.ok)
-        self.assertEqual(data, response.content)
-
     @record
     def test_web_container_normal_operations_working(self):
         web_container = "$web"

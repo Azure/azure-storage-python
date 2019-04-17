@@ -37,6 +37,7 @@ from azure.storage.common._error import (
     _validate_decryption_required,
     _validate_access_policies,
     _ERROR_PARALLEL_NOT_SEEKABLE,
+    _validate_user_delegation_key,
 )
 from azure.storage.common._http import HTTPRequest
 from azure.storage.common._serialization import (
@@ -65,6 +66,7 @@ from ._deserialization import (
     _convert_xml_to_signed_identifiers_and_access,
     _parse_base_properties,
     _parse_account_information,
+    _convert_xml_to_user_delegation_key,
 )
 from ._download_chunking import _download_blob_chunks
 from ._error import (
@@ -74,6 +76,7 @@ from ._error import (
 from ._serialization import (
     _get_path,
     _validate_and_format_range_headers,
+    _convert_delegation_key_info_to_xml,
 )
 from .models import (
     BlobProperties,
@@ -343,7 +346,7 @@ class BaseBlobService(StorageClient):
                                                    start=None, id=None, ip=None, protocol=None,
                                                    cache_control=None, content_disposition=None,
                                                    content_encoding=None, content_language=None,
-                                                   content_type=None):
+                                                   content_type=None, user_delegation_key=None):
         '''
         Generates a shared access signature for the container.
         Use the returned signature with the sas_token parameter of any BlobService.
@@ -400,14 +403,24 @@ class BaseBlobService(StorageClient):
         :param str content_type:
             Response header value for Content-Type when resource is accessed
             using this shared access signature.
+        :param ~azure.storage.blob.models.UserDelegationKey user_delegation_key:
+            Instead of an account key, the user could pass in a user delegation key.
+            A user delegation key can be obtained from the service by authenticating with an AAD identity;
+            this can be accomplished by calling get_user_delegation_key.
+            When present, the SAS is signed with the user delegation key instead.
         :return: A Shared Access Signature (sas) token.
         :rtype: str
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('self.account_name', self.account_name)
-        _validate_not_none('self.account_key', self.account_key)
 
-        sas = BlobSharedAccessSignature(self.account_name, self.account_key)
+        if user_delegation_key is not None:
+            _validate_user_delegation_key(user_delegation_key)
+            sas = BlobSharedAccessSignature(self.account_name, user_delegation_key=user_delegation_key)
+        else:
+            _validate_not_none('self.account_key', self.account_key)
+            sas = BlobSharedAccessSignature(self.account_name, account_key=self.account_key)
+
         return sas.generate_container(
             container_name,
             permission,
@@ -424,19 +437,22 @@ class BaseBlobService(StorageClient):
         )
 
     def generate_blob_shared_access_signature(
-            self, container_name, blob_name, permission=None,
+            self, container_name, blob_name, snapshot=None, permission=None,
             expiry=None, start=None, id=None, ip=None, protocol=None,
             cache_control=None, content_disposition=None,
             content_encoding=None, content_language=None,
-            content_type=None):
+            content_type=None, user_delegation_key=None):
         '''
-        Generates a shared access signature for the blob.
+        Generates a shared access signature for the blob or one of its snapshots.
         Use the returned signature with the sas_token parameter of any BlobService.
 
         :param str container_name:
             Name of container.
         :param str blob_name:
             Name of blob.
+        :param str snapshot:
+            The snapshot parameter is an opaque DateTime value that,
+            when present, specifies the blob snapshot to grant permission.
         :param BlobPermissions permission:
             The permissions associated with the shared access signature. The 
             user is restricted to operations allowed by the permissions.
@@ -486,20 +502,31 @@ class BaseBlobService(StorageClient):
         :param str content_type:
             Response header value for Content-Type when resource is accessed
             using this shared access signature.
+        :param ~azure.storage.blob.models.UserDelegationKey user_delegation_key:
+            Instead of an account key, the user could pass in a user delegation key.
+            A user delegation key can be obtained from the service by authenticating with an AAD identity;
+            this can be accomplished by calling get_user_delegation_key.
+            When present, the SAS is signed with the user delegation key instead.
         :return: A Shared Access Signature (sas) token.
         :rtype: str
         '''
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('self.account_name', self.account_name)
-        _validate_not_none('self.account_key', self.account_key)
 
-        sas = BlobSharedAccessSignature(self.account_name, self.account_key)
+        if user_delegation_key is not None:
+            _validate_user_delegation_key(user_delegation_key)
+            sas = BlobSharedAccessSignature(self.account_name, user_delegation_key=user_delegation_key)
+        else:
+            _validate_not_none('self.account_key', self.account_key)
+            sas = BlobSharedAccessSignature(self.account_name, account_key=self.account_key)
+
         return sas.generate_blob(
-            container_name,
-            blob_name,
-            permission,
-            expiry,
+            container_name=container_name,
+            blob_name=blob_name,
+            snapshot=snapshot,
+            permission=permission,
+            expiry=expiry,
             start=start,
             id=id,
             ip=ip,
@@ -510,6 +537,33 @@ class BaseBlobService(StorageClient):
             content_language=content_language,
             content_type=content_type,
         )
+
+    def get_user_delegation_key(self, key_start_time, key_expiry_time, timeout=None):
+        """
+        Obtain a user delegation key for the purpose of signing SAS tokens.
+        A token credential must be present on the service object for this request to succeed.
+
+        :param datetime key_start_time:
+            A DateTime value. Indicates when the key becomes valid.
+        :param datetime key_expiry_time:
+            A DateTime value. Indicates when the key stops being valid.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return:
+        """
+        _validate_not_none('key_start_time', key_start_time)
+        _validate_not_none('key_end_time', key_expiry_time)
+
+        request = HTTPRequest()
+        request.method = 'POST'
+        request.host_locations = self._get_host_locations(secondary=True)
+        request.query = {
+            'restype': 'service',
+            'comp': 'userdelegationkey',
+            'timeout': _int_to_str(timeout),
+        }
+        request.body = _get_request_body(_convert_delegation_key_info_to_xml(key_start_time, key_expiry_time))
+        return self._perform_request(request, _convert_xml_to_user_delegation_key)
 
     def list_containers(self, prefix=None, num_results=None, include_metadata=False,
                         marker=None, timeout=None):
