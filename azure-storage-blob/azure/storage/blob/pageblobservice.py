@@ -381,13 +381,11 @@ class PageBlobService(BaseBlobService):
         )
 
     def update_page_from_url(self, container_name, blob_name, start_range, end_range, copy_source_url,
-                             source_range_start, source_range_end,
-                             source_content_md5=None, source_if_modified_since=None,
-                             source_if_unmodified_since=None, source_if_match=None,
-                             source_if_none_match=None, lease_id=None, if_sequence_number_lte=None,
-                             if_sequence_number_lt=None, if_sequence_number_eq=None, if_modified_since=None,
-                             if_unmodified_since=None, if_match=None,
-                             if_none_match=None, timeout=None):
+                             source_range_start, source_content_md5=None, source_if_modified_since=None,
+                             source_if_unmodified_since=None, source_if_match=None, source_if_none_match=None,
+                             lease_id=None, if_sequence_number_lte=None, if_sequence_number_lt=None,
+                             if_sequence_number_eq=None, if_modified_since=None, if_unmodified_since=None,
+                             if_match=None, if_none_match=None, timeout=None):
         """
         Updates a range of pages to a page blob where the contents are read from a URL.
 
@@ -410,8 +408,7 @@ class PageBlobService(BaseBlobService):
             shared access signature attached.
         :param int source_range_start:
             This indicates the start of the range of bytes(inclusive) that has to be taken from the copy source.
-        :param int source_range_end:
-            This indicates the end of the range of bytes(inclusive) that has to be taken from the copy source.
+            The service will read the same number of bytes as the destination range (end_range-start_range).
         :param str source_content_md5:
             If given, the service will calculate the MD5 hash of the block content and compare against this value.
         :param datetime source_if_modified_since:
@@ -508,7 +505,7 @@ class PageBlobService(BaseBlobService):
         _validate_and_format_range_headers(
             request,
             source_range_start,
-            source_range_end,
+            source_range_start+(end_range-start_range),
             range_header_name="x-ms-source-range")
 
         return self._perform_request(request, _parse_page_properties)
