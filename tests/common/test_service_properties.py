@@ -132,6 +132,11 @@ class ServicePropertiesTest(StorageTestCase):
         self._assert_properties_default(props)
         self.assertEqual('2014-02-14', props.target_version)
 
+    def test_blob_service_properties_exception(self):
+        # if users did't provide any parameter, throw an Exception to alert them
+        with self.assertRaises(ValueError):
+            self.bs.set_blob_service_properties()
+
     @record
     def test_queue_service_properties(self):
         # Arrange
