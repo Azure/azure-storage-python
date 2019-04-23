@@ -29,7 +29,7 @@ from azure.storage.blob import (
     DeleteSnapshot,
     Include,
     ContainerPermissions,
-)
+    AppendBlobService)
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -1243,6 +1243,58 @@ class StorageCommonBlobTest(StorageTestCase):
         # Assert
         self.assertIsNotNone(info.sku_name)
         self.assertIsNotNone(info.account_kind)
+
+    @record
+    def test_create_blob_with_container_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        token = self.bs.generate_container_shared_access_signature(
+            self.container_name,
+            permission=ContainerPermissions.READ + ContainerPermissions.CREATE,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+
+        bs_with_sas = BlockBlobService(account_name=self.settings.STORAGE_ACCOUNT_NAME, sas_token=token,
+                                       protocol=self.settings.PROTOCOL)
+
+        # Act
+        test_blob_name = "testblobname"
+        test_blob_content = "test-blob-content"
+        bs_with_sas.create_blob_from_text(self.container_name, blob_name=test_blob_name, text=test_blob_content)
+        blob_created_successfully = bs_with_sas.exists(container_name=self.container_name, blob_name=test_blob_name)
+
+        # Assert
+        self.assertTrue(blob_created_successfully, "blob:" + test_blob_name + "was created successfully")
+
+    @record
+    def test_add_block_to_append_blob_with_container_sas(self):
+        # SAS URL is calculated from storage key, so this test runs live only
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        token = self.bs.generate_container_shared_access_signature(
+            self.container_name,
+            permission=ContainerPermissions.READ + ContainerPermissions.CREATE + ContainerPermissions.ADD,
+            expiry=datetime.utcnow() + timedelta(hours=1),
+        )
+
+        bs_with_sas = AppendBlobService(account_name=self.settings.STORAGE_ACCOUNT_NAME, sas_token=token,
+                                       protocol=self.settings.PROTOCOL)
+
+        # Act
+        test_blob_name = "testblobname"
+        text_blob_content = "test-blob-content"
+        bs_with_sas.create_blob(self.container_name, blob_name=test_blob_name)
+        bs_with_sas.append_blob_from_text(self.container_name, blob_name=test_blob_name, text=text_blob_content)
+
+        blob_content = bs_with_sas.get_blob_to_text(self.container_name, blob_name=test_blob_name)
+
+        # Assert
+        self.assertEqual(blob_content.content, text_blob_content)
 
     @record
     def test_get_account_information_with_blob_sas(self):
