@@ -1493,7 +1493,7 @@ class BaseBlobService(StorageClient):
 
     def set_blob_service_properties(
             self, logging=None, hour_metrics=None, minute_metrics=None,
-            cors=None, target_version=None, delete_retention_policy=None, static_website=None):
+            cors=None, target_version=None, timeout=None, delete_retention_policy=None, static_website=None):
         '''
         Sets the properties of a storage account's Blob service, including
         Azure Storage Analytics. If an element (ex Logging) is left as None, the 
