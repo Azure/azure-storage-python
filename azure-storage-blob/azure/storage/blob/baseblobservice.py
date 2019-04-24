@@ -1534,7 +1534,7 @@ class BaseBlobService(StorageClient):
         :type static_website:
             :class:`~azure.storage.common.models.StaticWebsite`
         '''
-        if all(parameter is None for parameter in [logging, hour_metrics, minute_metrics, cors, target_version, timeout,
+        if all(parameter is None for parameter in [logging, hour_metrics, minute_metrics, cors, target_version,
                                                    delete_retention_policy, static_website]):
 
             raise ValueError("set_blob_service_properties should be called with at least one parameter")
