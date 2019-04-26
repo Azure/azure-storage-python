@@ -6,6 +6,7 @@
 # license information.
 # --------------------------------------------------------------------------
 import os
+import io
 import unittest
 
 from azure.common import AzureHttpError
@@ -15,7 +16,7 @@ from azure.storage.blob import (
     BlockBlobService,
     ContentSettings,
 )
-from azure.storage.blob.models import StandardBlobTier
+from azure.storage.blob.models import StandardBlobTier, PublicAccess
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -520,6 +521,55 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(properties.content_settings.content_type, content_settings.content_type)
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
 
+    def test_createBlobFromStream_when_short_read_the_whole_stream(self):
+        # to get the actual uploaded blob, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        content = b"Example blob content."
+        stream = ShortReader(io.BytesIO(content), 10)
+        upload_size = len(content)
+
+        # Act
+        self.bs.create_blob_from_stream(self.container_name, blob_name, stream, upload_size)
+
+        # Assert
+        uploaded_blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+        self.assertEquals(content, uploaded_blob.content)
+
+    def test_createBlobFromStream_when_short_read_designated_size_of_stream(self):
+        # to get the actual uploaded blob, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        content = b"Example blob content."
+        stream = ShortReader(io.BytesIO(content), 10)
+        upload_size = 15  # designated size blob we want to upload
+
+        # Act
+        self.bs.create_blob_from_stream(self.container_name, blob_name, stream, upload_size)
+
+        # Assert
+        uploaded_blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+        self.assertEquals(upload_size, len(uploaded_blob.content))
+        self.assertEquals(content[:upload_size], uploaded_blob.content)
+
+    def test_createBlobFromStream_when_designated_size_larger_than_the_actual_stream_size(self):
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        content = b"Example blob content."
+        stream = ShortReader(io.BytesIO(content), 10)
+        upload_size = 100  # designated size blob we want to upload
+
+        # Assert
+        with self.assertRaises(ValueError):
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, upload_size)
+
     def test_create_blob_from_stream_chunked_upload(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
@@ -771,6 +821,20 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
 
+
+class ShortReader(io.RawIOBase):
+    """IOBase wrapper to limit read sizes, producing short reads"""
+
+    def __init__(self, reader, max_read_size):
+        self._reader = reader
+        self.max_read_size = max_read_size
+
+    def readinto(self, buf):
+        buf_size = len(buf)
+        read_size = min(buf_size, self.max_read_size)
+        data = self._reader.read(read_size)
+        buf[0:len(data)] = data
+        return len(data)
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()
