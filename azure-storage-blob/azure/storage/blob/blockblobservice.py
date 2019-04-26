@@ -573,13 +573,13 @@ class BlockBlobService(BaseBlobService):
             if progress_callback:
                 progress_callback(0, count)
 
-            data = b''  # New empty byte array to store data to be uploaded
-            data_chunk = stream.read(count)  # to store the chunk of data read from stream each time
+            data = stream.read(count)  # New empty byte array to store data to be uploaded
+            data_chunk = data  # to store the chunk of data read from stream each time
 
             # keep reading from stream util length of data >= count or reaching the end of stream
             while len(data) < count and len(data_chunk) is not 0:
-                data += data_chunk
                 data_chunk = stream.read(count)
+                data += data_chunk
 
             if len(data) < count:
                 raise ValueError('Parameter:count you provided is more than the actually data exist in stream,'
