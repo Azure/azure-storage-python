@@ -573,7 +573,7 @@ class BlockBlobService(BaseBlobService):
             if progress_callback:
                 progress_callback(0, count)
 
-            data = stream.read(count)  # New empty byte array to store data to be uploaded
+            data = stream.read(count)
             data_chunk = data  # to store the chunk of data read from stream each time
 
             # keep reading from stream util length of data >= count or reaching the end of stream
