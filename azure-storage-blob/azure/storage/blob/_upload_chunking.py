@@ -104,6 +104,11 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
         resource_properties.last_modified = uploader.last_modified
         resource_properties.etag = uploader.etag
 
+    if blob_size is not None:
+        if uploader.progress_total < blob_size:
+            raise ValueError('The actual size of data you want to upload is less than the blob size you specified.'
+                             'Please specify a valid blob size you want to upload')
+
     return range_ids
 
 
@@ -143,6 +148,10 @@ def _upload_blob_substream_blocks(blob_service, container_name, blob_name,
     else:
         range_ids = [uploader.process_substream_block(result) for result in uploader.get_substream_blocks()]
 
+    if blob_size is not None:
+        if uploader.progress_total < blob_size:
+            raise ValueError('The actual size of data you want to upload is less than the blob size you specified.'
+                             'Please specify a valid blob size you want to upload')
     return range_ids
 
 
@@ -211,15 +220,14 @@ class _BlobChunkUploader(object):
         return self._upload_chunk_with_progress(chunk_offset, chunk_bytes)
 
     def _update_progress(self, length):
-        if self.progress_callback is not None:
-            if self.progress_lock is not None:
-                with self.progress_lock:
-                    self.progress_total += length
-                    total = self.progress_total
-            else:
+        if self.progress_lock is not None:
+            with self.progress_lock:
                 self.progress_total += length
-                total = self.progress_total
-            self.progress_callback(total, self.blob_size)
+        else:
+            self.progress_total += length
+
+        if self.progress_callback is not None:
+            self.progress_callback(self.progress_total, self.blob_size)
 
     def _upload_chunk_with_progress(self, chunk_offset, chunk_data):
         range_id = self._upload_chunk(chunk_offset, chunk_data)
