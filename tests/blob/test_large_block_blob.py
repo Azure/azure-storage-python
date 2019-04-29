@@ -309,7 +309,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
 
-    def test_create_large_blob_from_stream_chunked_upload_with_count_larger_than_actual_data_size(self):
+    def test_create_large_blob_from_stream_block_upload_with_count_larger_than_actual_data_size(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
             return
@@ -317,6 +317,25 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         # Arrange
         self.bs.MAX_BLOCK_SIZE = 1024
         self.bs.MAX_SINGLE_PUT_SIZE = 500
+        blob_name = self._get_blob_reference()
+        data = bytearray(os.urandom(LARGE_BLOB_SIZE - 300))
+        with open(FILE_PATH, 'wb') as stream:
+            stream.write(data)
+        blob_size = LARGE_BLOB_SIZE
+
+        with self.assertRaises(ValueError):
+            with open(FILE_PATH, 'rb') as stream:
+                self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size)
+
+    def test_create_large_blob_from_stream_chunk_upload_with_count_larger_than_actual_data_size(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        self.bs.MAX_BLOCK_SIZE = 2048
+        self.bs.MAX_SINGLE_PUT_SIZE = 500
+        self.bs.MIN_LARGE_BLOCK_UPLOAD_THRESHOLD = 1024
         blob_name = self._get_blob_reference()
         data = bytearray(os.urandom(LARGE_BLOB_SIZE - 300))
         with open(FILE_PATH, 'wb') as stream:
