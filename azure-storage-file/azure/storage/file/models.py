@@ -153,6 +153,44 @@ class FileProperties(object):
         self.server_encrypted = None
 
 
+class Handle(object):
+    """
+    Represents a file handle.
+
+    :ivar str handle_id:
+        Used to identify handle.
+    :ivar str path:
+        Used to identify the name of the object for which the handle is open.
+    :ivar str file_id:
+        Uniquely identifies the file.
+        This is useful when renames are happening as the file ID does not change.
+    :ivar str parent_id:
+        Uniquely identifies the parent directory.
+        This is useful when renames are happening as the parent ID does not change.
+    :ivar str session_id:
+        Session ID in context of which the file handle was opened.
+    :ivar str client_ip:
+        Used to identify client that has opened the handle.
+        The field is included only if client IP is known by the service.
+    :ivar datetime open_time:
+        Used to decide if handle may have been leaked.
+    :ivar datetime last_reconnect_time:
+        Used to decide if handle was reopened after client/server disconnect due to networking or other faults.
+        The field is included only if disconnect event occurred and handle was reopened.
+    """
+
+    def __init__(self, handle_id=None, path=None, file_id=None, parent_id=None, session_id=None,
+                 client_ip=None, open_time=None, last_reconnect_time=None):
+        self.handle_id = handle_id
+        self.path = path
+        self.file_id = file_id
+        self.parent_id = parent_id
+        self.session_id = session_id
+        self.client_ip = client_ip
+        self.open_time = open_time
+        self.last_reconnect_time = last_reconnect_time
+
+
 class ContentSettings(object):
     '''
     Used to store the content settings of a file.
