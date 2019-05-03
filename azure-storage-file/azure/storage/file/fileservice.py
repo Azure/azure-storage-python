@@ -62,6 +62,8 @@ from azure.storage.common.storageclient import StorageClient
 from ._deserialization import (
     _convert_xml_to_shares,
     _convert_xml_to_directories_and_files,
+    _convert_xml_to_handles,
+    _parse_close_handle_response,
     _convert_xml_to_ranges,
     _convert_xml_to_share_stats,
     _parse_file,
@@ -898,7 +900,7 @@ class FileService(StorageClient):
         }
 
         usage = self._perform_request(request, _convert_xml_to_share_stats)
-        return int(math.ceil(float(usage)/_GB))
+        return int(math.ceil(float(usage) / _GB))
 
     def get_share_stats_in_bytes(self, share_name, timeout=None):
         """
@@ -1258,6 +1260,187 @@ class FileService(StorageClient):
 
         return self._perform_request(request, _convert_xml_to_directories_and_files,
                                      operation_context=_context)
+
+    def list_handles(self, share_name, directory_name=None, file_name=None, recursive=None,
+                     max_results=None, marker=None, snapshot=None, timeout=None):
+
+        """
+        Returns a generator to list opened handles on a directory or a file under the specified share.
+        The generator will lazily follow the continuation tokens returned by
+        the service and stop when all handles have been returned or
+        num_results is reached.
+
+        If num_results is specified and the share has more than that number of
+        files and directories, the generator will have a populated next_marker
+        field once it finishes. This marker can be used to create a new generator
+        if more results are desired.
+
+        :param str share_name:
+            Name of existing share.
+        :param str directory_name:
+            The path to the directory.
+        :param str file_name:
+            Name of existing file.
+        :param bool recursive:
+            Boolean that specifies if operation should apply to the directory specified in the URI,
+            its files, its subdirectories and their files.
+        :param int max_results:
+            Specifies the maximum number of handles taken on files and/or directories to return.
+            If the request does not specify max_results or specifies a value greater than 5,000,
+            the server will return up to 5,000 items.
+            Setting max_results to a value less than or equal to zero results in error response code 400 (Bad Request).
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the
+            next_marker field of a previous generator object if max_results was
+            specified and that generator has finished enumerating results. If
+            specified, this generator will begin returning results from the point
+            where the previous generator stopped.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        """
+        operation_context = _OperationContext(location_lock=True)
+        args = (share_name, directory_name, file_name)
+        kwargs = {'marker': marker, 'max_results': max_results, 'timeout': timeout, 'recursive': recursive,
+                  '_context': operation_context, 'snapshot': snapshot}
+
+        resp = self._list_handles(*args, **kwargs)
+
+        return ListGenerator(resp, self._list_handles, args, kwargs)
+
+    def _list_handles(self, share_name, directory_name=None, file_name=None, recursive=None,
+                      marker=None, max_results=None, timeout=None, _context=None, snapshot=None):
+        """
+        Returns a list of the directories and files under the specified share.
+
+        :param str share_name:
+            Name of existing share.
+        :param str directory_name:
+            The path to the directory.
+        :param str file_name:
+            Name of existing file.
+        :param bool recursive:
+            Boolean that specifies if operation should apply to the directory specified in the URI,
+            its files, its subdirectories and their files.
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the
+            next_marker field of a previous generator object if max_results was
+            specified and that generator has finished enumerating results. If
+            specified, this generator will begin returning results from the point
+            where the previous generator stopped.
+        :param int max_results:
+            Specifies the maximum number of handles to return,
+            including all directory elements. If the request does not specify
+            max_results or specifies a value greater than 5,000, the server will
+            return up to 5,000 items. Setting max_results to a value less than
+            or equal to zero results in error response code 400 (Bad Request).
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
+        """
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = {
+            'comp': 'listhandles',
+            'marker': _to_str(marker),
+            'maxresults': _int_to_str(max_results),
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot)
+        }
+        request.headers = {
+            'x-ms-recursive': _to_str(recursive)
+        }
+
+        return self._perform_request(request, _convert_xml_to_handles,
+                                     operation_context=_context)
+
+    def close_handles(self, share_name, directory_name=None, file_name=None, recursive=None,
+                      handle_id=None, marker=None, snapshot=None, timeout=None):
+
+        """
+        Returns a generator to close opened handles on a directory or a file under the specified share.
+        The generator will lazily follow the continuation tokens returned by
+        the service and stop when all handles have been closed.
+        The yielded values represent the number of handles that were closed.
+
+
+        :param str share_name:
+            Name of existing share.
+        :param str directory_name:
+            The path to the directory.
+        :param str file_name:
+            Name of existing file.
+        :param bool recursive:
+            Boolean that specifies if operation should apply to the directory specified in the URI,
+            its files, its subdirectories and their files.
+        :param str handle_id:
+            Required. Specifies handle ID opened on the file or directory to be closed.
+            Astrix (‘*’) is a wildcard that specifies all handles.
+        :param str marker:
+            An opaque continuation token. This value can be retrieved from the
+            next_marker field of a previous generator object if it has not finished closing handles. If
+            specified, this generator will begin closing handles from the point
+            where the previous generator stopped.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        """
+        operation_context = _OperationContext(location_lock=True)
+        args = (share_name, directory_name, file_name)
+        kwargs = {'marker': marker, 'handle_id': handle_id, 'timeout': timeout, 'recursive': recursive,
+                  '_context': operation_context, 'snapshot': snapshot}
+
+        resp = self._close_handles(*args, **kwargs)
+
+        return ListGenerator(resp, self._close_handles, args, kwargs)
+
+    def _close_handles(self, share_name, directory_name=None, file_name=None, recursive=None, handle_id=None,
+                       marker=None, timeout=None, _context=None, snapshot=None):
+        """
+        Returns the number of handles that got closed.
+
+        :param str share_name:
+            Name of existing share.
+        :param str directory_name:
+            The path to the directory.
+        :param str file_name:
+            Name of existing file.
+        :param bool recursive:
+            Boolean that specifies if operation should apply to the directory specified in the URI,
+            its files, its subdirectories and their files.
+        :param str handle_id:
+            Required. Specifies handle ID opened on the file or directory to be closed.
+            Astrix (‘*’) is a wildcard that specifies all handles.
+        :param str marker:
+            Specifies the maximum number of handles taken on files and/or directories to return.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :param str snapshot:
+            A string that represents the snapshot version, if applicable.
+        """
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(share_name, directory_name, file_name)
+        request.query = {
+            'comp': 'forceclosehandles',
+            'marker': _to_str(marker),
+            'timeout': _int_to_str(timeout),
+            'sharesnapshot': _to_str(snapshot)
+        }
+        request.headers = {
+            'x-ms-recursive': _to_str(recursive),
+            'x-ms-handle-id': _to_str(handle_id),
+        }
+
+        return self._perform_request(request, _parse_close_handle_response, operation_context=_context)
 
     def get_file_properties(self, share_name, directory_name, file_name, timeout=None, snapshot=None):
         '''

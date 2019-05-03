@@ -5,6 +5,7 @@
 ## Version XX.XX.XX:
 - Support for 2018-11-09 REST version. Please see our REST API documentation and blogs for information about the related added features.
 - Added an option to get share stats in bytes.
+- Added support for List/Close File Handles APIs.
 
 ## Version 1.4.0:
 
