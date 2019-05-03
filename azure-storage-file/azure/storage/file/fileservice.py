@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for
@@ -1366,7 +1368,7 @@ class FileService(StorageClient):
         Returns a generator to close opened handles on a directory or a file under the specified share.
         The generator will lazily follow the continuation tokens returned by
         the service and stop when all handles have been closed.
-        The yielded values represent the number of handles that were closed.
+        The yielded values represent the number of handles that were closed in each transaction.
 
 
         :param str share_name:
