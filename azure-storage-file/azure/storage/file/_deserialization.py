@@ -204,21 +204,20 @@ def _convert_xml_to_handles(response):
     """
     <?xml version="1.0" encoding="utf-8"?>
     <EnumerationResults>
-      <HandleList>
-        <Handle>
-          <HandleId>handle-id</HandleId>
-          <Path>file-or-directory-name-including-full-path</Path>
-          <FileId>file-id</FileId>
-          <ParentId>parent-file-id</ParentId>
-          <SessionId>session-id</SessionId>
-          <ClientIp>client-ip</ClientIp>
-          <OpenTime>opened-time</OpenTime>
-          <LastReconnectTime>lastreconnect-time</LastReconnectTime>
-        </Handle>
-        ...
-      </HandleList>
-      <NextMarker>next-marker</NextMarker>
-    </EnumerationResults>
+        <Entries>
+            <Handle>
+                <HandleId>21123954401</HandleId>
+                <Path />
+                <FileId>0</FileId>
+                <ParentId>0</ParentId>
+                <SessionId>9385737614310506553</SessionId>
+                <ClientIp>167.220.2.92:27553</ClientIp>
+                <OpenTime>Fri, 03 May 2019 05:59:43 GMT</OpenTime>
+            </Handle>
+            ...
+        </Entries>
+        <NextMarker />
+    </EnumerationResults>'
     """
     if response is None or response.body is None:
         return None

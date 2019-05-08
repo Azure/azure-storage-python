@@ -59,6 +59,21 @@ class StorageHandleTest(StorageTestCase):
         # Assert
         self._validate_handles(handles)
 
+#
+    @record
+    def test_list_handles_on_share_snapshot(self):
+        # don't run live, since the test set up was highly manual
+        # only run when recording, or playing back in CI
+        if not TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Act
+        handles = list(self.fs.list_handles(TEST_SHARE_NAME, recursive=True,
+                                            snapshot="2019-05-08T23:27:24.0000000Z"))
+
+        # Assert
+        self._validate_handles(handles)
+
     @record
     def test_list_handles_with_marker(self):
         # don't run live, since the test set up was highly manual
@@ -78,7 +93,8 @@ class StorageHandleTest(StorageTestCase):
         old_handle = handles[0]
 
         # Continue listing
-        remaining_handles = list(self.fs.list_handles(TEST_SHARE_NAME, recursive=True, marker=handle_generator.next_marker))
+        remaining_handles = list(
+            self.fs.list_handles(TEST_SHARE_NAME, recursive=True, marker=handle_generator.next_marker))
         self._validate_handles(handles)
 
         # Make sure the old handle did not appear
@@ -98,6 +114,12 @@ class StorageHandleTest(StorageTestCase):
 
         # Assert
         self._validate_handles(handles)
+
+        # Act
+        handles = list(self.fs.list_handles(TEST_SHARE_NAME, directory_name='wut', recursive=False))
+
+        # Assert recursive option is functioning when disabled
+        self.assertTrue(len(handles) == 0)
 
     @record
     def test_list_handles_on_file(self):
@@ -142,10 +164,12 @@ class StorageHandleTest(StorageTestCase):
         self._validate_handles(handles)
 
         # Act
-        num_closed = list(self.fs.close_handles(TEST_SHARE_NAME, handle_id="*", recursive=True))
+        total_num_handle_closed = 0
+        for num_closed in self.fs.close_handles(TEST_SHARE_NAME, handle_id="*", recursive=True):
+            total_num_handle_closed += num_closed
 
         # Assert at least 1 handle has been closed
-        self.assertTrue(1 < num_closed[0])
+        self.assertTrue(total_num_handle_closed > 1)
 
 
 # ------------------------------------------------------------------------------
