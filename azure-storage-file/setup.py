@@ -44,7 +44,7 @@ except ImportError:
 
 setup(
     name='azure-storage-file',
-    version='2.0.0',
+    version='2.0.1',
     description='Microsoft Azure Storage File Client Library for Python',
     long_description=open('README.rst', 'r').read(),
     license='MIT License',
@@ -72,7 +72,7 @@ setup(
     ]),
     install_requires=[
         'azure-common>=1.1.5',
-        'azure-storage-common~=1.4'
+        'azure-storage-common~=2.0'
     ],
     extras_require={
         ":python_version<'3.0'": ['futures'],

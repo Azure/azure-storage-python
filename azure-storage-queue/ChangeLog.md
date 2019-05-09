@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 2.0.1:
+- Updated dependency on azure-storage-common.
+
 ## Version 2.0.0:
 - Support for 2018-11-09 REST version.
 
