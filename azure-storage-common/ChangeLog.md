@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 2.0.0:
+- Bump version to avoid breaking file/blob/queue v1.5.0.
+
 ## Version 1.4.1:
 - Added minor helpers for SAS related changes
 
