@@ -2,6 +2,11 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 2.0.0:
+- Support for 2018-11-09 REST version. Please see our REST API documentation and blogs for information about the related added features.
+- Added an option to get share stats in bytes.
+- Added support for listing and closing file handles.
+
 ## Version 1.4.0:
 
 - azure-storage-nspkg is not installed anymore on Python 3 (PEP420-based namespace package)

@@ -1,4 +1,4 @@
-# -------------------------------------------------------------------------
+﻿# -------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
@@ -22,6 +22,7 @@ OAUTH_STORAGE_ACCOUNT_KEY = "XBB/YoZ41bDFBW1VcgCBNYmA1PDlc3NvQQaCk2rb/JtBoMBlekz
 ACTIVE_DIRECTORY_APPLICATION_ID = "68390a19-a897-236b-b453-488abf67b4fc"
 ACTIVE_DIRECTORY_APPLICATION_SECRET = "3Ujhg7pzkOeE7flc6Z187ugf5/cJnszGPjAiXmcwhaY="
 ACTIVE_DIRECTORY_TENANT_ID = "32f988bf-54f1-15af-36ab-2d7cd364db47"
+ACTIVE_DIRECTORY_AUTH_ENDPOINT = "https://login.microsoftonline.com"
 
 # Use instead of STORAGE_ACCOUNT_NAME and STORAGE_ACCOUNT_KEY if custom settings are needed
 CONNECTION_STRING = ""

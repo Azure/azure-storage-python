@@ -50,6 +50,7 @@ from ._encryption import (
 from ._serialization import (
     _convert_block_list_to_xml,
     _get_path,
+    _validate_and_format_range_headers,
 )
 from ._upload_chunking import (
     _BlockBlobChunkUploader,
@@ -315,8 +316,9 @@ class BlockBlobService(BaseBlobService):
 
         return self._perform_request(request, _convert_xml_to_block_list)
 
-    def put_block_from_url(self, container_name, blob_name, copy_source_url, source_range_start, source_range_end,
-                           block_id, source_content_md5=None, lease_id=None, timeout=None):
+    def put_block_from_url(self, container_name, blob_name, copy_source_url, block_id,
+                           source_range_start=None, source_range_end=None,
+                           source_content_md5=None, lease_id=None, timeout=None):
         """
         Creates a new block to be committed as part of a blob.
 
@@ -348,8 +350,6 @@ class BlockBlobService(BaseBlobService):
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('copy_source_url', copy_source_url)
-        _validate_not_none('source_range_start', source_range_start)
-        _validate_not_none('source_range_end', source_range_end)
         _validate_not_none('block_id', block_id)
 
         request = HTTPRequest()
@@ -364,9 +364,16 @@ class BlockBlobService(BaseBlobService):
         request.headers = {
             'x-ms-lease-id': _to_str(lease_id),
             'x-ms-copy-source': copy_source_url,
-            'x-ms-source-range': 'bytes=' + _to_str(source_range_start) + '-' + _to_str(source_range_end),
             'x-ms-source-content-md5': source_content_md5,
         }
+        _validate_and_format_range_headers(
+            request,
+            source_range_start,
+            source_range_end,
+            start_range_required=False,
+            end_range_required=False,
+            range_header_name="x-ms-source-range"
+        )
 
         self._perform_request(request)
 
@@ -884,7 +891,7 @@ class BlockBlobService(BaseBlobService):
                   metadata=None, source_if_modified_since=None,
                   source_if_unmodified_since=None, source_if_match=None,
                   source_if_none_match=None, destination_if_modified_since=None,
-                  destination_if_unmodified_since=None,destination_if_match=None,
+                  destination_if_unmodified_since=None, destination_if_match=None,
                   destination_if_none_match=None, destination_lease_id=None,
                   source_lease_id=None, timeout=None, requires_sync=None):
 

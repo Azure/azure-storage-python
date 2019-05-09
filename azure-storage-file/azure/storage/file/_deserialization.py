@@ -13,6 +13,7 @@ from .models import (
     Share,
     Directory,
     File,
+    Handle,
     FileProperties,
     FileRange,
     ShareProperties,
@@ -31,6 +32,7 @@ from azure.storage.common._common_conversion import (
     _to_str,
 )
 
+
 def _parse_snapshot_share(response, name):
     '''
     Extracts snapshot return header.
@@ -38,6 +40,7 @@ def _parse_snapshot_share(response, name):
     snapshot = response.headers.get('x-ms-snapshot')
 
     return _parse_share(response, name, snapshot)
+
 
 def _parse_share(response, name, snapshot=None):
     if response is None:
@@ -197,6 +200,70 @@ def _convert_xml_to_directories_and_files(response):
     return entries
 
 
+def _convert_xml_to_handles(response):
+    """
+    <?xml version="1.0" encoding="utf-8"?>
+    <EnumerationResults>
+        <Entries>
+            <Handle>
+                <HandleId>21123954401</HandleId>
+                <Path />
+                <FileId>0</FileId>
+                <ParentId>0</ParentId>
+                <SessionId>9385737614310506553</SessionId>
+                <ClientIp>167.220.2.92:27553</ClientIp>
+                <OpenTime>Fri, 03 May 2019 05:59:43 GMT</OpenTime>
+            </Handle>
+            ...
+        </Entries>
+        <NextMarker />
+    </EnumerationResults>'
+    """
+    if response is None or response.body is None:
+        return None
+
+    entries = _list()
+    list_element = ETree.fromstring(response.body)
+
+    # Set next marker
+    next_marker = list_element.findtext('NextMarker') or None
+    setattr(entries, 'next_marker', next_marker)
+
+    handles_list_element = list_element.find('Entries')
+
+    for handle_element in handles_list_element.findall('Handle'):
+        # Name element
+        handle = Handle()
+        handle.handle_id = handle_element.findtext('HandleId')
+        handle.path = handle_element.findtext('Path')
+        handle.file_id = handle_element.findtext('FileId')
+        handle.parent_id = handle_element.findtext('ParentId')
+        handle.session_id = handle_element.findtext('SessionId')
+        handle.client_ip = handle_element.findtext('ClientIp')
+        handle.open_time = parser.parse(handle_element.findtext('OpenTime'))
+
+        last_connect_time_string = handle_element.findtext('LastReconnectTime')
+        if last_connect_time_string is not None:
+            handle.last_reconnect_time = parser.parse(last_connect_time_string)
+
+        # Add file to list
+        entries.append(handle)
+
+    return entries
+
+
+def _parse_close_handle_response(response):
+    if response is None or response.body is None:
+        return 0
+
+    results = _list()
+    results.append(int(response.headers['x-ms-number-of-handles-closed']))
+
+    next_marker = None if 'x-ms-marker' not in response.headers else response.headers['x-ms-marker']
+    setattr(results, 'next_marker', next_marker)
+    return results
+
+
 def _convert_xml_to_ranges(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
@@ -231,11 +298,11 @@ def _convert_xml_to_share_stats(response):
     '''
     <?xml version="1.0" encoding="utf-8"?>
     <ShareStats>
-       <ShareUsage>15</ShareUsage>
+       <ShareUsageBytes>15</ShareUsageBytes>
     </ShareStats>
     '''
     if response is None or response.body is None:
         return None
 
     share_stats_element = ETree.fromstring(response.body)
-    return int(share_stats_element.findtext('ShareUsage'))
+    return int(share_stats_element.findtext('ShareUsageBytes'))

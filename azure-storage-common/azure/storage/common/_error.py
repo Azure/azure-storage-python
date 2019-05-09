@@ -183,6 +183,16 @@ def _validate_encryption_unsupported(require_encryption, key_encryption_key):
         raise ValueError(_ERROR_UNSUPPORTED_METHOD_FOR_ENCRYPTION)
 
 
+def _validate_user_delegation_key(user_delegation_key):
+    _validate_not_none('user_delegation_key.signed_oid', user_delegation_key.signed_oid)
+    _validate_not_none('user_delegation_key.signed_tid', user_delegation_key.signed_tid)
+    _validate_not_none('user_delegation_key.signed_start', user_delegation_key.signed_start)
+    _validate_not_none('user_delegation_key.signed_expiry', user_delegation_key.signed_expiry)
+    _validate_not_none('user_delegation_key.signed_version', user_delegation_key.signed_version)
+    _validate_not_none('user_delegation_key.signed_service', user_delegation_key.signed_service)
+    _validate_not_none('user_delegation_key.value', user_delegation_key.value)
+
+
 # wraps a given exception with the desired exception type
 def _wrap_exception(ex, desired_type):
     msg = ""

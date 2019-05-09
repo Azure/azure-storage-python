@@ -510,13 +510,26 @@ class StorageShareTest(StorageTestCase):
     def test_get_share_stats(self):
         # Arrange
         share_name = self._create_share()
-        self.fs.create_file_from_text(share_name, None, 'file1', b'hello world')
 
         # Act
         share_usage = self.fs.get_share_stats(share_name)
+        share_usage_in_bytes = self.fs.get_share_stats_in_bytes(share_name)
+
+        # Assert
+        self.assertEqual(share_usage, 0)
+        self.assertEqual(share_usage_in_bytes, 0)
+
+        # Arrange a file and try again
+        data = b'hello world'
+        self.fs.create_file_from_text(share_name, None, 'file1', data)
+
+        # Act
+        share_usage = self.fs.get_share_stats(share_name)
+        share_usage_in_bytes = self.fs.get_share_stats_in_bytes(share_name)
 
         # Assert
         self.assertEqual(share_usage, 1)
+        self.assertEqual(share_usage_in_bytes, len(data))
 
     @record
     def test_set_share_acl(self):

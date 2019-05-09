@@ -7,6 +7,8 @@
 from azure.storage.common.sharedaccesssignature import (
     SharedAccessSignature,
     _SharedAccessHelper,
+    _QueryStringConstants,
+    _sign_string,
 )
 from azure.storage.common._common_conversion import (
     _to_str,
@@ -103,14 +105,14 @@ class FileSharedAccessSignature(SharedAccessSignature):
             resource_path += '/' + _to_str(directory_name)
         resource_path += '/' + _to_str(file_name)
 
-        sas = _SharedAccessHelper()
+        sas = _FileSharedAccessHelper()
         sas.add_base(permission, expiry, start, ip, protocol, self.x_ms_version)
         sas.add_id(id)
         sas.add_resource('f')
         sas.add_override_response_headers(cache_control, content_disposition,
                                           content_encoding, content_language,
                                           content_type)
-        sas.add_resource_signature(self.account_name, self.account_key, 'file', resource_path)
+        sas.add_resource_signature(self.account_name, self.account_key, resource_path)
 
         return sas.get_token()
 
@@ -176,13 +178,52 @@ class FileSharedAccessSignature(SharedAccessSignature):
             Response header value for Content-Type when resource is accessed
             using this shared access signature.
         '''
-        sas = _SharedAccessHelper()
+        sas = _FileSharedAccessHelper()
         sas.add_base(permission, expiry, start, ip, protocol, self.x_ms_version)
         sas.add_id(id)
         sas.add_resource('s')
         sas.add_override_response_headers(cache_control, content_disposition,
                                           content_encoding, content_language,
                                           content_type)
-        sas.add_resource_signature(self.account_name, self.account_key, 'file', share_name)
+        sas.add_resource_signature(self.account_name, self.account_key, share_name)
 
         return sas.get_token()
+
+
+class _FileSharedAccessHelper(_SharedAccessHelper):
+    def __init__(self):
+        super(_FileSharedAccessHelper, self).__init__()
+
+    def add_resource_signature(self, account_name, account_key, path):
+        def get_value_to_append(query):
+            return_value = self.query_dict.get(query) or ''
+            return return_value + '\n'
+
+        if path[0] != '/':
+            path = '/' + path
+
+        canonicalized_resource = '/file/' + account_name + path + '\n'
+
+        # Form the string to sign from shared_access_policy and canonicalized
+        # resource. The order of values is important.
+        string_to_sign = \
+            (get_value_to_append(_QueryStringConstants.SIGNED_PERMISSION) +
+             get_value_to_append(_QueryStringConstants.SIGNED_START) +
+             get_value_to_append(_QueryStringConstants.SIGNED_EXPIRY) +
+             canonicalized_resource +
+             get_value_to_append(_QueryStringConstants.SIGNED_IDENTIFIER) +
+             get_value_to_append(_QueryStringConstants.SIGNED_IP) +
+             get_value_to_append(_QueryStringConstants.SIGNED_PROTOCOL) +
+             get_value_to_append(_QueryStringConstants.SIGNED_VERSION) +
+             get_value_to_append(_QueryStringConstants.SIGNED_CACHE_CONTROL) +
+             get_value_to_append(_QueryStringConstants.SIGNED_CONTENT_DISPOSITION) +
+             get_value_to_append(_QueryStringConstants.SIGNED_CONTENT_ENCODING) +
+             get_value_to_append(_QueryStringConstants.SIGNED_CONTENT_LANGUAGE) +
+             get_value_to_append(_QueryStringConstants.SIGNED_CONTENT_TYPE))
+
+        # remove the trailing newline
+        if string_to_sign[-1] == '\n':
+            string_to_sign = string_to_sign[:-1]
+
+        self._add_query(_QueryStringConstants.SIGNED_SIGNATURE,
+                        _sign_string(account_key, string_to_sign))

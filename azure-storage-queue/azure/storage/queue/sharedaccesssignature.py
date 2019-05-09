@@ -7,6 +7,8 @@
 from azure.storage.common.sharedaccesssignature import (
     SharedAccessSignature,
     _SharedAccessHelper,
+    _QueryStringConstants,
+    _sign_string,
 )
 from ._constants import X_MS_VERSION
 
@@ -73,9 +75,43 @@ class QueueSharedAccessSignature(SharedAccessSignature):
             Specifies the protocol permitted for a request made. The default value
             is https,http. See :class:`~azure.storage.common.models.Protocol` for possible values.
         '''
-        sas = _SharedAccessHelper()
+        sas = _QueueSharedAccessHelper()
         sas.add_base(permission, expiry, start, ip, protocol, self.x_ms_version)
         sas.add_id(id)
-        sas.add_resource_signature(self.account_name, self.account_key, 'queue', queue_name)
+        sas.add_resource_signature(self.account_name, self.account_key, queue_name)
 
         return sas.get_token()
+
+
+class _QueueSharedAccessHelper(_SharedAccessHelper):
+    def __init__(self):
+        super(_QueueSharedAccessHelper, self).__init__()
+
+    def add_resource_signature(self, account_name, account_key, path):
+        def get_value_to_append(query):
+            return_value = self.query_dict.get(query) or ''
+            return return_value + '\n'
+
+        if path[0] != '/':
+            path = '/' + path
+
+        canonicalized_resource = '/queue/' + account_name + path + '\n'
+
+        # Form the string to sign from shared_access_policy and canonicalized
+        # resource. The order of values is important.
+        string_to_sign = \
+            (get_value_to_append(_QueryStringConstants.SIGNED_PERMISSION) +
+             get_value_to_append(_QueryStringConstants.SIGNED_START) +
+             get_value_to_append(_QueryStringConstants.SIGNED_EXPIRY) +
+             canonicalized_resource +
+             get_value_to_append(_QueryStringConstants.SIGNED_IDENTIFIER) +
+             get_value_to_append(_QueryStringConstants.SIGNED_IP) +
+             get_value_to_append(_QueryStringConstants.SIGNED_PROTOCOL) +
+             get_value_to_append(_QueryStringConstants.SIGNED_VERSION))
+
+        # remove the trailing newline
+        if string_to_sign[-1] == '\n':
+            string_to_sign = string_to_sign[:-1]
+
+        self._add_query(_QueryStringConstants.SIGNED_SIGNATURE,
+                        _sign_string(account_key, string_to_sign))
