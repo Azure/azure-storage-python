@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 1.4.2:
+- Bumped version for dependency fix: same content as 1.4.0
+
 ## Version 1.4.0:
 
 - When unable to sign request, avoid wasting time on retries by failing faster.
