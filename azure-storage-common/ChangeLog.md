@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 1.4.1:
+- Added minor helpers for SAS related changes
+
+
 ## Version 1.4.0:
 
 - When unable to sign request, avoid wasting time on retries by failing faster.
