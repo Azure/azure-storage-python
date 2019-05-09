@@ -62,7 +62,7 @@ class StorageBlobSASTest(StorageTestCase):
 
     def _get_user_delegation_key(self, key_start_time, key_expiry_time):
         token_credential = TokenCredential(self.generate_oauth_token())
-        service = BlockBlobService(self.settings.STORAGE_ACCOUNT_NAME, token_credential=token_credential)
+        service = BlockBlobService(self.settings.OAUTH_STORAGE_ACCOUNT_NAME, token_credential=token_credential)
         return service.get_user_delegation_key(key_start_time, key_expiry_time)
 
     @record

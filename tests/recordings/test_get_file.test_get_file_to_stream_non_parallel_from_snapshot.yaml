@@ -4,55 +4,55 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3f142af2-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:45 GMT']
-      x-ms-version: ['2018-03-28']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [b9b7e10a-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:28 GMT']
+      x-ms-version: ['2018-11-09']
     method: PUT
     uri: https://storagename.file.core.windows.net/utshare512e1a50?restype=share&comp=snapshot
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 09 Nov 2018 23:14:45 GMT']
-      ETag: ['"0x8D64699230070C7"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Content-Length: ['0']
+      Date: ['Thu, 09 May 2019 01:35:27 GMT']
+      ETag: ['"0x8D6D41E9DC7AEAF"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [c393d0ff-401a-004f-7b82-780b33000000]
-      x-ms-snapshot: ['2018-11-09T23:14:45.0000000Z']
-      x-ms-version: ['2018-03-28']
+      x-ms-request-id: [110107a0-b01a-001e-7907-0615c6000000]
+      x-ms-snapshot: ['2019-05-09T01:35:28.0000000Z']
+      x-ms-version: ['2018-11-09']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3f3657a8-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:45 GMT']
-      x-ms-version: ['2018-03-28']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba07bce8-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:28 GMT']
+      x-ms-version: ['2018-11-09']
     method: DELETE
     uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      Content-Length: ['0']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [c393d103-401a-004f-7c82-780b33000000]
-      x-ms-version: ['2018-03-28']
+      x-ms-request-id: [110107a3-b01a-001e-7a07-0615c6000000]
+      x-ms-version: ['2018-11-09']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3f88215a-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba0d3182-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:28 GMT']
       x-ms-range: [bytes=0-32767]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -636,26 +636,26 @@ interactions:
       Content-Length: ['32768']
       Content-Range: [bytes 0-32767/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d104-401a-004f-7d82-780b33000000]
+      x-ms-request-id: [110107a4-b01a-001e-7b07-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3f9506e0-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba16b54a-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:28 GMT']
       x-ms-range: [bytes=32768-36863]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -736,26 +736,26 @@ interactions:
       Content-Length: ['4096']
       Content-Range: [bytes 32768-36863/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d106-401a-004f-7e82-780b33000000]
+      x-ms-request-id: [110107a6-b01a-001e-7c07-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3f9c0904-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba1c6ee0-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:28 GMT']
       x-ms-range: [bytes=36864-40959]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -836,26 +836,26 @@ interactions:
       Content-Length: ['4096']
       Content-Range: [bytes 36864-40959/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d107-401a-004f-7f82-780b33000000]
+      x-ms-request-id: [110107a7-b01a-001e-7d07-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3fa304e8-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba223406-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:29 GMT']
       x-ms-range: [bytes=40960-45055]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -936,26 +936,26 @@ interactions:
       Content-Length: ['4096']
       Content-Range: [bytes 40960-45055/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d108-401a-004f-8082-780b33000000]
+      x-ms-request-id: [110107a8-b01a-001e-7e07-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3fa9cf8a-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba27b638-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:29 GMT']
       x-ms-range: [bytes=45056-49151]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -1036,26 +1036,26 @@ interactions:
       Content-Length: ['4096']
       Content-Range: [bytes 45056-49151/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d109-401a-004f-0182-780b33000000]
+      x-ms-request-id: [110107a9-b01a-001e-7f07-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3fb1a700-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba2d2780-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:29 GMT']
       x-ms-range: [bytes=49152-53247]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -1136,26 +1136,26 @@ interactions:
       Content-Length: ['4096']
       Content-Range: [bytes 49152-53247/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d10a-401a-004f-0282-780b33000000]
+      x-ms-request-id: [110107ab-b01a-001e-8007-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3fb8b4c8-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba32b880-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:29 GMT']
       x-ms-range: [bytes=53248-57343]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -1236,26 +1236,26 @@ interactions:
       Content-Length: ['4096']
       Content-Range: [bytes 53248-57343/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d10b-401a-004f-0382-780b33000000]
+      x-ms-request-id: [110107ac-b01a-001e-0107-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3fc04134-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba383c38-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:29 GMT']
       x-ms-range: [bytes=57344-61439]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -1336,26 +1336,26 @@ interactions:
       Content-Length: ['4096']
       Content-Range: [bytes 57344-61439/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d10c-401a-004f-0482-780b33000000]
+      x-ms-request-id: [110107ad-b01a-001e-0207-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3fc83128-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba3dc61c-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:29 GMT']
       x-ms-range: [bytes=61440-65535]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -1436,26 +1436,26 @@ interactions:
       Content-Length: ['4096']
       Content-Range: [bytes 61440-65535/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d10d-401a-004f-0582-780b33000000]
+      x-ms-request-id: [110107b0-b01a-001e-0507-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [3fcffb6a-e475-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:14:46 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ba435cb2-71fa-11e9-ae82-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:35:29 GMT']
       x-ms-range: [bytes=65536-65540]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     method: GET
-    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2018-11-09T23%3A14%3A45.0000000Z
+    uri: https://storagename.file.core.windows.net/utshare512e1a50/utdir512e1a50/bytefile512e1a50?sharesnapshot=2019-05-09T01%3A35%3A28.0000000Z
   response:
     body:
       string: !!binary |
@@ -1465,13 +1465,13 @@ interactions:
       Content-Length: ['5']
       Content-Range: [bytes 65536-65540/65541]
       Content-Type: [application/octet-stream]
-      Date: ['Fri, 09 Nov 2018 23:14:46 GMT']
-      ETag: ['"0x8D646992340E544"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:14:45 GMT']
+      Date: ['Thu, 09 May 2019 01:35:28 GMT']
+      ETag: ['"0x8D6D41E9DE76F93"']
+      Last-Modified: ['Thu, 09 May 2019 01:35:28 GMT']
       Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
-      x-ms-request-id: [c393d10e-401a-004f-0682-780b33000000]
+      x-ms-request-id: [110107b1-b01a-001e-0607-0615c6000000]
       x-ms-server-encrypted: ['true']
       x-ms-type: [File]
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 206, message: Partial Content}
 version: 1

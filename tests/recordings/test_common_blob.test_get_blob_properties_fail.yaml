@@ -22,46 +22,623 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['1024']
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
       x-ms-blob-type: [BlockBlob]
-      x-ms-client-request-id: [a599f7ea-e473-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:03:18 GMT']
-      x-ms-version: ['2018-03-28']
+      x-ms-client-request-id: [c4b4f0f8-71f4-11e9-b134-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 00:52:49 GMT']
+      x-ms-version: ['2018-11-09']
     method: PUT
     uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
   response:
     body: {string: ''}
     headers:
+      Content-Length: ['0']
       Content-MD5: [rr2MyoxD0qRXsPiAw8/AKg==]
-      Date: ['Fri, 09 Nov 2018 23:03:18 GMT']
-      ETag: ['"0x8D6469789DEDCB2"']
-      Last-Modified: ['Fri, 09 Nov 2018 23:03:18 GMT']
+      Date: ['Thu, 09 May 2019 00:52:49 GMT']
+      ETag: ['"0x8D6D418A92CE7E2"']
+      Last-Modified: ['Thu, 09 May 2019 00:52:50 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      x-ms-request-id: [fb0b1f47-201e-001b-2c80-78e1b9000000]
+      x-ms-request-id: [ee83e780-201e-005f-2901-063dd5000000]
       x-ms-request-server-encrypted: ['true']
-      x-ms-version: ['2018-03-28']
+      x-ms-version: ['2018-11-09']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Connection: [keep-alive]
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [a5b2d0ee-e473-11e8-9ac5-acde48001122]
-      x-ms-date: ['Fri, 09 Nov 2018 23:03:18 GMT']
-      x-ms-version: ['2018-03-28']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [c4ffa30a-71f4-11e9-b134-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 00:52:50 GMT']
+      x-ms-version: ['2018-11-09']
     method: HEAD
     uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9?snapshot=1
   response:
     body: {string: ''}
     headers:
-      Date: ['Fri, 09 Nov 2018 23:03:18 GMT']
+      Date: ['Thu, 09 May 2019 00:52:50 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
-      Transfer-Encoding: [chunked]
-      Vary: [Origin]
-      x-ms-error-code: [InvalidQueryParameterValue]
-      x-ms-request-id: [fb0b1f5b-201e-001b-3d80-78e1b9000000]
-      x-ms-version: ['2018-03-28']
+      x-ms-request-id: [ee83e79a-201e-005f-3b01-063dd5000000]
+    status: {code: 400, message: Value for one of the query parameters specified in
+        the request URI is invalid.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [ae1ac9ce-71f6-11e9-8d30-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:06:30 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Content-MD5: [rr2MyoxD0qRXsPiAw8/AKg==]
+      Date: ['Thu, 09 May 2019 01:06:31 GMT']
+      ETag: ['"0x8D6D41A9299ECE6"']
+      Last-Modified: ['Thu, 09 May 2019 01:06:31 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [ee8e04c9-201e-005f-1f03-063dd5000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [ae6ace6a-71f6-11e9-8d30-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:06:31 GMT']
+      x-ms-version: ['2018-11-09']
+    method: HEAD
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9?snapshot=1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 May 2019 01:06:31 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [ee8e04e6-201e-005f-3403-063dd5000000]
+    status: {code: 400, message: Value for one of the query parameters specified in
+        the request URI is invalid.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [b7b52a74-71f6-11e9-b8ff-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:06:46 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
+        \ specified container does not exist.\nRequestId:ac0c2bf1-001e-0025-2103-065798000000\n\
+        Time:2019-05-09T01:06:47.5090690Z</Message></Error>"}
+    headers:
+      Content-Length: ['225']
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 May 2019 01:06:47 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [ContainerNotFound]
+      x-ms-request-id: [ac0c2bf1-001e-0025-2103-065798000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 404, message: The specified container does not exist.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [17c3fcce-71f7-11e9-b091-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:09:28 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Content-MD5: [rr2MyoxD0qRXsPiAw8/AKg==]
+      Date: ['Thu, 09 May 2019 01:09:28 GMT']
+      ETag: ['"0x8D6D41AFC080A7F"']
+      Last-Modified: ['Thu, 09 May 2019 01:09:28 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [726a0740-001e-000c-5203-0621da000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [17d8b8e4-71f7-11e9-b091-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:09:28 GMT']
+      x-ms-version: ['2018-11-09']
+    method: HEAD
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9?snapshot=1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 May 2019 01:09:28 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [726a0770-001e-000c-7703-0621da000000]
+    status: {code: 400, message: Value for one of the query parameters specified in
+        the request URI is invalid.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [756dcc7e-71f7-11e9-811b-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:12:05 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Content-MD5: [rr2MyoxD0qRXsPiAw8/AKg==]
+      Date: ['Thu, 09 May 2019 01:12:04 GMT']
+      ETag: ['"0x8D6D41B59B12B38"']
+      Last-Modified: ['Thu, 09 May 2019 01:12:05 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [31ac327b-401e-004f-2b04-060b33000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [8315ef00-71f7-11e9-811b-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:12:28 GMT']
+      x-ms-version: ['2018-11-09']
+    method: HEAD
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9?snapshot=1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 May 2019 01:12:27 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [31ac5db3-401e-004f-0c04-060b33000000]
+    status: {code: 400, message: Value for one of the query parameters specified in
+        the request URI is invalid.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [a41af858-71f7-11e9-89a0-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:13:23 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
+        \ specified container does not exist.\nRequestId:ee91ed83-201e-005f-1504-063dd5000000\n\
+        Time:2019-05-09T01:13:24.1054038Z</Message></Error>"}
+    headers:
+      Content-Length: ['225']
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 May 2019 01:13:23 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [ContainerNotFound]
+      x-ms-request-id: [ee91ed83-201e-005f-1504-063dd5000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 404, message: The specified container does not exist.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [a84118ae-71f7-11e9-99cf-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:13:30 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
+        \ specified container does not exist.\nRequestId:555e8cff-201e-0054-4204-0625a1000000\n\
+        Time:2019-05-09T01:13:30.9677858Z</Message></Error>"}
+    headers:
+      Content-Length: ['225']
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 May 2019 01:13:30 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [ContainerNotFound]
+      x-ms-request-id: [555e8cff-201e-0054-4204-0625a1000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 404, message: The specified container does not exist.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [d1b1c706-71f7-11e9-a27f-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:14:40 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Content-MD5: [rr2MyoxD0qRXsPiAw8/AKg==]
+      Date: ['Thu, 09 May 2019 01:14:39 GMT']
+      ETag: ['"0x8D6D41BB5F62BD8"']
+      Last-Modified: ['Thu, 09 May 2019 01:14:40 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [451f5a38-b01e-003c-2a04-067bf0000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [d1c75490-71f7-11e9-a27f-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:14:40 GMT']
+      x-ms-version: ['2018-11-09']
+    method: HEAD
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9?snapshot=1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 May 2019 01:14:39 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [451f5aab-b01e-003c-1504-067bf0000000]
+    status: {code: 400, message: Value for one of the query parameters specified in
+        the request URI is invalid.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [dab4919e-71f7-11e9-a778-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:14:55 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
+        \ specified container does not exist.\nRequestId:d50abddc-601e-003e-2d04-06790a000000\n\
+        Time:2019-05-09T01:14:58.6250182Z</Message></Error>"}
+    headers:
+      Content-Length: ['225']
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 May 2019 01:14:57 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [ContainerNotFound]
+      x-ms-request-id: [d50abddc-601e-003e-2d04-06790a000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 404, message: The specified container does not exist.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [e1bd0318-71f7-11e9-a0da-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:15:06 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>ContainerNotFound</Code><Message>The\
+        \ specified container does not exist.\nRequestId:06525324-a01e-000a-4904-06d6a2000000\n\
+        Time:2019-05-09T01:15:07.0858890Z</Message></Error>"}
+    headers:
+      Content-Length: ['225']
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 May 2019 01:15:06 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [ContainerNotFound]
+      x-ms-request-id: [06525324-a01e-000a-4904-06d6a2000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 404, message: The specified container does not exist.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [e9cdc1e6-71f7-11e9-9a6e-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:15:20 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Content-MD5: [rr2MyoxD0qRXsPiAw8/AKg==]
+      Date: ['Thu, 09 May 2019 01:15:20 GMT']
+      ETag: ['"0x8D6D41BCE15ABFC"']
+      Last-Modified: ['Thu, 09 May 2019 01:15:20 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [02363301-401e-0022-5204-06a11d000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [eb9f0142-71f7-11e9-9a6e-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:15:23 GMT']
+      x-ms-version: ['2018-11-09']
+    method: HEAD
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9?snapshot=1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 May 2019 01:15:23 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [02363bed-401e-0022-3604-06a11d000000]
+    status: {code: 400, message: Value for one of the query parameters specified in
+        the request URI is invalid.}
+- request:
+    body: !!binary |
+      AwpxUBP6zYXcmAUCXrBB8Ru2ppqxxXfecSifEFzeeGqricWyyi0zzEql0xrEm5xNPwANV2qai6qs
+      BaFG4Zu31a3Ez1rdVty/lKNa+RuQqC5vNsrb8YlyepLsiHHE7LJsw0H0XfZSvVLYQx3LasLXyqE2
+      6YvLE6Uro2A+7ttqE6Ixhjtt4cqV7LyOGhgJR+wvyiXaB6lpq33nYW6rR0uVts0+hhrrp5aaBIlt
+      nsW8CuW562L8S9icMMZeZQlomqfCEthrrnfOEdl4Xeaysm21hHDNWUtlREc2bZftrEcQiI2SaC/a
+      mG7Hl2fPTv2MRdEqkWJJrUNuu9P+in2x5EEUSVTlk4wEMQeEFli9+eWphRrhLIUZCS8p7XY8c3vS
+      7955s2Dk3k02IAGz68cjS18Odh3Shbmd1HtyzT2f2sxJx08Tt2BDHg0Q1qLRbgIEGxq0OP30UbeB
+      o9d8mMejP0keegQREKL8/HXH9myfnStYWZQtba3YAeeAjlPRdklU3GtpTNcIvrFzgMIhPyMxOnwr
+      jwfqwMnQHO+m67n2XWwzf0RuWcOL3Cvl2MoaN0T8nrMZoi9PhM8lc72opt/589Tje78ARQ9yPeny
+      6giHpFePxQPUDOHwNxD6o2lUEdjFUcHOGl+64rcO73EjTUe4/dY/9DlzHfY2AE3jZqFuwXQWCvY+
+      mdnaCel53VPNgw3yxU0oOF17JvW2/ZKvZmoh7VLuNhNKTGs0JkIhakWeE6ePjBmtMAynQ4Pedx2q
+      UX0D1jbbXn2j4bT7uaecpef0prDBOXRmHJh9kahx7DI41ifAwpfVH6QoxFHmJOB64dfoYl/fz2uo
+      ivkoktFDPUS/U7QQ8/l9nY+V2KYGoLE65KCcqe3P4X0kpxSt2jxIQUItHGuFWlIoGew8PmCR+2E8
+      QbCSUGafr8vvLhyrcxgPVqPNUYd1MIld60eqLaVyl/eMAcApjuhUIOs3VeS1HVbpIrkEsTV8v0f9
+      wYIWoZTPCw7YcT6/vPEJrODeOvA0l1ARNa/noV3uTyLgLTaCklzzjfM/b7+1FJGprtKtZsiEhShk
+      z1sTluO07jpJpmCfHSBSe3Y97VKP4rnoJu0LJBC4maXsiLtoCdBzGArpXvi1tqSa2DXMiZ8zLsno
+      UtkmY/uMc9V97+BQzyfsNr24n+x9r2nT5ZlQ9tkm1CHep2lXXFfUH7uCMR9DA0vnS9LCBwStgD9T
+      IhDT6Nrb2u5hmIw0cvGq3YUQaMD065I54YVyjNsyalBVv6spjg94Y855BAeDSm3IBypZGVEaY/LI
+      GfT7yvMbdO2dNU3lyuashcR7Aa+nO7OScNrC5bKFIkBikjuCX0VTl5UkwIPAz8K3hTXsO5mssA==
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['1024']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [008dc430-71f8-11e9-be04-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:15:58 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Content-MD5: [rr2MyoxD0qRXsPiAw8/AKg==]
+      Date: ['Thu, 09 May 2019 01:15:58 GMT']
+      ETag: ['"0x8D6D41BE5145A4A"']
+      Last-Modified: ['Thu, 09 May 2019 01:15:59 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [83872fad-701e-0021-6c04-06a21a000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [067b086c-71f8-11e9-be04-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:16:10 GMT']
+      x-ms-version: ['2018-11-09']
+    method: HEAD
+    uri: https://storagename.blob.core.windows.net/utcontainerbb2312d9/blobbb2312d9?snapshot=1
+  response:
+    body: {string: ''}
+    headers:
+      Date: ['Thu, 09 May 2019 01:16:14 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [83876bf0-701e-0021-6104-06a21a000000]
     status: {code: 400, message: Value for one of the query parameters specified in
         the request URI is invalid.}
 version: 1

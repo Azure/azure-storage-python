@@ -8,7 +8,7 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['180']
       User-Agent: [python-requests/2.19.1]
-      client-request-id: [9d13ca3e-8961-4764-9d3c-28b84db889c2]
+      client-request-id: [be75f958-27f4-4f9b-88f9-f81bff77832d]
       content-type: [application/x-www-form-urlencoded]
       return-client-request-id: ['true']
       x-client-CPU: [x64]
@@ -18,45 +18,237 @@ interactions:
     method: POST
     uri: https://login.microsoftonline.com/32f988bf-54f1-15af-36ab-2d7cd364db47/oauth2/token
   response:
-    body: {string: '{"token_type":"Bearer","expires_in":"3600","ext_expires_in":"3600","expires_on":"1554515927","not_before":"1554512027","resource":"https://storage.azure.com","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik4tbEMwbi05REFMcXdodUhZbkhRNjNHZUNYYyIsImtpZCI6Ik4tbEMwbi05REFMcXdodUhZbkhRNjNHZUNYYyJ9.eyJhdWQiOiJodHRwczovL3N0b3JhZ2UuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3LyIsImlhdCI6MTU1NDUxMjAyNywibmJmIjoxNTU0NTEyMDI3LCJleHAiOjE1NTQ1MTU5MjcsImFpbyI6IjQyWmdZTmdyS1ZQNTdyai85VHNMbTdhZmZYZVdHUUE9IiwiYXBwaWQiOiI2ODM5MGExOS1hNjQzLTQ1OGItYjcyNi00MDhhYmY2N2I0ZmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwib2lkIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwic3ViIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwidGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IiwidXRpIjoiNkhaSllaVGcza0MzeDF4ZWk3ZzNBQSIsInZlciI6IjEuMCJ9.PIVbpbaczjgvtBD0V6LAv30Eq_d1NxSNfW9rhjyLSxBRPhNGlQ-GZGwfzSKFZt-jnWICxCJZ79tExYsaAj0Fypr2-pXyXyyHffgiiP8i8lGS1Y53YzvrifThwugVHXnQCqdbA519NbNLM9YiS121RKyWFJRVJey-YrvvFOTEMMXzYlQkWvIXYJ8tJLGmSFQrVCVrOdQS-_dHIYypIdbFCa-Ei7Tt9imfq7Siok-RcMrHui7hUM8eUIPaUCVYKRBpysKNwYT5023A_cry3DbpmTcHPLV9HhpyMAYhGkeD1HWemiMTlB6VdokGP6MLj3O_UdblGj-ucqiiLDktAlaaQw"}'}
+    body: {string: '{"token_type":"Bearer","expires_in":"3599","ext_expires_in":"3599","expires_on":"1557366252","not_before":"1557362352","resource":"https://storage.azure.com","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCIsImtpZCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCJ9.eyJhdWQiOiJodHRwczovL3N0b3JhZ2UuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3LyIsImlhdCI6MTU1NzM2MjM1MiwibmJmIjoxNTU3MzYyMzUyLCJleHAiOjE1NTczNjYyNTIsImFpbyI6IjQyWmdZRGk3bm1ucmdtT21pVXg3YmlsYU9uRnVBZ0E9IiwiYXBwaWQiOiI2ODM5MGExOS1hNjQzLTQ1OGItYjcyNi00MDhhYmY2N2I0ZmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwib2lkIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwic3ViIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwidGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IiwidXRpIjoiOElpeTNCczZlMC1TbjROMWh3X0RBQSIsInZlciI6IjEuMCJ9.hh14AipiMn5ct3JobIxrFA3PSnzgqCt-xZ4tughzE_6fDPDNU7q7hQ6hFmcbvSDdUlZBD3ocvI7k6QYh2URlu00rkpX3YjKU02oqD8FWa9E4QEK_lb-jTcy_fdFXSSyHjbT1W9rO2wNLa1GP_229fMp29YvQwT14LtzS6XK2DwrhdHKgsXLI9ZODVC-Y1B1N6vgvkqllEoXZoOoJnL8J8sBK6yCgVOjwiVxUJKfMgF4ypDBCP1N2xDUCyY2E0SyfTxgbgUeDHl07Jge5qIM8_nh_CUwIMQCF63uHb56fQnMhlpyyaGwLFTiSotptsc9cQHjrsii97EaIbjQzds-fPw"}'}
     headers:
       Cache-Control: ['no-cache, no-store']
       Content-Length: ['1328']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Sat, 06 Apr 2019 00:58:46 GMT']
+      Date: ['Thu, 09 May 2019 00:44:12 GMT']
       Expires: ['-1']
       P3P: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
       Pragma: [no-cache]
-      Set-Cookie: ['fpc=AuKXvL5mWK9Nn4pDl9EJva7eSEc1AQAAAMfwOdQOAAAA; expires=Mon,
-          06-May-2019 00:58:47 GMT; path=/; secure; HttpOnly', x-ms-gateway-slice=prod;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      Set-Cookie: ['fpc=AjiBFoid1xFKuPF4adsC6N7eSEc1AQAAANtuZdQOAAAA; expires=Sat,
+          08-Jun-2019 00:44:12 GMT; path=/; secure; HttpOnly', x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=estscorp; path=/; secure; HttpOnly]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
-      client-request-id: [9d13ca3e-8961-4764-9d3c-28b84db889c2]
+      client-request-id: [be75f958-27f4-4f9b-88f9-f81bff77832d]
       x-ms-clitelem: ['1,0,0,,']
-      x-ms-request-id: [614976e8-e094-40de-b7c7-5c5e8bb83700]
+      x-ms-request-id: [dcb288f0-3a1b-4f7b-929f-8375870fc300]
     status: {code: 200, message: OK}
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <KeyInfo><Start>2019-04-06T00:58:47Z</Start><Expiry>2019-04-06T01:58:47Z</Expiry></KeyInfo>'
+      <KeyInfo><Start>2019-05-09T00:44:12Z</Start><Expiry>2019-05-09T01:44:12Z</Expiry></KeyInfo>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['130']
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [229624c4-5807-11e9-a062-acde48001122]
-      x-ms-date: ['Sat, 06 Apr 2019 00:58:47 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [90479376-71f3-11e9-b134-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 00:44:12 GMT']
       x-ms-version: ['2018-11-09']
     method: POST
     uri: https://storagename.blob.core.windows.net/?restype=service&comp=userdelegationkey
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>c4f48289-bb84-4086-b250-6f94a8f64cee</SignedOid><SignedTid>32f988bf-54f1-15af-36ab-2d7cd364db47</SignedTid><SignedStart>2019-04-06T00:58:47Z</SignedStart><SignedExpiry>2019-04-06T01:58:47Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2018-11-09</SignedVersion><Value>zZiNnLavBIg+WvBn/vcc52e+Mr/RI10P8iYI0FwPwaQ=</Value></UserDelegationKey>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>AuthorizationPermissionMismatch</Code><Message>This\
+        \ request is not authorized to perform this operation using this permission.\n\
+        RequestId:a78db925-301e-002d-5000-064ceb000000\nTime:2019-05-09T00:44:12.8635577Z</Message></Error>"}
+    headers:
+      Content-Length: ['279']
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 May 2019 00:44:12 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [AuthorizationPermissionMismatch]
+      x-ms-request-id: [a78db925-301e-002d-5000-064ceb000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 403, message: This request is not authorized to perform this operation
+        using this permission.}
+- request:
+    body: grant_type=client_credentials&client_id=68390a19-a897-236b-b453-488abf67b4fc&resource=https%3A%2F%2Fstorage.azure.com&client_secret=3Usxz7pzkOeE7flc6Z187ubs5%2FcJnszGPjAiXmcwhaY%3D
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['180']
+      User-Agent: [python-requests/2.19.1]
+      client-request-id: [9019ac71-215e-4d47-b67c-5ce19c7be143]
+      content-type: [application/x-www-form-urlencoded]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [darwin]
+      x-client-SKU: [Python]
+      x-client-Ver: [1.0.2]
+    method: POST
+    uri: https://login.microsoftonline.com/32f988bf-54f1-15af-36ab-2d7cd364db47/oauth2/token
+  response:
+    body: {string: '{"token_type":"Bearer","expires_in":"3600","ext_expires_in":"3600","expires_on":"1557367371","not_before":"1557363471","resource":"https://storage.azure.com","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCIsImtpZCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCJ9.eyJhdWQiOiJodHRwczovL3N0b3JhZ2UuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3LyIsImlhdCI6MTU1NzM2MzQ3MSwibmJmIjoxNTU3MzYzNDcxLCJleHAiOjE1NTczNjczNzEsImFpbyI6IjQyWmdZTmg3VFZXMWxuT1ZkT2pQbm1WQzNSWHZBQT09IiwiYXBwaWQiOiI2ODM5MGExOS1hNjQzLTQ1OGItYjcyNi00MDhhYmY2N2I0ZmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwib2lkIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwic3ViIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwidGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IiwidXRpIjoiYW5LQlV5a0JEVW1HQ0QySEhMcV9BQSIsInZlciI6IjEuMCJ9.pTIl70QGQwvQxM_Cj07UVpYnHl0-tkBm_cT7pDnd1e5UWorHFdN5fYDXfVqwGoyWYA43PW5QpQCgEIc71IByQ-ewCmX5jAykecL2tnFjytlUAgCNIgoCeTTgKYDeCxKQGtgnvVQqzhyA_zN2rIUzY6to9ZVl2wQsgblc1ORjC80TKKzlt-8b83YDxbtINwL_KW-HFlAtYVaY1y_Y2Gky8Gfi099zwdQT7eo_vG544Bw_J4SNYBi9gyPkpusTnxsgCkwfnrWtQh6TZsNGA5UM3kKVwAyAJMj-m3ktYnBiazX-WbxbM0MFnT8GCB8S3tTGDld3rKZcXyytb21bkdiWXA"}'}
+    headers:
+      Cache-Control: ['no-cache, no-store']
+      Content-Length: ['1328']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 09 May 2019 01:02:50 GMT']
+      Expires: ['-1']
+      P3P: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      Pragma: [no-cache]
+      Set-Cookie: ['fpc=AuGq_Wsu5DFGq2742u9u0YfeSEc1AQAAADtzZdQOAAAA; expires=Sat,
+          08-Jun-2019 01:02:51 GMT; path=/; secure; HttpOnly', x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=estscorp; path=/; secure; HttpOnly]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      X-Content-Type-Options: [nosniff]
+      client-request-id: [9019ac71-215e-4d47-b67c-5ce19c7be143]
+      x-ms-clitelem: ['1,0,0,,']
+      x-ms-request-id: [5381726a-0129-490d-8608-3d871cbabf00]
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <KeyInfo><Start>2019-05-09T01:02:51Z</Start><Expiry>2019-05-09T02:02:51Z</Expiry></KeyInfo>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['130']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [2b7d1df0-71f6-11e9-8d30-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:02:51 GMT']
+      x-ms-version: ['2018-11-09']
+    method: POST
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=userdelegationkey
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>AuthorizationPermissionMismatch</Code><Message>This\
+        \ request is not authorized to perform this operation using this permission.\n\
+        RequestId:022ca572-401e-0022-3f02-06a11d000000\nTime:2019-05-09T01:02:52.4501242Z</Message></Error>"}
+    headers:
+      Content-Length: ['279']
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 May 2019 01:02:52 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [AuthorizationPermissionMismatch]
+      x-ms-request-id: [022ca572-401e-0022-3f02-06a11d000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 403, message: This request is not authorized to perform this operation
+        using this permission.}
+- request:
+    body: grant_type=client_credentials&client_id=68390a19-a897-236b-b453-488abf67b4fc&resource=https%3A%2F%2Fstorage.azure.com&client_secret=3Usxz7pzkOeE7flc6Z187ubs5%2FcJnszGPjAiXmcwhaY%3D
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['180']
+      User-Agent: [python-requests/2.19.1]
+      client-request-id: [d958e610-cbd0-405d-af63-aaef6e986342]
+      content-type: [application/x-www-form-urlencoded]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [darwin]
+      x-client-SKU: [Python]
+      x-client-Ver: [1.0.2]
+    method: POST
+    uri: https://login.microsoftonline.com/32f988bf-54f1-15af-36ab-2d7cd364db47/oauth2/token
+  response:
+    body: {string: '{"token_type":"Bearer","expires_in":"3600","ext_expires_in":"3600","expires_on":"1557367605","not_before":"1557363705","resource":"https://storage.azure.com","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCIsImtpZCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCJ9.eyJhdWQiOiJodHRwczovL3N0b3JhZ2UuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3LyIsImlhdCI6MTU1NzM2MzcwNSwibmJmIjoxNTU3MzYzNzA1LCJleHAiOjE1NTczNjc2MDUsImFpbyI6IjQyWmdZSkJ2OGlzOWR2RHBNVzQ1bnhsZEQvN3dBQUE9IiwiYXBwaWQiOiI2ODM5MGExOS1hNjQzLTQ1OGItYjcyNi00MDhhYmY2N2I0ZmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwib2lkIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwic3ViIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwidGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IiwidXRpIjoibW9DZ0NLaW9ERVNvTjdKaGpndzdBQSIsInZlciI6IjEuMCJ9.EguL0aeeoAOc2jmtGi6Z2BLSYNOYE2e3BOL2DRf1VtiyRyCXIhg7d79E_J6znwxHs-Jis2YLDqyQpKPO5YkXIK97IIt0ixNFHO5nXMAtXwqr189zHlnCKK-tq7W6tJXAWczTkZbCFDPMI0Dmj75FziiUbtD4hYp21xkURVqKIkAQCdINfMirtoFw1Fs8YFjdn4VaGe4Kt6tahiKq9lP9MYgEeRWdjZWVDMz4sSLer3CG9hTSghKj7kNlrTKgxtZm-sFZCgM9pxSv5SzSUfyos7eS6V22LR-SlGmcO4VykJSFm9FEl4DWwb9_Fr-GoQfazu_5hyXWyGYrSbpoofjmuQ"}'}
+    headers:
+      Cache-Control: ['no-cache, no-store']
+      Content-Length: ['1328']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 09 May 2019 01:06:45 GMT']
+      Expires: ['-1']
+      P3P: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      Pragma: [no-cache]
+      Set-Cookie: ['fpc=AkocjhdETwZAnuyQv82ZaH_eSEc1AQAAACR0ZdQOAAAA; expires=Sat,
+          08-Jun-2019 01:06:45 GMT; path=/; secure; HttpOnly', x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=estscorp; path=/; secure; HttpOnly]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      X-Content-Type-Options: [nosniff]
+      client-request-id: [d958e610-cbd0-405d-af63-aaef6e986342]
+      x-ms-clitelem: ['1,0,0,,']
+      x-ms-request-id: [08a0809a-a8a8-440c-a837-b2618e0c3b00]
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <KeyInfo><Start>2019-05-09T01:06:44Z</Start><Expiry>2019-05-09T02:06:44Z</Expiry></KeyInfo>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['130']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [b6a9f5b0-71f6-11e9-b8ff-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:06:45 GMT']
+      x-ms-version: ['2018-11-09']
+    method: POST
+    uri: https://storagename.blob.core.windows.net/?restype=service&comp=userdelegationkey
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>AuthorizationPermissionMismatch</Code><Message>This\
+        \ request is not authorized to perform this operation using this permission.\n\
+        RequestId:d92fa429-d01e-002c-4203-064d16000000\nTime:2019-05-09T01:06:45.3219639Z</Message></Error>"}
+    headers:
+      Content-Length: ['279']
+      Content-Type: [application/xml]
+      Date: ['Thu, 09 May 2019 01:06:44 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [AuthorizationPermissionMismatch]
+      x-ms-request-id: [d92fa429-d01e-002c-4203-064d16000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 403, message: This request is not authorized to perform this operation
+        using this permission.}
+- request:
+    body: grant_type=client_credentials&client_id=68390a19-a897-236b-b453-488abf67b4fc&resource=https%3A%2F%2Fstorage.azure.com&client_secret=3Usxz7pzkOeE7flc6Z187ubs5%2FcJnszGPjAiXmcwhaY%3D
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['180']
+      User-Agent: [python-requests/2.19.1]
+      client-request-id: [bbdea877-0c4b-4b21-b5ba-9c90970992e5]
+      content-type: [application/x-www-form-urlencoded]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [darwin]
+      x-client-SKU: [Python]
+      x-client-Ver: [1.0.2]
+    method: POST
+    uri: https://login.microsoftonline.com/32f988bf-54f1-15af-36ab-2d7cd364db47/oauth2/token
+  response:
+    body: {string: '{"token_type":"Bearer","expires_in":"3600","ext_expires_in":"3600","expires_on":"1557367765","not_before":"1557363865","resource":"https://storage.azure.com","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCIsImtpZCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCJ9.eyJhdWQiOiJodHRwczovL3N0b3JhZ2UuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3LyIsImlhdCI6MTU1NzM2Mzg2NSwibmJmIjoxNTU3MzYzODY1LCJleHAiOjE1NTczNjc3NjUsImFpbyI6IjQyWmdZS2o2N3R2Z0lzc1c5R2pTbFZOR3Ftb1RBQT09IiwiYXBwaWQiOiI2ODM5MGExOS1hNjQzLTQ1OGItYjcyNi00MDhhYmY2N2I0ZmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwib2lkIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwic3ViIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwidGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IiwidXRpIjoib2t5dWR3N1lCVUc1Q0dxRXRMU3pBQSIsInZlciI6IjEuMCJ9.Ok-1eT1Gb_Ts8d5zELvnX5Hpj0yh3IgO3lF-31wnew3VK9WF5LTeuyIcQ5WkjnxZm1TsubynbTEJoGl9ea26Iuhxv1hNVJlDMA-Mjj7E1CXpJ9kxUztwEW8EbaZRadd5T1sBfGdr5Syvd_dC49v37aqpj6wx_jXn8QPkk2qXYgqKaGNTLAKwA1wgWp03boUr8VS8fyquH_MYwT3fSAVEz-d1ULmk5QEq1QC9aCLaMcGdfUdua-GCvkDMVLeTUfee_pagaSth7ZXW_SgeY7DKUwkEznXFFtFuMmXvFqzUf7e3QsrHcV8IoBTVsR86kWBx6sETYsYlFucbMs71I4GueQ"}'}
+    headers:
+      Cache-Control: ['no-cache, no-store']
+      Content-Length: ['1328']
+      Content-Type: [application/json; charset=utf-8]
+      Date: ['Thu, 09 May 2019 01:09:25 GMT']
+      Expires: ['-1']
+      P3P: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      Pragma: [no-cache]
+      Set-Cookie: ['fpc=Ak40VQzWVXRJjwcWWoSKAKHeSEc1AQAAAMR0ZdQOAAAA; expires=Sat,
+          08-Jun-2019 01:09:25 GMT; path=/; secure; HttpOnly', x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=estscorp; path=/; secure; HttpOnly]
+      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      X-Content-Type-Options: [nosniff]
+      client-request-id: [bbdea877-0c4b-4b21-b5ba-9c90970992e5]
+      x-ms-clitelem: ['1,0,0,,']
+      x-ms-request-id: [77ae4ca2-d80e-4105-b908-6a84b4b4b300]
+    status: {code: 200, message: OK}
+- request:
+    body: '<?xml version=''1.0'' encoding=''utf-8''?>
+
+      <KeyInfo><Start>2019-05-09T01:09:24Z</Start><Expiry>2019-05-09T02:09:24Z</Expiry></KeyInfo>'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['130']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [16098958-71f7-11e9-b091-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:09:25 GMT']
+      x-ms-version: ['2018-11-09']
+    method: POST
+    uri: https://oauthstoragename.blob.core.windows.net/?restype=service&comp=userdelegationkey
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>c4f48289-bb84-4086-b250-6f94a8f64cee</SignedOid><SignedTid>32f988bf-54f1-15af-36ab-2d7cd364db47</SignedTid><SignedStart>2019-05-09T01:09:24Z</SignedStart><SignedExpiry>2019-05-09T02:09:24Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2018-11-09</SignedVersion><Value>EWmKM9I+/Jw+fjBnol1OZBnboH5nE75XeUNiexypFPA=</Value></UserDelegationKey>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Sat, 06 Apr 2019 00:58:48 GMT']
+      Date: ['Thu, 09 May 2019 01:09:25 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [9f4c3a11-a01e-011c-7313-ecca96000000]
+      x-ms-request-id: [4e543422-401e-0038-4403-0636fb000000]
       x-ms-version: ['2018-11-09']
     status: {code: 200, message: OK}
 - request:
@@ -68,7 +260,7 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['180']
       User-Agent: [python-requests/2.19.1]
-      client-request-id: [3123c255-92cc-429e-ac1b-1c5870fafdfe]
+      client-request-id: [53efe535-7fc1-490a-ae7b-a3c567b8ab87]
       content-type: [application/x-www-form-urlencoded]
       return-client-request-id: ['true']
       x-client-CPU: [x64]
@@ -78,45 +270,45 @@ interactions:
     method: POST
     uri: https://login.microsoftonline.com/32f988bf-54f1-15af-36ab-2d7cd364db47/oauth2/token
   response:
-    body: {string: '{"token_type":"Bearer","expires_in":"3600","ext_expires_in":"3600","expires_on":"1554515929","not_before":"1554512029","resource":"https://storage.azure.com","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik4tbEMwbi05REFMcXdodUhZbkhRNjNHZUNYYyIsImtpZCI6Ik4tbEMwbi05REFMcXdodUhZbkhRNjNHZUNYYyJ9.eyJhdWQiOiJodHRwczovL3N0b3JhZ2UuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3LyIsImlhdCI6MTU1NDUxMjAyOSwibmJmIjoxNTU0NTEyMDI5LCJleHAiOjE1NTQ1MTU5MjksImFpbyI6IjQyWmdZTmlvdk1sMi81Y3R5N2d2blhGZytLOW9DQUE9IiwiYXBwaWQiOiI2ODM5MGExOS1hNjQzLTQ1OGItYjcyNi00MDhhYmY2N2I0ZmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwib2lkIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwic3ViIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwidGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IiwidXRpIjoiWC1MbXI5RHkyMEd0OHRxUTRNdzRBQSIsInZlciI6IjEuMCJ9.ZGN3fPzbRaRIYlznuCR1yf875svIOYUleh8P_xjh0EhTFyQfa5EuuwC7Yv3EYAbMe6sGMbTMFmbO08yDBcvhJp4ma8kdajnpVZEnGMl5T8gBLqM8Z8-K_IKXT3YV-4euZ7LfJrK9xcCYqbI2kBFy24I9-JdflVKdbWwLolQ94Se9c6LYXSgPeG9yV1-A0E7FygHeohuiIbGWGk-NdspOU4_o6DPw0iZr40Oholg-lLY8dBKmos3XST05GE2dkqRRnRS473b2QcJUhaC9Rkey_8UL7xJkCLyS-pZF2GGafavnztrRmgVfOF-tc7PtSIX3QZteN-SHXyvBWUpaW_JRWA"}'}
+    body: {string: '{"token_type":"Bearer","expires_in":"3600","ext_expires_in":"3600","expires_on":"1557367766","not_before":"1557363866","resource":"https://storage.azure.com","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCIsImtpZCI6IkhCeGw5bUFlNmd4YXZDa2NvT1UyVEhzRE5hMCJ9.eyJhdWQiOiJodHRwczovL3N0b3JhZ2UuYXp1cmUuY29tIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3LyIsImlhdCI6MTU1NzM2Mzg2NiwibmJmIjoxNTU3MzYzODY2LCJleHAiOjE1NTczNjc3NjYsImFpbyI6IjQyWmdZUGg3S2pqN3hNZTJDZmEybnp4L1ZweDFBd0E9IiwiYXBwaWQiOiI2ODM5MGExOS1hNjQzLTQ1OGItYjcyNi00MDhhYmY2N2I0ZmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC83MmY5ODhiZi04NmYxLTQxYWYtOTFhYi0yZDdjZDAxMWRiNDcvIiwib2lkIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwic3ViIjoiYzRmNDgyODktYmI4NC00MDg2LWIyNTAtNmY5NGE4ZjY0Y2VlIiwidGlkIjoiNzJmOTg4YmYtODZmMS00MWFmLTkxYWItMmQ3Y2QwMTFkYjQ3IiwidXRpIjoiYW5LQlV5a0JEVW1HQ0QySDllZV9BQSIsInZlciI6IjEuMCJ9.omOOWQ_4YtdiHLY4Ib3Q5JSYIsQ-EJSV9UIzO5RX-ou4pKQAuzxDYi7xypcVo5kSHJCU677t1fFfkJ3Npsiy71uJkFNVdjBrwT2KYHE9SMqy0t_ViNtfdehuGWJRxr6w-AfgeWhK8pAk7FEqYM5HqIOh0A0SS_cHIPoEauD4_4qoyWKUd4WLKevB1l08brllqHu9I47-8pi_DQI8Q3AgIBrHhmkP6rT6KK9iLBySrY2kS4XDPRdWeHAH9Q_TMrYevckNl1Qh3jTCee8d1jrdK0tIOEflpD2H7YphrmGJYxKhC6HrfXrbin8o3inTsgcWYmG2_Q4fuRQTTFYP74UHlQ"}'}
     headers:
       Cache-Control: ['no-cache, no-store']
       Content-Length: ['1328']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Sat, 06 Apr 2019 00:58:48 GMT']
+      Date: ['Thu, 09 May 2019 01:09:25 GMT']
       Expires: ['-1']
       P3P: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
       Pragma: [no-cache]
-      Set-Cookie: ['fpc=AgqMHSgEOFxOvnTxHvRCJn7eSEc1AQAAAMjwOdQOAAAA; expires=Mon,
-          06-May-2019 00:58:49 GMT; path=/; secure; HttpOnly', x-ms-gateway-slice=prod;
-          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      Set-Cookie: ['fpc=ArAOiR_ucw9Gj_USM5l4uTveSEc1AQAAAMV0ZdQOAAAA; expires=Sat,
+          08-Jun-2019 01:09:26 GMT; path=/; secure; HttpOnly', x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=estscorp; path=/; secure; HttpOnly]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       X-Content-Type-Options: [nosniff]
-      client-request-id: [3123c255-92cc-429e-ac1b-1c5870fafdfe]
+      client-request-id: [53efe535-7fc1-490a-ae7b-a3c567b8ab87]
       x-ms-clitelem: ['1,0,0,,']
-      x-ms-request-id: [afe6e25f-f2d0-41db-adf2-da90e0cc3800]
+      x-ms-request-id: [5381726a-0129-490d-8608-3d87f5e7bf00]
     status: {code: 200, message: OK}
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <KeyInfo><Start>2019-04-06T00:58:47Z</Start><Expiry>2019-04-06T01:58:47Z</Expiry></KeyInfo>'
+      <KeyInfo><Start>2019-05-09T01:09:24Z</Start><Expiry>2019-05-09T02:09:24Z</Expiry></KeyInfo>'
     headers:
       Connection: [keep-alive]
       Content-Length: ['130']
-      User-Agent: [Azure-Storage/1.4.0-1.4.0 (Python CPython 3.7.0; Darwin 18.2.0)]
-      x-ms-client-request-id: [235d6a16-5807-11e9-a062-acde48001122]
-      x-ms-date: ['Sat, 06 Apr 2019 00:58:49 GMT']
+      User-Agent: [Azure-Storage/1.4.0-2.0.0 (Python CPython 3.7.0; Darwin 18.5.0)]
+      x-ms-client-request-id: [16c6e34a-71f7-11e9-b091-acde48001122]
+      x-ms-date: ['Thu, 09 May 2019 01:09:26 GMT']
       x-ms-version: ['2018-11-09']
     method: POST
-    uri: https://storagename.blob.core.windows.net/?restype=service&comp=userdelegationkey
+    uri: https://oauthstoragename.blob.core.windows.net/?restype=service&comp=userdelegationkey
   response:
-    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>c4f48289-bb84-4086-b250-6f94a8f64cee</SignedOid><SignedTid>32f988bf-54f1-15af-36ab-2d7cd364db47</SignedTid><SignedStart>2019-04-06T00:58:47Z</SignedStart><SignedExpiry>2019-04-06T01:58:47Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2018-11-09</SignedVersion><Value>zZiNnLavBIg+WvBn/vcc52e+Mr/RI10P8iYI0FwPwaQ=</Value></UserDelegationKey>"}
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>c4f48289-bb84-4086-b250-6f94a8f64cee</SignedOid><SignedTid>32f988bf-54f1-15af-36ab-2d7cd364db47</SignedTid><SignedStart>2019-05-09T01:09:24Z</SignedStart><SignedExpiry>2019-05-09T02:09:24Z</SignedExpiry><SignedService>b</SignedService><SignedVersion>2018-11-09</SignedVersion><Value>EWmKM9I+/Jw+fjBnol1OZBnboH5nE75XeUNiexypFPA=</Value></UserDelegationKey>"}
     headers:
       Content-Type: [application/xml]
-      Date: ['Sat, 06 Apr 2019 00:58:48 GMT']
+      Date: ['Thu, 09 May 2019 01:09:26 GMT']
       Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
       Transfer-Encoding: [chunked]
-      x-ms-request-id: [7c799c76-101e-0089-1e13-ecedf0000000]
+      x-ms-request-id: [d964001a-001e-0039-1903-066927000000]
       x-ms-version: ['2018-11-09']
     status: {code: 200, message: OK}
 version: 1
