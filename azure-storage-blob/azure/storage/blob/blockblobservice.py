@@ -191,7 +191,7 @@ class BlockBlobService(BaseBlobService):
             self, container_name, blob_name, block_list, content_settings=None,
             metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
             if_unmodified_since=None, if_match=None, if_none_match=None,
-            timeout=None):
+            timeout=None, standard_blob_tier=None):
         '''
         Writes a blob by specifying the list of block IDs that make up the blob.
         In order to be written as part of a blob, a block must have been
@@ -248,6 +248,9 @@ class BlockBlobService(BaseBlobService):
             operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param StandardBlobTier standard_blob_tier:
+            A standard blob tier value to set the blob to. For this version of the library,
+            this is only applicable to block blobs on standard storage accounts.
         :return: ETag and last modified properties for the updated Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -266,7 +269,8 @@ class BlockBlobService(BaseBlobService):
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
-            timeout=timeout
+            timeout=timeout,
+            standard_blob_tier=standard_blob_tier
         )
 
     def get_block_list(self, container_name, blob_name, snapshot=None,
@@ -383,7 +387,7 @@ class BlockBlobService(BaseBlobService):
             self, container_name, blob_name, file_path, content_settings=None,
             metadata=None, validate_content=False, progress_callback=None,
             max_connections=2, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None):
+            if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None, standard_blob_tier=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -443,6 +447,9 @@ class BlockBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
+        :param StandardBlobTier standard_blob_tier:
+            A standard blob tier value to set the blob to. For this version of the library,
+            this is only applicable to block blobs on standard storage accounts.
         :return: ETag and last modified properties for the Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -467,14 +474,15 @@ class BlockBlobService(BaseBlobService):
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
                 if_none_match=if_none_match,
-                timeout=timeout)
+                timeout=timeout,
+                standard_blob_tier=standard_blob_tier)
 
     def create_blob_from_stream(
             self, container_name, blob_name, stream, count=None,
             content_settings=None, metadata=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None, use_byte_buffer=False):
+            if_none_match=None, timeout=None, use_byte_buffer=False, standard_blob_tier=None):
         '''
         Creates a new blob from a file/stream, or updates the content of
         an existing blob, with automatic chunking and progress
@@ -555,6 +563,9 @@ class BlockBlobService(BaseBlobService):
             with your input stream.
             The SubStream class will attempt to buffer up to 4 MB internally to reduce the amount of
             seek and read calls to the underlying stream. This is particularly beneficial when uploading larger blocks.
+        :param StandardBlobTier standard_blob_tier:
+            A standard blob tier value to set the blob to. For this version of the library,
+            this is only applicable to block blobs on standard storage accounts.
         :return: ETag and last modified properties for the Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -586,7 +597,8 @@ class BlockBlobService(BaseBlobService):
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
                 if_none_match=if_none_match,
-                timeout=timeout)
+                timeout=timeout,
+                standard_blob_tier=standard_blob_tier)
 
             if progress_callback:
                 progress_callback(count, count)
@@ -649,7 +661,8 @@ class BlockBlobService(BaseBlobService):
                 if_match=if_match,
                 if_none_match=if_none_match,
                 timeout=timeout,
-                encryption_data=encryption_data
+                encryption_data=encryption_data,
+                standard_blob_tier=standard_blob_tier
             )
 
     def create_blob_from_bytes(
@@ -657,7 +670,7 @@ class BlockBlobService(BaseBlobService):
             content_settings=None, metadata=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None):
+            if_none_match=None, timeout=None, standard_blob_tier=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -721,6 +734,9 @@ class BlockBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
+        :param StandardBlobTier standard_blob_tier:
+            A standard blob tier value to set the blob to. For this version of the library,
+            this is only applicable to block blobs on standard storage accounts.
         :return: ETag and last modified properties for the Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -755,7 +771,8 @@ class BlockBlobService(BaseBlobService):
             if_match=if_match,
             if_none_match=if_none_match,
             timeout=timeout,
-            use_byte_buffer=True
+            use_byte_buffer=True,
+            standard_blob_tier=standard_blob_tier
         )
 
     def create_blob_from_text(
@@ -763,7 +780,7 @@ class BlockBlobService(BaseBlobService):
             content_settings=None, metadata=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None):
+            if_none_match=None, timeout=None, standard_blob_tier=None):
         '''
         Creates a new blob from str/unicode, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -823,6 +840,9 @@ class BlockBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
+        :param StandardBlobTier standard_blob_tier:
+            A standard blob tier value to set the blob to. For this version of the library,
+            this is only applicable to block blobs on standard storage accounts.
         :return: ETag and last modified properties for the Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -850,7 +870,8 @@ class BlockBlobService(BaseBlobService):
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
-            timeout=timeout)
+            timeout=timeout,
+            standard_blob_tier=standard_blob_tier)
 
     def set_standard_blob_tier(
             self, container_name, blob_name, standard_blob_tier, timeout=None):
@@ -893,7 +914,7 @@ class BlockBlobService(BaseBlobService):
                   source_if_none_match=None, destination_if_modified_since=None,
                   destination_if_unmodified_since=None, destination_if_match=None,
                   destination_if_none_match=None, destination_lease_id=None,
-                  source_lease_id=None, timeout=None, requires_sync=None):
+                  source_lease_id=None, timeout=None, requires_sync=None, standard_blob_tier=None):
 
         '''
         Copies a blob. This operation returns a copy operation
@@ -997,6 +1018,9 @@ class BlockBlobService(BaseBlobService):
         The timeout parameter is expressed in seconds.
         :param bool requires_sync:
         Enforces that the service will not return a response until the copy is complete.
+        :param StandardBlobTier standard_blob_tier:
+        A standard blob tier value to set the blob to. For this version of the library,
+        this is only applicable to block blobs on standard storage accounts.
         :return: Copy operation properties such as status, source, and ID.
         :rtype: :class:`~azure.storage.blob.models.CopyProperties`
         '''
@@ -1015,13 +1039,14 @@ class BlockBlobService(BaseBlobService):
                                destination_lease_id=destination_lease_id,
                                source_lease_id=source_lease_id, timeout=timeout,
                                incremental_copy=False,
-                               requires_sync=requires_sync)
+                               requires_sync=requires_sync,
+                               standard_blob_tier=standard_blob_tier)
 
     # -----Helper methods------------------------------------
     def _put_blob(self, container_name, blob_name, blob, content_settings=None,
                   metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
                   if_unmodified_since=None, if_match=None, if_none_match=None,
-                  timeout=None):
+                  timeout=None, standard_blob_tier=None):
         '''
         Creates a blob or updates an existing blob.
 
@@ -1072,6 +1097,9 @@ class BlockBlobService(BaseBlobService):
             operation if it does exist.
         :param int timeout:
             The timeout parameter is expressed in seconds.
+        :param StandardBlobTier standard_blob_tier:
+            A standard blob tier value to set the blob to. For this version of the library,
+            this is only applicable to block blobs on standard storage accounts.
         :return: ETag and last modified properties for the new Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -1090,7 +1118,8 @@ class BlockBlobService(BaseBlobService):
             'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
             'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
             'If-Match': _to_str(if_match),
-            'If-None-Match': _to_str(if_none_match)
+            'If-None-Match': _to_str(if_none_match),
+            'x-ms-access-tier': _to_str(standard_blob_tier)
         }
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
@@ -1153,7 +1182,7 @@ class BlockBlobService(BaseBlobService):
             self, container_name, blob_name, block_list, content_settings=None,
             metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
             if_unmodified_since=None, if_match=None, if_none_match=None,
-            timeout=None, encryption_data=None):
+            timeout=None, encryption_data=None, standard_blob_tier=None):
         '''
         See put_block_list for more details. This helper method
         allows for encryption or other such special behavior because
@@ -1182,6 +1211,7 @@ class BlockBlobService(BaseBlobService):
             'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match),
+            'x-ms-access-tier': _to_str(standard_blob_tier)
         }
         _add_metadata_headers(metadata, request)
         if content_settings is not None:

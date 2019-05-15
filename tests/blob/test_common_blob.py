@@ -14,6 +14,8 @@ from azure.common import (
     AzureMissingResourceHttpError,
     AzureException,
 )
+from azure.storage.blob.models import StandardBlobTier
+
 from azure.storage.common import (
     AccessPolicy,
     ResourceTypes,
@@ -880,6 +882,25 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNotNone(copy.id)
         copy_blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1copy')
         self.assertEqual(copy_blob.content, self.byte_data)
+
+    @record
+    def test_copy_blob_with_blob_tier_specified(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+
+        # Act
+        sourceblob = '/{0}/{1}/{2}'.format(self.settings.STORAGE_ACCOUNT_NAME,
+                                           self.container_name,
+                                           blob_name)
+        blob_tier = StandardBlobTier.Cool
+        copy = self.bs.copy_blob(self.container_name, 'blob1copy', sourceblob, standard_blob_tier=blob_tier)
+        copy_blob_properties = self.bs.get_blob_properties(self.container_name, 'blob1copy').properties
+
+        # Assert
+        self.assertIsNotNone(copy)
+        self.assertEqual(copy.status, 'success')
+        self.assertIsNotNone(copy.id)
+        self.assertEqual(copy_blob_properties.blob_tier, blob_tier)
 
     @record
     def test_copy_blob_async_private_blob(self):
