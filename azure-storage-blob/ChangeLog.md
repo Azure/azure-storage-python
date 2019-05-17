@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX:
+- Added Blob Tier support PutBlob/PutBlockList/CopyBlob APIs
+
 ## Version 2.0.1:
 - Updated dependency on azure-storage-common.
 

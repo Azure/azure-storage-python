@@ -3197,7 +3197,8 @@ class BaseBlobService(StorageClient):
                    destination_lease_id=None,
                    source_lease_id=None, timeout=None,
                    incremental_copy=False,
-                   requires_sync=None):
+                   requires_sync=None,
+                   standard_blob_tier=None):
         '''
         See copy_blob for more details. This helper method
         allows for standard copies as well as incremental copies which are only supported for page blobs and sync
@@ -3252,7 +3253,7 @@ class BaseBlobService(StorageClient):
             'If-None-Match': _to_str(destination_if_none_match),
             'x-ms-lease-id': _to_str(destination_lease_id),
             'x-ms-source-lease-id': _to_str(source_lease_id),
-            'x-ms-access-tier': _to_str(premium_page_blob_tier),
+            'x-ms-access-tier': _to_str(premium_page_blob_tier) or _to_str(standard_blob_tier),
             'x-ms-requires-sync': _to_str(requires_sync)
         }
 
