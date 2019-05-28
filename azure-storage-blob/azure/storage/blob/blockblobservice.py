@@ -574,6 +574,20 @@ class BlockBlobService(BaseBlobService):
                 progress_callback(0, count)
 
             data = stream.read(count)
+            data_chunk = data  # to store the chunk of data read from stream each time
+
+            # keep reading from stream util length of data >= count or reaching the end of stream
+            while len(data) < count and len(data_chunk) is not 0:
+                data_chunk = stream.read(count)
+                data += data_chunk
+
+            if len(data) < count:
+                raise ValueError('Parameter:count is greater than the amount of data in the stream,'
+                                 'please specify a valid count')
+
+            if len(data) > count:
+                data = data[0:count]
+
             resp = self._put_blob(
                 container_name=container_name,
                 blob_name=blob_name,
