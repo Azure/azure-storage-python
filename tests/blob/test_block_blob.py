@@ -520,11 +520,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(properties.content_settings.content_type, content_settings.content_type)
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
 
+    @record
     def test_createBlobFromStream_when_short_read_the_whole_stream(self):
-        # to get the actual uploaded blob, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
         blob_name = self._get_blob_reference()
         content = b"Example blob content."
@@ -538,11 +535,8 @@ class StorageBlockBlobTest(StorageTestCase):
         uploaded_blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
         self.assertEquals(content, uploaded_blob.content)
 
+    @record
     def test_createBlobFromStream_when_short_read_designated_size_of_stream(self):
-        # to get the actual uploaded blob, can only run live
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
         blob_name = self._get_blob_reference()
         content = b"Example blob content."
@@ -554,8 +548,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Assert
         uploaded_blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
-        self.assertEquals(upload_size, len(uploaded_blob.content))
-        self.assertEquals(content[:upload_size], uploaded_blob.content)
+        self.assertEqual(upload_size, len(uploaded_blob.content))
 
     def test_createBlobFromStream_when_designated_size_larger_than_the_actual_stream_size(self):
 

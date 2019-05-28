@@ -582,8 +582,8 @@ class BlockBlobService(BaseBlobService):
                 data += data_chunk
 
             if len(data) < count:
-                raise ValueError('Parameter:count you provided is more than the actually data exist in stream,'
-                                 'Please specify a valid count')
+                raise ValueError('Parameter:count is greater than the amount of data in the stream,'
+                                 'please specify a valid count')
 
             if len(data) > count:
                 data = data[0:count]
