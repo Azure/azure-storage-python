@@ -883,11 +883,8 @@ class StorageCommonBlobTest(StorageTestCase):
         copy_blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1copy')
         self.assertEqual(copy_blob.content, self.byte_data)
 
+    @record
     def test_copy_blob_with_blob_tier_specified(self):
-        # Use live mode because we are using a preprod account for testing
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
         blob_name = self._create_block_blob()
 

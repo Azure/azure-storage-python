@@ -239,10 +239,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(block_list.committed_blocks[2].id, '3')
         self.assertEqual(block_list.committed_blocks[2].size, 3)
 
+    @record
     def test_put_block_list_with_blob_tier_specified(self):
-        # Use live mode because we are using a preprod account for testing
-        if TestMode.need_recording_file(self.test_mode):
-            return
 
         # Arrange
         blob_name = self._get_blob_reference()
@@ -456,11 +454,8 @@ class StorageBlockBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
 
+    @record
     def test_create_blob_from_bytes_with_blob_tier_specified(self):
-        # Use live mode because we are using a preprod account for testing
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
         blob_name = self._get_blob_reference()
         data = b'hello world'
@@ -557,11 +552,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(properties.content_settings.content_type, content_settings.content_type)
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
 
+    @record
     def test_create_blob_from_path_non_parallel_with_blob_tier_specified(self):
-        # Use live mode because we are using a preprod account for testing
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
         blob_name = self._get_blob_reference()
         data = self.get_random_bytes(100)
@@ -734,11 +726,8 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(properties.content_settings.content_type, content_settings.content_type)
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
 
+    @record
     def test_create_blob_from_stream_for_small_blob_with_blob_tier_specified(self):
-        # Use live mode because we are using a preprod account for testing
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
         blob_name = self._get_blob_reference()
         # generate a small blob to make sure the blob could be uploaded with put_blob request
@@ -846,11 +835,8 @@ class StorageBlockBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, encoded_data)
 
+    @record
     def test_create_blob_from_text_with_blob_tier_specified(self):
-        # Use live mode because we are using a preprod account for testing
-        if TestMode.need_recording_file(self.test_mode):
-            return
-
         # Arrange
         blob_name = self._get_blob_reference()
         text = u'hello 啊齄丂狛狜 world'
