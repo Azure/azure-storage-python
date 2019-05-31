@@ -578,7 +578,7 @@ class BlockBlobService(BaseBlobService):
 
             # keep reading from stream util length of data >= count or reaching the end of stream
             while len(data) < count and len(data_chunk) is not 0:
-                data_chunk = stream.read(count)
+                data_chunk = stream.read(count - len(data))
                 data += data_chunk
 
             if len(data) < count:
