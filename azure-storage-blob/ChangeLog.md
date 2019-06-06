@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX
+
+- Added Batch Delete Blob API
+
 ## Version 2.0.1:
 - Updated dependency on azure-storage-common.
 

@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------
 import sys
+import uuid
 from abc import ABCMeta
 
 from azure.common import AzureHttpError
@@ -45,7 +46,7 @@ from azure.storage.common._serialization import (
     _convert_signed_identifiers_to_xml,
     _convert_service_properties_to_xml,
     _add_metadata_headers,
-)
+    _update_request, _add_date_header)
 from azure.storage.common.models import (
     Services,
     ListGenerator,
@@ -67,7 +68,7 @@ from ._deserialization import (
     _parse_base_properties,
     _parse_account_information,
     _convert_xml_to_user_delegation_key,
-)
+    _ingest_batch_response)
 from ._download_chunking import _download_blob_chunks
 from ._error import (
     _ERROR_INVALID_LEASE_DURATION,
@@ -77,7 +78,7 @@ from ._serialization import (
     _get_path,
     _validate_and_format_range_headers,
     _convert_delegation_key_info_to_xml,
-)
+    _get_batch_request_delimiter, _serialize_batch_body)
 from .models import (
     BlobProperties,
     _LeaseActions,
@@ -3353,6 +3354,106 @@ class BaseBlobService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
+        request = self._get_basic_delete_blob_http_request(container_name,
+                                                           blob_name,
+                                                           snapshot=snapshot,
+                                                           lease_id=lease_id,
+                                                           delete_snapshots=delete_snapshots,
+                                                           if_modified_since=if_modified_since,
+                                                           if_unmodified_since=if_unmodified_since,
+                                                           if_match=if_match,
+                                                           if_none_match=if_none_match,
+                                                           timeout=timeout)
+
+        self._perform_request(request)
+
+    def batch_delete_blobs(self, batch_delete_sub_requests, timeout=None):
+        '''
+        Sends a batch of multiple blob delete requests.
+
+        The blob delete method deletes the specified blob or snapshot. Note that deleting a blob also deletes all its
+        snapshots. For more information, see https://docs.microsoft.com/rest/api/storageservices/delete-blob
+
+        :param list(BatchDeleteSubRequest) batch_delete_sub_requests:
+            The blob delete requests to send as a batch.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: parsed batch delete HTTP response
+        :rtype: list of :class:`~azure.storage.blob.models.BatchSubResponse`
+        '''
+
+        if batch_delete_sub_requests is None or len(batch_delete_sub_requests) < 1 or len(batch_delete_sub_requests) > 256:
+            raise ValueError("Batch delete should take 1 to 256 sub-requests")
+
+        request = HTTPRequest()
+        request.method = 'POST'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path()
+        batch_id = str(uuid.uuid1())
+        request.headers = {
+            'Content-Type': "multipart/mixed; boundary=" + _get_batch_request_delimiter(batch_id, False, False),
+        }
+        request.query = {
+            'comp': 'batch',
+            'timeout': _int_to_str(timeout)
+        }
+
+        batch_http_requests = []
+        for batch_delete_sub_request in batch_delete_sub_requests:
+            batch_delete_sub_http_request = self._construct_batch_delete_sub_http_request(len(batch_http_requests),
+                                                                                          batch_delete_sub_request)
+            batch_http_requests.append(batch_delete_sub_http_request)
+
+        request.body = _serialize_batch_body(batch_http_requests, batch_id)
+
+        return self._perform_request(request, parser=_ingest_batch_response, parser_args=[batch_delete_sub_requests])
+
+    def _construct_batch_delete_sub_http_request(self, content_id, batch_delete_sub_request):
+        """
+        Construct an HTTPRequest instance from a batch delete sub-request.
+
+        :param int content_id:
+            the index of sub-request in the list of sub-requests
+        :param ~azure.storage.blob.models.BatchDeleteSubRequest batch_delete_sub_request:
+            one of the delete request to be sent in a batch
+        :return: HTTPRequest parsed from batch delete sub-request
+        :rtype: :class:`~azure.storage.common._http.HTTPRequest`
+        """
+        request = self._get_basic_delete_blob_http_request(batch_delete_sub_request.container_name,
+                                                           batch_delete_sub_request.blob_name,
+                                                           snapshot=batch_delete_sub_request.snapshot,
+                                                           lease_id=batch_delete_sub_request.lease_id,
+                                                           delete_snapshots=batch_delete_sub_request.delete_snapshots,
+                                                           if_modified_since=batch_delete_sub_request.if_modified_since,
+                                                           if_unmodified_since=batch_delete_sub_request.if_unmodified_since,
+                                                           if_match=batch_delete_sub_request.if_match,
+                                                           if_none_match=batch_delete_sub_request.if_none_match)
+        request.headers.update({
+            'Content-ID': _int_to_str(content_id),
+            'Content-Length': _int_to_str(0),
+            'Content-Transfer-Encoding': 'binary',
+        })
+
+        _update_request(request, None, self._USER_AGENT_STRING)
+        # sub-request will use the batch request id automatically, no need to generate a separate one
+        request.headers.pop('x-ms-client-request-id', None)
+
+        _add_date_header(request)
+        self.authentication.sign_request(request)
+
+        return request
+
+    def _get_basic_delete_blob_http_request(self, container_name, blob_name, snapshot=None, lease_id=None,
+                                            delete_snapshots=None, if_modified_since=None, if_unmodified_since=None,
+                                            if_match=None, if_none_match=None, timeout=None):
+        """
+        Construct a basic HTTPRequest instance for delete blob
+
+        For more information about the parameters please see delete_blob
+
+        :return: an HTTPRequest for delete blob
+        :rtype :class:`~azure.storage.common._http.HTTPRequest`
+        """
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         request = HTTPRequest()
@@ -3372,7 +3473,7 @@ class BaseBlobService(StorageClient):
             'timeout': _int_to_str(timeout)
         }
 
-        self._perform_request(request)
+        return request
 
     def undelete_blob(self, container_name, blob_name, timeout=None):
         '''

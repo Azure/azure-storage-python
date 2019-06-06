@@ -823,3 +823,77 @@ class UserDelegationKey(object):
         self.signed_service = None
         self.signed_version = None
         self.value = None
+
+
+class BatchDeleteSubRequest(object):
+    """
+    Represents one request in batch of multiple blob delete requests
+
+    Organizes HttpRequest objects together for batch REST operations to a single host endpoint.
+
+    :ivar str container_name:
+            Name of existing container.
+    :ivar str blob_name:
+            Name of existing blob.
+    :ivar str snapshot:
+            The snapshot parameter is an opaque DateTime value that,
+            when present, specifies the blob snapshot to delete.
+    :ivar str lease_id:
+            Required if the blob has an active lease.
+    :ivar ~azure.storage.blob.models.DeleteSnapshot delete_snapshots:
+            Required if the blob has associated snapshots.
+    :ivar datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+    :ivardatetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+    :ivar str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+    :ivar str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
+    """
+    def __init__(self, container_name, blob_name, snapshot=None,
+                 lease_id=None, delete_snapshots=None,
+                 if_modified_since=None, if_unmodified_since=None,
+                 if_match=None, if_none_match=None):
+        self.container_name = container_name
+        self.blob_name = blob_name
+        self.snapshot = snapshot
+        self.lease_id = lease_id
+        self.delete_snapshots = delete_snapshots
+        self.if_modified_since = if_modified_since
+        self.if_unmodified_since = if_unmodified_since
+        self.if_match = if_match
+        self.if_none_match = if_none_match
+
+
+class BatchSubResponse(object):
+    """
+    Sub response parsed from batch http sub-response
+
+    Organizes batch sub-response info and batch sub-request together for easier processing
+
+    :ivar bool is_successful:
+        Represent if the batch sub-request is successful
+    :ivar :class:`~azure.storage.common._http.HTTPResponse` http_response:
+        Parsed batch sub-response, in HTTPResponse format
+    :ivar batch_sub_request:
+        Represent the batch sub-request corresponding to the batch sub-response.
+        This could be any type of sub-request. One example is class: ~azure.storage.blob.models.BatchDeleteSubRequest
+    """
+    def __init__(self, is_successful, http_response, batch_sub_request):
+        self.is_successful = is_successful
+        self.http_response = http_response
+        self.batch_sub_request = batch_sub_request

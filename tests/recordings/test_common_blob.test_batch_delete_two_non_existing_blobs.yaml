@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: "--batch_74db003e-8d61-11e9-a293-001a7dda7113\r\nContent-Type: application/http\r\nContent-ID:
+      0\r\nContent-Transfer-Encoding: binary\r\n\r\nDELETE /utcontainera4231766/0?
+      HTTP/1.1\r\nx-ms-delete-snapshots: include\r\nContent-Length: 0\r\nUser-Agent:
+      Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)\r\nx-ms-date: Wed,
+      12 Jun 2019 22:28:52 GMT\r\nAuthorization: SharedKey blobstoragename:RW6AVaZzP0iUEhmusx95oBsY/lfGvvRQgeZRCy6L9CY=\r\n\r\n\r\n--batch_74db003e-8d61-11e9-a293-001a7dda7113\r\nContent-Type:
+      application/http\r\nContent-ID: 1\r\nContent-Transfer-Encoding: binary\r\n\r\nDELETE
+      /utcontainera4231766/1? HTTP/1.1\r\nx-ms-delete-snapshots: include\r\nContent-Length:
+      0\r\nUser-Agent: Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)\r\nx-ms-date:
+      Wed, 12 Jun 2019 22:28:52 GMT\r\nAuthorization: SharedKey blobstoragename:dmFjVjFJPkv043vzsAbmOcsW4TpDaHzKEyFUFqMpg0s=\r\n\r\n\r\n--batch_74db003e-8d61-11e9-a293-001a7dda7113--\r\n"
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '914'
+      Content-Type:
+      - multipart/mixed; boundary=batch_74db003e-8d61-11e9-a293-001a7dda7113
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
+      x-ms-client-request-id:
+      - 74db003f-8d61-11e9-b774-001a7dda7113
+      x-ms-date:
+      - Wed, 12 Jun 2019 22:28:52 GMT
+      x-ms-version:
+      - '2018-11-09'
+    method: POST
+    uri: https://storagename.blob.core.windows.net/?comp=batch
+  response:
+    body:
+      string: "--batchresponse_9f75ed41-ba10-41be-9402-14176ca89611\r\nContent-Type:
+        application/http\r\nContent-ID: 0\r\n\r\nHTTP/1.1 404 The specified blob does
+        not exist.\r\nx-ms-error-code: BlobNotFound\r\nx-ms-request-id: da40e8e0-a01e-0004-126e-2194231ec889\r\nx-ms-version:
+        2018-11-09\r\nContent-Length: 216\r\nContent-Type: application/xml\r\nServer:
+        Windows-Azure-Blob/1.0\r\n\r\n\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Error><Code>BlobNotFound</Code><Message>The
+        specified blob does not exist.\nRequestId:da40e8e0-a01e-0004-126e-2194231ec889\nTime:2019-06-12T22:28:52.4320159Z</Message></Error>\r\n--batchresponse_9f75ed41-ba10-41be-9402-14176ca89611\r\nContent-Type:
+        application/http\r\nContent-ID: 1\r\n\r\nHTTP/1.1 404 The specified blob does
+        not exist.\r\nx-ms-error-code: BlobNotFound\r\nx-ms-request-id: da40e8e0-a01e-0004-126e-2194231ec88b\r\nx-ms-version:
+        2018-11-09\r\nContent-Length: 216\r\nContent-Type: application/xml\r\nServer:
+        Windows-Azure-Blob/1.0\r\n\r\n\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<Error><Code>BlobNotFound</Code><Message>The
+        specified blob does not exist.\nRequestId:da40e8e0-a01e-0004-126e-2194231ec88b\nTime:2019-06-12T22:28:52.4320159Z</Message></Error>\r\n--batchresponse_9f75ed41-ba10-41be-9402-14176ca89611--"
+    headers:
+      Content-Type:
+      - multipart/mixed; boundary=batchresponse_9f75ed41-ba10-41be-9402-14176ca89611
+      Date:
+      - Wed, 12 Jun 2019 22:28:51 GMT
+      Server:
+      - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
+      Transfer-Encoding:
+      - chunked
+      x-ms-request-id:
+      - da40e8e0-a01e-0004-126e-219423000000
+      x-ms-version:
+      - '2018-11-09'
+    status:
+      code: 202
+      message: Accepted
+version: 1

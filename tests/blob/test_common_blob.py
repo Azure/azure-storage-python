@@ -14,6 +14,8 @@ from azure.common import (
     AzureMissingResourceHttpError,
     AzureException,
 )
+
+from azure.storage.blob.models import BatchDeleteSubRequest
 from azure.storage.common import (
     AccessPolicy,
     ResourceTypes,
@@ -862,6 +864,131 @@ class StorageCommonBlobTest(StorageTestCase):
 
         finally:
             self._disable_soft_delete()
+
+    def test_empty_batch_delete(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        with self.assertRaises(ValueError):
+            self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+    def test_batch_delete_257_existing_blob(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        for i in range(0, 257):
+            batch_delete_sub_requests.append(BatchDeleteSubRequest(self.container_name, i))
+
+        with self.assertRaises(ValueError):
+            self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+    @record
+    def test_batch_delete_one_existing_blob(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+        batch_delete_sub_requests = list()
+        batch_delete_sub_requests.append(BatchDeleteSubRequest(self.container_name, blob_name))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        self.assertTrue(resp[0].is_successful)
+
+    @record
+    def test_batch_delete_one_existing_blob_with_non_askii_name(self):
+        # Arrange
+        blob_name = "ööööööööö"
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, self.byte_data)
+        batch_delete_sub_requests = list()
+        batch_delete_sub_requests.append(BatchDeleteSubRequest(self.container_name, blob_name))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        self.assertTrue(resp[0].is_successful)
+
+    @record
+    def test_batch_delete_two_existing_blob_and_their_snapshot(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        for i in range(0, 2):
+            blob_name = self._create_block_blob()
+            self.bs.snapshot_blob(self.container_name, blob_name)
+            batch_delete_sub_requests.append(
+                BatchDeleteSubRequest(self.container_name, blob_name, delete_snapshots=DeleteSnapshot.Include))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
+        self.assertEqual(len(blobs), 0)
+
+    @record
+    def test_batch_delete_ten_existing_blob_and_their_snapshot(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        # For even index, create batch delete sub-request for existing blob and their snapshot
+        # For odd index, create batch delete sub-request for non-existing blob
+        for i in range(0, 10):
+            if i % 2 is 0:
+                blob_name = str(i)
+                self.bs.create_blob_from_text(self.container_name, blob_name, "abc")
+                self.bs.snapshot_blob(self.container_name, blob_name)
+                # self.sleep(20)
+
+                # self.sleep(20)
+            else:
+                blob_name = str(i)
+            batch_delete_sub_requests.append(
+                BatchDeleteSubRequest(self.container_name, blob_name, delete_snapshots=DeleteSnapshot.Include))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
+        self.assertEqual(len(blobs), 0)
+        for i in range(0, len(resp)):
+            is_successful = resp[i].is_successful
+            # for every even indexed sub-request, the blob should be deleted successfully
+            if i % 2 is 0:
+                self.assertEquals(is_successful, True, "sub-request" + str(i) + "should be true")
+            # For every odd indexed sub-request, there should be a 404 http status code because the blob is non-existing
+            else:
+                self.assertEquals(is_successful, False, "sub-request" + str(i) + "should be false")
+                self.assertEquals(404, resp[i].http_response.status)
+
+    @record
+    def test_batch_delete_two_non_existing_blobs(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        for i in range(0, 2):
+            blob_name = str(i)
+            batch_delete_sub_requests.append(
+                BatchDeleteSubRequest(self.container_name, blob_name, delete_snapshots=DeleteSnapshot.Include))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        self.assertFalse(resp[0].is_successful)
+        self.assertEqual(resp[0].http_response.status, 404)
 
     @record
     def test_copy_blob_with_existing_blob(self):
