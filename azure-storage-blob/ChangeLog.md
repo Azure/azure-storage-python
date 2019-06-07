@@ -4,7 +4,7 @@
 
 ## Version XX.XX.XX
 
-- Added support for directory operations: create, rename, and delete.
+- Added support for path operations(only available for accounts with ADLS Gen2 Inter-op enabled): create and delete directory, rename path, get and set path access control.
 
 ## Version 2.1.0:
 
