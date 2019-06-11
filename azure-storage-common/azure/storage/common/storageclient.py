@@ -24,6 +24,7 @@ from ._constants import (
     _AUTHORIZATION_HEADER_NAME,
     _REDACTED_VALUE,
     _COPY_SOURCE_HEADER_NAME,
+    _CLIENT_REQUEST_ID_HEADER_NAME,
 )
 from ._error import (
     _ERROR_DECRYPTION_FAILURE,
@@ -260,6 +261,16 @@ class StorageClient(object):
             clean_queries[_QueryStringConstants.SIGNED_SIGNATURE] = _REDACTED_VALUE
         return clean_queries
 
+    @staticmethod
+    def _validate_echoed_client_request_id(request, response):
+        # raise exception if the echoed client request id from the service is not identical to the one we sent
+        if _CLIENT_REQUEST_ID_HEADER_NAME in response.headers and \
+                request.headers[_CLIENT_REQUEST_ID_HEADER_NAME] != response.headers[_CLIENT_REQUEST_ID_HEADER_NAME]:
+            raise AzureException(
+                "Echoed client request ID: {} does not match sent client request ID: {}.  Service request ID: {}".format(
+                    response.headers[_CLIENT_REQUEST_ID_HEADER_NAME], request.headers[_CLIENT_REQUEST_ID_HEADER_NAME],
+                    response.headers['x-ms-request-id']))
+
     def _perform_request(self, request, parser=None, parser_args=None, operation_context=None, expected_errors=None):
         '''
         Sends the request and return response. Catches HTTPError and hands it
@@ -282,7 +293,7 @@ class StorageClient(object):
 
         # Apply common settings to the request
         _update_request(request, self._X_MS_VERSION, self._USER_AGENT_STRING)
-        client_request_id_prefix = str.format("Client-Request-ID={0}", request.headers['x-ms-client-request-id'])
+        client_request_id_prefix = str.format("Client-Request-ID={0}", request.headers[_CLIENT_REQUEST_ID_HEADER_NAME])
 
         while True:
             try:
@@ -323,6 +334,9 @@ class StorageClient(object):
                     # Execute the response callback
                     if self.response_callback:
                         self.response_callback(response)
+
+                    # Validate the client request ID
+                    self._validate_echoed_client_request_id(request, response)
 
                     # Set the response context
                     retry_context.response = response

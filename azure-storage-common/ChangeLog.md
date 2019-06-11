@@ -2,10 +2,17 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX:
+
+- Support for 2019-02-02 REST version. Please see our REST API documentation and blog for information about the related added features.
+- Validate that the echoed client request ID from the service matches the sent one.
+
 ## Version 2.0.0:
+
 - Bump version to avoid breaking file/blob/queue v1.5.0.
 
 ## Version 1.4.1:
+
 - Added minor helpers for SAS related changes
 
 

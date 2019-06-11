@@ -17,7 +17,7 @@ USER_AGENT_STRING_SUFFIX = '(Python {} {}; {} {})'.format(platform.python_implem
                                                           platform.release())
 
 # default values for common package, in case it is used directly
-DEFAULT_X_MS_VERSION = '2018-03-28'
+DEFAULT_X_MS_VERSION = '2019-02-02'
 DEFAULT_USER_AGENT_STRING = '{}None {}'.format(USER_AGENT_STRING_PREFIX, USER_AGENT_STRING_SUFFIX)
 
 # Live ServiceClient URLs
@@ -49,3 +49,4 @@ _ENCRYPTION_PROTOCOL_V1 = '1.0'
 _AUTHORIZATION_HEADER_NAME = 'Authorization'
 _COPY_SOURCE_HEADER_NAME = 'x-ms-copy-source'
 _REDACTED_VALUE = 'REDACTED'
+_CLIENT_REQUEST_ID_HEADER_NAME = 'x-ms-client-request-id'
