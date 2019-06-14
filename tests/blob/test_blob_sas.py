@@ -230,7 +230,7 @@ class StorageBlobSASTest(StorageTestCase):
 
         access_policy = AccessPolicy()
         access_policy.start = '2011-10-11'
-        access_policy.expiry = '2018-10-12'
+        access_policy.expiry = '2088-10-12'
         access_policy.permission = BlobPermissions.READ
         identifiers = {'testid': access_policy}
 

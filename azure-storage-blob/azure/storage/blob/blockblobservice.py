@@ -52,7 +52,10 @@ from ._serialization import (
     _convert_block_list_to_xml,
     _get_path,
     _validate_and_format_range_headers,
-    _get_batch_request_delimiter, _serialize_batch_body)
+    _get_batch_request_delimiter,
+    _serialize_batch_body,
+    _validate_and_add_cpk_headers,
+)
 from ._upload_chunking import (
     _BlockBlobChunkUploader,
     _upload_blob_chunks,
@@ -147,7 +150,7 @@ class BlockBlobService(BaseBlobService):
             custom_domain, request_session, connection_string, socket_timeout, token_credential)
 
     def put_block(self, container_name, blob_name, block, block_id,
-                  validate_content=False, lease_id=None, timeout=None):
+                  validate_content=False, lease_id=None, cpk=None, timeout=None):
         '''
         Creates a new block to be committed as part of a blob.
 
@@ -171,6 +174,11 @@ class BlockBlobService(BaseBlobService):
             blob.
         :param str lease_id:
             Required if the blob has an active lease.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
@@ -183,13 +191,14 @@ class BlockBlobService(BaseBlobService):
             block_id,
             validate_content=validate_content,
             lease_id=lease_id,
-            timeout=timeout
+            timeout=timeout,
+            cpk=cpk,
         )
 
     def put_block_list(
             self, container_name, blob_name, block_list, content_settings=None,
             metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None,
+            if_unmodified_since=None, if_match=None, if_none_match=None, cpk=None,
             timeout=None, standard_blob_tier=None):
         '''
         Writes a blob by specifying the list of block IDs that make up the blob.
@@ -245,6 +254,11 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :param StandardBlobTier standard_blob_tier:
@@ -269,7 +283,8 @@ class BlockBlobService(BaseBlobService):
             if_match=if_match,
             if_none_match=if_none_match,
             timeout=timeout,
-            standard_blob_tier=standard_blob_tier
+            standard_blob_tier=standard_blob_tier,
+            cpk=cpk,
         )
 
     def get_block_list(self, container_name, blob_name, snapshot=None,
@@ -321,7 +336,7 @@ class BlockBlobService(BaseBlobService):
 
     def put_block_from_url(self, container_name, blob_name, copy_source_url, block_id,
                            source_range_start=None, source_range_end=None,
-                           source_content_md5=None, lease_id=None, timeout=None):
+                           source_content_md5=None, lease_id=None, cpk=None, timeout=None):
         """
         Creates a new block to be committed as part of a blob.
 
@@ -344,6 +359,11 @@ class BlockBlobService(BaseBlobService):
             If given, the service will calculate the MD5 hash of the block content and compare against this value.
         :param str lease_id:
             Required if the blob has an active lease.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         """
@@ -367,6 +387,7 @@ class BlockBlobService(BaseBlobService):
             'x-ms-copy-source': copy_source_url,
             'x-ms-source-content-md5': source_content_md5,
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _validate_and_format_range_headers(
             request,
             source_range_start,
@@ -384,7 +405,7 @@ class BlockBlobService(BaseBlobService):
             self, container_name, blob_name, file_path, content_settings=None,
             metadata=None, validate_content=False, progress_callback=None,
             max_connections=2, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None, standard_blob_tier=None):
+            if_unmodified_since=None, if_match=None, if_none_match=None, cpk=None, timeout=None, standard_blob_tier=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -440,6 +461,11 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -471,15 +497,16 @@ class BlockBlobService(BaseBlobService):
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
                 if_none_match=if_none_match,
-                timeout=timeout,
-                standard_blob_tier=standard_blob_tier)
+                standard_blob_tier=standard_blob_tier,
+                cpk=cpk,
+                timeout=timeout)
 
     def create_blob_from_stream(
             self, container_name, blob_name, stream, count=None,
             content_settings=None, metadata=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None, use_byte_buffer=False, standard_blob_tier=None):
+            if_none_match=None, cpk=None, timeout=None, use_byte_buffer=False, standard_blob_tier=None):
         '''
         Creates a new blob from a file/stream, or updates the content of
         an existing blob, with automatic chunking and progress
@@ -539,6 +566,11 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -608,8 +640,9 @@ class BlockBlobService(BaseBlobService):
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
                 if_none_match=if_none_match,
-                timeout=timeout,
-                standard_blob_tier=standard_blob_tier)
+                standard_blob_tier=standard_blob_tier,
+                cpk=cpk,
+                timeout=timeout)
 
             if progress_callback:
                 progress_callback(count, count)
@@ -641,7 +674,8 @@ class BlockBlobService(BaseBlobService):
                     uploader_class=_BlockBlobChunkUploader,
                     timeout=timeout,
                     content_encryption_key=cek,
-                    initialization_vector=iv
+                    initialization_vector=iv,
+                    cpk=cpk,
                 )
             else:
                 block_ids = _upload_blob_substream_blocks(
@@ -657,6 +691,7 @@ class BlockBlobService(BaseBlobService):
                     lease_id=lease_id,
                     uploader_class=_BlockBlobChunkUploader,
                     timeout=timeout,
+                    cpk=cpk,
                 )
 
             return self._put_block_list(
@@ -673,7 +708,8 @@ class BlockBlobService(BaseBlobService):
                 if_none_match=if_none_match,
                 timeout=timeout,
                 encryption_data=encryption_data,
-                standard_blob_tier=standard_blob_tier
+                standard_blob_tier=standard_blob_tier,
+                cpk=cpk,
             )
 
     def create_blob_from_bytes(
@@ -681,7 +717,7 @@ class BlockBlobService(BaseBlobService):
             content_settings=None, metadata=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None, standard_blob_tier=None):
+            if_none_match=None, cpk=None, timeout=None, standard_blob_tier=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -741,6 +777,11 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -783,7 +824,8 @@ class BlockBlobService(BaseBlobService):
             if_none_match=if_none_match,
             timeout=timeout,
             use_byte_buffer=True,
-            standard_blob_tier=standard_blob_tier
+            standard_blob_tier=standard_blob_tier,
+            cpk=cpk,
         )
 
     def create_blob_from_text(
@@ -791,7 +833,7 @@ class BlockBlobService(BaseBlobService):
             content_settings=None, metadata=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None, standard_blob_tier=None):
+            if_none_match=None, cpk=None, timeout=None, standard_blob_tier=None):
         '''
         Creates a new blob from str/unicode, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -847,6 +889,11 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -881,8 +928,9 @@ class BlockBlobService(BaseBlobService):
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
-            timeout=timeout,
-            standard_blob_tier=standard_blob_tier)
+            standard_blob_tier=standard_blob_tier,
+            cpk=cpk,
+            timeout=timeout)
 
     def set_standard_blob_tier(
             self, container_name, blob_name, standard_blob_tier, timeout=None, rehydrate_priority=None):
@@ -1153,7 +1201,7 @@ class BlockBlobService(BaseBlobService):
     def _put_blob(self, container_name, blob_name, blob, content_settings=None,
                   metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
                   if_unmodified_since=None, if_match=None, if_none_match=None,
-                  timeout=None, standard_blob_tier=None):
+                  cpk=None, timeout=None, standard_blob_tier=None):
         '''
         Creates a blob or updates an existing blob.
 
@@ -1202,6 +1250,11 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :param StandardBlobTier standard_blob_tier:
@@ -1228,6 +1281,7 @@ class BlockBlobService(BaseBlobService):
             'If-None-Match': _to_str(if_none_match),
             'x-ms-access-tier': _to_str(standard_blob_tier)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
@@ -1244,7 +1298,7 @@ class BlockBlobService(BaseBlobService):
         return self._perform_request(request, _parse_base_properties)
 
     def _put_block(self, container_name, blob_name, block, block_id,
-                   validate_content=False, lease_id=None, timeout=None):
+                   validate_content=False, lease_id=None, cpk=None, timeout=None):
         '''
         See put_block for more details. This helper method
         allows for encryption or other such special behavior because
@@ -1268,6 +1322,7 @@ class BlockBlobService(BaseBlobService):
         request.headers = {
             'x-ms-lease-id': _to_str(lease_id)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         request.body = _get_data_bytes_or_stream_only('block', block)
         if hasattr(request.body, 'read'):
             if _len_plus(request.body) is None:
@@ -1289,7 +1344,7 @@ class BlockBlobService(BaseBlobService):
             self, container_name, blob_name, block_list, content_settings=None,
             metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
             if_unmodified_since=None, if_match=None, if_none_match=None,
-            timeout=None, encryption_data=None, standard_blob_tier=None):
+            timeout=None, encryption_data=None, cpk=None, standard_blob_tier=None):
         '''
         See put_block_list for more details. This helper method
         allows for encryption or other such special behavior because
@@ -1320,6 +1375,7 @@ class BlockBlobService(BaseBlobService):
             'If-None-Match': _to_str(if_none_match),
             'x-ms-access-tier': _to_str(standard_blob_tier)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())

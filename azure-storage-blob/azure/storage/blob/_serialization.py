@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 from xml.sax.saxutils import escape as xml_escape
 from datetime import date
+
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -49,6 +50,18 @@ def _get_path(container_name=None, blob_name=None):
         return '/{0}'.format(_str(container_name))
     else:
         return '/'
+
+
+def _validate_and_add_cpk_headers(request, encryption_key, protocol):
+    if encryption_key is None:
+        return
+
+    if protocol.lower() != 'https':
+        raise ValueError("Customer provided encryption key must be used over HTTPS.")
+
+    request.headers['x-ms-encryption-key'] = encryption_key.key_value
+    request.headers['x-ms-encryption-key-sha256'] = encryption_key.key_hash
+    request.headers['x-ms-encryption-algorithm'] = encryption_key.algorithm
 
 
 def _validate_and_format_range_headers(request, start_range, end_range, start_range_required=True,

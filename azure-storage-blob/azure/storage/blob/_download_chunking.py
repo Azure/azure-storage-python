@@ -10,7 +10,7 @@ def _download_blob_chunks(blob_service, container_name, blob_name, snapshot,
                           download_size, block_size, progress, start_range, end_range,
                           stream, max_connections, progress_callback, validate_content,
                           lease_id, if_modified_since, if_unmodified_since, if_match,
-                          if_none_match, timeout, operation_context):
+                          if_none_match, timeout, operation_context, cpk):
 
     downloader_class = _ParallelBlobChunkDownloader if max_connections > 1 else _SequentialBlobChunkDownloader
 
@@ -34,6 +34,7 @@ def _download_blob_chunks(blob_service, container_name, blob_name, snapshot,
         if_none_match,
         timeout,
         operation_context,
+        cpk,
     )
 
     if max_connections > 1:
@@ -49,7 +50,7 @@ class _BlobChunkDownloader(object):
     def __init__(self, blob_service, container_name, blob_name, snapshot, download_size,
                  chunk_size, progress, start_range, end_range, stream,
                  progress_callback, validate_content, lease_id, if_modified_since,
-                 if_unmodified_since, if_match, if_none_match, timeout, operation_context):
+                 if_unmodified_since, if_match, if_none_match, timeout, operation_context, cpk):
         # identifiers for the blob
         self.blob_service = blob_service
         self.container_name = container_name
@@ -78,6 +79,7 @@ class _BlobChunkDownloader(object):
         self.if_unmodified_since = if_unmodified_since
         self.if_match = if_match
         self.if_none_match = if_none_match
+        self.cpk = cpk
 
     def get_chunk_offsets(self):
         index = self.start_index
@@ -119,7 +121,8 @@ class _BlobChunkDownloader(object):
             if_match=self.if_match,
             if_none_match=self.if_none_match,
             timeout=self.timeout,
-            _context=self.operation_context
+            _context=self.operation_context,
+            cpk=self.cpk,
         )
 
         # This makes sure that if_match is set so that we can validate 
@@ -132,7 +135,7 @@ class _ParallelBlobChunkDownloader(_BlobChunkDownloader):
     def __init__(self, blob_service, container_name, blob_name, snapshot, download_size,
                  chunk_size, progress, start_range, end_range, stream,
                  progress_callback, validate_content, lease_id, if_modified_since,
-                 if_unmodified_since, if_match, if_none_match, timeout, operation_context):
+                 if_unmodified_since, if_match, if_none_match, timeout, operation_context, cpk):
 
         super(_ParallelBlobChunkDownloader, self).__init__(blob_service, container_name, blob_name, snapshot,
                                                            download_size,
@@ -140,7 +143,7 @@ class _ParallelBlobChunkDownloader(_BlobChunkDownloader):
                                                            progress_callback, validate_content, lease_id,
                                                            if_modified_since,
                                                            if_unmodified_since, if_match, if_none_match, timeout,
-                                                           operation_context)
+                                                           operation_context, cpk)
 
         # for a parallel download, the stream is always seekable, so we note down the current position
         # in order to seek to the right place when out-of-order chunks come in

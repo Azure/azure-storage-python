@@ -2,12 +2,16 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version XX.XX.XX
-- Added Batch Delete Blob API
-- Added Batch Set Standard Blob Tier API(for BlockBlob)
-- Added Blob Tier support PutBlob/PutBlockList/CopyBlob APIs
+## Version XX.XX.XX:
+
+- Support for 2019-02-02 REST version. Please see our REST API documentation and blog for information about the related added features.
+- Added Batch Delete Blob API.
+- Added Batch Set Standard Blob Tier API(for BlockBlob).
+- Added Blob Tier support for PutBlob/PutBlockList/CopyBlob APIs.
+- Added support for client provided encryption key to numerous APIs. 
 
 ## Version 2.0.1:
+
 - Updated dependency on azure-storage-common.
 
 ## Version 2.0.0:

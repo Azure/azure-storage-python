@@ -78,7 +78,10 @@ from ._serialization import (
     _get_path,
     _validate_and_format_range_headers,
     _convert_delegation_key_info_to_xml,
-    _get_batch_request_delimiter, _serialize_batch_body)
+    _get_batch_request_delimiter,
+    _serialize_batch_body,
+    _validate_and_add_cpk_headers,
+)
 from .models import (
     BlobProperties,
     _LeaseActions,
@@ -1583,7 +1586,7 @@ class BaseBlobService(StorageClient):
     def get_blob_properties(
             self, container_name, blob_name, snapshot=None, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None):
+            if_none_match=None, cpk=None, timeout=None):
         '''
         Returns all user-defined metadata, standard HTTP properties, and
         system properties for the blob. It does not return the content of the blob.
@@ -1620,6 +1623,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Decrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: a blob object including properties and metadata.
@@ -1642,13 +1650,13 @@ class BaseBlobService(StorageClient):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match),
         }
-
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         return self._perform_request(request, _parse_blob, [blob_name, snapshot])
 
     def set_blob_properties(
             self, container_name, blob_name, content_settings=None, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None):
+            if_none_match=None, cpk=None, timeout=None):
         '''
         Sets system properties on the blob. If one property is set for the
         content_settings, all properties will be overriden.
@@ -1682,6 +1690,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: ETag and last modified properties for the updated Blob
@@ -1704,6 +1717,7 @@ class BaseBlobService(StorageClient):
             'If-None-Match': _to_str(if_none_match),
             'x-ms-lease-id': _to_str(lease_id)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
 
@@ -1751,7 +1765,7 @@ class BaseBlobService(StorageClient):
     def _get_blob(
             self, container_name, blob_name, snapshot=None, start_range=None,
             end_range=None, validate_content=False, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
+            if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None, cpk=None,
             _context=None):
         '''
         Downloads a blob's content, metadata, and properties. You can also
@@ -1806,6 +1820,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Decrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A Blob with content, properties, and metadata.
@@ -1851,6 +1870,7 @@ class BaseBlobService(StorageClient):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match),
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _validate_and_format_range_headers(
             request,
             start_range,
@@ -1870,7 +1890,7 @@ class BaseBlobService(StorageClient):
             snapshot=None, start_range=None, end_range=None,
             validate_content=False, progress_callback=None,
             max_connections=2, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None,
+            if_unmodified_since=None, if_match=None, if_none_match=None, cpk=None,
             timeout=None):
         '''
         Downloads a blob to a file path, with automatic chunking and progress
@@ -1951,6 +1971,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Decrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1985,6 +2010,7 @@ class BaseBlobService(StorageClient):
                 if_unmodified_since,
                 if_match,
                 if_none_match,
+                cpk,
                 timeout)
 
         return blob
@@ -1994,7 +2020,7 @@ class BaseBlobService(StorageClient):
             start_range=None, end_range=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None):
+            if_none_match=None, cpk=None, timeout=None):
 
         '''
         Downloads a blob to a stream, with automatic chunking and progress
@@ -2071,6 +2097,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Decrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2125,7 +2156,8 @@ class BaseBlobService(StorageClient):
                                   if_match=if_match,
                                   if_none_match=if_none_match,
                                   timeout=timeout,
-                                  _context=operation_context)
+                                  _context=operation_context,
+                                  cpk=cpk)
 
             # Parse the total blob size and adjust the download size if ranges
             # were specified
@@ -2152,7 +2184,8 @@ class BaseBlobService(StorageClient):
                                       if_match=if_match,
                                       if_none_match=if_none_match,
                                       timeout=timeout,
-                                      _context=operation_context)
+                                      _context=operation_context,
+                                      cpk=cpk)
 
                 # Set the download size to empty
                 download_size = 0
@@ -2201,7 +2234,8 @@ class BaseBlobService(StorageClient):
                 if_match,
                 if_none_match,
                 timeout,
-                operation_context
+                operation_context,
+                cpk,
             )
 
             # Set the content length to the download size instead of the size of
@@ -2223,7 +2257,7 @@ class BaseBlobService(StorageClient):
             start_range=None, end_range=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None):
+            if_none_match=None, cpk=None, timeout=None):
         '''
         Downloads a blob as an array of bytes, with automatic chunking and
         progress notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
@@ -2297,6 +2331,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Decrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2326,6 +2365,7 @@ class BaseBlobService(StorageClient):
             if_unmodified_since,
             if_match,
             if_none_match,
+            cpk,
             timeout)
 
         blob.content = stream.getvalue()
@@ -2336,7 +2376,7 @@ class BaseBlobService(StorageClient):
             start_range=None, end_range=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None):
+            if_none_match=None, cpk=None, timeout=None):
         '''
         Downloads a blob as unicode text, with automatic chunking and progress
         notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
@@ -2412,6 +2452,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Decrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2439,6 +2484,7 @@ class BaseBlobService(StorageClient):
                                       if_unmodified_since,
                                       if_match,
                                       if_none_match,
+                                      cpk,
                                       timeout)
         blob.content = blob.content.decode(encoding)
         return blob
@@ -2446,7 +2492,7 @@ class BaseBlobService(StorageClient):
     def get_blob_metadata(
             self, container_name, blob_name, snapshot=None, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None):
+            if_none_match=None, cpk=None, timeout=None):
         '''
         Returns all user-defined metadata for the specified blob or snapshot.
 
@@ -2480,6 +2526,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Decrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return:
@@ -2504,13 +2555,13 @@ class BaseBlobService(StorageClient):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match),
         }
-
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         return self._perform_request(request, _parse_metadata)
 
     def set_blob_metadata(self, container_name, blob_name,
                           metadata=None, lease_id=None,
                           if_modified_since=None, if_unmodified_since=None,
-                          if_match=None, if_none_match=None, timeout=None):
+                          if_match=None, if_none_match=None, cpk=None, timeout=None):
         '''
         Sets user-defined metadata for the specified blob as one or more
         name-value pairs.
@@ -2547,6 +2598,11 @@ class BaseBlobService(StorageClient):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: ETag and last modified properties for the updated Blob
@@ -2570,7 +2626,7 @@ class BaseBlobService(StorageClient):
             'x-ms-lease-id': _to_str(lease_id),
         }
         _add_metadata_headers(metadata, request)
-
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         return self._perform_request(request, _parse_base_properties)
 
     def _lease_blob_impl(self, container_name, blob_name,
@@ -2984,7 +3040,7 @@ class BaseBlobService(StorageClient):
     def snapshot_blob(self, container_name, blob_name,
                       metadata=None, if_modified_since=None,
                       if_unmodified_since=None, if_match=None,
-                      if_none_match=None, lease_id=None, timeout=None):
+                      if_none_match=None, lease_id=None, cpk=None, timeout=None):
         '''
         Creates a read-only snapshot of a blob.
 
@@ -3022,6 +3078,11 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param str lease_id:
             Required if the blob has an active lease.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: snapshot properties
@@ -3044,6 +3105,7 @@ class BaseBlobService(StorageClient):
             'If-None-Match': _to_str(if_none_match),
             'x-ms-lease-id': _to_str(lease_id)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _add_metadata_headers(metadata, request)
 
         return self._perform_request(request, _parse_snapshot_blob, [blob_name])

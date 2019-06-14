@@ -34,6 +34,7 @@ from ._deserialization import (
 from ._serialization import (
     _get_path,
     _validate_and_format_range_headers,
+    _validate_and_add_cpk_headers,
 )
 from ._upload_chunking import (
     _AppendBlobChunkUploader,
@@ -123,7 +124,7 @@ class AppendBlobService(BaseBlobService):
     def create_blob(self, container_name, blob_name, content_settings=None,
                     metadata=None, lease_id=None,
                     if_modified_since=None, if_unmodified_since=None,
-                    if_match=None, if_none_match=None, timeout=None):
+                    if_match=None, if_none_match=None, cpk=None, timeout=None):
         '''
         Creates a blob or overrides an existing blob. Use if_none_match=* to
         prevent overriding an existing blob. 
@@ -164,6 +165,11 @@ class AppendBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: ETag and last modified properties for the updated Append Blob
@@ -186,6 +192,7 @@ class AppendBlobService(BaseBlobService):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
@@ -197,7 +204,7 @@ class AppendBlobService(BaseBlobService):
                      appendpos_condition=None,
                      lease_id=None, if_modified_since=None,
                      if_unmodified_since=None, if_match=None,
-                     if_none_match=None, timeout=None):
+                     if_none_match=None, cpk=None, timeout=None):
         '''
         Commits a new block of data to the end of an existing append blob.
         
@@ -250,6 +257,11 @@ class AppendBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return:
@@ -279,6 +291,7 @@ class AppendBlobService(BaseBlobService):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         request.body = _get_data_bytes_only('block', block)
 
         if validate_content:
@@ -293,7 +306,7 @@ class AppendBlobService(BaseBlobService):
                               source_if_none_match=None, maxsize_condition=None,
                               appendpos_condition=None, lease_id=None, if_modified_since=None,
                               if_unmodified_since=None, if_match=None,
-                              if_none_match=None, timeout=None):
+                              if_none_match=None, cpk=None, timeout=None):
         """
         Creates a new block to be committed as part of a blob, where the contents are read from a source url.
 
@@ -367,6 +380,11 @@ class AppendBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key. 
         :param int timeout:
             The timeout parameter is expressed in seconds.
         """
@@ -398,7 +416,7 @@ class AppendBlobService(BaseBlobService):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match)
         }
-
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _validate_and_format_range_headers(request, source_range_start, source_range_end,
                                            start_range_required=False,
                                            end_range_required=False,
@@ -412,7 +430,7 @@ class AppendBlobService(BaseBlobService):
             self, container_name, blob_name, file_path, validate_content=False,
             maxsize_condition=None, progress_callback=None, lease_id=None, timeout=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None):
+            if_none_match=None, cpk=None):
         '''
         Appends to the content of an existing blob from a file path, with automatic
         chunking and progress notifications.
@@ -468,6 +486,11 @@ class AppendBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Append Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -491,13 +514,14 @@ class AppendBlobService(BaseBlobService):
                 if_modified_since=if_modified_since,
                 if_unmodified_since=if_unmodified_since,
                 if_match=if_match,
-                if_none_match=if_none_match)
+                if_none_match=if_none_match,
+                cpk=cpk)
 
     def append_blob_from_bytes(
             self, container_name, blob_name, blob, index=0, count=None,
             validate_content=False, maxsize_condition=None, progress_callback=None,
             lease_id=None, timeout=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None):
+            if_none_match=None, cpk=None):
         '''
         Appends to the content of an existing blob from an array of bytes, with
         automatic chunking and progress notifications.
@@ -558,6 +582,11 @@ class AppendBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Append Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -590,13 +619,14 @@ class AppendBlobService(BaseBlobService):
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
-            if_none_match=if_none_match)
+            if_none_match=if_none_match,
+            cpk=cpk)
 
     def append_blob_from_text(
             self, container_name, blob_name, text, encoding='utf-8',
             validate_content=False, maxsize_condition=None, progress_callback=None,
             lease_id=None, timeout=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None):
+            if_none_match=None, cpk=None):
         '''
         Appends to the content of an existing blob from str/unicode, with
         automatic chunking and progress notifications.
@@ -654,6 +684,11 @@ class AppendBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Append Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -680,13 +715,14 @@ class AppendBlobService(BaseBlobService):
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
-            if_none_match=if_none_match)
+            if_none_match=if_none_match,
+            cpk=cpk)
 
     def append_blob_from_stream(
             self, container_name, blob_name, stream, count=None,
             validate_content=False, maxsize_condition=None, progress_callback=None,
             lease_id=None, timeout=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None):
+            if_none_match=None, cpk=None):
         '''
         Appends to the content of an existing blob from a file/stream, with
         automatic chunking and progress notifications.
@@ -745,6 +781,11 @@ class AppendBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS. 
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Append Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -775,7 +816,8 @@ class AppendBlobService(BaseBlobService):
             if_modified_since=if_modified_since,
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
-            if_none_match=if_none_match
+            if_none_match=if_none_match,
+            cpk=cpk,
         )
 
         return resource_properties

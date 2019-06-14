@@ -64,6 +64,7 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-archive-status': (None, 'rehydration_status', _to_str),
     'x-ms-share-quota': (None, 'quota', _to_int),
     'x-ms-server-encrypted': (None, 'server_encrypted', _bool),
+    'x-ms-encryption-key-sha256': (None, 'encryption_key_sha256', _to_str),
     'x-ms-creation-time': (None, 'creation_time', parser.parse),
     'content-type': ('content_settings', 'content_type', _to_str),
     'cache-control': ('content_settings', 'cache_control', _to_str),

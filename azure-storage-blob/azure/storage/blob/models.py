@@ -112,6 +112,9 @@ class BlobProperties(object):
         concurrent writes.
     :ivar bool server_encrypted:
         Set to true if the blob is encrypted on the server.
+    :ivar str encryption_key_sha256:
+        The server will echo the SHA256 of the customer-provided encryption key
+        to validate the key used in the operation.
     :ivar ~azure.storage.blob.models.CopyProperties copy:
         Stores all the copy properties for the blob.
     :ivar ~azure.storage.blob.models.ContentSettings content_settings:
@@ -147,6 +150,7 @@ class BlobProperties(object):
         self.append_blob_committed_block_count = None
         self.page_blob_sequence_number = None
         self.server_encrypted = None
+        self.encryption_key_sha256 = None
         self.copy = CopyProperties()
         self.content_settings = ContentSettings()
         self.lease = LeaseProperties()
@@ -368,11 +372,25 @@ class ResourceProperties(object):
         has been modified.
     :ivar datetime last_modified:
         Datetime for last time resource was modified.
+    :ivar bool server_encrypted:
+        The value is set to true if the contents of the request are successfully
+        encrypted using the specified algorithm.
+    :ivar str encryption_key_sha256:
+        The server will echo the SHA256 of the customer-provided encryption key
+        to validate the key used in the operation.
     '''
 
     def __init__(self):
         self.last_modified = None
         self.etag = None
+        self.request_server_encrypted = None
+        self.encryption_key_sha256 = None
+
+    def clone(self, src):
+        self.last_modified = src.last_modified
+        self.etag = src.etag
+        self.request_server_encrypted = src.request_server_encrypted
+        self.encryption_key_sha256 = src.encryption_key_sha256
 
 
 class AppendBlockProperties(ResourceProperties):
@@ -931,3 +949,29 @@ class BatchSetBlobTierSubRequest(object):
         self.standard_blob_tier = standard_blob_tier
         self.rehydrate_priority = rehydrate_priority
 
+class CustomerProvidedEncryptionKey(object):
+    """
+    All data in Azure Storage is encrypted at-rest using an account-level encryption key.
+    In versions 2018-06-17 and newer, you can manage the key used to encrypt blob contents
+    and application metadata per-blob by providing an AES-256 encryption key in requests to the storage service.
+
+    When you use a customer-provided key, Azure Storage does not manage or persist your key.
+    When writing data to a blob, the provided key is used to encrypt your data before writing it to disk.
+    A SHA-256 hash of the encryption key is written alongside the blob contents,
+    and is used to verify that all subsequent operations against the blob use the same encryption key.
+    This hash cannot be used to retrieve the encryption key or decrypt the contents of the blob.
+    When reading a blob, the provided key is used to decrypt your data after reading it from disk.
+    In both cases, the provided encryption key is securely discarded
+    as soon as the encryption or decryption process completes.
+
+    :ivar str key_value:
+        Base64-encoded AES-256 encryption key value.
+    :ivar str key_hash:
+        Base64-encoded SHA256 of the encryption key.
+    :ivar str algorithm:
+        Specifies the algorithm to use when encrypting data using the given key. Must be AES256.
+    """
+    def __init__(self, key_value, key_hash):
+        self.key_value = key_value
+        self.key_hash = key_hash
+        self.algorithm = 'AES256'

@@ -30,6 +30,7 @@ from .models import (
     BatchDeleteSubRequest,
     BatchSetBlobTierSubRequest,
     BatchSubResponse,
+    CustomerProvidedEncryptionKey,
 )
 from .pageblobservice import PageBlobService
 from ._constants import __version__

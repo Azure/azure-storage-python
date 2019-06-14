@@ -49,6 +49,14 @@ from io import BytesIO
 
 _HTTP_LINE_ENDING = "\r\n"
 
+def _parse_cpk_headers(response, properties):
+    server_encrypted = response.headers.get('x-ms-request-server-encrypted')
+    if server_encrypted is not None:
+        properties.request_server_encrypted = _bool(server_encrypted)
+
+    properties.encryption_key_sha256 = response.headers.get('x-ms-encryption-key-sha256')
+
+
 def _parse_base_properties(response):
     '''
     Extracts basic response headers.
@@ -56,6 +64,7 @@ def _parse_base_properties(response):
     resource_properties = ResourceProperties()
     resource_properties.last_modified = parser.parse(response.headers.get('last-modified'))
     resource_properties.etag = response.headers.get('etag')
+    _parse_cpk_headers(response, resource_properties)
 
     return resource_properties
 
@@ -68,6 +77,7 @@ def _parse_page_properties(response):
     put_page.last_modified = parser.parse(response.headers.get('last-modified'))
     put_page.etag = response.headers.get('etag')
     put_page.sequence_number = _to_int(response.headers.get('x-ms-blob-sequence-number'))
+    _parse_cpk_headers(response, put_page)
 
     return put_page
 
@@ -81,6 +91,7 @@ def _parse_append_block(response):
     append_block.etag = response.headers.get('etag')
     append_block.append_offset = _to_int(response.headers.get('x-ms-blob-append-offset'))
     append_block.committed_block_count = _to_int(response.headers.get('x-ms-blob-committed-block-count'))
+    _parse_cpk_headers(response, append_block)
 
     return append_block
 
