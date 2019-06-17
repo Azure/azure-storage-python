@@ -520,6 +520,27 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(properties.content_settings.content_type, content_settings.content_type)
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
 
+    def test_create_blob_from_stream_from_empty_file(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = b''
+        with open(FILE_PATH, 'wb') as stream:
+            stream.write(data)
+
+        # Act
+        with open(FILE_PATH, 'rb') as stream:
+            create_resp = self.bs.create_blob_from_stream(self.container_name, blob_name, stream)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertBlobEqual(self.container_name, blob_name, data)
+        self.assertEqual(blob.properties.etag, create_resp.etag)
+        self.assertEqual(blob.properties.last_modified, create_resp.last_modified)
+
     def test_create_blob_from_stream_chunked_upload(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):

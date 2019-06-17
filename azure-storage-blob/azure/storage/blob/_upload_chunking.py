@@ -200,7 +200,7 @@ class _BlobChunkUploader(object):
                     data = self.padder.update(data) + self.padder.finalize()
                 if self.encryptor:
                     data = self.encryptor.update(data) + self.encryptor.finalize()
-                if len(data) > 0:
+                if len(data) > 0 or index == 0:
                     yield index, data
                 break
             index += len(data)
