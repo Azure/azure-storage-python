@@ -583,7 +583,7 @@ def _ingest_batch_response(batch_response, batch_sub_requests):
         sub_response_list[len(sub_response_list) - 1].split(_HTTP_LINE_ENDING + "--" + response_delimiter + "--")[0]
 
     for sub_response in sub_response_list:
-        if sub_response is not '':
+        if len(sub_response) != 0:
             http_response = _parse_sub_response_to_http_response(sub_response)
             is_successful = 200 <= http_response.status < 300
             index_of_sub_request = _to_int(http_response.headers.get('Content-ID'))

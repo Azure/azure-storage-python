@@ -27,6 +27,9 @@ from .models import (
     PublicAccess,
     BlobPrefix,
     DeleteSnapshot,
+    BatchDeleteSubRequest,
+    BatchSetBlobTierSubRequest,
+    BatchSubResponse,
 )
 from .pageblobservice import PageBlobService
 from ._constants import __version__
