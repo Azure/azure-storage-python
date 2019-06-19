@@ -172,13 +172,23 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(res, 'http://' + self.settings.STORAGE_ACCOUNT_NAME
                          + '.file.core.windows.net/vhds/vhd_dir/my.vhd')
 
-    @record
     def test_make_file_url_with_sas(self):
         # Arrange
 
         # Act
         res = self.fs.make_file_url(
             'vhds', 'vhd_dir', 'my.vhd', sas_token='sas')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME +
+                         '.file.core.windows.net/vhds/vhd_dir/my.vhd?sas')
+
+    def test_make_file_url_with_sas_starts_with_question_mark(self):
+        # Arrange
+
+        # Act
+        res = self.fs.make_file_url(
+            'vhds', 'vhd_dir', 'my.vhd', sas_token='?sas')
 
         # Assert
         self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME +
