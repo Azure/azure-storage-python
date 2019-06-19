@@ -3381,9 +3381,7 @@ class BaseBlobService(StorageClient):
         :return: parsed batch delete HTTP response
         :rtype: list of :class:`~azure.storage.blob.models.BatchSubResponse`
         '''
-
-        if batch_delete_sub_requests is None or len(batch_delete_sub_requests) < 1 or len(batch_delete_sub_requests) > 256:
-            raise ValueError("Batch delete should take 1 to 256 sub-requests")
+        self._check_batch_request(batch_delete_sub_requests)
 
         request = HTTPRequest()
         request.method = 'POST'
@@ -3474,6 +3472,11 @@ class BaseBlobService(StorageClient):
         }
 
         return request
+
+    @staticmethod
+    def _check_batch_request(request):
+        if request is None or len(request) < 1 or len(request) > 256:
+            raise ValueError("Batch request should take 1 to 256 sub-requests")
 
     def undelete_blob(self, container_name, blob_name, timeout=None):
         '''

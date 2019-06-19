@@ -5,6 +5,7 @@
 ## Version XX.XX.XX
 
 - Added Batch Delete Blob API
+- Added Batch Set Standard Blob Tier API(for BlockBlob)
 
 ## Version 2.0.1:
 - Updated dependency on azure-storage-common.

@@ -11,7 +11,7 @@ import unittest
 from azure.storage.blob import (
     BlockBlobService,
 )
-from azure.storage.blob.models import StandardBlobTier
+from azure.storage.blob.models import StandardBlobTier, BatchSetBlobTierSubRequest
 from tests.testcase import (
     StorageTestCase,
     record,
@@ -102,6 +102,163 @@ class BlobStorageAccountTest(StorageTestCase):
             self.assertIsNotNone(blobs[0].properties.blob_tier_change_time)
 
             self.bs.delete_blob(self.container_name, blob_name)
+
+    def test_empty_batch_set_standard_blob_tier(self):
+        # Arrange
+        batch_set_standard_blob_tier_requests = list()
+
+        with self.assertRaises(ValueError):
+            self.bs.batch_set_standard_blob_tier(batch_set_standard_blob_tier_requests)
+
+    def test_batch_set_257_standard_blob_tier_for_blobs(self):
+        # Arrange
+        batch_set_standard_blob_tier_requests = list()
+
+        for i in range(0, 257):
+            batch_set_standard_blob_tier_requests.append(
+                BatchSetBlobTierSubRequest(self.container_name, i, StandardBlobTier.Archive))
+
+        with self.assertRaises(ValueError):
+            self.bs.batch_set_standard_blob_tier(batch_set_standard_blob_tier_requests)
+
+    @record
+    def test_batch_set_standard_blob_tier_for_one_blob(self):
+        # Arrange
+        batch_set_blob_tier_request = []
+
+        self.bs.create_container(self.container_name)
+        blob_name = self._get_blob_reference()
+        data = b'hello world'
+        blob_tier = StandardBlobTier.Cool
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+
+        sub_request = BatchSetBlobTierSubRequest(self.container_name, blob_name, blob_tier)
+        batch_set_blob_tier_request.append(sub_request)
+
+        # Act
+        resp = self.bs.batch_set_standard_blob_tier(batch_set_blob_tier_request)
+        blob_ref = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_set_blob_tier_request), len(resp))
+        self.assertEquals(blob_tier, blob_ref.properties.blob_tier)
+        for sub_response in resp:
+            self.assertTrue(sub_response.is_successful)
+
+    @record
+    def test_batch_set_three_blob_tier(self):
+        # Arrange
+        self.bs.create_container(self.container_name)
+        tiers = [StandardBlobTier.Archive, StandardBlobTier.Cool, StandardBlobTier.Hot]
+        blob_names = list()
+
+        batch_set_blob_tier_request = []
+        for i in range(0, len(tiers)):
+            blob_name = str(i)
+            data = b'hello world'
+            self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+
+            sub_request = BatchSetBlobTierSubRequest(self.container_name, blob_name, tiers[i])
+            batch_set_blob_tier_request.append(sub_request)
+            blob_names.append(blob_name)
+
+        # Act
+        resp = self.bs.batch_set_standard_blob_tier(batch_set_blob_tier_request)
+        blob_refs = list()
+        for blob_name in blob_names:
+            blob_refs.append(self.bs.get_blob_properties(self.container_name, blob_name))
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_set_blob_tier_request), len(resp))
+        for i in range(0, len(resp)):
+            self.assertTrue(resp[i].is_successful)
+            # make sure the tier for each blob is correct
+            self.assertEquals(tiers[i], blob_refs[i].properties.blob_tier)
+
+    @record
+    def test_batch_set_nine_standard_blob_tier(self):
+        # To make sure BatchSubResponse is bounded to a correct sub-request
+
+        # Arrange
+        self.bs.create_container(self.container_name)
+        tiers = [StandardBlobTier.Archive, StandardBlobTier.Cool, StandardBlobTier.Hot,
+                 StandardBlobTier.Archive, StandardBlobTier.Cool, StandardBlobTier.Hot,
+                 StandardBlobTier.Archive, StandardBlobTier.Cool, StandardBlobTier.Hot]
+
+        batch_set_blob_tier_request = []
+        # For even index, create batch delete sub-request for existing blob and their snapshot
+        # For odd index, create batch delete sub-request for non-existing blob
+        for i in range(0, len(tiers)):
+            blob_name = str(i)
+            if i % 2 is 0:
+                data = b'hello world'
+                self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+
+            sub_request = BatchSetBlobTierSubRequest(self.container_name, blob_name, tiers[i])
+            batch_set_blob_tier_request.append(sub_request)
+
+        # Act
+        resp = self.bs.batch_set_standard_blob_tier(batch_set_blob_tier_request)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_set_blob_tier_request), len(resp))
+        for i in range(0, len(tiers)):
+            is_successful = resp[i].is_successful
+            # for every even indexed sub-request, the blob should be deleted successfully
+            if i % 2 is 0:
+                self.assertEquals(is_successful, True, "sub-request" + str(i) + "should be true")
+            # For every odd indexed sub-request, there should be a 404 http status code because the blob is non-existing
+            else:
+                self.assertEquals(is_successful, False, "sub-request" + str(i) + "should be false")
+                self.assertEquals(404, resp[i].http_response.status)
+
+    @record
+    def test_batch_set_standard_blob_tier_api_with_non_askii_blob_name(self):
+        # Arrange
+        self.bs.create_container(self.container_name)
+        tiers = [StandardBlobTier.Archive, StandardBlobTier.Cool, StandardBlobTier.Hot]
+
+        batch_set_blob_tier_request = []
+        for tier in tiers:
+            blob_name = "ööööööööö"
+            data = b'hello world'
+            self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
+
+            sub_request = BatchSetBlobTierSubRequest(self.container_name, blob_name, tier)
+            batch_set_blob_tier_request.append(sub_request)
+
+        # Act
+        resp = self.bs.batch_set_standard_blob_tier(batch_set_blob_tier_request)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_set_blob_tier_request), len(resp))
+        for sub_response in resp:
+            self.assertTrue(sub_response.is_successful)
+
+    @record
+    def test_batch_set_non_existing_blob_tier(self):
+        # Arrange
+        self.bs.create_container(self.container_name)
+        tiers = [StandardBlobTier.Archive, StandardBlobTier.Cool, StandardBlobTier.Hot]
+
+        batch_set_blob_tier_request = []
+        for tier in tiers:
+            blob_name = self._get_blob_reference()
+            sub_request = BatchSetBlobTierSubRequest(self.container_name, blob_name, tier)
+            batch_set_blob_tier_request.append(sub_request)
+
+        # Act
+        resp = self.bs.batch_set_standard_blob_tier(batch_set_blob_tier_request)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_set_blob_tier_request), len(resp))
+        for sub_response in resp:
+            self.assertFalse(sub_response.is_successful)
 
     @record
     def test_rehydration_status(self):

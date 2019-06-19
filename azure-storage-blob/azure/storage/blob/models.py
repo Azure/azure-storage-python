@@ -881,7 +881,7 @@ class BatchDeleteSubRequest(object):
 
 class BatchSubResponse(object):
     """
-    Sub response parsed from batch http sub-response
+    Sub-response parsed from batch http sub-response
 
     Organizes batch sub-response info and batch sub-request together for easier processing
 
@@ -897,3 +897,24 @@ class BatchSubResponse(object):
         self.is_successful = is_successful
         self.http_response = http_response
         self.batch_sub_request = batch_sub_request
+
+
+class BatchSetBlobTierSubRequest(object):
+    """
+    Represents one request in batch of multiple set block blob tier requests
+
+    Organizes HttpRequest objects together for batch REST operations to a single host endpoint.
+
+    :ivar str container_name:
+        Name of existing container.
+    :ivar str blob_name:
+        Name of existing blob.
+    :ivar StandardBlobTier standard_blob_tier:
+        A standard blob tier value to set the blob to. For this version of the library,
+        this is only applicable to block blobs on standard storage accounts.
+    """
+    def __init__(self, container_name, blob_name, standard_blob_tier):
+        self.container_name = container_name
+        self.blob_name = blob_name
+        self.standard_blob_tier = standard_blob_tier
+

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+import uuid
 from io import (
     BytesIO
 )
@@ -35,14 +36,14 @@ from azure.storage.common._serialization import (
     _get_data_bytes_only,
     _get_data_bytes_or_stream_only,
     _add_metadata_headers,
-)
+    _add_date_header, _update_request)
 from azure.storage.common._serialization import (
     _len_plus
 )
 from ._deserialization import (
     _convert_xml_to_block_list,
     _parse_base_properties,
-)
+    _ingest_batch_response)
 from ._encryption import (
     _encrypt_blob,
     _generate_blob_encryption_data,
@@ -51,7 +52,7 @@ from ._serialization import (
     _convert_block_list_to_xml,
     _get_path,
     _validate_and_format_range_headers,
-)
+    _get_batch_request_delimiter, _serialize_batch_body)
 from ._upload_chunking import (
     _BlockBlobChunkUploader,
     _upload_blob_chunks,
@@ -231,7 +232,7 @@ class BlockBlobService(BaseBlobService):
             if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
-            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If timezone is included, any non-UTC datetimes will be convFerted to UTC.
             If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only if
             the resource has not been modified since the specified date/time.
@@ -879,6 +880,93 @@ class BlockBlobService(BaseBlobService):
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
         '''
+        request = self._get_basic_set_blob_tier_http_request(container_name, blob_name, standard_blob_tier,
+                                                             timeout=timeout)
+
+        self._perform_request(request)
+
+    def batch_set_standard_blob_tier(
+            self, batch_set_blob_tier_sub_requests, timeout=None):
+        """
+        Sends a batch of multiple set block blob tiers requests.
+        This API is only supported for block blobs on standard storage accounts.
+
+        :param list(BatchSetBlobTierSubRequest) batch_set_blob_tier_sub_requests:
+            The set block blob tier requests to send as a batch.
+        :param int timeout:
+            The timeout parameter is expressed in seconds. This method may make
+            multiple calls to the Azure service and the timeout will apply to
+            each call individually.
+        :return: parsed batch set tier HTTP response which indicates if each sub-request is successful.
+        :rtype: list of :class:`~azure.storage.blob.models.BatchSubResponse`
+        """
+        self._check_batch_request(batch_set_blob_tier_sub_requests)
+
+        request = HTTPRequest()
+        request.method = 'POST'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path()
+        batch_id = str(uuid.uuid1())
+        request.headers = {
+            'Content-Type': "multipart/mixed; boundary=" + _get_batch_request_delimiter(batch_id, False, False),
+        }
+        request.query = {
+            'comp': 'batch',
+            'timeout': _int_to_str(timeout),
+        }
+
+        batch_http_requests = []
+        for batch_set_blob_tier_sub_request in batch_set_blob_tier_sub_requests:
+            batch_sub_http_request = \
+                self._construct_batch_set_blob_tier_sub_http_request(
+                    len(batch_http_requests), batch_set_blob_tier_sub_request)
+
+            batch_http_requests.append(batch_sub_http_request)
+
+        request.body = _serialize_batch_body(batch_http_requests, batch_id)
+
+        return self._perform_request(request, parser=_ingest_batch_response,
+                                     parser_args=[batch_set_blob_tier_sub_requests])
+
+    def _construct_batch_set_blob_tier_sub_http_request(self, content_id, batch_set_blob_tier_sub_request):
+        """
+        Construct an HTTPRequest instance from a batch set tier sub-request.
+
+        :param int content_id:
+            the index of sub-request in the list of sub-requests
+        :param ~azure.storage.blob.models.BatchSetBlobTierSubRequest batch_set_blob_tier_sub_request:
+            one of the set tier requests to be sent in a batch
+        :return: HTTPRequest parsed from batch set tier sub-request
+        :rtype: :class:`~azure.storage.common._http.HTTPRequest`
+        """
+        request = self._get_basic_set_blob_tier_http_request(batch_set_blob_tier_sub_request.container_name,
+                                                             batch_set_blob_tier_sub_request.blob_name,
+                                                             batch_set_blob_tier_sub_request.standard_blob_tier)
+        request.headers.update({
+            'Content-ID': _int_to_str(content_id),
+            'Content-Length': _int_to_str(0),
+            'Content-Transfer-Encoding': 'binary',
+            'User-Agent': self._USER_AGENT_STRING,
+        })
+
+        _update_request(request, None, self._USER_AGENT_STRING)
+        # sub-request will use the batch request id automatically, no need to generate a separate one
+        request.headers.pop('x-ms-client-request-id', None)
+
+        _add_date_header(request)
+        self.authentication.sign_request(request)
+
+        return request
+
+    def _get_basic_set_blob_tier_http_request(self, container_name, blob_name, standard_blob_tier, timeout=None):
+        """
+        Construct a basic HTTPRequest instance for set standard blob tier
+
+        For more information about the parameters please see set_standard_blob_tier
+
+        :return: an HTTPRequest for set standard blob tier
+        :rtype :class:`~azure.storage.common._http.HTTPRequest`
+        """
         _validate_not_none('container_name', container_name)
         _validate_not_none('blob_name', blob_name)
         _validate_not_none('standard_blob_tier', standard_blob_tier)
@@ -894,8 +982,7 @@ class BlockBlobService(BaseBlobService):
         request.headers = {
             'x-ms-access-tier': _to_str(standard_blob_tier)
         }
-
-        self._perform_request(request)
+        return request
 
     def copy_blob(self, container_name, blob_name, copy_source,
                   metadata=None, source_if_modified_since=None,
