@@ -230,7 +230,7 @@ class FileService(StorageClient):
             )
 
         if sas_token:
-            url += '?' + sas_token
+            url += (sas_token if sas_token.startswith('?') else '?' + sas_token)
 
         return url
 
