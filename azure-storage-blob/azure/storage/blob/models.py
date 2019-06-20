@@ -776,6 +776,18 @@ class StandardBlobTier(object):
     ''' Hot '''
 
 
+class RehydratePriority(object):
+    """
+    Indicates the priority with which to rehydrate an archived blob
+    """
+
+    Standard = 'Standard'
+    ''' The rehydrate priority is standard. '''
+
+    High = 'High'
+    ''' The rehydrate priority is high. '''
+
+
 class AccountInformation(object):
     """
     Holds information related to the storage account.
@@ -848,7 +860,7 @@ class BatchDeleteSubRequest(object):
             If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only
             if the resource has been modified since the specified time.
-    :ivardatetime if_unmodified_since:
+    :ivar datetime if_unmodified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
             If timezone is included, any non-UTC datetimes will be converted to UTC.
             If a date is passed in without timezone info, it is assumed to be UTC.
@@ -913,8 +925,9 @@ class BatchSetBlobTierSubRequest(object):
         A standard blob tier value to set the blob to. For this version of the library,
         this is only applicable to block blobs on standard storage accounts.
     """
-    def __init__(self, container_name, blob_name, standard_blob_tier):
+    def __init__(self, container_name, blob_name, standard_blob_tier, rehydrate_priority=None):
         self.container_name = container_name
         self.blob_name = blob_name
         self.standard_blob_tier = standard_blob_tier
+        self.rehydrate_priority = rehydrate_priority
 

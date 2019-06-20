@@ -3202,7 +3202,8 @@ class BaseBlobService(StorageClient):
                    source_lease_id=None, timeout=None,
                    incremental_copy=False,
                    requires_sync=None,
-                   standard_blob_tier=None):
+                   standard_blob_tier=None,
+                   rehydrate_priority=None):
         '''
         See copy_blob for more details. This helper method
         allows for standard copies as well as incremental copies which are only supported for page blobs and sync
@@ -3258,7 +3259,8 @@ class BaseBlobService(StorageClient):
             'x-ms-lease-id': _to_str(destination_lease_id),
             'x-ms-source-lease-id': _to_str(source_lease_id),
             'x-ms-access-tier': _to_str(premium_page_blob_tier) or _to_str(standard_blob_tier),
-            'x-ms-requires-sync': _to_str(requires_sync)
+            'x-ms-requires-sync': _to_str(requires_sync),
+            'x-ms-rehydrate-priority': _to_str(rehydrate_priority)
         }
 
         _add_metadata_headers(metadata, request)

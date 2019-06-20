@@ -11,7 +11,7 @@ import unittest
 from azure.storage.blob import (
     BlockBlobService,
 )
-from azure.storage.blob.models import StandardBlobTier, BatchSetBlobTierSubRequest
+from azure.storage.blob.models import StandardBlobTier, BatchSetBlobTierSubRequest, RehydratePriority
 from tests.testcase import (
     StorageTestCase,
     record,
@@ -122,6 +122,24 @@ class BlobStorageAccountTest(StorageTestCase):
             self.bs.batch_set_standard_blob_tier(batch_set_standard_blob_tier_requests)
 
     @record
+    def test_set_standard_blob_tier_with_rehydrate_priority(self):
+        # Arrange
+        self.bs.create_container(self.container_name)
+        blob_name = self._create_blob()
+        blob_tier = StandardBlobTier.Archive
+        rehydrate_tier = StandardBlobTier.Cool
+        rehydrate_priority = RehydratePriority.Standard
+
+        # Act
+        self.bs.set_standard_blob_tier(self.container_name, blob_name, blob_tier,
+                                       rehydrate_priority=rehydrate_priority)
+        self.bs.set_standard_blob_tier(self.container_name, blob_name, rehydrate_tier)
+        blob_ref = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertEquals('rehydrate-pending-to-cool', blob_ref.properties.rehydration_status)
+
+    @record
     def test_batch_set_standard_blob_tier_for_one_blob(self):
         # Arrange
         batch_set_blob_tier_request = []
@@ -151,6 +169,7 @@ class BlobStorageAccountTest(StorageTestCase):
         # Arrange
         self.bs.create_container(self.container_name)
         tiers = [StandardBlobTier.Archive, StandardBlobTier.Cool, StandardBlobTier.Hot]
+        rehydrate_priority = [RehydratePriority.High, RehydratePriority.Standard, RehydratePriority.High]
         blob_names = list()
 
         batch_set_blob_tier_request = []
@@ -159,7 +178,7 @@ class BlobStorageAccountTest(StorageTestCase):
             data = b'hello world'
             self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
 
-            sub_request = BatchSetBlobTierSubRequest(self.container_name, blob_name, tiers[i])
+            sub_request = BatchSetBlobTierSubRequest(self.container_name, blob_name, tiers[i], rehydrate_priority[i])
             batch_set_blob_tier_request.append(sub_request)
             blob_names.append(blob_name)
 

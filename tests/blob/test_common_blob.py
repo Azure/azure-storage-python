@@ -15,7 +15,7 @@ from azure.common import (
     AzureException,
 )
 
-from azure.storage.blob.models import BatchDeleteSubRequest
+from azure.storage.blob.models import BatchDeleteSubRequest, RehydratePriority
 from azure.storage.blob.models import StandardBlobTier
 from azure.storage.common import (
     AccessPolicy,
@@ -1027,6 +1027,31 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertEqual(copy.status, 'success')
         self.assertIsNotNone(copy.id)
         self.assertEqual(copy_blob_properties.blob_tier, blob_tier)
+
+    @record
+    def test_copy_blob_with_rehydrate_priority(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+
+        # Act
+        source_blob = '/{0}/{1}/{2}'.format(self.settings.STORAGE_ACCOUNT_NAME,
+                                            self.container_name,
+                                            blob_name)
+        blob_tier = StandardBlobTier.Archive
+        rehydrate_priority = RehydratePriority.High
+        copy = self.bs.copy_blob(self.container_name, 'blob1copy', source_blob,
+                                 standard_blob_tier=blob_tier,
+                                 rehydrate_priority=rehydrate_priority)
+        copy_blob_properties = self.bs.get_blob_properties(self.container_name, 'blob1copy').properties
+        self.bs.set_standard_blob_tier(self.container_name, 'blob1copy', StandardBlobTier.Hot)
+        second_resp = self.bs.get_blob_properties(self.container_name, 'blob1copy').properties
+
+        # Assert
+        self.assertIsNotNone(copy)
+        self.assertEqual(copy.status, 'success')
+        self.assertIsNotNone(copy.id)
+        self.assertEqual(copy_blob_properties.blob_tier, blob_tier)
+        self.assertEqual(second_resp.rehydration_status, 'rehydrate-pending-to-hot')
 
     @record
     def test_copy_blob_async_private_blob(self):

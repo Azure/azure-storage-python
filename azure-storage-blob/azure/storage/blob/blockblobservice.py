@@ -232,7 +232,7 @@ class BlockBlobService(BaseBlobService):
             if the resource has been modified since the specified time.
         :param datetime if_unmodified_since:
             A DateTime value. Azure expects the date value passed in to be UTC.
-            If timezone is included, any non-UTC datetimes will be convFerted to UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
             If a date is passed in without timezone info, it is assumed to be UTC.
             Specify this header to perform the operation only if
             the resource has not been modified since the specified date/time.
@@ -885,7 +885,7 @@ class BlockBlobService(BaseBlobService):
             standard_blob_tier=standard_blob_tier)
 
     def set_standard_blob_tier(
-            self, container_name, blob_name, standard_blob_tier, timeout=None):
+            self, container_name, blob_name, standard_blob_tier, timeout=None, rehydrate_priority=None):
         '''
         Sets the block blob tiers on the blob. This API is only supported for block blobs on standard storage accounts.
 
@@ -900,9 +900,11 @@ class BlockBlobService(BaseBlobService):
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
             each call individually.
+        :param :class:`~azure.storage.blob.models.RehydratePriority` rehydrate_priority:
+            Indicates the priority with which to rehydrate an archived blob
         '''
         request = self._get_basic_set_blob_tier_http_request(container_name, blob_name, standard_blob_tier,
-                                                             timeout=timeout)
+                                                             timeout=timeout, rehydrate_priority=rehydrate_priority)
 
         self._perform_request(request)
 
@@ -960,9 +962,11 @@ class BlockBlobService(BaseBlobService):
         :return: HTTPRequest parsed from batch set tier sub-request
         :rtype: :class:`~azure.storage.common._http.HTTPRequest`
         """
-        request = self._get_basic_set_blob_tier_http_request(batch_set_blob_tier_sub_request.container_name,
-                                                             batch_set_blob_tier_sub_request.blob_name,
-                                                             batch_set_blob_tier_sub_request.standard_blob_tier)
+        request = self._get_basic_set_blob_tier_http_request(
+            batch_set_blob_tier_sub_request.container_name,
+            batch_set_blob_tier_sub_request.blob_name,
+            batch_set_blob_tier_sub_request.standard_blob_tier,
+            rehydrate_priority=batch_set_blob_tier_sub_request.rehydrate_priority)
         request.headers.update({
             'Content-ID': _int_to_str(content_id),
             'Content-Length': _int_to_str(0),
@@ -979,7 +983,8 @@ class BlockBlobService(BaseBlobService):
 
         return request
 
-    def _get_basic_set_blob_tier_http_request(self, container_name, blob_name, standard_blob_tier, timeout=None):
+    def _get_basic_set_blob_tier_http_request(self, container_name, blob_name, standard_blob_tier, timeout=None,
+                                              rehydrate_priority=None):
         """
         Construct a basic HTTPRequest instance for set standard blob tier
 
@@ -1001,7 +1006,8 @@ class BlockBlobService(BaseBlobService):
             'timeout': _int_to_str(timeout),
         }
         request.headers = {
-            'x-ms-access-tier': _to_str(standard_blob_tier)
+            'x-ms-access-tier': _to_str(standard_blob_tier),
+            'x-ms-rehydrate-priority': _to_str(rehydrate_priority)
         }
         return request
 
@@ -1011,7 +1017,8 @@ class BlockBlobService(BaseBlobService):
                   source_if_none_match=None, destination_if_modified_since=None,
                   destination_if_unmodified_since=None, destination_if_match=None,
                   destination_if_none_match=None, destination_lease_id=None,
-                  source_lease_id=None, timeout=None, requires_sync=None, standard_blob_tier=None):
+                  source_lease_id=None, timeout=None, requires_sync=None, standard_blob_tier=None,
+                  rehydrate_priority=None):
 
         '''
         Copies a blob. This operation returns a copy operation
@@ -1118,6 +1125,8 @@ class BlockBlobService(BaseBlobService):
         :param StandardBlobTier standard_blob_tier:
         A standard blob tier value to set the blob to. For this version of the library,
         this is only applicable to block blobs on standard storage accounts.
+        :param :class:`~azure.storage.blob.models.RehydratePriority` rehydrate_priority:
+        Indicates the priority with which to rehydrate an archived blob
         :return: Copy operation properties such as status, source, and ID.
         :rtype: :class:`~azure.storage.blob.models.CopyProperties`
         '''
@@ -1137,7 +1146,8 @@ class BlockBlobService(BaseBlobService):
                                source_lease_id=source_lease_id, timeout=timeout,
                                incremental_copy=False,
                                requires_sync=requires_sync,
-                               standard_blob_tier=standard_blob_tier)
+                               standard_blob_tier=standard_blob_tier,
+                               rehydrate_priority=rehydrate_priority)
 
     # -----Helper methods------------------------------------
     def _put_blob(self, container_name, blob_name, blob, content_settings=None,
