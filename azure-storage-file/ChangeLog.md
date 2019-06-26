@@ -2,6 +2,9 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version XX.XX.XX
+- Added update_range_from_file_url API to writes the bytes from one Azure File endpoint into the specified range of another Azure File endpoint.
+
 ## Version 2.0.1:
 - Updated dependency on azure-storage-common.
 

@@ -2582,9 +2582,76 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
+        request = self._get_basic_update_file_http_request(share_name, directory_name, file_name, timeout=timeout)
+
+        _validate_not_none('data', data)
+        _validate_and_format_range_headers(request, start_range, end_range)
+        request.body = _get_data_bytes_only('data', data)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
+
+        self._perform_request(request)
+
+    def update_range_from_file_url(self, share_name, directory_name, file_name, start_range, end_range, source,
+                                   source_start_range, timeout=None):
+        '''
+        Writes the bytes from one Azure File endpoint into the specified range of another Azure File endpoint.
+
+        :param str share_name:
+            Name of existing share.
+        :param str directory_name:
+            The path to the directory.
+        :param str file_name:
+            Name of existing file.
+        :param int start_range:
+            Start of byte range to use for updating a section of the file.
+            The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
+        :param int end_range:
+            End of byte range to use for updating a section of the file.
+            The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
+        :param str source:
+            A URL of up to 2 KB in length that specifies an Azure file or blob.
+            The value should be URL-encoded as it would appear in a request URI.
+            If the source is in another account, the source must either be public
+            or must be authenticated via a shared access signature. If the source
+            is public, no authentication is required.
+            Examples:
+            https://myaccount.file.core.windows.net/myshare/mydir/myfile
+            https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken
+        :param int source_start_range:
+            Start of byte range to use for updating a section of the file.
+            The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+
+        request = self._get_basic_update_file_http_request(share_name, directory_name, file_name, timeout=timeout)
+
+        _validate_not_none('source', source)
+        _validate_and_format_range_headers(request, start_range, end_range)
+        _validate_and_format_range_headers(request,
+                                           source_start_range,
+                                           source_start_range+(end_range-start_range),
+                                           is_source=True)
+
+        request.headers.update({
+            'x-ms-copy-source': _to_str(source),
+            'Content-Length': _int_to_str(0)
+        })
+
+        self._perform_request(request)
+
+    def _get_basic_update_file_http_request(self, share_name, directory_name, file_name, timeout=None):
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
-        _validate_not_none('data', data)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host_locations = self._get_host_locations()
@@ -2596,15 +2663,8 @@ class FileService(StorageClient):
         request.headers = {
             'x-ms-write': 'update',
         }
-        _validate_and_format_range_headers(
-            request, start_range, end_range)
-        request.body = _get_data_bytes_only('data', data)
 
-        if validate_content:
-            computed_md5 = _get_content_md5(request.body)
-            request.headers['Content-MD5'] = _to_str(computed_md5)
-
-        self._perform_request(request)
+        return request
 
     def clear_range(self, share_name, directory_name, file_name, start_range,
                     end_range, timeout=None):

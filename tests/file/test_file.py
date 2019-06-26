@@ -436,6 +436,108 @@ class StorageFileTest(StorageTestCase):
         # Assert
 
     @record
+    def test_update_range_from_file_url_when_source_file_does_not_have_enough_bytes(self):
+        # Arrange
+        share_name = "sprasa-test"
+        source_file_name = 'testfile1'
+
+        self.fs.create_file(share_name, None, source_file_name, 2048)
+        data = b'abcdefghijklmnop' * 32
+        self.fs.update_range(share_name, None, source_file_name, data, 0, 511)
+
+        file_name = 'filetoupdate'
+        self.fs.create_file(share_name, None, file_name, 2048)
+
+        # generate SAS for the source file
+        sas_token_for_source_file = \
+            self.fs.generate_file_shared_access_signature(share_name,
+                                                          None,
+                                                          source_file_name,
+                                                          FilePermissions.READ,
+                                                          expiry=datetime.utcnow() + timedelta(hours=1))
+
+        source_file_url = self.fs.make_file_url(share_name, None, source_file_name, sas_token=sas_token_for_source_file)
+
+        # Act
+        with self.assertRaises(AzureHttpError):
+            # when the source file has less bytes than 2050, throw exception
+            self.fs.update_range_from_file_url(share_name, None, file_name, 0, 2049, source_file_url,
+                                               source_start_range=0)
+
+    @record
+    def test_update_range_from_file_url(self):
+        # Arrange
+        share_name = "sprasa-test"
+        source_file_name = 'testfile'
+
+        self.fs.create_file(share_name, None, source_file_name, 2048)
+        data = b'abcdefghijklmnop' * 32
+        self.fs.update_range(share_name, None, source_file_name, data, 0, 511)
+
+        file_name = 'filetoupdate'
+        self.fs.create_file(share_name, None, file_name, 2048)
+
+        # generate SAS for the source file
+        sas_token_for_source_file = \
+            self.fs.generate_file_shared_access_signature(share_name,
+                                                          None,
+                                                          source_file_name,
+                                                          FilePermissions.READ,
+                                                          expiry=datetime.utcnow() + timedelta(hours=1))
+
+        source_file_url = self.fs.make_file_url(share_name, None, source_file_name, sas_token=sas_token_for_source_file)
+
+        # Act
+        self.fs.update_range_from_file_url(share_name, None, file_name, 0, 511, source_file_url,
+                                           source_start_range=0)
+
+        # Assert
+        # To make sure the range of the file is actually updated
+        file_ranges = self.fs.list_ranges(share_name, None, file_name)
+        file = self.fs.get_file_to_bytes(share_name, None, file_name, 0, 511)
+        self.assertEquals(1, len(file_ranges))
+        self.assertEquals(0, file_ranges[0].start)
+        self.assertEquals(511, file_ranges[0].end)
+        self.assertEquals(data, file.content)
+
+    @record
+    def test_update_big_range_from_file_url(self):
+        # Arrange
+        share_name = "sprasa-test"
+        source_file_name = 'testfile1'
+        end = 1048575
+
+        self.fs.create_file(share_name, None, source_file_name, 1024 * 1024)
+        data = b'abcdefghijklmnop' * 65536
+        self.fs.update_range(share_name, None, source_file_name, data, 0, end)
+
+        file_name = 'filetoupdate1'
+        self.fs.create_file(share_name, None, file_name, 1024 * 1024)
+
+        # generate SAS for the source file
+        sas_token_for_source_file = \
+            self.fs.generate_file_shared_access_signature(share_name,
+                                                          None,
+                                                          source_file_name,
+                                                          FilePermissions.READ,
+                                                          expiry=datetime.utcnow() + timedelta(hours=1))
+
+        source_file_url = self.fs.make_file_url(share_name, None, source_file_name, sas_token=sas_token_for_source_file)
+
+        # Act
+        self.fs.update_range_from_file_url(share_name, None, file_name, 0, end, source_file_url,
+                                           source_start_range=0)
+
+        # Assert
+        # To make sure the range of the file is actually updated
+        file_ranges = self.fs.list_ranges(share_name, None, file_name)
+        file = self.fs.get_file_to_bytes(share_name, None, file_name, 0, end)
+        self.assertEquals(1, len(file_ranges))
+        self.assertEquals(0, file_ranges[0].start)
+        self.assertEquals(end, file_ranges[0].end)
+        self.assertEquals(data, file.content)
+
+    @record
     def test_clear_range(self):
         # Arrange
         file_name = self._create_file()

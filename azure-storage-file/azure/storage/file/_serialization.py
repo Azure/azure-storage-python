@@ -42,7 +42,7 @@ def _get_path(share_name=None, directory_name=None, file_name=None):
 
 
 def _validate_and_format_range_headers(request, start_range, end_range, start_range_required=True,
-                                       end_range_required=True, check_content_md5=False):
+                                       end_range_required=True, check_content_md5=False, is_source=False):
     # If end range is provided, start range must be provided
     if start_range_required or end_range is not None:
         _validate_not_none('start_range', start_range)
@@ -51,10 +51,11 @@ def _validate_and_format_range_headers(request, start_range, end_range, start_ra
 
     # Format based on whether end_range is present
     request.headers = request.headers or {}
+    header_name = 'x-ms-source-range' if is_source else 'x-ms-range'
     if end_range is not None:
-        request.headers['x-ms-range'] = 'bytes={0}-{1}'.format(start_range, end_range)
+        request.headers[header_name] = 'bytes={0}-{1}'.format(start_range, end_range)
     elif start_range is not None:
-        request.headers['x-ms-range'] = 'bytes={0}-'.format(start_range)
+        request.headers[header_name] = 'bytes={0}-'.format(start_range)
 
     # Content MD5 can only be provided for a complete range less than 4MB in size
     if check_content_md5:
