@@ -3944,31 +3944,3 @@ class BaseBlobService(StorageClient):
         # Note that only the primary endpoint is supported for the DFS endpoint
         return {LocationMode.PRIMARY: host_locations[LocationMode.PRIMARY].replace(_BLOB_SERVICE_PUBLIC_CLOUD_HOST,
                                                                                    _DFS_SERVICE_PUBLIC_CLOUD_HOST, 1)}
-
-    # TODO remove after service update, needed for testing against HN-enabled account for the moment
-    def _create_file_system(self, filesystem_name, timeout=None):
-        _validate_not_none('filesystem_name', filesystem_name)
-        request = HTTPRequest()
-        request.host_locations = self._swap_blob_endpoints(self._get_host_locations())
-        request.method = 'PUT'
-        request.path = _get_path(filesystem_name)
-        request.query = {
-            'resource': 'filesystem',
-            'timeout': _int_to_str(timeout),
-        }
-        self._perform_request(request)
-        return True
-
-    # TODO remove after service update, needed for testing against HN-enabled account for the moment
-    def _delete_file_system(self, filesystem_name, timeout=None):
-        _validate_not_none('filesystem_name', filesystem_name)
-        request = HTTPRequest()
-        request.host_locations = self._swap_blob_endpoints(self._get_host_locations())
-        request.method = 'DELETE'
-        request.path = _get_path(filesystem_name)
-        request.query = {
-            'resource': 'filesystem',
-            'timeout': _int_to_str(timeout),
-        }
-        self._perform_request(request)
-        return True
