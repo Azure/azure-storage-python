@@ -357,6 +357,7 @@ class StorageShareTest(StorageTestCase):
         shares1 = generator1.items
         shares2 = generator2.items
 
+
         # Assert
         self.assertIsNotNone(shares1)
         self.assertEqual(len(shares1), 2)
@@ -752,6 +753,24 @@ class StorageShareTest(StorageTestCase):
         # Assert
         self.assertTrue(response.ok)
         self.assertEqual(data, response.content)
+
+    @record
+    def test_create_permission_for_share(self):
+        share_name = self._create_share()
+        user_given_permission = b'{\"permission\":' \
+                     b'\"O:S-1-5-21-2127521184-1604012920-1887927527-21560751G:S-1-5-21-2127521184-1604012920-188' \
+                     b'7927527-513D:AI(A;;FA;;;SY)(A;;FA;;;BA)(A;;0x1200a9;;;S-1-5-21-397955417-626881126-188441444-3' \
+                     b'053964)\"}'
+        permission_key = self.fs.create_permission_for_share(share_name, user_given_permission)
+        self.assertIsNotNone(permission_key)
+
+        server_returned_permission = self.fs.get_permission_for_share(share_name, permission_key)
+        self.assertIsNotNone(server_returned_permission)
+
+        permission_key2 = self.fs.create_permission_for_share(share_name, server_returned_permission)
+        # the permission key obtained from user_given_permission should be the same as the permission key obtained from
+        # server returned permission
+        self.assertEquals(permission_key, permission_key2)
 
 
 # ------------------------------------------------------------------------------

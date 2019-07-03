@@ -9,7 +9,7 @@ import base64
 import os
 import unittest
 from datetime import datetime, timedelta
-
+import time
 import requests
 from azure.common import (
     AzureHttpError,
@@ -28,6 +28,7 @@ from azure.storage.file import (
     FilePermissions,
     DeleteSnapshot,
 )
+from azure.storage.file.models import SMBProperties, NTFSAttributes
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -205,6 +206,37 @@ class StorageFileTest(StorageTestCase):
         # Assert
         self.fs.exists(self.share_name, None, file_name)
 
+    def test_create_file_when_file_permission_is_too_long(self):
+        file_name = self._get_file_reference()
+        permission = self.get_random_bytes(9 * 1024)
+        with self.assertRaises(ValueError):
+            self.fs.create_file(self.share_name, None, file_name, 1024, file_permission=permission)
+
+    @record
+    def test_create_file_with_invalid_file_permission(self):
+        # Arrange
+        file_name = self._get_file_reference()
+
+        with self.assertRaises(AzureHttpError):
+            self.fs.create_file(self.share_name, None, file_name, 1024, file_permission="abcde")
+
+    @record
+    def test_create_file_will_set_all_smb_properties(self):
+        # Arrange
+        file_name = self._get_file_reference()
+        data = b'abc'
+
+        # Act
+        self.fs.create_file(self.share_name, None, file_name, 1024)
+        file_properties = self.fs.get_file_properties(self.share_name, None, file_name)
+
+        # Assert
+        self.assertIsNotNone(file_properties)
+        self.assertIsNotNone(file_properties.properties.smb_properties.change_time)
+        self.assertIsNotNone(file_properties.properties.smb_properties.creation_time)
+        self.assertIsNotNone(file_properties.properties.smb_properties.ntfs_attributes)
+        self.assertIsNotNone(file_properties.properties.smb_properties.last_write_time)
+
     @record
     def test_create_file_with_metadata(self):
         # Arrange
@@ -297,6 +329,43 @@ class StorageFileTest(StorageTestCase):
         properties = self.fs.get_file_properties(self.share_name, None, file_name).properties
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
         self.assertEqual(properties.content_settings.content_disposition, content_settings.content_disposition)
+
+    @record
+    def test_set_file_properties_with_file_permission(self):
+        # Arrange
+        file_name = self._create_file()
+        properties_on_creation = self.fs.get_file_properties(self.share_name, None, file_name).properties
+
+        content_settings = ContentSettings(
+            content_language='spanish',
+            content_disposition='inline')
+
+        ntfs_attributes = NTFSAttributes(archive=True, temporary=True)
+        last_write_time = properties_on_creation.smb_properties.last_write_time + timedelta(hours=3)
+        creation_time = properties_on_creation.smb_properties.creation_time + timedelta(hours=3)
+        smb_properties = SMBProperties(ntfs_attributes=ntfs_attributes, last_write_time=last_write_time,
+                                       creation_time=creation_time)
+
+        smb_properties.permission_key = \
+            self.fs.get_file_properties(self.share_name, None, file_name).properties.smb_properties.permission_key
+
+        # Act
+        self.fs.set_file_properties(
+            self.share_name,
+            None,
+            file_name,
+            content_settings=content_settings,
+            smb_properties=smb_properties
+        )
+
+        # Assert
+        properties = self.fs.get_file_properties(self.share_name, None, file_name).properties
+        self.assertEquals(properties.content_settings.content_language, content_settings.content_language)
+        self.assertEquals(properties.content_settings.content_disposition, content_settings.content_disposition)
+        self.assertEquals(properties.smb_properties.creation_time, smb_properties.creation_time)
+        self.assertEquals(properties.smb_properties.last_write_time, smb_properties.last_write_time)
+        self.assertIn("Archive", properties.smb_properties.ntfs_attributes)
+        self.assertIn("Temporary", properties.smb_properties.ntfs_attributes)
 
     @record
     def test_get_file_properties(self):

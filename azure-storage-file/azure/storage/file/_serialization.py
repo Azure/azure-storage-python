@@ -3,12 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+from sys import getsizeof
+
 from azure.storage.common._common_conversion import _str
 from azure.storage.common._error import (
     _validate_not_none,
     _ERROR_START_END_NEEDED_FOR_MD5,
     _ERROR_RANGE_TOO_LARGE_FOR_MD5,
 )
+_ERROR_TOO_MANY_FILE_PERMISSIONS = 'file_permission and file_permission_key should not be set at the same time'
+_FILE_PERMISSION_TOO_LONG = 'Size of file_permission is too large. file_permission should be <=8KB, else' \
+                            'please use file_permission_key'
 
 
 def _get_path(share_name=None, directory_name=None, file_name=None):
@@ -65,3 +70,25 @@ def _validate_and_format_range_headers(request, start_range, end_range, start_ra
             raise ValueError(_ERROR_RANGE_TOO_LARGE_FOR_MD5)
 
         request.headers['x-ms-range-get-content-md5'] = 'true'
+
+
+def _validate_and_return_file_permission(file_permission, file_permission_key, default_permission):
+    # if file_permission and file_permission are both empty, then use the default_permission value as file permission
+    # file_permission size should be <= 8KB, else file permission_key should be used
+    empty_file_permission = file_permission is None or len(file_permission) == 0
+    empty_file_permission_key = file_permission_key is None or len(file_permission_key) == 0
+    file_permission_size_too_big = getsizeof(file_permission) > 8 * 1024
+
+    if file_permission_size_too_big:
+        raise ValueError(_FILE_PERMISSION_TOO_LONG)
+
+    if empty_file_permission:
+        if empty_file_permission_key:
+            return default_permission
+        else:
+            return None
+
+    if empty_file_permission_key:
+        return file_permission
+
+    raise ValueError(_ERROR_TOO_MANY_FILE_PERMISSIONS)

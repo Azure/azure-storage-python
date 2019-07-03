@@ -84,6 +84,13 @@ GET_PROPERTIES_ATTRIBUTE_MAP = {
     'x-ms-copy-status-description': ('copy', 'status_description', _to_str),
     'x-ms-has-immutability-policy': (None, 'has_immutability_policy', _bool),
     'x-ms-has-legal-hold': (None, 'has_legal_hold', _bool),
+    'x-ms-file-attributes': ('smb_properties', 'ntfs_attributes', _to_str),
+    'x-ms-file-creation-time': ('smb_properties', 'creation_time', parser.parse, True),
+    'x-ms-file-last-write-time': ('smb_properties', 'last_write_time', parser.parse, True),
+    'x-ms-file-change-time': ('smb_properties', 'change_time', parser.parse, True),
+    'x-ms-file-permission-key': ('smb_properties', 'permission_key', _to_str),
+    'x-ms-file-id': ('smb_properties', 'file_id', _to_str),
+    'x-ms-file-parent-id': ('smb_properties', 'parent_id', _to_str),
 }
 
 
@@ -120,7 +127,11 @@ def _parse_properties(response, result_class):
                 setattr(props, info[1], info[2](value))
             else:
                 attr = getattr(props, info[0])
-                setattr(attr, info[1], info[2](value))
+                # if info[3] is True, time zones in parsed strings are ignored and a naive :class:`datetime` object
+                # will be returned.
+                ignoretz = info[3] if len(info) > 3 else False
+                header_value = info[2](value, ignoretz=ignoretz) if info[2] is parser.parse else info[2](value)
+                setattr(attr, info[1], header_value)
 
     if hasattr(props, 'blob_type') and props.blob_type == 'PageBlob' and hasattr(props, 'blob_tier') and props.blob_tier is not None:
         props.blob_tier = _to_upper_str(props.blob_tier)
