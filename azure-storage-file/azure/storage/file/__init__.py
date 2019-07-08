@@ -18,3 +18,4 @@ from .models import (
     FilePermissions,
     DeleteSnapshot,
 )
+from ._constants import __version__
