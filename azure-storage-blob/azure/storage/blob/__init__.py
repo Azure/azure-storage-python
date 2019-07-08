@@ -29,3 +29,4 @@ from .models import (
     DeleteSnapshot,
 )
 from .pageblobservice import PageBlobService
+from ._constants import __version__

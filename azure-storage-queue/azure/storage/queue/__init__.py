@@ -11,3 +11,4 @@ from .models import (
 )
 
 from .queueservice import QueueService
+from ._constants import __version__
