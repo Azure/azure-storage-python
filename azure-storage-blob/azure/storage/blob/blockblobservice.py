@@ -158,11 +158,9 @@ class BlockBlobService(BaseBlobService):
         :type block: io.IOBase or bytes
             Content of the block.
         :param str block_id:
-            A valid Base64 string value that identifies the block. Prior to
-            encoding, the string must be less than or equal to 64 bytes in size.
-            For a given blob, the length of the value specified for the blockid
-            parameter must be the same size for each block. Note that the Base64
-            string must be URL-encoded.
+            A string value that identifies the block. The string should be less than
+            or equal to 64 bytes in size.
+            For a given blob, the block_id must be the same size for each block.
         :param bool validate_content:
             If true, calculates an MD5 hash of the block content. The storage
             service checks the hash of the content that has arrived
@@ -334,11 +332,9 @@ class BlockBlobService(BaseBlobService):
         :param int source_range_end:
             This indicates the end of the range of bytes(inclusive) that has to be taken from the copy source.
         :param str block_id:
-            A valid Base64 string value that identifies the block. Prior to
-            encoding, the string must be less than or equal to 64 bytes in size.
-            For a given blob, the length of the value specified for the blockid
-            parameter must be the same size for each block. Note that the Base64
-            string must be URL-encoded.
+            A string value that identifies the block. The string should be less than
+            or equal to 64 bytes in size.
+            For a given blob, the block_id must be the same size for each block.
         :param str source_content_md5:
             If given, the service will calculate the MD5 hash of the block content and compare against this value.
         :param str lease_id:
