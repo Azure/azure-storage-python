@@ -74,8 +74,6 @@ class _StorageSharedKeyAuthentication(object):
             # Doing so will clarify/locate the source of problem
             raise _wrap_exception(ex, AzureSigningError)
 
-
-class _StorageSharedKeyAuthentication(_StorageSharedKeyAuthentication):
     def sign_request(self, request):
         string_to_sign = \
             self._get_verb(request) + \
