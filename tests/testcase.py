@@ -168,6 +168,7 @@ class StorageTestCase(unittest.TestCase):
                 settings.STORAGE_ACCOUNT_KEY,
                 protocol=settings.PROTOCOL,
             )
+        service._is_validating_request_id = False if TestMode.is_playback(self.test_mode) else True
         self._set_test_proxy(service, settings)
         return service
 
@@ -186,6 +187,7 @@ class StorageTestCase(unittest.TestCase):
         else:
             raise SkipTest('BLOB_CONNECTION_STRING or BLOB_STORAGE_ACCOUNT_NAME must be populated to run this test')
 
+        service._is_validating_request_id = False if TestMode.is_playback(self.test_mode) else True
         self._set_test_proxy(service, settings)
         return service
 
@@ -203,6 +205,7 @@ class StorageTestCase(unittest.TestCase):
         else:
             raise SkipTest('PREMIUM_CONNECTION_STRING or PREMIUM_STORAGE_ACCOUNT_NAME must be populated to run this test')
 
+        service._is_validating_request_id = False if TestMode.is_playback(self.test_mode) else True
         self._set_test_proxy(service, settings)
         return service
 
@@ -215,6 +218,8 @@ class StorageTestCase(unittest.TestCase):
             )
         else:
             print("REMOTE_STORAGE_ACCOUNT_NAME and REMOTE_STORAGE_ACCOUNT_KEY not set in test settings file.")
+
+        service._is_validating_request_id = False if TestMode.is_playback(self.test_mode) else True
         self._set_test_proxy(service, settings)
         return service
 

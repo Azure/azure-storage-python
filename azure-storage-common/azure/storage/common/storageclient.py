@@ -150,6 +150,7 @@ class StorageClient(object):
         self.retry_callback = None
         self._X_MS_VERSION = DEFAULT_X_MS_VERSION
         self._USER_AGENT_STRING = DEFAULT_USER_AGENT_STRING
+        self._is_validating_request_id = True
 
     def _update_user_agent_string(self, service_package_version):
         self._USER_AGENT_STRING = '{}{} {}'.format(USER_AGENT_STRING_PREFIX,
@@ -336,7 +337,8 @@ class StorageClient(object):
                         self.response_callback(response)
 
                     # Validate the client request ID
-                    self._validate_echoed_client_request_id(request, response)
+                    if self._is_validating_request_id:
+                        self._validate_echoed_client_request_id(request, response)
 
                     # Set the response context
                     retry_context.response = response
