@@ -365,8 +365,7 @@ class StorageBlockBlobTest(StorageTestCase):
         content_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish')
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
-                                       content_settings=content_settings)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, content_settings=content_settings)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -523,8 +522,7 @@ class StorageBlockBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH,
-                                      progress_callback=callback)
+        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, progress_callback=callback)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -605,8 +603,7 @@ class StorageBlockBlobTest(StorageTestCase):
         blob_tier = StandardBlobTier.Cool
 
         # Act
-        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH,
-                                      max_connections=1,
+        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, max_connections=1,
                                       standard_blob_tier=blob_tier)
         blob = self.bs.get_blob_properties(self.container_name, blob_name)
 
@@ -649,8 +646,8 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StorageBlockBlobTest.NonSeekableFile(stream)
-            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file,
-                                            count=blob_size, max_connections=1)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file, count=blob_size,
+                                            max_connections=1)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
@@ -669,8 +666,7 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StorageBlockBlobTest.NonSeekableFile(stream)
-            self.bs.create_blob_from_stream(self.container_name, blob_name,
-                                            non_seekable_file, max_connections=1)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file, max_connections=1)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -735,8 +731,8 @@ class StorageBlockBlobTest(StorageTestCase):
             content_language='spanish')
         blob_size = len(data) - 301
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            blob_size, content_settings=content_settings)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size,
+                                            content_settings=content_settings)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
@@ -760,8 +756,7 @@ class StorageBlockBlobTest(StorageTestCase):
             content_type='image/png',
             content_language='spanish')
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            content_settings=content_settings)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, content_settings=content_settings)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -782,8 +777,8 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Act
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            count=blob_size, standard_blob_tier=blob_tier)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, count=blob_size,
+                                            standard_blob_tier=blob_tier)
 
         # Assert
         properties = self.bs.get_blob_properties(self.container_name, blob_name).properties
@@ -803,8 +798,7 @@ class StorageBlockBlobTest(StorageTestCase):
 
         # Act
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            standard_blob_tier=blob_tier)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, standard_blob_tier=blob_tier)
         blob_properties = self.bs.get_blob_properties(self.container_name, blob_name).properties
 
         # Assert
@@ -852,8 +846,7 @@ class StorageBlockBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_text(self.container_name, blob_name, text, 'utf-16',
-                                      progress_callback=callback)
+        self.bs.create_blob_from_text(self.container_name, blob_name, text, 'utf-16', progress_callback=callback)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -899,8 +892,7 @@ class StorageBlockBlobTest(StorageTestCase):
         data = b'hello world'
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
-                                       validate_content=True)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, validate_content=True)
 
         # Assert
 
@@ -914,8 +906,7 @@ class StorageBlockBlobTest(StorageTestCase):
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
-                                       validate_content=True)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, validate_content=True)
 
         # Assert
 

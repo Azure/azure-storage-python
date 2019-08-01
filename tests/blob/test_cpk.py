@@ -112,6 +112,10 @@ class StorageCPKTest(StorageTestCase):
 
     @record
     def test_create_block_blob_with_chunks(self):
+        # parallel operation
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._get_blob_reference()
 
@@ -388,6 +392,9 @@ class StorageCPKTest(StorageTestCase):
 
     @record
     def test_create_page_blob_with_chunks(self):
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
         # Arrange
         blob_name = self._get_blob_reference()
         # Act
@@ -415,8 +422,7 @@ class StorageCPKTest(StorageTestCase):
     def test_get_set_blob_properties(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        self.bbs.create_blob_from_bytes(self.container_name, blob_name, b'AAABBBCCC',
-                                        cpk=TEST_ENCRYPTION_KEY)
+        self.bbs.create_blob_from_bytes(self.container_name, blob_name, b'AAABBBCCC', cpk=TEST_ENCRYPTION_KEY)
 
         # Act without the encryption key should fail
         with self.assertRaises(AzureHttpError):
@@ -448,8 +454,7 @@ class StorageCPKTest(StorageTestCase):
     def test_get_set_blob_metadata(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        self.bbs.create_blob_from_bytes(self.container_name, blob_name, b'AAABBBCCC',
-                                        cpk=TEST_ENCRYPTION_KEY)
+        self.bbs.create_blob_from_bytes(self.container_name, blob_name, b'AAABBBCCC', cpk=TEST_ENCRYPTION_KEY)
         metadata = {'hello': 'world', 'number': '42', 'UP': 'UPval'}
 
         # Act without cpk should fail
@@ -475,8 +480,7 @@ class StorageCPKTest(StorageTestCase):
     def test_snapshot_blob(self):
         # Arrange
         blob_name = self._get_blob_reference()
-        self.bbs.create_blob_from_bytes(self.container_name, blob_name, b'AAABBBCCC',
-                                        cpk=TEST_ENCRYPTION_KEY)
+        self.bbs.create_blob_from_bytes(self.container_name, blob_name, b'AAABBBCCC', cpk=TEST_ENCRYPTION_KEY)
 
         # Act without cpk should not work
         with self.assertRaises(AzureHttpError):

@@ -124,7 +124,7 @@ class AppendBlobService(BaseBlobService):
     def create_blob(self, container_name, blob_name, content_settings=None,
                     metadata=None, lease_id=None,
                     if_modified_since=None, if_unmodified_since=None,
-                    if_match=None, if_none_match=None, cpk=None, timeout=None):
+                    if_match=None, if_none_match=None, timeout=None, cpk=None):
         '''
         Creates a blob or overrides an existing blob. Use if_none_match=* to
         prevent overriding an existing blob. 
@@ -204,7 +204,7 @@ class AppendBlobService(BaseBlobService):
                      appendpos_condition=None,
                      lease_id=None, if_modified_since=None,
                      if_unmodified_since=None, if_match=None,
-                     if_none_match=None, cpk=None, timeout=None):
+                     if_none_match=None, timeout=None, cpk=None):
         '''
         Commits a new block of data to the end of an existing append blob.
         
@@ -306,7 +306,7 @@ class AppendBlobService(BaseBlobService):
                               source_if_none_match=None, maxsize_condition=None,
                               appendpos_condition=None, lease_id=None, if_modified_since=None,
                               if_unmodified_since=None, if_match=None,
-                              if_none_match=None, cpk=None, timeout=None):
+                              if_none_match=None, timeout=None, cpk=None):
         """
         Creates a new block to be committed as part of a blob, where the contents are read from a source url.
 

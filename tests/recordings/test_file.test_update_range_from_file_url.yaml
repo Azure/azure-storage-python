@@ -2,686 +2,190 @@ interactions:
 - request:
     body: null
     headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - ecdfe910-985e-11e9-8a74-001a7dda7113
-      x-ms-copy-source:
-      - https://stagesctewz1.file.core.windows.net/sprasa-test/testfile?se=2019-06-26T23%3A08%3A27Z&sp=r&sv=2019-02-02&sr=f&sig=fClZ3P8Q7pdAZWaeZN0l6bCuxcXnzYGeyW%2BW6OdrCnc%3D
-      x-ms-date:
-      - Wed, 26 Jun 2019 22:08:27 GMT
-      x-ms-range:
-      - bytes=0-511
-      x-ms-source-range:
-      - bytes=0-511
-      x-ms-version:
-      - '2019-02-02'
-      x-ms-write:
-      - update
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.1.0-2.1.0 (Python CPython 3.7.0; Darwin 18.7.0)]
+      x-ms-client-request-id: [ad0a8092-b4c2-11e9-9070-f218981b70f8]
+      x-ms-content-length: ['2048']
+      x-ms-date: ['Fri, 02 Aug 2019 01:13:03 GMT']
+      x-ms-file-attributes: [Archive]
+      x-ms-file-creation-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-last-write-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-permission: [Inherit]
+      x-ms-type: [file]
+      x-ms-version: ['2019-02-02']
     method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate?comp=range
+    uri: https://storagename.file.core.windows.net/utshare5ed210c0/testfile
   response:
-    body:
-      string: ''
+    body: {string: ''}
     headers:
-      Content-Length:
-      - '0'
-      Date:
-      - Wed, 26 Jun 2019 22:08:28 GMT
-      ETag:
-      - '"0x8D6FA82D17BDC3A"'
-      Last-Modified:
-      - Wed, 26 Jun 2019 22:08:28 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-client-request-id:
-      - ecdfe910-985e-11e9-8a74-001a7dda7113
-      x-ms-content-crc64:
-      - EZA9hgZaRrQ=
-      x-ms-request-id:
-      - c4d70da6-101a-0025-706b-2c3b47000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2019-02-02'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - ed4df7be-985e-11e9-8035-001a7dda7113
-      x-ms-date:
-      - Wed, 26 Jun 2019 22:08:28 GMT
-      x-ms-version:
-      - '2019-02-02'
-    method: GET
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate?comp=rangelist
-  response:
-    body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Ranges><Range><Start>0</Start><End>511</End></Range></Ranges>"
-    headers:
-      Content-Type:
-      - application/xml
-      Date:
-      - Wed, 26 Jun 2019 22:08:28 GMT
-      ETag:
-      - '"0x8D6FA82D17BDC3A"'
-      Last-Modified:
-      - Wed, 26 Jun 2019 22:08:28 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      Transfer-Encoding:
-      - chunked
-      x-ms-client-request-id:
-      - ed4df7be-985e-11e9-8035-001a7dda7113
-      x-ms-content-length:
-      - '2048'
-      x-ms-request-id:
-      - c4d70dab-101a-0025-746b-2c3b47000000
-      x-ms-version:
-      - '2019-02-02'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - 5efbe0be-985f-11e9-b40e-001a7dda7113
-      x-ms-copy-source:
-      - https://stagesctewz1.file.core.windows.net/sprasa-test/testfile?se=2019-06-26T23%3A11%3A39Z&sp=r&sv=2019-02-02&sr=f&sig=IZre3XNUJjeSlgCwj4kWXRlTBaqfaJPYmthl34cjmTs%3D
-      x-ms-date:
-      - Wed, 26 Jun 2019 22:11:39 GMT
-      x-ms-range:
-      - bytes=0-511
-      x-ms-source-range:
-      - bytes=0-511
-      x-ms-version:
-      - '2019-02-02'
-      x-ms-write:
-      - update
-    method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate?comp=range
-  response:
-    body:
-      string: ''
-    headers:
-      Content-Length:
-      - '0'
-      Date:
-      - Wed, 26 Jun 2019 22:11:39 GMT
-      ETag:
-      - '"0x8D6FA83437AF81B"'
-      Last-Modified:
-      - Wed, 26 Jun 2019 22:11:39 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-client-request-id:
-      - 5efbe0be-985f-11e9-b40e-001a7dda7113
-      x-ms-content-crc64:
-      - EZA9hgZaRrQ=
-      x-ms-request-id:
-      - ed14036e-f01a-002d-2e6c-2c2148000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2019-02-02'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - 5f4dc3ec-985f-11e9-8aa6-001a7dda7113
-      x-ms-date:
-      - Wed, 26 Jun 2019 22:11:39 GMT
-      x-ms-version:
-      - '2019-02-02'
-    method: GET
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate?comp=rangelist
-  response:
-    body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Ranges><Range><Start>0</Start><End>511</End></Range></Ranges>"
-    headers:
-      Content-Type:
-      - application/xml
-      Date:
-      - Wed, 26 Jun 2019 22:11:39 GMT
-      ETag:
-      - '"0x8D6FA83437AF81B"'
-      Last-Modified:
-      - Wed, 26 Jun 2019 22:11:39 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      Transfer-Encoding:
-      - chunked
-      x-ms-client-request-id:
-      - 5f4dc3ec-985f-11e9-8aa6-001a7dda7113
-      x-ms-content-length:
-      - '2048'
-      x-ms-request-id:
-      - ed140374-f01a-002d-316c-2c2148000000
-      x-ms-version:
-      - '2019-02-02'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - 146fcf12-a06c-11e9-8107-001a7dda7113
-      x-ms-content-length:
-      - '2048'
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:02:47 GMT
-      x-ms-type:
-      - file
-      x-ms-version:
-      - '2018-11-09'
-    method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/testfile
-  response:
-    body:
-      string: ''
-    headers:
-      Content-Length:
-      - '0'
-      Date:
-      - Sun, 07 Jul 2019 04:02:46 GMT
-      ETag:
-      - '"0x8D7028FF8D469CE"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:02:47 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - b547648f-c01a-0026-4378-34da23000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
+      Content-Length: ['0']
+      Date: ['Fri, 02 Aug 2019 01:13:03 GMT']
+      ETag: ['"0x8D716E68C712FAA"']
+      Last-Modified: ['Fri, 02 Aug 2019 01:12:55 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [ad0a8092-b4c2-11e9-9070-f218981b70f8]
+      x-ms-file-attributes: [Archive]
+      x-ms-file-change-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-creation-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-id: ['13835128424026341376']
+      x-ms-file-last-write-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-parent-id: ['0']
+      x-ms-file-permission-key: [5068516693366841476*17218973682704664586]
+      x-ms-request-id: [42cf34b0-e01a-002f-2bcf-484e11000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2019-02-02']
+    status: {code: 201, message: Created}
 - request:
     body: abcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnop
     headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '512'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - 14a7f902-a06c-11e9-b992-001a7dda7113
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:02:47 GMT
-      x-ms-range:
-      - bytes=0-511
-      x-ms-version:
-      - '2018-11-09'
-      x-ms-write:
-      - update
+      Connection: [keep-alive]
+      Content-Length: ['512']
+      User-Agent: [Azure-Storage/2.1.0-2.1.0 (Python CPython 3.7.0; Darwin 18.7.0)]
+      x-ms-client-request-id: [ad1e45a0-b4c2-11e9-9070-f218981b70f8]
+      x-ms-date: ['Fri, 02 Aug 2019 01:13:03 GMT']
+      x-ms-range: [bytes=0-511]
+      x-ms-version: ['2019-02-02']
+      x-ms-write: [update]
     method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/testfile?comp=range
+    uri: https://storagename.file.core.windows.net/utshare5ed210c0/testfile?comp=range
   response:
-    body:
-      string: ''
+    body: {string: ''}
     headers:
-      Content-Length:
-      - '0'
-      Content-MD5:
-      - pTsTLZHyQ+et6NksJ1OHxg==
-      Date:
-      - Sun, 07 Jul 2019 04:02:47 GMT
-      ETag:
-      - '"0x8D7028FF8E2C1AD"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:02:47 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - b5476499-c01a-0026-4d78-34da23000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
+      Content-Length: ['0']
+      Content-MD5: [pTsTLZHyQ+et6NksJ1OHxg==]
+      Date: ['Fri, 02 Aug 2019 01:13:03 GMT']
+      ETag: ['"0x8D716E691551464"']
+      Last-Modified: ['Fri, 02 Aug 2019 01:13:03 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [ad1e45a0-b4c2-11e9-9070-f218981b70f8]
+      x-ms-request-id: [42cf34b2-e01a-002f-2ccf-484e11000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2019-02-02']
+    status: {code: 201, message: Created}
 - request:
     body: null
     headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - 14b6950c-a06c-11e9-8a91-001a7dda7113
-      x-ms-content-length:
-      - '2048'
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:02:47 GMT
-      x-ms-type:
-      - file
-      x-ms-version:
-      - '2018-11-09'
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.1.0-2.1.0 (Python CPython 3.7.0; Darwin 18.7.0)]
+      x-ms-client-request-id: [ad239ece-b4c2-11e9-9070-f218981b70f8]
+      x-ms-content-length: ['2048']
+      x-ms-date: ['Fri, 02 Aug 2019 01:13:03 GMT']
+      x-ms-file-attributes: [Archive]
+      x-ms-file-creation-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-last-write-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-permission: [Inherit]
+      x-ms-type: [file]
+      x-ms-version: ['2019-02-02']
     method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate
+    uri: https://storagename.file.core.windows.net/utshare5ed210c0/filetoupdate
   response:
-    body:
-      string: ''
+    body: {string: ''}
     headers:
-      Content-Length:
-      - '0'
-      Date:
-      - Sun, 07 Jul 2019 04:02:47 GMT
-      ETag:
-      - '"0x8D7028FF8F167A8"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:02:47 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - b547649e-c01a-0026-5278-34da23000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
+      Content-Length: ['0']
+      Date: ['Fri, 02 Aug 2019 01:13:03 GMT']
+      ETag: ['"0x8D716E68C712FAA"']
+      Last-Modified: ['Fri, 02 Aug 2019 01:12:55 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [ad239ece-b4c2-11e9-9070-f218981b70f8]
+      x-ms-file-attributes: [Archive]
+      x-ms-file-change-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-creation-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-id: ['11529285414812647424']
+      x-ms-file-last-write-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-parent-id: ['0']
+      x-ms-file-permission-key: [5068516693366841476*17218973682704664586]
+      x-ms-request-id: [42cf34b3-e01a-002f-2dcf-484e11000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2019-02-02']
+    status: {code: 201, message: Created}
 - request:
     body: null
     headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - a93e46be-a06d-11e9-b046-001a7dda7113
-      x-ms-content-length:
-      - '2048'
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:14:06 GMT
-      x-ms-type:
-      - file
-      x-ms-version:
-      - '2018-11-09'
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.1.0-2.1.0 (Python CPython 3.7.0; Darwin 18.7.0)]
+      x-ms-client-request-id: [ad2a3342-b4c2-11e9-9070-f218981b70f8]
+      x-ms-copy-source: ['https://zemaintest.file.core.windows.net/utshare5ed210c0/testfile?se=2019-08-02T02%3A13%3A03Z&sp=r&sv=2019-02-02&sr=f&sig=ZfsanYQ2doxCoxW91JVZoiifT%2BcHQLzqi0Rby6Un5K8%3D']
+      x-ms-date: ['Fri, 02 Aug 2019 01:13:03 GMT']
+      x-ms-range: [bytes=0-511]
+      x-ms-source-range: [bytes=0-511]
+      x-ms-version: ['2019-02-02']
+      x-ms-write: [update]
     method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/testfile
+    uri: https://storagename.file.core.windows.net/utshare5ed210c0/filetoupdate?comp=range
   response:
-    body:
-      string: ''
+    body: {string: ''}
     headers:
-      Content-Length:
-      - '0'
-      Date:
-      - Sun, 07 Jul 2019 04:14:05 GMT
-      ETag:
-      - '"0x8D702918DA37510"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:14:06 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - 8e463378-b01a-002c-1e7a-347e94000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: abcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnop
-    headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '512'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - a977875e-a06d-11e9-a6bc-001a7dda7113
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:14:06 GMT
-      x-ms-range:
-      - bytes=0-511
-      x-ms-version:
-      - '2018-11-09'
-      x-ms-write:
-      - update
-    method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/testfile?comp=range
-  response:
-    body:
-      string: ''
-    headers:
-      Content-Length:
-      - '0'
-      Content-MD5:
-      - pTsTLZHyQ+et6NksJ1OHxg==
-      Date:
-      - Sun, 07 Jul 2019 04:14:05 GMT
-      ETag:
-      - '"0x8D702918DB1CD0A"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:14:06 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - 8e463379-b01a-002c-1f7a-347e94000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
+      Content-Length: ['0']
+      Date: ['Fri, 02 Aug 2019 01:13:04 GMT']
+      ETag: ['"0x8D716E692041CFC"']
+      Last-Modified: ['Fri, 02 Aug 2019 01:13:04 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [ad2a3342-b4c2-11e9-9070-f218981b70f8]
+      x-ms-content-crc64: [EZA9hgZaRrQ=]
+      x-ms-request-id: [42cf34b4-e01a-002f-2ecf-484e11000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2019-02-02']
+    status: {code: 201, message: Created}
 - request:
     body: null
     headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - a9862eee-a06d-11e9-a66f-001a7dda7113
-      x-ms-content-length:
-      - '2048'
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:14:06 GMT
-      x-ms-type:
-      - file
-      x-ms-version:
-      - '2018-11-09'
-    method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate
-  response:
-    body:
-      string: ''
-    headers:
-      Content-Length:
-      - '0'
-      Date:
-      - Sun, 07 Jul 2019 04:14:06 GMT
-      ETag:
-      - '"0x8D702918DC30B1A"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:14:06 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - 8e46337b-b01a-002c-217a-347e94000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - c314fad4-a06d-11e9-b72b-001a7dda7113
-      x-ms-content-length:
-      - '2048'
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:14:49 GMT
-      x-ms-type:
-      - file
-      x-ms-version:
-      - '2018-11-09'
-    method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/testfile
-  response:
-    body:
-      string: ''
-    headers:
-      Content-Length:
-      - '0'
-      Date:
-      - Sun, 07 Jul 2019 04:14:49 GMT
-      ETag:
-      - '"0x8D70291A77C5360"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:14:49 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - 587e715f-d01a-0015-597a-348588000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: abcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnop
-    headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '512'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - c350a780-a06d-11e9-a1f9-001a7dda7113
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:14:50 GMT
-      x-ms-range:
-      - bytes=0-511
-      x-ms-version:
-      - '2018-11-09'
-      x-ms-write:
-      - update
-    method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/testfile?comp=range
-  response:
-    body:
-      string: ''
-    headers:
-      Content-Length:
-      - '0'
-      Content-MD5:
-      - pTsTLZHyQ+et6NksJ1OHxg==
-      Date:
-      - Sun, 07 Jul 2019 04:14:49 GMT
-      ETag:
-      - '"0x8D70291A78D916E"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:14:50 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - 587e7167-d01a-0015-607a-348588000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - c361e8de-a06d-11e9-b3ef-001a7dda7113
-      x-ms-content-length:
-      - '2048'
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:14:50 GMT
-      x-ms-type:
-      - file
-      x-ms-version:
-      - '2018-11-09'
-    method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate
-  response:
-    body:
-      string: ''
-    headers:
-      Content-Length:
-      - '0'
-      Date:
-      - Sun, 07 Jul 2019 04:14:49 GMT
-      ETag:
-      - '"0x8D70291A79D9712"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:14:50 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - 587e716d-d01a-0015-667a-348588000000
-      x-ms-request-server-encrypted:
-      - 'true'
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - c371d654-a06d-11e9-b30d-001a7dda7113
-      x-ms-copy-source:
-      - https://stagesctewz1.file.core.windows.net/sprasa-test/testfile?se=2019-07-07T05%3A14%3A50Z&sp=r&sv=2018-11-09&sr=f&sig=IKIgpcWB7oDjPUZH7xbBWUcKuXAzW6HIa9Q3/sfiqnc%3D
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:14:50 GMT
-      x-ms-range:
-      - bytes=0-511
-      x-ms-source-range:
-      - bytes=0-511
-      x-ms-version:
-      - '2018-11-09'
-      x-ms-write:
-      - update
-    method: PUT
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate?comp=range
-  response:
-    body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>InvalidHeaderValue</Code><Message>The
-        value for one of the HTTP headers is not in the correct format.\nRequestId:587e7172-d01a-0015-6b7a-348588000000\nTime:2019-07-07T04:14:50.2763250Z</Message><HeaderName>Content-Length</HeaderName><HeaderValue>0</HeaderValue></Error>"
-    headers:
-      Content-Length:
-      - '321'
-      Content-Type:
-      - application/xml
-      Date:
-      - Sun, 07 Jul 2019 04:14:49 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-error-code:
-      - InvalidHeaderValue
-      x-ms-request-id:
-      - 587e7172-d01a-0015-6b7a-348588000000
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 400
-      message: The value for one of the HTTP headers is not in the correct format.
-- request:
-    body: null
-    headers:
-      Connection:
-      - keep-alive
-      User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
-      x-ms-client-request-id:
-      - 3deb694c-a072-11e9-87a5-001a7dda7113
-      x-ms-date:
-      - Sun, 07 Jul 2019 04:46:53 GMT
-      x-ms-range:
-      - bytes=0-511
-      x-ms-version:
-      - '2018-11-09'
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/2.1.0-2.1.0 (Python CPython 3.7.0; Darwin 18.7.0)]
+      x-ms-client-request-id: [ade15234-b4c2-11e9-9070-f218981b70f8]
+      x-ms-date: ['Fri, 02 Aug 2019 01:13:04 GMT']
+      x-ms-version: ['2019-02-02']
     method: GET
-    uri: https://storagename.file.core.windows.net/sprasa-test/filetoupdate
+    uri: https://storagename.file.core.windows.net/utshare5ed210c0/filetoupdate?comp=rangelist
   response:
-    body:
-      string: abcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnop
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Ranges><Range><Start>0</Start><End>511</End></Range></Ranges>"}
     headers:
-      Accept-Ranges:
-      - bytes
-      Content-Length:
-      - '512'
-      Content-Range:
-      - bytes 0-511/2048
-      Content-Type:
-      - application/octet-stream
-      Date:
-      - Sun, 07 Jul 2019 04:46:53 GMT
-      ETag:
-      - '"0x8D702959D130857"'
-      Last-Modified:
-      - Sun, 07 Jul 2019 04:43:10 GMT
-      Server:
-      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
-      x-ms-request-id:
-      - 588014f6-d01a-0015-247e-348588000000
-      x-ms-server-encrypted:
-      - 'true'
-      x-ms-type:
-      - File
-      x-ms-version:
-      - '2018-11-09'
-    status:
-      code: 206
-      message: Partial Content
+      Content-Type: [application/xml]
+      Date: ['Fri, 02 Aug 2019 01:13:04 GMT']
+      ETag: ['"0x8D716E692041CFC"']
+      Last-Modified: ['Fri, 02 Aug 2019 01:13:04 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      Transfer-Encoding: [chunked]
+      x-ms-client-request-id: [ade15234-b4c2-11e9-9070-f218981b70f8]
+      x-ms-content-length: ['2048']
+      x-ms-request-id: [42cf34b7-e01a-002f-2fcf-484e11000000]
+      x-ms-version: ['2019-02-02']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/2.1.0-2.1.0 (Python CPython 3.7.0; Darwin 18.7.0)]
+      x-ms-client-request-id: [ade6487a-b4c2-11e9-9070-f218981b70f8]
+      x-ms-date: ['Fri, 02 Aug 2019 01:13:04 GMT']
+      x-ms-range: [bytes=0-511]
+      x-ms-version: ['2019-02-02']
+    method: GET
+    uri: https://storagename.file.core.windows.net/utshare5ed210c0/filetoupdate
+  response:
+    body: {string: abcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnopabcdefghijklmnop}
+    headers:
+      Accept-Ranges: [bytes]
+      Content-Length: ['512']
+      Content-Range: [bytes 0-511/2048]
+      Content-Type: [application/octet-stream]
+      Date: ['Fri, 02 Aug 2019 01:13:04 GMT']
+      ETag: ['"0x8D716E692041CFC"']
+      Last-Modified: ['Fri, 02 Aug 2019 01:13:04 GMT']
+      Server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [ade6487a-b4c2-11e9-9070-f218981b70f8]
+      x-ms-file-attributes: [Archive]
+      x-ms-file-change-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-creation-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-id: ['11529285414812647424']
+      x-ms-file-last-write-time: ['2019-08-02T01:12:55.0731690Z']
+      x-ms-file-parent-id: ['0']
+      x-ms-file-permission-key: [5068516693366841476*17218973682704664586]
+      x-ms-request-id: [42cf34b8-e01a-002f-30cf-484e11000000]
+      x-ms-server-encrypted: ['true']
+      x-ms-type: [File]
+      x-ms-version: ['2019-02-02']
+    status: {code: 206, message: Partial Content}
 version: 1

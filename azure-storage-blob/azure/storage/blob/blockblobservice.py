@@ -150,7 +150,7 @@ class BlockBlobService(BaseBlobService):
             custom_domain, request_session, connection_string, socket_timeout, token_credential)
 
     def put_block(self, container_name, blob_name, block, block_id,
-                  validate_content=False, lease_id=None, cpk=None, timeout=None):
+                  validate_content=False, lease_id=None, timeout=None, cpk=None):
         '''
         Creates a new block to be committed as part of a blob.
 
@@ -198,8 +198,8 @@ class BlockBlobService(BaseBlobService):
     def put_block_list(
             self, container_name, blob_name, block_list, content_settings=None,
             metadata=None, validate_content=False, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None, cpk=None,
-            timeout=None, standard_blob_tier=None):
+            if_unmodified_since=None, if_match=None, if_none_match=None,
+            timeout=None, standard_blob_tier=None, cpk=None):
         '''
         Writes a blob by specifying the list of block IDs that make up the blob.
         In order to be written as part of a blob, a block must have been
@@ -336,7 +336,7 @@ class BlockBlobService(BaseBlobService):
 
     def put_block_from_url(self, container_name, blob_name, copy_source_url, block_id,
                            source_range_start=None, source_range_end=None,
-                           source_content_md5=None, lease_id=None, cpk=None, timeout=None):
+                           source_content_md5=None, lease_id=None, timeout=None, cpk=None):
         """
         Creates a new block to be committed as part of a blob.
 
@@ -401,11 +401,10 @@ class BlockBlobService(BaseBlobService):
 
     # ----Convenience APIs-----------------------------------------------------
 
-    def create_blob_from_path(
-            self, container_name, blob_name, file_path, content_settings=None,
-            metadata=None, validate_content=False, progress_callback=None,
-            max_connections=2, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None, cpk=None, timeout=None, standard_blob_tier=None):
+    def create_blob_from_path(self, container_name, blob_name, file_path, content_settings=None, metadata=None,
+                              validate_content=False, progress_callback=None, max_connections=2, lease_id=None,
+                              if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None,
+                              timeout=None, standard_blob_tier=None, cpk=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -482,31 +481,20 @@ class BlockBlobService(BaseBlobService):
 
         count = path.getsize(file_path)
         with open(file_path, 'rb') as stream:
-            return self.create_blob_from_stream(
-                container_name=container_name,
-                blob_name=blob_name,
-                stream=stream,
-                count=count,
-                content_settings=content_settings,
-                metadata=metadata,
-                validate_content=validate_content,
-                lease_id=lease_id,
-                progress_callback=progress_callback,
-                max_connections=max_connections,
-                if_modified_since=if_modified_since,
-                if_unmodified_since=if_unmodified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                standard_blob_tier=standard_blob_tier,
-                cpk=cpk,
-                timeout=timeout)
+            return self.create_blob_from_stream(container_name=container_name, blob_name=blob_name, stream=stream,
+                                                count=count, content_settings=content_settings, metadata=metadata,
+                                                validate_content=validate_content, progress_callback=progress_callback,
+                                                max_connections=max_connections, lease_id=lease_id,
+                                                if_modified_since=if_modified_since,
+                                                if_unmodified_since=if_unmodified_since, if_match=if_match,
+                                                if_none_match=if_none_match, timeout=timeout,
+                                                standard_blob_tier=standard_blob_tier, cpk=cpk)
 
-    def create_blob_from_stream(
-            self, container_name, blob_name, stream, count=None,
-            content_settings=None, metadata=None, validate_content=False,
-            progress_callback=None, max_connections=2, lease_id=None,
-            if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None, use_byte_buffer=False, standard_blob_tier=None):
+    def create_blob_from_stream(self, container_name, blob_name, stream, count=None, content_settings=None,
+                                metadata=None, validate_content=False, progress_callback=None, max_connections=2,
+                                lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+                                if_none_match=None, timeout=None, use_byte_buffer=False, standard_blob_tier=None,
+                                cpk=None):
         '''
         Creates a new blob from a file/stream, or updates the content of
         an existing blob, with automatic chunking and progress
@@ -712,12 +700,10 @@ class BlockBlobService(BaseBlobService):
                 cpk=cpk,
             )
 
-    def create_blob_from_bytes(
-            self, container_name, blob_name, blob, index=0, count=None,
-            content_settings=None, metadata=None, validate_content=False,
-            progress_callback=None, max_connections=2, lease_id=None,
-            if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None, standard_blob_tier=None):
+    def create_blob_from_bytes(self, container_name, blob_name, blob, index=0, count=None, content_settings=None,
+                               metadata=None, validate_content=False, progress_callback=None, max_connections=2,
+                               lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+                               if_none_match=None, timeout=None, standard_blob_tier=None, cpk=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -807,33 +793,19 @@ class BlockBlobService(BaseBlobService):
         stream = BytesIO(blob)
         stream.seek(index)
 
-        return self.create_blob_from_stream(
-            container_name=container_name,
-            blob_name=blob_name,
-            stream=stream,
-            count=count,
-            content_settings=content_settings,
-            metadata=metadata,
-            validate_content=validate_content,
-            progress_callback=progress_callback,
-            max_connections=max_connections,
-            lease_id=lease_id,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            timeout=timeout,
-            use_byte_buffer=True,
-            standard_blob_tier=standard_blob_tier,
-            cpk=cpk,
-        )
+        return self.create_blob_from_stream(container_name=container_name, blob_name=blob_name, stream=stream,
+                                            count=count, content_settings=content_settings, metadata=metadata,
+                                            validate_content=validate_content, progress_callback=progress_callback,
+                                            max_connections=max_connections, lease_id=lease_id,
+                                            if_modified_since=if_modified_since,
+                                            if_unmodified_since=if_unmodified_since, if_match=if_match,
+                                            if_none_match=if_none_match, timeout=timeout, use_byte_buffer=True,
+                                            standard_blob_tier=standard_blob_tier, cpk=cpk)
 
-    def create_blob_from_text(
-            self, container_name, blob_name, text, encoding='utf-8',
-            content_settings=None, metadata=None, validate_content=False,
-            progress_callback=None, max_connections=2, lease_id=None,
-            if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None, standard_blob_tier=None):
+    def create_blob_from_text(self, container_name, blob_name, text, encoding='utf-8', content_settings=None,
+                              metadata=None, validate_content=False, progress_callback=None, max_connections=2,
+                              lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+                              if_none_match=None, timeout=None, standard_blob_tier=None, cpk=None):
         '''
         Creates a new blob from str/unicode, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -912,25 +884,13 @@ class BlockBlobService(BaseBlobService):
             _validate_not_none('encoding', encoding)
             text = text.encode(encoding)
 
-        return self.create_blob_from_bytes(
-            container_name=container_name,
-            blob_name=blob_name,
-            blob=text,
-            index=0,
-            count=len(text),
-            content_settings=content_settings,
-            metadata=metadata,
-            validate_content=validate_content,
-            lease_id=lease_id,
-            progress_callback=progress_callback,
-            max_connections=max_connections,
-            if_modified_since=if_modified_since,
-            if_unmodified_since=if_unmodified_since,
-            if_match=if_match,
-            if_none_match=if_none_match,
-            standard_blob_tier=standard_blob_tier,
-            cpk=cpk,
-            timeout=timeout)
+        return self.create_blob_from_bytes(container_name=container_name, blob_name=blob_name, blob=text, index=0,
+                                           count=len(text), content_settings=content_settings, metadata=metadata,
+                                           validate_content=validate_content, progress_callback=progress_callback,
+                                           max_connections=max_connections, lease_id=lease_id,
+                                           if_modified_since=if_modified_since, if_unmodified_since=if_unmodified_since,
+                                           if_match=if_match, if_none_match=if_none_match, timeout=timeout,
+                                           standard_blob_tier=standard_blob_tier, cpk=cpk)
 
     def set_standard_blob_tier(
             self, container_name, blob_name, standard_blob_tier, timeout=None, rehydrate_priority=None):

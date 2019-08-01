@@ -31,6 +31,7 @@ from .models import (
     BatchSetBlobTierSubRequest,
     BatchSubResponse,
     CustomerProvidedEncryptionKey,
+    RehydratePriority,
 )
 from .pageblobservice import PageBlobService
 from ._constants import __version__

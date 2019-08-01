@@ -1586,7 +1586,7 @@ class BaseBlobService(StorageClient):
     def get_blob_properties(
             self, container_name, blob_name, snapshot=None, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None):
+            if_none_match=None, timeout=None, cpk=None):
         '''
         Returns all user-defined metadata, standard HTTP properties, and
         system properties for the blob. It does not return the content of the blob.
@@ -1656,7 +1656,7 @@ class BaseBlobService(StorageClient):
     def set_blob_properties(
             self, container_name, blob_name, content_settings=None, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None):
+            if_none_match=None, timeout=None, cpk=None):
         '''
         Sets system properties on the blob. If one property is set for the
         content_settings, all properties will be overriden.
@@ -1890,8 +1890,7 @@ class BaseBlobService(StorageClient):
             snapshot=None, start_range=None, end_range=None,
             validate_content=False, progress_callback=None,
             max_connections=2, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None, cpk=None,
-            timeout=None):
+            if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None, cpk=None):
         '''
         Downloads a blob to a file path, with automatic chunking and progress
         notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
@@ -2010,8 +2009,8 @@ class BaseBlobService(StorageClient):
                 if_unmodified_since,
                 if_match,
                 if_none_match,
-                cpk,
-                timeout)
+                timeout=timeout,
+                cpk=cpk)
 
         return blob
 
@@ -2020,7 +2019,7 @@ class BaseBlobService(StorageClient):
             start_range=None, end_range=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None):
+            if_none_match=None, timeout=None, cpk=None):
 
         '''
         Downloads a blob to a stream, with automatic chunking and progress
@@ -2257,7 +2256,7 @@ class BaseBlobService(StorageClient):
             start_range=None, end_range=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None):
+            if_none_match=None, timeout=None, cpk=None):
         '''
         Downloads a blob as an array of bytes, with automatic chunking and
         progress notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
@@ -2365,8 +2364,8 @@ class BaseBlobService(StorageClient):
             if_unmodified_since,
             if_match,
             if_none_match,
-            cpk,
-            timeout)
+            timeout=timeout,
+            cpk=cpk)
 
         blob.content = stream.getvalue()
         return blob
@@ -2376,7 +2375,7 @@ class BaseBlobService(StorageClient):
             start_range=None, end_range=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None):
+            if_none_match=None, timeout=None, cpk=None):
         '''
         Downloads a blob as unicode text, with automatic chunking and progress
         notifications. Returns an instance of :class:`~azure.storage.blob.models.Blob` with
@@ -2484,15 +2483,15 @@ class BaseBlobService(StorageClient):
                                       if_unmodified_since,
                                       if_match,
                                       if_none_match,
-                                      cpk,
-                                      timeout)
+                                      timeout=timeout,
+                                      cpk=cpk)
         blob.content = blob.content.decode(encoding)
         return blob
 
     def get_blob_metadata(
             self, container_name, blob_name, snapshot=None, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, cpk=None, timeout=None):
+            if_none_match=None, timeout=None, cpk=None):
         '''
         Returns all user-defined metadata for the specified blob or snapshot.
 
@@ -2561,7 +2560,7 @@ class BaseBlobService(StorageClient):
     def set_blob_metadata(self, container_name, blob_name,
                           metadata=None, lease_id=None,
                           if_modified_since=None, if_unmodified_since=None,
-                          if_match=None, if_none_match=None, cpk=None, timeout=None):
+                          if_match=None, if_none_match=None, timeout=None, cpk=None):
         '''
         Sets user-defined metadata for the specified blob as one or more
         name-value pairs.
@@ -3040,7 +3039,7 @@ class BaseBlobService(StorageClient):
     def snapshot_blob(self, container_name, blob_name,
                       metadata=None, if_modified_since=None,
                       if_unmodified_since=None, if_match=None,
-                      if_none_match=None, lease_id=None, cpk=None, timeout=None):
+                      if_none_match=None, lease_id=None, timeout=None, cpk=None):
         '''
         Creates a read-only snapshot of a blob.
 

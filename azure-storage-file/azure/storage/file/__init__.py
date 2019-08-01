@@ -17,5 +17,7 @@ from .models import (
     SharePermissions,
     FilePermissions,
     DeleteSnapshot,
+    SMBProperties,
+    NTFSAttributes,
 )
 from ._constants import __version__

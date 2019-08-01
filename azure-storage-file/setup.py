@@ -72,7 +72,7 @@ setup(
     ]),
     install_requires=[
         'azure-common>=1.1.5',
-        'azure-storage-common~=2.0'
+        'azure-storage-common~=2.1'
     ],
     extras_require={
         ":python_version<'3.0'": ['futures'],

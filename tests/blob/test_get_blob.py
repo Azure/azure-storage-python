@@ -193,7 +193,8 @@ class StorageGetBlobTest(StorageTestCase):
 
         # Arrange
         snapshot = self.bs.snapshot_blob(self.container_name, self.byte_blob)
-        self.bs.create_blob_from_bytes(self.container_name, self.byte_blob, self.byte_data) # Modify the blob so the Etag no longer matches
+        self.bs.create_blob_from_bytes(self.container_name, self.byte_blob,
+                                       self.byte_data)  # Modify the blob so the Etag no longer matches
 
         # Act
         blob = self.bs.get_blob_to_bytes(self.container_name, self.byte_blob, snapshot.snapshot)

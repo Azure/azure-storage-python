@@ -982,7 +982,7 @@ class FileService(StorageClient):
             return True
 
     def create_directory(self, share_name, directory_name, metadata=None,
-                         fail_on_exist=False, file_permission=None, smb_properties=SMBProperties(), timeout=None):
+                         fail_on_exist=False, timeout=None, file_permission=None, smb_properties=SMBProperties()):
         '''
         Creates a new directory under the specified share or parent directory. 
         If the directory with the same name already exists, the operation fails
@@ -1591,7 +1591,7 @@ class FileService(StorageClient):
         self._perform_request(request)
 
     def set_file_properties(self, share_name, directory_name, file_name,
-                            content_settings, file_permission=None, smb_properties=SMBProperties(), timeout=None):
+                            content_settings, timeout=None, file_permission=None, smb_properties=SMBProperties()):
         '''
         Sets system properties on the file. If one property is set for the
         content_settings, all properties will be overriden.
@@ -1827,8 +1827,8 @@ class FileService(StorageClient):
         self._perform_request(request)
 
     def create_file(self, share_name, directory_name, file_name,
-                    content_length, content_settings=None, metadata=None,
-                    file_permission=None, smb_properties=SMBProperties(), timeout=None):
+                    content_length, content_settings=None, metadata=None, timeout=None,
+                    file_permission=None, smb_properties=SMBProperties()):
         '''
         Creates a new file.
 
@@ -1944,8 +1944,8 @@ class FileService(StorageClient):
 
     def create_file_from_text(self, share_name, directory_name, file_name,
                               text, encoding='utf-8', content_settings=None,
-                              metadata=None, validate_content=False, file_permission=None,
-                              smb_properties=SMBProperties(), timeout=None):
+                              metadata=None, validate_content=False, timeout=None, file_permission=None,
+                              smb_properties=SMBProperties()):
         '''
         Creates a new file from str/unicode, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1998,8 +1998,8 @@ class FileService(StorageClient):
     def create_file_from_bytes(
             self, share_name, directory_name, file_name, file,
             index=0, count=None, content_settings=None, metadata=None,
-            validate_content=False, progress_callback=None, max_connections=2,
-            file_permission=None, smb_properties=SMBProperties(), timeout=None):
+            validate_content=False, progress_callback=None, max_connections=2, timeout=None,
+            file_permission=None, smb_properties=SMBProperties()):
         '''
         Creates a new file from an array of bytes, or updates the content
         of an existing file, with automatic chunking and progress
@@ -2068,8 +2068,8 @@ class FileService(StorageClient):
     def create_file_from_stream(
             self, share_name, directory_name, file_name, stream, count,
             content_settings=None, metadata=None, validate_content=False,
-            progress_callback=None, max_connections=2, file_permission=None, smb_properties=SMBProperties(),
-            timeout=None):
+            progress_callback=None, max_connections=2, timeout=None,
+            file_permission=None, smb_properties=SMBProperties()):
         '''
         Creates a new file from a file/stream, or updates the content of an
         existing file, with automatic chunking and progress notifications.

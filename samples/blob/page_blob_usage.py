@@ -270,8 +270,7 @@ class PageBlobSamples():
         settings = ContentSettings(content_type='html', content_language='fr')
         metadata = {'val1': 'foo', 'val2': 'blah'}
         blob_name = self._get_blob_reference()
-        self.service.create_blob_from_bytes(container_name, blob_name, data,
-                                            content_settings=settings,
+        self.service.create_blob_from_bytes(container_name, blob_name, data, content_settings=settings,
                                             metadata=metadata)
         blob = self.service.get_blob_to_bytes(container_name, blob_name)
         metadata = blob.metadata  # metadata={'val1': 'foo', 'val2': 'blah'}
@@ -291,8 +290,7 @@ class PageBlobSamples():
         blob_name = self._get_blob_reference()
 
         print('upload: ')
-        self.service.create_blob_from_bytes(container_name, blob_name, data,
-                                            progress_callback=upload_callback)
+        self.service.create_blob_from_bytes(container_name, blob_name, data, progress_callback=upload_callback)
 
         print('download: ')
         blob = self.service.get_blob_to_bytes(container_name, blob_name,
@@ -307,8 +305,7 @@ class PageBlobSamples():
         input_stream = io.BytesIO(self._get_random_bytes(512))
         output_stream = io.BytesIO()
         blob_name = self._get_blob_reference()
-        self.service.create_blob_from_stream(container_name, blob_name,
-                                             input_stream, 512)
+        self.service.create_blob_from_stream(container_name, blob_name, input_stream, 512)
         blob = self.service.get_blob_to_stream(container_name, blob_name,
                                                output_stream)
         content_length = blob.properties.content_length

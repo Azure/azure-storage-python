@@ -95,8 +95,7 @@ class StorageCommonBlobTest(StorageTestCase):
         if not blob_data:
             blob_data = b'12345678' * 1024 * 1024
         source_blob_name = self._get_blob_reference()
-        self.bs2.create_blob_from_bytes(
-            self.remote_container_name, source_blob_name, blob_data)
+        self.bs2.create_blob_from_bytes(self.remote_container_name, source_blob_name, blob_data)
         return source_blob_name
 
     def _wait_for_async_copy(self, container_name, blob_name):
@@ -314,9 +313,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         data = b'hello world again'
-        resp = self.bs.create_blob_from_bytes (
-            self.container_name, blob_name, data,
-            lease_id=lease_id)
+        resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data, lease_id=lease_id)
 
         # Assert
         self.assertIsNotNone(resp.etag)
@@ -332,8 +329,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         data = b'hello world'
-        resp = self.bs.create_blob_from_bytes(
-            self.container_name, blob_name, data, metadata=metadata)
+        resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data, metadata=metadata)
 
         # Assert
         self.assertIsNotNone(resp.etag)
@@ -370,8 +366,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         blob_name = self._create_block_blob()
         snapshot = self.bs.snapshot_blob(self.container_name, blob_name)
-        self.bs.create_blob_from_bytes (self.container_name, blob_name,
-                         b'hello world again', )
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello world again')
 
         # Act
         blob_previous = self.bs.get_blob_to_bytes(
@@ -1185,14 +1180,12 @@ class StorageCommonBlobTest(StorageTestCase):
         # Act
         lease_id = self.bs.acquire_blob_lease(
             self.container_name, blob_name, lease_duration=15)
-        resp2 = self.bs.create_blob_from_bytes (self.container_name, blob_name, b'hello 2',
-                                 lease_id=lease_id)
+        resp2 = self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello 2', lease_id=lease_id)
         self.sleep(15)
 
         # Assert
         with self.assertRaises(AzureHttpError):
-            self.bs.create_blob_from_bytes (self.container_name, blob_name, b'hello 3',
-                             lease_id=lease_id)
+            self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello 3', lease_id=lease_id)
 
     @record
     def test_lease_blob_with_proposed_lease_id(self):
@@ -1233,11 +1226,11 @@ class StorageCommonBlobTest(StorageTestCase):
                                    lease_duration=15)
         lease_time = self.bs.break_blob_lease(self.container_name, blob_name,
                                    lease_break_period=5)
-        blob = self.bs.create_blob_from_bytes (self.container_name, blob_name, b'hello 2', lease_id=lease_id)
+        blob = self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello 2', lease_id=lease_id)
         self.sleep(5)
 
         with self.assertRaises(AzureHttpError):
-            self.bs.create_blob_from_bytes (self.container_name, blob_name, b'hello 3', lease_id=lease_id)
+            self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello 3', lease_id=lease_id)
 
         # Assert
         self.assertIsNotNone(lease_id)
@@ -1290,8 +1283,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         data = u'hello world啊齄丂狛狜'.encode('utf-8')
-        resp = self.bs.create_blob_from_bytes (
-            self.container_name, blob_name, data, )
+        resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
 
         # Assert
         self.assertIsNotNone(resp.etag)
@@ -1316,7 +1308,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = 'blob1.txt'
         container_name = self._get_container_reference()
         self.bs.create_container(container_name, None, 'blob')
-        self.bs.create_blob_from_bytes (container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes(container_name, blob_name, data)
 
         # Act
         url = self.bs.make_blob_url(container_name, blob_name)
@@ -1333,7 +1325,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = 'blob1.txt'
         container_name = self._get_container_reference()
         self.bs.create_container(container_name, None, 'blob')
-        self.bs.create_blob_from_bytes (container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes(container_name, blob_name, data)
 
         # Act
         service = BlockBlobService(
@@ -1351,7 +1343,7 @@ class StorageCommonBlobTest(StorageTestCase):
         token_credential = TokenCredential(self.generate_oauth_token())
 
         # Action 1: make sure token works
-        service = BlockBlobService(self.settings.OAUTH_STORAGE_ACCOUNT_NAME, token_credential=token_credential)
+        service = BlockBlobService(self.settings.STORAGE_ACCOUNT_NAME, token_credential=token_credential)
         result = service.exists("test")
         self.assertIsNotNone(result)
 
