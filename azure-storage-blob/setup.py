@@ -44,7 +44,7 @@ except ImportError:
 
 setup(
     name='azure-storage-blob',
-    version='2.0.1',
+    version='2.1.0',
     description='Microsoft Azure Storage Blob Client Library for Python',
     long_description=open('README.rst', 'r').read(),
     license='MIT License',

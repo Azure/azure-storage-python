@@ -2,7 +2,7 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
-## Version XX.XX.XX:
+## Version 2.1.0:
 
 - Support for 2019-02-02 REST version. Please see our REST API documentation and blog for information about the related added features.
 - Added Batch Delete Blob API.

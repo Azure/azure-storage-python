@@ -2,6 +2,10 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 2.1.0:
+
+- Support for 2019-02-02 REST version. No new features for Queue.
+
 ## Version 2.0.1:
 - Updated dependency on azure-storage-common.
 
