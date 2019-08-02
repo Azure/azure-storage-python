@@ -437,6 +437,9 @@ class StorageAppendBlobTest(StorageTestCase):
 
         # Act part 2: put block from url with failing condition
         with self.assertRaises(AzureHttpError):
+            # make sure sufficient time has passed
+            if not self.is_playback():
+                self.sleep(2)
             self.bs.append_block_from_url(self.container_name, dest_blob_name, self.source_blob_url,
                                           source_range_start=0, source_range_end=SOURCE_BLOB_SIZE - 1,
                                           if_modified_since=resource_properties.last_modified)

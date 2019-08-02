@@ -535,6 +535,9 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act part 2: put block from url with failing condition
         with self.assertRaises(AzureHttpError):
+            # make sure sufficient time has passed
+            if not self.is_playback():
+                self.sleep(2)
             self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                          end_range=SOURCE_BLOB_SIZE - 1, copy_source_url=self.source_blob_url,
                                          source_range_start=0, if_modified_since=resource_properties.last_modified)
