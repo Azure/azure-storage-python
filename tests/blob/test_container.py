@@ -711,8 +711,8 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'blob1', data, )
-        self.bs.create_blob_from_bytes (container_name, 'blob2', data, )
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data)
+        self.bs.create_blob_from_bytes(container_name, 'blob2', data)
 
         # Act
         blobs = list(self.bs.list_blob_names(container_name))
@@ -725,8 +725,8 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'blob1', data, )
-        self.bs.create_blob_from_bytes (container_name, 'blob2', data, )
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data)
+        self.bs.create_blob_from_bytes(container_name, 'blob2', data)
 
         # Act
         blobs = list(self.bs.list_blobs(container_name))
@@ -747,7 +747,7 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'blob1', data, )
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data)
         lease = self.bs.acquire_blob_lease(container_name, 'blob1')
 
         # Act
@@ -768,9 +768,9 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'bloba1', data, )
-        self.bs.create_blob_from_bytes (container_name, 'bloba2', data, )
-        self.bs.create_blob_from_bytes (container_name, 'blobb1', data, )
+        self.bs.create_blob_from_bytes(container_name, 'bloba1', data)
+        self.bs.create_blob_from_bytes(container_name, 'bloba2', data)
+        self.bs.create_blob_from_bytes(container_name, 'blobb1', data)
 
         # Act
         resp = list(self.bs.list_blobs(container_name, 'bloba'))
@@ -786,10 +786,10 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'bloba1', data, )
-        self.bs.create_blob_from_bytes (container_name, 'bloba2', data, )
-        self.bs.create_blob_from_bytes (container_name, 'bloba3', data, )
-        self.bs.create_blob_from_bytes (container_name, 'blobb1', data, )
+        self.bs.create_blob_from_bytes(container_name, 'bloba1', data)
+        self.bs.create_blob_from_bytes(container_name, 'bloba2', data)
+        self.bs.create_blob_from_bytes(container_name, 'bloba3', data)
+        self.bs.create_blob_from_bytes(container_name, 'blobb1', data)
 
         # Act
         blobs = list(self.bs.list_blobs(container_name, num_results=2))
@@ -805,8 +805,8 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'blob1', data, )
-        self.bs.create_blob_from_bytes (container_name, 'blob2', data, )
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data)
+        self.bs.create_blob_from_bytes(container_name, 'blob2', data)
         self.bs.snapshot_blob(container_name, 'blob1')
 
         # Act
@@ -826,10 +826,8 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'blob1', data,
-                         metadata={'number': '1', 'name': 'bob'})
-        self.bs.create_blob_from_bytes (container_name, 'blob2', data,
-                         metadata={'number': '2', 'name': 'car'})
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data, metadata={'number': '1', 'name': 'bob'})
+        self.bs.create_blob_from_bytes(container_name, 'blob2', data, metadata={'number': '2', 'name': 'car'})
         self.bs.snapshot_blob(container_name, 'blob1')
 
         # Act
@@ -852,8 +850,7 @@ class StorageContainerTest(StorageTestCase):
         self.bs.put_block(container_name, 'blob1', b'AAA', '1')
         self.bs.put_block(container_name, 'blob1', b'BBB', '2')
         self.bs.put_block(container_name, 'blob1', b'CCC', '3')
-        self.bs.create_blob_from_bytes (container_name, 'blob2', data,
-                         metadata={'number': '2', 'name': 'car'})
+        self.bs.create_blob_from_bytes(container_name, 'blob2', data, metadata={'number': '2', 'name': 'car'})
 
         # Act
         blobs = list(self.bs.list_blobs(container_name, include=Include.UNCOMMITTED_BLOBS))
@@ -868,8 +865,7 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes(container_name, 'blob1', data,
-                         metadata={'status': 'original'})
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data, metadata={'status': 'original'})
         sourceblob = 'https://{0}.blob.core.windows.net/{1}/{2}'.format(
             self.settings.STORAGE_ACCOUNT_NAME,
             container_name,
@@ -906,10 +902,10 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'a/blob1', data, )
-        self.bs.create_blob_from_bytes (container_name, 'a/blob2', data, )
-        self.bs.create_blob_from_bytes (container_name, 'b/blob1', data, )
-        self.bs.create_blob_from_bytes (container_name, 'blob1', data, )
+        self.bs.create_blob_from_bytes(container_name, 'a/blob1', data)
+        self.bs.create_blob_from_bytes(container_name, 'a/blob2', data)
+        self.bs.create_blob_from_bytes(container_name, 'b/blob1', data)
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data)
 
         # Act
         resp = list(self.bs.list_blobs(container_name, delimiter='/'))
@@ -926,10 +922,8 @@ class StorageContainerTest(StorageTestCase):
         # Arrange
         container_name = self._create_container()
         data = b'hello world'
-        self.bs.create_blob_from_bytes (container_name, 'blob1', data,
-                         metadata={'number': '1', 'name': 'bob'})
-        self.bs.create_blob_from_bytes (container_name, 'blob2', data,
-                         metadata={'number': '2', 'name': 'car'})
+        self.bs.create_blob_from_bytes(container_name, 'blob1', data, metadata={'number': '1', 'name': 'bob'})
+        self.bs.create_blob_from_bytes(container_name, 'blob2', data, metadata={'number': '2', 'name': 'car'})
         self.bs.snapshot_blob(container_name, 'blob1')
 
         # Act

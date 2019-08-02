@@ -1,0 +1,146 @@
+interactions:
+- request:
+    body: AAABBBCCC
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['9']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.0; Darwin 18.6.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [8cbf2f8a-8e76-11e9-b55c-f218981b70f8]
+      x-ms-date: ['Fri, 14 Jun 2019 07:32:23 GMT']
+      x-ms-encryption-algorithm: [AES256]
+      x-ms-encryption-key: [MDEyMzQ1NjcwMTIzNDU2NzAxMjM0NTY3MDEyMzQ1Njc=]
+      x-ms-encryption-key-sha256: [3QFFFpRA5+XANHqwwbT4yXDmrT/2JaLt/FKHjzhOdoE=]
+      x-ms-version: ['2019-02-02']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer770e34/cpk770e34
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Content-MD5: [Yge131eW6WNBDTvEtqQhiw==]
+      Date: ['Fri, 14 Jun 2019 07:32:23 GMT']
+      ETag: ['"0x8D6F09A712A2F6C"']
+      Last-Modified: ['Fri, 14 Jun 2019 07:32:23 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [8cbf2f8a-8e76-11e9-b55c-f218981b70f8]
+      x-ms-content-crc64: [DTngHrtvLQU=]
+      x-ms-encryption-key-sha256: [3QFFFpRA5+XANHqwwbT4yXDmrT/2JaLt/FKHjzhOdoE=]
+      x-ms-request-id: [5ff8dce6-801e-0008-6d83-228834000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2019-02-02']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.0; Darwin 18.6.0)]
+      x-ms-client-request-id: [8d0032dc-8e76-11e9-b55c-f218981b70f8]
+      x-ms-date: ['Fri, 14 Jun 2019 07:32:23 GMT']
+      x-ms-meta-UP: [UPval]
+      x-ms-meta-hello: [world]
+      x-ms-meta-number: ['42']
+      x-ms-version: ['2019-02-02']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer770e34/cpk770e34?comp=metadata
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>BlobUsesCustomerSpecifiedEncryption</Code><Message>The\
+        \ blob is encrypted with customer specified encryption, but it was not provided\
+        \ in the request.\nRequestId:5ff8dcf1-801e-0008-7683-228834000000\nTime:2019-06-14T07:32:24.0882498Z</Message></Error>"}
+    headers:
+      Content-Length: ['301']
+      Content-Type: [application/xml]
+      Date: ['Fri, 14 Jun 2019 07:32:23 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [8d0032dc-8e76-11e9-b55c-f218981b70f8]
+      x-ms-error-code: [BlobUsesCustomerSpecifiedEncryption]
+      x-ms-request-id: [5ff8dcf1-801e-0008-7683-228834000000]
+      x-ms-version: ['2019-02-02']
+    status: {code: 409, message: 'The blob is encrypted with customer specified encryption,
+        but it was not provided in the request.'}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.0; Darwin 18.6.0)]
+      x-ms-client-request-id: [8d6db8d4-8e76-11e9-b55c-f218981b70f8]
+      x-ms-date: ['Fri, 14 Jun 2019 07:32:24 GMT']
+      x-ms-encryption-algorithm: [AES256]
+      x-ms-encryption-key: [MDEyMzQ1NjcwMTIzNDU2NzAxMjM0NTY3MDEyMzQ1Njc=]
+      x-ms-encryption-key-sha256: [3QFFFpRA5+XANHqwwbT4yXDmrT/2JaLt/FKHjzhOdoE=]
+      x-ms-meta-UP: [UPval]
+      x-ms-meta-hello: [world]
+      x-ms-meta-number: ['42']
+      x-ms-version: ['2019-02-02']
+    method: PUT
+    uri: https://storagename.blob.core.windows.net/utcontainer770e34/cpk770e34?comp=metadata
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Date: ['Fri, 14 Jun 2019 07:32:24 GMT']
+      ETag: ['"0x8D6F09A71AA5CE3"']
+      Last-Modified: ['Fri, 14 Jun 2019 07:32:24 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [8d6db8d4-8e76-11e9-b55c-f218981b70f8]
+      x-ms-encryption-key-sha256: [3QFFFpRA5+XANHqwwbT4yXDmrT/2JaLt/FKHjzhOdoE=]
+      x-ms-request-id: [5ff8dd27-801e-0008-2983-228834000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2019-02-02']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.0; Darwin 18.6.0)]
+      x-ms-client-request-id: [8d8d49d8-8e76-11e9-b55c-f218981b70f8]
+      x-ms-date: ['Fri, 14 Jun 2019 07:32:24 GMT']
+      x-ms-encryption-algorithm: [AES256]
+      x-ms-encryption-key: [MDEyMzQ1NjcwMTIzNDU2NzAxMjM0NTY3MDEyMzQ1Njc=]
+      x-ms-encryption-key-sha256: [3QFFFpRA5+XANHqwwbT4yXDmrT/2JaLt/FKHjzhOdoE=]
+      x-ms-version: ['2019-02-02']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer770e34/cpk770e34?comp=metadata
+  response:
+    body: {string: ''}
+    headers:
+      Content-Length: ['0']
+      Date: ['Fri, 14 Jun 2019 07:32:24 GMT']
+      ETag: ['"0x8D6F09A71AA5CE3"']
+      Last-Modified: ['Fri, 14 Jun 2019 07:32:24 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [8d8d49d8-8e76-11e9-b55c-f218981b70f8]
+      x-ms-meta-UP: [UPval]
+      x-ms-meta-hello: [world]
+      x-ms-meta-number: ['42']
+      x-ms-request-id: [5ff8dd37-801e-0008-3983-228834000000]
+      x-ms-version: ['2019-02-02']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.0; Darwin 18.6.0)]
+      x-ms-client-request-id: [8da058f2-8e76-11e9-b55c-f218981b70f8]
+      x-ms-date: ['Fri, 14 Jun 2019 07:32:24 GMT']
+      x-ms-version: ['2019-02-02']
+    method: GET
+    uri: https://storagename.blob.core.windows.net/utcontainer770e34/cpk770e34?comp=metadata
+  response:
+    body: {string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>BlobUsesCustomerSpecifiedEncryption</Code><Message>The\
+        \ blob is encrypted with customer specified encryption, but it was not provided\
+        \ in the request.\nRequestId:5ff8dd44-801e-0008-4383-228834000000\nTime:2019-06-14T07:32:24.7192591Z</Message></Error>"}
+    headers:
+      Content-Length: ['301']
+      Content-Type: [application/xml]
+      Date: ['Fri, 14 Jun 2019 07:32:24 GMT']
+      Server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-client-request-id: [8da058f2-8e76-11e9-b55c-f218981b70f8]
+      x-ms-error-code: [BlobUsesCustomerSpecifiedEncryption]
+      x-ms-request-id: [5ff8dd44-801e-0008-4383-228834000000]
+      x-ms-version: ['2019-02-02']
+    status: {code: 409, message: 'The blob is encrypted with customer specified encryption,
+        but it was not provided in the request.'}
+version: 1

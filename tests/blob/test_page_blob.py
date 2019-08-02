@@ -535,6 +535,9 @@ class StoragePageBlobTest(StorageTestCase):
 
         # Act part 2: put block from url with failing condition
         with self.assertRaises(AzureHttpError):
+            # make sure sufficient time has passed
+            if not self.is_playback():
+                self.sleep(2)
             self.bs.update_page_from_url(self.container_name, dest_blob_name, start_range=0,
                                          end_range=SOURCE_BLOB_SIZE - 1, copy_source_url=self.source_blob_url,
                                          source_range_start=0, if_modified_since=resource_properties.last_modified)
@@ -941,8 +944,7 @@ class StoragePageBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH,
-                                      progress_callback=callback)
+        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, progress_callback=callback)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -1017,8 +1019,7 @@ class StoragePageBlobTest(StorageTestCase):
         blob_size = len(data)
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StoragePageBlobTest.NonSeekableFile(stream)
-            self.bs.create_blob_from_stream(self.container_name, blob_name,
-                                            non_seekable_file, blob_size,
+            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file, blob_size,
                                             max_connections=1)
 
         # Assert
@@ -1043,8 +1044,8 @@ class StoragePageBlobTest(StorageTestCase):
 
         blob_size = len(data)
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            blob_size, progress_callback=callback)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size,
+                                            progress_callback=callback)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
@@ -1088,8 +1089,8 @@ class StoragePageBlobTest(StorageTestCase):
 
         blob_size = len(data) - 512
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            blob_size, progress_callback=callback)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size,
+                                            progress_callback=callback)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
@@ -1102,8 +1103,7 @@ class StoragePageBlobTest(StorageTestCase):
         data = self.get_random_bytes(512)
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
-                                       validate_content=True)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, validate_content=True)
 
         # Assert
 
@@ -1117,8 +1117,7 @@ class StoragePageBlobTest(StorageTestCase):
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
-                                       validate_content=True)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, validate_content=True)
 
         # Assert
 

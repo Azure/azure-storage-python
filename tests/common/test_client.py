@@ -16,7 +16,9 @@ from tests.testcase import (
     StorageTestCase,
     record,
 )
-from azure.storage.common import TokenCredential
+from azure.storage.common import TokenCredential, ExponentialRetry
+from azure.storage.common._constants import _CLIENT_REQUEST_ID_HEADER_NAME
+from azure.common import AzureException
 
 # ------------------------------------------------------------------------------
 SERVICES = {
@@ -388,6 +390,34 @@ class StorageClientTest(StorageTestCase):
         # Assert
         exists = service.exists(name)
         self.assertTrue(exists)
+
+    @record
+    def test_client_request_id_echo(self):
+        # Arrange
+        service = BlockBlobService(self.account_name, self.account_key, is_emulated=self.settings.IS_EMULATED)
+        service.retry = ExponentialRetry(max_attempts=1, initial_backoff=1,).retry
+        name = self.get_resource_name('cont')
+
+        # Act make the client request ID slightly different
+        def callback(response):
+            response.status = 200
+            response.headers[_CLIENT_REQUEST_ID_HEADER_NAME] += '1'
+
+        service.response_callback = callback
+
+        # Assert the client request ID validation is working
+        with self.assertRaises(AzureException):
+            service.exists(name)
+
+        # Act remove the echoed client request ID
+        def callback(response):
+            response.status = 200
+            del response.headers[_CLIENT_REQUEST_ID_HEADER_NAME]
+
+        service.response_callback = callback
+
+        # Assert the client request ID validation is not throwing when the ID is not echoed
+        service.exists(name)
 
 
 # ------------------------------------------------------------------------------

@@ -60,6 +60,24 @@ def _parse_directory(response, name):
     return Directory(name, props, metadata)
 
 
+def _parse_permission_key(response):
+    '''
+    Extracts out file permission key
+    '''
+
+    if response is None or response.headers is None:
+        return None
+    return response.headers.get('x-ms-file-permission-key', None)
+
+
+def _parse_permission(response):
+    '''
+    Extracts out file permission
+    '''
+
+    return response.body
+
+
 def _parse_file(response, name, validate_content=False):
     if response is None:
         return None

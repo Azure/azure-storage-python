@@ -9,7 +9,7 @@ import base64
 import os
 import unittest
 from datetime import datetime, timedelta
-
+import time
 import requests
 from azure.common import (
     AzureHttpError,
@@ -28,6 +28,7 @@ from azure.storage.file import (
     FilePermissions,
     DeleteSnapshot,
 )
+from azure.storage.file.models import SMBProperties, NTFSAttributes
 from tests.testcase import (
     StorageTestCase,
     TestMode,
@@ -172,13 +173,23 @@ class StorageFileTest(StorageTestCase):
         self.assertEqual(res, 'http://' + self.settings.STORAGE_ACCOUNT_NAME
                          + '.file.core.windows.net/vhds/vhd_dir/my.vhd')
 
-    @record
     def test_make_file_url_with_sas(self):
         # Arrange
 
         # Act
         res = self.fs.make_file_url(
             'vhds', 'vhd_dir', 'my.vhd', sas_token='sas')
+
+        # Assert
+        self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME +
+                         '.file.core.windows.net/vhds/vhd_dir/my.vhd?sas')
+
+    def test_make_file_url_with_sas_starts_with_question_mark(self):
+        # Arrange
+
+        # Act
+        res = self.fs.make_file_url(
+            'vhds', 'vhd_dir', 'my.vhd', sas_token='?sas')
 
         # Assert
         self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME +
@@ -194,6 +205,36 @@ class StorageFileTest(StorageTestCase):
 
         # Assert
         self.fs.exists(self.share_name, None, file_name)
+
+    def test_create_file_when_file_permission_is_too_long(self):
+        file_name = self._get_file_reference()
+        permission = str(self.get_random_bytes(8 * 1024 + 1))
+        with self.assertRaises(ValueError):
+            self.fs.create_file(self.share_name, None, file_name, 1024, file_permission=permission)
+
+    @record
+    def test_create_file_with_invalid_file_permission(self):
+        # Arrange
+        file_name = self._get_file_reference()
+
+        with self.assertRaises(AzureHttpError):
+            self.fs.create_file(self.share_name, None, file_name, 1024, file_permission="abcde")
+
+    @record
+    def test_create_file_will_set_all_smb_properties(self):
+        # Arrange
+        file_name = self._get_file_reference()
+
+        # Act
+        self.fs.create_file(self.share_name, None, file_name, 1024)
+        file_properties = self.fs.get_file_properties(self.share_name, None, file_name)
+
+        # Assert
+        self.assertIsNotNone(file_properties)
+        self.assertIsNotNone(file_properties.properties.smb_properties.change_time)
+        self.assertIsNotNone(file_properties.properties.smb_properties.creation_time)
+        self.assertIsNotNone(file_properties.properties.smb_properties.ntfs_attributes)
+        self.assertIsNotNone(file_properties.properties.smb_properties.last_write_time)
 
     @record
     def test_create_file_with_metadata(self):
@@ -287,6 +328,43 @@ class StorageFileTest(StorageTestCase):
         properties = self.fs.get_file_properties(self.share_name, None, file_name).properties
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
         self.assertEqual(properties.content_settings.content_disposition, content_settings.content_disposition)
+
+    @record
+    def test_set_file_properties_with_file_permission(self):
+        # Arrange
+        file_name = self._create_file()
+        properties_on_creation = self.fs.get_file_properties(self.share_name, None, file_name).properties
+
+        content_settings = ContentSettings(
+            content_language='spanish',
+            content_disposition='inline')
+
+        ntfs_attributes = NTFSAttributes(archive=True, temporary=True)
+        last_write_time = properties_on_creation.smb_properties.last_write_time + timedelta(hours=3)
+        creation_time = properties_on_creation.smb_properties.creation_time + timedelta(hours=3)
+        smb_properties = SMBProperties(ntfs_attributes=ntfs_attributes, last_write_time=last_write_time,
+                                       creation_time=creation_time)
+
+        smb_properties.permission_key = \
+            self.fs.get_file_properties(self.share_name, None, file_name).properties.smb_properties.permission_key
+
+        # Act
+        self.fs.set_file_properties(
+            self.share_name,
+            None,
+            file_name,
+            content_settings=content_settings,
+            smb_properties=smb_properties
+        )
+
+        # Assert
+        properties = self.fs.get_file_properties(self.share_name, None, file_name).properties
+        self.assertEquals(properties.content_settings.content_language, content_settings.content_language)
+        self.assertEquals(properties.content_settings.content_disposition, content_settings.content_disposition)
+        self.assertEquals(properties.smb_properties.creation_time, smb_properties.creation_time)
+        self.assertEquals(properties.smb_properties.last_write_time, smb_properties.last_write_time)
+        self.assertIn("Archive", properties.smb_properties.ntfs_attributes)
+        self.assertIn("Temporary", properties.smb_properties.ntfs_attributes)
 
     @record
     def test_get_file_properties(self):
@@ -424,6 +502,105 @@ class StorageFileTest(StorageTestCase):
         self.fs.update_range(self.share_name, None, file_name, data, 0, 511, validate_content=True)
 
         # Assert
+
+    @record
+    def test_update_range_from_file_url_when_source_file_does_not_have_enough_bytes(self):
+        # Arrange
+        source_file_name = 'testfile1'
+
+        self.fs.create_file(self.share_name, None, source_file_name, 2048)
+        data = b'abcdefghijklmnop' * 32
+        self.fs.update_range(self.share_name, None, source_file_name, data, 0, 511)
+
+        file_name = 'filetoupdate'
+        self.fs.create_file(self.share_name, None, file_name, 2048)
+
+        # generate SAS for the source file
+        sas_token_for_source_file = \
+            self.fs.generate_file_shared_access_signature(self.share_name,
+                                                          None,
+                                                          source_file_name,
+                                                          FilePermissions.READ,
+                                                          expiry=datetime.utcnow() + timedelta(hours=1))
+
+        source_file_url = self.fs.make_file_url(self.share_name, None, source_file_name, sas_token=sas_token_for_source_file)
+
+        # Act
+        with self.assertRaises(AzureHttpError):
+            # when the source file has less bytes than 2050, throw exception
+            self.fs.update_range_from_file_url(self.share_name, None, file_name, 0, 2049, source_file_url,
+                                               source_start_range=0)
+
+    @record
+    def test_update_range_from_file_url(self):
+        # Arrange
+        source_file_name = 'testfile'
+
+        self.fs.create_file(self.share_name, None, source_file_name, 2048)
+        data = b'abcdefghijklmnop' * 32
+        self.fs.update_range(self.share_name, None, source_file_name, data, 0, 511)
+
+        file_name = 'filetoupdate'
+        self.fs.create_file(self.share_name, None, file_name, 2048)
+
+        # generate SAS for the source file
+        sas_token_for_source_file = \
+            self.fs.generate_file_shared_access_signature(self.share_name,
+                                                          None,
+                                                          source_file_name,
+                                                          FilePermissions.READ,
+                                                          expiry=datetime.utcnow() + timedelta(hours=1))
+
+        source_file_url = self.fs.make_file_url(self.share_name, None, source_file_name, sas_token=sas_token_for_source_file)
+
+        # Act
+        self.fs.update_range_from_file_url(self.share_name, None, file_name, 0, 511, source_file_url,
+                                           source_start_range=0)
+
+        # Assert
+        # To make sure the range of the file is actually updated
+        file_ranges = self.fs.list_ranges(self.share_name, None, file_name)
+        file = self.fs.get_file_to_bytes(self.share_name, None, file_name, 0, 511)
+        self.assertEquals(1, len(file_ranges))
+        self.assertEquals(0, file_ranges[0].start)
+        self.assertEquals(511, file_ranges[0].end)
+        self.assertEquals(data, file.content)
+
+    @record
+    def test_update_big_range_from_file_url(self):
+        # Arrange
+        source_file_name = 'testfile1'
+        end = 1048575
+
+        self.fs.create_file(self.share_name, None, source_file_name, 1024 * 1024)
+        data = b'abcdefghijklmnop' * 65536
+        self.fs.update_range(self.share_name, None, source_file_name, data, 0, end)
+
+        file_name = 'filetoupdate1'
+        self.fs.create_file(self.share_name, None, file_name, 1024 * 1024)
+
+        # generate SAS for the source file
+        sas_token_for_source_file = \
+            self.fs.generate_file_shared_access_signature(self.share_name,
+                                                          None,
+                                                          source_file_name,
+                                                          FilePermissions.READ,
+                                                          expiry=datetime.utcnow() + timedelta(hours=1))
+
+        source_file_url = self.fs.make_file_url(self.share_name, None, source_file_name, sas_token=sas_token_for_source_file)
+
+        # Act
+        self.fs.update_range_from_file_url(self.share_name, None, file_name, 0, end, source_file_url,
+                                           source_start_range=0)
+
+        # Assert
+        # To make sure the range of the file is actually updated
+        file_ranges = self.fs.list_ranges(self.share_name, None, file_name)
+        file = self.fs.get_file_to_bytes(self.share_name, None, file_name, 0, end)
+        self.assertEquals(1, len(file_ranges))
+        self.assertEquals(0, file_ranges[0].start)
+        self.assertEquals(end, file_ranges[0].end)
+        self.assertEquals(data, file.content)
 
     @record
     def test_clear_range(self):

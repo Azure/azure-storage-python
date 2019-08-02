@@ -6,6 +6,7 @@
 # license information.
 # --------------------------------------------------------------------------
 import os
+import io
 import unittest
 
 from azure.common import AzureHttpError
@@ -240,6 +241,25 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertEqual(block_list.committed_blocks[2].size, 3)
 
     @record
+    def test_put_block_list_with_blob_tier_specified(self):
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        self.bs.put_block(self.container_name, blob_name, b'AAA', '1')
+        self.bs.put_block(self.container_name, blob_name, b'BBB', '2')
+        self.bs.put_block(self.container_name, blob_name, b'CCC', '3')
+        blob_tier = StandardBlobTier.Cool
+
+        # Act
+        block_list = [BlobBlock(id='1'), BlobBlock(id='2'), BlobBlock(id='3')]
+        self.bs.put_block_list(self.container_name, blob_name, block_list,
+                               standard_blob_tier=blob_tier)
+
+        # Assert
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+        self.assertEqual(blob.properties.blob_tier, blob_tier)
+
+    @record
     def test_create_blob_from_bytes_single_put(self):
         # Arrange
         blob_name = self._get_blob_reference()
@@ -332,7 +352,6 @@ class StorageBlockBlobTest(StorageTestCase):
         md = self.bs.get_blob_metadata(self.container_name, blob_name)
         self.assertDictEqual(md, metadata)
 
-
     def test_create_blob_from_bytes_with_properties(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
@@ -346,8 +365,7 @@ class StorageBlockBlobTest(StorageTestCase):
         content_settings=ContentSettings(
                 content_type='image/png',
                 content_language='spanish')
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
-                                       content_settings=content_settings)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, content_settings=content_settings)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -436,6 +454,20 @@ class StorageBlockBlobTest(StorageTestCase):
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
 
+    @record
+    def test_create_blob_from_bytes_with_blob_tier_specified(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = b'hello world'
+        blob_tier = StandardBlobTier.Cool
+
+        # Act
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, standard_blob_tier=blob_tier)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertEqual(blob.properties.blob_tier, blob_tier)
+
     def test_create_blob_from_path(self):
         # parallel tests introduce random order of requests, can only run live
         if TestMode.need_recording_file(self.test_mode):
@@ -490,8 +522,7 @@ class StorageBlockBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH,
-                                      progress_callback=callback)
+        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, progress_callback=callback)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -519,6 +550,65 @@ class StorageBlockBlobTest(StorageTestCase):
         properties = self.bs.get_blob_properties(self.container_name, blob_name).properties
         self.assertEqual(properties.content_settings.content_type, content_settings.content_type)
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
+
+    @record
+    def test_createBlobFromStream_when_short_read_the_whole_stream(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        content = b"Example blob content."
+        stream = ShortReader(io.BytesIO(content), 10)
+        upload_size = len(content)
+
+        # Act
+        self.bs.create_blob_from_stream(self.container_name, blob_name, stream, upload_size)
+
+        # Assert
+        uploaded_blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+        self.assertEquals(content, uploaded_blob.content)
+
+    @record
+    def test_createBlobFromStream_when_short_read_designated_size_of_stream(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        content = b"Example blob content."
+        stream = ShortReader(io.BytesIO(content), 10)
+        upload_size = 15  # designated size blob we want to upload
+
+        # Act
+        self.bs.create_blob_from_stream(self.container_name, blob_name, stream, upload_size)
+
+        # Assert
+        uploaded_blob = self.bs.get_blob_to_bytes(self.container_name, blob_name)
+        self.assertEqual(upload_size, len(uploaded_blob.content))
+
+    def test_createBlobFromStream_when_designated_size_larger_than_the_actual_stream_size(self):
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        content = b"Example blob content."
+        stream = ShortReader(io.BytesIO(content), 10)
+        upload_size = 100  # designated size blob we want to upload
+
+        # Assert
+        with self.assertRaises(ValueError):
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, upload_size)
+
+    @record
+    def test_create_blob_from_path_non_parallel_with_blob_tier_specified(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(100)
+        with open(FILE_PATH, 'wb') as stream:
+            stream.write(data)
+        blob_tier = StandardBlobTier.Cool
+
+        # Act
+        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, max_connections=1,
+                                      standard_blob_tier=blob_tier)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertEqual(blob.properties.blob_tier, blob_tier)
 
     def test_create_blob_from_stream_chunked_upload(self):
         # parallel tests introduce random order of requests, can only run live
@@ -556,8 +646,8 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StorageBlockBlobTest.NonSeekableFile(stream)
-            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file,
-                                            count=blob_size, max_connections=1)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file, count=blob_size,
+                                            max_connections=1)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
@@ -576,8 +666,7 @@ class StorageBlockBlobTest(StorageTestCase):
         # Act
         with open(FILE_PATH, 'rb') as stream:
             non_seekable_file = StorageBlockBlobTest.NonSeekableFile(stream)
-            self.bs.create_blob_from_stream(self.container_name, blob_name,
-                                            non_seekable_file, max_connections=1)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, non_seekable_file, max_connections=1)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -642,8 +731,8 @@ class StorageBlockBlobTest(StorageTestCase):
             content_language='spanish')
         blob_size = len(data) - 301
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            blob_size, content_settings=content_settings)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size,
+                                            content_settings=content_settings)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
@@ -667,14 +756,53 @@ class StorageBlockBlobTest(StorageTestCase):
             content_type='image/png',
             content_language='spanish')
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            content_settings=content_settings)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, content_settings=content_settings)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
         properties = self.bs.get_blob_properties(self.container_name, blob_name).properties
         self.assertEqual(properties.content_settings.content_type, content_settings.content_type)
         self.assertEqual(properties.content_settings.content_language, content_settings.content_language)
+
+    @record
+    def test_create_blob_from_stream_for_small_blob_with_blob_tier_specified(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        # generate a small blob to make sure the blob could be uploaded with put_blob request
+        blob_size = 1024
+        data = self.get_random_bytes(blob_size)
+        with open(FILE_PATH, 'wb') as stream:
+            stream.write(data)
+        blob_tier = StandardBlobTier.Cool
+
+        # Act
+        with open(FILE_PATH, 'rb') as stream:
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, count=blob_size,
+                                            standard_blob_tier=blob_tier)
+
+        # Assert
+        properties = self.bs.get_blob_properties(self.container_name, blob_name).properties
+        self.assertEqual(properties.blob_tier, blob_tier)
+
+    def test_create_blob_from_stream_chunked_upload_with_blob_tier_specified(self):
+        # parallel tests introduce random order of requests, can only run live
+        if TestMode.need_recording_file(self.test_mode):
+            return
+
+        # Arrange
+        blob_name = self._get_blob_reference()
+        data = self.get_random_bytes(LARGE_BLOB_SIZE)
+        with open(FILE_PATH, 'wb') as stream:
+            stream.write(data)
+        blob_tier = StandardBlobTier.Cool
+
+        # Act
+        with open(FILE_PATH, 'rb') as stream:
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, standard_blob_tier=blob_tier)
+        blob_properties = self.bs.get_blob_properties(self.container_name, blob_name).properties
+
+        # Assert
+        self.assertEqual(blob_properties.blob_tier, blob_tier)
 
     @record
     def test_create_blob_from_text(self):
@@ -718,8 +846,7 @@ class StorageBlockBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_text(self.container_name, blob_name, text, 'utf-16',
-                                      progress_callback=callback)
+        self.bs.create_blob_from_text(self.container_name, blob_name, text, 'utf-16', progress_callback=callback)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -745,14 +872,27 @@ class StorageBlockBlobTest(StorageTestCase):
         self.assertBlobEqual(self.container_name, blob_name, encoded_data)
 
     @record
+    def test_create_blob_from_text_with_blob_tier_specified(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        text = u'hello 啊齄丂狛狜 world'
+        blob_tier = StandardBlobTier.Archive
+
+        # Act
+        self.bs.create_blob_from_text(self.container_name, blob_name, text, standard_blob_tier=blob_tier)
+        blob = self.bs.get_blob_properties(self.container_name, blob_name)
+
+        # Assert
+        self.assertEqual(blob.properties.blob_tier, blob_tier)
+
+    @record
     def test_create_blob_with_md5(self):
         # Arrange
         blob_name = self._get_blob_reference()
         data = b'hello world'
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
-                                       validate_content=True)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, validate_content=True)
 
         # Assert
 
@@ -766,11 +906,24 @@ class StorageBlockBlobTest(StorageTestCase):
         data = self.get_random_bytes(LARGE_BLOB_SIZE)
 
         # Act
-        self.bs.create_blob_from_bytes(self.container_name, blob_name, data,
-                                       validate_content=True)
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, data, validate_content=True)
 
         # Assert
 
+
+class ShortReader(io.RawIOBase):
+    """IOBase wrapper to limit read sizes, producing short reads"""
+
+    def __init__(self, reader, max_read_size):
+        self._reader = reader
+        self.max_read_size = max_read_size
+
+    def readinto(self, buf):
+        buf_size = len(buf)
+        read_size = min(buf_size, self.max_read_size)
+        data = self._reader.read(read_size)
+        buf[0:len(data)] = data
+        return len(data)
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     unittest.main()

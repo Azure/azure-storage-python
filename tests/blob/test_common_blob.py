@@ -14,6 +14,9 @@ from azure.common import (
     AzureMissingResourceHttpError,
     AzureException,
 )
+
+from azure.storage.blob.models import BatchDeleteSubRequest, RehydratePriority
+from azure.storage.blob.models import StandardBlobTier
 from azure.storage.common import (
     AccessPolicy,
     ResourceTypes,
@@ -92,8 +95,7 @@ class StorageCommonBlobTest(StorageTestCase):
         if not blob_data:
             blob_data = b'12345678' * 1024 * 1024
         source_blob_name = self._get_blob_reference()
-        self.bs2.create_blob_from_bytes(
-            self.remote_container_name, source_blob_name, blob_data)
+        self.bs2.create_blob_from_bytes(self.remote_container_name, source_blob_name, blob_data)
         return source_blob_name
 
     def _wait_for_async_copy(self, container_name, blob_name):
@@ -311,9 +313,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         data = b'hello world again'
-        resp = self.bs.create_blob_from_bytes (
-            self.container_name, blob_name, data,
-            lease_id=lease_id)
+        resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data, lease_id=lease_id)
 
         # Assert
         self.assertIsNotNone(resp.etag)
@@ -329,8 +329,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         data = b'hello world'
-        resp = self.bs.create_blob_from_bytes(
-            self.container_name, blob_name, data, metadata=metadata)
+        resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data, metadata=metadata)
 
         # Assert
         self.assertIsNotNone(resp.etag)
@@ -367,8 +366,7 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         blob_name = self._create_block_blob()
         snapshot = self.bs.snapshot_blob(self.container_name, blob_name)
-        self.bs.create_blob_from_bytes (self.container_name, blob_name,
-                         b'hello world again', )
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello world again')
 
         # Act
         blob_previous = self.bs.get_blob_to_bytes(
@@ -863,6 +861,131 @@ class StorageCommonBlobTest(StorageTestCase):
         finally:
             self._disable_soft_delete()
 
+    def test_empty_batch_delete(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        with self.assertRaises(ValueError):
+            self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+    def test_batch_delete_257_existing_blob(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        for i in range(0, 257):
+            batch_delete_sub_requests.append(BatchDeleteSubRequest(self.container_name, i))
+
+        with self.assertRaises(ValueError):
+            self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+    @record
+    def test_batch_delete_one_existing_blob(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+        batch_delete_sub_requests = list()
+        batch_delete_sub_requests.append(BatchDeleteSubRequest(self.container_name, blob_name))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        self.assertTrue(resp[0].is_successful)
+
+    @record
+    def test_batch_delete_one_existing_blob_with_non_askii_name(self):
+        # Arrange
+        blob_name = "ööööööööö"
+        self.bs.create_blob_from_bytes(self.container_name, blob_name, self.byte_data)
+        batch_delete_sub_requests = list()
+        batch_delete_sub_requests.append(BatchDeleteSubRequest(self.container_name, blob_name))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        self.assertTrue(resp[0].is_successful)
+
+    @record
+    def test_batch_delete_two_existing_blob_and_their_snapshot(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        for i in range(0, 2):
+            blob_name = self._create_block_blob()
+            self.bs.snapshot_blob(self.container_name, blob_name)
+            batch_delete_sub_requests.append(
+                BatchDeleteSubRequest(self.container_name, blob_name, delete_snapshots=DeleteSnapshot.Include))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
+        self.assertEqual(len(blobs), 0)
+
+    @record
+    def test_batch_delete_ten_existing_blob_and_their_snapshot(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        # For even index, create batch delete sub-request for existing blob and their snapshot
+        # For odd index, create batch delete sub-request for non-existing blob
+        for i in range(0, 10):
+            if i % 2 is 0:
+                blob_name = str(i)
+                self.bs.create_blob_from_text(self.container_name, blob_name, "abc")
+                self.bs.snapshot_blob(self.container_name, blob_name)
+                # self.sleep(20)
+
+                # self.sleep(20)
+            else:
+                blob_name = str(i)
+            batch_delete_sub_requests.append(
+                BatchDeleteSubRequest(self.container_name, blob_name, delete_snapshots=DeleteSnapshot.Include))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        blobs = list(self.bs.list_blobs(self.container_name, include='snapshots'))
+        self.assertEqual(len(blobs), 0)
+        for i in range(0, len(resp)):
+            is_successful = resp[i].is_successful
+            # for every even indexed sub-request, the blob should be deleted successfully
+            if i % 2 is 0:
+                self.assertEquals(is_successful, True, "sub-request" + str(i) + "should be true")
+            # For every odd indexed sub-request, there should be a 404 http status code because the blob is non-existing
+            else:
+                self.assertEquals(is_successful, False, "sub-request" + str(i) + "should be false")
+                self.assertEquals(404, resp[i].http_response.status)
+
+    @record
+    def test_batch_delete_two_non_existing_blobs(self):
+        # Arrange
+        batch_delete_sub_requests = list()
+
+        for i in range(0, 2):
+            blob_name = str(i)
+            batch_delete_sub_requests.append(
+                BatchDeleteSubRequest(self.container_name, blob_name, delete_snapshots=DeleteSnapshot.Include))
+
+        # Act
+        resp = self.bs.batch_delete_blobs(batch_delete_sub_requests)
+
+        # Assert
+        self.assertIsNotNone(resp)
+        self.assertEquals(len(batch_delete_sub_requests), len(resp))
+        self.assertFalse(resp[0].is_successful)
+        self.assertEqual(resp[0].http_response.status, 404)
+
     @record
     def test_copy_blob_with_existing_blob(self):
         # Arrange
@@ -880,6 +1003,50 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertIsNotNone(copy.id)
         copy_blob = self.bs.get_blob_to_bytes(self.container_name, 'blob1copy')
         self.assertEqual(copy_blob.content, self.byte_data)
+
+    @record
+    def test_copy_blob_with_blob_tier_specified(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+
+        # Act
+        sourceblob = '/{0}/{1}/{2}'.format(self.settings.STORAGE_ACCOUNT_NAME,
+                                           self.container_name,
+                                           blob_name)
+        blob_tier = StandardBlobTier.Cool
+        copy = self.bs.copy_blob(self.container_name, 'blob1copy', sourceblob, standard_blob_tier=blob_tier)
+        copy_blob_properties = self.bs.get_blob_properties(self.container_name, 'blob1copy').properties
+
+        # Assert
+        self.assertIsNotNone(copy)
+        self.assertEqual(copy.status, 'success')
+        self.assertIsNotNone(copy.id)
+        self.assertEqual(copy_blob_properties.blob_tier, blob_tier)
+
+    @record
+    def test_copy_blob_with_rehydrate_priority(self):
+        # Arrange
+        blob_name = self._create_block_blob()
+
+        # Act
+        source_blob = '/{0}/{1}/{2}'.format(self.settings.STORAGE_ACCOUNT_NAME,
+                                            self.container_name,
+                                            blob_name)
+        blob_tier = StandardBlobTier.Archive
+        rehydrate_priority = RehydratePriority.High
+        copy = self.bs.copy_blob(self.container_name, 'blob1copy', source_blob,
+                                 standard_blob_tier=blob_tier,
+                                 rehydrate_priority=rehydrate_priority)
+        copy_blob_properties = self.bs.get_blob_properties(self.container_name, 'blob1copy').properties
+        self.bs.set_standard_blob_tier(self.container_name, 'blob1copy', StandardBlobTier.Hot)
+        second_resp = self.bs.get_blob_properties(self.container_name, 'blob1copy').properties
+
+        # Assert
+        self.assertIsNotNone(copy)
+        self.assertEqual(copy.status, 'success')
+        self.assertIsNotNone(copy.id)
+        self.assertEqual(copy_blob_properties.blob_tier, blob_tier)
+        self.assertEqual(second_resp.rehydration_status, 'rehydrate-pending-to-hot')
 
     @record
     def test_copy_blob_async_private_blob(self):
@@ -1013,14 +1180,12 @@ class StorageCommonBlobTest(StorageTestCase):
         # Act
         lease_id = self.bs.acquire_blob_lease(
             self.container_name, blob_name, lease_duration=15)
-        resp2 = self.bs.create_blob_from_bytes (self.container_name, blob_name, b'hello 2',
-                                 lease_id=lease_id)
+        resp2 = self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello 2', lease_id=lease_id)
         self.sleep(15)
 
         # Assert
         with self.assertRaises(AzureHttpError):
-            self.bs.create_blob_from_bytes (self.container_name, blob_name, b'hello 3',
-                             lease_id=lease_id)
+            self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello 3', lease_id=lease_id)
 
     @record
     def test_lease_blob_with_proposed_lease_id(self):
@@ -1061,11 +1226,11 @@ class StorageCommonBlobTest(StorageTestCase):
                                    lease_duration=15)
         lease_time = self.bs.break_blob_lease(self.container_name, blob_name,
                                    lease_break_period=5)
-        blob = self.bs.create_blob_from_bytes (self.container_name, blob_name, b'hello 2', lease_id=lease_id)
+        blob = self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello 2', lease_id=lease_id)
         self.sleep(5)
 
         with self.assertRaises(AzureHttpError):
-            self.bs.create_blob_from_bytes (self.container_name, blob_name, b'hello 3', lease_id=lease_id)
+            self.bs.create_blob_from_bytes(self.container_name, blob_name, b'hello 3', lease_id=lease_id)
 
         # Assert
         self.assertIsNotNone(lease_id)
@@ -1118,8 +1283,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Act
         data = u'hello world啊齄丂狛狜'.encode('utf-8')
-        resp = self.bs.create_blob_from_bytes (
-            self.container_name, blob_name, data, )
+        resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data)
 
         # Assert
         self.assertIsNotNone(resp.etag)
@@ -1144,7 +1308,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = 'blob1.txt'
         container_name = self._get_container_reference()
         self.bs.create_container(container_name, None, 'blob')
-        self.bs.create_blob_from_bytes (container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes(container_name, blob_name, data)
 
         # Act
         url = self.bs.make_blob_url(container_name, blob_name)
@@ -1161,7 +1325,7 @@ class StorageCommonBlobTest(StorageTestCase):
         blob_name = 'blob1.txt'
         container_name = self._get_container_reference()
         self.bs.create_container(container_name, None, 'blob')
-        self.bs.create_blob_from_bytes (container_name, blob_name, data, )
+        self.bs.create_blob_from_bytes(container_name, blob_name, data)
 
         # Act
         service = BlockBlobService(
@@ -1179,7 +1343,7 @@ class StorageCommonBlobTest(StorageTestCase):
         token_credential = TokenCredential(self.generate_oauth_token())
 
         # Action 1: make sure token works
-        service = BlockBlobService(self.settings.OAUTH_STORAGE_ACCOUNT_NAME, token_credential=token_credential)
+        service = BlockBlobService(self.settings.STORAGE_ACCOUNT_NAME, token_credential=token_credential)
         result = service.exists("test")
         self.assertIsNotNone(result)
 

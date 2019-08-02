@@ -556,7 +556,7 @@ class StorageQueueTest(StorageTestCase):
         token_credential = TokenCredential(self.generate_oauth_token())
 
         # Action 1: make sure token works
-        service = QueueService(self.settings.OAUTH_STORAGE_ACCOUNT_NAME, token_credential=token_credential)
+        service = QueueService(self.settings.STORAGE_ACCOUNT_NAME, token_credential=token_credential)
         queues = list(service.list_queues())
         self.assertIsNotNone(queues)
 

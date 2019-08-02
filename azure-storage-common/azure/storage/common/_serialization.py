@@ -34,6 +34,7 @@ from .models import (
 from ._common_conversion import (
     _str,
 )
+from ._constants import _CLIENT_REQUEST_ID_HEADER_NAME
 
 
 def _to_utc_datetime(value):
@@ -62,7 +63,7 @@ def _update_request(request, x_ms_version, user_agent_string):
     # append addtional headers based on the service
     request.headers['x-ms-version'] = x_ms_version
     request.headers['User-Agent'] = user_agent_string
-    request.headers['x-ms-client-request-id'] = str(uuid.uuid1())
+    request.headers[_CLIENT_REQUEST_ID_HEADER_NAME] = str(uuid.uuid1())
 
     # If the host has a path component (ex local storage), move it
     path = request.host.split('/', 1)

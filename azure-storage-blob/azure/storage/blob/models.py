@@ -112,6 +112,9 @@ class BlobProperties(object):
         concurrent writes.
     :ivar bool server_encrypted:
         Set to true if the blob is encrypted on the server.
+    :ivar str encryption_key_sha256:
+        The server will echo the SHA256 of the customer-provided encryption key
+        to validate the key used in the operation.
     :ivar ~azure.storage.blob.models.CopyProperties copy:
         Stores all the copy properties for the blob.
     :ivar ~azure.storage.blob.models.ContentSettings content_settings:
@@ -147,6 +150,7 @@ class BlobProperties(object):
         self.append_blob_committed_block_count = None
         self.page_blob_sequence_number = None
         self.server_encrypted = None
+        self.encryption_key_sha256 = None
         self.copy = CopyProperties()
         self.content_settings = ContentSettings()
         self.lease = LeaseProperties()
@@ -368,11 +372,25 @@ class ResourceProperties(object):
         has been modified.
     :ivar datetime last_modified:
         Datetime for last time resource was modified.
+    :ivar bool server_encrypted:
+        The value is set to true if the contents of the request are successfully
+        encrypted using the specified algorithm.
+    :ivar str encryption_key_sha256:
+        The server will echo the SHA256 of the customer-provided encryption key
+        to validate the key used in the operation.
     '''
 
     def __init__(self):
         self.last_modified = None
         self.etag = None
+        self.request_server_encrypted = None
+        self.encryption_key_sha256 = None
+
+    def clone(self, src):
+        self.last_modified = src.last_modified
+        self.etag = src.etag
+        self.request_server_encrypted = src.request_server_encrypted
+        self.encryption_key_sha256 = src.encryption_key_sha256
 
 
 class AppendBlockProperties(ResourceProperties):
@@ -776,6 +794,18 @@ class StandardBlobTier(object):
     ''' Hot '''
 
 
+class RehydratePriority(object):
+    """
+    Indicates the priority with which to rehydrate an archived blob
+    """
+
+    Standard = 'Standard'
+    ''' The rehydrate priority is standard. '''
+
+    High = 'High'
+    ''' The rehydrate priority is high. '''
+
+
 class AccountInformation(object):
     """
     Holds information related to the storage account.
@@ -823,3 +853,125 @@ class UserDelegationKey(object):
         self.signed_service = None
         self.signed_version = None
         self.value = None
+
+
+class BatchDeleteSubRequest(object):
+    """
+    Represents one request in batch of multiple blob delete requests
+
+    Organizes HttpRequest objects together for batch REST operations to a single host endpoint.
+
+    :ivar str container_name:
+            Name of existing container.
+    :ivar str blob_name:
+            Name of existing blob.
+    :ivar str snapshot:
+            The snapshot parameter is an opaque DateTime value that,
+            when present, specifies the blob snapshot to delete.
+    :ivar str lease_id:
+            Required if the blob has an active lease.
+    :ivar ~azure.storage.blob.models.DeleteSnapshot delete_snapshots:
+            Required if the blob has associated snapshots.
+    :ivar datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+    :ivar datetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+    :ivar str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+    :ivar str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified. Specify the wildcard character (*) to perform
+            the operation only if the resource does not exist, and fail the
+            operation if it does exist.
+    """
+    def __init__(self, container_name, blob_name, snapshot=None,
+                 lease_id=None, delete_snapshots=None,
+                 if_modified_since=None, if_unmodified_since=None,
+                 if_match=None, if_none_match=None):
+        self.container_name = container_name
+        self.blob_name = blob_name
+        self.snapshot = snapshot
+        self.lease_id = lease_id
+        self.delete_snapshots = delete_snapshots
+        self.if_modified_since = if_modified_since
+        self.if_unmodified_since = if_unmodified_since
+        self.if_match = if_match
+        self.if_none_match = if_none_match
+
+
+class BatchSubResponse(object):
+    """
+    Sub-response parsed from batch http sub-response
+
+    Organizes batch sub-response info and batch sub-request together for easier processing
+
+    :ivar bool is_successful:
+        Represent if the batch sub-request is successful
+    :ivar :class:`~azure.storage.common._http.HTTPResponse` http_response:
+        Parsed batch sub-response, in HTTPResponse format
+    :ivar batch_sub_request:
+        Represent the batch sub-request corresponding to the batch sub-response.
+        This could be any type of sub-request. One example is class: ~azure.storage.blob.models.BatchDeleteSubRequest
+    """
+    def __init__(self, is_successful, http_response, batch_sub_request):
+        self.is_successful = is_successful
+        self.http_response = http_response
+        self.batch_sub_request = batch_sub_request
+
+
+class BatchSetBlobTierSubRequest(object):
+    """
+    Represents one request in batch of multiple set block blob tier requests
+
+    Organizes HttpRequest objects together for batch REST operations to a single host endpoint.
+
+    :ivar str container_name:
+        Name of existing container.
+    :ivar str blob_name:
+        Name of existing blob.
+    :ivar StandardBlobTier standard_blob_tier:
+        A standard blob tier value to set the blob to. For this version of the library,
+        this is only applicable to block blobs on standard storage accounts.
+    """
+    def __init__(self, container_name, blob_name, standard_blob_tier, rehydrate_priority=None):
+        self.container_name = container_name
+        self.blob_name = blob_name
+        self.standard_blob_tier = standard_blob_tier
+        self.rehydrate_priority = rehydrate_priority
+
+class CustomerProvidedEncryptionKey(object):
+    """
+    All data in Azure Storage is encrypted at-rest using an account-level encryption key.
+    In versions 2018-06-17 and newer, you can manage the key used to encrypt blob contents
+    and application metadata per-blob by providing an AES-256 encryption key in requests to the storage service.
+
+    When you use a customer-provided key, Azure Storage does not manage or persist your key.
+    When writing data to a blob, the provided key is used to encrypt your data before writing it to disk.
+    A SHA-256 hash of the encryption key is written alongside the blob contents,
+    and is used to verify that all subsequent operations against the blob use the same encryption key.
+    This hash cannot be used to retrieve the encryption key or decrypt the contents of the blob.
+    When reading a blob, the provided key is used to decrypt your data after reading it from disk.
+    In both cases, the provided encryption key is securely discarded
+    as soon as the encryption or decryption process completes.
+
+    :ivar str key_value:
+        Base64-encoded AES-256 encryption key value.
+    :ivar str key_hash:
+        Base64-encoded SHA256 of the encryption key.
+    :ivar str algorithm:
+        Specifies the algorithm to use when encrypting data using the given key. Must be AES256.
+    """
+    def __init__(self, key_value, key_hash):
+        self.key_value = key_value
+        self.key_hash = key_hash
+        self.algorithm = 'AES256'

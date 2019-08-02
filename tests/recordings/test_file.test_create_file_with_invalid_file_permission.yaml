@@ -1,0 +1,55 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.3; Windows 10)
+      x-ms-client-request-id:
+      - d3579c06-a732-11e9-b3c4-001a7dda7113
+      x-ms-content-length:
+      - '1024'
+      x-ms-date:
+      - Mon, 15 Jul 2019 19:00:34 GMT
+      x-ms-file-attributes:
+      - Archive
+      x-ms-file-creation-time:
+      - '2019-07-15T19:00:34.7448320Z'
+      x-ms-file-last-write-time:
+      - '2019-07-15T19:00:34.7448320Z'
+      x-ms-file-permission:
+      - abcde
+      x-ms-type:
+      - file
+      x-ms-version:
+      - '2019-02-02'
+    method: PUT
+    uri: https://storagename.file.core.windows.net/utshare725b1688/file725b1688
+  response:
+    body:
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><Error><Code>FileInvalidPermission</Code><Message>The
+        specified file permission is not valid.\nRequestId:f044e5f5-201a-0011-173f-3b088f000000\nTime:2019-07-15T19:00:35.0308204Z</Message></Error>"
+    headers:
+      Content-Length:
+      - '233'
+      Content-Type:
+      - application/xml
+      Date:
+      - Mon, 15 Jul 2019 19:00:34 GMT
+      Server:
+      - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
+      x-ms-client-request-id:
+      - d3579c06-a732-11e9-b3c4-001a7dda7113
+      x-ms-error-code:
+      - FileInvalidPermission
+      x-ms-request-id:
+      - f044e5f5-201a-0011-173f-3b088f000000
+      x-ms-version:
+      - '2019-02-02'
+    status:
+      code: 400
+      message: The specified file permission is not valid.
+version: 1
