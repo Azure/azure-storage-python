@@ -5,6 +5,7 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # --------------------------------------------------------------------------
+from datetime import datetime, timedelta
 import unittest
 
 from azure.common import (
@@ -16,6 +17,7 @@ from azure.storage.file import (
     FileService,
     DeleteSnapshot,
 )
+from azure.storage.file.models import SMBProperties
 from tests.testcase import (
     StorageTestCase,
     record,
@@ -227,6 +229,52 @@ class StorageDirectoryTest(StorageTestCase):
 
         # Assert
         self.assertDictEqual(md, metadata)
+
+    @record
+    def test_set_directory_properties_with_empty_smb_properties(self):
+        # Arrange
+        self.fs.create_directory(self.share_name, 'dir1')
+        directory_properties_on_creation = self.fs.get_directory_properties(self.share_name, 'dir1').properties
+
+        # Act
+        self.fs.set_directory_properties(self.share_name, 'dir1')
+        directory_properties = self.fs.get_directory_properties(self.share_name, 'dir1').properties
+
+        # Assert
+        # Make sure set empty smb_properties doesn't change smb_properties
+        self.assertEquals(directory_properties_on_creation.smb_properties.creation_time,
+                          directory_properties.smb_properties.creation_time)
+        self.assertEquals(directory_properties_on_creation.smb_properties.last_write_time,
+                          directory_properties.smb_properties.last_write_time)
+        self.assertEquals(directory_properties_on_creation.smb_properties.permission_key,
+                          directory_properties.smb_properties.permission_key)
+
+    @record
+    def test_set_directory_properties_with_file_permission_key(self):
+        # Arrange
+        self.fs.create_directory(self.share_name, 'dir1')
+
+        smb_properties_on_creation = self.fs.get_directory_properties(self.share_name, 'dir1')\
+            .properties.smb_properties
+        permission_key = smb_properties_on_creation.permission_key
+        last_write_time = smb_properties_on_creation.last_write_time
+        creation_time = smb_properties_on_creation.creation_time
+
+        new_last_write_time = last_write_time + timedelta(hours=1)
+        new_creation_time = creation_time + timedelta(hours=1)
+        smb_properties = SMBProperties(ntfs_attributes='None', permission_key=permission_key,
+                                       last_write_time=new_last_write_time, creation_time=new_creation_time)
+        self.fs.create_directory(self.share_name, 'dir1')
+
+        # Act
+        self.fs.set_directory_properties(self.share_name, 'dir1', smb_properties=smb_properties)
+        directory_properties = self.fs.get_directory_properties(self.share_name, 'dir1').properties
+
+        # Assert
+        self.assertIsNotNone(directory_properties)
+        self.assertIsNotNone(directory_properties.smb_properties)
+        self.assertEquals(directory_properties.smb_properties.creation_time, smb_properties.creation_time)
+        self.assertEquals(directory_properties.smb_properties.last_write_time, smb_properties.last_write_time)
 
     @record
     def test_delete_directory_with_existing_share(self):

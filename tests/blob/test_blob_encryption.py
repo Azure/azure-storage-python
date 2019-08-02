@@ -329,8 +329,8 @@ class StorageBlobEncryptionTest(StorageTestCase):
         blob_name = self._get_blob_reference('block_blob')
 
         # Act
-        self.bbs.create_blob_from_bytes(self.container_name, blob_name, content, max_connections=3,
-                                        count=self.bbs.MAX_SINGLE_PUT_SIZE+53)
+        self.bbs.create_blob_from_bytes(self.container_name, blob_name, content,
+                                        count=self.bbs.MAX_SINGLE_PUT_SIZE + 53, max_connections=3)
         blob = self.bbs.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert
@@ -364,8 +364,7 @@ class StorageBlobEncryptionTest(StorageTestCase):
 
         # Act
         self.bbs.create_blob_from_bytes(self.container_name, blob_name, content, index=2,
-                                        count=self.bbs.MAX_SINGLE_PUT_SIZE + 5,
-                                        max_connections=1)
+                                        count=self.bbs.MAX_SINGLE_PUT_SIZE + 5, max_connections=1)
         blob = self.bbs.get_blob_to_bytes(self.container_name, blob_name)
 
         # Assert

@@ -218,8 +218,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
         def callback(current, total):
             progress.append((current, total))
 
-        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH,
-                                      progress_callback=callback)
+        self.bs.create_blob_from_path(self.container_name, blob_name, FILE_PATH, progress_callback=callback)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)
@@ -326,8 +325,8 @@ class StorageLargeBlockBlobTest(StorageTestCase):
             content_language='spanish')
         blob_size = len(data) - 301
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            blob_size, content_settings=content_settings)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, blob_size,
+                                            content_settings=content_settings)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data[:blob_size])
@@ -351,8 +350,7 @@ class StorageLargeBlockBlobTest(StorageTestCase):
             content_type='image/png',
             content_language='spanish')
         with open(FILE_PATH, 'rb') as stream:
-            self.bs.create_blob_from_stream(self.container_name, blob_name, stream,
-                                            content_settings=content_settings)
+            self.bs.create_blob_from_stream(self.container_name, blob_name, stream, content_settings=content_settings)
 
         # Assert
         self.assertBlobEqual(self.container_name, blob_name, data)

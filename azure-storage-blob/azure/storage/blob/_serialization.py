@@ -5,6 +5,7 @@
 # --------------------------------------------------------------------------
 from xml.sax.saxutils import escape as xml_escape
 from datetime import date
+
 try:
     from xml.etree import cElementTree as ETree
 except ImportError:
@@ -28,6 +29,9 @@ from ._error import (
 )
 from io import BytesIO
 
+_REQUEST_DELIMITER_PREFIX = "batch_"
+_HTTP1_1_IDENTIFIER = "HTTP/1.1"
+_HTTP_LINE_ENDING = "\r\n"
 
 def _get_path(container_name=None, blob_name=None):
     '''
@@ -46,6 +50,18 @@ def _get_path(container_name=None, blob_name=None):
         return '/{0}'.format(_str(container_name))
     else:
         return '/'
+
+
+def _validate_and_add_cpk_headers(request, encryption_key, protocol):
+    if encryption_key is None:
+        return
+
+    if protocol.lower() != 'https':
+        raise ValueError("Customer provided encryption key must be used over HTTPS.")
+
+    request.headers['x-ms-encryption-key'] = encryption_key.key_value
+    request.headers['x-ms-encryption-key-sha256'] = encryption_key.key_hash
+    request.headers['x-ms-encryption-algorithm'] = encryption_key.algorithm
 
 
 def _validate_and_format_range_headers(request, start_range, end_range, start_range_required=True,
@@ -151,3 +167,138 @@ def _convert_delegation_key_info_to_xml(start_time, expiry_time):
 
     # return xml value
     return output
+
+
+def _serialize_batch_body(requests, batch_id):
+    """
+    --<delimiter>
+    <subrequest>
+    --<delimiter>
+    <subrequest>    (repeated as needed)
+    --<delimiter>--
+
+    Serializes the requests in this batch to a single HTTP mixed/multipart body.
+
+    :param list(class:`~azure.storage.common._http.HTTPRequest`) requests:
+        a list of sub-request for the batch request
+    :param str batch_id:
+        to be embedded in batch sub-request delimiter
+    :return: The body bytes for this batch.
+    """
+
+    if requests is None or len(requests) is 0:
+        raise ValueError('Please provide sub-request(s) for this batch request')
+
+    delimiter_bytes = (_get_batch_request_delimiter(batch_id, True, False) + _HTTP_LINE_ENDING).encode('utf-8')
+    newline_bytes = _HTTP_LINE_ENDING.encode('utf-8')
+    batch_body = list()
+
+    for request in requests:
+        batch_body.append(delimiter_bytes)
+        batch_body.append(_make_body_from_sub_request(request))
+        batch_body.append(newline_bytes)
+
+    batch_body.append(_get_batch_request_delimiter(batch_id, True, True).encode('utf-8'))
+    # final line of body MUST have \r\n at the end, or it will not be properly read by the service
+    batch_body.append(newline_bytes)
+
+    return bytes().join(batch_body)
+
+
+def _get_batch_request_delimiter(batch_id, is_prepend_dashes=False, is_append_dashes=False):
+    """
+    Gets the delimiter used for this batch request's mixed/multipart HTTP format.
+
+    :param batch_id Randomly generated id
+    :param is_prepend_dashes Whether to include the starting dashes. Used in the body, but non on defining the delimiter.
+    :param is_append_dashes  Whether to include the ending dashes. Used in the body on the closing delimiter only.
+    :return: The delimiter, WITHOUT a trailing newline.
+    """
+
+    prepend_dashes = '--' if is_prepend_dashes else ''
+    append_dashes = '--' if is_append_dashes else ''
+
+    return prepend_dashes + _REQUEST_DELIMITER_PREFIX + batch_id + append_dashes
+
+
+def _make_body_from_sub_request(sub_request):
+    """
+     Content-Type: application/http
+     Content-ID: <sequential int ID>
+     Content-Transfer-Encoding: <value> (if present)
+
+     <verb> <path><query> HTTP/<version>
+     <header key>: <header value> (repeated as necessary)
+     Content-Length: <value>
+     (newline if content length > 0)
+     <body> (if content length > 0)
+
+     Serializes an http request.
+
+     :param :class:`~azure.storage.common._http.HTTPRequest` sub_request Request to serialize.
+     :return: The serialized sub-request in bytes
+     """
+
+    # put the sub-request's headers into a list for efficient str concatenation
+    sub_request_body = list()
+
+    # get headers for ease of manipulation; remove headers as they are used
+    headers = sub_request.headers
+
+    # append opening headers
+    sub_request_body.append("Content-Type: application/http")
+    sub_request_body.append(_HTTP_LINE_ENDING)
+
+    sub_request_body.append("Content-ID: ")
+    sub_request_body.append(headers.pop("Content-ID", ""))
+    sub_request_body.append(_HTTP_LINE_ENDING)
+
+    sub_request_body.append("Content-Transfer-Encoding: ")
+    sub_request_body.append(headers.pop("Content-Transfer-Encoding", ""))
+    sub_request_body.append(_HTTP_LINE_ENDING)
+
+    # append blank line
+    sub_request_body.append(_HTTP_LINE_ENDING)
+
+    # append HTTP verb and path and query and HTTP version
+    sub_request_body.append(sub_request.method)
+    sub_request_body.append(' ')
+    sub_request_body.append(sub_request.path)
+    sub_request_body.append("" if sub_request.query is None else '?' + _serialize_query(sub_request.query))
+    sub_request_body.append(' ')
+    sub_request_body.append(_HTTP1_1_IDENTIFIER)
+    sub_request_body.append(_HTTP_LINE_ENDING)
+
+    # append remaining headers (this will set the Content-Length, as it was set on `sub-request`)
+    for header_name, header_value in headers.items():
+        if header_value is not None:
+            sub_request_body.append(header_name)
+            sub_request_body.append(": ")
+            sub_request_body.append(header_value)
+            sub_request_body.append(_HTTP_LINE_ENDING)
+
+    # finished if no body
+    if sub_request.body is None:
+        return sub_request_body.encode('utf-8')
+
+    # append blank line
+    sub_request_body.append(_HTTP_LINE_ENDING)
+
+    sub_request_body.append(sub_request.body)
+
+    return ''.join(sub_request_body).encode('utf-8')
+
+
+def _serialize_query(query):
+    serialized_query = []
+    for query_key, query_value in query.items():
+        if query_value is not None:
+            serialized_query.append(query_key)
+            serialized_query.append("=")
+            serialized_query.append(query_value)
+            serialized_query.append("&")
+
+    if len(serialized_query) is not 0:
+        del serialized_query[-1]
+
+    return ''.join(serialized_query)

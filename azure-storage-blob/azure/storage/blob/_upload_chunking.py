@@ -15,6 +15,7 @@ from azure.storage.common._serialization import (
     _get_data_bytes_only,
     _len_plus
 )
+from ._deserialization import _parse_base_properties
 from ._constants import (
     _LARGE_BLOB_UPLOAD_MAX_READ_BUFFER_SIZE
 )
@@ -28,7 +29,7 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
                         blob_size, block_size, stream, max_connections,
                         progress_callback, validate_content, lease_id, uploader_class,
                         maxsize_condition=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
-                        if_none_match=None, timeout=None,
+                        if_none_match=None, timeout=None, cpk=None,
                         content_encryption_key=None, initialization_vector=None, resource_properties=None):
     encryptor, padder = _get_blob_encryptor_and_padder(content_encryption_key, initialization_vector,
                                                        uploader_class is not _PageBlobChunkUploader)
@@ -46,7 +47,8 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
         lease_id,
         timeout,
         encryptor,
-        padder
+        padder,
+        cpk,
     )
 
     uploader.maxsize_condition = maxsize_condition
@@ -100,9 +102,8 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
     else:
         range_ids = [uploader.process_chunk(result) for result in uploader.get_chunk_streams()]
 
-    if resource_properties:
-        resource_properties.last_modified = uploader.last_modified
-        resource_properties.etag = uploader.etag
+    if resource_properties and uploader.response_properties is not None:
+        resource_properties.clone(uploader.response_properties)
 
     return range_ids
 
@@ -110,7 +111,7 @@ def _upload_blob_chunks(blob_service, container_name, blob_name,
 def _upload_blob_substream_blocks(blob_service, container_name, blob_name,
                                   blob_size, block_size, stream, max_connections,
                                   progress_callback, validate_content, lease_id, uploader_class,
-                                  maxsize_condition=None, if_match=None, timeout=None):
+                                  maxsize_condition=None, if_match=None, timeout=None, cpk=None):
     uploader = uploader_class(
         blob_service,
         container_name,
@@ -124,7 +125,8 @@ def _upload_blob_substream_blocks(blob_service, container_name, blob_name,
         lease_id,
         timeout,
         None,
-        None
+        None,
+        cpk,
     )
 
     uploader.maxsize_condition = maxsize_condition
@@ -149,7 +151,7 @@ def _upload_blob_substream_blocks(blob_service, container_name, blob_name,
 class _BlobChunkUploader(object):
     def __init__(self, blob_service, container_name, blob_name, blob_size,
                  chunk_size, stream, parallel, progress_callback,
-                 validate_content, lease_id, timeout, encryptor, padder):
+                 validate_content, lease_id, timeout, encryptor, padder, cpk):
         self.blob_service = blob_service
         self.container_name = container_name
         self.blob_name = blob_name
@@ -167,8 +169,8 @@ class _BlobChunkUploader(object):
         self.timeout = timeout
         self.encryptor = encryptor
         self.padder = padder
-        self.last_modified = None
-        self.etag = None
+        self.response_properties = None
+        self.cpk = cpk
 
     def get_chunk_streams(self):
         index = 0
@@ -253,8 +255,7 @@ class _BlobChunkUploader(object):
         return range_id
 
     def set_response_properties(self, resp):
-        self.etag = resp.etag
-        self.last_modified = resp.last_modified
+        self.response_properties = resp
 
 
 class _BlockBlobChunkUploader(_BlobChunkUploader):
@@ -268,6 +269,7 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
             validate_content=self.validate_content,
             lease_id=self.lease_id,
             timeout=self.timeout,
+            cpk=self.cpk,
         )
         return BlobBlock(block_id)
 
@@ -281,6 +283,7 @@ class _BlockBlobChunkUploader(_BlobChunkUploader):
                 validate_content=self.validate_content,
                 lease_id=self.lease_id,
                 timeout=self.timeout,
+                cpk=self.cpk,
             )
         finally:
             block_stream.close()
@@ -310,6 +313,7 @@ class _PageBlobChunkUploader(_BlobChunkUploader):
                 lease_id=self.lease_id,
                 if_match=self.if_match,
                 timeout=self.timeout,
+                cpk=self.cpk,
             )
 
             if not self.parallel:
@@ -332,7 +336,8 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 if_modified_since=self.if_modified_since,
                 if_unmodified_since=self.if_unmodified_since,
                 if_match=self.if_match,
-                if_none_match=self.if_none_match
+                if_none_match=self.if_none_match,
+                cpk=self.cpk,
             )
 
             self.current_length = resp.append_offset
@@ -346,6 +351,7 @@ class _AppendBlobChunkUploader(_BlobChunkUploader):
                 maxsize_condition=self.maxsize_condition,
                 appendpos_condition=self.current_length + chunk_offset,
                 timeout=self.timeout,
+                cpk=self.cpk,
             )
 
         self.set_response_properties(resp)

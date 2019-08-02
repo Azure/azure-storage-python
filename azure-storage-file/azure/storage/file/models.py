@@ -85,12 +85,15 @@ class DirectoryProperties(object):
         conditionally.
     :ivar bool server_encrypted:
         Set to true if the directory metadata is encrypted on the server.
+    :ivar ~azure.storage.file.models.SMBProperties smb_properties:
+        SMB related file properties
     '''
 
     def __init__(self):
         self.last_modified = None
         self.etag = None
         self.server_encrypted = None
+        self.smb_properties = SMBProperties()
 
 
 class File(object):
@@ -139,8 +142,12 @@ class FileProperties(object):
         Stores all the content settings for the file.
     :ivar ~azure.storage.file.models.CopyProperties copy:
         Stores all the copy properties for the file.
-    ivar bool server_encrypted:
+    :ivar bool server_encrypted:
         Set to true if the file data and application metadata are completely encrypted.
+    :ivar ~azure.storage.file.models.SMBProperties smb_properties:
+        SMB related file properties
+    :ivar ~azure.storage.file.models.LeaseProperties lease:
+        Stores all the lease information for the file.
     '''
 
     def __init__(self):
@@ -151,6 +158,73 @@ class FileProperties(object):
         self.content_settings = ContentSettings()
         self.copy = CopyProperties()
         self.server_encrypted = None
+        self.smb_properties = SMBProperties()
+        self.lease = LeaseProperties()
+
+
+class SMBProperties(object):
+    """
+    SMB related properties to get/set for for file/directory
+
+    :ivar str or :class:`~azure.storage.file.models.NTFSAttributes` ntfs_attributes:
+        The file system attributes for files and directories.
+        If not set, indicates preservation of existing values.
+        Here is an example for when the var type is str: 'Temporary|Archive'
+    :ivar str or datetime creation_time:
+        When the File or Directory was created.
+        If it is a string type, time should have 7 decimal digits, eg. '2019-07-07T02:52:46.5540162Z'
+    :ivar str or datetime last_write_time:
+        When the File or Directory was last modified. eg. '2019-07-07T02:52:46.5540162Z'
+        If it is a string type, time should have 7 decimal digits, eg. '2019-07-07T02:52:46.5540162Z'
+    :ivar str permission_key:
+        The file's File Permission Key
+    :ivar str change_time:
+        When the File was last changed. This is what will be returned by service. Users don't need to specify.
+    :ivar str file_id:
+        The Id of this directory. This is what will be returned by service. Users don't need to specify.
+    :ivar str parent_id:
+        The Id of this directory's parent. This is what will be returned by service. Users don't need to specify.
+    """
+    def __init__(self, ntfs_attributes=None, creation_time=None, last_write_time=None, permission_key=None):
+        self.ntfs_attributes = ntfs_attributes
+        self.creation_time = creation_time
+        self.last_write_time = last_write_time
+        self.permission_key = permission_key
+        self.change_time = None
+        self.file_id = None
+        self.parent_id = None
+
+    def _to_request_headers(self):
+        creation_time = self.creation_time if isinstance(self.creation_time, str) \
+            else self.creation_time.isoformat() + '0Z'
+        last_write_time = self.last_write_time if isinstance(self.last_write_time, str) \
+            else self.last_write_time.isoformat() + '0Z'
+        return {
+            'x-ms-file-attributes': _to_str(self.ntfs_attributes),
+            'x-ms-file-creation-time': creation_time,
+            'x-ms-file-last-write-time': last_write_time,
+            'x-ms-file-permission-key': _to_str(self.permission_key)
+        }
+
+
+class LeaseProperties(object):
+    '''
+    File Lease Properties.
+
+    :ivar str status:
+        The lease status of the file.
+        Possible values: locked|unlocked
+    :ivar str state:
+        Lease state of the file.
+        Possible values: available|leased|expired|breaking|broken
+    :ivar str duration:
+        When a file is leased, specifies whether the lease is of infinite or fixed duration.
+    '''
+
+    def __init__(self):
+        self.status = None
+        self.state = None
+        self.duration = None
 
 
 class Handle(object):
@@ -443,3 +517,77 @@ SharePermissions.DELETE = SharePermissions(delete=True)
 SharePermissions.LIST = SharePermissions(list=True)
 SharePermissions.READ = SharePermissions(read=True)
 SharePermissions.WRITE = SharePermissions(write=True)
+
+
+class NTFSAttributes(object):
+    """
+    Valid set of attributes to set for file or directory.
+    To set attribute for directory, 'Directory' should always be enabled except setting 'None' for directory.
+
+    :ivar bool read_only:
+        Enable/disable 'ReadOnly' attribute for DIRECTORY or FILE
+    :ivar bool hidden:
+        Enable/disable 'Hidden' attribute for DIRECTORY or FILE
+    :ivar bool system:
+        Enable/disable 'System' attribute for DIRECTORY or FILE
+    :ivar bool none:
+        Enable/disable 'None' attribute for DIRECTORY or FILE to clear all attributes of FILE/DIRECTORY
+    :ivar bool directory:
+        Enable/disable 'Directory' attribute for DIRECTORY
+    :ivar bool archive:
+        Enable/disable 'Archive' attribute for DIRECTORY or FILE
+    :ivar bool temporary:
+        Enable/disable 'Temporary' attribute for FILE
+    :ivar bool offline:
+        Enable/disable 'Offline' attribute for DIRECTORY or FILE
+    :ivar bool not_content_indexed:
+        Enable/disable 'NotContentIndexed' attribute for DIRECTORY or FILE
+    :ivar bool no_scrub_data:
+        Enable/disable 'NoScrubData' attribute for DIRECTORY or FILE
+    """
+    def __init__(self, read_only=False, hidden=False, system=False, none=False, directory=False, archive=False,
+                 temporary=False, offline=False, not_content_indexed=False, no_scrub_data=False, _str=None):
+        if not _str:
+            _str = ''
+        self.read_only = read_only or ('ReadOnly' in _str)
+        self.hidden = hidden or ('Hidden' in _str)
+        self.system = system or ('System' in _str)
+        self.none = none or ('None' in _str)
+        self.directory = directory or ('Directory' in _str)
+        self.archive = archive or ('Archive' in _str)
+        self.temporary = temporary or ('Temporary' in _str)
+        self.offline = offline or ('Offline' in _str)
+        self.not_content_indexed = not_content_indexed or ('NotContentIndexed' in _str)
+        self.no_scrub_data = no_scrub_data or ('NoScrubData' in _str)
+
+    def __or__(self, other):
+        return NTFSAttributes(_str=str(self) + str(other))
+
+    def __add__(self, other):
+        return NTFSAttributes(_str=str(self) + str(other))
+
+    def __str__(self):
+        concatenated_params = (('ReadOnly|' if self.read_only else '') +
+                               ('Hidden|' if self.hidden else '') +
+                               ('System|' if self.system else '') +
+                               ('None|' if self.none else '') +
+                               ('Directory|' if self.directory else '') +
+                               ('Archive|' if self.archive else '') +
+                               ('Temporary|' if self.temporary else '') +
+                               ('Offline|' if self.offline else '') +
+                               ('NotContentIndexed|' if self.not_content_indexed else '') +
+                               ('NoScrubData|' if self.no_scrub_data else ''))
+
+        return concatenated_params.strip('|')
+
+
+NTFSAttributes.READ_ONLY = NTFSAttributes(read_only=True)
+NTFSAttributes.HIDDEN = NTFSAttributes(hidden=True)
+NTFSAttributes.SYSTEM = NTFSAttributes(system=True)
+NTFSAttributes.NONE = NTFSAttributes(none=True)
+NTFSAttributes.DIRECTORY = NTFSAttributes(directory=True)
+NTFSAttributes.ARCHIVE = NTFSAttributes(archive=True)
+NTFSAttributes.TEMPORARY = NTFSAttributes(temporary=True)
+NTFSAttributes.OFFLINE = NTFSAttributes(offline=True)
+NTFSAttributes.NOT_CONTENT_INDEXED = NTFSAttributes(not_content_indexed=True)
+NTFSAttributes.NO_SCRUB_DATA = NTFSAttributes(no_scrub_data=True)

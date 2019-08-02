@@ -40,6 +40,7 @@ from ._error import (
 from ._serialization import (
     _get_path,
     _validate_and_format_range_headers,
+    _validate_and_add_cpk_headers,
 )
 from ._upload_chunking import (
     _PageBlobChunkUploader,
@@ -132,7 +133,8 @@ class PageBlobService(BaseBlobService):
     def create_blob(
             self, container_name, blob_name, content_length, content_settings=None,
             sequence_number=None, metadata=None, lease_id=None, if_modified_since=None,
-            if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None, premium_page_blob_tier=None):
+            if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
+            premium_page_blob_tier=None, cpk=None):
         '''
         Creates a new Page Blob.
 
@@ -186,6 +188,11 @@ class PageBlobService(BaseBlobService):
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the new Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -204,7 +211,8 @@ class PageBlobService(BaseBlobService):
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
-            timeout=timeout
+            timeout=timeout,
+            cpk=cpk,
         )
 
     def incremental_copy_blob(self, container_name, blob_name, copy_source,
@@ -295,7 +303,7 @@ class PageBlobService(BaseBlobService):
             validate_content=False, lease_id=None, if_sequence_number_lte=None,
             if_sequence_number_lt=None, if_sequence_number_eq=None,
             if_modified_since=None, if_unmodified_since=None,
-            if_match=None, if_none_match=None, timeout=None):
+            if_match=None, if_none_match=None, cpk=None, timeout=None):
         '''
         Updates a range of pages.
 
@@ -354,6 +362,11 @@ class PageBlobService(BaseBlobService):
             header to write the page only if the blob's ETag value does not
             match the value specified. If the values are identical, the Blob
             service fails.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: ETag and last modified properties for the updated Page Blob
@@ -377,6 +390,7 @@ class PageBlobService(BaseBlobService):
             if_unmodified_since=if_unmodified_since,
             if_match=if_match,
             if_none_match=if_none_match,
+            cpk=cpk,
             timeout=timeout
         )
 
@@ -385,7 +399,7 @@ class PageBlobService(BaseBlobService):
                              source_if_unmodified_since=None, source_if_match=None, source_if_none_match=None,
                              lease_id=None, if_sequence_number_lte=None, if_sequence_number_lt=None,
                              if_sequence_number_eq=None, if_modified_since=None, if_unmodified_since=None,
-                             if_match=None, if_none_match=None, timeout=None):
+                             if_match=None, if_none_match=None, cpk=None, timeout=None):
         """
         Updates a range of pages to a page blob where the contents are read from a URL.
 
@@ -464,6 +478,11 @@ class PageBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         """
@@ -497,6 +516,7 @@ class PageBlobService(BaseBlobService):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _validate_and_format_range_headers(
             request,
             start_range,
@@ -923,7 +943,7 @@ class PageBlobService(BaseBlobService):
             self, container_name, blob_name, file_path, content_settings=None,
             metadata=None, validate_content=False, progress_callback=None, max_connections=2,
             lease_id=None, if_modified_since=None, if_unmodified_since=None,
-            if_match=None, if_none_match=None, timeout=None, premium_page_blob_tier=None):
+            if_match=None, if_none_match=None, timeout=None, premium_page_blob_tier=None, cpk=None):
         '''
         Creates a new blob from a file path, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -985,6 +1005,11 @@ class PageBlobService(BaseBlobService):
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -1010,14 +1035,15 @@ class PageBlobService(BaseBlobService):
                 if_match=if_match,
                 if_none_match=if_none_match,
                 timeout=timeout,
-                premium_page_blob_tier=premium_page_blob_tier)
+                premium_page_blob_tier=premium_page_blob_tier,
+                cpk=cpk)
 
     def create_blob_from_stream(
             self, container_name, blob_name, stream, count, content_settings=None,
             metadata=None, validate_content=False, progress_callback=None,
             max_connections=2, lease_id=None, if_modified_since=None,
             if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
-            premium_page_blob_tier=None):
+            premium_page_blob_tier=None, cpk=None):
         '''
         Creates a new blob from a file/stream, or updates the content of an
         existing blob, with automatic chunking and progress notifications.
@@ -1083,6 +1109,11 @@ class PageBlobService(BaseBlobService):
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -1115,7 +1146,8 @@ class PageBlobService(BaseBlobService):
             if_match=if_match,
             if_none_match=if_none_match,
             timeout=timeout,
-            encryption_data=encryption_data
+            encryption_data=encryption_data,
+            cpk=cpk,
         )
 
         if count == 0:
@@ -1141,7 +1173,8 @@ class PageBlobService(BaseBlobService):
             timeout=timeout,
             content_encryption_key=cek,
             initialization_vector=iv,
-            resource_properties=resource_properties
+            resource_properties=resource_properties,
+            cpk=cpk,
         )
 
         return resource_properties
@@ -1151,7 +1184,7 @@ class PageBlobService(BaseBlobService):
             content_settings=None, metadata=None, validate_content=False,
             progress_callback=None, max_connections=2, lease_id=None,
             if_modified_since=None, if_unmodified_since=None, if_match=None,
-            if_none_match=None, timeout=None, premium_page_blob_tier=None):
+            if_none_match=None, timeout=None, premium_page_blob_tier=None, cpk=None):
         '''
         Creates a new blob from an array of bytes, or updates the content
         of an existing blob, with automatic chunking and progress
@@ -1218,6 +1251,11 @@ class PageBlobService(BaseBlobService):
             A page blob tier value to set the blob to. The tier correlates to the size of the
             blob and number of allowed IOPS. This is only applicable to page blobs on
             premium storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -1251,7 +1289,8 @@ class PageBlobService(BaseBlobService):
             if_match=if_match,
             if_none_match=if_none_match,
             timeout=timeout,
-            premium_page_blob_tier=premium_page_blob_tier)
+            premium_page_blob_tier=premium_page_blob_tier,
+            cpk=cpk)
 
     def set_premium_page_blob_tier(
             self, container_name, blob_name, premium_page_blob_tier,
@@ -1436,7 +1475,7 @@ class PageBlobService(BaseBlobService):
             self, container_name, blob_name, content_length, content_settings=None,
             sequence_number=None, metadata=None, lease_id=None, premium_page_blob_tier=None, if_modified_since=None,
             if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
-            encryption_data=None):
+            encryption_data=None, cpk=None):
         '''
         See create_blob for more details. This helper method
         allows for encryption or other such special behavior because
@@ -1446,6 +1485,11 @@ class PageBlobService(BaseBlobService):
             The JSON formatted encryption metadata to upload as a part of the blob.
             This should only be passed internally from other methods and only applied
             when uploading entire blob contents immediately follows creation of the blob.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.
         '''
 
         _validate_not_none('container_name', container_name)
@@ -1467,6 +1511,7 @@ class PageBlobService(BaseBlobService):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
@@ -1481,7 +1526,7 @@ class PageBlobService(BaseBlobService):
             validate_content=False, lease_id=None, if_sequence_number_lte=None,
             if_sequence_number_lt=None, if_sequence_number_eq=None,
             if_modified_since=None, if_unmodified_since=None,
-            if_match=None, if_none_match=None, timeout=None):
+            if_match=None, if_none_match=None, cpk=None, timeout=None):
         '''
         See update_page for more details. This helper method
         allows for encryption or other such special behavior because
@@ -1508,6 +1553,7 @@ class PageBlobService(BaseBlobService):
             'If-Match': _to_str(if_match),
             'If-None-Match': _to_str(if_none_match)
         }
+        _validate_and_add_cpk_headers(request, encryption_key=cpk, protocol=self.protocol)
         _validate_and_format_range_headers(
             request,
             start_range,

@@ -2,6 +2,14 @@
 
 > See [BreakingChanges](BreakingChanges.md) for a detailed list of API breaks.
 
+## Version 2.1.0:
+
+- Support for 2019-02-02 REST version. Please see our REST API documentation and blog for information about the related added features.
+- Added update_range_from_file_url API to writes the bytes from one Azure File endpoint into the specified range of another Azure File endpoint.
+- Added set_directory_properties, create_permission_for_share and get_permission_for_share APIs
+- Added optional parameters(file_permission, smb_properties) for create_file*, create_directory* related APIs and set_file_properties API
+- Updated get_file_properties, get_directory_properties so that the response has SMB related properties
+
 ## Version 2.0.1:
 - Updated dependency on azure-storage-common.
 

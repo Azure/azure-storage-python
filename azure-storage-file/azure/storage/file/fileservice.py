@@ -6,6 +6,8 @@
 # license information.
 # --------------------------------------------------------------------------
 import sys
+from datetime import datetime
+
 import math
 from os import path
 
@@ -72,16 +74,16 @@ from ._deserialization import (
     _parse_share,
     _parse_snapshot_share,
     _parse_directory,
-)
+    _parse_permission_key, _parse_permission)
 from ._download_chunking import _download_file_chunks
 from ._serialization import (
     _get_path,
     _validate_and_format_range_headers,
-)
+    _validate_and_return_file_permission)
 from ._upload_chunking import _upload_file_chunks
 from .models import (
     FileProperties,
-)
+    SMBProperties)
 
 from ._constants import (
     X_MS_VERSION,
@@ -980,7 +982,7 @@ class FileService(StorageClient):
             return True
 
     def create_directory(self, share_name, directory_name, metadata=None,
-                         fail_on_exist=False, timeout=None):
+                         fail_on_exist=False, timeout=None, file_permission=None, smb_properties=SMBProperties()):
         '''
         Creates a new directory under the specified share or parent directory. 
         If the directory with the same name already exists, the operation fails
@@ -999,6 +1001,10 @@ class FileService(StorageClient):
         :param bool fail_on_exist:
             specify whether to throw an exception when the directory exists.
             False by default.
+        :param str file_permission:
+            File permission, a portable SDDL
+        :param ~azure.storage.file.models.SMBProperties smb_properties:
+            Sets the SMB related file properties
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: True if directory is created, False if directory already exists.
@@ -1006,6 +1012,17 @@ class FileService(StorageClient):
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('directory_name', directory_name)
+        current_time = datetime.utcnow()
+        if smb_properties.ntfs_attributes is None:
+            smb_properties.ntfs_attributes = 'Directory'
+        if smb_properties.creation_time is None:
+            smb_properties.creation_time = current_time
+        if smb_properties.last_write_time is None:
+            smb_properties.last_write_time = current_time
+        file_permission = _validate_and_return_file_permission(file_permission,
+                                                               smb_properties.permission_key,
+                                                               'Inherit')
+
         request = HTTPRequest()
         request.method = 'PUT'
         request.host_locations = self._get_host_locations()
@@ -1015,6 +1032,8 @@ class FileService(StorageClient):
             'timeout': _int_to_str(timeout),
         }
         _add_metadata_headers(metadata, request)
+        request.headers.update({'x-ms-file-permission': file_permission})
+        request.headers.update(smb_properties._to_request_headers())
 
         if not fail_on_exist:
             try:
@@ -1026,6 +1045,29 @@ class FileService(StorageClient):
         else:
             self._perform_request(request)
             return True
+
+    def set_directory_properties(self, share_name, directory_name, file_permission=None,
+                                 smb_properties=SMBProperties(), timeout=None):
+        """
+
+        :param share_name:
+            Name of the share
+        :param directory_name:
+            Name of the directory
+        :param str file_permission:
+            File permission, a portable SDDL
+        :param ~azure.storage.file.models.SMBProperties smb_properties:
+            Sets the SMB related file properties
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        """
+        _validate_not_none('share_name', share_name)
+        _validate_not_none('directory_name', directory_name)
+        request = self._get_basic_set_file_or_directory_properties_http_request(share_name, directory_name, None,
+                                                                                file_permission, smb_properties,
+                                                                                timeout)
+        request.query.update({'restype': 'directory'})
+        self._perform_request(request)
 
     def delete_directory(self, share_name, directory_name,
                          fail_not_exist=False, timeout=None):
@@ -1522,8 +1564,7 @@ class FileService(StorageClient):
             _dont_fail_not_exist(ex)
             return False
 
-    def resize_file(self, share_name, directory_name,
-                    file_name, content_length, timeout=None):
+    def resize_file(self, share_name, directory_name, file_name, content_length, timeout=None):
         '''
         Resizes a file to the specified size. If the specified byte
         value is less than the current size of the file, then all
@@ -1543,22 +1584,14 @@ class FileService(StorageClient):
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
         _validate_not_none('content_length', content_length)
-        request = HTTPRequest()
-        request.method = 'PUT'
-        request.host_locations = self._get_host_locations()
-        request.path = _get_path(share_name, directory_name, file_name)
-        request.query = {
-            'comp': 'properties',
-            'timeout': _int_to_str(timeout),
-        }
-        request.headers = {
-            'x-ms-content-length': _to_str(content_length)
-        }
+        request = self._get_basic_set_file_or_directory_properties_http_request(share_name, directory_name, file_name,
+                                                                                None, SMBProperties(), timeout)
+        request.headers.update({'x-ms-content-length': _to_str(content_length)})
 
         self._perform_request(request)
 
     def set_file_properties(self, share_name, directory_name, file_name,
-                            content_settings, timeout=None):
+                            content_settings, timeout=None, file_permission=None, smb_properties=SMBProperties()):
         '''
         Sets system properties on the file. If one property is set for the
         content_settings, all properties will be overriden.
@@ -1571,12 +1604,36 @@ class FileService(StorageClient):
             Name of existing file.
         :param ~azure.storage.file.models.ContentSettings content_settings:
             ContentSettings object used to set the file properties.
+        :param str file_permission:
+            File permission, a portable SDDL
+        :param ~azure.storage.file.models.SMBProperties smb_properties:
+            Sets the SMB related file properties
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
         _validate_not_none('content_settings', content_settings)
+        request = self._get_basic_set_file_or_directory_properties_http_request(share_name, directory_name, file_name,
+                                                                                file_permission, smb_properties,
+                                                                                timeout)
+        request.headers.update(content_settings._to_headers())
+
+        self._perform_request(request)
+
+    def _get_basic_set_file_or_directory_properties_http_request(self, share_name, directory_name, file_name,
+                                                                 file_permission, smb_properties, timeout):
+        common_default_value = 'Preserve'
+        if smb_properties.ntfs_attributes is None:
+            smb_properties.ntfs_attributes = common_default_value
+        if smb_properties.creation_time is None:
+            smb_properties.creation_time = common_default_value
+        if smb_properties.last_write_time is None:
+            smb_properties.last_write_time = common_default_value
+        file_permission = _validate_and_return_file_permission(file_permission,
+                                                               smb_properties.permission_key,
+                                                               common_default_value)
+
         request = HTTPRequest()
         request.method = 'PUT'
         request.host_locations = self._get_host_locations()
@@ -1585,9 +1642,10 @@ class FileService(StorageClient):
             'comp': 'properties',
             'timeout': _int_to_str(timeout),
         }
-        request.headers = content_settings._to_headers()
+        request.headers = {'x-ms-file-permission': file_permission}
+        request.headers.update(smb_properties._to_request_headers())
 
-        self._perform_request(request)
+        return request
 
     def get_file_metadata(self, share_name, directory_name, file_name, timeout=None, snapshot=None):
         '''
@@ -1769,8 +1827,8 @@ class FileService(StorageClient):
         self._perform_request(request)
 
     def create_file(self, share_name, directory_name, file_name,
-                    content_length, content_settings=None, metadata=None,
-                    timeout=None):
+                    content_length, content_settings=None, metadata=None, timeout=None,
+                    file_permission=None, smb_properties=SMBProperties()):
         '''
         Creates a new file.
 
@@ -1791,12 +1849,27 @@ class FileService(StorageClient):
         :param metadata:
             Name-value pairs associated with the file as metadata.
         :type metadata: dict(str, str)
+        :param str file_permission:
+            File permission, a portable SDDL
+        :param ~azure.storage.file.models.SMBProperties smb_properties:
+            Sets the SMB related file properties
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
         _validate_not_none('content_length', content_length)
+        current_time = datetime.utcnow()
+        if smb_properties.ntfs_attributes is None:
+            smb_properties.ntfs_attributes = 'Archive'
+        if smb_properties.creation_time is None:
+            smb_properties.creation_time = current_time
+        if smb_properties.last_write_time is None:
+            smb_properties.last_write_time = current_time
+
+        file_permission = _validate_and_return_file_permission(file_permission,
+                                                               smb_properties.permission_key,
+                                                               'Inherit')
         request = HTTPRequest()
         request.method = 'PUT'
         request.host_locations = self._get_host_locations()
@@ -1804,18 +1877,20 @@ class FileService(StorageClient):
         request.query = {'timeout': _int_to_str(timeout)}
         request.headers = {
             'x-ms-content-length': _to_str(content_length),
-            'x-ms-type': 'file'
+            'x-ms-type': 'file',
+            'x-ms-file-permission': file_permission
         }
         _add_metadata_headers(metadata, request)
         if content_settings is not None:
             request.headers.update(content_settings._to_headers())
+        request.headers.update(smb_properties._to_request_headers())
 
         self._perform_request(request)
 
     def create_file_from_path(self, share_name, directory_name, file_name,
                               local_file_path, content_settings=None,
                               metadata=None, validate_content=False, progress_callback=None,
-                              max_connections=2, timeout=None):
+                              max_connections=2, file_permission=None, smb_properties=SMBProperties(), timeout=None):
         '''
         Creates a new azure file from a local file path, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1847,6 +1922,10 @@ class FileService(StorageClient):
         :type progress_callback: func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
+        :param str file_permission:
+            File permission, a portable SDDL
+        :param ~azure.storage.file.models.SMBProperties smb_properties:
+            Sets the SMB related file properties
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1861,11 +1940,12 @@ class FileService(StorageClient):
             self.create_file_from_stream(
                 share_name, directory_name, file_name, stream,
                 count, content_settings, metadata, validate_content, progress_callback,
-                max_connections, timeout)
+                max_connections, file_permission=file_permission, smb_properties=smb_properties, timeout=timeout)
 
     def create_file_from_text(self, share_name, directory_name, file_name,
                               text, encoding='utf-8', content_settings=None,
-                              metadata=None, validate_content=False, timeout=None):
+                              metadata=None, validate_content=False, timeout=None, file_permission=None,
+                              smb_properties=SMBProperties()):
         '''
         Creates a new file from str/unicode, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -1892,6 +1972,10 @@ class FileService(StorageClient):
             the wire if using http instead of https as https (the default) will 
             already validate. Note that this MD5 hash is not stored with the 
             file.
+        :param str file_permission:
+            File permission, a portable SDDL
+        :param ~azure.storage.file.models.SMBProperties smb_properties:
+            Sets the SMB related file properties
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1908,13 +1992,14 @@ class FileService(StorageClient):
         self.create_file_from_bytes(
             share_name, directory_name, file_name, text, count=len(text),
             content_settings=content_settings, metadata=metadata,
-            validate_content=validate_content, timeout=timeout)
+            validate_content=validate_content, file_permission=file_permission, smb_properties=smb_properties,
+            timeout=timeout)
 
     def create_file_from_bytes(
             self, share_name, directory_name, file_name, file,
             index=0, count=None, content_settings=None, metadata=None,
-            validate_content=False, progress_callback=None, max_connections=2,
-            timeout=None):
+            validate_content=False, progress_callback=None, max_connections=2, timeout=None,
+            file_permission=None, smb_properties=SMBProperties()):
         '''
         Creates a new file from an array of bytes, or updates the content
         of an existing file, with automatic chunking and progress
@@ -1952,6 +2037,10 @@ class FileService(StorageClient):
         :type progress_callback: func(current, total)
         :param int max_connections:
             Maximum number of parallel connections to use.
+        :param str file_permission:
+            File permission, a portable SDDL
+        :param ~azure.storage.file.models.SMBProperties smb_properties:
+            Sets the SMB related file properties
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -1974,12 +2063,13 @@ class FileService(StorageClient):
         self.create_file_from_stream(
             share_name, directory_name, file_name, stream, count,
             content_settings, metadata, validate_content, progress_callback,
-            max_connections, timeout)
+            max_connections, file_permission=file_permission, smb_properties=smb_properties, timeout=timeout)
 
     def create_file_from_stream(
             self, share_name, directory_name, file_name, stream, count,
             content_settings=None, metadata=None, validate_content=False,
-            progress_callback=None, max_connections=2, timeout=None):
+            progress_callback=None, max_connections=2, timeout=None,
+            file_permission=None, smb_properties=SMBProperties()):
         '''
         Creates a new file from a file/stream, or updates the content of an
         existing file, with automatic chunking and progress notifications.
@@ -2015,6 +2105,10 @@ class FileService(StorageClient):
         :param int max_connections:
             Maximum number of parallel connections to use. Note that parallel upload 
             requires the stream to be seekable.
+        :param str file_permission:
+            File permission, a portable SDDL
+        :param ~azure.storage.file.models.SMBProperties smb_properties:
+            Sets the SMB related file properties
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2035,7 +2129,9 @@ class FileService(StorageClient):
             count,
             content_settings,
             metadata,
-            timeout
+            file_permission=file_permission,
+            smb_properties=smb_properties,
+            timeout=timeout
         )
 
         _upload_file_chunks(
@@ -2582,9 +2678,76 @@ class FileService(StorageClient):
         :param int timeout:
             The timeout parameter is expressed in seconds.
         '''
+        request = self._get_basic_update_file_http_request(share_name, directory_name, file_name, timeout=timeout)
+
+        _validate_not_none('data', data)
+        _validate_and_format_range_headers(request, start_range, end_range)
+        request.body = _get_data_bytes_only('data', data)
+
+        if validate_content:
+            computed_md5 = _get_content_md5(request.body)
+            request.headers['Content-MD5'] = _to_str(computed_md5)
+
+        self._perform_request(request)
+
+    def update_range_from_file_url(self, share_name, directory_name, file_name, start_range, end_range, source,
+                                   source_start_range, timeout=None):
+        '''
+        Writes the bytes from one Azure File endpoint into the specified range of another Azure File endpoint.
+
+        :param str share_name:
+            Name of existing share.
+        :param str directory_name:
+            The path to the directory.
+        :param str file_name:
+            Name of existing file.
+        :param int start_range:
+            Start of byte range to use for updating a section of the file.
+            The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
+        :param int end_range:
+            End of byte range to use for updating a section of the file.
+            The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
+        :param str source:
+            A URL of up to 2 KB in length that specifies an Azure file or blob.
+            The value should be URL-encoded as it would appear in a request URI.
+            If the source is in another account, the source must either be public
+            or must be authenticated via a shared access signature. If the source
+            is public, no authentication is required.
+            Examples:
+            https://myaccount.file.core.windows.net/myshare/mydir/myfile
+            https://otheraccount.file.core.windows.net/myshare/mydir/myfile?sastoken
+        :param int source_start_range:
+            Start of byte range to use for updating a section of the file.
+            The range can be up to 4 MB in size.
+            The start_range and end_range params are inclusive.
+            Ex: start_range=0, end_range=511 will download first 512 bytes of file.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        '''
+
+        request = self._get_basic_update_file_http_request(share_name, directory_name, file_name, timeout=timeout)
+
+        _validate_not_none('source', source)
+        _validate_and_format_range_headers(request, start_range, end_range)
+        _validate_and_format_range_headers(request,
+                                           source_start_range,
+                                           source_start_range+(end_range-start_range),
+                                           is_source=True)
+
+        request.headers.update({
+            'x-ms-copy-source': _to_str(source),
+            'Content-Length': _int_to_str(0)
+        })
+
+        self._perform_request(request)
+
+    def _get_basic_update_file_http_request(self, share_name, directory_name, file_name, timeout=None):
         _validate_not_none('share_name', share_name)
         _validate_not_none('file_name', file_name)
-        _validate_not_none('data', data)
         request = HTTPRequest()
         request.method = 'PUT'
         request.host_locations = self._get_host_locations()
@@ -2596,15 +2759,8 @@ class FileService(StorageClient):
         request.headers = {
             'x-ms-write': 'update',
         }
-        _validate_and_format_range_headers(
-            request, start_range, end_range)
-        request.body = _get_data_bytes_only('data', data)
 
-        if validate_content:
-            computed_md5 = _get_content_md5(request.body)
-            request.headers['Content-MD5'] = _to_str(computed_md5)
-
-        self._perform_request(request)
+        return request
 
     def clear_range(self, share_name, directory_name, file_name, start_range,
                     end_range, timeout=None):
@@ -2696,3 +2852,65 @@ class FileService(StorageClient):
                 end_range_required=False)
 
         return self._perform_request(request, _convert_xml_to_ranges)
+
+    def create_permission_for_share(self, share_name, file_permission, timeout=None):
+        """
+        Create a permission(a security descriptor) at the share level.
+        This 'permission' can be used for the files/directories in the share.
+        If a 'permission' already exists, it shall return the key of it, else
+        creates a new permission at the share level and return its key.
+
+        :param share_name:
+            Name of share.
+        :param file_permission:
+            File permission, a Portable SDDL
+        :param timeout:
+            The timeout parameter is expressed in seconds.
+        :returns a file permission key
+        :rtype str
+        """
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'PUT'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(share_name)
+        request.query = {
+            'restype': 'share',
+            'comp': 'filepermission',
+            'timeout': _int_to_str(timeout),
+        }
+        request.body = file_permission
+        return self._perform_request(request, parser=_parse_permission_key)
+
+    def get_permission_for_share(self, share_name, file_permission_key, timeout=None):
+        """
+        Create a permission(a security descriptor) at the share level.
+        This 'permission' can be used for the files/directories in the share.
+        If a 'permission' already exists, it shall return the key of it, else
+        creates a new permission at the share level and return its key.
+
+        :param share_name:
+            Name of share.
+        :param file_permission_key:
+            Key of the file permission to retrieve
+        :param timeout:
+            The timeout parameter is expressed in seconds.
+        :returns a file permission(a portable SDDL)
+        :rtype str
+        """
+        _validate_not_none('share_name', share_name)
+        request = HTTPRequest()
+        request.method = 'GET'
+        request.host_locations = self._get_host_locations()
+        request.path = _get_path(share_name)
+        request.query = {
+            'restype': 'share',
+            'comp': 'filepermission',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-file-permission-key': file_permission_key
+        }
+        request.body = None
+
+        return self._perform_request(request, parser=_parse_permission)
