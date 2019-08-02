@@ -77,7 +77,8 @@ def _validate_and_return_file_permission(file_permission, file_permission_key, d
     # value as file permission, file_permission size should be <= 8KB, else file permission_key should be used
     empty_file_permission = file_permission is None or len(file_permission) == 0
     empty_file_permission_key = file_permission_key is None or len(file_permission_key) == 0
-    file_permission_size_too_big = False if file_permission is None else len(file_permission.encode('utf-8')) > 8 * 1024
+    file_permission_size_too_big = False if file_permission is None \
+        else len(str(file_permission).encode('utf-8')) > 8 * 1024
 
     if file_permission_size_too_big:
         raise ValueError(_FILE_PERMISSION_TOO_LONG)

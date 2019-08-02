@@ -208,7 +208,7 @@ class StorageFileTest(StorageTestCase):
 
     def test_create_file_when_file_permission_is_too_long(self):
         file_name = self._get_file_reference()
-        permission = self.get_random_bytes(9 * 1024)
+        permission = str(self.get_random_bytes(8 * 1024 + 1))
         with self.assertRaises(ValueError):
             self.fs.create_file(self.share_name, None, file_name, 1024, file_permission=permission)
 
@@ -224,7 +224,6 @@ class StorageFileTest(StorageTestCase):
     def test_create_file_will_set_all_smb_properties(self):
         # Arrange
         file_name = self._get_file_reference()
-        data = b'abc'
 
         # Act
         self.fs.create_file(self.share_name, None, file_name, 1024)
