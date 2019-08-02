@@ -553,7 +553,8 @@ class BaseBlobService(StorageClient):
             A DateTime value. Indicates when the key stops being valid.
         :param int timeout:
             The timeout parameter is expressed in seconds.
-        :return:
+        :return: The user delegation key.
+        :rtype: ~azure.storage.blob.models.UserDelegationKey
         """
         _validate_not_none('key_start_time', key_start_time)
         _validate_not_none('key_end_time', key_expiry_time)
