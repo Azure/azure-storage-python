@@ -1625,9 +1625,9 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Decrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: a blob object including properties and metadata.
@@ -1692,7 +1692,7 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
             a secure connection must be established to transfer the key.
         :param int timeout:
@@ -1822,9 +1822,9 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Decrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: A Blob with content, properties, and metadata.
@@ -1972,9 +1972,9 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Decrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2098,9 +2098,9 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Decrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2332,9 +2332,9 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Decrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2453,9 +2453,9 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Decrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make 
             multiple calls to the Azure service and the timeout will apply to 
@@ -2527,9 +2527,9 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Decrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return:
@@ -2599,7 +2599,7 @@ class BaseBlobService(StorageClient):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
             a secure connection must be established to transfer the key.
         :param int timeout:
@@ -3079,9 +3079,9 @@ class BaseBlobService(StorageClient):
             Required if the blob has an active lease.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: snapshot properties

@@ -167,9 +167,9 @@ class AppendBlobService(BaseBlobService):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: ETag and last modified properties for the updated Append Blob
@@ -259,9 +259,9 @@ class AppendBlobService(BaseBlobService):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return:
@@ -382,9 +382,9 @@ class AppendBlobService(BaseBlobService):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         """
@@ -488,7 +488,7 @@ class AppendBlobService(BaseBlobService):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
             a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Append Blob
@@ -584,7 +584,7 @@ class AppendBlobService(BaseBlobService):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
             a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Append Blob
@@ -686,7 +686,7 @@ class AppendBlobService(BaseBlobService):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
             a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Append Blob
@@ -783,7 +783,7 @@ class AppendBlobService(BaseBlobService):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
             a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Append Blob

@@ -190,9 +190,9 @@ class PageBlobService(BaseBlobService):
             premium storage accounts.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the new Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -364,9 +364,9 @@ class PageBlobService(BaseBlobService):
             service fails.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :return: ETag and last modified properties for the updated Page Blob
@@ -480,9 +480,9 @@ class PageBlobService(BaseBlobService):
             operation if it does exist.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         """
@@ -1007,9 +1007,9 @@ class PageBlobService(BaseBlobService):
             premium storage accounts.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -1111,9 +1111,9 @@ class PageBlobService(BaseBlobService):
             premium storage accounts.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -1253,9 +1253,9 @@ class PageBlobService(BaseBlobService):
             premium storage accounts.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         :return: ETag and last modified properties for the Page Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -1487,9 +1487,9 @@ class PageBlobService(BaseBlobService):
             when uploading entire blob contents immediately follows creation of the blob.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS. 
+            Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key. 
+            a secure connection must be established to transfer the key.
         '''
 
         _validate_not_none('container_name', container_name)
