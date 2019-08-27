@@ -125,10 +125,6 @@ class _BlobChunkDownloader(object):
             cpk=self.cpk,
         )
 
-        if self.if_match is None:
-            # This makes sure that if_match is set so that we can validate 
-            # that subsequent downloads are to an unmodified blob
-            self.if_match = response.properties.etag
         return response
 
 
