@@ -286,7 +286,7 @@ class BaseBlobService(StorageClient):
         :rtype: str
         '''
 
-        url = '{}://{}/{}?restype=container'.format(
+        url = '{}://{}/{}'.format(
             protocol or self.protocol,
             self.primary_endpoint,
             container_name,

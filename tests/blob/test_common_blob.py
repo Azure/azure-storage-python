@@ -256,7 +256,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
-                         + '.blob.core.windows.net/vhds?restype=container')
+                         + '.blob.core.windows.net/vhds')
 
     def test_make_container_url_with_protocol(self):
         # Arrange
@@ -266,7 +266,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(res, 'http://' + self.settings.STORAGE_ACCOUNT_NAME
-                         + '.blob.core.windows.net/vhds?restype=container')
+                         + '.blob.core.windows.net/vhds')
 
     def test_make_container_url_with_sas(self):
         # Arrange
@@ -276,7 +276,7 @@ class StorageCommonBlobTest(StorageTestCase):
 
         # Assert
         self.assertEqual(res, 'https://' + self.settings.STORAGE_ACCOUNT_NAME
-                         + '.blob.core.windows.net/vhds?restype=container&sas')
+                         + '.blob.core.windows.net/vhds&sas')
 
     @record
     def test_create_blob_with_question_mark(self):
