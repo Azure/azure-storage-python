@@ -337,6 +337,23 @@ class StorageCommonBlobTest(StorageTestCase):
         self.assertDictEqual(md, metadata)
 
     @record
+    def test_create_blob_with_metadata_with_trailing_space(self):
+        # Arrange
+        blob_name = self._get_blob_reference()
+        metadata = {'hello': 'world ', 'number': '42'}
+        isitstr = isinstance(None, str)
+
+        # Act
+        data = b'hello world'
+        resp = self.bs.create_blob_from_bytes(self.container_name, blob_name, data, metadata=metadata)
+
+        # Assert
+        self.assertIsNotNone(resp.etag)
+        md = self.bs.get_blob_metadata(self.container_name, blob_name)
+        self.assertEqual(md['hello'], metadata['hello'].strip())
+        self.assertEqual(md['number'], metadata['number'].strip())
+
+    @record
     def test_get_blob_with_existing_blob(self):
         # Arrange
         blob_name = self._create_block_blob()
