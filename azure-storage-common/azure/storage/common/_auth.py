@@ -57,7 +57,7 @@ class _StorageSharedKeyAuthentication(object):
         x_ms_headers = []
         for name, value in request.headers.items():
             if name.startswith('x-ms-'):
-                x_ms_headers.append((name.lower(), value))
+                x_ms_headers.append((name.lower(), value.strip() if value else value))
         x_ms_headers.sort()
         for name, value in x_ms_headers:
             if value is not None:
