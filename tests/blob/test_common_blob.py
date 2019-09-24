@@ -341,7 +341,6 @@ class StorageCommonBlobTest(StorageTestCase):
         # Arrange
         blob_name = self._get_blob_reference()
         metadata = {'hello': 'world ', 'number': '42'}
-        isitstr = isinstance(None, str)
 
         # Act
         data = b'hello world'
