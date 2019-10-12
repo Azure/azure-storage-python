@@ -1,0 +1,541 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [97bc53d4-9729-11e9-8ece-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:10 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytest5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:10 GMT']
+      etag: ['"0x8D6F94D7C29D635"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1e3-d01f-003a-2f36-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [97ff2aba-9729-11e9-a4bb-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestparent5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      etag: ['"0x8D6F94D7C3C3E75"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1e4-d01f-003a-3036-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [9811e600-9729-11e9-97e7-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestparent5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1e5-d01f-003a-3136-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [982ae478-9729-11e9-99b4-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytest5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      etag: ['"0x8D6F94D7C67A270"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1e6-d01f-003a-3236-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [983cdc3d-9729-11e9-a7a2-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-source-if-match: ['0x111111111111111']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode '{"error":{"code":"SourceConditionNotMet","message":"The
+        source condition specified using HTTP conditional header(s) is not met.\nRequestId:a3a9b1e7-d01f-003a-3336-2b8843000000\nTime:2019-06-25T09:14:11.8416655Z"}}'}
+    headers:
+      content-length: ['213']
+      content-type: [application/json;charset=utf-8]
+      date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [SourceConditionNotMet]
+      x-ms-request-id: [a3a9b1e7-d01f-003a-3336-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 412, message: The source condition specified using HTTP conditional
+        header(s) is not met.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [987ee96b-9729-11e9-add4-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-source-if-match: ['"0x8D6F94D7C67A270"']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:11 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1e8-d01f-003a-3436-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [9896cd5c-9729-11e9-97dc-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytest5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      etag: ['"0x8D6F94D7CD37E18"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1e9-d01f-003a-3536-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [98a8e514-9729-11e9-8f05-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-source-if-none-match: ['"0x8D6F94D7CD37E18"']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode '{"error":{"code":"SourceConditionNotMet","message":"The
+        source condition specified using HTTP conditional header(s) is not met.\nRequestId:a3a9b1ea-d01f-003a-3636-2b8843000000\nTime:2019-06-25T09:14:12.2841087Z"}}'}
+    headers:
+      content-length: ['213']
+      content-type: [application/json;charset=utf-8]
+      date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [SourceConditionNotMet]
+      x-ms-request-id: [a3a9b1ea-d01f-003a-3636-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 412, message: The source condition specified using HTTP conditional
+        header(s) is not met.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [98bc4f28-9729-11e9-ad15-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-source-if-none-match: ['0x111111111111111']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1eb-d01f-003a-3736-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [98d55cfa-9729-11e9-bf1e-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytest5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      etag: ['"0x8D6F94D7D11C1D2"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1ec-d01f-003a-3836-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [98e716f3-9729-11e9-82a4-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-source-if-modified-since: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode '{"error":{"code":"SourceConditionNotMet","message":"The
+        source condition specified using HTTP conditional header(s) is not met.\nRequestId:a3a9b1ed-d01f-003a-3936-2b8843000000\nTime:2019-06-25T09:14:12.6934347Z"}}'}
+    headers:
+      content-length: ['213']
+      content-type: [application/json;charset=utf-8]
+      date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [SourceConditionNotMet]
+      x-ms-request-id: [a3a9b1ed-d01f-003a-3936-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 412, message: The source condition specified using HTTP conditional
+        header(s) is not met.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [98fa9df0-9729-11e9-a8d7-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-source-if-modified-since: ['Tue, 25 Jun 2019 09:13:12 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1f0-d01f-003a-3c36-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [99125e70-9729-11e9-aa01-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytest5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      etag: ['"0x8D6F94D7D4F3FB7"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1f1-d01f-003a-3d36-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [99248711-9729-11e9-8aca-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-source-if-unmodified-since: ['Tue, 25 Jun 2019 09:13:12 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode '{"error":{"code":"SourceConditionNotMet","message":"The
+        source condition specified using HTTP conditional header(s) is not met.\nRequestId:a3a9b1f2-d01f-003a-3e36-2b8843000000\nTime:2019-06-25T09:14:13.1008400Z"}}'}
+    headers:
+      content-length: ['213']
+      content-type: [application/json;charset=utf-8]
+      date: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [SourceConditionNotMet]
+      x-ms-request-id: [a3a9b1f2-d01f-003a-3e36-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 412, message: The source condition specified using HTTP conditional
+        header(s) is not met.}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [9938c742-9729-11e9-a572-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-source-if-unmodified-since: ['Tue, 25 Jun 2019 09:14:12 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1f3-d01f-003a-3f36-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [99545cb3-9729-11e9-b703-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytest5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      etag: ['"0x8D6F94D7D926DE7"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1f4-d01f-003a-4036-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [9967b41c-9729-11e9-95e1-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      etag: ['"0x8D6F94D7DA4D79A"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1f5-d01f-003a-4136-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: !!python/unicode 'test'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['4']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [997a106b-9729-11e9-9726-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.blob.core.windows.net/utcontainer5f351603/directorytestnew5f351603/blob5f351603
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      content-md5: [CY9rzUYh03PK3k6DJie09g==]
+      date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      etag: ['"0x8D6F94D7DE7297F"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [1f1e1b51-501e-0024-1136-2b649b000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [99bc73a6-9729-11e9-b44d-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603]
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytestnew5f351603?mode=legacy
+  response:
+    body: {string: !!python/unicode '{"error":{"code":"InternalOperationAbortError","message":"This
+        operation is aborted because there is another conflicting operation in progress.\nRequestId:a3a9b1f6-d01f-003a-4236-2b8843000000\nTime:2019-06-25T09:14:14.0726744Z"}}'}
+    headers:
+      content-length: ['229']
+      content-type: [application/json;charset=utf-8]
+      date: ['Tue, 25 Jun 2019 09:14:13 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-error-code: [InternalOperationAbortError]
+      x-ms-request-id: [a3a9b1f6-d01f-003a-4236-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 409, message: This operation is aborted because there is another
+        conflicting operation in progress.}
+- request:
+    body: !!python/unicode 'test'
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['4']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-blob-type: [BlockBlob]
+      x-ms-client-request-id: [99ccef4f-9729-11e9-b253-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.blob.core.windows.net/utcontainer5f351603/directorytest5f351603/blob5f351603old
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      content-md5: [CY9rzUYh03PK3k6DJie09g==]
+      date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      etag: ['"0x8D6F94D7E0B1113"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [1f1e1b5c-501e-0024-1a36-2b649b000000]
+      x-ms-request-server-encrypted: ['true']
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [99e10194-9729-11e9-89d6-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytest5f351603?resource=directory
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      etag: ['"0x8D6F94D7E1DE62E"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b1f8-d01f-003a-4436-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [99f332a6-9729-11e9-9e61-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      x-ms-rename-source: [/utcontainer5f351603/directorytest5f351603/blob5f351603old]
+      x-ms-version: ['2018-11-09']
+    method: PUT
+    uri: https://hierarchicalnamespacestoragename.dfs.core.windows.net/utcontainer5f351603/directorytest5f351603/blob5f351603new
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      content-length: ['0']
+      date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      server: [Windows-Azure-HDFS/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-request-id: [a3a9b200-d01f-003a-4c36-2b8843000000]
+      x-ms-version: ['2018-11-09']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Connection: [keep-alive]
+      User-Agent: [Azure-Storage/2.0.0-2.0.1 (Python CPython 2.7.15; Darwin 18.6.0)]
+      x-ms-client-request-id: [9a0b3ee8-9729-11e9-a7d9-acde48001122]
+      x-ms-date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      x-ms-version: ['2018-11-09']
+    method: HEAD
+    uri: https://hierarchicalnamespacestoragename.blob.core.windows.net/utcontainer5f351603/directorytest5f351603/blob5f351603new
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      accept-ranges: [bytes]
+      content-length: ['4']
+      content-md5: [CY9rzUYh03PK3k6DJie09g==]
+      content-type: [application/octet-stream]
+      date: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      etag: ['"0x8D6F94D7E325B6D"']
+      last-modified: ['Tue, 25 Jun 2019 09:14:14 GMT']
+      server: [Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0]
+      x-ms-access-tier: [Hot]
+      x-ms-access-tier-inferred: ['true']
+      x-ms-blob-type: [BlockBlob]
+      x-ms-creation-time: ['Mon, 01 Jan 1601 00:00:00 GMT']
+      x-ms-lease-state: [available]
+      x-ms-lease-status: [unlocked]
+      x-ms-request-id: [1f1e1b61-501e-0024-1c36-2b649b000000]
+      x-ms-server-encrypted: ['true']
+      x-ms-tag-count: ['0']
+      x-ms-version: ['2018-11-09']
+    status: {code: 200, message: OK}
+version: 1

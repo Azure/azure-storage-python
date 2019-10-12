@@ -38,7 +38,10 @@ from .models import (
     ResourceProperties,
     BlobPrefix,
     AccountInformation,
-    UserDelegationKey, BatchSubResponse)
+    BatchSubResponse,
+    UserDelegationKey,
+    PathProperties,
+)
 from ._encryption import _decrypt_blob
 from azure.storage.common.models import _list
 from azure.storage.common._error import (
@@ -648,3 +651,17 @@ def _parse_sub_response_to_http_response(sub_response):
         body_stream.close()
 
     return batch_http_sub_response
+
+
+def _parse_continuation_token(response):
+    marker = response.headers.get('x-ms-continuation')
+    return marker if marker is not '' else None
+
+
+def _parse_path_permission_and_acl(response):
+    props = PathProperties()
+    props.owner = response.headers.get('x-ms-owner')
+    props.group = response.headers.get('x-ms-group')
+    props.permissions = response.headers.get('x-ms-permissions')
+    props.acl = response.headers.get('x-ms-acl')
+    return props

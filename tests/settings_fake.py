@@ -9,6 +9,8 @@
 
 STORAGE_ACCOUNT_NAME = "storagename"
 STORAGE_ACCOUNT_KEY = "NzhL3hKZbJBuJ2484dPTR+xF30kYaWSSCbs2BzLgVVI1woqeST/1IgqaLm6QAOTxtGvxctSNbIR/1hW8yH+bJg=="
+HIERARCHICAL_NAMESPACE_ACCOUNT_NAME = "hierarchicalnamespacestoragename"
+HIERARCHICAL_NAMESPACE_ACCOUNT_KEY = "NzhL3hKZbJBuJ2484dPTR+xF30kYaWSSCbs2BzLgVVI1woqeST/1IgqaLm6QAOTxtGvxctSNbIR/1hW8yH+bJg=="
 BLOB_STORAGE_ACCOUNT_NAME = "blobstoragename"
 BLOB_STORAGE_ACCOUNT_KEY = "NzhL3hKZbJBuJ2484dPTR+xF30kYaWSSCbs2BzLgVVI1woqeST/1IgqaLm6QAOTxtGvxctSNbIR/1hW8yH+bJg=="
 REMOTE_STORAGE_ACCOUNT_NAME = "remotestoragename"
@@ -26,6 +28,7 @@ ACTIVE_DIRECTORY_AUTH_ENDPOINT = "https://login.microsoftonline.com"
 CONNECTION_STRING = ""
 BLOB_CONNECTION_STRING = ""
 PREMIUM_CONNECTION_STRING = ""
+HIERARCHICAL_NAMESPACE_CONNECTION_STRING = ""
 
 # Use 'https' or 'http' protocol for sending requests, 'https' highly recommended
 PROTOCOL = "https"

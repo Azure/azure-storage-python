@@ -7,7 +7,10 @@ import sys
 import uuid
 from abc import ABCMeta
 
-from azure.common import AzureHttpError
+from azure.common import (
+    AzureHttpError,
+    AzureMissingResourceHttpError,
+)
 
 from azure.storage.common._auth import (
     _StorageSASAuthentication,
@@ -51,6 +54,7 @@ from azure.storage.common.models import (
     Services,
     ListGenerator,
     _OperationContext,
+    LocationMode,
 )
 from .sharedaccesssignature import (
     BlobSharedAccessSignature,
@@ -68,7 +72,10 @@ from ._deserialization import (
     _parse_base_properties,
     _parse_account_information,
     _convert_xml_to_user_delegation_key,
-    _ingest_batch_response)
+    _ingest_batch_response,
+    _parse_continuation_token,
+    _parse_path_permission_and_acl,
+)
 from ._download_chunking import _download_blob_chunks
 from ._error import (
     _ERROR_INVALID_LEASE_DURATION,
@@ -81,6 +88,7 @@ from ._serialization import (
     _get_batch_request_delimiter,
     _serialize_batch_body,
     _validate_and_add_cpk_headers,
+    _add_file_or_directory_properties_header,
 )
 from .models import (
     BlobProperties,
@@ -92,11 +100,14 @@ from .models import (
 from ._constants import (
     X_MS_VERSION,
     __version__ as package_version,
+    _BLOB_SERVICE_PUBLIC_CLOUD_HOST,
+    _DFS_SERVICE_PUBLIC_CLOUD_HOST,
 )
 
 _CONTAINER_ALREADY_EXISTS_ERROR_CODE = 'ContainerAlreadyExists'
 _BLOB_NOT_FOUND_ERROR_CODE = 'BlobNotFound'
 _CONTAINER_NOT_FOUND_ERROR_CODE = 'ContainerNotFound'
+_PATH_NOT_FOUND_ERROR_CODE = 'PathNotFound'
 
 if sys.version_info >= (3,):
     from io import BytesIO
@@ -1544,7 +1555,6 @@ class BaseBlobService(StorageClient):
         '''
         if all(parameter is None for parameter in [logging, hour_metrics, minute_metrics, cors, target_version,
                                                    delete_retention_policy, static_website]):
-
             raise ValueError("set_blob_service_properties should be called with at least one parameter")
 
         request = HTTPRequest()
@@ -3567,3 +3577,370 @@ class BaseBlobService(StorageClient):
         }
 
         self._perform_request(request)
+
+    # ----------------------------Methods related to directory manipulations---------------------------- #
+
+    def create_directory(self, container_name, directory_path, lease_id=None, metadata=None,
+                         posix_permissions=None, posix_umask=None, timeout=None):
+        """
+        Create a directory which can contain other directories or blobs.
+
+        :param str container_name:
+            Name of existing container.
+        :param str directory_path:
+            Path of the directory to be created. Ex: 'dirfoo/dirbar'.
+            The service will create parent directories if they do not exist yet.
+        :param str lease_id:
+            Required if the directory to be overwritten has an active lease.
+        :param metadata:
+            A dict with name_value pairs to associate with the
+            container as metadata. Example:{'Category':'test'}
+        :type metadata: dict(str, str)
+        :param str posix_permissions:
+            Optional and only valid if Hierarchical Namespace is enabled for the account.
+            Sets POSIX access permissions for the file owner, the file owning group, and others.
+            Each class may be granted read, write, or execute permission.
+            The sticky bit is also supported.
+            Both symbolic (rwxrw-rw-) and 4-digit octal notation (e.g. 0766) are supported.
+        :param str posix_umask:
+            Optional and only valid if Hierarchical Namespace is enabled for the account.
+            This umask restricts permission settings for file and directory,
+            and will only be applied when default Acl does not exist in parent directory.
+            If the umask bit has set, it means that the corresponding permission will be disabled.
+            Otherwise the corresponding permission will be determined by the permission.
+            A 4-digit octal notation (e.g. 0022) is supported here.
+            If no umask was specified, a default umask - 0027 will be used.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: ETag and last modified time of the new directory.
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
+        """
+
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('directory_path', directory_path)
+
+        request = HTTPRequest()
+        # TODO remove endpoint swapping after service update
+        request.host_locations = self._swap_blob_endpoints(self._get_host_locations())
+        request.method = 'PUT'
+        request.path = _get_path(container_name, directory_path)
+        request.query = {
+            'resource': 'directory',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-permissions': _to_str(posix_permissions),
+            'x-ms-umask': _to_str(posix_umask),
+        }
+        # TODO add test cases for lease
+        _add_file_or_directory_properties_header(metadata, request)
+        return self._perform_request(request, parser=_parse_base_properties)
+
+    def delete_directory(self, container_name, directory_path, fail_not_exist=False, recursive=False, marker=None,
+                         lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
+                         if_none_match=None, timeout=None):
+        """
+        Delete a directory. This operation's behavior is different depending on whether Hierarchical Namespace
+        is enabled; if yes, then the delete operation can be atomic and instantaneous;
+        if not, the operation is performed in batches and a continuation token could be returned.
+
+        :param str container_name:
+            Name of existing container.
+        :param str directory_path:
+            Path of the directory to be deleted. Ex: 'dirfoo/dirbar'.
+        :param fail_not_exist:
+            Specify whether to throw an exception when the directory doesn't exist.
+        :param recursive:
+            If "true", all paths beneath the directory will be deleted.
+            If "false" and the directory is non-empty, an error occurs.
+        :param marker:
+            Optional. When deleting a directory without the Hierarchical Namespace,
+            the number of paths that are deleted with each invocation is limited.
+            If the number of paths to be deleted exceeds this limit,
+            a continuation token is returned. When a continuation token is returned,
+            it must be specified in a subsequent invocation of the delete operation to continue deleting the directory.
+        :param str lease_id:
+            Required if the directory has an active lease.
+        :param datetime if_modified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only
+            if the resource has been modified since the specified time.
+        :param datetime if_unmodified_since:
+            A DateTime value. Azure expects the date value passed in to be UTC.
+            If timezone is included, any non-UTC datetimes will be converted to UTC.
+            If a date is passed in without timezone info, it is assumed to be UTC.
+            Specify this header to perform the operation only if
+            the resource has not been modified since the specified date/time.
+        :param str if_match:
+            An ETag value, or the wildcard character (*). Specify this header to perform
+            the operation only if the resource's ETag matches the value specified.
+        :param str if_none_match:
+            An ETag value, or the wildcard character (*). Specify this header
+            to perform the operation only if the resource's ETag does not match
+            the value specified.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return:
+            (True, marker) if the directory is successfully deleted. Otherwise return (False, None).
+        :rtype: (bool, str)
+        """
+        _validate_not_none('container_name', container_name)
+        _validate_not_none('directory_path', directory_path)
+
+        request = HTTPRequest()
+        # TODO remove endpoint swapping after service update
+        request.host_locations = self._swap_blob_endpoints(self._get_host_locations())
+        request.method = 'DELETE'
+        request.path = _get_path(container_name, directory_path)
+        request.query = {
+            'recursive': _to_str(recursive),
+            'continuation': _to_str(marker),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
+        # TODO add test cases for lease
+        if not fail_not_exist:
+            try:
+                return True, self._perform_request(request, expected_errors=[_PATH_NOT_FOUND_ERROR_CODE],
+                                                   parser=_parse_continuation_token)
+            except AzureMissingResourceHttpError as ex:
+                _dont_fail_not_exist(ex)
+                return False, None
+        else:
+            return True, self._perform_request(request, parser=_parse_continuation_token)
+
+    def rename_path(self, container_name, new_path, source_path,
+                    mode=None, marker=None, lease_id=None, source_lease_id=None,
+                    source_if_modified_since=None, source_if_unmodified_since=None,
+                    source_if_match=None, source_if_none_match=None, timeout=None):
+        """
+        Rename a blob or directory(which can contain other directories or blobs).
+
+        :param str container_name:
+            Name of existing container.
+        :param str new_path:
+            New path for source_path. Ex: 'topdir1/dirsubfoo'.
+            Note that the path should be an absolute path under the container.
+        :param str source_path:
+            Path to be renamed. Ex: 'topdir1/dirbar'.
+            Note that the path should be an absolute path under the container.
+        :param mode:
+            Optional. Valid only when namespace is enabled.
+            This parameter determines the behavior of the rename operation.
+            The value must be "legacy" or "posix", and the default value will be "posix".
+            Legacy: if the destination of the move is an existing directory and that directory is empty,
+            the source will overwrite the destination. If the directory is not empty, the move will fail.
+            Posix: if the destination of the move is an existing empty directory,
+            destination will be overwritten. Otherwise, the source will be moved into the destination directory.
+            If the destination is an existing file, the file will be overwritten.
+        :param marker:
+            Optional. When renaming a directory, the number of paths that are renamed with each invocation is limited.
+            If the number of paths to be renamed exceeds this limit,
+            a continuation token is returned. When a continuation token is returned,
+            it must be specified in a subsequent invocation of the rename operation to continue renaming the directory.
+        :param str lease_id:
+            Optional. A lease ID for the new_path.
+            The new_path must have an active lease and the lease ID must match.
+        :param str source_lease_id:
+            Optional. A lease ID for the source_path.
+            The source_path must have an active lease and the lease ID must match.
+        :param datetime source_if_modified_since:
+            Optional. A date and time value. Specify this header to perform the rename operation
+            only if the source has been modified since the specified date and time.
+        :param datetime source_if_unmodified_since:
+            Optional. A date and time value. Specify this header to perform the rename operation
+            only if the source has not been modified since the specified date and time.
+        :param str source_if_match:
+            Optional. An ETag value. Specify this header to perform the rename operation
+            only if the source's ETag matches the value specified.
+        :param str source_if_none_match:
+            Optional. An ETag value or the special wildcard ("*") value.
+            Specify this header to perform the rename operation
+            only if the source's ETag does not match the value specified.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return:
+            A continuation marker if applicable. Otherwise return None.
+        :rtype: str
+        """
+        _validate_not_none('source_path', source_path)
+        _validate_not_none('new_path', new_path)
+
+        request = HTTPRequest()
+        # TODO remove endpoint swapping after service update
+        request.host_locations = self._swap_blob_endpoints(self._get_host_locations())
+        request.method = 'PUT'
+        request.path = _get_path(container_name, new_path)
+        request.query = {
+            'mode': mode,
+            'continuation': _to_str(marker),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-rename-source': _get_path(container_name, source_path),
+            'x-ms-lease-id': _to_str(lease_id),
+            'x-ms-source-lease-id': _to_str(source_lease_id),
+            'x-ms-source-if-modified-since': _datetime_to_utc_string(source_if_modified_since),
+            'x-ms-source-if-unmodified-since': _datetime_to_utc_string(source_if_unmodified_since),
+            'x-ms-source-if-match': _to_str(source_if_match),
+            'x-ms-source-if-none-match': _to_str(source_if_none_match),
+        }
+        return self._perform_request(request, parser=_parse_continuation_token)
+
+    def get_path_access_control(self, container_name, path, user_principle_names=False,
+                                lease_id=None, if_modified_since=None, if_unmodified_since=None,
+                                if_match=None, if_none_match=None, timeout=None):
+        """
+        Retrieve the access control properties of a path(directory or blob).
+
+        :param str container_name:
+            Name of existing container.
+        :param str path:
+            Path of the directory/blob.
+        :param user_principle_names:
+            Valid only when Hierarchical Namespace is enabled for the account.
+            If "true", the user identity values returned for owner, group, and acl will be transformed
+            from Azure Active Directory Object IDs to User Principal Names.
+            If "false", the values will be returned as Azure Active Directory Object IDs.
+            The default value is false. Note that group and application Object IDs are not translated
+            because they do not have unique friendly names.
+        :param str lease_id:
+            Required if the path has an active lease.
+        :param datetime if_modified_since:
+            A date and time value. Specify this header to perform the operation only if the resource
+            has been modified since the specified date and time.
+        :param datetime if_unmodified_since:
+            A date and time value. Specify this header to perform the operation only if the resource
+            has not been modified since the specified date and time.
+        :param datetime if_match:
+            An ETag value. Specify this header to perform the operation
+            only if the resource's ETag matches the value specified. The ETag must be specified in quotes.
+        :param datetime if_none_match:
+            An ETag value or the special wildcard ("*") value.
+            Specify this header to perform the operation only if the resource's ETag
+            does not match the value specified. The ETag must be specified in quotes.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: ETag and last modified time of the new directory.
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
+        """
+        _validate_not_none('path', path)
+
+        request = HTTPRequest()
+        # TODO remove endpoint swapping after service update
+        request.host_locations = self._swap_blob_endpoints(self._get_host_locations())
+        request.method = 'HEAD'
+        request.path = _get_path(container_name, path)
+        request.query = {
+            'action': 'getAccessControl',
+            'upn': _to_str(user_principle_names),
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
+        return self._perform_request(request, parser=_parse_path_permission_and_acl)
+
+    def set_path_access_control(self, container_name, path, owner=None, group=None, permissions=None,
+                                acl=None, lease_id=None, if_modified_since=None, if_unmodified_since=None,
+                                if_match=None, if_none_match=None, timeout=None):
+        """
+        Set the access control properties of a path(directory or blob).
+
+        :param str container_name:
+            Name of existing container.
+        :param str path:
+            Path of the directory/blob.
+        :param str owner:
+            Sets the owner of the file or directory.
+        :param str group:
+            Sets the owning group of the file or directory.
+        :param str permissions:
+            Invalid in conjunction with acl.
+            Sets POSIX access permissions for the file owner, the file owning group, and others.
+            Each class may be granted read, write, or execute permission.
+            The sticky bit is also supported. Both symbolic (rwxrw-rw-)
+            and 4-digit octal notation (e.g. 0766) are supported.
+        :param str acl:
+            Invalid in conjunction with permissions.
+            Sets POSIX access control rights on files and directories.
+            The value is a comma-separated list of access control entries that fully replaces the existing
+            access control list (ACL). Each access control entry (ACE) consists of a scope, a type,
+            a user or group identifier, and permissions in the format "[scope:][type]:[id]:[permissions]".
+            The scope must be "default" to indicate the ACE belongs to the default ACL for a directory;
+            otherwise scope is implicit and the ACE belongs to the access ACL.
+            There are four ACE types: "user" grants rights to the owner or a named user,
+            "group" grants rights to the owning group or a named group,
+            "mask" restricts rights granted to named users and the members of groups,
+            and "other" grants rights to all users not found in any of the other entries.
+            The user or group identifier is omitted for entries of type "mask" and "other".
+            The user or group identifier is also omitted for the owner and owning group.
+            The permission field is a 3-character sequence where the first character is 'r' to grant read access,
+            the second character is 'w' to grant write access, and the third character is 'x'
+            to grant execute permission. If access is not granted, the '-' character is used to denote
+            that the permission is denied. For example, the following ACL grants read, write, and execute rights to
+            the file owner and john.doe@contoso, the read right to the owning group,
+            and nothing to everyone else: "user::rwx,user:john.doe@contoso:rwx,group::r--,other::---,mask=rwx".
+        :param str lease_id:
+            Required if the path has an active lease.
+        :param datetime if_modified_since:
+            A date and time value. Specify this header to perform the operation only if the resource
+            has been modified since the specified date and time.
+        :param datetime if_unmodified_since:
+            A date and time value. Specify this header to perform the operation only if the resource
+            has not been modified since the specified date and time.
+        :param datetime if_match:
+            An ETag value. Specify this header to perform the operation
+            only if the resource's ETag matches the value specified. The ETag must be specified in quotes.
+        :param datetime if_none_match:
+            An ETag value or the special wildcard ("*") value.
+            Specify this header to perform the operation only if the resource's ETag
+            does not match the value specified. The ETag must be specified in quotes.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
+        :return: ETag and last modified time of the new directory.
+        :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
+        """
+        _validate_not_none('path', path)
+
+        request = HTTPRequest()
+        # TODO remove endpoint swapping after service update
+        request.host_locations = self._swap_blob_endpoints(self._get_host_locations())
+        request.method = 'PATCH'
+        request.path = _get_path(container_name, path)
+        request.query = {
+            'action': 'setAccessControl',
+            'timeout': _int_to_str(timeout),
+        }
+        request.headers = {
+            'x-ms-owner': _to_str(owner),
+            'x-ms-group': _to_str(group),
+            'x-ms-permissions': _to_str(permissions),
+            'x-ms-acl': _to_str(acl),
+            'x-ms-lease-id': _to_str(lease_id),
+            'If-Modified-Since': _datetime_to_utc_string(if_modified_since),
+            'If-Unmodified-Since': _datetime_to_utc_string(if_unmodified_since),
+            'If-Match': _to_str(if_match),
+            'If-None-Match': _to_str(if_none_match),
+        }
+        return self._perform_request(request, parser=_parse_base_properties)
+
+    # ----------------------------Helpers for directory manipulations---------------------------- #
+    @staticmethod
+    def _swap_blob_endpoints(host_locations):
+        # Note that only the primary endpoint is supported for the DFS endpoint
+        return {LocationMode.PRIMARY: host_locations[LocationMode.PRIMARY].replace(_BLOB_SERVICE_PUBLIC_CLOUD_HOST,
+                                                                                   _DFS_SERVICE_PUBLIC_CLOUD_HOST, 1)}

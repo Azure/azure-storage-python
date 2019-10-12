@@ -975,3 +975,24 @@ class CustomerProvidedEncryptionKey(object):
         self.key_value = key_value
         self.key_hash = key_hash
         self.algorithm = 'AES256'
+
+class PathProperties(object):
+    """
+    Represent a path's properties(only permissions and acl at the moment).
+    The path can be either a directory or a file.
+
+    :ivar string owner:
+        Represents the owner of the path.
+    :ivar string group:
+        Represents the group of the path.
+    :ivar string permissions:
+        Represents the permissions of the path.
+    :ivar string acl:
+        Represents the acl of the path.
+    """
+
+    def __init__(self):
+        self.owner = None
+        self.group = None
+        self.permissions = None
+        self.acl = None
