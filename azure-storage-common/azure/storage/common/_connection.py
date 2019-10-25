@@ -132,7 +132,10 @@ class _ServiceParameters(object):
     @staticmethod
     def _from_connection_string(connection_string, service):
         # Split into key=value pairs removing empties, then split the pairs into a dict
-        config = dict(s.split('=', 1) for s in connection_string.split(';') if s)
+        try:
+            config = dict(s.split('=', 1) for s in connection_string.split(';') if s)
+        except:
+            raise Exception("Invalid Azure Storage ConnectionString")
 
         # Authentication
         account_name = config.get('AccountName')
