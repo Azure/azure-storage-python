@@ -1,5 +1,10 @@
 Microsoft Azure Storage SDK for Python
 ======================================
+**NEWS!! azure-storage-blob version 12.0.0 is GA now!** 
+
+Here is the link to `v12.0.0 repo`_.  
+
+**Note**: the current repo is for azure-storage-blob<=2.1.0, upgrading to v12.0.0 could break you current code. `Link for breaking change details`_.
 
 .. image:: https://travis-ci.org/Azure/azure-storage-python.svg
     :target: https://travis-ci.org/Azure/azure-storage-python
@@ -230,3 +235,5 @@ Learn More
 .. _problems: https://github.com/Azure/azure-storage-python/issues/219
 .. _upgrading pip: https://docs.microsoft.com/en-us/visualstudio/python/managing-python-on-azure-app-service
 .. _cosmosdb: https://github.com/Azure/azure-cosmosdb-python
+.. _v12.0.0 Repo: https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/storage/azure-storage-blob/azure/storage/blob
+.. _Link for breaking change details: https://github.com/Azure/azure-sdk-for-python/blob/f720fd6535a9370dd51453d37bf99dc8b34889a5/sdk/storage/azure-storage-blob/HISTORY.md#version-1200b1
