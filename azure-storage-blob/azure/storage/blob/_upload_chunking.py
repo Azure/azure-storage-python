@@ -406,7 +406,7 @@ class _SubStream(IOBase):
             n = self._length - self._position
 
         # return fast
-        if n is 0 or self._buffer.closed:
+        if n == 0 or self._buffer.closed:
             return b''
 
         # attempt first read from the read buffer and update position
