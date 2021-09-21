@@ -186,7 +186,7 @@ def _serialize_batch_body(requests, batch_id):
     :return: The body bytes for this batch.
     """
 
-    if requests is None or len(requests) is 0:
+    if requests is None or not len(requests):
         raise ValueError('Please provide sub-request(s) for this batch request')
 
     delimiter_bytes = (_get_batch_request_delimiter(batch_id, True, False) + _HTTP_LINE_ENDING).encode('utf-8')
@@ -298,7 +298,7 @@ def _serialize_query(query):
             serialized_query.append(query_value)
             serialized_query.append("&")
 
-    if len(serialized_query) is not 0:
+    if len(serialized_query):
         del serialized_query[-1]
 
     return ''.join(serialized_query)
