@@ -605,7 +605,7 @@ class BlockBlobService(BaseBlobService):
             data_chunk = data  # to store the chunk of data read from stream each time
 
             # keep reading from stream util length of data >= count or reaching the end of stream
-            while len(data) < count and len(data_chunk) is not 0:
+            while len(data) < count and len(data_chunk):
                 data_chunk = stream.read(count - len(data))
                 data += data_chunk
 
