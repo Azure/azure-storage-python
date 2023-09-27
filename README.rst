@@ -1,10 +1,14 @@
-Microsoft Azure Storage SDK for Python
-======================================
-**NEWS!! azure-storage-blob version 12.0.0 is GA now!** 
+Microsoft Azure Storage SDK for Python (Deprecated)
 
-Here is the link to `v12.0.0 repo`_.  
+This project will be in [Community Support](https://azure.github.io/azure-sdk/policies_support.html#package-lifecycle) until 13 September 2024. After this date the project and associated client libraries will be retired permanently. For more details on the retirement and alternatives to using this project, visit [Retirement notice: The legacy Azure Storage Python client libraries will be retired on 13 September 2024](https://azure.microsoft.com/updates/retirement-notice-the-legacy-azure-storage-python-client-libraries-will-be-retired-on-13-september-2024/).
 
-**Note**: the current repo is for azure-storage-blob<=2.1.0, upgrading to v12.0.0 could break you current code. `Link for breaking change details`_.
+=============
+
+**NEWS!! azure-storage-blob v12 is GA now!** 
+
+Visit https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/storage to learn more.
+
+**Note**: the current repo is for azure-storage-blob<=2.1.0, upgrading to v12.0.0 could break you current code.
 
 .. image:: https://travis-ci.org/Azure/azure-storage-python.svg
     :target: https://travis-ci.org/Azure/azure-storage-python
