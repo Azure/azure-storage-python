@@ -15,6 +15,16 @@ matrix:
     - os: osx
       osx_image: xcode9.4
       language: generic
+# ppc64le specific code
+    - os: linux
+      arch: ppc64le
+      python: "2.7"
+    - os: linux
+      arch: ppc64le
+      python: "3.5"
+    - os: linux
+      arch: ppc64le
+      python: "3.6"
   allow_failures:
     - os: osx
     - python: "pypy3.5-5.8.0"
