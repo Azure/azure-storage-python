@@ -174,13 +174,13 @@ class BlockBlobService(BaseBlobService):
             blob.
         :param str lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
             Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key.
-        :param int timeout:
-            The timeout parameter is expressed in seconds.
+            a secure connection must be established to transfer the key.            
         '''
         _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
 
@@ -254,16 +254,16 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
-        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
-            Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS.
-            As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds.
         :param StandardBlobTier standard_blob_tier:
             A standard blob tier value to set the blob to. For this version of the library,
             this is only applicable to block blobs on standard storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.            
         :return: ETag and last modified properties for the updated Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -359,13 +359,13 @@ class BlockBlobService(BaseBlobService):
             If given, the service will calculate the MD5 hash of the block content and compare against this value.
         :param str lease_id:
             Required if the blob has an active lease.
+        :param int timeout:
+            The timeout parameter is expressed in seconds.
         :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
             Encrypts the data on the service-side with the given key.
             Use of customer-provided keys must be done over HTTPS.
             As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key.
-        :param int timeout:
-            The timeout parameter is expressed in seconds.
+            a secure connection must be established to transfer the key.            
         """
         _validate_encryption_unsupported(self.require_encryption, self.key_encryption_key)
         _validate_not_none('container_name', container_name)
@@ -460,11 +460,6 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
-        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
-            Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS.
-            As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -472,6 +467,11 @@ class BlockBlobService(BaseBlobService):
         :param StandardBlobTier standard_blob_tier:
             A standard blob tier value to set the blob to. For this version of the library,
             this is only applicable to block blobs on standard storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.            
         :return: ETag and last modified properties for the Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -554,11 +554,6 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
-        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
-            Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS.
-            As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -583,6 +578,11 @@ class BlockBlobService(BaseBlobService):
         :param StandardBlobTier standard_blob_tier:
             A standard blob tier value to set the blob to. For this version of the library,
             this is only applicable to block blobs on standard storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.            
         :return: ETag and last modified properties for the Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -763,11 +763,6 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
-        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
-            Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS.
-            As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -775,6 +770,11 @@ class BlockBlobService(BaseBlobService):
         :param StandardBlobTier standard_blob_tier:
             A standard blob tier value to set the blob to. For this version of the library,
             this is only applicable to block blobs on standard storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.            
         :return: ETag and last modified properties for the Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
@@ -861,11 +861,6 @@ class BlockBlobService(BaseBlobService):
             the value specified. Specify the wildcard character (*) to perform
             the operation only if the resource does not exist, and fail the
             operation if it does exist.
-        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
-            Encrypts the data on the service-side with the given key.
-            Use of customer-provided keys must be done over HTTPS.
-            As the encryption key itself is provided in the request,
-            a secure connection must be established to transfer the key.
         :param int timeout:
             The timeout parameter is expressed in seconds. This method may make
             multiple calls to the Azure service and the timeout will apply to
@@ -873,6 +868,11 @@ class BlockBlobService(BaseBlobService):
         :param StandardBlobTier standard_blob_tier:
             A standard blob tier value to set the blob to. For this version of the library,
             this is only applicable to block blobs on standard storage accounts.
+        :param ~azure.storage.blob.models.CustomerProvidedEncryptionKey cpk:
+            Encrypts the data on the service-side with the given key.
+            Use of customer-provided keys must be done over HTTPS.
+            As the encryption key itself is provided in the request,
+            a secure connection must be established to transfer the key.            
         :return: ETag and last modified properties for the Block Blob
         :rtype: :class:`~azure.storage.blob.models.ResourceProperties`
         '''
