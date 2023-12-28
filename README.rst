@@ -1,6 +1,10 @@
 Microsoft Azure Storage SDK for Python (Deprecated)
+===================================================
 
-This project will be in [Community Support](https://azure.github.io/azure-sdk/policies_support.html#package-lifecycle) until 13 September 2024. After this date the project and associated client libraries will be retired permanently. For more details on the retirement and alternatives to using this project, visit [Retirement notice: The legacy Azure Storage Python client libraries will be retired on 13 September 2024](https://azure.microsoft.com/updates/retirement-notice-the-legacy-azure-storage-python-client-libraries-will-be-retired-on-13-september-2024/).
+.. caution ::
+
+   This project will be in `Community Support`_ until **13 September 2024**. After this date the project and associated client libraries will be retired permanently.
+   For more details on the retirement and alternatives to using this project, visit `Retirement notice: The legacy Azure Storage Python client libraries will be retired on 13 September 2024 <https://azure.microsoft.com/updates/retirement-notice-the-legacy-azure-storage-python-client-libraries-will-be-retired-on-13-september-2024/>`_.
 
 =============
 
@@ -8,10 +12,8 @@ This project will be in [Community Support](https://azure.github.io/azure-sdk/po
 
 Visit https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/storage to learn more.
 
-**Note**: the current repo is for azure-storage-blob<=2.1.0, upgrading to v12.0.0 could break you current code.
+**Note**: the current repo is for ``azure-storage-blob<=2.1.0``, upgrading to v12.0.0 could break your current code.
 
-.. image:: https://travis-ci.org/Azure/azure-storage-python.svg
-    :target: https://travis-ci.org/Azure/azure-storage-python
 .. image:: https://img.shields.io/codecov/c/github/azure/azure-storage-python.svg
     :target: https://codecov.io/gh/Azure/azure-storage-python
 
@@ -241,3 +243,4 @@ Learn More
 .. _cosmosdb: https://github.com/Azure/azure-cosmosdb-python
 .. _v12.0.0 Repo: https://github.com/Azure/azure-sdk-for-python/tree/master/sdk/storage/azure-storage-blob/azure/storage/blob
 .. _Link for breaking change details: https://github.com/Azure/azure-sdk-for-python/blob/f720fd6535a9370dd51453d37bf99dc8b34889a5/sdk/storage/azure-storage-blob/HISTORY.md#version-1200b1
+.. _Community support: https://azure.github.io/azure-sdk/policies_support.html#package-lifecycle
