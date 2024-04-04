@@ -159,7 +159,6 @@ class _BlobChunkUploader(object):
         self.chunk_size = chunk_size
         self.stream = stream
         self.parallel = parallel
-        self.stream_start = stream.tell() if parallel else None
         self.stream_lock = Lock() if parallel else None
         self.progress_callback = progress_callback
         self.progress_total = 0
@@ -182,6 +181,8 @@ class _BlobChunkUploader(object):
             while True:
                 if self.blob_size:
                     read_size = min(self.chunk_size - len(data), self.blob_size - (index + len(data)))
+                elif data:
+                    read_size = self.chunk_size - len(data)
                 temp = self.stream.read(read_size)
                 temp = _get_data_bytes_only('temp', temp)
                 data += temp
