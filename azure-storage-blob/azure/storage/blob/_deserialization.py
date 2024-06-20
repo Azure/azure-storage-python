@@ -638,7 +638,7 @@ def _parse_sub_response_to_http_response(sub_response):
                 num_empty_lines += 1
             elif line.startswith("x-ms-error-code".encode('utf-8')):
                 batch_http_sub_response.message = line.decode('utf-8').split(": ")[1].rstrip()
-            elif num_empty_lines is 2:
+            elif num_empty_lines == 2:
                 batch_http_sub_response.body += line
             else:
                 header = line.decode('utf-8').split(": ")[0]
